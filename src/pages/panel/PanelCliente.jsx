@@ -57,7 +57,15 @@ export default function PanelCliente() {
     } catch { window.location.href = "/"; }
     try {
       const rs = await apiGET("/solicitudes/mias");
-      setTieneSolicitudes(rs.ok && (rs.solicitudes || []).length > 0);
+      const lista = rs.ok ? (rs.solicitudes || []) : [];
+      const tieneNoVisado = lista.some((s) => {
+        const cod = String(
+          s?.tipo_solicitud || s?.tipo || s?.categoria ||
+          s?.servicio?.codigo || s?.codigo_servicio || s?.nombre_servicio || ""
+        ).toUpperCase();
+        return !cod.includes("VISADO") && String(s?.codigo_servicio || s?.servicio?.codigo || "") !== "017";
+      });
+      setTieneSolicitudes(tieneNoVisado);
     } catch { setTieneSolicitudes(false); }
   }
 

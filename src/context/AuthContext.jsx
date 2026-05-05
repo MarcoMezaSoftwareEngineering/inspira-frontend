@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -54,15 +54,14 @@ export function AuthProvider({ children }) {
 
       setUser(null);
 
-      // ✅ volver a la misma página donde estaba el usuario
+      // ✅ volver a la misma página donde estaba el usuario (solo paths relativos)
       const currentPath =
         window.location.pathname +
         window.location.search +
         window.location.hash;
 
-      let redirect = currentPath || "/";
+      let redirect = currentPath && currentPath.startsWith("/") ? currentPath : "/";
 
-      // Opcional: si estaba en /panel, mándalo al home porque ya no tiene sesión
       if (redirect.startsWith("/panel")) {
         redirect = "/";
       }

@@ -4,6 +4,15 @@ import { apiPOST } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { dialog } from "../services/dialogService";
 
+function isMercadoPagoUrl(url) {
+  try {
+    const { hostname } = new URL(url);
+    return hostname.includes("mercadopago.com");
+  } catch {
+    return false;
+  }
+}
+
 export function usePagoServicio() {
   const { user } = useAuth();
   const [loadingId, setLoadingId] = useState(null);
@@ -20,7 +29,7 @@ export function usePagoServicio() {
         id_servicio,
       });
 
-      if (res?.ok && res.preferencia?.init_point) {
+      if (res?.ok && res.preferencia?.init_point && isMercadoPagoUrl(res.preferencia.init_point)) {
         window.location.href = res.preferencia.init_point;
       } else {
         console.error("Error preferencia servicio:", res);

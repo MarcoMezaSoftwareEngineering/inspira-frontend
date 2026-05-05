@@ -1,5 +1,5 @@
 // src/services/backofficeApi.js
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 /* === Token almacenado en BackOffice === */
 function getToken() {
@@ -12,67 +12,81 @@ function baseHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/* === Logout automático si el token expira === */
+function handleUnauthorized() {
+  localStorage.removeItem("bo_token");
+  window.location.href = "/backoffice/login";
+}
+
+/* === Helper central: detecta 401 y parsea JSON con seguridad === */
+async function makeRequest(method, path, body, extraHeaders = {}) {
+  const isJson = body !== undefined && !(body instanceof FormData);
+  const headers = {
+    ...(isJson ? { "Content-Type": "application/json" } : {}),
+    ...baseHeaders(),
+    ...extraHeaders,
+  };
+
+  const r = await fetch(`${API_URL}${path}`, {
+    method,
+    headers,
+    body: isJson ? JSON.stringify(body) : body,
+  });
+
+  if (r.status === 401) {
+    handleUnauthorized();
+    return {};
+  }
+
+  try {
+    return await r.json();
+  } catch {
+    return {};
+  }
+}
+
 /* ====================================================================== */
 /* =========================  MÉTODOS HTTP  ============================= */
 /* ====================================================================== */
 
-export async function boGET(path) {
-  const r = await fetch(`${API_URL}${path}`, {
-    method: "GET",
-    headers: { ...baseHeaders() },
-  });
-  return r.json();
+export function boGET(path) {
+  return makeRequest("GET", path);
 }
 
-export async function boPOST(path, body = {}) {
-  const r = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...baseHeaders() },
-    body: JSON.stringify(body),
-  });
-  return r.json();
+export function boPOST(path, body = {}) {
+  return makeRequest("POST", path, body);
 }
 
-export async function boPATCH(path, body = {}) {
-  const r = await fetch(`${API_URL}${path}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", ...baseHeaders() },
-    body: JSON.stringify(body),
-  });
-  return r.json();
+export function boPATCH(path, body = {}) {
+  return makeRequest("PATCH", path, body);
 }
 
-export async function boPUT(path, body = {}) {
-  const r = await fetch(`${API_URL}${path}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", ...baseHeaders() },
-    body: JSON.stringify(body),
-  });
-  return r.json();
+export function boPUT(path, body = {}) {
+  return makeRequest("PUT", path, body);
 }
 
-export async function boDELETE(path) {
-  const r = await fetch(`${API_URL}${path}`, {
-    method: "DELETE",
-    headers: { ...baseHeaders() },
-  });
-  return r.json();
+export function boDELETE(path) {
+  return makeRequest("DELETE", path);
 }
 
-// NUEVO: helper para subir archivos (sin Content-Type manual)
+// Para subir archivos (sin Content-Type manual — el browser lo pone con boundary)
 export async function boUpload(path, file) {
   const formData = new FormData();
   formData.append("archivo", file);
+  return makeRequest("POST", path, formData);
+}
 
-  const res = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: {
-      ...baseHeaders(), // solo Authorization; NUNCA pongas Content-Type aquí
-    },
-    body: formData,
+// Para respuestas que NO son JSON (PDFs, streams, blobs)
+export async function boFetch(path, options = {}) {
+  const r = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: { ...baseHeaders(), ...(options.headers || {}) },
   });
-
-  return res.json();
+  if (r.status === 401) {
+    handleUnauthorized();
+    return null;
+  }
+  return r;
 }
 
 

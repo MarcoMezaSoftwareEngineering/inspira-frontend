@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src https://api.inspira-legal.cloud; object-src 'none'; base-uri 'none';" />
 <title>Calculadora de Máster — Inspira</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -327,7 +328,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 <script>
 const WPP_NUMERO = "51908945354";
 const CALENDLY_URL = "https://calendly.com/administracion-inspira-legal/30min";
-const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/voeyix4mq3rnqps39q8pa37pxh249fi2";
+const API_BASE = "https://api.inspira-legal.cloud";
 
 const UNIS_AUIP = [
   "universidad de lima","universidad lima","universidad nacional mayor de san marcos","san marcos","unmsm",
@@ -398,7 +399,7 @@ function irPaso(n){
   [1,2,3,4].forEach(i=>{ document.getElementById('paso'+i).classList.remove('active'); const d=document.getElementById('dot'+i); d.classList.remove('active','done'); if(i<n) d.classList.add('done'); });
   if(n<=4){ document.getElementById('paso'+n).classList.add('active'); document.getElementById('dot'+n).classList.add('active'); }
   ['line1','line2','line3'].forEach((id,i)=>document.getElementById(id).classList.toggle('done',n>i+1));
-  window.parent.postMessage({type:'scrollTop'},'*');
+  window.parent.postMessage({type:'scrollTop'},'https://inspira-legal.cloud');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -427,7 +428,7 @@ const UNIS={
   "Otra":[{n:"Universidad de Granada",com:"Andalucía",p:850},{n:"Universidad de Sevilla",com:"Andalucía",p:850},{n:"Universidad de Salamanca",com:"Castilla y León",p:1000},{n:"Universidad de Santiago de Compostela",com:"Galicia",p:950},{n:"Universidad del País Vasco (UPV/EHU)",com:"País Vasco",p:1800},{n:"Universitat de València (UV)",com:"Valencia",p:3200},{n:"Universidad Rey Juan Carlos (URJC)",com:"Madrid",p:5300},{n:"Universidad Complutense de Madrid (UCM)",com:"Madrid",p:5300},{n:"Universidad Autónoma de Madrid (UAM)",com:"Madrid",p:5300},{n:"Universitat de Barcelona (UB)",com:"Cataluña",p:4500}]
 };
 
-function enviarAMake(datos){ fetch(MAKE_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)}).catch(()=>{}); }
+function enviarAMake(datos){ fetch(API_BASE+'/api/calculadora/make-webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)}).catch(()=>{}); }
 
 function generarMensajeAsesoria(d){ return encodeURIComponent('Hola! Completé la calculadora de Inspira y quiero separar mi asesoría diagnóstico.\n\n📋 Mi perfil:\n• Nombre: '+d.nombre+'\n• País: '+d.pais+'\n• Carrera: '+d.carrera+'\n• Área: '+d.area+'\n• Interés de Máster: '+d.masterInteres+'\n• Promedio: '+d.promedioES+'/10\n• Presupuesto: '+d.presupuesto+' €/año\n• Perfil de vida: '+d.vida+'\n\n¿Tienen disponibilidad? 🙏'); }
 function generarMensajePaquete(d,paquete){ return encodeURIComponent('Hola! Completé la calculadora de Inspira y quiero contratar el siguiente paquete:\n\n📦 *'+paquete.n+'* — '+paquete.p+'\n\n📋 Mi perfil:\n• Nombre: '+d.nombre+' ('+d.pais+')\n• Carrera: '+d.carrera+'\n• Área: '+d.area+'\n• Interés de Máster: '+d.masterInteres+'\n• Promedio: '+d.promedioES+'/10\n• Presupuesto: '+d.presupuesto+' €/año\n• Perfil: '+d.vida+'\n• AUIP: '+d.auip+'\n\n¿Cómo procedo? 🙏'); }
@@ -525,7 +526,7 @@ function calcular(){
   ['paso1','paso2','paso3','paso4'].forEach(id=>document.getElementById(id).classList.remove('active'));
   ['dot1','dot2','dot3','dot4'].forEach(id=>{document.getElementById(id).classList.remove('active');document.getElementById(id).classList.add('done');});
   document.getElementById('resultado').classList.add('active');
-  window.parent.postMessage({type:'scrollTop'},'*');
+  window.parent.postMessage({type:'scrollTop'},'https://inspira-legal.cloud');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 </script>

@@ -1,11 +1,16 @@
 // src/services/api.js
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 function authHeaders() {
   const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/* === Logout automático si el token del panel expira === */
+function handleUnauthorized() {
+  localStorage.removeItem("token");
+  window.location.href = "/";
+}
 
 async function parseJsonSafe(response) {
   try {
@@ -15,13 +20,24 @@ async function parseJsonSafe(response) {
   }
 }
 
-
-// GET genérico para panel cliente
-export async function apiGET(url) {
+/* === Helper central: detecta 401 y parsea JSON con seguridad === */
+async function makeRequest(method, url, body, extraHeaders = {}) {
+  const isJson = body !== undefined && !(body instanceof FormData);
   const r = await fetch(API_URL + url, {
-    headers: { ...authHeaders() },
-    cache: "no-store", // <- desactiva caché, evita 304
+    method,
+    headers: {
+      ...(isJson ? { "Content-Type": "application/json" } : {}),
+      ...authHeaders(),
+      ...extraHeaders,
+    },
+    body: isJson ? JSON.stringify(body) : body,
+    cache: "no-store",
   });
+
+  if (r.status === 401) {
+    handleUnauthorized();
+    return {};
+  }
 
   const data = await parseJsonSafe(r);
 
@@ -33,54 +49,39 @@ export async function apiGET(url) {
   return data;
 }
 
-export async function apiPOST(url, body) {
-  const r = await fetch(API_URL + url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-    },
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
-
-  return parseJsonSafe(r);
+export function apiGET(url) {
+  return makeRequest("GET", url);
 }
 
-
-export async function apiPATCH(url, body) {
-  const r = await fetch(API_URL + url, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-    },
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
-
-  return parseJsonSafe(r);
+export function apiPOST(url, body) {
+  return makeRequest("POST", url, body);
 }
 
+export function apiPATCH(url, body) {
+  return makeRequest("PATCH", url, body);
+}
 
 export async function apiUpload(path, formData) {
-  const res = await fetch(API_URL + path, {
+  const r = await fetch(API_URL + path, {
     method: "POST",
-    headers: {
-      ...authHeaders(), // JWT del cliente
-    },
+    headers: { ...authHeaders() },
     body: formData,
     cache: "no-store",
   });
 
-  let data = {};
-  try {
-    data = await res.json();
-  } catch (e) {
-    // por si el backend devuelve vacío
+  if (r.status === 401) {
+    handleUnauthorized();
+    return {};
   }
 
-  if (!res.ok || data.ok === false) {
+  let data = {};
+  try {
+    data = await r.json();
+  } catch {
+    // backend puede devolver vacío
+  }
+
+  if (!r.ok || data.ok === false) {
     throw new Error(data.msg || data.message || "Error al subir archivo");
   }
 
@@ -93,22 +94,15 @@ export async function apiDELETE(url) {
     headers: { ...authHeaders() },
     cache: "no-store",
   });
+
+  if (r.status === 401) {
+    handleUnauthorized();
+    return {};
+  }
+
   const data = await parseJsonSafe(r);
   if (!r.ok || data.ok === false) {
     throw new Error(data.msg || data.message || "Error al eliminar");
   }
   return data;
-}
-
-export async function boUpload(path, file) {
-  const formData = new FormData();
-  formData.append("archivo", file);
-
-  const r = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: { ...baseHeaders() }, // solo Authorization; NO Content-Type
-    body: formData,
-  });
-
-  return r.json();
 }

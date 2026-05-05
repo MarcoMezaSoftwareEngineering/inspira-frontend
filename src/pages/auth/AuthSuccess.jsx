@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 export default function AuthSuccess() {
   useEffect(() => {

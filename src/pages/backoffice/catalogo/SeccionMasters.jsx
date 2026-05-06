@@ -10,7 +10,7 @@ import {
 
 const FORM_INIT = {
   id_universidad: "", nombre_limpio: "", nombre_original: "",
-  rama: "CIENCIAS_SOCIALES_JURIDICAS", modalidad: "PRESENCIAL", ects: "60",
+  rama: "CIENCIAS_SOCIALES_JURIDICAS", id_sub_area: "", modalidad: "PRESENCIAL", ects: "60",
   es_habilitante: false, tiene_practicas: "", es_interuniversitario: false, es_dual: false,
   titulo_acceso: "", notas: "", activo: true,
 };
@@ -246,6 +246,7 @@ function ModalMaster({ item, universidades, comunidades, ramas, onClose, onSaved
           nombre_limpio:         item.nombre_limpio        || "",
           nombre_original:       item.nombre_original      || "",
           rama:                  item.rama                 || "CIENCIAS_SOCIALES_JURIDICAS",
+          id_sub_area:           item.sub_area?.id_sub_area != null ? String(item.sub_area.id_sub_area) : "",
           modalidad:             item.modalidad            || "PRESENCIAL",
           ects:                  String(item.ects          || 60),
           es_habilitante:        !!item.es_habilitante,
@@ -262,8 +263,16 @@ function ModalMaster({ item, universidades, comunidades, ramas, onClose, onSaved
   const [err,       setErr]       = useState(null);
   const [criterios, setCriterios] = useState([]);
   const [loadingCrit, setLoadingCrit] = useState(false);
+  const [subAreas,  setSubAreas]  = useState([]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // Carga sub-áreas al montar y cada vez que cambia la rama
+  useEffect(() => {
+    if (!form.rama) { setSubAreas([]); return; }
+    boGET(`/backoffice/catalogo/subareas?rama=${form.rama}`)
+      .then((d) => { if (d.ok) setSubAreas(d.subareas || []); });
+  }, [form.rama]); // eslint-disable-line
 
   const univSel    = universidades.find((u) => String(u.id_universidad) === String(form.id_universidad));
   const comUniv    = univSel ? comunidades.find((c) => c.id_comunidad === univSel.id_comunidad) : null;
@@ -298,7 +307,8 @@ function ModalMaster({ item, universidades, comunidades, ramas, onClose, onSaved
       const data = await boPOST(url, {
         id_universidad: form.id_universidad, nombre_limpio: form.nombre_limpio,
         nombre_original: form.nombre_original || form.nombre_limpio,
-        rama: form.rama, modalidad: form.modalidad, ects: form.ects,
+        rama: form.rama, id_sub_area: form.id_sub_area === "" ? null : Number(form.id_sub_area),
+        modalidad: form.modalidad, ects: form.ects,
         es_habilitante: form.es_habilitante,
         tiene_practicas: form.tiene_practicas === "" ? null : form.tiene_practicas,
         es_interuniversitario: form.es_interuniversitario, es_dual: form.es_dual,
@@ -359,7 +369,7 @@ function ModalMaster({ item, universidades, comunidades, ramas, onClose, onSaved
             <div>
               <label className="block text-xs font-semibold text-neutral-500 mb-1">Rama *</label>
               <select required className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                value={form.rama} onChange={(e) => set("rama", e.target.value)}>
+                value={form.rama} onChange={(e) => { set("rama", e.target.value); set("id_sub_area", ""); }}>
                 <option value="">Seleccionar…</option>
                 {ramas.filter((r) => r.activo).map((r) => (
                   <option key={r.id_rama} value={r.valor}>{r.etiqueta}</option>
@@ -373,6 +383,17 @@ function ModalMaster({ item, universidades, comunidades, ramas, onClose, onSaved
                 {MODALIDADES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-neutral-500 mb-1">Sub-área</label>
+            <select className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              value={form.id_sub_area} onChange={(e) => set("id_sub_area", e.target.value)}>
+              <option value="">Sin sub-área</option>
+              {subAreas.filter((s) => s.activo).map((s) => (
+                <option key={s.id_sub_area} value={s.id_sub_area}>{s.etiqueta}</option>
+              ))}
+            </select>
           </div>
 
           <div>

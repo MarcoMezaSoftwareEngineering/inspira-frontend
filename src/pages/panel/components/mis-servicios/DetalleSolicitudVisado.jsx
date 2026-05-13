@@ -82,8 +82,8 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
             {/* VISADO: solo 1,2 y 7 */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
-              {/* Fila 1: 50/50 con scroll interno en ambos */}
-              <div className="h-[520px]">
+              {/* Fila 1: 50/50 */}
+              <div className="min-h-[320px] xl:h-[520px]">
                 <ChecklistDocumentos
                   checklist={checklist}
                   cargarTodo={cargarTodo}
@@ -91,7 +91,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                 />
               </div>
 
-              <div className="h-[520px]">
+              <div className="min-h-[240px] xl:h-[520px]">
                 <InstructivosPlantillas instructivos={instructivos} />
               </div>
 

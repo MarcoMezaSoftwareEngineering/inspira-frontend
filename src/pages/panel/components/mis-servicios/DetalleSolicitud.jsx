@@ -378,12 +378,36 @@ export default function DetalleSolicitud({ solicitudBase, onVolver }) {
         )}
       </div>
 
-      {/* Panel de dos columnas */}
+      {/* Panel principal */}
       {!loading && !error && detalle && (
-        <div className="flex-1 min-h-0 flex gap-3">
+        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
 
-          {/* ── Panel izquierdo: navegación ── */}
-          <div className="w-52 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex flex-col gap-0.5 overflow-y-auto">
+          {/* ── Móvil: tab bar horizontal ── */}
+          <div className="md:hidden shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 flex gap-1 overflow-x-auto">
+            {navSections.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setActiveSection(s.id)}
+                className={`shrink-0 flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all ${
+                  activeSection === s.id
+                    ? "bg-[#023A4B] text-white"
+                    : "text-neutral-600 hover:bg-neutral-100"
+                }`}
+              >
+                <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${
+                  activeSection === s.id ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
+                }`}>{s.num}</span>
+                {s.titulo}
+                {s.estado && (
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeSection === s.id ? "bg-white/40" : (DOT_COLORS[s.estado] || "bg-neutral-300")}`} />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* ── Desktop: sidebar vertical ── */}
+          <div className="hidden md:flex w-52 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
             {navSections.map((s) => (
               <NavItem
                 key={s.id}
@@ -397,7 +421,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver }) {
             ))}
           </div>
 
-          {/* ── Panel derecho: contenido de la sección activa ── */}
+          {/* ── Contenido de la sección activa ── */}
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <SeccionSiempreAbiertoCtx.Provider value={true}>
 

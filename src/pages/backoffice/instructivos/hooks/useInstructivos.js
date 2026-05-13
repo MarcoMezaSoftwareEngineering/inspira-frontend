@@ -68,7 +68,7 @@ export function useInstructivos() {
     if (!await dialog.confirm("¿Eliminar este instructivo?")) return;
     const r = await boDELETE(`/backoffice/instructivos/${id_instructivo}`);
     if (!r.ok) { dialog.toast(r.msg || "No se pudo eliminar", "error"); return; }
-    if (selectedServicio) cargarInstructivos(selectedServicio);
+    setInstructivos(prev => prev.filter(i => i.id_instructivo !== id_instructivo));
     cargarServicios();
   }
 

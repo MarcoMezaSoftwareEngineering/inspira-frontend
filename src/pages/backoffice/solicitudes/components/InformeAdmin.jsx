@@ -557,13 +557,22 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
             {!editMode ? (
               <>
                 {!loadingCompat && (
-                  <button onClick={entrarEdicion}
-                    className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#22456e] transition-all duration-200 font-semibold">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Modificar lista
-                  </button>
+                  <>
+                    <button onClick={abrirModalCrear} disabled={loadingCatalog}
+                      className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg border border-[#1D6A4A] text-[#1D6A4A] hover:bg-[#E8F5EE] transition-all duration-200 font-semibold disabled:opacity-50">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      {loadingCatalog ? "Cargando…" : "Nuevo máster"}
+                    </button>
+                    <button onClick={entrarEdicion}
+                      className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#22456e] transition-all duration-200 font-semibold">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Modificar lista
+                    </button>
+                  </>
                 )}
                 {listaVista.length > 0 && (
                   <button onClick={publicarInforme} disabled={publicando}

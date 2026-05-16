@@ -508,7 +508,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
           <div className="flex gap-1.5 shrink-0">
             {!editMode ? (
               <>
-                {listaVista.length > 0 && (
+                {!loadingCompat && (
                   <button onClick={entrarEdicion}
                     className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#22456e] transition-all duration-200 font-semibold">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

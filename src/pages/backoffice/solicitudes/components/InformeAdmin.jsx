@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { boGET, boPATCH, boUpload } from "../../../../services/backofficeApi";
 import { dialog } from "../../../../services/dialogService";
 import { API_URL, formatearFecha } from "../utils";
+import ModalMaster from "../../catalogo/ModalMaster";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -180,6 +181,11 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   const [searchResults, setSearchResults]     = useState([]);
   const [searchingMasters, setSearchingMasters] = useState(false);
 
+  // Modal de crear nuevo máster
+  const [modalCrear,    setModalCrear]    = useState(false);
+  const [catalogData,   setCatalogData]   = useState(null);
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
+
   const searchRef  = useRef(null);
   const debounceRef = useRef(null);
 
@@ -273,6 +279,36 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
 
   function cambiarScore(idx, valor) {
     setListaEdit((prev) => prev.map((item, i) => i === idx ? { ...item, score: valor } : item));
+  }
+
+  async function abrirModalCrear() {
+    if (catalogData) { setModalCrear(true); return; }
+    setLoadingCatalog(true);
+    try {
+      const [rRamas, rCom, rUni] = await Promise.all([
+        boGET("/backoffice/catalogo/ramas"),
+        boGET("/backoffice/catalogo/comunidades"),
+        boGET("/backoffice/catalogo/universidades"),
+      ]);
+      setCatalogData({
+        ramas:         rRamas.ok  ? rRamas.ramas         : [],
+        comunidades:   rCom.ok    ? rCom.comunidades      : [],
+        universidades: rUni.ok    ? rUni.universidades    : [],
+      });
+      setModalCrear(true);
+    } catch { dialog.toast("Error cargando catálogo", "error"); }
+    finally { setLoadingCatalog(false); }
+  }
+
+  async function onMasterCreado(masterRaw) {
+    setModalCrear(false);
+    if (!masterRaw?.id_master) return;
+    try {
+      const r = await boGET(`/backoffice/catalogo/masters/${masterRaw.id_master}`);
+      if (r.ok && r.master) {
+        añadirItem({ master: r.master, score: null });
+      }
+    } catch { /* si falla solo no lo agrega */ }
   }
 
   async function publicarInforme() {
@@ -497,6 +533,18 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
         )}
       </div>
 
+      {/* ── Modal crear máster ────────────────────────────────────── */}
+      {modalCrear && catalogData && (
+        <ModalMaster
+          item={null}
+          universidades={catalogData.universidades}
+          comunidades={catalogData.comunidades}
+          ramas={catalogData.ramas}
+          onClose={() => setModalCrear(false)}
+          onSaved={onMasterCreado}
+        />
+      )}
+
       {/* ── Compatibilidad automática ─────────────────────────────── */}
       <div className="px-5 pt-4 pb-5">
 
@@ -705,11 +753,30 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
               {/* Sin resultados */}
               {showDropdown && !searchingMasters && searchResults.length === 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-neutral-200 rounded-xl shadow-lg z-20 px-4 py-4 text-center">
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-neutral-400 mb-2">
                     Sin resultados para <span className="font-semibold text-neutral-600">"{searchQ}"</span>
                   </p>
+                  <button type="button" onClick={abrirModalCrear} disabled={loadingCatalog}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1D6A4A] text-white text-xs font-semibold hover:bg-[#175a3d] transition disabled:opacity-50">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {loadingCatalog ? "Cargando…" : "Crear nuevo máster"}
+                  </button>
                 </div>
               )}
+            </div>
+
+            {/* Crear nuevo máster si no está en el catálogo */}
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-neutral-400">¿No está en el catálogo?</p>
+              <button type="button" onClick={abrirModalCrear} disabled={loadingCatalog}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1D6A4A] hover:underline disabled:opacity-50 transition">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                {loadingCatalog ? "Cargando…" : "Crear nuevo máster"}
+              </button>
             </div>
 
             {/* Lista editable */}

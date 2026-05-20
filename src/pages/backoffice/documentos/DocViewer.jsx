@@ -29,7 +29,9 @@ export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObserva
         if (!r.ok) { setError("No se pudo cargar el archivo."); setLoading(false); return; }
         const blob = await r.blob();
         if (cancelled) return;
-        objectUrl = URL.createObjectURL(blob);
+        // Forzar MIME type correcto — el servidor puede devolver application/octet-stream
+        const typedBlob = doc.mime_type ? new Blob([blob], { type: doc.mime_type }) : blob;
+        objectUrl = URL.createObjectURL(typedBlob);
         setBlobUrl(objectUrl);
       } catch {
         if (!cancelled) setError("Error al cargar el archivo.");

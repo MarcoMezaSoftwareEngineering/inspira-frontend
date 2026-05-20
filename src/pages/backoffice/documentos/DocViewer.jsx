@@ -6,7 +6,6 @@ import { API_URL, fileIcon, formatBytes, formatDate, descargarDocumento } from "
 export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObservar }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [blobUrl, setBlobUrl] = useState(null);
   const [driveLoading, setDriveLoading] = useState(false);
   const [driveError, setDriveError] = useState("");
 
@@ -14,35 +13,14 @@ export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObserva
   const isImage = doc.mime_type?.includes("image");
   const canPreview = isPdf || isImage;
 
+  // URL directa con token como query param (los iframes no pueden enviar headers)
+  const token = localStorage.getItem("bo_token");
+  const baseUrl = fetchUrl || `${API_URL}/api/admin/documentos/${doc.id_documento}/descargar`;
+  const viewUrl = `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}view=1&token=${token}`;
+
   useEffect(() => {
-    if (!canPreview) { setLoading(false); return; }
-
-    let objectUrl = null;
-    let cancelled = false;
-
-    async function load() {
-      const token = localStorage.getItem("bo_token");
-      const url = fetchUrl || `${API_URL}/api/admin/documentos/${doc.id_documento}/descargar`;
-      try {
-        const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-        if (cancelled) return;
-        if (!r.ok) { setError("No se pudo cargar el archivo."); setLoading(false); return; }
-        const blob = await r.blob();
-        if (cancelled) return;
-        objectUrl = URL.createObjectURL(blob);
-        setBlobUrl(objectUrl);
-      } catch {
-        if (!cancelled) setError("Error al cargar el archivo.");
-      }
-      if (!cancelled) setLoading(false);
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [doc.id_documento, canPreview, fetchUrl]);
+    if (!canPreview) setLoading(false);
+  }, [canPreview]);
 
   useEffect(() => {
     const handler = (e) => { if (e.key === "Escape") onClose(); };
@@ -54,7 +32,6 @@ export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObserva
     setDriveLoading(true);
     setDriveError("");
     try {
-      const token = localStorage.getItem("bo_token");
       const r = await fetch(
         `${API_URL}/api/admin/documentos/${doc.id_documento}/drive-url`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -121,8 +98,8 @@ export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObserva
           <span className="text-base leading-none">{fileIcon(doc.mime_type)}</span>
           <span className="flex-1 text-sm font-medium text-neutral-800 truncate">{doc.nombre_original}</span>
           <span className="text-[11px] text-neutral-400 shrink-0 hidden sm:block">{formatBytes(doc.tamano_bytes)}</span>
-          {blobUrl && isPdf && (
-            <button onClick={() => window.open(blobUrl, "_blank")} className="text-[11px] px-2 py-1 rounded border border-neutral-300 hover:bg-neutral-100 shrink-0">
+          {isPdf && (
+            <button onClick={() => window.open(viewUrl, "_blank")} className="text-[11px] px-2 py-1 rounded border border-neutral-300 hover:bg-neutral-100 shrink-0">
               Nueva ventana ↗
             </button>
           )}
@@ -146,13 +123,25 @@ export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObserva
 
         <div className="flex-1 overflow-hidden flex items-center justify-center bg-neutral-300">
           {loading && (
-            <div className="text-sm text-neutral-600 bg-white px-5 py-3 rounded-lg shadow">Cargando archivo…</div>
+            <div className="text-sm text-neutral-600 bg-white px-5 py-3 rounded-lg shadow absolute">Cargando archivo…</div>
           )}
-          {!loading && !error && blobUrl && isPdf && (
-            <iframe src={blobUrl} className="w-full h-full border-0" title={doc.nombre_original} />
+          {isPdf && (
+            <iframe
+              src={viewUrl}
+              className="w-full h-full border-0"
+              title={doc.nombre_original}
+              onLoad={() => setLoading(false)}
+              onError={() => { setError("No se pudo cargar el archivo."); setLoading(false); }}
+            />
           )}
-          {!loading && !error && blobUrl && isImage && (
-            <img src={blobUrl} alt={doc.nombre_original} className="max-w-full max-h-full object-contain p-4" />
+          {isImage && (
+            <img
+              src={viewUrl}
+              alt={doc.nombre_original}
+              className="max-w-full max-h-full object-contain p-4"
+              onLoad={() => setLoading(false)}
+              onError={() => { setError("No se pudo cargar la imagen."); setLoading(false); }}
+            />
           )}
         </div>
       </div>

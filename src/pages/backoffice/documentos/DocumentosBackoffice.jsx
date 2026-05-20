@@ -351,16 +351,7 @@ export default function DocumentosBackoffice() {
 
       {/* ── Pestañas ─────────────────────────────────────────────── */}
       <div className="shrink-0 flex gap-0.5 border-b border-neutral-200">
-        <button
-          onClick={() => setTabActivo("arbol")}
-          className={`flex items-center gap-1.5 text-sm px-4 py-2 font-medium border-b-2 transition-colors -mb-px ${
-            tabActivo === "arbol"
-              ? "border-primary text-primary"
-              : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300"
-          }`}
-        >
-          📂 Árbol de Documentos
-        </button>
+        
         <button
           onClick={() => setTabActivo("aprobacion")}
           className={`flex items-center gap-1.5 text-sm px-4 py-2 font-medium border-b-2 transition-colors -mb-px ${
@@ -375,6 +366,17 @@ export default function DocumentosBackoffice() {
               {estadoCounts.SUBIDO}
             </span>
           )}
+        </button>
+
+        <button
+          onClick={() => setTabActivo("arbol")}
+          className={`flex items-center gap-1.5 text-sm px-4 py-2 font-medium border-b-2 transition-colors -mb-px ${
+            tabActivo === "arbol"
+              ? "border-primary text-primary"
+              : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300"
+          }`}
+        >
+          📂 Árbol de Documentos
         </button>
       </div>
 

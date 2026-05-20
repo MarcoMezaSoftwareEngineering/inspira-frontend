@@ -82,7 +82,10 @@ function AprobacionRow({ entrada, onCambioEstado }) {
 
   return (
     <>
-      <div className="flex items-center gap-2 py-2.5 px-4 border-b border-neutral-100 hover:bg-neutral-50 transition-colors last:border-0">
+      <div
+        onClick={() => setVerDoc(true)}
+        className="flex items-center gap-2 py-2.5 px-4 border-b border-neutral-100 hover:bg-blue-50/40 transition-colors last:border-0 cursor-pointer"
+      >
         <span className="text-base leading-none shrink-0">{fileIcon(doc.mime_type)}</span>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-neutral-800 truncate">{doc.nombre_original}</p>
@@ -97,12 +100,6 @@ function AprobacionRow({ entrada, onCambioEstado }) {
         <span className="text-[11px] text-neutral-400 shrink-0 hidden md:block">{formatDate(doc.fecha_subida)}</span>
 
         <button
-          onClick={() => setVerDoc(true)}
-          className="text-[11px] px-2 py-1 rounded border border-blue-300 text-blue-600 hover:bg-blue-50 shrink-0"
-        >
-          Abrir
-        </button>
-        <button
           onClick={handleDrive}
           disabled={loadingDrive}
           className="group flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-neutral-200 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 hover:border-blue-200 active:scale-95 transition-all shrink-0 disabled:opacity-50"
@@ -111,20 +108,20 @@ function AprobacionRow({ entrada, onCambioEstado }) {
           <span className="text-neutral-500 group-hover:text-neutral-800 font-medium">Drive</span>
         </button>
         <button
-          onClick={() => descargarDocumento(doc)}
+          onClick={(e) => { e.stopPropagation(); descargarDocumento(doc); }}
           className="text-[11px] px-2 py-1 rounded border border-neutral-300 hover:bg-neutral-100 shrink-0"
         >
           Descargar
         </button>
         <button
-          onClick={() => cambiarRevision("APROBADO")}
+          onClick={(e) => { e.stopPropagation(); cambiarRevision("APROBADO"); }}
           disabled={procesando || estadoLocal === "APROBADO"}
           className="text-[11px] px-2 py-1 rounded border border-emerald-400 text-emerald-700 hover:bg-emerald-50 shrink-0 disabled:opacity-40 font-medium transition-colors"
         >
           {procesando ? "…" : "Aprobar"}
         </button>
         <button
-          onClick={() => cambiarRevision("OBSERVADO")}
+          onClick={(e) => { e.stopPropagation(); cambiarRevision("OBSERVADO"); }}
           disabled={procesando || estadoLocal === "OBSERVADO"}
           className="text-[11px] px-2 py-1 rounded border border-amber-400 text-amber-700 hover:bg-amber-50 shrink-0 disabled:opacity-40 font-medium transition-colors"
         >

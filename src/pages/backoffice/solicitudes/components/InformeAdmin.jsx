@@ -67,8 +67,10 @@ function ScoreRing({ score }) {
 function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEliminar, onScoreChange, esFirst, esLast }) {
   const { master, score } = resultado;
   const dur = durLabel(master.duracion_anios);
-  const precio = master.precio_total_estimado
-    ? `€${Math.round(master.precio_total_estimado).toLocaleString("es-ES")}`
+  const precioFinal = master.precio_final != null
+    ? { texto: `€${Math.round(master.precio_final).toLocaleString("es-ES")}`, esRef: false }
+    : master.precio_total_estimado != null
+    ? { texto: `€${Math.round(master.precio_total_estimado).toLocaleString("es-ES")}`, esRef: true }
     : null;
 
   const numBg =
@@ -116,8 +118,14 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
           {master.universidad.comunidad ? ` · ${master.universidad.comunidad}` : ""}
         </p>
         <div className="flex flex-wrap gap-1 mt-1.5">
-          {precio && (
-            <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded-md">{precio}</span>
+          {precioFinal && (
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
+              precioFinal.esRef
+                ? "bg-amber-50 text-amber-600 border border-amber-200"
+                : "bg-neutral-100 text-neutral-500"
+            }`}>
+              {precioFinal.texto}{precioFinal.esRef ? " (ref.)" : ""}
+            </span>
           )}
           {dur && (
             <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded-md">{dur}</span>

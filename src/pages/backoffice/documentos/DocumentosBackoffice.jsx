@@ -218,7 +218,7 @@ export default function DocumentosBackoffice() {
   const [expandedMap, setExpandedMap] = useState({});
   const [pagina, setPagina] = useState(0);
   const [filtroEstado, setFiltroEstado] = useState(null);
-  const [tabActivo, setTabActivo] = useState("arbol");
+  const [tabActivo, setTabActivo] = useState("aprobacion");
 
   const usuario = getUser();
   const isAdmin = usuario?.rol === "admin";

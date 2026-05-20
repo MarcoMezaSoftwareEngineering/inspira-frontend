@@ -29,10 +29,19 @@ export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObserva
         if (!r.ok) { setError("No se pudo cargar el archivo."); setLoading(false); return; }
         const blob = await r.blob();
         if (cancelled) return;
-        // Forzar MIME type correcto — el servidor puede devolver application/octet-stream
-        const typedBlob = doc.mime_type ? new Blob([blob], { type: doc.mime_type }) : blob;
-        objectUrl = URL.createObjectURL(typedBlob);
-        setBlobUrl(objectUrl);
+
+        if (isImage) {
+          // data URL para imágenes: no se puede revocar y esquiva restricciones CSP sobre blob:
+          await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => { if (!cancelled) setBlobUrl(reader.result); resolve(); };
+            reader.onerror = () => reject(new Error("FileReader error"));
+            reader.readAsDataURL(blob);
+          });
+        } else {
+          objectUrl = URL.createObjectURL(blob);
+          setBlobUrl(objectUrl);
+        }
       } catch {
         if (!cancelled) setError("Error al cargar el archivo.");
       }

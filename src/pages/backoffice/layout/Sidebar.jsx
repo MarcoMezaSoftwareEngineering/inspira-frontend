@@ -13,9 +13,10 @@ const NAV_SECTIONS = [
   {
     label: "Comercial",
     items: [
-      { label: "Presupuestos Portal", href: "/backoffice/presupuestos" },
-      { label: "Calculadora — Leads", href: "/backoffice/calculadora" },
-      { label: "Clientes",            href: "/backoffice/clientes" },
+      { label: "Presupuestos Portal",   href: "/backoffice/presupuestos" },
+      { label: "Calculadora — Leads",   href: "/backoffice/calculadora" },
+      { label: "Clientes",              href: "/backoffice/clientes" },
+      { label: "Tracker Universidades", href: "/backoffice/tracker-universidades" },
     ],
   },
   {

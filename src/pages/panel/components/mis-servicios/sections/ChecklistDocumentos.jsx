@@ -3,6 +3,8 @@ import { useState, useMemo, useEffect } from "react";
 import { apiDELETE, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
+
 const ESTADO_CFG = {
   aprobado:  { label: "Aprobado",  bg: "bg-emerald-50",  text: "text-emerald-700" },
   enviado:   { label: "Enviado",   bg: "bg-sky-50",      text: "text-sky-700"     },
@@ -34,7 +36,7 @@ function VisorModal({ doc, onClose }) {
 
     async function load() {
       const token = localStorage.getItem("token");
-      const url = `/api/documentos/${doc.id_documento}/descargar`;
+      const url = `${API_URL}/api/documentos/${doc.id_documento}/descargar`;
       try {
         const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
         if (cancelled) return;

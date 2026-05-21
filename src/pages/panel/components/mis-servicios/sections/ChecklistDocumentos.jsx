@@ -51,7 +51,9 @@ function VisorModal({ doc, onClose }) {
             reader.readAsDataURL(blob);
           });
         } else {
-          objectUrl = URL.createObjectURL(blob);
+          // Forzar application/pdf para que Chrome active su visor de PDF
+          const pdfBlob = new Blob([blob], { type: "application/pdf" });
+          objectUrl = URL.createObjectURL(pdfBlob);
           if (!cancelled) setBlobUrl(objectUrl);
         }
       } catch {

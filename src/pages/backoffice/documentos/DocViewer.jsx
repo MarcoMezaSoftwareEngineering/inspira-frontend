@@ -39,7 +39,9 @@ export default function DocViewer({ doc, onClose, fetchUrl, onAprobar, onObserva
             reader.readAsDataURL(blob);
           });
         } else {
-          objectUrl = URL.createObjectURL(blob);
+          // Forzar application/pdf para que Chrome active su visor de PDF
+          const pdfBlob = new Blob([blob], { type: "application/pdf" });
+          objectUrl = URL.createObjectURL(pdfBlob);
           setBlobUrl(objectUrl);
         }
       } catch {

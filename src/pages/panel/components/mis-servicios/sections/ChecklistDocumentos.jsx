@@ -22,11 +22,51 @@ function esVisualizableInline(mimeType) {
 
 // ─── Visor modal ────────────────────────────────────────────────────────────
 function VisorModal({ doc, onClose }) {
-  const url = `/api/documentos/${doc.id_documento}/descargar?view=1`;
-  const esPdf = (doc.mime_type || "").toLowerCase().includes("pdf");
+  const esPdf    = (doc.mime_type || "").toLowerCase().includes("pdf");
   const esImagen = (doc.mime_type || "").toLowerCase().includes("image/");
+  const [blobUrl,  setBlobUrl]  = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error,    setError]    = useState("");
 
-  // Cerrar con Escape
+  useEffect(() => {
+    let objectUrl = null;
+    let cancelled = false;
+
+    async function load() {
+      const token = localStorage.getItem("token");
+      const url = `/api/documentos/${doc.id_documento}/descargar`;
+      try {
+        const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (cancelled) return;
+        if (!r.ok) { setError("No se pudo cargar el archivo."); setCargando(false); return; }
+        const blob = await r.blob();
+        if (cancelled) return;
+
+        if (esImagen) {
+          // data URL para imágenes: evita problemas de CSP con blob: y revocaciones
+          await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => { if (!cancelled) setBlobUrl(reader.result); resolve(); };
+            reader.onerror = () => reject(new Error("FileReader error"));
+            reader.readAsDataURL(blob);
+          });
+        } else {
+          objectUrl = URL.createObjectURL(blob);
+          if (!cancelled) setBlobUrl(objectUrl);
+        }
+      } catch {
+        if (!cancelled) setError("Error al cargar el archivo.");
+      }
+      if (!cancelled) setCargando(false);
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [doc.id_documento, esPdf, esImagen]);
+
   useEffect(() => {
     function onKey(e) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", onKey);
@@ -60,21 +100,15 @@ function VisorModal({ doc, onClose }) {
         </div>
 
         {/* Contenido */}
-        <div className="flex-1 overflow-hidden rounded-b-2xl bg-neutral-100">
-          {esPdf && (
-            <iframe
-              src={url}
-              title={doc.nombre_original}
-              className="w-full h-full border-0"
-            />
+        <div className="flex-1 overflow-hidden rounded-b-2xl bg-neutral-100 flex items-center justify-center">
+          {cargando && <p className="text-sm text-neutral-500">Cargando archivo…</p>}
+          {error    && <p className="text-sm text-red-600">{error}</p>}
+          {!cargando && !error && blobUrl && esPdf && (
+            <iframe src={blobUrl} title={doc.nombre_original} className="w-full h-full border-0" />
           )}
-          {esImagen && (
+          {!cargando && !error && blobUrl && esImagen && (
             <div className="w-full h-full flex items-center justify-center p-4">
-              <img
-                src={url}
-                alt={doc.nombre_original}
-                className="max-w-full max-h-full object-contain rounded-xl shadow"
-              />
+              <img src={blobUrl} alt={doc.nombre_original} className="max-w-full max-h-full object-contain rounded-xl shadow" />
             </div>
           )}
         </div>

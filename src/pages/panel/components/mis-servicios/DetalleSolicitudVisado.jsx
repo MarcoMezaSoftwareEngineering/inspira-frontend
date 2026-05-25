@@ -31,7 +31,7 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
         {num}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-xs font-semibold leading-tight truncate ${active ? "text-white" : "text-neutral-800"}`}>
+        <p className={`text-xs font-semibold leading-tight ${active ? "text-white" : "text-neutral-800"}`}>
           {titulo}
         </p>
         {subtitulo && (
@@ -438,7 +438,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
           </div>
 
           {/* Desktop: sidebar vertical */}
-          <div className="hidden md:flex w-52 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
+          <div className="hidden md:flex w-64 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
             {navSections.map((s) => (
               <NavItem
                 key={s.id}

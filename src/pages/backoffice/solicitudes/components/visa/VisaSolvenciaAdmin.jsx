@@ -17,6 +17,12 @@ export default function VisaSolvenciaAdmin({ idSolicitud, expediente, onSaved })
     });
   }, [expediente]);
 
+  async function setTipo(nuevo) {
+    if (nuevo === tipo) return;
+    const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/visa-expediente`, { tipo_solvencia: nuevo });
+    if (r.ok) onSaved?.(r.expediente);
+  }
+
   async function guardarAval() {
     setSaving(true);
     try {
@@ -29,38 +35,36 @@ export default function VisaSolvenciaAdmin({ idSolicitud, expediente, onSaved })
 
   function set(k, v) { setAval((p) => ({ ...p, [k]: v })); }
 
-  if (tipo === "PENDIENTE") {
+  const opt = (val, icon, titulo, sub) => {
+    const on = tipo === val;
+    const color = val === "PROPIOS" ? "#1D6A4A" : "#7D3C98";
     return (
-      <div className="px-5 py-7 text-center">
-        <span className="block text-3xl mb-2">💰</span>
-        <p className="text-[13px] text-[#6B7280] max-w-md mx-auto leading-relaxed">
-          El tipo de solvencia (medios propios o con aval) se define en el <b>Bloque 4 — Sesión de diagnóstico</b>.
-          Mientras tanto, el Bloque 2 (Documentos) permanece bloqueado.
-        </p>
-      </div>
+      <button type="button" onClick={() => setTipo(val)}
+        className={`flex-1 text-center rounded-xl border-2 px-3 py-3 transition-all ${on ? "" : "border-[#E2E8F0] bg-white"}`}
+        style={on ? { borderColor: color, background: `${color}10` } : {}}>
+        <span className="block text-xl mb-1">{icon}</span>
+        <span className="block text-[12px] font-bold" style={{ color: on ? color : "#1A3557" }}>{titulo}</span>
+        <span className="block text-[10px] text-neutral-500 mt-0.5">{sub}</span>
+      </button>
     );
-  }
-
-  const esAval = tipo === "AVAL";
-  const color = esAval ? "#7D3C98" : "#1D6A4A";
-  const bg = esAval ? "#F5EEF8" : "#E8F5EE";
+  };
 
   return (
     <div className="px-5 py-4">
-      <div className="rounded-xl border-2 px-4 py-3" style={{ borderColor: `${color}55`, background: bg }}>
-        <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color }}>Variante definida</p>
-        <p className="text-[15px] font-bold" style={{ color }}>
-          {esAval ? "👨‍👩‍👧 Con aval / tercero" : "🙋 Medios propios"}
-        </p>
-        <p className="text-[11px] text-neutral-500 mt-1">
-          {esAval
-            ? "El cliente acredita la solvencia con un aval (familiar/tercero). El Bloque 2 muestra los documentos del aval."
-            : "El cliente acredita la solvencia con su propia cuenta bancaria. El Bloque 2 muestra los documentos de medios propios."}
-        </p>
-        <p className="text-[11px] text-neutral-400 mt-1">Para cambiarla, usa el selector en el Bloque 4 — Sesión de diagnóstico.</p>
+      <p className="text-[12px] text-neutral-500 mb-3">
+        Define cómo el cliente acredita su solvencia. Cambia los documentos del Bloque 2. También puedes definirla en el Bloque 4 (Sesión de diagnóstico).
+      </p>
+      <div className="flex gap-2">
+        {opt("PROPIOS", "🙋", "Medios propios", "Cuenta bancaria propia · 6 meses · ~7.200 €")}
+        {opt("AVAL", "👨‍👩‍👧", "Con aval / tercero", "Patrocinador · Vínculo familiar")}
       </div>
+      {tipo === "PENDIENTE" && (
+        <p className="text-[11px] text-[#9A7D0A] bg-[#FEF9E7] border border-[#F9E79F] rounded-lg px-3 py-2 mt-3">
+          Aún sin definir. Mientras tanto el Bloque 2 (Documentos) permanece bloqueado para el cliente.
+        </p>
+      )}
 
-      {esAval && (
+      {tipo === "AVAL" && (
         <>
           <SubLabel>Datos del aval</SubLabel>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

@@ -6,8 +6,9 @@ import DetalleSolicitud from "./mis-servicios/DetalleSolicitud";
 import DetalleSolicitudVisado from "./mis-servicios/DetalleSolicitudVisado";
 
 function esVisado(s) {
+  if (Number(s?.id_tipo_solicitud) === 15) return true;
   const cod = String(
-    s?.tipo_solicitud || s?.tipo || s?.categoria ||
+    s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.categoria || s?.titulo ||
     s?.servicio?.codigo || s?.codigo_servicio || s?.nombre_servicio || ""
   ).toUpperCase();
   return cod.includes("VISADO");

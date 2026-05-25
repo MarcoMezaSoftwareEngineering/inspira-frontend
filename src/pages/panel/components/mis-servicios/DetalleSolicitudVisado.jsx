@@ -174,6 +174,8 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     return docsListas === checklist.length ? "completado" : "pendiente";
   }, [checklist, docsListas]);
 
+  const docsBloqueados = (visaExp?.tipo_solvencia || "PENDIENTE") === "PENDIENTE";
+
   const sesionPorTipo = (tipo) => sesiones.find((s) => s.tipo === tipo) || null;
   const sesionEstado = (tipo) => (sesionPorTipo(tipo)?.estado === "COMPLETADA" ? "completado" : "pendiente");
 
@@ -194,7 +196,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
   const navSections = [
     { id: "datos", num: 1, titulo: "Mis datos personales", subtitulo: "Datos de tu expediente" },
-    { id: "docs", num: 2, titulo: "Mis documentos", subtitulo: total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
+    { id: "docs", num: 2, titulo: "Mis documentos", subtitulo: docsBloqueados ? "Se activa tras el diagnóstico" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
     { id: "solvencia", num: 3, titulo: "Mi tipo de solvencia", subtitulo: "Medios propios o aval" },
     { id: "diagnostico", num: 4, titulo: "Sesión de diagnóstico", subtitulo: "Evaluación inicial" },
     { id: "seguimiento", num: 5, titulo: "Sesión de seguimiento", subtitulo: "Avance de documentos" },
@@ -253,6 +255,11 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
         return visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE" ? (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
             <p className="text-[14px] font-bold text-[#1D6A4A] mb-2">{SOLV_LABEL[visaExp.tipo_solvencia]}</p>
+            <p className="text-[13px] text-neutral-600 leading-relaxed mb-2">
+              {visaExp.tipo_solvencia === "AVAL"
+                ? "Necesitas que un familiar con residencia en España o ingresos verificables respalde tu solicitud. Tu asesor te explicará los detalles."
+                : "Acreditas tu solvencia con tu propia cuenta bancaria (saldo aproximado de 7.200 € en los últimos 6 meses)."}
+            </p>
             {visaExp.tipo_solvencia === "AVAL" && (
               <>
                 <Linea label="Aval" value={visaExp.aval_nombre} />
@@ -463,6 +470,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                   numero="2"
                   titulo="Mis documentos"
                   sectionId="2"
+                  bloqueado={docsBloqueados}
                 />
               ) : (
                 <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>

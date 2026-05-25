@@ -124,25 +124,6 @@ function CBox({ children }) {
   );
 }
 
-// Selector de variante de solvencia (propios / aval). Cambia los documentos del Bloque 2.
-function VarianteBar({ tipo = "PENDIENTE", onChange }) {
-  const base = "flex-1 flex flex-col items-center gap-1 py-2.5 rounded-[11px] border-2 text-[12px] font-semibold transition-all";
-  const propiosOn = tipo === "PROPIOS";
-  const avalOn = tipo === "AVAL";
-  return (
-    <div className="flex gap-2 mb-4">
-      <button type="button" onClick={() => onChange?.("PROPIOS")}
-        className={`${base} ${propiosOn ? "border-[#1D6A4A] bg-[#E8F5EE] text-[#1D6A4A]" : "border-[#E2E8F0] bg-white text-[#6B7280]"}`}>
-        <span className="text-base">🙋</span>Medios propios
-      </button>
-      <button type="button" onClick={() => onChange?.("AVAL")}
-        className={`${base} ${avalOn ? "border-[#7D3C98] bg-[#F5EEF8] text-[#7D3C98]" : "border-[#E2E8F0] bg-white text-[#6B7280]"}`}>
-        <span className="text-base">👨‍👩‍👧</span>Con aval / tercero
-      </button>
-    </div>
-  );
-}
-
 export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const mainRef = useRef(null);
 
@@ -403,8 +384,6 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-[22px] pb-20">
 
-          {isVisado && <VarianteBar tipo={visaExp?.tipo_solvencia || "PENDIENTE"} onChange={cambiarSolvencia} />}
-
           {/* B1 — Encabezado del cliente */}
           <div id="bloque-cliente" className="scroll-mt-4">
             <BlqHead numero="1" titulo="Encabezado del cliente" estado={calcClienteEstado(detalle)}
@@ -468,6 +447,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   <CBox>
                     <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="DIAGNOSTICO"
                       sesion={sesionPorTipo("DIAGNOSTICO")} onSaved={onSesionGuardada}
+                      solvencia={visaExp?.tipo_solvencia || "PENDIENTE"} onSolvencia={cambiarSolvencia}
                       agenda={["Revisar situación migratoria actual", "Evaluar viabilidad del expediente", "Definir tipo de medios económicos (propios o aval)", "Identificar documentos complejos y plazos", "Instrucciones certificado médico y antecedentes penales"]} />
                   </CBox>
                 )}

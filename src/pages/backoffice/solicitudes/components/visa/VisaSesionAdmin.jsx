@@ -8,7 +8,7 @@ const ESTADO_OPTS = [
   { value: "COMPLETADA", label: "Completada" },
 ];
 
-export default function VisaSesionAdmin({ idSolicitud, tipo, sesion, onSaved, agenda = [] }) {
+export default function VisaSesionAdmin({ idSolicitud, tipo, sesion, onSaved, agenda = [], solvencia, onSolvencia }) {
   const [form, setForm] = useState({ estado: "PENDIENTE", fecha: "", hora: "", plataforma: "", enlace_meet: "", notas: "" });
   const [saving, setSaving] = useState(false);
 
@@ -35,8 +35,34 @@ export default function VisaSesionAdmin({ idSolicitud, tipo, sesion, onSaved, ag
     }
   }
 
+  const solvBtn = (val, icon, titulo) => {
+    const on = (solvencia || "PENDIENTE") === val;
+    const color = val === "PROPIOS" ? "#1D6A4A" : "#7D3C98";
+    return (
+      <button type="button" onClick={() => onSolvencia?.(val)}
+        className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-[11px] border-2 text-[12px] font-semibold transition-all ${on ? "" : "border-[#E2E8F0] bg-white text-[#6B7280]"}`}
+        style={on ? { borderColor: color, background: `${color}12`, color } : {}}>
+        <span className="text-base">{icon}</span>{titulo}
+      </button>
+    );
+  };
+
   return (
     <div className="px-5 py-4 space-y-3">
+      {onSolvencia && (
+        <div className="bg-[#F5EEF8] border border-[#D7BDE2] rounded-xl px-3 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#7D3C98] mb-2">
+            Tipo de solvencia — se define en esta sesión
+          </p>
+          <div className="flex gap-2">
+            {solvBtn("PROPIOS", "🙋", "Medios propios")}
+            {solvBtn("AVAL", "👨‍👩‍👧", "Con aval / tercero")}
+          </div>
+          <p className="text-[11px] text-neutral-500 mt-2">
+            Al elegir la variante se activan los documentos del Bloque 2 (hoy: {solvencia && solvencia !== "PENDIENTE" ? (solvencia === "AVAL" ? "Con aval" : "Medios propios") : "sin definir"}).
+          </p>
+        </div>
+      )}
       {agenda.length > 0 && (
         <div className="bg-[#FEF9E7] border border-[#F9E79F] rounded-xl px-3 py-2.5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#9A7D0A] mb-1">Agenda de la sesión</p>

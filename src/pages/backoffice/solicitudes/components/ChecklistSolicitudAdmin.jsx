@@ -158,6 +158,19 @@ export default function ChecklistSolicitudAdmin({
     input.click();
   }
 
+  // Visado: el Bloque 2 queda bloqueado hasta que se defina el tipo de solvencia (en la sesión de diagnóstico).
+  if (isVisado && tipoSolvencia === "PENDIENTE") {
+    return (
+      <div className="text-center py-10 px-4">
+        <span className="block text-3xl mb-2">🔒</span>
+        <p className="text-sm font-semibold text-neutral-700">Documentos bloqueados</p>
+        <p className="text-sm text-neutral-500 max-w-md mx-auto mt-1">
+          La lista de documentos se activará después de la sesión de diagnóstico, cuando definas el tipo de solvencia en el <b>Bloque 4</b>.
+        </p>
+      </div>
+    );
+  }
+
   if (Object.keys(checklistPorEtapa).length === 0) {
     return <p className="text-sm text-neutral-500 py-2">Esta solicitud no tiene checklist configurado.</p>;
   }

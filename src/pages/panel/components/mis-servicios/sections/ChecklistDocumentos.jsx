@@ -281,6 +281,8 @@ export default function ChecklistDocumentos({
   sectionId = "1",
   open,
   onToggle,
+  bloqueado = false,
+  mensajeBloqueo = "",
 }) {
   const [docVisor, setDocVisor] = useState(null);
 
@@ -313,8 +315,9 @@ export default function ChecklistDocumentos({
     return allDone ? "completado" : "pendiente";
   }, [checklist]);
 
-  const subtitulo =
-    total > 0
+  const subtitulo = bloqueado
+    ? "Se activará tras la sesión de diagnóstico"
+    : total > 0
       ? `${aprobados} de ${total} documentos listos`
       : "Sube los archivos del checklist de tu servicio.";
 
@@ -340,7 +343,17 @@ export default function ChecklistDocumentos({
         open={open}
         onToggle={onToggle}
       >
-        {total > 0 && (
+        {bloqueado && (
+          <div className="text-center py-8 px-3">
+            <span className="block text-3xl mb-2">🔒</span>
+            <p className="text-sm font-semibold text-neutral-700">Documentos aún no disponibles</p>
+            <p className="text-sm text-neutral-500 max-w-sm mx-auto mt-1">
+              {mensajeBloqueo || "La lista de documentos se activará después de tu sesión de diagnóstico, cuando tu asesor defina el tipo de solvencia."}
+            </p>
+          </div>
+        )}
+
+        {!bloqueado && total > 0 && (
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <p className="text-sm text-neutral-500">
               Sube todos tus documentos para que tu asesor pueda revisarlos.
@@ -352,13 +365,13 @@ export default function ChecklistDocumentos({
           </div>
         )}
 
-        {Object.keys(grupos).length === 0 && (
+        {!bloqueado && Object.keys(grupos).length === 0 && (
           <p className="text-sm text-neutral-400 py-4 text-center">
             Aún no hay checklist configurado.
           </p>
         )}
 
-        {gruposOrdenados.map(([nombre, items]) => (
+        {!bloqueado && gruposOrdenados.map(([nombre, items]) => (
           <div key={nombre} className="space-y-3">
             {multiGrupo && (
               <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 pb-2 border-b border-neutral-100">

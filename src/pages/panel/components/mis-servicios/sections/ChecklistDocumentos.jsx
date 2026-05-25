@@ -279,6 +279,8 @@ export default function ChecklistDocumentos({
   numero = "1",
   titulo = "Documentos requeridos",
   sectionId = "1",
+  open,
+  onToggle,
 }) {
   const [docVisor, setDocVisor] = useState(null);
 
@@ -335,6 +337,8 @@ export default function ChecklistDocumentos({
         subtitulo={subtitulo}
         estado={estadoGlobal}
         sectionId={sectionId}
+        open={open}
+        onToggle={onToggle}
       >
         {total > 0 && (
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">

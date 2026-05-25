@@ -62,6 +62,8 @@ function formCompleto(datos) {
 }
 
 function BlqHead({ numero, titulo, estado, open, onToggle }) {
+  // Vista de sección única: solo se muestra la cabecera del bloque activo.
+  if (!open) return null;
   const badge = {
     completado: "bg-[#1D6A4A] text-white",
     observado:  "bg-[#DC2626] text-white",
@@ -159,7 +161,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const [visaSesiones, setVisaSesiones] = useState([]);
 
   function toggleBloque(id) {
-    setActiveBloque((prev) => (prev === id ? null : id));
+    setActiveBloque(id);
   }
 
   function irABloque(id) {

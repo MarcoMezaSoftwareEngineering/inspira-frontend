@@ -123,9 +123,24 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idSolicitud]);
 
-  async function cargarTodo() {
-    setLoading(true);
-    setError("");
+  // Auto-refresco: re-consulta cada ~25s y al volver a esta pestaña (silencioso, sin flicker).
+  useEffect(() => {
+    const refrescar = () => {
+      if (document.visibilityState === "visible") cargarTodo({ silent: true });
+    };
+    const intervalo = setInterval(refrescar, 25000);
+    window.addEventListener("focus", refrescar);
+    document.addEventListener("visibilitychange", refrescar);
+    return () => {
+      clearInterval(intervalo);
+      window.removeEventListener("focus", refrescar);
+      document.removeEventListener("visibilitychange", refrescar);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idSolicitud]);
+
+  async function cargarTodo({ silent = false } = {}) {
+    if (!silent) { setLoading(true); setError(""); }
     try {
       const rDetalle = await apiGET(`/solicitudes/${idSolicitud}`);
       if (rDetalle.ok) setDetalle(rDetalle.solicitud);
@@ -152,9 +167,9 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
       }
     } catch (e) {
       console.error(e);
-      setError("Error al cargar información.");
+      if (!silent) setError("Error al cargar información.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 

@@ -1,15 +1,21 @@
 // src/pages/panel/components/mis-servicios/sections/InstructivosPlantillas.jsx
 import SeccionPanel from "./SeccionPanel";
 
-export default function InstructivosPlantillas({ instructivos }) {
+export default function InstructivosPlantillas({
+  instructivos,
+  numero = "2",
+  titulo = "Instructivos y plantillas",
+  subtitulo = "Descarga la guía paso a paso de tu servicio.",
+  sectionId = "2",
+}) {
   const lista = Array.isArray(instructivos) ? instructivos : [];
 
   return (
     <SeccionPanel
-      numero="2"
-      titulo="Instructivos y plantillas"
-      subtitulo="Descarga la guía paso a paso de tu servicio."
-      sectionId="2"
+      numero={numero}
+      titulo={titulo}
+      subtitulo={subtitulo}
+      sectionId={sectionId}
     >
       {lista.length === 0 ? (
         <div className="py-6 text-center">

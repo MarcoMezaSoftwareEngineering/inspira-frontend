@@ -7,11 +7,13 @@ import DocViewer from "../../documentos/DocViewer";
 import { DriveToast, useDriveToast } from "../../driveToast";
 
 const ESTADO_CFG = {
-  aprobado:  { label: "Aprobado",  bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
-  enviado:   { label: "Enviado",   bg: "bg-sky-50",     text: "text-sky-700",     border: "border-sky-200",     dot: "bg-sky-500"     },
-  observado: { label: "Observado", bg: "bg-red-50",     text: "text-red-700",     border: "border-red-200",     dot: "bg-red-500"     },
-  no_aplica: { label: "No aplica", bg: "bg-neutral-50", text: "text-neutral-500", border: "border-neutral-200", dot: "bg-neutral-400" },
-  pendiente: { label: "Pendiente", bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200",   dot: "bg-amber-400"   },
+  aprobado:   { label: "Aprobado",  bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
+  enviado:    { label: "Enviado",   bg: "bg-sky-50",     text: "text-sky-700",     border: "border-sky-200",     dot: "bg-sky-500"     },
+  observado:  { label: "Observado", bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200",   dot: "bg-amber-500"   },
+  solicitado: { label: "Adicional", bg: "bg-violet-50",  text: "text-violet-700",  border: "border-violet-200",  dot: "bg-violet-500"  },
+  rechazado:  { label: "Rechazado", bg: "bg-red-50",     text: "text-red-700",     border: "border-red-300",     dot: "bg-red-600"     },
+  no_aplica:  { label: "No aplica", bg: "bg-neutral-50", text: "text-neutral-500", border: "border-neutral-200", dot: "bg-neutral-400" },
+  pendiente:  { label: "Pendiente", bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200",   dot: "bg-amber-400"   },
 };
 
 function getEstadoCfg(estado) {
@@ -21,11 +23,21 @@ function getEstadoCfg(estado) {
 export default function ChecklistSolicitudAdmin({
   detalle,
   checklistPorEtapa,
-  setChecklist,
   recargar,
+  isVisado = false,
+  tipoSolvencia = "PENDIENTE",
 }) {
   const [viewingDoc, setViewingDoc] = useState(null);
   const driveToastState = useDriveToast();
+
+  // Oculta el set de solvencia que no corresponde a la variante activa.
+  const variante = tipoSolvencia === "AVAL" ? "aval" : "propios";
+  function visiblePorSolvencia(it) {
+    const g = it.item?.grupo;
+    if (g === "solvencia_propios") return variante === "propios";
+    if (g === "solvencia_aval") return variante === "aval";
+    return true;
+  }
 
   async function abrirEnDrive(doc) {
     window.dispatchEvent(new CustomEvent("drive-opening"));
@@ -64,6 +76,32 @@ export default function ChecklistSolicitudAdmin({
       console.error(e);
       dialog.toast("Error al actualizar el documento.", "error");
       return false;
+    }
+  }
+
+  // Cambiar el estado del ÍTEM (acciones del asesor: adicional / rechazar / etc.)
+  async function cambiarEstadoItem(it, nuevoEstado) {
+    if (!detalle || !it) return;
+    let comentario;
+    if (nuevoEstado === "rechazado" || nuevoEstado === "solicitado") {
+      comentario = await dialog.prompt(
+        nuevoEstado === "rechazado"
+          ? "Motivo del rechazo (se mostrará al cliente):"
+          : "Detalle del documento adicional solicitado:",
+        it.comentario_asesor || ""
+      );
+      if (comentario === null) return;
+    }
+    try {
+      const r = await boPATCH(
+        `/api/admin/solicitudes/${detalle.id_solicitud}/items/${it.id_solicitud_item}/estado`,
+        { estado_item: nuevoEstado, comentario_asesor: comentario ?? null }
+      );
+      if (!r.ok) { dialog.toast(r.msg || r.message || "No se pudo actualizar el estado.", "error"); return; }
+      await recargar();
+    } catch (e) {
+      console.error(e);
+      dialog.toast("Error al actualizar el estado del ítem.", "error");
     }
   }
 
@@ -125,7 +163,7 @@ export default function ChecklistSolicitudAdmin({
   }
 
   // Contadores para la barra de resumen
-  const todosLosItems = Object.values(checklistPorEtapa).flat();
+  const todosLosItems = Object.values(checklistPorEtapa).flat().filter(visiblePorSolvencia);
   const totalDocs     = todosLosItems.length;
   const nEnviados     = todosLosItems.filter((it) => ["enviado","aprobado","no_aplica"].includes((it.estado_item||"").toLowerCase())).length;
   const nPendientes   = todosLosItems.filter((it) => (it.estado_item||"pendiente").toLowerCase() === "pendiente" && (it.documentos?.length > 0 || it.documento)).length;
@@ -150,7 +188,12 @@ export default function ChecklistSolicitudAdmin({
     </div>
 
     <div className="space-y-5">
-      {Object.entries(checklistPorEtapa).map(([nombreEtapa, items]) => (
+      {Object.entries(checklistPorEtapa)
+        .sort((a, b) => (a[1][0]?.item?.etapa?.orden ?? 99) - (b[1][0]?.item?.etapa?.orden ?? 99))
+        .map(([nombreEtapa, itemsAll]) => {
+        const items = itemsAll.filter(visiblePorSolvencia);
+        if (items.length === 0) return null;
+        return (
         <div key={nombreEtapa}>
           {Object.keys(checklistPorEtapa).length > 1 && (
             <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 pb-2 mb-3 border-b border-neutral-100">
@@ -164,7 +207,9 @@ export default function ChecklistSolicitudAdmin({
                 : it.documento ? [it.documento] : [];
               const cfg = getEstadoCfg(it.estado_item);
               const borderColor =
-                it.estado_item === "observado" ? "border-red-200 bg-red-50/30" :
+                it.estado_item === "rechazado" ? "border-red-300 bg-red-50/40" :
+                it.estado_item === "observado" ? "border-amber-200 bg-amber-50/30" :
+                it.estado_item === "solicitado" ? "border-violet-200 bg-violet-50/30" :
                 it.estado_item === "aprobado"  ? "border-emerald-200 bg-emerald-50/20" :
                 "border-neutral-200 bg-white hover:border-neutral-300";
 
@@ -193,6 +238,35 @@ export default function ChecklistSolicitudAdmin({
                       {cfg.label}
                     </span>
                   </div>
+
+                  {/* Acciones a nivel de requisito (ítem) — solo Visado */}
+                  {isVisado && (
+                    <div className="flex flex-wrap gap-1.5 mb-1.5">
+                      <button
+                        type="button"
+                        onClick={() => cambiarEstadoItem(it, "solicitado")}
+                        className="text-[11px] px-2 py-1 rounded-lg border border-violet-300 text-violet-700 hover:bg-violet-50 transition"
+                      >
+                        ➕ Adicional
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cambiarEstadoItem(it, "rechazado")}
+                        className="text-[11px] px-2 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 transition"
+                      >
+                        ✕ Rechazar
+                      </button>
+                      {["solicitado", "rechazado"].includes((it.estado_item || "").toLowerCase()) && (
+                        <button
+                          type="button"
+                          onClick={() => cambiarEstadoItem(it, "pendiente")}
+                          className="text-[11px] px-2 py-1 rounded-lg border border-neutral-300 text-neutral-600 hover:bg-neutral-50 transition"
+                        >
+                          ↺ Reiniciar
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {/* Documentos */}
                   {docs.length === 0 ? (
@@ -281,7 +355,8 @@ export default function ChecklistSolicitudAdmin({
             })}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
     {viewingDoc && (
       <DocViewer

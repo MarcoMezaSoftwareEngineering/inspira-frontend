@@ -1,6 +1,6 @@
 // src/pages/backoffice/solicitudes/SolicitudDetalleBackoffice.jsx
-import { useMemo, useRef, useState } from "react";
-import { boPATCH } from "../../../services/backofficeApi";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { boGET, boPATCH } from "../../../services/backofficeApi";
 import FormularioDatosAcademicosAdmin from "./FormularioDatosAcademicosAdmin";
 import EleccionMastersAdmin from "./EleccionMastersAdmin";
 import ProgramacionPostulacionesAdmin from "./ProgramacionPostulacionesAdmin";
@@ -10,6 +10,11 @@ import { useSolicitudDetalle } from "./hooks/useSolicitudDetalle";
 import ChecklistSolicitudAdmin from "./components/ChecklistSolicitudAdmin";
 import InformeAdmin from "./components/InformeAdmin";
 import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
+import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
+import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
+import VisaCitaAdmin from "./components/visa/VisaCitaAdmin";
+import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
+import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
 
 const RING_R = 13;
 const RING_C = 2 * Math.PI * RING_R;
@@ -117,16 +122,39 @@ function CBox({ children }) {
   );
 }
 
+// Selector de variante de solvencia (propios / aval). Cambia los documentos del Bloque 2.
+function VarianteBar({ tipo = "PENDIENTE", onChange }) {
+  const base = "flex-1 flex flex-col items-center gap-1 py-2.5 rounded-[11px] border-2 text-[12px] font-semibold transition-all";
+  const propiosOn = tipo === "PROPIOS";
+  const avalOn = tipo === "AVAL";
+  return (
+    <div className="flex gap-2 mb-4">
+      <button type="button" onClick={() => onChange?.("PROPIOS")}
+        className={`${base} ${propiosOn ? "border-[#1D6A4A] bg-[#E8F5EE] text-[#1D6A4A]" : "border-[#E2E8F0] bg-white text-[#6B7280]"}`}>
+        <span className="text-base">🙋</span>Medios propios
+      </button>
+      <button type="button" onClick={() => onChange?.("AVAL")}
+        className={`${base} ${avalOn ? "border-[#7D3C98] bg-[#F5EEF8] text-[#7D3C98]" : "border-[#E2E8F0] bg-white text-[#6B7280]"}`}>
+        <span className="text-base">👨‍👩‍👧</span>Con aval / tercero
+      </button>
+    </div>
+  );
+}
+
 export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const mainRef = useRef(null);
 
   const {
     detalle, setDetalle,
-    checklistPorEtapa, setChecklist,
+    checklistPorEtapa,
     loading, error, cargar,
   } = useSolicitudDetalle(idSolicitud);
 
   const [expanded, setExpanded] = useState(new Set());
+
+  // Datos de Visado (Fase 2)
+  const [visaExp, setVisaExp] = useState(null);
+  const [visaSesiones, setVisaSesiones] = useState([]);
 
   function toggleBloque(id) {
     setExpanded((prev) => {
@@ -180,10 +208,16 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
     const lista = visado
       ? [
-          { id: "cliente",     numero: "1", label: "Encabezado cliente",  estado: clienteEstado },
-          { id: "checklist",   numero: "2", label: "Documentos",          estado: checklistStats.estado },
-          { id: "instructivo", numero: "3", label: "Instructivo",         estado: "inactivo" },
-          { id: "portales",    numero: "4", label: "Portales · Claves",   estado: "pendiente" },
+          { id: "cliente",      numero: "1", label: "Encabezado del cliente",   estado: clienteEstado },
+          { id: "checklist",    numero: "2", label: "Documentos requeridos",    estado: checklistStats.estado },
+          { id: "solvencia",    numero: "3", label: "Tipo de medios económicos", estado: "inactivo" },
+          { id: "diagnostico",  numero: "4", label: "Sesión diagnóstico",       estado: "inactivo" },
+          { id: "seguimiento",  numero: "5", label: "Sesión seguimiento",       estado: "inactivo" },
+          { id: "formulario",   numero: "6", label: "Formulario de visado",     estado: "inactivo" },
+          { id: "precita",      numero: "7", label: "Sesión pre-cita",          estado: "inactivo" },
+          { id: "cita",         numero: "8", label: "Cita BLS / Consulado",     estado: "inactivo" },
+          { id: "cierre",       numero: "9", label: "Cierre del expediente",    estado: "inactivo" },
+          { id: "portales",     numero: "P", label: "Portales · Claves",        estado: "pendiente" },
         ]
       : [
           { id: "cliente",      numero: "1", label: "Encabezado cliente",      estado: clienteEstado },
@@ -197,6 +231,37 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
         ];
     return { bloques: lista, isVisado: visado };
   }, [detalle, checklistStats, eleccionEnPicker]); // eslint-disable-line
+
+  // Cargar expediente + sesiones de Visado
+  useEffect(() => {
+    if (!detalle || !isVisado) return;
+    let cancel = false;
+    (async () => {
+      const [e, s] = await Promise.all([
+        boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/visa-expediente`),
+        boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/sesiones`),
+      ]);
+      if (cancel) return;
+      if (e.ok) setVisaExp(e.expediente || null);
+      if (s.ok) setVisaSesiones(s.sesiones || []);
+    })();
+    return () => { cancel = true; };
+  }, [detalle, isVisado]);
+
+  const sesionPorTipo = (tipo) => visaSesiones.find((s) => s.tipo === tipo) || null;
+  const sesionEstadoBloque = (tipo) => (sesionPorTipo(tipo)?.estado === "COMPLETADA" ? "completado" : "pendiente");
+
+  function onSesionGuardada(sesion) {
+    setVisaSesiones((prev) => {
+      const otras = prev.filter((s) => s.tipo !== sesion.tipo);
+      return [...otras, sesion];
+    });
+  }
+
+  async function cambiarSolvencia(nuevo) {
+    const r = await boPATCH(`/backoffice/solicitudes/${detalle.id_solicitud}/visa-expediente`, { tipo_solvencia: nuevo });
+    if (r.ok) setVisaExp(r.expediente);
+  }
 
   function handleEleccionesActualizadas(nuevasElecciones) {
     setDetalle((prev) => ({ ...prev, eleccion_masters: nuevasElecciones }));
@@ -337,6 +402,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-[22px] pb-20">
 
+          {isVisado && <VarianteBar tipo={visaExp?.tipo_solvencia || "PENDIENTE"} onChange={cambiarSolvencia} />}
+
           {/* B1 — Encabezado del cliente */}
           <div id="bloque-cliente" className="scroll-mt-4">
             <BlqHead numero="1" titulo="Encabezado del cliente" estado={calcClienteEstado(detalle)}
@@ -349,6 +416,11 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                     setDetalle((prev) => ({ ...prev, cliente: clienteActualizado }))
                   }
                 />
+                {isVisado && (
+                  <div className="border-t border-[#E2E8F0]">
+                    <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                  </div>
+                )}
               </CBox>
             )}
           </div>
@@ -363,8 +435,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   <ChecklistSolicitudAdmin
                     detalle={detalle}
                     checklistPorEtapa={checklistPorEtapa}
-                    setChecklist={setChecklist}
                     recargar={cargar}
+                    isVisado={isVisado}
+                    tipoSolvencia={visaExp?.tipo_solvencia || "PENDIENTE"}
                   />
                 </div>
               </CBox>
@@ -373,22 +446,99 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
           {isVisado ? (
             <>
-              <div id="bloque-instructivo" className="scroll-mt-4">
-                <BlqHead numero="3" titulo="Instructivo y plantillas" estado="inactivo"
-                  open={expanded.has("instructivo")} onToggle={() => toggleBloque("instructivo")} />
-                {expanded.has("instructivo") && (
+              {/* B3 — Tipo de medios económicos */}
+              <div id="bloque-solvencia" className="scroll-mt-4">
+                <BlqHead numero="3" titulo="Tipo de medios económicos"
+                  estado={(visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE") ? "completado" : "pendiente"}
+                  open={expanded.has("solvencia")} onToggle={() => toggleBloque("solvencia")} />
+                {expanded.has("solvencia") && (
                   <CBox>
-                    <div className="px-5 py-4">
-                      <p className="text-sm text-neutral-500">
-                        Este contenido se configura por servicio en <b>Instructivos</b>.
-                      </p>
-                    </div>
+                    <VisaSolvenciaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
                   </CBox>
                 )}
               </div>
 
+              {/* B4 — Sesión diagnóstico */}
+              <div id="bloque-diagnostico" className="scroll-mt-4">
+                <BlqHead numero="4" titulo="Sesión de diagnóstico"
+                  estado={sesionEstadoBloque("DIAGNOSTICO")}
+                  open={expanded.has("diagnostico")} onToggle={() => toggleBloque("diagnostico")} />
+                {expanded.has("diagnostico") && (
+                  <CBox>
+                    <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="DIAGNOSTICO"
+                      sesion={sesionPorTipo("DIAGNOSTICO")} onSaved={onSesionGuardada}
+                      agenda={["Revisar situación migratoria actual", "Evaluar viabilidad del expediente", "Definir tipo de medios económicos (propios o aval)", "Identificar documentos complejos y plazos", "Instrucciones certificado médico y antecedentes penales"]} />
+                  </CBox>
+                )}
+              </div>
+
+              {/* B5 — Sesión seguimiento */}
+              <div id="bloque-seguimiento" className="scroll-mt-4">
+                <BlqHead numero="5" titulo="Sesión de seguimiento"
+                  estado={sesionEstadoBloque("SEGUIMIENTO")}
+                  open={expanded.has("seguimiento")} onToggle={() => toggleBloque("seguimiento")} />
+                {expanded.has("seguimiento") && (
+                  <CBox>
+                    <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="SEGUIMIENTO"
+                      sesion={sesionPorTipo("SEGUIMIENTO")} onSaved={onSesionGuardada}
+                      agenda={["Revisión de documentos ya reunidos", "Observaciones pendientes por subsanar", "Estado de la solvencia económica y apostillas", "Definir fecha estimada para formulario y cita"]} />
+                  </CBox>
+                )}
+              </div>
+
+              {/* B6 — Formulario de visado */}
+              <div id="bloque-formulario" className="scroll-mt-4">
+                <BlqHead numero="6" titulo="Formulario de visado"
+                  estado={visaExp?.formulario_estado === "FIRMADO" ? "completado" : visaExp?.formulario_estado === "ENVIADO" ? "revision" : "pendiente"}
+                  open={expanded.has("formulario")} onToggle={() => toggleBloque("formulario")} />
+                {expanded.has("formulario") && (
+                  <CBox>
+                    <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} mode="estado" />
+                  </CBox>
+                )}
+              </div>
+
+              {/* B7 — Sesión pre-cita */}
+              <div id="bloque-precita" className="scroll-mt-4">
+                <BlqHead numero="7" titulo="Sesión pre-cita"
+                  estado={sesionEstadoBloque("PRECITA")}
+                  open={expanded.has("precita")} onToggle={() => toggleBloque("precita")} />
+                {expanded.has("precita") && (
+                  <CBox>
+                    <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="PRECITA"
+                      sesion={sesionPorTipo("PRECITA")} onSaved={onSesionGuardada}
+                      agenda={["Verificar que todos los documentos estén aprobados", "Confirmar expediente original completo (original + copia)", "Recordar efectivo para la tasa consular", "Instrucciones logísticas: dirección BLS, hora, qué llevar", "Recordar no comprar billete de avión aún (solo reserva)"]} />
+                  </CBox>
+                )}
+              </div>
+
+              {/* B8 — Cita BLS / Consulado */}
+              <div id="bloque-cita" className="scroll-mt-4">
+                <BlqHead numero="8" titulo="Cita BLS / Consulado España"
+                  estado={visaExp?.cita_estado === "REALIZADA" ? "completado" : (visaExp?.cita_estado && visaExp.cita_estado !== "PENDIENTE") ? "revision" : "pendiente"}
+                  open={expanded.has("cita")} onToggle={() => toggleBloque("cita")} />
+                {expanded.has("cita") && (
+                  <CBox>
+                    <VisaCitaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                  </CBox>
+                )}
+              </div>
+
+              {/* B9 — Cierre del expediente */}
+              <div id="bloque-cierre" className="scroll-mt-4">
+                <BlqHead numero="9" titulo="Cierre del expediente"
+                  estado={visaExp?.cierre_estado === "CERRADO" ? "completado" : visaExp?.cierre_estado === "CANCELADO" ? "observado" : "pendiente"}
+                  open={expanded.has("cierre")} onToggle={() => toggleBloque("cierre")} />
+                {expanded.has("cierre") && (
+                  <CBox>
+                    <VisaCierreAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                  </CBox>
+                )}
+              </div>
+
+              {/* Portales · Claves (herramienta interna del asesor) */}
               <div id="bloque-portales" className="scroll-mt-4">
-                <BlqHead numero="4" titulo="Portales, claves y justificantes" estado="pendiente"
+                <BlqHead numero="P" titulo="Portales, claves y justificantes" estado="pendiente"
                   open={expanded.has("portales")} onToggle={() => toggleBloque("portales")} />
                 {expanded.has("portales") && (
                   <CBox>

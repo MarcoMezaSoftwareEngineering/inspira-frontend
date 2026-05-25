@@ -6,11 +6,13 @@ import SeccionPanel from "./SeccionPanel";
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 const ESTADO_CFG = {
-  aprobado:  { label: "Aprobado",  bg: "bg-emerald-50",  text: "text-emerald-700" },
-  enviado:   { label: "Enviado",   bg: "bg-sky-50",      text: "text-sky-700"     },
-  observado: { label: "Observado", bg: "bg-red-50",      text: "text-red-700"     },
-  no_aplica: { label: "No aplica", bg: "bg-neutral-50",  text: "text-neutral-500" },
-  pendiente: { label: "Pendiente", bg: "bg-amber-50",    text: "text-amber-700"   },
+  aprobado:   { label: "Aprobado",  bg: "bg-emerald-50",  text: "text-emerald-700" },
+  enviado:    { label: "Enviado",   bg: "bg-sky-50",      text: "text-sky-700"     },
+  observado:  { label: "Observado", bg: "bg-red-50",      text: "text-red-700"     },
+  solicitado: { label: "Adicional", bg: "bg-violet-50",   text: "text-violet-700"  },
+  rechazado:  { label: "Rechazado", bg: "bg-rose-100",    text: "text-rose-800"    },
+  no_aplica:  { label: "No aplica", bg: "bg-neutral-50",  text: "text-neutral-500" },
+  pendiente:  { label: "Pendiente", bg: "bg-amber-50",    text: "text-amber-700"   },
 };
 
 function getCfg(estado) {
@@ -163,8 +165,12 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
   return (
     <div
       className={`border rounded-xl p-3 relative flex flex-col gap-2 ${
-        it.estado_item === "observado"
+        it.estado_item === "rechazado"
+          ? "border-rose-300 bg-rose-50/30"
+          : it.estado_item === "observado"
           ? "border-red-200 bg-red-50/20"
+          : it.estado_item === "solicitado"
+          ? "border-violet-200 bg-violet-50/20"
           : it.estado_item === "aprobado"
           ? "border-emerald-200 bg-emerald-50/10"
           : "border-neutral-200 bg-white"
@@ -266,7 +272,14 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
 }
 
 // ─── Componente principal ────────────────────────────────────────────────────
-export default function ChecklistDocumentos({ checklist, cargarTodo, idSolicitud }) {
+export default function ChecklistDocumentos({
+  checklist,
+  cargarTodo,
+  idSolicitud,
+  numero = "1",
+  titulo = "Documentos requeridos",
+  sectionId = "1",
+}) {
   const [docVisor, setDocVisor] = useState(null);
 
   const grupos = {};
@@ -276,6 +289,10 @@ export default function ChecklistDocumentos({ checklist, cargarTodo, idSolicitud
     grupos[etapa].push(it);
   });
   const multiGrupo = Object.keys(grupos).length > 1;
+  // Ordena las categorías por el orden de su etapa.
+  const gruposOrdenados = Object.entries(grupos).sort(
+    (a, b) => (a[1][0]?.item?.etapa?.orden ?? 99) - (b[1][0]?.item?.etapa?.orden ?? 99)
+  );
 
   const total = checklist.length;
   const aprobados = checklist.filter((it) =>
@@ -313,11 +330,11 @@ export default function ChecklistDocumentos({ checklist, cargarTodo, idSolicitud
       )}
 
       <SeccionPanel
-        numero="1"
-        titulo="Documentos requeridos"
+        numero={numero}
+        titulo={titulo}
         subtitulo={subtitulo}
         estado={estadoGlobal}
-        sectionId="1"
+        sectionId={sectionId}
       >
         {total > 0 && (
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
@@ -337,7 +354,7 @@ export default function ChecklistDocumentos({ checklist, cargarTodo, idSolicitud
           </p>
         )}
 
-        {Object.entries(grupos).map(([nombre, items]) => (
+        {gruposOrdenados.map(([nombre, items]) => (
           <div key={nombre} className="space-y-3">
             {multiGrupo && (
               <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 pb-2 border-b border-neutral-100">

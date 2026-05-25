@@ -150,26 +150,20 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     loading, error, cargar,
   } = useSolicitudDetalle(idSolicitud);
 
-  const [expanded, setExpanded] = useState(new Set());
+  // Acordeón de apertura única: solo un bloque abierto a la vez.
+  const [activeBloque, setActiveBloque] = useState("cliente");
+  const isOpen = (id) => activeBloque === id;
 
   // Datos de Visado (Fase 2)
   const [visaExp, setVisaExp] = useState(null);
   const [visaSesiones, setVisaSesiones] = useState([]);
 
   function toggleBloque(id) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    setActiveBloque((prev) => (prev === id ? null : id));
   }
 
   function irABloque(id) {
-    // Expand if collapsed before scrolling
-    setExpanded((prev) => {
-      if (prev.has(id)) return prev;
-      return new Set([...prev, id]);
-    });
+    setActiveBloque(id);
     setTimeout(() => {
       const el = document.getElementById(`bloque-${id}`);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -378,24 +372,29 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
         </p>
 
         {/* Nav links */}
-        {bloques.map((b) => (
+        {bloques.map((b) => {
+          const activo = activeBloque === b.id;
+          return (
           <button
             key={b.id}
             type="button"
             onClick={() => irABloque(b.id)}
-            className={`flex items-center gap-2 px-2 py-2 rounded-[8px] transition-all cursor-pointer w-full mb-[2px] border border-transparent text-left ${
-              b.estado === "completado" ? "text-[#155a3d]" : "text-[#6B7280]"
-            } hover:bg-[#F4F6F9] hover:text-[#1A1A2E]`}
+            className={`flex items-center gap-2 px-2 py-2 rounded-[8px] transition-all cursor-pointer w-full mb-[2px] border text-left ${
+              activo
+                ? "bg-[#E8F5EE] border-[#1D6A4A]/30 text-[#1D6A4A]"
+                : `border-transparent hover:bg-[#F4F6F9] hover:text-[#1A1A2E] ${b.estado === "completado" ? "text-[#155a3d]" : "text-[#6B7280]"}`
+            }`}
           >
             <span className={`w-[21px] h-[21px] rounded-[6px] flex items-center justify-center text-[10px] font-bold font-mono shrink-0 ${
-              b.estado === "completado" ? "bg-[#E8F5EE] text-[#1D6A4A]" : "bg-[#F4F6F9] text-[#6B7280]"
+              activo ? "bg-[#1D6A4A] text-white" : b.estado === "completado" ? "bg-[#E8F5EE] text-[#1D6A4A]" : "bg-[#F4F6F9] text-[#6B7280]"
             }`}>
               {b.numero}
             </span>
-            <span className="text-[11.5px] font-medium flex-1 leading-[1.3]">{b.label}</span>
+            <span className={`text-[11.5px] flex-1 leading-[1.3] ${activo ? "font-bold" : "font-medium"}`}>{b.label}</span>
             <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${dotColor(b.estado)}`} />
           </button>
-        ))}
+          );
+        })}
       </aside>
 
       {/* ── MAIN SCROLL ── */}
@@ -407,8 +406,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           {/* B1 — Encabezado del cliente */}
           <div id="bloque-cliente" className="scroll-mt-4">
             <BlqHead numero="1" titulo="Encabezado del cliente" estado={calcClienteEstado(detalle)}
-              open={expanded.has("cliente")} onToggle={() => toggleBloque("cliente")} />
-            {expanded.has("cliente") && (
+              open={isOpen("cliente")} onToggle={() => toggleBloque("cliente")} />
+            {isOpen("cliente") && (
               <CBox>
                 <EncabezadoClienteAdmin
                   detalle={detalle}
@@ -428,8 +427,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           {/* B2 — Documentos requeridos */}
           <div id="bloque-checklist" className="scroll-mt-4">
             <BlqHead numero="2" titulo="Documentos requeridos" estado={checklistStats.estado}
-              open={expanded.has("checklist")} onToggle={() => toggleBloque("checklist")} />
-            {expanded.has("checklist") && (
+              open={isOpen("checklist")} onToggle={() => toggleBloque("checklist")} />
+            {isOpen("checklist") && (
               <CBox>
                 <div className="p-5">
                   <ChecklistSolicitudAdmin
@@ -450,8 +449,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <div id="bloque-solvencia" className="scroll-mt-4">
                 <BlqHead numero="3" titulo="Tipo de medios económicos"
                   estado={(visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE") ? "completado" : "pendiente"}
-                  open={expanded.has("solvencia")} onToggle={() => toggleBloque("solvencia")} />
-                {expanded.has("solvencia") && (
+                  open={isOpen("solvencia")} onToggle={() => toggleBloque("solvencia")} />
+                {isOpen("solvencia") && (
                   <CBox>
                     <VisaSolvenciaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
                   </CBox>
@@ -462,8 +461,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <div id="bloque-diagnostico" className="scroll-mt-4">
                 <BlqHead numero="4" titulo="Sesión de diagnóstico"
                   estado={sesionEstadoBloque("DIAGNOSTICO")}
-                  open={expanded.has("diagnostico")} onToggle={() => toggleBloque("diagnostico")} />
-                {expanded.has("diagnostico") && (
+                  open={isOpen("diagnostico")} onToggle={() => toggleBloque("diagnostico")} />
+                {isOpen("diagnostico") && (
                   <CBox>
                     <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="DIAGNOSTICO"
                       sesion={sesionPorTipo("DIAGNOSTICO")} onSaved={onSesionGuardada}
@@ -476,8 +475,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <div id="bloque-seguimiento" className="scroll-mt-4">
                 <BlqHead numero="5" titulo="Sesión de seguimiento"
                   estado={sesionEstadoBloque("SEGUIMIENTO")}
-                  open={expanded.has("seguimiento")} onToggle={() => toggleBloque("seguimiento")} />
-                {expanded.has("seguimiento") && (
+                  open={isOpen("seguimiento")} onToggle={() => toggleBloque("seguimiento")} />
+                {isOpen("seguimiento") && (
                   <CBox>
                     <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="SEGUIMIENTO"
                       sesion={sesionPorTipo("SEGUIMIENTO")} onSaved={onSesionGuardada}
@@ -490,8 +489,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <div id="bloque-formulario" className="scroll-mt-4">
                 <BlqHead numero="6" titulo="Formulario de visado"
                   estado={visaExp?.formulario_estado === "FIRMADO" ? "completado" : visaExp?.formulario_estado === "ENVIADO" ? "revision" : "pendiente"}
-                  open={expanded.has("formulario")} onToggle={() => toggleBloque("formulario")} />
-                {expanded.has("formulario") && (
+                  open={isOpen("formulario")} onToggle={() => toggleBloque("formulario")} />
+                {isOpen("formulario") && (
                   <CBox>
                     <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} mode="estado" />
                   </CBox>
@@ -502,8 +501,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <div id="bloque-precita" className="scroll-mt-4">
                 <BlqHead numero="7" titulo="Sesión pre-cita"
                   estado={sesionEstadoBloque("PRECITA")}
-                  open={expanded.has("precita")} onToggle={() => toggleBloque("precita")} />
-                {expanded.has("precita") && (
+                  open={isOpen("precita")} onToggle={() => toggleBloque("precita")} />
+                {isOpen("precita") && (
                   <CBox>
                     <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="PRECITA"
                       sesion={sesionPorTipo("PRECITA")} onSaved={onSesionGuardada}
@@ -516,8 +515,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <div id="bloque-cita" className="scroll-mt-4">
                 <BlqHead numero="8" titulo="Cita BLS / Consulado España"
                   estado={visaExp?.cita_estado === "REALIZADA" ? "completado" : (visaExp?.cita_estado && visaExp.cita_estado !== "PENDIENTE") ? "revision" : "pendiente"}
-                  open={expanded.has("cita")} onToggle={() => toggleBloque("cita")} />
-                {expanded.has("cita") && (
+                  open={isOpen("cita")} onToggle={() => toggleBloque("cita")} />
+                {isOpen("cita") && (
                   <CBox>
                     <VisaCitaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
                   </CBox>
@@ -528,8 +527,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <div id="bloque-cierre" className="scroll-mt-4">
                 <BlqHead numero="9" titulo="Cierre del expediente"
                   estado={visaExp?.cierre_estado === "CERRADO" ? "completado" : visaExp?.cierre_estado === "CANCELADO" ? "observado" : "pendiente"}
-                  open={expanded.has("cierre")} onToggle={() => toggleBloque("cierre")} />
-                {expanded.has("cierre") && (
+                  open={isOpen("cierre")} onToggle={() => toggleBloque("cierre")} />
+                {isOpen("cierre") && (
                   <CBox>
                     <VisaCierreAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
                   </CBox>
@@ -539,8 +538,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               {/* Portales · Claves (herramienta interna del asesor) */}
               <div id="bloque-portales" className="scroll-mt-4">
                 <BlqHead numero="P" titulo="Portales, claves y justificantes" estado="pendiente"
-                  open={expanded.has("portales")} onToggle={() => toggleBloque("portales")} />
-                {expanded.has("portales") && (
+                  open={isOpen("portales")} onToggle={() => toggleBloque("portales")} />
+                {isOpen("portales") && (
                   <CBox>
                     <div className="p-5">
                       <PortalesYJustificantesAdmin idSolicitud={detalle.id_solicitud} />
@@ -557,9 +556,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   numero="3"
                   titulo="Formulario de datos académicos"
                   estado={tieneFormulario ? "completado" : "pendiente"}
-                  open={expanded.has("formulario")} onToggle={() => toggleBloque("formulario")}
+                  open={isOpen("formulario")} onToggle={() => toggleBloque("formulario")}
                 />
-                {expanded.has("formulario") && (
+                {isOpen("formulario") && (
                   <CBox>
                     <div className="p-5">
                       <FormularioDatosAcademicosAdmin
@@ -580,9 +579,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   numero="4"
                   titulo="Informe de búsqueda de másteres"
                   estado={(detalle.informe_fecha_subida || tieneFormulario) ? "completado" : "pendiente"}
-                  open={expanded.has("informe")} onToggle={() => toggleBloque("informe")}
+                  open={isOpen("informe")} onToggle={() => toggleBloque("informe")}
                 />
-                {expanded.has("informe") && (
+                {isOpen("informe") && (
                   <CBox>
                     <div className="px-5 pt-4">
                       <InformeAdmin detalle={detalle} recargar={cargar} onRegenerado={handleInformeRegenerado} />
@@ -597,9 +596,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   numero="5"
                   titulo="Elección de másteres (cliente)"
                   estado={!tieneEleccion ? "pendiente" : adminDecidioTodoBody ? "completado" : "revision"}
-                  open={expanded.has("eleccion")} onToggle={() => toggleBloque("eleccion")}
+                  open={isOpen("eleccion")} onToggle={() => toggleBloque("eleccion")}
                 />
-                {expanded.has("eleccion") && (
+                {isOpen("eleccion") && (
                   <CBox>
                     <div className="p-5">
                       <EleccionMastersAdmin
@@ -616,8 +615,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               {/* B6 — Programación de postulaciones */}
               <div id="bloque-programacion" className="scroll-mt-4">
                 <BlqHead numero="6" titulo="Programación de postulaciones" estado="pendiente"
-                  open={expanded.has("programacion")} onToggle={() => toggleBloque("programacion")} />
-                {expanded.has("programacion") && (
+                  open={isOpen("programacion")} onToggle={() => toggleBloque("programacion")} />
+                {isOpen("programacion") && (
                   <CBox>
                     <div className="p-5">
                       <ProgramacionPostulacionesAdmin idSolicitud={detalle.id_solicitud} refreshKey={progRefreshKey} />
@@ -629,8 +628,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               {/* B7 — Portales y justificantes */}
               <div id="bloque-portales" className="scroll-mt-4">
                 <BlqHead numero="7" titulo="Portales, claves y justificantes" estado="pendiente"
-                  open={expanded.has("portales")} onToggle={() => toggleBloque("portales")} />
-                {expanded.has("portales") && (
+                  open={isOpen("portales")} onToggle={() => toggleBloque("portales")} />
+                {isOpen("portales") && (
                   <CBox>
                     <div className="p-5">
                       <PortalesYJustificantesAdmin idSolicitud={detalle.id_solicitud} />
@@ -642,8 +641,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               {/* B8 — Cierre de servicio */}
               <div id="bloque-cierre" className="scroll-mt-4">
                 <BlqHead numero="8" titulo="Cierre de servicio y derivación" estado="pendiente"
-                  open={expanded.has("cierre")} onToggle={() => toggleBloque("cierre")} />
-                {expanded.has("cierre") && (
+                  open={isOpen("cierre")} onToggle={() => toggleBloque("cierre")} />
+                {isOpen("cierre") && (
                   <CBox>
                     <div className="px-5 pt-4">
                       <CierreServicioMasterAdmin idSolicitud={detalle.id_solicitud} />

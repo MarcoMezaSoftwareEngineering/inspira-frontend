@@ -2,12 +2,52 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiGET } from "../../../../services/api";
 import { formatearFecha } from "./utils";
-import ChecklistDocumentos from "./sections/ChecklistDocumentos";
+import { SeccionSiempreAbiertoCtx } from "./sections/SeccionPanel";
 import SeccionPanel from "./sections/SeccionPanel";
+import ChecklistDocumentos from "./sections/ChecklistDocumentos";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-// ── Campo de solo lectura ──────────────────────────────────────────────
+const DOT_COLORS = {
+  completado: "bg-emerald-500",
+  pendiente:  "bg-amber-400",
+  observado:  "bg-red-400",
+  cargando:   "bg-blue-400 animate-pulse",
+};
+
+// ── NavItem — botón de la barra lateral (copiado del detalle de Máster) ───────
+function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center gap-2.5 ${
+        active ? "bg-[#023A4B] shadow-sm" : "hover:bg-neutral-100"
+      }`}
+    >
+      <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-colors ${
+        active ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
+      }`}>
+        {num}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-xs font-semibold leading-tight truncate ${active ? "text-white" : "text-neutral-800"}`}>
+          {titulo}
+        </p>
+        {subtitulo && (
+          <p className={`text-[10px] mt-0.5 truncate ${active ? "text-white/60" : "text-neutral-400"}`}>
+            {subtitulo}
+          </p>
+        )}
+      </div>
+      {estado && (
+        <span className={`shrink-0 w-2 h-2 rounded-full ${active ? "bg-white/40" : (DOT_COLORS[estado] || "bg-neutral-300")}`} />
+      )}
+    </button>
+  );
+}
+
+// ── Helpers de contenido ──────────────────────────────────────────────────────
 function CampoLectura({ label, value }) {
   const vacio = value === null || value === undefined || value === "";
   return (
@@ -20,11 +60,10 @@ function CampoLectura({ label, value }) {
   );
 }
 
-// ── Bloque informativo ──────────────────────────────────────────────
 function BloqueInfo({ icon, children }) {
   return (
-    <div className="text-center py-6 px-2">
-      <span className="block text-3xl mb-3">{icon}</span>
+    <div className="text-center py-8 px-2">
+      <span className="block text-4xl mb-3">{icon}</span>
       <div className="text-[13px] text-neutral-500 leading-relaxed max-w-md mx-auto">{children}</div>
     </div>
   );
@@ -39,7 +78,6 @@ function Linea({ label, value }) {
   );
 }
 
-// Sesión de asesoría (cliente, solo lectura)
 function SesionView({ sesion, icon, vacio }) {
   if (!sesion || sesion.estado === "PENDIENTE") {
     return <BloqueInfo icon={icon}>{vacio}</BloqueInfo>;
@@ -67,13 +105,7 @@ function SesionView({ sesion, icon, vacio }) {
   );
 }
 
-function dotColor(estado) {
-  if (estado === "completado") return "bg-emerald-500";
-  if (estado === "observado") return "bg-red-500";
-  if (estado === "pendiente") return "bg-amber-400";
-  return "bg-neutral-300";
-}
-
+// ── Componente principal ──────────────────────────────────────────────────────
 export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const [detalle, setDetalle] = useState(null);
   const [checklist, setChecklist] = useState([]);
@@ -82,7 +114,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const [sesiones, setSesiones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeKey, setActiveKey] = useState("docs");
+  const [activeSection, setActiveSection] = useState("docs");
 
   const idSolicitud = solicitudBase.id_solicitud;
 
@@ -110,14 +142,11 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
       const rInst = await apiGET(`/solicitudes/${idSolicitud}/instructivos`);
       if (rInst.ok) {
         const base = (API_URL || "").replace(/\/+$/, "");
-        const lista = (rInst.instructivos || []).map((i) => {
+        setInstructivos((rInst.instructivos || []).map((i) => {
           const rawUrl = i.url || i.archivo_url || "";
           const isAbsolute = /^https?:\/\//i.test(rawUrl);
-          if (isAbsolute) return { label: i.label, url: rawUrl };
-          const path = rawUrl.replace(/^\/+/, "");
-          return { label: i.label, url: `${base}/${path}` };
-        });
-        setInstructivos(lista);
+          return { label: i.label, url: isAbsolute ? rawUrl : `${base}/${rawUrl.replace(/^\/+/, "")}` };
+        }));
       } else {
         setInstructivos([]);
       }
@@ -136,15 +165,14 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const datosCompletos = !!(cli.nombre && cli.pasaporte && (extra.fecha_nacimiento || extra.pasaporte_vencimiento));
 
   const total = checklist.length;
-  const aprobados = checklist.filter((it) => ["aprobado", "no_aplica"].includes((it.estado_item || "").toLowerCase())).length;
+  const docsListas = checklist.filter((it) => ["aprobado", "no_aplica"].includes((it.estado_item || "").toLowerCase())).length;
 
   const docsEstado = useMemo(() => {
     if (!checklist.length) return "pendiente";
     const hayObs = checklist.some((it) => ["observado", "rechazado"].includes((it.estado_item || "").toLowerCase()));
     if (hayObs) return "observado";
-    const allDone = checklist.every((it) => ["aprobado", "no_aplica"].includes((it.estado_item || "").toLowerCase()));
-    return allDone ? "completado" : "pendiente";
-  }, [checklist]);
+    return docsListas === checklist.length ? "completado" : "pendiente";
+  }, [checklist, docsListas]);
 
   const sesionPorTipo = (tipo) => sesiones.find((s) => s.tipo === tipo) || null;
   const sesionEstado = (tipo) => (sesionPorTipo(tipo)?.estado === "COMPLETADA" ? "completado" : "pendiente");
@@ -152,7 +180,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const estadoBloque = (key) => {
     switch (key) {
       case "datos": return datosCompletos ? "completado" : "pendiente";
-      case "docs": return docsEstado;
+      case "docs": return checklist.length ? docsEstado : "pendiente";
       case "solvencia": return visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE" ? "completado" : "pendiente";
       case "diagnostico": return sesionEstado("DIAGNOSTICO");
       case "seguimiento": return sesionEstado("SEGUIMIENTO");
@@ -164,31 +192,23 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     }
   };
 
-  const BLOQUES = [
-    { key: "datos", n: "1", label: "Mis datos personales", sub: "Datos registrados de tu expediente" },
-    { key: "docs", n: "2", label: "Mis documentos", sub: `${aprobados} de ${total} documentos listos` },
-    { key: "solvencia", n: "3", label: "Mi tipo de solvencia", sub: "Se define en la sesión de diagnóstico" },
-    { key: "diagnostico", n: "4", label: "Mi sesión de diagnóstico", sub: "Evaluación inicial de tu caso" },
-    { key: "seguimiento", n: "5", label: "Mi sesión de seguimiento", sub: "Revisión del avance de tus documentos" },
-    { key: "formulario", n: "6", label: "Formulario de visado", sub: "Preparado por Inspira" },
-    { key: "precita", n: "7", label: "Mi sesión pre-cita", sub: "Verificación final antes de ir a BLS" },
-    { key: "cita", n: "8", label: "Mi cita en BLS / Consulado", sub: "Presentación presencial del expediente" },
-    { key: "cierre", n: "9", label: "Resultado y cierre", sub: "Cierre de tu expediente" },
-  ];
+  const navSections = [
+    { id: "datos", num: 1, titulo: "Mis datos personales", subtitulo: "Datos de tu expediente" },
+    { id: "docs", num: 2, titulo: "Mis documentos", subtitulo: total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
+    { id: "solvencia", num: 3, titulo: "Mi tipo de solvencia", subtitulo: "Medios propios o aval" },
+    { id: "diagnostico", num: 4, titulo: "Sesión de diagnóstico", subtitulo: "Evaluación inicial" },
+    { id: "seguimiento", num: 5, titulo: "Sesión de seguimiento", subtitulo: "Avance de documentos" },
+    { id: "formulario", num: 6, titulo: "Formulario de visado", subtitulo: "Preparado por Inspira" },
+    { id: "precita", num: 7, titulo: "Sesión pre-cita", subtitulo: "Verificación final" },
+    { id: "cita", num: 8, titulo: "Cita BLS / Consulado", subtitulo: "Presentación presencial" },
+    { id: "cierre", num: 9, titulo: "Resultado y cierre", subtitulo: "Cierre del expediente" },
+  ].map((s) => ({ ...s, estado: estadoBloque(s.id) }));
 
-  const bloquesDone = BLOQUES.filter((b) => estadoBloque(b.key) === "completado").length;
-  const pct = Math.round((bloquesDone / BLOQUES.length) * 100);
+  const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
+  const pct = Math.round((bloquesDone / navSections.length) * 100);
 
   const SOLV_LABEL = { PROPIOS: "🙋 Medios propios", AVAL: "👨‍👩‍👧 Con aval / tercero", PENDIENTE: "Pendiente de definir" };
   const FORM_LABEL = { EN_PREPARACION: "En preparación", ENVIADO: "Enviado para tu revisión", FIRMADO: "Firmado" };
-
-  function abrir(key) {
-    setActiveKey(key);
-    setTimeout(() => document.getElementById(`b-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 40);
-  }
-  function toggle(key) {
-    setActiveKey((prev) => (prev === key ? null : key));
-  }
 
   function renderBody(key) {
     switch (key) {
@@ -225,7 +245,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                 </div>
               </>
             )}
-            <p className="text-[11px] text-neutral-400">Si necesitas corregir algún dato, contacta a tu asesor.</p>
+            <p className="text-[11px] text-neutral-400 pt-1">Si necesitas corregir algún dato, contacta a tu asesor.</p>
           </div>
         );
 
@@ -338,80 +358,104 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <button onClick={onVolver} className="text-xs text-[#1D6A4A] hover:underline mb-3">← Volver a mis servicios</button>
-        <p className="text-sm text-neutral-500">Cargando…</p>
-      </div>
-    );
-  }
-
-  if (error || !detalle) {
-    return (
-      <div className="p-6">
-        <button onClick={onVolver} className="text-xs text-[#1D6A4A] hover:underline mb-3">← Volver a mis servicios</button>
-        <p className="text-sm text-red-600">{error || "No se pudo cargar la solicitud."}</p>
-      </div>
-    );
-  }
+  const sec = navSections.find((s) => s.id === activeSection) || navSections[0];
 
   return (
-    <div className="max-w-6xl mx-auto w-full px-3 sm:px-4 pb-16 space-y-3">
-      <button onClick={onVolver} className="text-xs text-[#1D6A4A] hover:underline pt-2">
-        ← Volver a mis servicios
-      </button>
+    <div className="flex flex-col h-full min-h-0">
 
-      {/* Welcome */}
-      <div className="rounded-2xl p-5 bg-gradient-to-br from-[#15533a] to-[#1D6A4A] text-white">
-        <p className="text-[11px] text-white/70">Bienvenido/a,</p>
-        <h2 className="font-serif text-2xl leading-tight">{cli.nombre || "—"}</h2>
-        <div className="flex flex-wrap items-center gap-2 mt-2">
-          <span className="text-[11px] text-[#B7E4C7]">🇪🇸 Visa de Estudios · España</span>
-          <span className="text-[10px] font-mono bg-white/15 px-2 py-0.5 rounded-full">Solicitud #{detalle.id_solicitud}</span>
-        </div>
-      </div>
+      {/* Fila superior: botón volver + encabezado compacto */}
+      <div className="shrink-0 flex items-center gap-3 mb-3">
+        <button
+          onClick={onVolver}
+          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] px-3.5 py-2 rounded-xl bg-[#023A4B] text-white text-xs font-semibold hover:bg-[#035670] active:scale-95 transition-all shadow-sm group"
+        >
+          <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Mis servicios
+        </button>
 
-      {/* Progreso */}
-      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4">
-        <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Tu progreso</p>
-        <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-[#2D6A4F] to-[#40916C] transition-all duration-700" style={{ width: `${pct}%` }} />
-        </div>
-        <div className="flex justify-between mt-1.5">
-          <span className="text-[12px] font-bold text-[#1D6A4A]">{pct}%</span>
-          <span className="text-[10px] text-neutral-400">{bloquesDone} de {BLOQUES.length} bloques completados</span>
-        </div>
-      </div>
-
-      {/* Sidebar + contenido */}
-      <div className="flex gap-4 items-start">
-        {/* Barra lateral de bloques */}
-        <aside className="hidden md:block w-56 shrink-0 sticky top-4 self-start">
-          <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-2">
-            <p className="text-[9px] font-bold uppercase tracking-[.15em] text-neutral-400 px-2 pt-1 pb-2">Bloques del expediente</p>
-            {BLOQUES.map((b) => {
-              const est = estadoBloque(b.key);
-              const on = activeKey === b.key;
-              return (
-                <button key={b.key} type="button" onClick={() => abrir(b.key)}
-                  className={`w-full flex items-center gap-2 px-2 py-2 rounded-[9px] mb-0.5 text-left transition-all ${on ? "bg-[#E8F5EE]" : "hover:bg-neutral-50"}`}>
-                  <span className={`w-[22px] h-[22px] rounded-[6px] flex items-center justify-center text-[11px] font-bold shrink-0 ${on ? "bg-[#1D6A4A] text-white" : "bg-neutral-100 text-neutral-500"}`}>
-                    {b.n}
-                  </span>
-                  <span className={`text-[12px] flex-1 leading-tight ${on ? "font-bold text-[#1D6A4A]" : "font-medium text-neutral-600"}`}>{b.label}</span>
-                  <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${dotColor(est)}`} />
-                </button>
-              );
-            })}
+        {loading && (
+          <div className="flex items-center gap-2 text-neutral-400">
+            <div className="w-4 h-4 border-2 border-[#046C8C] border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm">Cargando…</span>
           </div>
-        </aside>
+        )}
+        {error && (
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+            <span className="text-red-500 text-sm">⚠</span>
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
 
-        {/* Contenido — acordeón de apertura única */}
-        <div className="flex-1 min-w-0 space-y-3">
-          {BLOQUES.map((b) => (
-            <div key={b.key} id={`b-${b.key}`} className="scroll-mt-4">
-              {b.key === "docs" ? (
+        {!loading && !error && detalle && (
+          <div className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-4 py-2.5 flex items-center gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold text-[#046C8C] uppercase tracking-widest leading-none">
+                Solicitud #{detalle.id_solicitud}
+              </p>
+              <p className="text-sm font-bold text-neutral-900 leading-snug truncate mt-0.5">
+                🇪🇸 {detalle.tipo?.nombre || "Visa de Estudios"} · {cli.nombre || ""}
+              </p>
+            </div>
+            <div className="shrink-0 hidden sm:block w-32">
+              <div className="flex justify-between text-[10px] mb-1">
+                <span className="text-neutral-500 font-medium">Progreso</span>
+                <span className="font-bold text-neutral-800">{pct}%</span>
+              </div>
+              <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-700 bg-[#1D6A4A]" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Panel principal */}
+      {!loading && !error && detalle && (
+        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
+
+          {/* Móvil: tab bar horizontal */}
+          <div className="md:hidden shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 flex gap-1 overflow-x-auto">
+            {navSections.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setActiveSection(s.id)}
+                className={`shrink-0 flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all ${
+                  activeSection === s.id ? "bg-[#023A4B] text-white" : "text-neutral-600 hover:bg-neutral-100"
+                }`}
+              >
+                <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${
+                  activeSection === s.id ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
+                }`}>{s.num}</span>
+                {s.titulo}
+                {s.estado && (
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeSection === s.id ? "bg-white/40" : (DOT_COLORS[s.estado] || "bg-neutral-300")}`} />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop: sidebar vertical */}
+          <div className="hidden md:flex w-52 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
+            {navSections.map((s) => (
+              <NavItem
+                key={s.id}
+                num={s.num}
+                titulo={s.titulo}
+                subtitulo={s.subtitulo}
+                estado={s.estado}
+                active={activeSection === s.id}
+                onClick={() => setActiveSection(s.id)}
+              />
+            ))}
+          </div>
+
+          {/* Contenido de la sección activa (llena el área) */}
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+            <SeccionSiempreAbiertoCtx.Provider value={true}>
+              {activeSection === "docs" ? (
                 <ChecklistDocumentos
                   checklist={checklist}
                   cargarTodo={cargarTodo}
@@ -419,25 +463,16 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                   numero="2"
                   titulo="Mis documentos"
                   sectionId="2"
-                  open={activeKey === "docs"}
-                  onToggle={() => toggle("docs")}
                 />
               ) : (
-                <SeccionPanel
-                  numero={b.n}
-                  titulo={b.label}
-                  subtitulo={b.sub}
-                  estado={estadoBloque(b.key)}
-                  open={activeKey === b.key}
-                  onToggle={() => toggle(b.key)}
-                >
-                  {renderBody(b.key)}
+                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
+                  {renderBody(sec.id)}
                 </SeccionPanel>
               )}
-            </div>
-          ))}
+            </SeccionSiempreAbiertoCtx.Provider>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

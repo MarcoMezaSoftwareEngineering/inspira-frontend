@@ -137,13 +137,22 @@ export default function PreciosServicios() {
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-5 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-primary">Precios / Servicios</h1>
-        <p className="text-sm text-neutral-500 mt-0.5">Gestiona los servicios y sus precios actuales.</p>
+    <div className="p-4 sm:p-6 space-y-6 max-w-6xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-11 h-11 rounded-2xl bg-secondary text-primary flex items-center justify-center shrink-0">
+          <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5.586a1 1 0 01.707.293l7.414 7.414a1 1 0 010 1.414l-8.586 8.586a1 1 0 01-1.414 0L3.293 13.293A1 1 0 013 12.586V7a4 4 0 014-4z" />
+          </svg>
+        </div>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-primary">Precios / Servicios</h1>
+          <p className="text-sm text-neutral-500 mt-0.5">Gestiona los servicios y sus precios actuales.</p>
+        </div>
       </div>
 
-      <div className="flex gap-1 bg-neutral-100 rounded-lg p-1 w-fit">
+      {/* Filtro por estado */}
+      <div className="flex gap-1 bg-neutral-100 rounded-xl p-1 w-fit">
         {[
           { value: "todos", label: "Todos" },
           { value: "activos", label: "Activos" },
@@ -152,8 +161,8 @@ export default function PreciosServicios() {
           <button
             key={opt.value}
             onClick={() => setFiltro(opt.value)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition whitespace-nowrap ${
-              filtro === opt.value ? "bg-white text-[#1a5c3a] shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+              filtro === opt.value ? "bg-white text-primary shadow-sm" : "text-neutral-500 hover:text-neutral-700"
             }`}
           >
             {opt.label}
@@ -184,10 +193,15 @@ export default function PreciosServicios() {
               onReset={resetForm}
             />
           ) : (
-            <div className="border border-neutral-200 rounded-lg p-4 text-xs text-neutral-600 bg-neutral-50">
-              Solo los administradores pueden crear o modificar servicios y
-              precios. Como asesor, puedes consultar la lista de servicios en la
-              columna izquierda, pero no realizar cambios.
+            <div className="flex gap-3 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800 bg-amber-50">
+              <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <p>
+                Solo los administradores pueden crear o modificar servicios y
+                precios. Como asesor, puedes consultar la lista de servicios en
+                la columna izquierda, pero no realizar cambios.
+              </p>
             </div>
           )}
         </div>

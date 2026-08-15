@@ -270,46 +270,59 @@ export default function Agenda() {
 }
 
 /* ── Mi calendario (sistema propio: AgendaSlot / ReservaCita) ──── */
-const ESTADO_SLOT_STYLE = {
-  LIBRE:     "bg-green-50 border-green-200 text-green-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600",
-  RESERVADO: "bg-amber-50 border-amber-200 text-amber-700 cursor-default",
-  OCUPADO:   "bg-primary/10 border-primary/30 text-primary cursor-default",
-  BLOQUEADO: "bg-neutral-100 border-neutral-300 text-neutral-400 hover:border-primary hover:text-primary",
-};
-const ESTADO_SLOT_LABEL = { LIBRE: "Libre", RESERVADO: "Reservado", OCUPADO: "Ocupado", BLOQUEADO: "Bloqueado" };
+/* Vista de calendario semanal estilo Calendly: columnas = días, filas = medias horas. */
 
-function toISODate(d) { return d.toISOString().slice(0, 10); }
-function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+const HOUR_START = 7;   // 07:00
+const HOUR_END = 21;    // 21:00 (el último renglón es 20:30–21:00)
+const ROWS = (HOUR_END - HOUR_START) * 2;
+const ROW_H = 30; // px por cada media hora
+
+const ESTADO_BLOCK_STYLE = {
+  LIBRE:     "bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-red-100 hover:border-red-300 hover:text-red-700",
+  RESERVADO: "bg-amber-100 border-amber-300 text-amber-800 cursor-default",
+  OCUPADO:   "bg-primary text-white border-primary cursor-default",
+  BLOQUEADO: "bg-neutral-200 border-neutral-300 text-neutral-500 hover:bg-primary/10 hover:border-primary hover:text-primary",
+};
+const ESTADO_DOT = { LIBRE: "bg-emerald-400", RESERVADO: "bg-amber-400", OCUPADO: "bg-primary", BLOQUEADO: "bg-neutral-300" };
+const ESTADO_LABEL = { LIBRE: "Libre — clic para borrar", RESERVADO: "Reservado (pago en curso)", OCUPADO: "Ocupado — cita confirmada", BLOQUEADO: "Bloqueado — clic para liberar" };
+
+const WEEKDAY_SHORT = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+
+function toISODate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); r.setHours(0, 0, 0, 0); return r; }
+function startOfDay(d) { const r = new Date(d); r.setHours(0, 0, 0, 0); return r; }
+function rowLabel(row) {
+  const totalMin = HOUR_START * 60 + row * 30;
+  return `${String(Math.floor(totalMin / 60)).padStart(2, "0")}:${String(totalMin % 60).padStart(2, "0")}`;
+}
+function rangeLabel(weekDays) {
+  const a = weekDays[0], b = weekDays[6];
+  const mesA = a.toLocaleDateString("es-ES", { month: "short" });
+  const mesB = b.toLocaleDateString("es-ES", { month: "short" });
+  const anio = b.getFullYear();
+  return mesA === mesB
+    ? `${a.getDate()} – ${b.getDate()} de ${mesB} ${anio}`
+    : `${a.getDate()} ${mesA} – ${b.getDate()} ${mesB} ${anio}`;
+}
 
 function MiCalendarioTab() {
-  const today = new Date();
-  const [desde, setDesde] = useState(toISODate(today));
-  const [hasta, setHasta] = useState(toISODate(addDays(today, 13)));
+  const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const desde = toISODate(weekDays[0]);
+  const hasta = toISODate(weekDays[6]);
 
-  const [slotsPorDia, setSlotsPorDia] = useState([]); // [{fecha, slots:[...]}]
+  const [slotMap, setSlotMap] = useState(new Map()); // "fecha|hora" -> slot
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [busyCell, setBusyCell] = useState(null); // "fecha|hora" en vuelo (evita doble clic)
 
-  // Form "crear horarios"
-  const [fecha, setFecha] = useState(toISODate(today));
-  const [horaDesde, setHoraDesde] = useState("09:00");
-  const [horaHasta, setHoraHasta] = useState("13:00");
+  // Toolbar "generar varios de una vez"
+  const [showBulk, setShowBulk] = useState(false);
+  const [bulkFecha, setBulkFecha] = useState(toISODate(new Date()));
+  const [bulkDesde, setBulkDesde] = useState("09:00");
+  const [bulkHasta, setBulkHasta] = useState("18:00");
   const [creando, setCreando] = useState(false);
-
-  function agruparPorDia(slots) {
-    const map = new Map();
-    for (const s of slots) {
-      if (!map.has(s.fecha)) map.set(s.fecha, []);
-      map.get(s.fecha).push(s);
-    }
-    return Array.from(map.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([fecha, slots]) => ({
-        fecha,
-        slots: slots.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio)),
-      }));
-  }
 
   async function cargar() {
     setLoading(true);
@@ -321,7 +334,9 @@ function MiCalendarioTab() {
       ]);
       if (resSlots?.ok === false) throw new Error(resSlots.msg || "Error al cargar horarios");
       if (resReservas?.ok === false) throw new Error(resReservas.msg || "Error al cargar citas");
-      setSlotsPorDia(agruparPorDia(resSlots?.slots || []));
+      const map = new Map();
+      for (const s of resSlots?.slots || []) map.set(`${s.fecha}|${s.hora_inicio}`, s);
+      setSlotMap(map);
       setReservas(resReservas?.reservas || []);
     } catch (err) {
       setError(err.message);
@@ -332,27 +347,29 @@ function MiCalendarioTab() {
 
   useEffect(() => { cargar(); }, [desde, hasta]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function crearHorarios(e) {
-    e.preventDefault();
-    setCreando(true);
-    try {
-      const res = await boPOST("/backoffice/agenda/slots", { fecha, desde: horaDesde, hasta: horaHasta });
-      if (res?.ok === false) throw new Error(res.msg || "No se pudo crear el horario");
-      dialog.toast(`${res.creados} horario(s) de 30 min creados para ${fecha}.`, "success");
-      cargar();
-    } catch (err) {
-      dialog.toast(err.message, "error");
-    } finally {
-      setCreando(false);
-    }
+  const todayKey = toISODate(new Date());
+  const nowMin = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
+
+  function esPasado(fecha, hora) {
+    if (fecha < todayKey) return true;
+    if (fecha > todayKey) return false;
+    const [h, m] = hora.split(":").map(Number);
+    return h * 60 + m <= nowMin;
+  }
+
+  // Clic en celda vacía -> crea al instante un horario libre de 30 min
+  async function crearSlotRapido(fecha, hora) {
+    const key = `${fecha}|${hora}`;
+    setBusyCell(key);
+    const res = await boPOST("/backoffice/agenda/slots", { fecha, horas: [hora] });
+    setBusyCell(null);
+    if (res?.ok === false) return dialog.toast(res.msg || "No se pudo crear el horario", "error");
+    cargar();
   }
 
   async function onClickSlot(slot) {
     if (slot.estado === "LIBRE") {
-      const ok = await dialog.confirm(
-        `¿Borrar el horario libre de las ${slot.hora_inicio}?`,
-        "Borrar horario"
-      );
+      const ok = await dialog.confirm(`¿Borrar el horario libre de las ${slot.hora_inicio}?`, "Borrar horario");
       if (!ok) return;
       const res = await boDELETE(`/backoffice/agenda/slots/${slot.id_slot}`);
       if (res?.ok === false) return dialog.toast(res.msg || "No se pudo borrar", "error");
@@ -371,120 +388,214 @@ function MiCalendarioTab() {
     cargar();
   }
 
+  async function crearBulk(e) {
+    e.preventDefault();
+    setCreando(true);
+    try {
+      const res = await boPOST("/backoffice/agenda/slots", { fecha: bulkFecha, desde: bulkDesde, hasta: bulkHasta });
+      if (res?.ok === false) throw new Error(res.msg || "No se pudo crear el horario");
+      dialog.toast(`${res.creados} horario(s) de 30 min creados para ${bulkFecha}.`, "success");
+      setShowBulk(false);
+      cargar();
+    } catch (err) {
+      dialog.toast(err.message, "error");
+    } finally {
+      setCreando(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
-      {/* Crear horarios */}
-      <form onSubmit={crearHorarios} className="bg-white border border-neutral-200 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-neutral-700 mb-3">Crear horarios libres</h3>
-        <div className="flex flex-wrap items-end gap-3">
-          <label className="text-xs text-neutral-500">
-            Fecha
-            <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required
-              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
-          </label>
-          <label className="text-xs text-neutral-500">
-            Desde
-            <input type="time" step="1800" value={horaDesde} onChange={(e) => setHoraDesde(e.target.value)} required
-              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
-          </label>
-          <label className="text-xs text-neutral-500">
-            Hasta
-            <input type="time" step="1800" value={horaHasta} onChange={(e) => setHoraHasta(e.target.value)} required
-              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
-          </label>
-          <button type="submit" disabled={creando}
-            className="px-4 py-1.5 bg-accent text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50">
-            {creando ? "Creando..." : "Generar bloques de 30 min"}
+      {/* Toolbar: navegación de semana + acciones */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <button onClick={() => setWeekStart((d) => addDays(d, -7))}
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors">
+            ‹
+          </button>
+          <div className="text-sm font-semibold text-neutral-800 capitalize min-w-[180px] text-center">
+            {rangeLabel(weekDays)}
+          </div>
+          <button onClick={() => setWeekStart((d) => addDays(d, 7))}
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors">
+            ›
+          </button>
+          <button onClick={() => setWeekStart(startOfDay(new Date()))}
+            className="ml-1 px-3 py-1.5 rounded-full text-xs font-medium border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
+            Hoy
           </button>
         </div>
-        <p className="text-[11px] text-neutral-400 mt-2">
-          Los horarios siempre empiezan en punto o media hora (ej. 09:00, 09:30…). Se crea un bloque de 30 min por cada intervalo entre "desde" y "hasta".
-        </p>
-      </form>
-
-      {/* Rango visible */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <label className="text-xs text-neutral-500">
-          Ver desde
-          <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)}
-            className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm" />
-        </label>
-        <label className="text-xs text-neutral-500">
-          hasta
-          <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)}
-            className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm" />
-        </label>
-        <button onClick={cargar}
-          className="mt-4 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
-          Actualizar
+        <button onClick={() => setShowBulk((v) => !v)}
+          className="px-4 py-1.5 rounded-full bg-accent text-white text-xs font-semibold hover:opacity-90 transition-opacity">
+          + Generar varios horarios
         </button>
       </div>
 
-      {loading ? (
-        <div className="bg-white border border-neutral-200 rounded-xl p-10 text-center text-sm text-neutral-400">Cargando…</div>
-      ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">Error: {error}</div>
-      ) : (
-        <>
-          {/* Grid de horarios por día */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-neutral-700">Horarios</h3>
-              <div className="flex gap-3 text-[10px] text-neutral-500">
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-400" />Libre</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400" />Reservado</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary" />Ocupado</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-neutral-300" />Bloqueado</span>
-              </div>
+      {/* Panel "generar varios de una vez" (colapsable) */}
+      {showBulk && (
+        <form onSubmit={crearBulk} className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 flex flex-wrap items-end gap-3">
+          <label className="text-xs text-neutral-500">
+            Fecha
+            <input type="date" value={bulkFecha} onChange={(e) => setBulkFecha(e.target.value)} required
+              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+          </label>
+          <label className="text-xs text-neutral-500">
+            Desde
+            <input type="time" step="1800" value={bulkDesde} onChange={(e) => setBulkDesde(e.target.value)} required
+              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+          </label>
+          <label className="text-xs text-neutral-500">
+            Hasta
+            <input type="time" step="1800" value={bulkHasta} onChange={(e) => setBulkHasta(e.target.value)} required
+              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+          </label>
+          <button type="submit" disabled={creando}
+            className="px-4 py-1.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-light disabled:opacity-50 transition-colors">
+            {creando ? "Creando…" : "Generar bloques de 30 min"}
+          </button>
+          <p className="basis-full text-[11px] text-neutral-400">
+            También puedes hacer clic directo en una celda vacía del calendario para crear un solo horario de 30 min.
+          </p>
+        </form>
+      )}
+
+      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">Error: {error}</div>}
+
+      {/* Calendario semanal */}
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-4 pt-4">
+          <h3 className="text-sm font-semibold text-neutral-700">Tu semana</h3>
+          <div className="flex gap-3 text-[10px] text-neutral-500">
+            {Object.entries(ESTADO_DOT).map(([k, dot]) => (
+              <span key={k} className="flex items-center gap-1">
+                <span className={`w-2.5 h-2.5 rounded-full ${dot}`} />
+                {k === "LIBRE" ? "Libre" : k === "RESERVADO" ? "Reservado" : k === "OCUPADO" ? "Ocupado" : "Bloqueado"}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <div className="min-w-[720px]">
+            {/* Encabezado de días */}
+            <div className="grid sticky top-0 z-10 bg-white border-b border-neutral-100" style={{ gridTemplateColumns: "56px repeat(7, 1fr)" }}>
+              <div />
+              {weekDays.map((d) => {
+                const key = toISODate(d);
+                const isToday = key === todayKey;
+                return (
+                  <div key={key} className="flex flex-col items-center py-2.5">
+                    <span className="text-[10px] uppercase tracking-wide text-neutral-400">{WEEKDAY_SHORT[d.getDay()]}</span>
+                    <span className={`mt-1 w-7 h-7 flex items-center justify-center rounded-full text-sm font-semibold ${isToday ? "bg-primary text-white" : "text-neutral-700"}`}>
+                      {d.getDate()}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-            {slotsPorDia.length === 0 ? (
-              <p className="text-sm text-neutral-400 text-center py-6">No hay horarios creados en este rango.</p>
+
+            {/* Grid de horas × días */}
+            {loading ? (
+              <div className="p-10 text-center text-sm text-neutral-400">Cargando…</div>
             ) : (
-              <div className="space-y-4">
-                {slotsPorDia.map(({ fecha, slots }) => (
-                  <div key={fecha}>
-                    <p className="text-xs font-semibold text-neutral-500 capitalize mb-1.5">
-                      {new Date(fecha + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {slots.map((s) => (
-                        <button
-                          key={s.id_slot}
-                          onClick={() => onClickSlot(s)}
-                          onContextMenu={(e) => { e.preventDefault(); if (s.estado === "LIBRE") bloquearSlot(s, e); }}
-                          title={s.estado === "LIBRE" ? "Clic para borrar · clic derecho para bloquear" : s.estado === "BLOQUEADO" ? "Clic para desbloquear" : ESTADO_SLOT_LABEL[s.estado]}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${ESTADO_SLOT_STYLE[s.estado]}`}
-                        >
-                          {s.hora_inicio}
-                        </button>
-                      ))}
-                    </div>
+              <div className="relative grid" style={{ gridTemplateColumns: "56px repeat(7, 1fr)", gridTemplateRows: `repeat(${ROWS}, ${ROW_H}px)` }}>
+                {/* Líneas de hora + etiquetas */}
+                {Array.from({ length: ROWS }, (_, row) => (
+                  <div key={`label-${row}`}
+                    className="text-[10px] text-neutral-400 text-right pr-2 border-t border-neutral-100 -translate-y-1/2"
+                    style={{ gridColumn: 1, gridRow: row + 1 }}>
+                    {row % 2 === 0 ? rowLabel(row) : ""}
                   </div>
                 ))}
-              </div>
-            )}
-            <p className="text-[10px] text-neutral-400 mt-3 pt-3 border-t border-neutral-100">
-              Clic en un horario libre para borrarlo · clic derecho para bloquearlo · clic en uno bloqueado para liberarlo.
-            </p>
-          </div>
 
-          {/* Citas confirmadas */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-neutral-700 mb-4">Citas confirmadas y pagadas</h3>
-            {reservas.length === 0 ? (
-              <p className="text-sm text-neutral-400 text-center py-6">No hay citas en este rango.</p>
-            ) : (
-              <div className="space-y-3">
-                {reservas.map((r) => (
-                  <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} />
-                ))}
+                {/* Celdas por día */}
+                {weekDays.map((d, dayIdx) => {
+                  const fecha = toISODate(d);
+                  return Array.from({ length: ROWS }, (_, row) => {
+                    const hora = rowLabel(row);
+                    const key = `${fecha}|${hora}`;
+                    const slot = slotMap.get(key);
+                    const pasado = esPasado(fecha, hora);
+
+                    if (!slot) {
+                      return (
+                        <button
+                          key={key}
+                          disabled={pasado || busyCell === key}
+                          onClick={() => crearSlotRapido(fecha, hora)}
+                          title={pasado ? "" : `Crear horario ${hora}`}
+                          className={`border-t border-l border-neutral-100 transition-colors ${
+                            pasado ? "bg-neutral-50/60 cursor-default" : "hover:bg-primary/5 cursor-pointer"
+                          } ${busyCell === key ? "bg-primary/10" : ""}`}
+                          style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}
+                        />
+                      );
+                    }
+
+                    return (
+                      <div key={key} className="relative group border-t border-l border-neutral-100" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
+                        <button
+                          onClick={() => onClickSlot(slot)}
+                          title={ESTADO_LABEL[slot.estado]}
+                          className={`absolute inset-0.5 rounded-md border text-[10px] font-semibold flex items-center justify-center transition-colors ${ESTADO_BLOCK_STYLE[slot.estado]}`}
+                        >
+                          {hora}
+                        </button>
+                        {slot.estado === "LIBRE" && (
+                          <button
+                            onClick={(e) => bloquearSlot(slot, e)}
+                            title="Bloquear este horario"
+                            className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white border border-neutral-300 text-neutral-500 text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:border-primary hover:text-primary transition-opacity"
+                          >
+                            🔒
+                          </button>
+                        )}
+                      </div>
+                    );
+                  });
+                })}
               </div>
             )}
           </div>
-        </>
-      )}
+        </div>
+        <p className="text-[10px] text-neutral-400 px-4 py-3 border-t border-neutral-100">
+          Clic en una celda vacía para crear un horario · clic en uno libre para borrarlo (🔒 para bloquearlo) · clic en uno bloqueado para liberarlo.
+        </p>
+      </div>
+
+      {/* Citas confirmadas */}
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5">
+        <h3 className="text-sm font-semibold text-neutral-700 mb-4">Citas confirmadas y pagadas esta semana</h3>
+        {reservas.length === 0 ? (
+          <p className="text-sm text-neutral-400 text-center py-6">No hay citas en este rango.</p>
+        ) : (
+          <div className="space-y-3">
+            {reservas.map((r) => (
+              <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+function Pill({ tone, children }) {
+  const tones = {
+    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    amber: "bg-amber-50 text-amber-700 border-amber-200",
+    red: "bg-red-50 text-red-600 border-red-200",
+    neutral: "bg-neutral-100 text-neutral-500 border-neutral-200",
+    primary: "bg-primary/10 text-primary border-primary/20",
+  };
+  return <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${tones[tone]}`}>{children}</span>;
+}
+
+function pagoTone(estado) {
+  return { APROBADO: "green", PENDIENTE: "amber", RECHAZADO: "red", REEMBOLSADO: "neutral" }[estado] || "neutral";
+}
+function reservaTone(estado) {
+  return { CONFIRMADA: "primary", COMPLETADA: "neutral", CANCELADA: "red", PENDIENTE_PAGO: "amber", EXPIRADA: "neutral" }[estado] || "neutral";
 }
 
 function ReservaCard({ reserva: r, onChanged }) {
@@ -509,7 +620,7 @@ function ReservaCard({ reserva: r, onChanged }) {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 border border-neutral-100 rounded-lg p-3">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 border border-neutral-100 rounded-xl p-3 hover:border-neutral-200 transition-colors">
       <div className="w-24 flex-shrink-0">
         <div className="text-sm font-bold text-primary">{r.hora_inicio}</div>
         <div className="text-[10px] text-neutral-400">{r.fecha}</div>
@@ -517,8 +628,10 @@ function ReservaCard({ reserva: r, onChanged }) {
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold text-neutral-800">{r.cliente?.nombre || "Sin nombre"}</div>
         <div className="text-xs text-neutral-500">{r.cliente?.email_contacto}{r.cliente?.telefono ? ` · ${r.cliente.telefono}` : ""}</div>
-        <div className="text-[10px] text-neutral-400 mt-0.5">
-          {r.monto} {r.moneda} · pago {r.pago_estado.toLowerCase()} · estado {r.estado.toLowerCase()}
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <Pill tone="neutral">{r.monto} {r.moneda}</Pill>
+          <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
+          <Pill tone={reservaTone(r.estado)}>{r.estado.toLowerCase().replaceAll("_", " ")}</Pill>
         </div>
       </div>
       <div className="flex gap-2 flex-shrink-0">

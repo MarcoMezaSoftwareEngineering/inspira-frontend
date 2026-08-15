@@ -1,7 +1,8 @@
 // src/pages/backoffice/documentos/DocumentosBackoffice.jsx
 import { useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
-import { getUser, descargarZipCliente } from "./documentosUtils";
+import { descargarZipCliente } from "./documentosUtils";
+import { useAuth } from "../context/AuthContext";
 import { TreeNode, SolicitudNode, DriveIcon } from "./DocumentosTree";
 import { API_URL } from "./documentosUtils";
 import AprobacionDocumentos from "./AprobacionDocumentos";
@@ -220,8 +221,7 @@ export default function DocumentosBackoffice() {
   const [filtroEstado, setFiltroEstado] = useState(null);
   const [tabActivo, setTabActivo] = useState("aprobacion");
 
-  const usuario = getUser();
-  const isAdmin = usuario?.rol === "admin";
+  const { isAdmin } = useAuth();
 
   useEffect(() => { cargar(); }, []);
 

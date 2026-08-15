@@ -4,6 +4,7 @@ import { boGET, boPOST, boPUT } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import ServiciosList from "./ServiciosList";
 import ServicioForm from "./ServicioForm";
+import { useAuth } from "../context/AuthContext";
 
 const ESTADO_FORM_INICIAL = {
   id_servicio: null,
@@ -23,25 +24,8 @@ export default function PreciosServicios() {
   const [modo, setModo] = useState("nuevo"); // "nuevo" | "editar"
   const [filtro, setFiltro] = useState("todos"); // activos | inactivos | todos
 
-  const [usuario, setUsuario] = useState(null);
-const isAdmin = (usuario?.rol || "").toLowerCase() === "admin";
-
-  // ============================
-  // Carga de usuario logueado
-  // ============================
-  useEffect(() => {
-    async function cargarUsuario() {
-      try {
-        const r = await boGET("/backoffice/me");
-        if (r.ok) {
-          setUsuario(r.usuario || r.user || null);
-        }
-      } catch (e) {
-        console.error("Error al cargar usuario backoffice", e);
-      }
-    }
-    cargarUsuario();
-  }, []);
+  const { hasPermission } = useAuth();
+  const puedeEditar = hasPermission("precios.editar");
 
   // ============================
   // Carga de servicios
@@ -87,8 +71,8 @@ const isAdmin = (usuario?.rol || "").toLowerCase() === "admin";
     e.preventDefault();
     if (saving) return;
 
-    if (!isAdmin) {
-      dialog.toast("Solo un administrador puede crear o modificar servicios y precios.", "info");
+    if (!puedeEditar) {
+      dialog.toast("No tienes permiso para crear o modificar servicios y precios.", "info");
       return;
     }
 
@@ -183,14 +167,14 @@ const isAdmin = (usuario?.rol || "").toLowerCase() === "admin";
           <ServiciosList
             servicios={servicios}
             loading={loading}
-            onEditar={isAdmin ? editarServicio : undefined}
+            onEditar={puedeEditar ? editarServicio : undefined}
             onChecklist={abrirChecklist}
           />
         </div>
 
         {/* Formulario lateral */}
         <div>
-          {isAdmin ? (
+          {puedeEditar ? (
             <ServicioForm
               modo={modo}
               form={form}

@@ -6,6 +6,7 @@ import ClientesTable from "./ClientesTable";
 import ClienteForm from "./ClienteForm";
 import ServiciosClienteModal from "./ServiciosClienteModal";
 import PerfilClienteModal from "./PerfilClienteModal";
+import { useAuth } from "../context/AuthContext";
 
 const FORM_INICIAL = {
   id_cliente: null,
@@ -40,7 +41,7 @@ function Toast({ msg, tipo, onClose }) {
   );
 }
 
-export default function Clientes({ user }) {
+export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -53,7 +54,7 @@ export default function Clientes({ user }) {
   const [toast, setToast] = useState(null); // { msg, tipo }
 
   const debounceRef = useRef(null);
-  const isAdmin = user?.rol === "admin";
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     cargar();

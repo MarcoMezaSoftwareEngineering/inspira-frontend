@@ -1,17 +1,16 @@
 // src/pages/backoffice/solicitudes/SolicitudesList.jsx
 import { useState } from "react";
-import { useSolicitudes, getBackofficeUser } from "./hooks/useSolicitudes";
+import { useSolicitudes } from "./hooks/useSolicitudes";
 import { dialog } from "../../../services/dialogService";
 import { usePapelera } from "./hooks/usePapelera";
 import SolicitudRow, { SolicitudCard } from "./components/SolicitudRow";
 import CreateSolicitudAdmin from "./CreateSolicitudAdmin";
+import { useAuth } from "../context/AuthContext";
 
 export default function SolicitudesList({ onVerSolicitud }) {
-  const [usuario] = useState(() => getBackofficeUser());
+  const { isAdmin } = useAuth();
   const [mostrarCrear, setMostrarCrear] = useState(false);
   const [tab, setTab] = useState("activas"); // "activas" | "papelera"
-
-  const isAdmin = usuario?.rol === "admin";
 
   const {
     solicitudes, loading,

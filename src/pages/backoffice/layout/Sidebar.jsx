@@ -1,11 +1,15 @@
 import { useRef, useState } from "react";
 import { navigate } from "../../../services/navigate";
+import { useAuth } from "../context/AuthContext";
 
+// Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos) o
+// `adminOnly: true` (fijo, no configurable). Sin ninguno de los dos, el
+// ítem es visible para cualquier rol interno logueado.
 const NAV_SECTIONS = [
   {
     label: "Principal",
     items: [
-      { label: "Dashboard",   href: "/backoffice/dashboard" },
+      { label: "Dashboard",   href: "/backoffice/dashboard", perm: "dashboard.ver" },
       { label: "Agenda",      href: "/backoffice/agenda" },
       { label: "Solicitudes", href: "/backoffice/solicitudes" },
     ],
@@ -16,25 +20,25 @@ const NAV_SECTIONS = [
       { label: "Presupuestos Portal",   href: "/backoffice/presupuestos" },
       { label: "Calculadora — Leads",   href: "/backoffice/calculadora" },
       { label: "Clientes",              href: "/backoffice/clientes" },
-      { label: "Tracker Universidades", href: "/backoffice/tracker-universidades" },
+      { label: "Tracker Universidades", href: "/backoffice/tracker-universidades", perm: "tracker.ver" },
     ],
   },
   {
     label: "Operación",
     items: [
-      { label: "Catálogo Másteres",      href: "/backoffice/catalogo-masters" },
+      { label: "Catálogo Másteres",      href: "/backoffice/catalogo-masters", perm: "catalogo.ver" },
       { label: "Documentos",             href: "/backoffice/documentos" },
-      { label: "Checklist / Instructivos", href: "/backoffice/checklist-servicios", alsoActive: ["/backoffice/instructivos"] },
-      { label: "Panel Asesoras",         href: "/backoffice/panel-asesoras" },
+      { label: "Checklist / Instructivos", href: "/backoffice/checklist-servicios", alsoActive: ["/backoffice/instructivos"], perm: "checklist.ver" },
+      { label: "Panel Asesoras",         href: "/backoffice/panel-asesoras", perm: "panel_asesoras.ver" },
     ],
   },
   {
     label: "Configuración",
     items: [
-      { label: "Planes",            href: "/backoffice/planes" },
-      { label: "Precios/Servicios", href: "/backoffice/precios" },
-      { label: "Correos / Media",   href: "/backoffice/correos", alsoActive: ["/backoffice/media"] },
-      { label: "Settings",          href: "/backoffice/settings" },
+      { label: "Planes",            href: "/backoffice/planes", perm: "planes.ver" },
+      { label: "Precios/Servicios", href: "/backoffice/precios", perm: "precios.ver" },
+      { label: "Correos / Media",   href: "/backoffice/correos", alsoActive: ["/backoffice/media"], adminOnly: true },
+      { label: "Settings",          href: "/backoffice/settings", adminOnly: true },
     ],
   },
 ];
@@ -50,6 +54,14 @@ function initials(user) {
 }
 
 export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user, onLogout }) {
+  const { isAdmin, hasPermission } = useAuth();
+
+  function itemVisible(item) {
+    if (item.adminOnly) return isAdmin;
+    if (item.perm) return hasPermission(item.perm);
+    return true;
+  }
+
   const [width, setWidth] = useState(() => {
     const s = localStorage.getItem("bo_sidebar_w");
     const n = s ? parseInt(s, 10) : DEFAULT_W;
@@ -146,13 +158,16 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
 
         {/* Navegación */}
         <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-4">
-          {NAV_SECTIONS.map((section) => (
+          {NAV_SECTIONS.map((section) => {
+            const visibleItems = section.items.filter(itemVisible);
+            if (visibleItems.length === 0) return null;
+            return (
             <div key={section.label}>
               <p className="px-3 mb-1 text-[10px] font-bold uppercase tracking-widest text-white/35 select-none">
                 {section.label}
               </p>
               <div className="space-y-0.5">
-                {section.items.map((it) => {
+                {visibleItems.map((it) => {
                   const active =
                     path === it.href ||
                     path.startsWith(it.href + "/") ||
@@ -175,7 +190,8 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
                 })}
               </div>
             </div>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Footer: usuario + logout */}

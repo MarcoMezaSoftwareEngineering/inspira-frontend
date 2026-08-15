@@ -39,22 +39,21 @@ export default function UsuariosForm({
         />
       </div>
 
-      {/* Password solo al crear */}
-      {!editingId && (
-        <div>
-          <label className="block text-sm font-medium text-neutral-700">
-            Password
-          </label>
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={onChange}
-            className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
-            required
-          />
-        </div>
-      )}
+      <div>
+        <label className="block text-sm font-medium text-neutral-700">
+          {editingId ? "Nueva contraseña (opcional)" : "Password"}
+        </label>
+        <input
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={onChange}
+          placeholder={editingId ? "Dejar vacío para no cambiarla" : ""}
+          className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+          required={!editingId}
+          minLength={8}
+        />
+      </div>
 
       <div>
         <label className="block text-sm font-medium text-neutral-700">

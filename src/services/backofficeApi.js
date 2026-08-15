@@ -1,4 +1,6 @@
 // src/services/backofficeApi.js
+import { dialog } from "./dialogService";
+
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 /* === Token almacenado en BackOffice === */
@@ -36,6 +38,19 @@ async function makeRequest(method, path, body, extraHeaders = {}) {
   if (r.status === 401) {
     handleUnauthorized();
     return {};
+  }
+
+  if (r.status === 403) {
+    let msg = "No tienes permiso para esta acción";
+    try {
+      const data = await r.json();
+      msg = data.msg || data.message || msg;
+      dialog.toast(msg, "error");
+      return data;
+    } catch {
+      dialog.toast(msg, "error");
+      return { ok: false, msg };
+    }
   }
 
   try {

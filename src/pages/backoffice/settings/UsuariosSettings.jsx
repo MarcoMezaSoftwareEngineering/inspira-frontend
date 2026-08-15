@@ -1,36 +1,46 @@
 // src/pages/backoffice/settings/UsuariosSettings.jsx
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET, boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
+import { useAuth } from "../context/AuthContext";
+import TabView from "../layout/TabView";
 import UsuariosForm from "./components/UsuariosForm";
 import UsuariosTable from "./components/UsuariosTable";
+import RolesPermisos from "./RolesPermisos";
 
-export default function UsuariosSettings({ user }) {
+const FORM_VACIO = {
+  nombre: "",
+  email: "",
+  password: "",
+  rol: "asesor",
+  telefono: "",
+  cargo: "",
+};
+
+function UsuariosInternosTab() {
+  const { user: usuarioActual } = useAuth();
+
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(FORM_VACIO);
 
-  const [form, setForm] = useState({
-    nombre: "",
-    email: "",
-    password: "",
-    rol: "asesor",
-    telefono: "",
-    cargo: "",
-  });
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroRol, setFiltroRol] = useState("todos");
+  const [filtroEstado, setFiltroEstado] = useState("todos");
 
-  useEffect(() => {
-    cargar();
-  }, []);
-
-  async function cargar() {
+  const cargar = useCallback(async () => {
     setLoading(true);
     const r = await boGET("/backoffice/usuarios");
     if (r.ok) setUsuarios(r.usuarios || []);
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    cargar();
+  }, [cargar]);
 
   function onChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -38,14 +48,7 @@ export default function UsuariosSettings({ user }) {
 
   function resetForm() {
     setEditingId(null);
-    setForm({
-      nombre: "",
-      email: "",
-      password: "",
-      rol: "asesor",
-      telefono: "",
-      cargo: "",
-    });
+    setForm(FORM_VACIO);
   }
 
   async function onSubmit(e) {
@@ -54,16 +57,16 @@ export default function UsuariosSettings({ user }) {
 
     let r;
     if (editingId) {
-      // EDITAR (no tocamos password aquí)
-      r = await boPOST(`/backoffice/usuarios/${editingId}`, {
+      const body = {
         nombre: form.nombre,
         email: form.email,
         rol: form.rol,
         telefono: form.telefono,
         cargo: form.cargo,
-      });
+      };
+      if (form.password) body.password = form.password;
+      r = await boPOST(`/backoffice/usuarios/${editingId}`, body);
     } else {
-      // CREAR
       r = await boPOST("/backoffice/usuarios", form);
     }
 
@@ -82,8 +85,10 @@ export default function UsuariosSettings({ user }) {
       setUsuarios((prev) =>
         prev.map((x) => (x.id_usuario === editingId ? r.usuario : x))
       );
+      dialog.toast("Usuario actualizado", "success");
     } else {
       setUsuarios((prev) => [...prev, r.usuario]);
+      dialog.toast("Usuario creado", "success");
     }
 
     resetForm();
@@ -94,7 +99,7 @@ export default function UsuariosSettings({ user }) {
     setForm({
       nombre: u.nombre || "",
       email: u.email || "",
-      password: "", // no se usa para editar
+      password: "",
       rol: u.rol || "asesor",
       telefono: u.telefono || "",
       cargo: u.cargo || "",
@@ -102,6 +107,17 @@ export default function UsuariosSettings({ user }) {
   }
 
   async function toggleActivo(u) {
+    const esUnoMismo = u.id_usuario === usuarioActual?.id_usuario;
+    const vaADesactivar = u.activo;
+
+    if (vaADesactivar && (u.rol === "admin" || esUnoMismo)) {
+      const mensaje = esUnoMismo
+        ? "Vas a desactivar tu propia cuenta y se cerrará tu sesión. ¿Continuar?"
+        : `Vas a desactivar a ${u.nombre}, que es administrador. ¿Continuar?`;
+      const ok = await dialog.confirm(mensaje, "Confirmar desactivación");
+      if (!ok) return;
+    }
+
     const r = await boPOST(`/backoffice/usuarios/${u.id_usuario}/estado`, {
       activo: !u.activo,
     });
@@ -116,19 +132,16 @@ export default function UsuariosSettings({ user }) {
     );
   }
 
-  // Bloqueo visual si no es admin (el backend igual lo valida)
-  if (!user || user.rol !== "admin") {
-    return (
-      <div className="p-4 sm:p-6">
-        <h1 className="text-2xl font-bold text-primary">Usuarios internos</h1>
-        <p className="mt-2 text-neutral-700">
-          Solo los usuarios con rol{" "}
-          <span className="font-semibold">admin</span> pueden gestionar el
-          staff.
-        </p>
-      </div>
-    );
-  }
+  const usuariosFiltrados = useMemo(() => {
+    const q = busqueda.trim().toLowerCase();
+    return usuarios.filter((u) => {
+      if (filtroRol !== "todos" && u.rol !== filtroRol) return false;
+      if (filtroEstado === "activos" && !u.activo) return false;
+      if (filtroEstado === "inactivos" && u.activo) return false;
+      if (q && !(`${u.nombre} ${u.email}`.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }, [usuarios, busqueda, filtroRol, filtroEstado]);
 
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-3xl mx-auto">
@@ -143,12 +156,51 @@ export default function UsuariosSettings({ user }) {
         onCancelEdit={resetForm}
       />
 
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar por nombre o email…"
+          className="flex-1 border rounded-lg px-3 py-2 text-sm"
+        />
+        <select
+          value={filtroRol}
+          onChange={(e) => setFiltroRol(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm"
+        >
+          <option value="todos">Todos los roles</option>
+          <option value="admin">Admin</option>
+          <option value="asesor">Asesor</option>
+          <option value="soporte">Soporte</option>
+        </select>
+        <select
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm"
+        >
+          <option value="todos">Todos los estados</option>
+          <option value="activos">Solo activos</option>
+          <option value="inactivos">Solo inactivos</option>
+        </select>
+      </div>
+
       <UsuariosTable
-        usuarios={usuarios}
+        usuarios={usuariosFiltrados}
         loading={loading}
         onToggleActivo={toggleActivo}
         onEditClick={startEdit}
       />
     </div>
+  );
+}
+
+export default function UsuariosSettings() {
+  return (
+    <TabView
+      tabs={[
+        { label: "Usuarios internos", content: <UsuariosInternosTab /> },
+        { label: "Roles y Permisos", content: <RolesPermisos /> },
+      ]}
+    />
   );
 }

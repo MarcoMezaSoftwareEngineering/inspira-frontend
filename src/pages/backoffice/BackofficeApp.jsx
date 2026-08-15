@@ -2,6 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import Sidebar from "./layout/Sidebar";
 import ProtectedRoute from "./layout/ProtectedRoute";
+import ModuleGate from "./layout/ModuleGate";
+import TabView from "./layout/TabView";
+import { AuthProvider } from "./context/AuthContext";
 import BackofficeLogin from "./login/BackofficeLogin";
 import Dashboard from "./dashboard/Dashboard";
 import PreciosServicios from "./precios/PreciosServicios";
@@ -87,6 +90,7 @@ export default function BackofficeApp() {
 
   return (
     <ProtectedRoute onLogout={logout}>
+    <AuthProvider user={user} onLogout={logout}>
       {/* Layout de altura fija, con sidebar izquierdo + panel derecho con scroll */}
       <div className="flex w-full h-dvh overflow-hidden">
         <Sidebar
@@ -124,8 +128,8 @@ export default function BackofficeApp() {
               />
             )}
             {/* Rutas internas */}
-            {path === "/backoffice" && <Dashboard />}
-            {path === "/backoffice/dashboard" && <Dashboard />}
+            {path === "/backoffice" && <ModuleGate perm="dashboard.ver"><Dashboard /></ModuleGate>}
+            {path === "/backoffice/dashboard" && <ModuleGate perm="dashboard.ver"><Dashboard /></ModuleGate>}
 
             {path === "/backoffice/agenda" && <Agenda />}
 
@@ -151,73 +155,51 @@ export default function BackofficeApp() {
                 key="checklist-instructivos"
                 initialTab={path === "/backoffice/instructivos" ? 1 : 0}
                 tabs={[
-                  { label: "Checklist Servicios", content: <ChecklistServicios /> },
-                  { label: "Instructivos",         content: <InstructivosServicios /> },
+                  { label: "Checklist Servicios", content: <ModuleGate perm="checklist.ver"><ChecklistServicios /></ModuleGate> },
+                  { label: "Instructivos",         content: <ModuleGate perm="instructivos.ver"><InstructivosServicios /></ModuleGate> },
                 ]}
               />
             )}
 
             {path === "/backoffice/documentos" && <DocumentosBackoffice />}
 
-            {path === "/backoffice/clientes" && <Clientes user={user} />}
-            {path === "/backoffice/precios" && <PreciosServicios />}
+            {path === "/backoffice/clientes" && <Clientes />}
+            {path === "/backoffice/precios" && <ModuleGate perm="precios.ver"><PreciosServicios /></ModuleGate>}
 
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
 
-            {path === "/backoffice/calculadora" && <LeadsCalculadora user={user} />}
+            {path === "/backoffice/calculadora" && <LeadsCalculadora />}
 
-            {path === "/backoffice/tracker-universidades" && <TrackerUniversidades />}
+            {path === "/backoffice/tracker-universidades" && <ModuleGate perm="tracker.ver"><TrackerUniversidades /></ModuleGate>}
 
-            {path === "/backoffice/catalogo-masters" && <CatalogoMasters />}
-            {path === "/backoffice/planes" && <PlanesAdmin />}
+            {path === "/backoffice/catalogo-masters" && <ModuleGate perm="catalogo.ver"><CatalogoMasters /></ModuleGate>}
+            {path === "/backoffice/planes" && <ModuleGate perm="planes.ver"><PlanesAdmin /></ModuleGate>}
 
-            {path === "/backoffice/panel-asesoras" && <PanelAsesoras />}
+            {path === "/backoffice/panel-asesoras" && <ModuleGate perm="panel_asesoras.ver"><PanelAsesoras /></ModuleGate>}
 
             {(path === "/backoffice/correos" || path === "/backoffice/media") && (
-              <TabView
-                key="correos-media"
-                initialTab={path === "/backoffice/media" ? 1 : 0}
-                tabs={[
-                  { label: "Correos", content: <EmailTemplates /> },
-                  { label: "Media",   content: <MediaPanel /> },
-                ]}
-              />
+              <ModuleGate adminOnly>
+                <TabView
+                  key="correos-media"
+                  initialTab={path === "/backoffice/media" ? 1 : 0}
+                  tabs={[
+                    { label: "Correos", content: <EmailTemplates /> },
+                    { label: "Media",   content: <MediaPanel /> },
+                  ]}
+                />
+              </ModuleGate>
             )}
 
             {path === "/backoffice/settings" && (
-              <UsuariosSettings user={user} />
+              <ModuleGate adminOnly>
+                <UsuariosSettings />
+              </ModuleGate>
             )}
           </main>
         </div>
       </div>
+    </AuthProvider>
     </ProtectedRoute>
-  );
-}
-
-function TabView({ tabs, initialTab = 0 }) {
-  const [active, setActive] = useState(initialTab);
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex border-b border-neutral-200 px-6 pt-4 gap-1 shrink-0">
-        {tabs.map((t, i) => (
-          <button
-            key={t.label}
-            onClick={() => setActive(i)}
-            className={[
-              "px-4 py-2 text-sm font-medium rounded-t-lg transition-colors",
-              active === i
-                ? "bg-primary text-white"
-                : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100",
-            ].join(" ")}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        {tabs[active].content}
-      </div>
-    </div>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { boGET, boPUT, boDELETE, boPATCH } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
+import { useAuth } from "../context/AuthContext";
 
 const STATUS_LABEL = {
   new:      "Nueva",
@@ -20,15 +21,6 @@ const STATUS_DOT = {
   done:     "bg-emerald-500",
   cancel:   "bg-red-500",
 };
-
-function getUser() {
-  try {
-    const token = localStorage.getItem("bo_token");
-    if (!token) return null;
-    const base64 = token.split(".")[1]?.replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(decodeURIComponent(atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")));
-  } catch { return null; }
-}
 
 function fmt(n) { return "€" + (n || 0).toLocaleString("es-ES"); }
 function fmtFecha(iso) { return new Date(iso).toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" }); }
@@ -209,8 +201,7 @@ function Modal({ row, onClose, onStatusChange, onArchivar, isAdmin }) {
 
 // ── Componente principal ─────────────────────────────────────────────────────
 export default function PresupuestosPortal() {
-  const [usuario]   = useState(() => getUser());
-  const isAdmin     = usuario?.rol === "admin";
+  const { isAdmin } = useAuth();
 
   const [rows,      setRows]      = useState([]);
   const [archivadas, setArchivadas] = useState([]);

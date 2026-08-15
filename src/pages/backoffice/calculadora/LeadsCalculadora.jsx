@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { boGET, boPATCH, boDELETE } from "../../../services/backofficeApi";
+import { useAuth } from "../context/AuthContext";
 
 const VIDA_LABEL = { economico: "Económico", equilibrado: "Equilibrado", ambicioso: "Ambicioso" };
 const PAGE_SIZE  = 50;
@@ -69,8 +70,8 @@ function BecasPills({ becas }) {
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-export default function LeadsCalculadora({ user }) {
-  const isAdmin = user?.rol === "admin";
+export default function LeadsCalculadora() {
+  const { isAdmin } = useAuth();
 
   const [leads,   setLeads]   = useState([]);
   const [total,   setTotal]   = useState(0);

@@ -305,13 +305,24 @@ function rangeLabel(weekDays) {
     : `${a.getDate()} ${mesA} – ${b.getDate()} ${mesB} ${anio}`;
 }
 
+function iniciales(nombre) {
+  if (!nombre) return "?";
+  const partes = nombre.trim().split(/\s+/);
+  return ((partes[0]?.[0] || "") + (partes[1]?.[0] || "")).toUpperCase();
+}
+
 function MiCalendarioTab() {
+  const esAdmin = getUserRole() === "admin";
+
   const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const desde = toISODate(weekDays[0]);
   const hasta = toISODate(weekDays[6]);
 
-  const [slotMap, setSlotMap] = useState(new Map()); // "fecha|hora" -> slot
+  const [asesores, setAsesores] = useState([]);
+  const [filtro, setFiltro] = useState(esAdmin ? "todos" : "yo"); // "todos" | "yo" | id_usuario
+
+  const [slotMap, setSlotMap] = useState(new Map()); // "fecha|hora" -> slot[]
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -324,18 +335,34 @@ function MiCalendarioTab() {
   const [bulkHasta, setBulkHasta] = useState("18:00");
   const [creando, setCreando] = useState(false);
 
+  // Solo admin: cargar el combo de asesores una vez
+  useEffect(() => {
+    if (!esAdmin) return;
+    boGET("/backoffice/usuarios-internos").then((res) => {
+      if (res?.ok) setAsesores(res.usuarios || []);
+    });
+  }, [esAdmin]);
+
+  const combinado = esAdmin && filtro === "todos"; // vista de todo el equipo a la vez
+  const idUsuarioObjetivo = esAdmin && filtro !== "todos" && filtro !== "yo" ? Number(filtro) : null;
+
   async function cargar() {
     setLoading(true);
     setError(null);
     try {
+      const qs = `desde=${desde}&hasta=${hasta}${idUsuarioObjetivo ? `&id_usuario=${idUsuarioObjetivo}` : ""}`;
       const [resSlots, resReservas] = await Promise.all([
-        boGET(`/backoffice/agenda/slots?desde=${desde}&hasta=${hasta}`),
-        boGET(`/backoffice/agenda/reservas?desde=${desde}&hasta=${hasta}`),
+        boGET(`/backoffice/agenda/slots?${qs}`),
+        boGET(`/backoffice/agenda/reservas?${qs}`),
       ]);
       if (resSlots?.ok === false) throw new Error(resSlots.msg || "Error al cargar horarios");
       if (resReservas?.ok === false) throw new Error(resReservas.msg || "Error al cargar citas");
       const map = new Map();
-      for (const s of resSlots?.slots || []) map.set(`${s.fecha}|${s.hora_inicio}`, s);
+      for (const s of resSlots?.slots || []) {
+        const k = `${s.fecha}|${s.hora_inicio}`;
+        if (!map.has(k)) map.set(k, []);
+        map.get(k).push(s);
+      }
       setSlotMap(map);
       setReservas(resReservas?.reservas || []);
     } catch (err) {
@@ -345,7 +372,7 @@ function MiCalendarioTab() {
     }
   }
 
-  useEffect(() => { cargar(); }, [desde, hasta]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { cargar(); }, [desde, hasta, filtro]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const todayKey = toISODate(new Date());
   const nowMin = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
@@ -359,9 +386,12 @@ function MiCalendarioTab() {
 
   // Clic en celda vacía -> crea al instante un horario libre de 30 min
   async function crearSlotRapido(fecha, hora) {
+    if (combinado) return; // ambiguo a quién pertenecería: hay que elegir un asesor primero
     const key = `${fecha}|${hora}`;
     setBusyCell(key);
-    const res = await boPOST("/backoffice/agenda/slots", { fecha, horas: [hora] });
+    const body = { fecha, horas: [hora] };
+    if (idUsuarioObjetivo) body.id_usuario = idUsuarioObjetivo;
+    const res = await boPOST("/backoffice/agenda/slots", body);
     setBusyCell(null);
     if (res?.ok === false) return dialog.toast(res.msg || "No se pudo crear el horario", "error");
     cargar();
@@ -392,7 +422,9 @@ function MiCalendarioTab() {
     e.preventDefault();
     setCreando(true);
     try {
-      const res = await boPOST("/backoffice/agenda/slots", { fecha: bulkFecha, desde: bulkDesde, hasta: bulkHasta });
+      const body = { fecha: bulkFecha, desde: bulkDesde, hasta: bulkHasta };
+      if (idUsuarioObjetivo) body.id_usuario = idUsuarioObjetivo;
+      const res = await boPOST("/backoffice/agenda/slots", body);
       if (res?.ok === false) throw new Error(res.msg || "No se pudo crear el horario");
       dialog.toast(`${res.creados} horario(s) de 30 min creados para ${bulkFecha}.`, "success");
       setShowBulk(false);
@@ -408,12 +440,12 @@ function MiCalendarioTab() {
     <div className="space-y-5">
       {/* Toolbar: navegación de semana + acciones */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button onClick={() => setWeekStart((d) => addDays(d, -7))}
             className="w-8 h-8 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors">
             ‹
           </button>
-          <div className="text-sm font-semibold text-neutral-800 capitalize min-w-[180px] text-center">
+          <div className="text-sm font-semibold text-neutral-800 capitalize min-w-[150px] text-center">
             {rangeLabel(weekDays)}
           </div>
           <button onClick={() => setWeekStart((d) => addDays(d, 7))}
@@ -424,15 +456,25 @@ function MiCalendarioTab() {
             className="ml-1 px-3 py-1.5 rounded-full text-xs font-medium border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
             Hoy
           </button>
+          {esAdmin && (
+            <select value={filtro} onChange={(e) => setFiltro(e.target.value)}
+              className="ml-1 border border-neutral-200 rounded-full px-3 py-1.5 text-xs font-medium text-neutral-700 focus:outline-none focus:border-primary">
+              <option value="todos">👥 Todo el equipo</option>
+              {asesores.map((a) => (
+                <option key={a.id_usuario} value={a.id_usuario}>{a.nombre}</option>
+              ))}
+            </select>
+          )}
         </div>
-        <button onClick={() => setShowBulk((v) => !v)}
-          className="px-4 py-1.5 rounded-full bg-accent text-white text-xs font-semibold hover:opacity-90 transition-opacity">
+        <button onClick={() => setShowBulk((v) => !v)} disabled={combinado}
+          title={combinado ? "Elige un asesor específico para crear horarios" : undefined}
+          className="px-4 py-1.5 rounded-full bg-accent text-white text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">
           + Generar varios horarios
         </button>
       </div>
 
       {/* Panel "generar varios de una vez" (colapsable) */}
-      {showBulk && (
+      {showBulk && !combinado && (
         <form onSubmit={crearBulk} className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 flex flex-wrap items-end gap-3">
           <label className="text-xs text-neutral-500">
             Fecha
@@ -463,8 +505,10 @@ function MiCalendarioTab() {
 
       {/* Calendario semanal */}
       <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-4 pt-4">
-          <h3 className="text-sm font-semibold text-neutral-700">Tu semana</h3>
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
+          <h3 className="text-sm font-semibold text-neutral-700">
+            {combinado ? "Todo el equipo" : "Tu semana"}
+          </h3>
           <div className="flex gap-3 text-[10px] text-neutral-500">
             {Object.entries(ESTADO_DOT).map(([k, dot]) => (
               <span key={k} className="flex items-center gap-1">
@@ -474,12 +518,19 @@ function MiCalendarioTab() {
             ))}
           </div>
         </div>
+        {combinado && (
+          <p className="text-[11px] text-neutral-400 px-4 pt-1.5">
+            Cuando dos asesores tienen horario a la misma hora, verás varios bloques juntos en esa celda.
+          </p>
+        )}
 
-        <div className="overflow-x-auto">
-          <div className="min-w-[720px]">
+        {/* Contenedor con scroll interno propio: el encabezado de días queda fijo arriba
+            y el eje de horas queda fijo a la izquierda, sin que la página entera se desplace. */}
+        <div className="mt-3 max-h-[55vh] min-h-[320px] overflow-auto">
+          <div className="min-w-[640px]">
             {/* Encabezado de días */}
-            <div className="grid sticky top-0 z-10 bg-white border-b border-neutral-100" style={{ gridTemplateColumns: "56px repeat(7, 1fr)" }}>
-              <div />
+            <div className="grid sticky top-0 z-20 bg-white border-b border-neutral-100" style={{ gridTemplateColumns: "52px repeat(7, 1fr)" }}>
+              <div className="sticky left-0 bg-white z-10" />
               {weekDays.map((d) => {
                 const key = toISODate(d);
                 const isToday = key === todayKey;
@@ -498,11 +549,11 @@ function MiCalendarioTab() {
             {loading ? (
               <div className="p-10 text-center text-sm text-neutral-400">Cargando…</div>
             ) : (
-              <div className="relative grid" style={{ gridTemplateColumns: "56px repeat(7, 1fr)", gridTemplateRows: `repeat(${ROWS}, ${ROW_H}px)` }}>
-                {/* Líneas de hora + etiquetas */}
+              <div className="relative grid" style={{ gridTemplateColumns: "52px repeat(7, 1fr)", gridTemplateRows: `repeat(${ROWS}, ${ROW_H}px)` }}>
+                {/* Líneas de hora + etiquetas (columna fija al hacer scroll horizontal) */}
                 {Array.from({ length: ROWS }, (_, row) => (
                   <div key={`label-${row}`}
-                    className="text-[10px] text-neutral-400 text-right pr-2 border-t border-neutral-100 -translate-y-1/2"
+                    className="sticky left-0 z-10 bg-white text-[10px] text-neutral-400 text-right pr-2 border-t border-neutral-100 -translate-y-1/2"
                     style={{ gridColumn: 1, gridRow: row + 1 }}>
                     {row % 2 === 0 ? rowLabel(row) : ""}
                   </div>
@@ -514,42 +565,61 @@ function MiCalendarioTab() {
                   return Array.from({ length: ROWS }, (_, row) => {
                     const hora = rowLabel(row);
                     const key = `${fecha}|${hora}`;
-                    const slot = slotMap.get(key);
+                    const arr = slotMap.get(key) || [];
                     const pasado = esPasado(fecha, hora);
 
-                    if (!slot) {
+                    if (arr.length === 0) {
                       return (
                         <button
                           key={key}
-                          disabled={pasado || busyCell === key}
+                          disabled={pasado || busyCell === key || combinado}
                           onClick={() => crearSlotRapido(fecha, hora)}
-                          title={pasado ? "" : `Crear horario ${hora}`}
+                          title={pasado || combinado ? "" : `Crear horario ${hora}`}
                           className={`border-t border-l border-neutral-100 transition-colors ${
-                            pasado ? "bg-neutral-50/60 cursor-default" : "hover:bg-primary/5 cursor-pointer"
+                            pasado || combinado ? "bg-neutral-50/60 cursor-default" : "hover:bg-primary/5 cursor-pointer"
                           } ${busyCell === key ? "bg-primary/10" : ""}`}
                           style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}
                         />
                       );
                     }
 
-                    return (
-                      <div key={key} className="relative group border-t border-l border-neutral-100" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
-                        <button
-                          onClick={() => onClickSlot(slot)}
-                          title={ESTADO_LABEL[slot.estado]}
-                          className={`absolute inset-0.5 rounded-md border text-[10px] font-semibold flex items-center justify-center transition-colors ${ESTADO_BLOCK_STYLE[slot.estado]}`}
-                        >
-                          {hora}
-                        </button>
-                        {slot.estado === "LIBRE" && (
+                    if (arr.length === 1) {
+                      const slot = arr[0];
+                      return (
+                        <div key={key} className="relative group border-t border-l border-neutral-100" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
                           <button
-                            onClick={(e) => bloquearSlot(slot, e)}
-                            title="Bloquear este horario"
-                            className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white border border-neutral-300 text-neutral-500 text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:border-primary hover:text-primary transition-opacity"
+                            onClick={() => onClickSlot(slot)}
+                            title={`${ESTADO_LABEL[slot.estado]}${slot.asesor ? ` — ${slot.asesor.nombre}` : ""}`}
+                            className={`absolute inset-0.5 rounded-md border text-[10px] font-semibold flex items-center justify-center transition-colors ${ESTADO_BLOCK_STYLE[slot.estado]}`}
                           >
-                            🔒
+                            {combinado && slot.asesor ? iniciales(slot.asesor.nombre) : hora}
                           </button>
-                        )}
+                          {slot.estado === "LIBRE" && (
+                            <button
+                              onClick={(e) => bloquearSlot(slot, e)}
+                              title="Bloquear este horario"
+                              className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white border border-neutral-300 text-neutral-500 text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:border-primary hover:text-primary transition-opacity"
+                            >
+                              🔒
+                            </button>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    // Varios asesores con horario a la misma hora -> mini bloques lado a lado (cruce visible)
+                    return (
+                      <div key={key} className="flex gap-0.5 p-0.5 border-t border-l border-neutral-100" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
+                        {arr.map((slot) => (
+                          <button
+                            key={slot.id_slot}
+                            onClick={() => onClickSlot(slot)}
+                            title={`${slot.asesor?.nombre || ""} — ${ESTADO_LABEL[slot.estado]}`}
+                            className={`flex-1 rounded border text-[8px] font-bold flex items-center justify-center transition-colors ${ESTADO_BLOCK_STYLE[slot.estado]}`}
+                          >
+                            {iniciales(slot.asesor?.nombre)}
+                          </button>
+                        ))}
                       </div>
                     );
                   });
@@ -559,19 +629,23 @@ function MiCalendarioTab() {
           </div>
         </div>
         <p className="text-[10px] text-neutral-400 px-4 py-3 border-t border-neutral-100">
-          Clic en una celda vacía para crear un horario · clic en uno libre para borrarlo (🔒 para bloquearlo) · clic en uno bloqueado para liberarlo.
+          {combinado
+            ? "Elige un asesor en el selector de arriba para crear o modificar horarios."
+            : "Clic en una celda vacía para crear un horario · clic en uno libre para borrarlo (🔒 para bloquearlo) · clic en uno bloqueado para liberarlo."}
         </p>
       </div>
 
       {/* Citas confirmadas */}
       <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5">
-        <h3 className="text-sm font-semibold text-neutral-700 mb-4">Citas confirmadas y pagadas esta semana</h3>
+        <h3 className="text-sm font-semibold text-neutral-700 mb-4">
+          {combinado ? "Citas confirmadas del equipo esta semana" : "Citas confirmadas y pagadas esta semana"}
+        </h3>
         {reservas.length === 0 ? (
           <p className="text-sm text-neutral-400 text-center py-6">No hay citas en este rango.</p>
         ) : (
           <div className="space-y-3">
             {reservas.map((r) => (
-              <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} />
+              <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} mostrarAsesor={combinado} />
             ))}
           </div>
         )}
@@ -598,7 +672,7 @@ function reservaTone(estado) {
   return { CONFIRMADA: "primary", COMPLETADA: "neutral", CANCELADA: "red", PENDIENTE_PAGO: "amber", EXPIRADA: "neutral" }[estado] || "neutral";
 }
 
-function ReservaCard({ reserva: r, onChanged }) {
+function ReservaCard({ reserva: r, onChanged, mostrarAsesor }) {
   const [editando, setEditando] = useState(false);
 
   async function editarMeet() {
@@ -628,10 +702,11 @@ function ReservaCard({ reserva: r, onChanged }) {
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold text-neutral-800">{r.cliente?.nombre || "Sin nombre"}</div>
         <div className="text-xs text-neutral-500">{r.cliente?.email_contacto}{r.cliente?.telefono ? ` · ${r.cliente.telefono}` : ""}</div>
-        <div className="flex items-center gap-1.5 mt-1.5">
+        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
           <Pill tone="neutral">{r.monto} {r.moneda}</Pill>
           <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
           <Pill tone={reservaTone(r.estado)}>{r.estado.toLowerCase().replaceAll("_", " ")}</Pill>
+          {mostrarAsesor && r.asesor && <Pill tone="primary">{r.asesor.nombre}</Pill>}
         </div>
       </div>
       <div className="flex gap-2 flex-shrink-0">

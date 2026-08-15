@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { boGET, boPOST } from "../../../services/backofficeApi";
+import { boGET, boPOST, boPATCH, boDELETE } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 
 const DAYS_OPTIONS = [
@@ -22,7 +22,7 @@ function getUserRole() {
 }
 
 export default function Agenda() {
-  const [tab, setTab] = useState("reuniones"); // "reuniones" | "disponibilidad"
+  const [tab, setTab] = useState("micalendario"); // "micalendario" | "reuniones" | "disponibilidad"
 
   // --- Reuniones ---
   const [data, setData] = useState(null);
@@ -109,19 +109,28 @@ export default function Agenda() {
         {/* Tabs */}
         <div className="flex rounded-lg border border-neutral-200 overflow-hidden text-sm font-medium">
           <button
+            onClick={() => setTab("micalendario")}
+            className={`px-4 py-2 transition-colors ${tab === "micalendario" ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
+          >
+            Mi calendario
+          </button>
+          <button
             onClick={() => setTab("reuniones")}
             className={`px-4 py-2 transition-colors ${tab === "reuniones" ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
           >
-            Reuniones
+            Reuniones (Calendly)
           </button>
           <button
             onClick={() => setTab("disponibilidad")}
             className={`px-4 py-2 transition-colors ${tab === "disponibilidad" ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
           >
-            Disponibilidad
+            Disponibilidad (Calendly)
           </button>
         </div>
       </div>
+
+      {/* ===== TAB MI CALENDARIO (sistema propio) ===== */}
+      {tab === "micalendario" && <MiCalendarioTab />}
 
       {/* ===== TAB REUNIONES ===== */}
       {tab === "reuniones" && (
@@ -256,6 +265,282 @@ export default function Agenda() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Mi calendario (sistema propio: AgendaSlot / ReservaCita) ──── */
+const ESTADO_SLOT_STYLE = {
+  LIBRE:     "bg-green-50 border-green-200 text-green-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600",
+  RESERVADO: "bg-amber-50 border-amber-200 text-amber-700 cursor-default",
+  OCUPADO:   "bg-primary/10 border-primary/30 text-primary cursor-default",
+  BLOQUEADO: "bg-neutral-100 border-neutral-300 text-neutral-400 hover:border-primary hover:text-primary",
+};
+const ESTADO_SLOT_LABEL = { LIBRE: "Libre", RESERVADO: "Reservado", OCUPADO: "Ocupado", BLOQUEADO: "Bloqueado" };
+
+function toISODate(d) { return d.toISOString().slice(0, 10); }
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+
+function MiCalendarioTab() {
+  const today = new Date();
+  const [desde, setDesde] = useState(toISODate(today));
+  const [hasta, setHasta] = useState(toISODate(addDays(today, 13)));
+
+  const [slotsPorDia, setSlotsPorDia] = useState([]); // [{fecha, slots:[...]}]
+  const [reservas, setReservas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Form "crear horarios"
+  const [fecha, setFecha] = useState(toISODate(today));
+  const [horaDesde, setHoraDesde] = useState("09:00");
+  const [horaHasta, setHoraHasta] = useState("13:00");
+  const [creando, setCreando] = useState(false);
+
+  function agruparPorDia(slots) {
+    const map = new Map();
+    for (const s of slots) {
+      if (!map.has(s.fecha)) map.set(s.fecha, []);
+      map.get(s.fecha).push(s);
+    }
+    return Array.from(map.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([fecha, slots]) => ({
+        fecha,
+        slots: slots.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio)),
+      }));
+  }
+
+  async function cargar() {
+    setLoading(true);
+    setError(null);
+    try {
+      const [resSlots, resReservas] = await Promise.all([
+        boGET(`/backoffice/agenda/slots?desde=${desde}&hasta=${hasta}`),
+        boGET(`/backoffice/agenda/reservas?desde=${desde}&hasta=${hasta}`),
+      ]);
+      if (resSlots?.ok === false) throw new Error(resSlots.msg || "Error al cargar horarios");
+      if (resReservas?.ok === false) throw new Error(resReservas.msg || "Error al cargar citas");
+      setSlotsPorDia(agruparPorDia(resSlots?.slots || []));
+      setReservas(resReservas?.reservas || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { cargar(); }, [desde, hasta]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function crearHorarios(e) {
+    e.preventDefault();
+    setCreando(true);
+    try {
+      const res = await boPOST("/backoffice/agenda/slots", { fecha, desde: horaDesde, hasta: horaHasta });
+      if (res?.ok === false) throw new Error(res.msg || "No se pudo crear el horario");
+      dialog.toast(`${res.creados} horario(s) de 30 min creados para ${fecha}.`, "success");
+      cargar();
+    } catch (err) {
+      dialog.toast(err.message, "error");
+    } finally {
+      setCreando(false);
+    }
+  }
+
+  async function onClickSlot(slot) {
+    if (slot.estado === "LIBRE") {
+      const ok = await dialog.confirm(
+        `¿Borrar el horario libre de las ${slot.hora_inicio}?`,
+        "Borrar horario"
+      );
+      if (!ok) return;
+      const res = await boDELETE(`/backoffice/agenda/slots/${slot.id_slot}`);
+      if (res?.ok === false) return dialog.toast(res.msg || "No se pudo borrar", "error");
+      cargar();
+    } else if (slot.estado === "BLOQUEADO") {
+      const res = await boPATCH(`/backoffice/agenda/slots/${slot.id_slot}`, { estado: "LIBRE" });
+      if (res?.ok === false) return dialog.toast(res.msg || "No se pudo desbloquear", "error");
+      cargar();
+    }
+  }
+
+  async function bloquearSlot(slot, e) {
+    e.stopPropagation();
+    const res = await boPATCH(`/backoffice/agenda/slots/${slot.id_slot}`, { estado: "BLOQUEADO" });
+    if (res?.ok === false) return dialog.toast(res.msg || "No se pudo bloquear", "error");
+    cargar();
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Crear horarios */}
+      <form onSubmit={crearHorarios} className="bg-white border border-neutral-200 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-neutral-700 mb-3">Crear horarios libres</h3>
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="text-xs text-neutral-500">
+            Fecha
+            <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required
+              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+          </label>
+          <label className="text-xs text-neutral-500">
+            Desde
+            <input type="time" step="1800" value={horaDesde} onChange={(e) => setHoraDesde(e.target.value)} required
+              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+          </label>
+          <label className="text-xs text-neutral-500">
+            Hasta
+            <input type="time" step="1800" value={horaHasta} onChange={(e) => setHoraHasta(e.target.value)} required
+              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+          </label>
+          <button type="submit" disabled={creando}
+            className="px-4 py-1.5 bg-accent text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50">
+            {creando ? "Creando..." : "Generar bloques de 30 min"}
+          </button>
+        </div>
+        <p className="text-[11px] text-neutral-400 mt-2">
+          Los horarios siempre empiezan en punto o media hora (ej. 09:00, 09:30…). Se crea un bloque de 30 min por cada intervalo entre "desde" y "hasta".
+        </p>
+      </form>
+
+      {/* Rango visible */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <label className="text-xs text-neutral-500">
+          Ver desde
+          <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)}
+            className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm" />
+        </label>
+        <label className="text-xs text-neutral-500">
+          hasta
+          <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)}
+            className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm" />
+        </label>
+        <button onClick={cargar}
+          className="mt-4 px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
+          Actualizar
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="bg-white border border-neutral-200 rounded-xl p-10 text-center text-sm text-neutral-400">Cargando…</div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">Error: {error}</div>
+      ) : (
+        <>
+          {/* Grid de horarios por día */}
+          <div className="bg-white border border-neutral-200 rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-neutral-700">Horarios</h3>
+              <div className="flex gap-3 text-[10px] text-neutral-500">
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-400" />Libre</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400" />Reservado</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary" />Ocupado</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-neutral-300" />Bloqueado</span>
+              </div>
+            </div>
+            {slotsPorDia.length === 0 ? (
+              <p className="text-sm text-neutral-400 text-center py-6">No hay horarios creados en este rango.</p>
+            ) : (
+              <div className="space-y-4">
+                {slotsPorDia.map(({ fecha, slots }) => (
+                  <div key={fecha}>
+                    <p className="text-xs font-semibold text-neutral-500 capitalize mb-1.5">
+                      {new Date(fecha + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {slots.map((s) => (
+                        <button
+                          key={s.id_slot}
+                          onClick={() => onClickSlot(s)}
+                          onContextMenu={(e) => { e.preventDefault(); if (s.estado === "LIBRE") bloquearSlot(s, e); }}
+                          title={s.estado === "LIBRE" ? "Clic para borrar · clic derecho para bloquear" : s.estado === "BLOQUEADO" ? "Clic para desbloquear" : ESTADO_SLOT_LABEL[s.estado]}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${ESTADO_SLOT_STYLE[s.estado]}`}
+                        >
+                          {s.hora_inicio}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-[10px] text-neutral-400 mt-3 pt-3 border-t border-neutral-100">
+              Clic en un horario libre para borrarlo · clic derecho para bloquearlo · clic en uno bloqueado para liberarlo.
+            </p>
+          </div>
+
+          {/* Citas confirmadas */}
+          <div className="bg-white border border-neutral-200 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-neutral-700 mb-4">Citas confirmadas y pagadas</h3>
+            {reservas.length === 0 ? (
+              <p className="text-sm text-neutral-400 text-center py-6">No hay citas en este rango.</p>
+            ) : (
+              <div className="space-y-3">
+                {reservas.map((r) => (
+                  <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} />
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ReservaCard({ reserva: r, onChanged }) {
+  const [editando, setEditando] = useState(false);
+
+  async function editarMeet() {
+    const url = await dialog.prompt("Enlace de Google Meet:", r.meet_url || "", "Editar enlace de reunión");
+    if (url === null) return;
+    setEditando(true);
+    const res = await boPATCH(`/backoffice/agenda/reservas/${r.id_reserva}`, { meet_url: url });
+    setEditando(false);
+    if (res?.ok === false) return dialog.toast(res.msg || "No se pudo actualizar", "error");
+    onChanged();
+  }
+
+  async function cancelar() {
+    const ok = await dialog.confirm(`¿Cancelar la cita de ${r.cliente?.nombre || r.cliente?.email_contacto}? Esto libera el horario.`, "Cancelar cita");
+    if (!ok) return;
+    const res = await boPATCH(`/backoffice/agenda/reservas/${r.id_reserva}`, { estado: "CANCELADA" });
+    if (res?.ok === false) return dialog.toast(res.msg || "No se pudo cancelar", "error");
+    onChanged();
+  }
+
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 border border-neutral-100 rounded-lg p-3">
+      <div className="w-24 flex-shrink-0">
+        <div className="text-sm font-bold text-primary">{r.hora_inicio}</div>
+        <div className="text-[10px] text-neutral-400">{r.fecha}</div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-semibold text-neutral-800">{r.cliente?.nombre || "Sin nombre"}</div>
+        <div className="text-xs text-neutral-500">{r.cliente?.email_contacto}{r.cliente?.telefono ? ` · ${r.cliente.telefono}` : ""}</div>
+        <div className="text-[10px] text-neutral-400 mt-0.5">
+          {r.monto} {r.moneda} · pago {r.pago_estado.toLowerCase()} · estado {r.estado.toLowerCase()}
+        </div>
+      </div>
+      <div className="flex gap-2 flex-shrink-0">
+        {r.meet_url ? (
+          <a href={r.meet_url} target="_blank" rel="noopener noreferrer"
+            className="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-medium hover:bg-blue-100">
+            Unirse
+          </a>
+        ) : (
+          <span className="px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs">Sin Meet</span>
+        )}
+        <button onClick={editarMeet} disabled={editando}
+          className="px-3 py-1.5 bg-white border border-neutral-200 text-neutral-600 rounded-lg text-xs hover:border-neutral-300 disabled:opacity-50">
+          Editar link
+        </button>
+        {r.estado !== "CANCELADA" && (
+          <button onClick={cancelar}
+            className="px-3 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-xs hover:bg-red-50">
+            Cancelar
+          </button>
+        )}
+      </div>
     </div>
   );
 }

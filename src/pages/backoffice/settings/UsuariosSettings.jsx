@@ -17,6 +17,53 @@ const FORM_VACIO = {
   cargo: "",
 };
 
+const FILTROS_ESTADO = [
+  { value: "todos", label: "Todos", activeClass: "bg-neutral-900 text-white" },
+  { value: "activos", label: "Activos", activeClass: "bg-[#1A3557] text-white" },
+  { value: "inactivos", label: "Inactivos", activeClass: "bg-neutral-700 text-white" },
+];
+
+const FILTROS_ROL = [
+  { value: "todos", label: "Todos", activeClass: "bg-neutral-900 text-white" },
+  { value: "admin", label: "Admin", activeClass: "bg-[#1A3557] text-white" },
+  { value: "asesor", label: "Asesor", activeClass: "bg-primary text-white" },
+  { value: "soporte", label: "Soporte", activeClass: "bg-amber-500 text-white" },
+];
+
+function ToggleGroup({ value, onChange, options }) {
+  return (
+    <div className="inline-flex rounded-lg border border-neutral-200 overflow-hidden text-xs shrink-0">
+      {options.map((opt, i) => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          className={`px-3 py-1.5 transition-colors whitespace-nowrap ${i > 0 ? "border-l border-neutral-200" : ""} ${
+            value === opt.value ? opt.activeClass : "bg-white text-neutral-600 hover:bg-neutral-50"
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function StatCard({ label, value, accent }) {
+  const COLORS = {
+    blue: "border-t-blue-500",
+    green: "border-t-emerald-500",
+    amber: "border-t-amber-500",
+    navy: "border-t-[#1A3557]",
+  };
+  return (
+    <div className={`bg-white rounded-xl border border-neutral-200 border-t-4 ${COLORS[accent]} p-4 shadow-sm`}>
+      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">{label}</p>
+      <p className="font-['Fraunces'] text-3xl font-bold text-[#0d3320] leading-none">{value}</p>
+    </div>
+  );
+}
+
 function UsuariosInternosTab() {
   const { user: usuarioActual } = useAuth();
 
@@ -24,6 +71,7 @@ function UsuariosInternosTab() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VACIO);
 
@@ -46,7 +94,14 @@ function UsuariosInternosTab() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
 
-  function resetForm() {
+  function openCrear() {
+    setEditingId(null);
+    setForm(FORM_VACIO);
+    setFormOpen(true);
+  }
+
+  function closeForm() {
+    setFormOpen(false);
     setEditingId(null);
     setForm(FORM_VACIO);
   }
@@ -91,7 +146,7 @@ function UsuariosInternosTab() {
       dialog.toast("Usuario creado", "success");
     }
 
-    resetForm();
+    closeForm();
   }
 
   function startEdit(u) {
@@ -104,6 +159,7 @@ function UsuariosInternosTab() {
       telefono: u.telefono || "",
       cargo: u.cargo || "",
     });
+    setFormOpen(true);
   }
 
   async function toggleActivo(u) {
@@ -143,52 +199,79 @@ function UsuariosInternosTab() {
     });
   }, [usuarios, busqueda, filtroRol, filtroEstado]);
 
+  const totalActivos = usuarios.filter((u) => u.activo).length;
+  const totalInactivos = usuarios.length - totalActivos;
+  const totalAdmins = usuarios.filter((u) => u.rol === "admin").length;
+
   return (
-    <div className="p-4 sm:p-6 space-y-5 max-w-3xl mx-auto">
-      <h1 className="text-xl sm:text-2xl font-bold text-primary">Usuarios internos</h1>
-
-      <UsuariosForm
-        form={form}
-        onChange={onChange}
-        onSubmit={onSubmit}
-        saving={saving}
-        editingId={editingId}
-        onCancelEdit={resetForm}
-      />
-
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por nombre o email…"
-          className="flex-1 border rounded-lg px-3 py-2 text-sm"
-        />
-        <select
-          value={filtroRol}
-          onChange={(e) => setFiltroRol(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm"
+    <div className="p-4 sm:p-6 space-y-5">
+      {/* Cabecera */}
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-primary">Usuarios internos</h1>
+          <p className="text-sm text-neutral-500">Staff con acceso al backoffice de Inspira.</p>
+        </div>
+        <button
+          type="button"
+          onClick={openCrear}
+          className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity shadow-sm"
         >
-          <option value="todos">Todos los roles</option>
-          <option value="admin">Admin</option>
-          <option value="asesor">Asesor</option>
-          <option value="soporte">Soporte</option>
-        </select>
-        <select
-          value={filtroEstado}
-          onChange={(e) => setFiltroEstado(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm"
-        >
-          <option value="todos">Todos los estados</option>
-          <option value="activos">Solo activos</option>
-          <option value="inactivos">Solo inactivos</option>
-        </select>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Nuevo usuario
+        </button>
       </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard label="Total" value={usuarios.length} accent="navy" />
+        <StatCard label="Activos" value={totalActivos} accent="green" />
+        <StatCard label="Inactivos" value={totalInactivos} accent="amber" />
+        <StatCard label="Admins" value={totalAdmins} accent="blue" />
+      </div>
+
+      {/* Buscador + filtros */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="relative flex-1">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none"
+            fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+          >
+            <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" />
+          </svg>
+          <input
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre o email…"
+            className="w-full border border-neutral-300 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-colors"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <ToggleGroup value={filtroEstado} onChange={setFiltroEstado} options={FILTROS_ESTADO} />
+          <ToggleGroup value={filtroRol} onChange={setFiltroRol} options={FILTROS_ROL} />
+        </div>
+      </div>
+
+      <p className="text-xs text-neutral-400">
+        {loading ? "Cargando…" : `${usuariosFiltrados.length} de ${usuarios.length} usuarios`}
+      </p>
 
       <UsuariosTable
         usuarios={usuariosFiltrados}
         loading={loading}
         onToggleActivo={toggleActivo}
         onEditClick={startEdit}
+      />
+
+      <UsuariosForm
+        open={formOpen}
+        form={form}
+        onChange={onChange}
+        onSubmit={onSubmit}
+        onClose={closeForm}
+        saving={saving}
+        editingId={editingId}
       />
     </div>
   );

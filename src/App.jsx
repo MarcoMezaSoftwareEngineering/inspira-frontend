@@ -10,6 +10,8 @@ import EstanciaLanding from "./pages/servicios/estancia/EstanciaLanding";
 import BackofficeApp from "./pages/backoffice/BackofficeApp";
 import CalculadoraMaster from "./pages/calculadora/CalculadoraMaster";
 import PanelCliente from "./pages/panel/PanelCliente";
+import ReservarCita from "./pages/reservar/ReservarCita";
+import { PagoExitoso, PagoFallido, PagoPendiente } from "./pages/pago/PagoResultado";
 import NotFound from "./pages/NotFound";
 
 import { useSEO } from "./hooks/useSEO";
@@ -40,6 +42,12 @@ const SEO_PAGES = {
     description:
       "Calcula el costo real de estudiar un máster en España desde Latinoamérica: matrícula, visa, apostilla, alojamiento y gastos de vida. Gratis e instantáneo.",
     path: "/calculadora-master",
+  },
+  "/reservar": {
+    title: "Reserva tu cita de asesoría – Inspira Legal",
+    description:
+      "Agenda una cita de asesoría con el equipo de Inspira Legal. Elige día y hora y confirma tu reserva con pago seguro por Mercado Pago.",
+    path: "/reservar",
   },
 };
 
@@ -106,6 +114,10 @@ const PUBLIC_PATHS = [
   "/servicios/estancia",
   "/calculadora-master",
   "/panel",
+  "/reservar",
+  "/pago-exitoso",
+  "/pago-fallido",
+  "/pago-pendiente",
 ];
 
 export default function App() {
@@ -141,6 +153,10 @@ export default function App() {
       {path === "/servicios/estancia" && <EstanciaLanding />}
       {path === "/calculadora-master" && <CalculadoraMaster />}
       {path === "/panel" && <PanelCliente />}
+      {path === "/reservar" && <ReservarCita />}
+      {path === "/pago-exitoso" && <PagoExitoso />}
+      {path === "/pago-fallido" && <PagoFallido />}
+      {path === "/pago-pendiente" && <PagoPendiente />}
 
       {/* 404 */}
       {isNotFound && (

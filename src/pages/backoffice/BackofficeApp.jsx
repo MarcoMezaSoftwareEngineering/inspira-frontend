@@ -23,6 +23,7 @@ import Agenda from "./agenda/Agenda";
 import EmailTemplates from "./correos/EmailTemplates";
 import MediaPanel from "./media/MediaPanel";
 import PresupuestosPortal from "./presupuestos/PresupuestosPortal";
+import CumplimientoLegal from "./legal/CumplimientoLegal";
 import CatalogoMasters from "./catalogo/CatalogoMasters";
 import PlanesAdmin from "./planes/PlanesAdmin";
 import TrackerUniversidades from "./tracker/TrackerUniversidades";
@@ -182,6 +183,8 @@ export default function BackofficeApp() {
             {path === "/backoffice/precios" && <ModuleGate perm="precios.ver"><PreciosServicios /></ModuleGate>}
 
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
+
+            {path === "/backoffice/legal" && <CumplimientoLegal />}
 
             {path === "/backoffice/calculadora" && <LeadsCalculadora />}
 

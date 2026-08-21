@@ -1,4 +1,7 @@
 // src/components/servicios/ConfirmarPagoModal.jsx
+import { useState } from "react";
+import AceptarTerminos from "../legal/AceptarTerminos";
+
 export default function ConfirmarPagoModal({
   open,
   onClose,
@@ -6,6 +9,18 @@ export default function ConfirmarPagoModal({
   onConfirm,
   loading = false,
 }) {
+  const [aceptado, setAceptado] = useState(false);
+
+  // La aceptación no se arrastra entre aperturas del modal ni entre planes:
+  // cada contratación exige un acto afirmativo propio. Se reinicia durante el
+  // render al detectar el cambio, sin efecto ni render en cascada.
+  const claveApertura = open ? plan?.id ?? "abierto" : null;
+  const [clavePrevia, setClavePrevia] = useState(claveApertura);
+  if (clavePrevia !== claveApertura) {
+    setClavePrevia(claveApertura);
+    setAceptado(false);
+  }
+
   if (!open || !plan) return null;
 
   return (
@@ -44,11 +59,11 @@ export default function ConfirmarPagoModal({
           )}
         </div>
 
-        <p className="mt-4 text-xs text-neutral-500">
-          Al confirmar, serás redirigido a la pasarela segura de Mercado Pago
-          para completar el pago. Una vez aprobado, registraremos tu servicio y
-          lo verás en tu panel de cliente.
-        </p>
+        <AceptarTerminos
+          checked={aceptado}
+          onChange={setAceptado}
+          resumen="Al confirmar, serás redirigido a la pasarela segura de Mercado Pago para completar el pago. Una vez aprobado, registraremos tu servicio y lo verás en tu panel de cliente."
+        />
 
         <div className="mt-6 flex justify-end gap-3">
           <button
@@ -62,7 +77,7 @@ export default function ConfirmarPagoModal({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={loading}
+            disabled={loading || !aceptado}
             className="px-5 py-2 rounded-full bg-accent text-white text-sm font-semibold hover:bg-accent-dark transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Redirigiendo..." : "Confirmar y pagar"}

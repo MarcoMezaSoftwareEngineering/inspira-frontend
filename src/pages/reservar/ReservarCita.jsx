@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiGET } from "../../services/api";
 import { useReservarCita } from "../../hooks/useReservarCita";
+import AceptarTerminos from "../../components/legal/AceptarTerminos";
 
 // "YYYY-MM-DD" -> "Lunes 21 de julio de 2026" (hora de Perú)
 function fechaLarga(fechaISO) {
@@ -29,6 +30,7 @@ export default function ReservarCita() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [seleccion, setSeleccion] = useState(null); // { id_slot, fecha, hora_inicio, hora_fin }
+  const [aceptado, setAceptado] = useState(false);
 
   const { reservarSlot, loadingSlot, isLoggedIn } = useReservarCita();
 
@@ -114,14 +116,15 @@ export default function ReservarCita() {
                         <button
                           key={s.id_slot}
                           type="button"
-                          onClick={() =>
+                          onClick={() => {
+                            setAceptado(false);
                             setSeleccion({
                               id_slot: s.id_slot,
                               fecha: dia.fecha,
                               hora_inicio: s.hora_inicio,
                               hora_fin: s.hora_fin,
-                            })
-                          }
+                            });
+                          }}
                           className="rounded-full border border-primary/30 px-4 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-white transition"
                         >
                           {s.hora_inicio}
@@ -154,11 +157,15 @@ export default function ReservarCita() {
               )}
             </div>
 
-            <p className="mt-4 text-xs text-neutral-500">
-              {isLoggedIn
-                ? "Al confirmar serás redirigido a Mercado Pago. Cuando el pago se apruebe, recibirás por correo el enlace de Google Meet."
-                : "Para reservar necesitas iniciar sesión con Google. Al continuar te llevaremos al inicio de sesión y luego podrás pagar."}
-            </p>
+            <AceptarTerminos
+              checked={aceptado}
+              onChange={setAceptado}
+              resumen={
+                isLoggedIn
+                  ? "Al confirmar serás redirigido a Mercado Pago. Cuando el pago se apruebe, recibirás por correo el enlace de Google Meet. Puedes reprogramar sin costo avisando con 24 horas de antelación."
+                  : "Para reservar necesitas iniciar sesión con Google. Al continuar te llevaremos al inicio de sesión y luego podrás pagar. Puedes reprogramar sin costo avisando con 24 horas de antelación."
+              }
+            />
 
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -172,7 +179,7 @@ export default function ReservarCita() {
               <button
                 type="button"
                 onClick={() => reservarSlot(seleccion.id_slot)}
-                disabled={loadingSlot === seleccion.id_slot}
+                disabled={loadingSlot === seleccion.id_slot || !aceptado}
                 className="px-5 py-2 rounded-full bg-accent text-white text-sm font-semibold hover:bg-accent-dark transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loadingSlot === seleccion.id_slot

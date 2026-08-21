@@ -29,4 +29,41 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Documentos legales y canales obligatorios: deben ser indexables y
+       accesibles sin necesidad de contratar ni iniciar sesión. -->
+  <url>
+    <loc>https://inspira-legal.cloud/legal/privacidad</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://inspira-legal.cloud/legal/cookies</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://inspira-legal.cloud/legal/terminos</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://inspira-legal.cloud/legal/derechos</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://inspira-legal.cloud/libro-de-reclamaciones</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
 </urlset>

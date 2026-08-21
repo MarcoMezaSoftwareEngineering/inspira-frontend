@@ -1,0 +1,72 @@
+// src/config/legal.js
+// ─────────────────────────────────────────────────────────────────────────────
+// FUENTE ÚNICA DE VERDAD de los datos legales del titular del sitio.
+// Todo el footer, las políticas, el banner de cookies y el Libro de
+// Reclamaciones leen de aquí. Si cambia un dato, se cambia SOLO en este archivo.
+//
+// ⚠️ Los valores marcados con "COMPLETAR" deben rellenarse antes de publicar.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * true si el valor sigue siendo un placeholder sin completar.
+ * El footer y las páginas públicas usan esto para OCULTAR el campo en vez de
+ * mostrar el texto "COMPLETAR:..." a los visitantes.
+ */
+export const pendiente = (v) => typeof v === "string" && v.startsWith("COMPLETAR");
+
+export const TITULAR = {
+  razonSocial: "PROYECTA PRODUCCIONES GROUP S.A.C.",
+  nombreComercial: "Inspira Legal",
+  ruc: "20610501941",
+  // Domicilio fiscal declarado en SUNAT (obligatorio: deber de información al consumidor)
+  domicilioFiscal: "COMPLETAR: Av./Jr. ______ N.° ___, distrito, provincia, Lima, Perú",
+  pais: "Perú",
+  // Representante legal / responsable del sitio
+  representanteLegal: "COMPLETAR: Nombres y apellidos del representante legal",
+  // Canales oficiales de contacto
+  emailContacto: "administracion@inspira-legal.cloud",
+  emailDatosPersonales: "datospersonales@inspira-legal.cloud",
+  telefono: "COMPLETAR: +51 9XX XXX XXX",
+  whatsapp: "COMPLETAR: +51 9XX XXX XXX",
+  web: "https://inspira-legal.cloud",
+};
+
+// Responsable interno de protección de datos (ODP o punto de contacto equivalente)
+export const RESPONSABLE_DATOS = {
+  designado: false, // cambiar a true cuando se formalice la designación
+  nombre: "COMPLETAR: Nombres y apellidos",
+  cargo: "Punto de contacto en materia de protección de datos personales",
+  email: "datospersonales@inspira-legal.cloud",
+};
+
+// Versionado de documentos legales: cualquier cambio sustancial sube la versión
+// y la fecha. La versión se guarda junto a cada consentimiento como prueba.
+export const VERSIONES = {
+  privacidad: { version: "1.0", fecha: "2026-08-21" },
+  cookies: { version: "1.0", fecha: "2026-08-21" },
+  terminos: { version: "1.0", fecha: "2026-08-21" },
+};
+
+// Plazos legales aplicables (Ley N.° 29733 y su Reglamento)
+export const PLAZOS = {
+  acceso: "20 días hábiles",
+  rectificacionCancelacionOposicion: "10 días hábiles",
+  reclamoConsumidor: "15 días hábiles",
+};
+
+export const RUTAS_LEGALES = {
+  privacidad: "/legal/privacidad",
+  cookies: "/legal/cookies",
+  terminos: "/legal/terminos",
+  derechos: "/legal/derechos",
+  reclamaciones: "/libro-de-reclamaciones",
+};
+
+// Autoridad de control
+export const AUTORIDAD = {
+  nombre:
+    "Autoridad Nacional de Protección de Datos Personales (Ministerio de Justicia y Derechos Humanos)",
+  web: "https://www.gob.pe/minjus",
+  consumidor: "INDECOPI",
+  consumidorWeb: "https://www.indecopi.gob.pe",
+};

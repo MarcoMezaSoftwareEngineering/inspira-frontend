@@ -187,6 +187,12 @@ button,input,select,textarea{font:inherit}
 .svx-pay p{font-size:9px;line-height:1.58;color:#536a72;margin:0}
 .svx-pay small{color:#87989d}
 
+.privacidad{margin-top:14px}
+.privacidad-info{background:#f3f8f6;border:1px solid #dceae4;border-radius:10px;padding:10px 11px;font-size:9px;line-height:1.55;color:#3f5a63}
+.privacidad-info strong{display:block;color:#1d6a4a;font-size:9.5px;margin-bottom:4px}
+.privacidad-info a,.consent-item a{color:#1d6a4a;font-weight:600}
+.consent-item{display:flex;gap:8px;align-items:flex-start;margin-top:9px;font-size:9.5px;line-height:1.5;color:#25424b;cursor:pointer}
+.consent-item input{accent-color:#1d6a4a;margin-top:2px;width:15px;height:15px;flex:0 0 auto}
 footer{padding:26px 0 40px;border-top:1px solid var(--sv-line);color:var(--sv-muted);font-size:9.5px;text-align:center;background:#fff}
 
 @media(max-width:1060px){
@@ -502,6 +508,22 @@ footer{padding:26px 0 40px;border-top:1px solid var(--sv-line);color:var(--sv-mu
           <div class="svx-field"><label>Tu nombre</label><input id="c-nom" placeholder="Nombre completo"></div>
           <div class="svx-field"><label>WhatsApp o email</label><input id="c-con" placeholder="+51 999... o tu@email.com"></div>
           <div class="svx-field"><label>Cuéntanos tu situación (opcional)</label><textarea id="c-sit" placeholder="Ej: Ya tengo mi título apostillado, sé qué máster quiero..."></textarea></div>
+          <!-- ── Aviso de privacidad y consentimiento (Ley N.° 29733) ────────── -->
+          <div class="privacidad" id="c-consent-box">
+            <div class="privacidad-info">
+              <strong>Información básica sobre el tratamiento de tus datos</strong>
+              <p><b>Responsable:</b> PROYECTA PRODUCCIONES GROUP S.A.C. (RUC 20610501941), que opera como Inspira Legal.
+              <b>Finalidad:</b> elaborar y enviarte una propuesta económica y responder tu consulta.
+              <b>Legitimación:</b> tu consentimiento y las medidas precontractuales que pides.
+              <b>Destinatarios:</b> proveedores tecnológicos que actúan como encargados, con flujo transfronterizo de datos.
+              <b>Conservación:</b> 24 meses desde el último contacto.
+              <b>Derechos:</b> acceso, rectificación, cancelación y oposición escribiendo a datospersonales@inspira-legal.cloud o desde el
+              <a href="https://inspira-legal.cloud/legal/derechos" target="_top">formulario de derechos</a>.
+              Detalle en el <a href="https://inspira-legal.cloud/legal/privacidad" target="_top">Aviso de Privacidad</a>.</p>
+            </div>
+            <label class="consent-item"><input type="checkbox" id="c-acepta"><span>He le&iacute;do y acepto el <a href="https://inspira-legal.cloud/legal/privacidad" target="_top" onclick="event.stopPropagation()">Aviso de Privacidad</a> y consiento el tratamiento de mis datos para recibir mi presupuesto <b style="color:#c0392b">*</b></span></label>
+            <label class="consent-item"><input type="checkbox" id="c-marketing"><span><b>Opcional:</b> quiero recibir informaci&oacute;n sobre convocatorias, becas y servicios de Inspira Legal.</span></label>
+          </div>
         </div>
         <div>
           <div class="bcard" id="bcard">
@@ -521,7 +543,18 @@ footer{padding:26px 0 40px;border-top:1px solid var(--sv-line);color:var(--sv-mu
   </div>
 </main>
 
-<footer>Tasas fijas: 1 EUR = $1.09 USD | 1 EUR = S/ 4.10 PEN · Actualizado Abril 2026 · Inspira — Especialistas en Extranjería</footer>
+<footer>
+  <div style="line-height:1.7">
+    Tasas fijas referenciales: 1 EUR = $1.09 USD | 1 EUR = S/ 4.10 PEN · Actualizado Abril 2026<br>
+    <b>PROYECTA PRODUCCIONES GROUP S.A.C.</b> — RUC 20610501941 · Nombre comercial: Inspira Legal<br>
+    <a href="https://inspira-legal.cloud/legal/privacidad" target="_top">Aviso de Privacidad</a> ·
+    <a href="https://inspira-legal.cloud/legal/cookies" target="_top">Pol&iacute;tica de Cookies</a> ·
+    <a href="https://inspira-legal.cloud/legal/terminos" target="_top">T&eacute;rminos y Condiciones</a> ·
+    <a href="https://inspira-legal.cloud/legal/derechos" target="_top">Derechos ARCO</a> ·
+    <a href="https://inspira-legal.cloud/libro-de-reclamaciones" target="_top">📕 Libro de Reclamaciones</a><br>
+    Las estimaciones mostradas son orientativas y no constituyen una oferta vinculante.
+  </div>
+</footer>
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────
@@ -965,6 +998,19 @@ async function enviar() {
   const n = document.getElementById('c-nom').value.trim();
   const c = document.getElementById('c-con').value.trim();
   if(!n || !c) { alert('Por favor completa tu nombre y contacto.'); return; }
+  // Sin consentimiento expreso no se envía ni se guarda ningún dato.
+  if(!document.getElementById('c-acepta').checked) {
+    alert('Para enviarte el presupuesto necesitamos que aceptes el Aviso de Privacidad.');
+    document.getElementById('c-consent-box').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  const consentimiento = {
+    acepta_politica: true,
+    acepta_marketing: document.getElementById('c-marketing').checked,
+    politica_version: '1.0',
+    consent_ts: new Date().toISOString(),
+    consent_origen: 'portal-presupuesto'
+  };
 
   const comunidades = [...document.querySelectorAll('#c-comunidades .on')].map(el => el.textContent.trim());
   const servicios   = [...document.querySelectorAll('#c-servicios .on')].map(el => el.textContent.trim());
@@ -986,7 +1032,7 @@ async function enviar() {
     const res = await fetch('https://api.inspira-legal.cloud/api/presupuesto', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre: n, contacto: c, comunidades, cant_unis, servicios, estimacion_eur, situacion })
+      body: JSON.stringify({ nombre: n, contacto: c, comunidades, cant_unis, servicios, estimacion_eur, situacion, ...consentimiento })
     });
     const data = await res.json();
     if(data.ok) {
@@ -994,6 +1040,8 @@ async function enviar() {
       document.getElementById('c-nom').value = '';
       document.getElementById('c-con').value = '';
       document.getElementById('c-sit').value = '';
+      document.getElementById('c-acepta').checked = false;
+      document.getElementById('c-marketing').checked = false;
       document.getElementById('c-cant').value = '';
       document.querySelectorAll('.chk.on').forEach(el => el.classList.remove('on'));
       document.getElementById('bcard').style.display = 'none';

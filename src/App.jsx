@@ -14,6 +14,15 @@ import ReservarCita from "./pages/reservar/ReservarCita";
 import { PagoExitoso, PagoFallido, PagoPendiente } from "./pages/pago/PagoResultado";
 import NotFound from "./pages/NotFound";
 
+// ── Legales ────────────────────────────────────────────────────────────────
+import Footer from "./components/layout/footer";
+import CookieConsent from "./components/legal/CookieConsent";
+import PoliticaPrivacidad from "./pages/legal/PoliticaPrivacidad";
+import PoliticaCookies from "./pages/legal/PoliticaCookies";
+import TerminosCondiciones from "./pages/legal/TerminosCondiciones";
+import DerechosArco from "./pages/legal/DerechosArco";
+import LibroReclamaciones from "./pages/legal/LibroReclamaciones";
+
 import { useSEO } from "./hooks/useSEO";
 import SEOSchema from "./components/SEOSchema";
 
@@ -48,6 +57,36 @@ const SEO_PAGES = {
     description:
       "Agenda una cita de asesoría con el equipo de Inspira Legal. Elige día y hora y confirma tu reserva con pago seguro por Mercado Pago.",
     path: "/reservar",
+  },
+  "/legal/privacidad": {
+    title: "Aviso y Política de Privacidad – Inspira Legal",
+    description:
+      "Qué datos personales tratamos, con qué finalidad, con quién los compartimos, cuánto los conservamos y cómo ejercer tus derechos.",
+    path: "/legal/privacidad",
+  },
+  "/legal/cookies": {
+    title: "Política de Cookies – Inspira Legal",
+    description:
+      "Inventario detallado de las cookies y del almacenamiento local que utiliza inspira-legal.cloud y cómo gestionar tu consentimiento.",
+    path: "/legal/cookies",
+  },
+  "/legal/terminos": {
+    title: "Términos y Condiciones de Contratación – Inspira Legal",
+    description:
+      "Condiciones de contratación de los servicios de Inspira Legal: proceso de contratación, precios, devoluciones y atención de reclamos.",
+    path: "/legal/terminos",
+  },
+  "/legal/derechos": {
+    title: "Ejerce tus derechos sobre tus datos – Inspira Legal",
+    description:
+      "Canal oficial y gratuito para ejercer los derechos de acceso, rectificación, cancelación y oposición sobre tus datos personales.",
+    path: "/legal/derechos",
+  },
+  "/libro-de-reclamaciones": {
+    title: "Libro de Reclamaciones – Inspira Legal",
+    description:
+      "Libro de Reclamaciones virtual de PROYECTA PRODUCCIONES GROUP S.A.C. Registra tu reclamo o queja y recibe respuesta en el plazo legal.",
+    path: "/libro-de-reclamaciones",
   },
 };
 
@@ -118,6 +157,11 @@ const PUBLIC_PATHS = [
   "/pago-exitoso",
   "/pago-fallido",
   "/pago-pendiente",
+  "/legal/privacidad",
+  "/legal/cookies",
+  "/legal/terminos",
+  "/legal/derechos",
+  "/libro-de-reclamaciones",
 ];
 
 export default function App() {
@@ -130,7 +174,12 @@ export default function App() {
   }, []);
 
   if (path.startsWith("/backoffice")) {
-    return <BackofficeApp />;
+    return (
+      <>
+        <BackofficeApp />
+        <CookieConsent />
+      </>
+    );
   }
 
   const isPanel = path.startsWith("/panel");
@@ -158,6 +207,13 @@ export default function App() {
       {path === "/pago-fallido" && <PagoFallido />}
       {path === "/pago-pendiente" && <PagoPendiente />}
 
+      {/* Documentos legales y canales obligatorios */}
+      {path === "/legal/privacidad" && <PoliticaPrivacidad />}
+      {path === "/legal/cookies" && <PoliticaCookies />}
+      {path === "/legal/terminos" && <TerminosCondiciones />}
+      {path === "/legal/derechos" && <DerechosArco />}
+      {path === "/libro-de-reclamaciones" && <LibroReclamaciones />}
+
       {/* 404 */}
       {isNotFound && (
         <>
@@ -165,6 +221,12 @@ export default function App() {
           <NotFound />
         </>
       )}
+
+      {/* El footer identifica al proveedor en todas las páginas públicas */}
+      {!isPanel && <Footer />}
+
+      {/* Banner de cookies: siempre montado, decide él si se muestra */}
+      <CookieConsent />
     </div>
   );
 }

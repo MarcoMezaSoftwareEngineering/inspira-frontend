@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
   GraduationCap, BookOpen, FolderOpen, CheckSquare, UserCog, Layers,
-  Tag, Mail, Settings,
+  Tag, Mail, Settings, Scale,
 } from "lucide-react";
 
 // Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos) o
@@ -41,6 +41,7 @@ export const NAV_SECTIONS = [
       { label: "Planes",            href: "/backoffice/planes", perm: "planes.ver", icon: Layers },
       { label: "Precios/Servicios", href: "/backoffice/precios", perm: "precios.ver", icon: Tag },
       { label: "Correos / Media",   href: "/backoffice/correos", alsoActive: ["/backoffice/media"], adminOnly: true, icon: Mail },
+      { label: "Cumplimiento legal", href: "/backoffice/legal", adminOnly: true, icon: Scale },
       { label: "Settings",          href: "/backoffice/settings", adminOnly: true, icon: Settings },
     ],
   },

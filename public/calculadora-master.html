@@ -104,6 +104,19 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .check-item{display:flex;align-items:center;gap:7px;height:38px;border:1px solid #d8e3e7;border-radius:10px;padding:0 10px;font-size:9.5px;cursor:pointer;transition:.15s;background:#fff}
 .check-item:hover{border-color:#9ab8ae;background:#fbfdfd}
 .check-item input{accent-color:#1d6a4a}
+.privacidad{margin-top:18px;border-top:1px solid #e7eef0;padding-top:14px}
+.privacidad-info{background:#f3f8f6;border:1px solid #dceae4;border-radius:11px;padding:11px 12px;font-size:9.6px;line-height:1.55;color:#3f5a63}
+.privacidad-info strong{display:block;color:#1d6a4a;font-size:10px;margin-bottom:4px}
+.privacidad-info a{color:#1d6a4a;font-weight:600}
+.consent-item{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:10px;line-height:1.5;color:#25424b;cursor:pointer}
+.consent-item input{accent-color:#1d6a4a;margin-top:2px;width:15px;height:15px;flex:0 0 auto}
+.consent-item a{color:#1d6a4a;font-weight:600}
+#err-consent{display:none}
+#bloque-consentimiento.err #err-consent{display:block}
+.legal-foot{max-width:760px;margin:26px auto 34px;padding:16px 18px 0;border-top:1px solid #e7eef0;text-align:center;font-size:9px;line-height:1.7;color:#6a828b}
+.legal-foot a{color:#1d6a4a;font-weight:600;text-decoration:none}
+.legal-foot a:hover{text-decoration:underline}
+.legal-foot-nota{margin-top:8px;color:#82969d}
 
 .btn-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:21px;padding-top:18px;border-top:1px solid #edf2f3}
 .btn{height:46px;border:0;border-radius:12px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:10.5px;font-weight:850;cursor:pointer;transition:.2s var(--ease)}
@@ -361,7 +374,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
       <div class="hint-auip" id="hint-auip"></div>
     </div>
     <div class="field" style="margin-top:14px"><label>¿Tienes alguna comunidad preferida? (opcional)</label>
-      <div class="checks-grid">
+      <div class="checks-grid" id="comunidades-grid">
         <label class="check-item"><input type="checkbox" value="Andalucía"> Andalucía</label>
         <label class="check-item"><input type="checkbox" value="Madrid"> Madrid</label>
         <label class="check-item"><input type="checkbox" value="Cataluña"> Cataluña</label>
@@ -371,6 +384,29 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
         <label class="check-item"><input type="checkbox" value="País Vasco"> País Vasco</label>
         <label class="check-item"><input type="checkbox" value="Navarra"> Navarra</label>
       </div>
+    </div>
+    <!-- ── Aviso de privacidad y consentimiento (Ley N.° 29733) ────────────── -->
+    <div class="privacidad" id="bloque-consentimiento">
+      <div class="privacidad-info">
+        <strong>Información básica sobre el tratamiento de tus datos</strong>
+        <p><b>Responsable:</b> PROYECTA PRODUCCIONES GROUP S.A.C. (RUC 20610501941), que opera como Inspira Legal.
+        <b>Finalidad:</b> calcular tu equivalencia de nota, estimar costos, mostrarte universidades y becas compatibles con tu perfil y enviarte estos resultados.
+        <b>Legitimación:</b> tu consentimiento.
+        <b>Destinatarios:</b> proveedores tecnológicos que actúan como encargados (Google, Make, Calendly), con flujo transfronterizo de datos.
+        <b>Conservación:</b> 24 meses desde el último contacto.
+        <b>Derechos:</b> acceso, rectificación, cancelación y oposición, entre otros, escribiendo a datospersonales@inspira-legal.cloud o desde el
+        <a href="https://inspira-legal.cloud/legal/derechos" target="_top">formulario de derechos</a>.
+        Detalle completo en el <a href="https://inspira-legal.cloud/legal/privacidad" target="_top">Aviso de Privacidad</a>.</p>
+      </div>
+      <label class="consent-item" id="f-consent">
+        <input type="checkbox" id="acepta-politica">
+        <span>He le&iacute;do y acepto el <a href="https://inspira-legal.cloud/legal/privacidad" target="_top" onclick="event.stopPropagation()">Aviso de Privacidad</a> y consiento el tratamiento de mis datos para calcular y recibir mis resultados <span class="req">*</span></span>
+      </label>
+      <label class="consent-item">
+        <input type="checkbox" id="acepta-marketing">
+        <span><b>Opcional:</b> quiero recibir por correo y WhatsApp informaci&oacute;n sobre convocatorias, becas, plazos y servicios de Inspira Legal. Puedo darme de baja cuando quiera.</span>
+      </label>
+      <div class="field-error" id="err-consent">Debes aceptar el Aviso de Privacidad para continuar</div>
     </div>
     <div class="btn-row"><button class="btn btn-back" onclick="irPaso(3)">← Atrás</button><button class="btn btn-next" onclick="calcular()">Ver mis resultados ✨</button></div>
   </div>
@@ -404,6 +440,23 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
     </div>
   </div>
 </div>
+
+<!-- Identificación del proveedor y accesos legales (deber de información) -->
+<footer class="legal-foot">
+  <p><b>PROYECTA PRODUCCIONES GROUP S.A.C.</b> — RUC 20610501941 · Nombre comercial: Inspira Legal</p>
+  <p>
+    <a href="https://inspira-legal.cloud/legal/privacidad" target="_top">Aviso de Privacidad</a> ·
+    <a href="https://inspira-legal.cloud/legal/cookies" target="_top">Pol&iacute;tica de Cookies</a> ·
+    <a href="https://inspira-legal.cloud/legal/terminos" target="_top">T&eacute;rminos y Condiciones</a> ·
+    <a href="https://inspira-legal.cloud/legal/derechos" target="_top">Derechos ARCO</a> ·
+    <a href="https://inspira-legal.cloud/libro-de-reclamaciones" target="_top">📕 Libro de Reclamaciones</a>
+  </p>
+  <p class="legal-foot-nota">
+    Los resultados de esta calculadora son <b>estimaciones referenciales</b> elaboradas con los datos que t&uacute; introduces y con
+    convocatorias publicadas que pueden variar o no repetirse. No constituyen una oferta ni una garant&iacute;a de admisi&oacute;n,
+    de beca ni de visado: esas decisiones corresponden exclusivamente a las universidades y autoridades competentes.
+  </p>
+</footer>
 <script>
 const WPP_NUMERO = "51908945354";
 const CALENDLY_URL = "https://calendly.com/administracion-inspira-legal/30min";
@@ -493,7 +546,17 @@ function validar1(){
   return true;
 }
 function validar2(){ if(!document.getElementById('vida-grid').querySelector('.selected')){ alert('Selecciona tu tipo de vida.'); return false; } return true; }
-function validar4(){ const email=document.getElementById('email').value.trim(); const wpp=document.getElementById('wpp').value.trim(); const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); setErr('f-email',!emailOk); setErr('f-wpp',!wpp); if(!emailOk||!wpp) return false; return true; }
+function validar4(){
+  const email=document.getElementById('email').value.trim();
+  const wpp=document.getElementById('wpp').value.trim();
+  const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  setErr('f-email',!emailOk); setErr('f-wpp',!wpp);
+  // Sin consentimiento expreso no se trata ningún dato: no se guarda, no se envía.
+  const consiente=document.getElementById('acepta-politica').checked;
+  document.getElementById('bloque-consentimiento').classList.toggle('err',!consiente);
+  if(!emailOk||!wpp||!consiente) return false;
+  return true;
+}
 
 const UNIS={
   "Administración y Negocios":[{n:"Universidad de Sevilla",com:"Andalucía",p:850},{n:"Universidad de Granada",com:"Andalucía",p:850},{n:"Universidad de Santiago de Compostela",com:"Galicia",p:950},{n:"Universidad de Salamanca",com:"Castilla y León",p:1000},{n:"Universidad de Valladolid",com:"Castilla y León",p:1000},{n:"Universidad del País Vasco (UPV/EHU)",com:"País Vasco",p:1800},{n:"Universitat de València (UV)",com:"Valencia",p:3200},{n:"Universidad Rey Juan Carlos (URJC)",com:"Madrid",p:5300},{n:"Universidad Carlos III de Madrid (UC3M)",com:"Madrid",p:5300},{n:"Universidad Autónoma de Madrid (UAM)",com:"Madrid",p:5300}],
@@ -530,7 +593,15 @@ function calcular(){
   const email=document.getElementById('email').value.trim();
   const wpp=document.getElementById('wpp').value.trim();
   const universidad=document.getElementById('universidad').value.trim();
-  const comunidadesPref=[...document.querySelectorAll('.check-item input:checked')].map(i=>i.value).join(', ');
+  const comunidadesPref=[...document.querySelectorAll('#comunidades-grid .check-item input:checked')].map(i=>i.value).join(', ');
+  // Prueba del consentimiento: qué aceptó, cuándo y con qué versión de la política
+  const consentimiento={
+    acepta_politica:document.getElementById('acepta-politica').checked,
+    acepta_marketing:document.getElementById('acepta-marketing').checked,
+    politica_version:'1.0',
+    consent_ts:new Date().toISOString(),
+    consent_origen:'calculadora-master'
+  };
   const promedioES=nota?nota.toFixed(2):'—';
 
   const todas=[{n:"Andalucía",p:850,l:"1"},{n:"Galicia",p:950,l:"1"},{n:"Castilla-La Mancha",p:900,l:"1"},{n:"Castilla y León",p:1000,l:"1"},{n:"Cantabria",p:1200,l:"1"},{n:"Asturias",p:1310,l:"1"},{n:"Extremadura",p:1100,l:"2"},{n:"Aragón",p:1500,l:"2"},{n:"Navarra",p:1900,l:"2"},{n:"País Vasco",p:1800,l:"2"},{n:"Murcia",p:3100,l:"2"},{n:"La Rioja",p:3200,l:"2"},{n:"Valencia",p:3200,l:"2"},{n:"Cataluña",p:4500,l:"3"},{n:"Madrid",p:5300,l:"3"}];
@@ -578,12 +649,12 @@ function calcular(){
   const paqRecomendado=paquetes.find(p=>p.t==='recomendado');
 
   // Enviar a Make.com (automatizaciones del equipo)
-  enviarAMake({fecha:new Date().toISOString(),nombre,pais,email,whatsapp:wpp,carrera,area_carrera:area,master_interes:masterInteres,universidad,promedio_original:document.getElementById('promedio').value,escala:document.getElementById('escala').options[document.getElementById('escala').selectedIndex].text,promedio_espana:promedioES,presupuesto:pres,perfil_vida:vida,auip,funcionario:func_,ods,ranking_academico:ranking,comunidades_preferidas:comunidadesPref,becas_califica:becasCalifica,becas_posibles:becasPosibles,paquete_recomendado:paqRecomendado?.n||'',precio_paquete:paqRecomendado?.p||'',fuente:'Calculadora Web Inspira'});
+  enviarAMake({fecha:new Date().toISOString(),nombre,pais,email,whatsapp:wpp,carrera,area_carrera:area,master_interes:masterInteres,universidad,promedio_original:document.getElementById('promedio').value,escala:document.getElementById('escala').options[document.getElementById('escala').selectedIndex].text,promedio_espana:promedioES,presupuesto:pres,perfil_vida:vida,auip,funcionario:func_,ods,ranking_academico:ranking,comunidades_preferidas:comunidadesPref,becas_califica:becasCalifica,becas_posibles:becasPosibles,paquete_recomendado:paqRecomendado?.n||'',precio_paquete:paqRecomendado?.p||'',fuente:'Calculadora Web Inspira',acepta_marketing:consentimiento.acepta_marketing?'si':'no',consent_ts:consentimiento.consent_ts});
 
   // Guardar en base de datos del backoffice
   try {
     const becasCalificadas=becas.filter(b=>b.e==='si'||b.e==='posible').map(b=>({nombre:b.n,estado:b.e}));
-    fetch('https://api.inspira-legal.cloud/api/calculadora/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,pais,email,whatsapp:wpp,nota_espana:nota,area,presupuesto:pres,vida,auip,funcionario:func_,ods,cyl:comunidadesPref,universidad:universidad||null,ranking,becas_califica:becasCalificadas})}).catch(()=>{});
+    fetch('https://api.inspira-legal.cloud/api/calculadora/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,pais,email,whatsapp:wpp,nota_espana:nota,area,presupuesto:pres,vida,auip,funcionario:func_,ods,cyl:comunidadesPref,universidad:universidad||null,ranking,becas_califica:becasCalificadas,...consentimiento})}).catch(()=>{});
   } catch(e) {}
 
   const dWpp={nombre,pais,carrera,area,masterInteres,promedioES,presupuesto:pres+' €',vida:vida==='economico'?'Económico':vida==='equilibrado'?'Equilibrado':'Ambicioso',auip:auip==='si'?'Sí':'No'};

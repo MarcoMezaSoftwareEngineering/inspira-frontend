@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { boGET, boPATCH, boDELETE } from "../../../services/backofficeApi";
 import { useAuth } from "../context/AuthContext";
+import {
+  Search, MapPin, Layers, CheckCircle2, MoreVertical, Copy, StickyNote,
+  Pencil, Trash2, ChevronLeft, ChevronRight,
+} from "lucide-react";
 
 const VIDA_LABEL = { economico: "Económico", equilibrado: "Equilibrado", ambicioso: "Ambicioso" };
 const PAGE_SIZE  = 50;
@@ -16,6 +20,32 @@ function fmtFechaHora(iso) {
     day: "2-digit", month: "2-digit", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   });
+}
+
+function initials(nombre) {
+  return (nombre || "")
+    .split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "?";
+}
+
+function scoreClass(v) {
+  const n = Number(v);
+  if (n >= 8) return "text-emerald-600";
+  if (n < 6.5) return "text-amber-600";
+  return "text-neutral-700";
+}
+
+function pageList(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([1, 2, total - 1, total, current - 1, current, current + 1]);
+  const sorted = [...pages].filter(p => p >= 1 && p <= total).sort((a, b) => a - b);
+  const out = [];
+  let prev = 0;
+  for (const p of sorted) {
+    if (prev && p - prev > 1) out.push("…");
+    out.push(p);
+    prev = p;
+  }
+  return out;
 }
 
 function SortIcon({ active, dir }) {
@@ -99,11 +129,37 @@ export default function LeadsCalculadora() {
   // Modal: eliminar
   const [confirmDel, setConfirmDel] = useState(null);
 
+  // Menú contextual "···" (fila desktop / card móvil)
+  const [menuFor, setMenuFor] = useState(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+
+  // Toast de feedback
+  const [toast, setToast] = useState("");
+
   // Ordenamiento client-side
   const [sortKey, setSortKey] = useState("fecha_creacion");
   const [sortDir, setSortDir] = useState("desc");
 
   useEffect(() => { cargar(); }, [page, filtroNombre, filtroPais, filtroArea, filtroPerfil, filtroAuip]); // eslint-disable-line
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 1800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  useEffect(() => {
+    if (!menuFor) return;
+    function onDismiss() { setMenuFor(null); }
+    document.addEventListener("click", onDismiss);
+    window.addEventListener("resize", onDismiss);
+    window.addEventListener("scroll", onDismiss, true);
+    return () => {
+      document.removeEventListener("click", onDismiss);
+      window.removeEventListener("resize", onDismiss);
+      window.removeEventListener("scroll", onDismiss, true);
+    };
+  }, [menuFor]);
 
   async function cargar() {
     setLoading(true);
@@ -120,6 +176,7 @@ export default function LeadsCalculadora() {
   }
 
   function resetPage() { setPage(1); }
+  function showToast(msg) { setToast(msg); }
 
   // ── Editar datos básicos ──
   function openEdit(l) {
@@ -132,7 +189,7 @@ export default function LeadsCalculadora() {
     try {
       const { id, nombre, email, whatsapp } = modalEdit;
       const res = await boPATCH(`/backoffice/calculadora/leads/${id}`, { nombre, email, whatsapp });
-      if (res.ok) { closeEdit(); cargar(); }
+      if (res.ok) { closeEdit(); cargar(); showToast("Lead actualizado"); }
     } finally { setSaving(false); }
   }
 
@@ -183,7 +240,7 @@ export default function LeadsCalculadora() {
     setSavingNotas(true);
     try {
       const res = await boPATCH(`/backoffice/calculadora/leads/${modalNotas.id}`, { notas: modalNotas.notas });
-      if (res.ok) { closeNotas(); cargar(); }
+      if (res.ok) { closeNotas(); cargar(); showToast("Notas guardadas"); }
     } finally { setSavingNotas(false); }
   }
 
@@ -194,6 +251,7 @@ export default function LeadsCalculadora() {
     await boDELETE(`/backoffice/calculadora/leads/${confirmDel.id}`);
     setConfirmDel(null);
     cargar();
+    showToast("Lead eliminado");
   }
 
   function limpiarFiltros() {
@@ -204,6 +262,29 @@ export default function LeadsCalculadora() {
   function toggleSort(key) {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
+  }
+
+  // ── Menú contextual "···" ──
+  function openRowMenu(e, l) {
+    e.stopPropagation();
+    const r = e.currentTarget.getBoundingClientRect();
+    const menuW = 200, menuH = 200, gap = 6;
+    let left = r.right - menuW;
+    let top = r.bottom + gap;
+    if (left < 8) left = 8;
+    if (top + menuH > window.innerHeight - 8) top = r.top - menuH - gap;
+    setMenuPos({ top, left });
+    setMenuFor(l.id_lead);
+  }
+
+  async function copiarContacto(l) {
+    const partes = [l.nombre, l.email, l.whatsapp].filter(Boolean).join(" — ");
+    try {
+      await navigator.clipboard.writeText(partes);
+      showToast("Contacto copiado");
+    } catch {
+      showToast("No se pudo copiar");
+    }
   }
 
   const sortedLeads = [...leads].sort((a, b) => {
@@ -218,6 +299,7 @@ export default function LeadsCalculadora() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const hayFiltros = filtroNombre || filtroPais || filtroArea || filtroPerfil || filtroAuip;
   const sp = { sortKey, sortDir, onSort: toggleSort };
+  const menuLead = menuFor ? sortedLeads.find(x => x.id_lead === menuFor) : null;
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
@@ -417,161 +499,222 @@ export default function LeadsCalculadora() {
         </div>
       )}
 
+      {/* ── Menú contextual "···" ── */}
+      {menuLead && (
+        <div
+          className="fixed z-[70] bg-white border border-neutral-200 rounded-xl shadow-2xl p-1.5 min-w-[190px]"
+          style={{ top: menuPos.top, left: menuPos.left }}
+          onClick={e => e.stopPropagation()}
+        >
+          <button onClick={() => { openEdit(menuLead); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
+            <Pencil className="w-4 h-4 text-neutral-400" /> Editar lead
+          </button>
+          <button onClick={() => { copiarContacto(menuLead); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
+            <Copy className="w-4 h-4 text-neutral-400" /> Copiar contacto
+          </button>
+          <button onClick={() => { openNotas(menuLead); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
+            <StickyNote className="w-4 h-4 text-neutral-400" />
+            {Array.isArray(menuLead.notas) && menuLead.notas.length > 0 ? `Notas (${menuLead.notas.length})` : "Añadir nota"}
+          </button>
+          {isAdmin && (
+            <>
+              <div className="h-px bg-neutral-100 my-1" />
+              <button onClick={() => { pedirEliminar(menuLead); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-red-500 hover:bg-red-50 text-left">
+                <Trash2 className="w-4 h-4" /> Eliminar lead
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── Toast ── */}
+      <div className={`fixed left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 bottom-6 z-[80] bg-neutral-900 text-white text-[13px] font-medium px-4 py-2.5 rounded-xl shadow-2xl transition-all duration-200 ${toast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
+        {toast}
+      </div>
+
       {/* Header */}
       <div>
+        <div className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.11em] text-primary mb-1.5">
+          <span className="w-[7px] h-[7px] rounded-full bg-emerald-400" style={{ boxShadow: "0 0 0 4px rgba(70,183,127,0.15)" }} />
+          Pipeline de captación
+        </div>
         <h1 className="text-[26px] sm:text-[32px] font-bold text-primary leading-tight">Calculadora — Leads</h1>
         <p className="text-[13px] sm:text-sm text-neutral-500 mt-0.5">{total} registros totales</p>
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-2 flex-wrap items-stretch sm:items-end">
-        <input className="flex-1 min-w-[130px] h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Buscar nombre…" value={filtroNombre} onChange={e => { setFiltroNombre(e.target.value); resetPage(); }} />
-        <input className="w-full sm:w-24 h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="País…" value={filtroPais} onChange={e => { setFiltroPais(e.target.value); resetPage(); }} />
-        <input className="flex-1 min-w-[130px] h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Área de estudio…" value={filtroArea} onChange={e => { setFiltroArea(e.target.value); resetPage(); }} />
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-3 flex flex-col sm:flex-row gap-2 flex-wrap items-stretch sm:items-center">
+        <div className="relative flex-1 min-w-[150px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+          <input className="w-full h-11 border border-neutral-200 rounded-lg pl-9 pr-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Buscar nombre, email o universidad…" value={filtroNombre} onChange={e => { setFiltroNombre(e.target.value); resetPage(); }} />
+        </div>
+        <div className="relative w-full sm:w-32">
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+          <input className="w-full h-11 border border-neutral-200 rounded-lg pl-9 pr-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="País" value={filtroPais} onChange={e => { setFiltroPais(e.target.value); resetPage(); }} />
+        </div>
+        <div className="relative flex-1 min-w-[150px]">
+          <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+          <input className="w-full h-11 border border-neutral-200 rounded-lg pl-9 pr-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Área de estudio" value={filtroArea} onChange={e => { setFiltroArea(e.target.value); resetPage(); }} />
+        </div>
         <select className="h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white" value={filtroPerfil} onChange={e => { setFiltroPerfil(e.target.value); resetPage(); }}>
           <option value="">Todos los perfiles</option>
           <option value="economico">Económico</option>
           <option value="equilibrado">Equilibrado</option>
           <option value="ambicioso">Ambicioso</option>
         </select>
-        <button onClick={() => { setFiltroAuip(filtroAuip === "si" ? "" : "si"); resetPage(); }} className={`h-11 px-3 text-[13px] font-medium rounded-lg border transition whitespace-nowrap ${filtroAuip === "si" ? "bg-emerald-100 border-emerald-300 text-emerald-700" : "border-neutral-200 text-neutral-500 hover:bg-neutral-50"}`}>
-          ✓ AUIP
+        <button onClick={() => { setFiltroAuip(filtroAuip === "si" ? "" : "si"); resetPage(); }} className={`h-11 px-3.5 text-[13px] font-semibold rounded-lg border transition whitespace-nowrap inline-flex items-center justify-center gap-1.5 ${filtroAuip === "si" ? "bg-emerald-50 border-emerald-300 text-emerald-700" : "border-neutral-200 text-neutral-500 hover:bg-neutral-50"}`}>
+          <CheckCircle2 className="w-4 h-4" /> AUIP
         </button>
-        {hayFiltros && <button onClick={limpiarFiltros} className="h-11 px-3 text-[13px] text-neutral-500 border border-neutral-200 rounded-lg hover:bg-neutral-50 whitespace-nowrap">✕ Limpiar</button>}
+        {hayFiltros && <button onClick={limpiarFiltros} className="h-11 px-3 text-[13px] text-neutral-500 hover:text-primary whitespace-nowrap">✕ Limpiar</button>}
       </div>
 
       {/* ── Desktop: tabla ── */}
-      <div className="hidden sm:block overflow-x-auto rounded-xl border border-neutral-200 shadow-sm">
-        <table className="w-full text-sm table-fixed">
-          <colgroup>
-            <col style={{ width: "100px" }} /> {/* Fecha/Hora */}
-            <col style={{ width: "100px" }} /> {/* Nombre */}
-            <col style={{ width: "58px"  }} /> {/* País */}
-            <col style={{ width: "68px"  }} /> {/* Nota ES */}
-            <col style={{ width: "130px" }} /> {/* Área / Universidad */}
-            <col style={{ width: "72px"  }} /> {/* Presup. */}
-            <col style={{ width: "46px"  }} /> {/* AUIP */}
-            <col style={{ width: "100px" }} /> {/* CyL */}
-            <col style={{ width: "112px" }} /> {/* Email */}
-            <col style={{ width: "76px"  }} /> {/* WhatsApp */}
-            <col style={{ width: "110px" }} /> {/* Becas */}
-            <col style={{ width: "182px" }} /> {/* Notas */}
-            <col style={{ width: "62px"  }} /> {/* Acc. */}
-          </colgroup>
-          <thead>
-            <tr className="bg-[#e8f5ee] text-[#1a5c3a] text-left">
-              <ThSort label="Fecha / Hora" campo="fecha_creacion" {...sp} />
-              <ThSort label="Nombre"       campo="nombre"          {...sp} />
-              <ThSort label="País"         campo="pais"            {...sp} />
-              <ThSort label="Nota ES"      campo="nota_espana"     center {...sp} />
-              <ThSort label="Área / Universidad" campo="area"       {...sp} />
-              <ThSort label="Presup."      campo="presupuesto"     {...sp} />
-              <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">AUIP</th>
-              <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">CyL</th>
-              <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">Email</th>
-              <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">WhatsApp</th>
-              <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide">Becas</th>
-              <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide">Notas</th>
-              <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">Acc.</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && <tr><td colSpan={13} className="px-4 py-8 text-center text-neutral-400">Cargando...</td></tr>}
-            {!loading && sortedLeads.length === 0 && <tr><td colSpan={13} className="px-4 py-8 text-center text-neutral-400">Sin leads todavía.</td></tr>}
-            {!loading && sortedLeads.map((l, i) => {
-              const notas = Array.isArray(l.notas) ? l.notas : [];
-              return (
-                <tr key={l.id_lead} className="border-t border-neutral-100 hover:bg-neutral-50 transition cursor-pointer">
+      <div className="hidden sm:block bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-neutral-100 bg-neutral-50/70">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-[13px] font-bold text-neutral-700">Base de leads</span>
+            <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">{sortedLeads.length} visibles</span>
+          </div>
+          <span className="text-[11px] text-neutral-400 hidden md:block">Click en una columna para ordenar</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col style={{ width: "100px" }} /> {/* Fecha/Hora */}
+              <col style={{ width: "110px" }} /> {/* Nombre */}
+              <col style={{ width: "58px"  }} /> {/* País */}
+              <col style={{ width: "68px"  }} /> {/* Nota ES */}
+              <col style={{ width: "130px" }} /> {/* Área / Universidad */}
+              <col style={{ width: "72px"  }} /> {/* Presup. */}
+              <col style={{ width: "56px"  }} /> {/* AUIP */}
+              <col style={{ width: "100px" }} /> {/* CyL */}
+              <col style={{ width: "112px" }} /> {/* Email */}
+              <col style={{ width: "76px"  }} /> {/* WhatsApp */}
+              <col style={{ width: "110px" }} /> {/* Becas */}
+              <col style={{ width: "182px" }} /> {/* Notas */}
+              <col style={{ width: "56px"  }} /> {/* Acc. */}
+            </colgroup>
+            <thead>
+              <tr className="bg-[#e8f5ee] text-[#1a5c3a] text-left">
+                <ThSort label="Fecha / Hora" campo="fecha_creacion" {...sp} />
+                <ThSort label="Nombre"       campo="nombre"          {...sp} />
+                <ThSort label="País"         campo="pais"            {...sp} />
+                <ThSort label="Nota ES"      campo="nota_espana"     center {...sp} />
+                <ThSort label="Área / Universidad" campo="area"       {...sp} />
+                <ThSort label="Presup."      campo="presupuesto"     {...sp} />
+                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">AUIP</th>
+                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">CyL</th>
+                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">Email</th>
+                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">WhatsApp</th>
+                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide">Becas</th>
+                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide">Notas</th>
+                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">Acc.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading && <tr><td colSpan={13} className="px-4 py-8 text-center text-neutral-400">Cargando...</td></tr>}
+              {!loading && sortedLeads.length === 0 && <tr><td colSpan={13} className="px-4 py-8 text-center text-neutral-400">Sin leads todavía.</td></tr>}
+              {!loading && sortedLeads.map((l) => {
+                const notas = Array.isArray(l.notas) ? l.notas : [];
+                return (
+                  <tr key={l.id_lead} className="border-t border-neutral-100 hover:bg-neutral-50 transition">
 
-                  <td className="px-3 py-3">
-                    <span className="block text-neutral-700 text-xs whitespace-nowrap">{fmtFecha(l.fecha_creacion)}</span>
-                    <span className="block text-neutral-400 text-[11px] whitespace-nowrap">{fmtHora(l.fecha_creacion)}</span>
-                  </td>
+                    <td className="px-3 py-3">
+                      <span className="block text-neutral-700 text-xs whitespace-nowrap">{fmtFecha(l.fecha_creacion)}</span>
+                      <span className="block text-neutral-400 text-[11px] whitespace-nowrap">{fmtHora(l.fecha_creacion)}</span>
+                    </td>
 
-                  <td className="px-3 py-3 text-[13px] font-bold text-primary">
-                    <span style={{ overflowWrap: "break-word" }}>{l.nombre}</span>
-                  </td>
-
-                  <td className="px-3 py-3 text-xs whitespace-nowrap">{l.pais}</td>
-
-                  <td className="px-3 py-3 font-semibold text-center text-sm">{Number(l.nota_espana).toFixed(2)}</td>
-
-                  <td className="px-3 py-3 text-xs">
-                    <span style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.area}</span>
-                    {l.universidad && (
-                      <span className="block text-neutral-400 mt-0.5" style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }} title={l.universidad}>{l.universidad}</span>
-                    )}
-                  </td>
-
-                  <td className="px-3 py-3 text-xs whitespace-nowrap">{l.presupuesto.toLocaleString("es-ES")} €</td>
-
-                  <td className="px-3 py-3 text-center">
-                    {l.auip === "si" ? <span className="text-emerald-600 font-bold">✓</span> : <span className="text-neutral-300">—</span>}
-                  </td>
-
-                  <td className="px-3 py-3 text-xs" title={l.cyl || ""}>
-                    {l.cyl
-                      ? <span style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.cyl}</span>
-                      : <span className="text-neutral-300">—</span>}
-                  </td>
-
-                  <td className="px-3 py-3">
-                    {l.email ? <a href={`mailto:${l.email}`} className="text-blue-600 hover:underline text-xs" style={{ overflowWrap: "break-word", wordBreak: "break-all" }}>{l.email}</a> : <span className="text-neutral-300">—</span>}
-                  </td>
-
-                  <td className="px-3 py-3">
-                    {l.whatsapp ? <a href={`https://wa.me/${l.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-green-600 hover:underline text-xs whitespace-nowrap">{l.whatsapp}</a> : <span className="text-neutral-300">—</span>}
-                  </td>
-
-                  <td className="px-3 py-3"><BecasPills becas={l.becas_califica} /></td>
-
-                  {/* ── Notas: muestra contenido inline ── */}
-                  <td className="px-3 py-3 cursor-pointer" onClick={() => openNotas(l)}>
-                    {notas.length === 0 ? (
-                      <span className="text-[11px] text-neutral-300 hover:text-primary/60 transition border border-dashed border-neutral-200 hover:border-primary/30 rounded-full px-2 py-0.5">
-                        + nota
-                      </span>
-                    ) : (
-                      <div className="space-y-1">
-                        {notas.slice(0, 3).map((n, ni) => (
-                          <div key={ni} className="flex items-center gap-1 min-w-0">
-                            <span className="shrink-0 text-[11px]">{NOTA_ICON[n.tipo] ?? "📝"}</span>
-                            {n.tipo === "link" ? (
-                              <a
-                                href={n.valor}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-[11px] text-blue-600 hover:underline truncate min-w-0"
-                                title={n.label ? `${n.label}: ${n.valor}` : n.valor}
-                                onClick={e => e.stopPropagation()}
-                              >
-                                {n.label || n.valor}
-                              </a>
-                            ) : (
-                              <span className="text-[11px] text-neutral-600 truncate min-w-0" title={n.valor}>
-                                {n.label || n.valor}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                        {notas.length > 3 && (
-                          <span className="text-[11px] text-neutral-400">+{notas.length - 3} más</span>
-                        )}
+                    <td className="px-3 py-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-primary flex items-center justify-center text-[11px] font-bold shrink-0">
+                          {initials(l.nombre)}
+                        </div>
+                        <span className="text-[13px] font-bold text-neutral-800 truncate" style={{ overflowWrap: "break-word" }}>{l.nombre}</span>
                       </div>
-                    )}
-                  </td>
+                    </td>
 
-                  <td className="px-3 py-3 text-center">
-                    <div className="flex gap-1 justify-center">
-                      <button onClick={() => openEdit(l)} className="px-2.5 py-2 text-[13px] text-neutral-600 border border-neutral-200 rounded hover:bg-neutral-50 transition" title="Editar">✏️</button>
-                      {isAdmin && <button onClick={() => pedirEliminar(l)} className="px-2.5 py-2 text-[13px] text-red-400 border border-red-200 rounded hover:bg-red-50 transition" title="Eliminar">🗑️</button>}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    <td className="px-3 py-3 text-xs whitespace-nowrap">{l.pais}</td>
+
+                    <td className={`px-3 py-3 font-extrabold text-center text-sm ${scoreClass(l.nota_espana)}`}>{Number(l.nota_espana).toFixed(2)}</td>
+
+                    <td className="px-3 py-3 text-xs">
+                      <span style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.area}</span>
+                      {l.universidad && (
+                        <span className="block text-neutral-400 mt-0.5" style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }} title={l.universidad}>{l.universidad}</span>
+                      )}
+                    </td>
+
+                    <td className="px-3 py-3 text-xs whitespace-nowrap">{l.presupuesto.toLocaleString("es-ES")} €</td>
+
+                    <td className="px-3 py-3 text-center">
+                      {l.auip === "si"
+                        ? <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 rounded-full px-2 py-1"><CheckCircle2 className="w-3 h-3" />Sí</span>
+                        : <span className="text-neutral-300 text-xs">—</span>}
+                    </td>
+
+                    <td className="px-3 py-3 text-xs" title={l.cyl || ""}>
+                      {l.cyl
+                        ? <span style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.cyl}</span>
+                        : <span className="text-neutral-300">—</span>}
+                    </td>
+
+                    <td className="px-3 py-3">
+                      {l.email ? <a href={`mailto:${l.email}`} className="text-blue-600 hover:underline text-xs" style={{ overflowWrap: "break-word", wordBreak: "break-all" }}>{l.email}</a> : <span className="text-neutral-300">—</span>}
+                    </td>
+
+                    <td className="px-3 py-3">
+                      {l.whatsapp ? <a href={`https://wa.me/${l.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-green-600 hover:underline text-xs whitespace-nowrap">{l.whatsapp}</a> : <span className="text-neutral-300">—</span>}
+                    </td>
+
+                    <td className="px-3 py-3"><BecasPills becas={l.becas_califica} /></td>
+
+                    {/* ── Notas: muestra contenido inline ── */}
+                    <td className="px-3 py-3 cursor-pointer" onClick={() => openNotas(l)}>
+                      {notas.length === 0 ? (
+                        <span className="text-[11px] text-neutral-300 hover:text-primary/60 transition border border-dashed border-neutral-200 hover:border-primary/30 rounded-full px-2 py-0.5">
+                          + nota
+                        </span>
+                      ) : (
+                        <div className="space-y-1">
+                          {notas.slice(0, 3).map((n, ni) => (
+                            <div key={ni} className="flex items-center gap-1 min-w-0">
+                              <span className="shrink-0 text-[11px]">{NOTA_ICON[n.tipo] ?? "📝"}</span>
+                              {n.tipo === "link" ? (
+                                <a
+                                  href={n.valor}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-[11px] text-blue-600 hover:underline truncate min-w-0"
+                                  title={n.label ? `${n.label}: ${n.valor}` : n.valor}
+                                  onClick={e => e.stopPropagation()}
+                                >
+                                  {n.label || n.valor}
+                                </a>
+                              ) : (
+                                <span className="text-[11px] text-neutral-600 truncate min-w-0" title={n.valor}>
+                                  {n.label || n.valor}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                          {notas.length > 3 && (
+                            <span className="text-[11px] text-neutral-400">+{notas.length - 3} más</span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="px-3 py-3 text-center">
+                      <button onClick={(e) => openRowMenu(e, l)} className="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-50 hover:border-neutral-300 transition" aria-label={`Acciones de ${l.nombre}`}>
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ── Móvil: cards ── */}
@@ -581,19 +724,27 @@ export default function LeadsCalculadora() {
         {!loading && sortedLeads.map((l) => {
           const notas = Array.isArray(l.notas) ? l.notas : [];
           return (
-            <div key={l.id_lead} className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm space-y-2">
+            <div key={l.id_lead} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-primary text-sm truncate">{l.nombre}</p>
-                  <p className="text-xs text-neutral-400">{l.pais} · {fmtFechaHora(l.fecha_creacion)}</p>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                    {initials(l.nombre)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-neutral-800 text-sm truncate">{l.nombre}</p>
+                    <p className="text-xs text-neutral-400 truncate">{l.pais} · {fmtFechaHora(l.fecha_creacion)}</p>
+                  </div>
                 </div>
+                <button onClick={(e) => openRowMenu(e, l)} className="w-11 h-11 shrink-0 inline-flex items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-50" aria-label={`Acciones de ${l.nombre}`}>
+                  <MoreVertical className="w-4 h-4" />
+                </button>
               </div>
               {l.area && <p className="text-xs text-neutral-600">{l.area}</p>}
               {l.universidad && <p className="text-xs text-neutral-500">🎓 {l.universidad}</p>}
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                <span className="text-neutral-500">Nota ES: <b>{Number(l.nota_espana).toFixed(2)}</b></span>
+                <span className="text-neutral-500">Nota ES: <b className={scoreClass(l.nota_espana)}>{Number(l.nota_espana).toFixed(2)}</b></span>
                 <span className="text-neutral-500">Presupuesto: <b>{l.presupuesto.toLocaleString("es-ES")} €</b></span>
-                {l.auip === "si" && <span className="text-emerald-600 font-medium">✓ AUIP</span>}
+                {l.auip === "si" && <span className="text-emerald-600 font-medium inline-flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" />AUIP</span>}
                 {l.cyl && <span className="text-neutral-500">CyL: <b>{l.cyl}</b></span>}
               </div>
               <div className="flex flex-col gap-1 text-xs">
@@ -615,11 +766,12 @@ export default function LeadsCalculadora() {
                 </div>
               )}
               <div className="pt-2 border-t border-neutral-100 flex gap-2">
-                <button onClick={() => openEdit(l)} className="flex-1 h-11 text-[13px] text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50">✏️ Editar</button>
-                <button onClick={() => openNotas(l)} className={`flex-1 h-11 text-[13px] rounded-lg border transition ${notas.length > 0 ? "text-primary border-primary/30 bg-primary/5 hover:bg-primary/10" : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"}`}>
-                  📝 {notas.length > 0 ? `Notas (${notas.length})` : "Notas"}
+                <button onClick={() => openEdit(l)} className="flex-1 h-11 text-[13px] text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50 inline-flex items-center justify-center gap-1.5">
+                  <Pencil className="w-3.5 h-3.5" /> Editar
                 </button>
-                {isAdmin && <button onClick={() => pedirEliminar(l)} className="px-3 h-11 text-[13px] text-red-500 border border-red-200 rounded-lg hover:bg-red-50">🗑️</button>}
+                <button onClick={() => openNotas(l)} className={`flex-1 h-11 text-[13px] rounded-lg border inline-flex items-center justify-center gap-1.5 transition ${notas.length > 0 ? "text-primary border-primary/30 bg-primary/5 hover:bg-primary/10" : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"}`}>
+                  <StickyNote className="w-3.5 h-3.5" /> {notas.length > 0 ? `Notas (${notas.length})` : "Notas"}
+                </button>
               </div>
             </div>
           );
@@ -628,11 +780,24 @@ export default function LeadsCalculadora() {
 
       {/* Paginación */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-3 justify-between text-sm">
-          <span className="text-neutral-400 text-xs">Pág. {page} de {totalPages} · {total} registros</span>
-          <div className="flex gap-2">
-            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-4 h-11 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-[#e8f5ee] transition text-sm">← Anterior</button>
-            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="px-4 h-11 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-[#e8f5ee] transition text-sm">Siguiente →</button>
+        <div className="flex flex-col sm:flex-row items-center gap-3 justify-between bg-white border border-neutral-200 rounded-2xl shadow-sm px-4 py-3">
+          <span className="text-[12px] text-neutral-500">Mostrando <b className="text-neutral-700">{sortedLeads.length}</b> de <b className="text-neutral-700">{total}</b> registros</span>
+          <div className="flex items-center gap-1.5">
+            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="w-9 h-9 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-neutral-50 transition inline-flex items-center justify-center" aria-label="Página anterior">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {pageList(page, totalPages).map((p, i) =>
+              p === "…"
+                ? <span key={`e${i}`} className="w-9 h-9 inline-flex items-center justify-center text-neutral-300 text-xs">…</span>
+                : (
+                  <button key={p} onClick={() => setPage(p)} className={`w-9 h-9 rounded-lg border text-[12px] font-bold transition ${p === page ? "bg-primary border-primary text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-50"}`}>
+                    {p}
+                  </button>
+                )
+            )}
+            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="w-9 h-9 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-neutral-50 transition inline-flex items-center justify-center" aria-label="Página siguiente">
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

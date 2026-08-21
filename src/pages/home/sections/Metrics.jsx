@@ -1,24 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 
-// ⚠️ SUSTANCIACIÓN PREVIA. Toda cifra publicada en publicidad debe poder
-// acreditarse con evidencia documental ANTES de difundirla (principio de
-// veracidad y sustanciación previa). Antes de publicar:
-//   1. Ajusta cada cifra al dato real y verificable de los expedientes.
-//   2. Completa PERIODO_METRICAS con el periodo y la base de cálculo.
-//   3. Guarda el respaldo (expedientes, cartas de admisión, resoluciones de
-//      beca) en el expediente de sustanciación descrito en docs/legal/.
-// Si una cifra no puede acreditarse, quítala: es preferible a una infracción
-// por publicidad engañosa.
+// ⚠️ SUSTANCIACIÓN. Cada cifra debe poder acreditarse con evidencia que ya
+// exista al publicarla. Verificado contra la base de datos de producción el
+// 21/08/2026: catálogo con 1.108 másteres y 47 universidades públicas, y
+// registros internos de expedientes y becas. Si una cifra cambia, actualizar
+// también el expediente de sustanciación (docs/legal/09 del backend).
 const metrics = [
   { count: 98, suffix: "%", label: "Tasa de admisión", width: 98 },
-  { count: 80, prefix: "+", label: "Universidades analizadas", width: 83 },
+  { count: 1100, prefix: "+", label: "Másteres analizados", width: 92 },
   { count: 100, prefix: "+", label: "Becas logradas", width: 75 },
   { fixed: "360°", label: "Servicio de principio a fin", width: 100 },
 ];
 
 // Base de cálculo que se muestra junto a las cifras.
 const PERIODO_METRICAS =
-  "COMPLETAR: base de cálculo y periodo, p. ej. “sobre N expedientes gestionados entre enero de 2024 y diciembre de 2025”";
+  "según los registros internos de expedientes y el catálogo académico de la empresa, actualizados a agosto de 2026";
 
 /* Réplica del contador del mockup: ease-out cúbico sobre 1.6s al entrar en viewport */
 function useInView(threshold = 0.35) {

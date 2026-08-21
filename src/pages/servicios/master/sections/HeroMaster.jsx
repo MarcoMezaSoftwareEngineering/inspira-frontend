@@ -50,7 +50,7 @@ export default function HeroMaster() {
             <div className="flex gap-4 mb-8">
               {[
                 { n: "98%", l: "Admisión" },
-                { n: "+80", l: "Universidades" },
+                { n: "+45", l: "Universidades" },
                 { n: "4", l: "Etapas" },
               ].map((s) => (
                 <div

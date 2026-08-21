@@ -19,15 +19,18 @@ export const TITULAR = {
   nombreComercial: "Inspira Legal",
   ruc: "20610501941",
   // Domicilio fiscal declarado en SUNAT (obligatorio: deber de información al consumidor)
-  domicilioFiscal: "COMPLETAR: Av./Jr. ______ N.° ___, distrito, provincia, Lima, Perú",
+  domicilioFiscal:
+    "Cal. Fermín Tanguis Nro. 279, Urb. Ingeniería, San Martín de Porres, Lima, Perú",
   pais: "Perú",
   // Representante legal / responsable del sitio
   representanteLegal: "COMPLETAR: Nombres y apellidos del representante legal",
   // Canales oficiales de contacto
   emailContacto: "administracion@inspira-legal.cloud",
-  emailDatosPersonales: "datospersonales@inspira-legal.cloud",
-  telefono: "COMPLETAR: +51 9XX XXX XXX",
-  whatsapp: "COMPLETAR: +51 9XX XXX XXX",
+  // Canal único de contacto (también para protección de datos): la empresa
+  // decidió no crear un buzón separado, así que todo llega a administración.
+  emailDatosPersonales: "administracion@inspira-legal.cloud",
+  telefono: "+51 908 945 354",
+  whatsapp: "+51 908 945 354",
   web: "https://inspira-legal.cloud",
 };
 
@@ -36,7 +39,7 @@ export const RESPONSABLE_DATOS = {
   designado: false, // cambiar a true cuando se formalice la designación
   nombre: "COMPLETAR: Nombres y apellidos",
   cargo: "Punto de contacto en materia de protección de datos personales",
-  email: "datospersonales@inspira-legal.cloud",
+  email: "administracion@inspira-legal.cloud",
 };
 
 // Versionado de documentos legales: cualquier cambio sustancial sube la versión

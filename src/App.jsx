@@ -95,6 +95,10 @@ const SCHEMA_ORG = {
   "@context": "https://schema.org",
   "@type": "LegalService",
   name: "Inspira Legal",
+  legalName: "PROYECTA PRODUCCIONES GROUP S.A.C.",
+  taxID: "20610501941",
+  telephone: "+51908945354",
+  email: "administracion@inspira-legal.cloud",
   url: "https://inspira-legal.cloud",
   description:
     "Consultoría especializada en másteres y postgrados en España, visas de estudiante y trámites de extranjería para latinoamericanos.",
@@ -102,8 +106,9 @@ const SCHEMA_ORG = {
   serviceType: ["Asesoría académica", "Gestión de visas", "Trámites de extranjería"],
   address: {
     "@type": "PostalAddress",
+    streetAddress: "Cal. Fermín Tanguis Nro. 279, Urb. Ingeniería",
+    addressLocality: "San Martín de Porres, Lima",
     addressCountry: "PE",
-    addressLocality: "Lima",
   },
   contactPoint: {
     "@type": "ContactPoint",

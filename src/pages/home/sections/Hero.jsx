@@ -42,7 +42,7 @@ export default function Hero() {
           </div>
           <div className="proof-inline">
             <span><b>98%</b> admisión</span>
-            <span><b>+80</b> universidades</span>
+            <span><b>+1,100</b> másteres analizados</span>
             <span><b>+100</b> becas logradas</span>
             <span><b>360°</b> acompañamiento</span>
           </div>

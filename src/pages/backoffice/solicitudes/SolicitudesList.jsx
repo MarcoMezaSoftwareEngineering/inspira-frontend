@@ -37,29 +37,32 @@ export default function SolicitudesList({ onVerSolicitud }) {
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-4">
+    <div className="p-4 sm:p-6 space-y-5 bg-[#f5f7f5] min-h-full">
       {/* Cabecera */}
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-primary">Solicitudes</h1>
-            <p className="text-sm text-neutral-500">Expedientes de clientes</p>
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#147a4d] mb-1">
+              Operación · Expedientes
+            </div>
+            <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-[#142219]">Solicitudes</h1>
+            <p className="text-sm text-neutral-500 mt-0.5">Control de expedientes, pagos y seguimiento de clientes.</p>
           </div>
 
           {/* Tabs — solo admins ven la papelera */}
           {isAdmin && (
-            <div className="flex rounded-lg border border-neutral-200 overflow-hidden text-sm font-medium">
+            <div className="flex bg-[#eef2ef] p-1 rounded-xl gap-0.5 text-sm font-bold">
               <button
                 onClick={() => setTab("activas")}
-                className={`px-4 py-2 transition ${tab === "activas" ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
+                className={`px-4 py-2 rounded-lg transition ${tab === "activas" ? "bg-white text-[#0f5b3a] shadow-sm" : "text-[#627068] hover:text-[#0f5b3a]"}`}
               >
                 Activas
               </button>
               <button
                 onClick={() => setTab("papelera")}
-                className={`px-4 py-2 transition border-l border-neutral-200 ${tab === "papelera" ? "bg-red-600 text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
+                className={`px-4 py-2 rounded-lg transition ${tab === "papelera" ? "bg-white text-red-600 shadow-sm" : "text-[#627068] hover:text-red-600"}`}
               >
-                Papelera {papelera.total > 0 && <span className="ml-1 text-xs">({papelera.total})</span>}
+                Papelera {papelera.total > 0 && <span className="ml-1 text-xs opacity-70">({papelera.total})</span>}
               </button>
             </div>
           )}
@@ -69,14 +72,20 @@ export default function SolicitudesList({ onVerSolicitud }) {
         {tab === "activas" && (
           <div className="flex flex-col sm:flex-row gap-2">
             <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-1">
-              <input
-                type="text"
-                className="flex-1 min-w-0 border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="Buscar por cliente o correo…"
-                value={searchCliente}
-                onChange={(e) => setSearchCliente(e.target.value)}
-              />
-              <button type="submit" className="px-4 py-2 text-sm bg-primary text-white rounded-lg font-medium whitespace-nowrap">
+              <div className="relative flex-1 min-w-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+                <input
+                  type="text"
+                  className="w-full border border-neutral-200 bg-white rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition"
+                  placeholder="Buscar por cliente o correo…"
+                  value={searchCliente}
+                  onChange={(e) => setSearchCliente(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="px-5 py-2.5 text-sm bg-primary text-white rounded-xl font-bold whitespace-nowrap shadow-sm hover:bg-primary-light transition">
                 Buscar
               </button>
             </form>
@@ -84,7 +93,7 @@ export default function SolicitudesList({ onVerSolicitud }) {
               <button
                 type="button"
                 onClick={() => setMostrarCrear((v) => !v)}
-                className="px-4 py-2 text-sm rounded-lg bg-primary text-white font-medium whitespace-nowrap"
+                className="px-5 py-2.5 text-sm rounded-xl bg-primary text-white font-bold whitespace-nowrap shadow-sm hover:bg-primary-light transition"
               >
                 {mostrarCrear ? "✕ Cerrar" : "+ Crear solicitud"}
               </button>
@@ -102,10 +111,10 @@ export default function SolicitudesList({ onVerSolicitud }) {
 
       {/* ══ TAB ACTIVAS ══ */}
       {tab === "activas" && (
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-neutral-100 flex justify-between items-center bg-neutral-50">
-            <span className="text-sm font-semibold text-neutral-800">Listado</span>
-            <span className="text-xs text-neutral-400">
+        <div className="bg-white border border-neutral-200 rounded-2xl shadow-[0_12px_40px_rgba(16,40,26,0.08)] overflow-hidden">
+          <div className="px-4 py-3.5 border-b border-neutral-100 flex justify-between items-center">
+            <span className="text-sm font-extrabold text-neutral-800">Listado</span>
+            <span className="text-xs text-neutral-400 font-medium">
               {loading ? "Cargando…" : `Pág. ${page}/${totalPages} · ${total} resultado${total === 1 ? "" : "s"}`}
             </span>
           </div>
@@ -120,9 +129,9 @@ export default function SolicitudesList({ onVerSolicitud }) {
               <div className="hidden sm:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="bg-[#e8f5ee] text-[#1a5c3a] text-left text-xs font-bold uppercase tracking-wide">
+                    <tr className="bg-[#f8faf8] text-[#647269] text-left text-[10px] font-extrabold uppercase tracking-wider">
                       {["#ID", "Cliente", "Tipo", "Estado", "Origen", "Fecha", "Pagado", "Acciones"].map((h) => (
-                        <th key={h} className={`px-3 py-3 ${h === "Acciones" ? "text-right" : ""}`}>{h}</th>
+                        <th key={h} className={`px-3 py-3 border-b border-neutral-100 ${h === "Acciones" ? "text-right" : ""}`}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -139,13 +148,13 @@ export default function SolicitudesList({ onVerSolicitud }) {
                 ))}
               </div>
 
-              <div className="px-4 py-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2 text-xs bg-neutral-50">
+              <div className="px-4 py-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2 text-xs bg-[#fbfcfb]">
                 <div className="flex items-center gap-2">
-                  <span className="text-neutral-500">Filas:</span>
+                  <span className="text-neutral-400 font-medium">Filas:</span>
                   <select
                     value={pageSize}
                     onChange={(e) => cargarSolicitudes({ page: 1, pageSize: Number(e.target.value) })}
-                    className="border border-neutral-200 rounded px-2 py-1 text-xs bg-white"
+                    className="border border-neutral-200 rounded-lg px-2 py-1 text-xs bg-white font-semibold"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
@@ -154,12 +163,12 @@ export default function SolicitudesList({ onVerSolicitud }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => changePage(page - 1)} disabled={page <= 1}
-                    className="px-3 py-1.5 border border-neutral-200 rounded-lg disabled:opacity-40 hover:bg-neutral-100 transition">
+                    className="px-3 py-1.5 border border-neutral-200 rounded-lg font-semibold disabled:opacity-40 hover:bg-neutral-100 transition">
                     ← Ant.
                   </button>
-                  <span className="text-neutral-500">Pág. {page}/{totalPages}</span>
+                  <span className="text-neutral-500 font-medium">Pág. {page}/{totalPages}</span>
                   <button onClick={() => changePage(page + 1)} disabled={page >= totalPages}
-                    className="px-3 py-1.5 border border-neutral-200 rounded-lg disabled:opacity-40 hover:bg-neutral-100 transition">
+                    className="px-3 py-1.5 border border-neutral-200 rounded-lg font-semibold disabled:opacity-40 hover:bg-neutral-100 transition">
                     Sig. →
                   </button>
                 </div>
@@ -171,10 +180,10 @@ export default function SolicitudesList({ onVerSolicitud }) {
 
       {/* ══ TAB PAPELERA ══ */}
       {tab === "papelera" && isAdmin && (
-        <div className="bg-white border border-red-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-red-100 flex justify-between items-center bg-red-50">
-            <span className="text-sm font-semibold text-red-700">Solicitudes eliminadas</span>
-            <span className="text-xs text-red-400">
+        <div className="bg-white border border-red-200 rounded-2xl shadow-[0_12px_40px_rgba(16,40,26,0.08)] overflow-hidden">
+          <div className="px-4 py-3.5 border-b border-red-100 flex justify-between items-center bg-red-50">
+            <span className="text-sm font-extrabold text-red-700">Solicitudes eliminadas</span>
+            <span className="text-xs text-red-400 font-medium">
               {papelera.loading ? "Cargando…" : `${papelera.total} eliminada${papelera.total === 1 ? "" : "s"}`}
             </span>
           </div>

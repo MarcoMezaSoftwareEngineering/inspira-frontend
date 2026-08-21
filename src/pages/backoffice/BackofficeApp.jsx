@@ -1,6 +1,8 @@
 // src/pages/backoffice/BackofficeApp.jsx
 import { useEffect, useRef, useState } from "react";
 import Sidebar from "./layout/Sidebar";
+import MobileAppBar from "./layout/MobileAppBar";
+import MobileDrawer from "./layout/MobileDrawer";
 import ProtectedRoute from "./layout/ProtectedRoute";
 import ModuleGate from "./layout/ModuleGate";
 import TabView from "./layout/TabView";
@@ -39,6 +41,9 @@ export default function BackofficeApp() {
   const sidebarPinnedRef = useRef(false);
   sidebarPinnedRef.current = sidebarPinned;
 
+  // Drawer móvil: independiente del sidebar de escritorio (sin concepto de "pin")
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
   const [user, setUser] = useState(() => {
     const u = localStorage.getItem("bo_user");
     return u ? JSON.parse(u) : null;
@@ -49,6 +54,7 @@ export default function BackofficeApp() {
       setPath(window.location.pathname);
       // Solo cierra el sidebar al navegar si NO está fijado
       if (!sidebarPinnedRef.current) setSidebarOpen(false);
+      setMobileDrawerOpen(false);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -103,14 +109,23 @@ export default function BackofficeApp() {
           onLogout={logout}
         />
 
+        <MobileAppBar onMenuToggle={() => setMobileDrawerOpen(true)} user={user} />
+        <MobileDrawer
+          open={mobileDrawerOpen}
+          onClose={() => setMobileDrawerOpen(false)}
+          path={path}
+          user={user}
+          onLogout={logout}
+        />
+
         {/* Panel derecho */}
         <div className="flex-1 flex flex-col h-full bg-white min-w-0">
-          {/* Botón de abrir sidebar — visible solo cuando está cerrado */}
+          {/* Botón de abrir sidebar — solo desktop; en móvil la app bar cubre este rol */}
           {!sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(true)}
               aria-label="Abrir menú"
-              className="fixed top-3 left-3 z-50 w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary/90 transition"
+              className="hidden md:flex fixed top-3 left-3 z-50 w-9 h-9 rounded-lg bg-primary text-white items-center justify-center shadow-md hover:bg-primary/90 transition"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -118,7 +133,7 @@ export default function BackofficeApp() {
             </button>
           )}
 
-          <main className="flex-1 flex flex-col overflow-y-auto relative">
+          <main className="flex-1 flex flex-col overflow-y-auto relative pt-[60px] md:pt-0">
             {/* Overlay transparente: cierra el sidebar al hacer clic fuera cuando no está fijado */}
             {sidebarOpen && !sidebarPinned && (
               <div

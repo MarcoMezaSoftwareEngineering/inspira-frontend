@@ -19,8 +19,8 @@ function fmtFechaHora(iso) {
 }
 
 function SortIcon({ active, dir }) {
-  if (!active) return <span className="ml-0.5 opacity-30 text-[10px]">↕</span>;
-  return <span className="ml-0.5 text-[10px]">{dir === "asc" ? "↑" : "↓"}</span>;
+  if (!active) return <span className="ml-0.5 opacity-30 text-[11px]">↕</span>;
+  return <span className="ml-0.5 text-[11px]">{dir === "asc" ? "↑" : "↓"}</span>;
 }
 
 function ThSort({ label, campo, center, sortKey, sortDir, onSort }) {
@@ -224,29 +224,29 @@ export default function LeadsCalculadora() {
 
       {/* ── Modal: Editar lead ── */}
       {modalEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm p-6 space-y-4 max-h-[92dvh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-neutral-800 text-base">Editar lead</h2>
-              <button onClick={closeEdit} className="text-neutral-400 hover:text-neutral-600 text-2xl leading-none">×</button>
+              <button onClick={closeEdit} className="text-neutral-400 hover:text-neutral-600 text-2xl leading-none w-11 h-11 flex items-center justify-center -mr-2">×</button>
             </div>
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-neutral-500 mb-1">Nombre</label>
-                <input autoFocus className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={modalEdit.nombre} onChange={e => setModalEdit(m => ({ ...m, nombre: e.target.value }))} />
+                <input autoFocus className="w-full h-11 border border-neutral-200 rounded-lg px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={modalEdit.nombre} onChange={e => setModalEdit(m => ({ ...m, nombre: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-neutral-500 mb-1">Email</label>
-                <input type="email" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={modalEdit.email} onChange={e => setModalEdit(m => ({ ...m, email: e.target.value }))} />
+                <input type="email" className="w-full h-11 border border-neutral-200 rounded-lg px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={modalEdit.email} onChange={e => setModalEdit(m => ({ ...m, email: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-neutral-500 mb-1">WhatsApp</label>
-                <input type="tel" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={modalEdit.whatsapp} onChange={e => setModalEdit(m => ({ ...m, whatsapp: e.target.value }))} />
+                <input type="tel" className="w-full h-11 border border-neutral-200 rounded-lg px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={modalEdit.whatsapp} onChange={e => setModalEdit(m => ({ ...m, whatsapp: e.target.value }))} />
               </div>
             </div>
             <div className="flex gap-3 pt-1">
-              <button onClick={closeEdit} className="flex-1 py-2 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 transition font-medium">Cancelar</button>
-              <button onClick={saveModal} disabled={saving} className="flex-1 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium disabled:opacity-50">{saving ? "Guardando…" : "Guardar"}</button>
+              <button onClick={closeEdit} className="flex-1 h-11 text-[13px] border border-neutral-200 rounded-lg hover:bg-neutral-50 transition font-medium">Cancelar</button>
+              <button onClick={saveModal} disabled={saving} className="flex-1 h-11 text-[13px] bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium disabled:opacity-50">{saving ? "Guardando…" : "Guardar"}</button>
             </div>
           </div>
         </div>
@@ -254,15 +254,15 @@ export default function LeadsCalculadora() {
 
       {/* ── Modal: Notas ── */}
       {modalNotas && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4" style={{ maxHeight: "88vh", overflowY: "auto" }}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md p-6 space-y-4 max-h-[92dvh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h2 className="font-bold text-neutral-800 text-base">Notas</h2>
                 <p className="text-xs text-neutral-500 mt-0.5">{modalNotas.nombre}</p>
               </div>
-              <button onClick={closeNotas} className="text-neutral-400 hover:text-neutral-600 text-2xl leading-none shrink-0">×</button>
+              <button onClick={closeNotas} className="text-neutral-400 hover:text-neutral-600 text-2xl leading-none shrink-0 w-11 h-11 flex items-center justify-center -mr-2 -mt-1">×</button>
             </div>
 
             {/* Lista de notas */}
@@ -276,7 +276,7 @@ export default function LeadsCalculadora() {
                   <div key={i} className="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-2">
                     <div className="flex gap-2">
                       <select
-                        className="border border-neutral-200 rounded-lg px-2 py-1.5 text-sm bg-white shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        className="h-10 border border-neutral-200 rounded-lg px-2 text-base sm:text-sm bg-white shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
                         value={editingNotaData.tipo}
                         onChange={e => setEditingNotaData(d => ({ ...d, tipo: e.target.value }))}
                       >
@@ -284,7 +284,7 @@ export default function LeadsCalculadora() {
                         <option value="nota">📝 Nota</option>
                       </select>
                       <input
-                        className="flex-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        className="flex-1 h-10 border border-neutral-200 rounded-lg px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                         placeholder="Etiqueta (ej: LinkedIn…)"
                         value={editingNotaData.label}
                         onChange={e => setEditingNotaData(d => ({ ...d, label: e.target.value }))}
@@ -293,12 +293,12 @@ export default function LeadsCalculadora() {
                     {editingNotaData.tipo === "nota"
                       ? <textarea
                           rows={2}
-                          className="w-full border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                          className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                           value={editingNotaData.valor}
                           onChange={e => setEditingNotaData(d => ({ ...d, valor: e.target.value }))}
                         />
                       : <input
-                          className="w-full border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="w-full h-10 border border-neutral-200 rounded-lg px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                           placeholder="https://..."
                           value={editingNotaData.valor}
                           onChange={e => setEditingNotaData(d => ({ ...d, valor: e.target.value }))}
@@ -306,8 +306,8 @@ export default function LeadsCalculadora() {
                         />
                     }
                     <div className="flex gap-2 justify-end">
-                      <button onClick={cancelEditNota} className="px-3 py-1 text-xs border border-neutral-200 rounded-lg hover:bg-neutral-50 transition">Cancelar</button>
-                      <button onClick={saveEditNota} disabled={!editingNotaData.valor.trim()} className="px-3 py-1 text-xs bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-40 transition">Guardar</button>
+                      <button onClick={cancelEditNota} className="px-3 h-9 text-[13px] border border-neutral-200 rounded-lg hover:bg-neutral-50 transition">Cancelar</button>
+                      <button onClick={saveEditNota} disabled={!editingNotaData.valor.trim()} className="px-3 h-9 text-[13px] bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-40 transition">Guardar</button>
                     </div>
                   </div>
                 ) : (
@@ -321,16 +321,16 @@ export default function LeadsCalculadora() {
                         : <p className="text-sm text-neutral-700 break-words whitespace-pre-wrap">{n.valor}</p>
                       }
                     </div>
-                    <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition">
+                    <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
                       <button
                         onClick={() => startEditNota(i)}
                         title="Editar"
-                        className="text-neutral-400 hover:text-primary transition text-sm px-1"
+                        className="text-neutral-400 hover:text-primary transition text-sm w-9 h-9 flex items-center justify-center"
                       >✏️</button>
                       <button
                         onClick={() => removeNota(i)}
                         title="Eliminar"
-                        className="text-neutral-300 hover:text-red-400 transition text-lg leading-none px-1"
+                        className="text-neutral-300 hover:text-red-400 transition text-lg leading-none w-9 h-9 flex items-center justify-center"
                       >×</button>
                     </div>
                   </div>
@@ -343,7 +343,7 @@ export default function LeadsCalculadora() {
               <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Nueva nota</p>
               <div className="flex gap-2">
                 <select
-                  className="border border-neutral-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white shrink-0"
+                  className="h-11 border border-neutral-200 rounded-lg px-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white shrink-0"
                   value={newNota.tipo}
                   onChange={e => setNewNota(n => ({ ...n, tipo: e.target.value }))}
                 >
@@ -351,7 +351,7 @@ export default function LeadsCalculadora() {
                   <option value="nota">📝 Nota</option>
                 </select>
                 <input
-                  className="flex-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="flex-1 h-11 border border-neutral-200 rounded-lg px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   placeholder="Etiqueta (ej: LinkedIn, Instagram…)"
                   value={newNota.label}
                   onChange={e => setNewNota(n => ({ ...n, label: e.target.value }))}
@@ -361,13 +361,13 @@ export default function LeadsCalculadora() {
                 {newNota.tipo === "nota"
                   ? <textarea
                       rows={2}
-                      className="flex-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                      className="flex-1 border border-neutral-200 rounded-lg px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                       placeholder="Escribe el comentario…"
                       value={newNota.valor}
                       onChange={e => setNewNota(n => ({ ...n, valor: e.target.value }))}
                     />
                   : <input
-                      className="flex-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="flex-1 h-11 border border-neutral-200 rounded-lg px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                       placeholder="https://linkedin.com/in/..."
                       value={newNota.valor}
                       onChange={e => setNewNota(n => ({ ...n, valor: e.target.value }))}
@@ -377,7 +377,7 @@ export default function LeadsCalculadora() {
                 <button
                   onClick={addNota}
                   disabled={!newNota.valor.trim()}
-                  className="px-3 py-2 text-sm bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 disabled:opacity-30 transition whitespace-nowrap shrink-0"
+                  className="px-3 h-11 text-[13px] bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 disabled:opacity-30 transition whitespace-nowrap shrink-0"
                 >
                   + Agregar
                 </button>
@@ -386,8 +386,8 @@ export default function LeadsCalculadora() {
 
             {/* Acciones */}
             <div className="flex gap-3 pt-2 border-t border-neutral-100">
-              <button onClick={closeNotas} className="flex-1 py-2 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 transition font-medium">Cancelar</button>
-              <button onClick={saveNotas} disabled={savingNotas} className="flex-1 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium disabled:opacity-50">
+              <button onClick={closeNotas} className="flex-1 h-11 text-[13px] border border-neutral-200 rounded-lg hover:bg-neutral-50 transition font-medium">Cancelar</button>
+              <button onClick={saveNotas} disabled={savingNotas} className="flex-1 h-11 text-[13px] bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium disabled:opacity-50">
                 {savingNotas ? "Guardando…" : "Guardar notas"}
               </button>
             </div>
@@ -397,8 +397,8 @@ export default function LeadsCalculadora() {
 
       {/* ── Modal: Confirmar eliminar ── */}
       {confirmDel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl sm:max-w-sm w-full p-6 space-y-4">
             <div className="flex items-start gap-3">
               <div className="shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-xl">🗑️</div>
               <div>
@@ -410,8 +410,8 @@ export default function LeadsCalculadora() {
               Esta acción <strong>no se puede deshacer</strong>. Los datos se eliminarán de forma permanente y no podrán recuperarse.
             </div>
             <div className="flex gap-3 pt-1">
-              <button onClick={() => setConfirmDel(null)} className="flex-1 py-2 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 transition font-medium">Cancelar</button>
-              <button onClick={confirmarEliminar} className="flex-1 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium">Sí, eliminar</button>
+              <button onClick={() => setConfirmDel(null)} className="flex-1 h-11 text-[13px] border border-neutral-200 rounded-lg hover:bg-neutral-50 transition font-medium">Cancelar</button>
+              <button onClick={confirmarEliminar} className="flex-1 h-11 text-[13px] bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium">Sí, eliminar</button>
             </div>
           </div>
         </div>
@@ -419,25 +419,25 @@ export default function LeadsCalculadora() {
 
       {/* Header */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-primary">Calculadora — Leads</h1>
-        <p className="text-sm text-neutral-500 mt-0.5">{total} registros totales</p>
+        <h1 className="text-[26px] sm:text-[32px] font-bold text-primary leading-tight">Calculadora — Leads</h1>
+        <p className="text-[13px] sm:text-sm text-neutral-500 mt-0.5">{total} registros totales</p>
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-2 flex-wrap items-end">
-        <input className="flex-1 min-w-[130px] border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Buscar nombre…" value={filtroNombre} onChange={e => { setFiltroNombre(e.target.value); resetPage(); }} />
-        <input className="w-full sm:w-24 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="País…" value={filtroPais} onChange={e => { setFiltroPais(e.target.value); resetPage(); }} />
-        <input className="flex-1 min-w-[130px] border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Área de estudio…" value={filtroArea} onChange={e => { setFiltroArea(e.target.value); resetPage(); }} />
-        <select className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white" value={filtroPerfil} onChange={e => { setFiltroPerfil(e.target.value); resetPage(); }}>
+      <div className="flex flex-col sm:flex-row gap-2 flex-wrap items-stretch sm:items-end">
+        <input className="flex-1 min-w-[130px] h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Buscar nombre…" value={filtroNombre} onChange={e => { setFiltroNombre(e.target.value); resetPage(); }} />
+        <input className="w-full sm:w-24 h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="País…" value={filtroPais} onChange={e => { setFiltroPais(e.target.value); resetPage(); }} />
+        <input className="flex-1 min-w-[130px] h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Área de estudio…" value={filtroArea} onChange={e => { setFiltroArea(e.target.value); resetPage(); }} />
+        <select className="h-11 border border-neutral-200 rounded-lg px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white" value={filtroPerfil} onChange={e => { setFiltroPerfil(e.target.value); resetPage(); }}>
           <option value="">Todos los perfiles</option>
           <option value="economico">Económico</option>
           <option value="equilibrado">Equilibrado</option>
           <option value="ambicioso">Ambicioso</option>
         </select>
-        <button onClick={() => { setFiltroAuip(filtroAuip === "si" ? "" : "si"); resetPage(); }} className={`px-3 py-2 text-xs font-medium rounded-lg border transition whitespace-nowrap ${filtroAuip === "si" ? "bg-emerald-100 border-emerald-300 text-emerald-700" : "border-neutral-200 text-neutral-500 hover:bg-neutral-50"}`}>
+        <button onClick={() => { setFiltroAuip(filtroAuip === "si" ? "" : "si"); resetPage(); }} className={`h-11 px-3 text-[13px] font-medium rounded-lg border transition whitespace-nowrap ${filtroAuip === "si" ? "bg-emerald-100 border-emerald-300 text-emerald-700" : "border-neutral-200 text-neutral-500 hover:bg-neutral-50"}`}>
           ✓ AUIP
         </button>
-        {hayFiltros && <button onClick={limpiarFiltros} className="px-3 py-2 text-xs text-neutral-500 border border-neutral-200 rounded-lg hover:bg-neutral-50 whitespace-nowrap">✕ Limpiar</button>}
+        {hayFiltros && <button onClick={limpiarFiltros} className="h-11 px-3 text-[13px] text-neutral-500 border border-neutral-200 rounded-lg hover:bg-neutral-50 whitespace-nowrap">✕ Limpiar</button>}
       </div>
 
       {/* ── Desktop: tabla ── */}
@@ -483,50 +483,50 @@ export default function LeadsCalculadora() {
               return (
                 <tr key={l.id_lead} className="border-t border-neutral-100 hover:bg-neutral-50 transition cursor-pointer">
 
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-3">
                     <span className="block text-neutral-700 text-xs whitespace-nowrap">{fmtFecha(l.fecha_creacion)}</span>
                     <span className="block text-neutral-400 text-[11px] whitespace-nowrap">{fmtHora(l.fecha_creacion)}</span>
                   </td>
 
-                  <td className="px-3 py-2.5 font-medium text-primary">
+                  <td className="px-3 py-3 text-[13px] font-bold text-primary">
                     <span style={{ overflowWrap: "break-word" }}>{l.nombre}</span>
                   </td>
 
-                  <td className="px-3 py-2.5 text-xs whitespace-nowrap">{l.pais}</td>
+                  <td className="px-3 py-3 text-xs whitespace-nowrap">{l.pais}</td>
 
-                  <td className="px-3 py-2.5 font-semibold text-center text-sm">{Number(l.nota_espana).toFixed(2)}</td>
+                  <td className="px-3 py-3 font-semibold text-center text-sm">{Number(l.nota_espana).toFixed(2)}</td>
 
-                  <td className="px-3 py-2.5 text-xs">
+                  <td className="px-3 py-3 text-xs">
                     <span style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.area}</span>
                     {l.universidad && (
                       <span className="block text-neutral-400 mt-0.5" style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }} title={l.universidad}>{l.universidad}</span>
                     )}
                   </td>
 
-                  <td className="px-3 py-2.5 text-xs whitespace-nowrap">{l.presupuesto.toLocaleString("es-ES")} €</td>
+                  <td className="px-3 py-3 text-xs whitespace-nowrap">{l.presupuesto.toLocaleString("es-ES")} €</td>
 
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-3 py-3 text-center">
                     {l.auip === "si" ? <span className="text-emerald-600 font-bold">✓</span> : <span className="text-neutral-300">—</span>}
                   </td>
 
-                  <td className="px-3 py-2.5 text-xs" title={l.cyl || ""}>
+                  <td className="px-3 py-3 text-xs" title={l.cyl || ""}>
                     {l.cyl
                       ? <span style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.cyl}</span>
                       : <span className="text-neutral-300">—</span>}
                   </td>
 
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-3">
                     {l.email ? <a href={`mailto:${l.email}`} className="text-blue-600 hover:underline text-xs" style={{ overflowWrap: "break-word", wordBreak: "break-all" }}>{l.email}</a> : <span className="text-neutral-300">—</span>}
                   </td>
 
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-3">
                     {l.whatsapp ? <a href={`https://wa.me/${l.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-green-600 hover:underline text-xs whitespace-nowrap">{l.whatsapp}</a> : <span className="text-neutral-300">—</span>}
                   </td>
 
-                  <td className="px-3 py-2.5"><BecasPills becas={l.becas_califica} /></td>
+                  <td className="px-3 py-3"><BecasPills becas={l.becas_califica} /></td>
 
                   {/* ── Notas: muestra contenido inline ── */}
-                  <td className="px-3 py-2.5 cursor-pointer" onClick={() => openNotas(l)}>
+                  <td className="px-3 py-3 cursor-pointer" onClick={() => openNotas(l)}>
                     {notas.length === 0 ? (
                       <span className="text-[11px] text-neutral-300 hover:text-primary/60 transition border border-dashed border-neutral-200 hover:border-primary/30 rounded-full px-2 py-0.5">
                         + nota
@@ -561,10 +561,10 @@ export default function LeadsCalculadora() {
                     )}
                   </td>
 
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-3 py-3 text-center">
                     <div className="flex gap-1 justify-center">
-                      <button onClick={() => openEdit(l)} className="px-2 py-1 text-xs text-neutral-600 border border-neutral-200 rounded hover:bg-neutral-50 transition" title="Editar">✏️</button>
-                      {isAdmin && <button onClick={() => pedirEliminar(l)} className="px-2 py-1 text-xs text-red-400 border border-red-200 rounded hover:bg-red-50 transition" title="Eliminar">🗑️</button>}
+                      <button onClick={() => openEdit(l)} className="px-2.5 py-2 text-[13px] text-neutral-600 border border-neutral-200 rounded hover:bg-neutral-50 transition" title="Editar">✏️</button>
+                      {isAdmin && <button onClick={() => pedirEliminar(l)} className="px-2.5 py-2 text-[13px] text-red-400 border border-red-200 rounded hover:bg-red-50 transition" title="Eliminar">🗑️</button>}
                     </div>
                   </td>
                 </tr>
@@ -615,11 +615,11 @@ export default function LeadsCalculadora() {
                 </div>
               )}
               <div className="pt-2 border-t border-neutral-100 flex gap-2">
-                <button onClick={() => openEdit(l)} className="flex-1 py-1.5 text-xs text-neutral-600 border border-neutral-200 rounded hover:bg-neutral-50">✏️ Editar</button>
-                <button onClick={() => openNotas(l)} className={`flex-1 py-1.5 text-xs rounded border transition ${notas.length > 0 ? "text-primary border-primary/30 bg-primary/5 hover:bg-primary/10" : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"}`}>
+                <button onClick={() => openEdit(l)} className="flex-1 h-11 text-[13px] text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50">✏️ Editar</button>
+                <button onClick={() => openNotas(l)} className={`flex-1 h-11 text-[13px] rounded-lg border transition ${notas.length > 0 ? "text-primary border-primary/30 bg-primary/5 hover:bg-primary/10" : "text-neutral-500 border-neutral-200 hover:bg-neutral-50"}`}>
                   📝 {notas.length > 0 ? `Notas (${notas.length})` : "Notas"}
                 </button>
-                {isAdmin && <button onClick={() => pedirEliminar(l)} className="px-3 py-1.5 text-xs text-red-500 border border-red-200 rounded hover:bg-red-50">🗑️</button>}
+                {isAdmin && <button onClick={() => pedirEliminar(l)} className="px-3 h-11 text-[13px] text-red-500 border border-red-200 rounded-lg hover:bg-red-50">🗑️</button>}
               </div>
             </div>
           );
@@ -631,8 +631,8 @@ export default function LeadsCalculadora() {
         <div className="flex items-center gap-3 justify-between text-sm">
           <span className="text-neutral-400 text-xs">Pág. {page} de {totalPages} · {total} registros</span>
           <div className="flex gap-2">
-            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-4 py-2 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-[#e8f5ee] transition text-sm">← Anterior</button>
-            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="px-4 py-2 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-[#e8f5ee] transition text-sm">Siguiente →</button>
+            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-4 h-11 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-[#e8f5ee] transition text-sm">← Anterior</button>
+            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="px-4 h-11 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-[#e8f5ee] transition text-sm">Siguiente →</button>
           </div>
         </div>
       )}

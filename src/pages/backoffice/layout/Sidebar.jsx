@@ -1,62 +1,11 @@
 import { useRef, useState } from "react";
 import { navigate } from "../../../services/navigate";
 import { useAuth } from "../context/AuthContext";
-import {
-  LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
-  GraduationCap, BookOpen, FolderOpen, CheckSquare, UserCog, Layers,
-  Tag, Mail, Settings,
-} from "lucide-react";
-
-// Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos) o
-// `adminOnly: true` (fijo, no configurable). Sin ninguno de los dos, el
-// ítem es visible para cualquier rol interno logueado.
-const NAV_SECTIONS = [
-  {
-    label: "Principal",
-    items: [
-      { label: "Dashboard",   href: "/backoffice/dashboard", perm: "dashboard.ver", icon: LayoutDashboard },
-      { label: "Agenda",      href: "/backoffice/agenda", icon: Calendar },
-      { label: "Solicitudes", href: "/backoffice/solicitudes", icon: FileText },
-    ],
-  },
-  {
-    label: "Comercial",
-    items: [
-      { label: "Presupuestos Portal",   href: "/backoffice/presupuestos", icon: Calculator },
-      { label: "Calculadora — Leads",   href: "/backoffice/calculadora", icon: TrendingUp },
-      { label: "Clientes",              href: "/backoffice/clientes", icon: Users },
-      { label: "Tracker Universidades", href: "/backoffice/tracker-universidades", perm: "tracker.ver", icon: GraduationCap },
-    ],
-  },
-  {
-    label: "Operación",
-    items: [
-      { label: "Catálogo Másteres",      href: "/backoffice/catalogo-masters", perm: "catalogo.ver", icon: BookOpen },
-      { label: "Documentos",             href: "/backoffice/documentos", icon: FolderOpen },
-      { label: "Checklist / Instructivos", href: "/backoffice/checklist-servicios", alsoActive: ["/backoffice/instructivos"], perm: "checklist.ver", icon: CheckSquare },
-      { label: "Panel Asesoras",         href: "/backoffice/panel-asesoras", perm: "panel_asesoras.ver", icon: UserCog },
-    ],
-  },
-  {
-    label: "Configuración",
-    items: [
-      { label: "Planes",            href: "/backoffice/planes", perm: "planes.ver", icon: Layers },
-      { label: "Precios/Servicios", href: "/backoffice/precios", perm: "precios.ver", icon: Tag },
-      { label: "Correos / Media",   href: "/backoffice/correos", alsoActive: ["/backoffice/media"], adminOnly: true, icon: Mail },
-      { label: "Settings",          href: "/backoffice/settings", adminOnly: true, icon: Settings },
-    ],
-  },
-];
+import { NAV_SECTIONS, initials } from "./navSections";
 
 const MIN_W = 150;
 const MAX_W = 380;
 const DEFAULT_W = 210;
-
-function initials(user) {
-  if (!user) return "IL";
-  if (user.nombre) return user.nombre.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
-  return (user.email || "IL").slice(0, 2).toUpperCase();
-}
 
 export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user, onLogout }) {
   const { isAdmin, hasPermission } = useAuth();
@@ -115,7 +64,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
   return (
     <aside
       ref={asideRef}
-      className="shrink-0 flex flex-col text-white h-full overflow-hidden relative"
+      className="hidden md:flex shrink-0 flex-col text-white h-full overflow-hidden relative"
       style={{
         width: open ? `${width}px` : "0px",
         transition: "width 260ms ease-in-out",
@@ -169,7 +118,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
             if (visibleItems.length === 0) return null;
             return (
             <div key={section.label}>
-              <p className="px-3 mb-1 text-[9px] font-extrabold uppercase tracking-[0.15em] text-white/35 select-none">
+              <p className="px-3 mb-1 text-[11px] font-extrabold uppercase tracking-[0.15em] text-white/35 select-none">
                 {section.label}
               </p>
               <div className="space-y-0.5">
@@ -211,7 +160,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-white truncate">{user.nombre || user.email || "Usuario"}</p>
-                <p className="text-[10px] text-white/40 capitalize">{user.rol || "—"}</p>
+                <p className="text-[11px] text-white/40 capitalize">{user.rol || "—"}</p>
               </div>
               <button
                 onClick={onLogout}

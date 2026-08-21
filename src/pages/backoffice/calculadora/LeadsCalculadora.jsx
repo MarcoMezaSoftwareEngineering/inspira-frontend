@@ -287,6 +287,16 @@ export default function LeadsCalculadora() {
     }
   }
 
+  async function copyValue(value, label) {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      showToast(`${label} copiado`);
+    } catch {
+      showToast("No se pudo copiar");
+    }
+  }
+
   const sortedLeads = [...leads].sort((a, b) => {
     let va = a[sortKey], vb = b[sortKey];
     if (sortKey === "fecha_creacion") return sortDir === "asc" ? new Date(va) - new Date(vb) : new Date(vb) - new Date(va);
@@ -570,30 +580,15 @@ export default function LeadsCalculadora() {
 
       {/* ── Desktop: tabla ── */}
       <div className="hidden sm:block bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-neutral-100 bg-neutral-50/70">
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-neutral-100 bg-neutral-50/70">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="text-[13px] font-bold text-neutral-700">Base de leads</span>
             <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">{sortedLeads.length} visibles</span>
           </div>
-          <span className="text-[11px] text-neutral-400 hidden md:block">Click en una columna para ordenar</span>
+          <span className="text-[11px] text-neutral-400 hidden md:block">Click en una columna para ordenar · pasa el cursor sobre una fila para copiar</span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm table-fixed">
-            <colgroup>
-              <col style={{ width: "100px" }} /> {/* Fecha/Hora */}
-              <col style={{ width: "110px" }} /> {/* Nombre */}
-              <col style={{ width: "58px"  }} /> {/* País */}
-              <col style={{ width: "68px"  }} /> {/* Nota ES */}
-              <col style={{ width: "130px" }} /> {/* Área / Universidad */}
-              <col style={{ width: "72px"  }} /> {/* Presup. */}
-              <col style={{ width: "56px"  }} /> {/* AUIP */}
-              <col style={{ width: "100px" }} /> {/* CyL */}
-              <col style={{ width: "112px" }} /> {/* Email */}
-              <col style={{ width: "76px"  }} /> {/* WhatsApp */}
-              <col style={{ width: "110px" }} /> {/* Becas */}
-              <col style={{ width: "182px" }} /> {/* Notas */}
-              <col style={{ width: "56px"  }} /> {/* Acc. */}
-            </colgroup>
+          <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#e8f5ee] text-[#1a5c3a] text-left">
                 <ThSort label="Fecha / Hora" campo="fecha_creacion" {...sp} />
@@ -602,13 +597,13 @@ export default function LeadsCalculadora() {
                 <ThSort label="Nota ES"      campo="nota_espana"     center {...sp} />
                 <ThSort label="Área / Universidad" campo="area"       {...sp} />
                 <ThSort label="Presup."      campo="presupuesto"     {...sp} />
-                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">AUIP</th>
-                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">CyL</th>
-                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">Email</th>
-                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide whitespace-nowrap">WhatsApp</th>
-                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide">Becas</th>
-                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide">Notas</th>
-                <th className="px-3 py-3 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">Acc.</th>
+                <th className="px-3 py-2.5 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">AUIP</th>
+                <th className="px-3 py-2.5 font-bold text-xs uppercase tracking-wide whitespace-nowrap">CyL</th>
+                <th className="px-3 py-2.5 font-bold text-xs uppercase tracking-wide whitespace-nowrap">Email</th>
+                <th className="px-3 py-2.5 font-bold text-xs uppercase tracking-wide whitespace-nowrap">WhatsApp</th>
+                <th className="px-3 py-2.5 font-bold text-xs uppercase tracking-wide whitespace-nowrap">Becas</th>
+                <th className="px-3 py-2.5 font-bold text-xs uppercase tracking-wide whitespace-nowrap">Notas</th>
+                <th className="px-3 py-2.5 font-bold text-xs uppercase tracking-wide text-center whitespace-nowrap">Acc.</th>
               </tr>
             </thead>
             <tbody>
@@ -617,59 +612,81 @@ export default function LeadsCalculadora() {
               {!loading && sortedLeads.map((l) => {
                 const notas = Array.isArray(l.notas) ? l.notas : [];
                 return (
-                  <tr key={l.id_lead} className="border-t border-neutral-100 hover:bg-neutral-50 transition">
+                  <tr key={l.id_lead} className="group border-t border-neutral-100 hover:bg-neutral-50 transition">
 
-                    <td className="px-3 py-3">
-                      <span className="block text-neutral-700 text-xs whitespace-nowrap">{fmtFecha(l.fecha_creacion)}</span>
-                      <span className="block text-neutral-400 text-[11px] whitespace-nowrap">{fmtHora(l.fecha_creacion)}</span>
+                    <td className="px-3 py-2.5 whitespace-nowrap">
+                      <span className="block text-neutral-700 text-xs">{fmtFecha(l.fecha_creacion)}</span>
+                      <span className="block text-neutral-400 text-[11px]">{fmtHora(l.fecha_creacion)}</span>
                     </td>
 
-                    <td className="px-3 py-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-primary flex items-center justify-center text-[11px] font-bold shrink-0">
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 text-primary flex items-center justify-center text-[11px] font-bold shrink-0">
                           {initials(l.nombre)}
                         </div>
-                        <span className="text-[13px] font-bold text-neutral-800 truncate" style={{ overflowWrap: "break-word" }}>{l.nombre}</span>
+                        <span className="text-[13px] font-bold text-neutral-800 truncate max-w-[170px]" title={l.nombre}>{l.nombre}</span>
+                        <button onClick={() => copyValue(l.nombre, "Nombre")} className="shrink-0 opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-primary transition p-0.5" title="Copiar nombre" aria-label="Copiar nombre">
+                          <Copy className="w-3 h-3" />
+                        </button>
                       </div>
                     </td>
 
-                    <td className="px-3 py-3 text-xs whitespace-nowrap">{l.pais}</td>
+                    <td className="px-3 py-2.5 text-xs whitespace-nowrap">{l.pais}</td>
 
-                    <td className={`px-3 py-3 font-extrabold text-center text-sm ${scoreClass(l.nota_espana)}`}>{Number(l.nota_espana).toFixed(2)}</td>
+                    <td className={`px-3 py-2.5 font-extrabold text-center text-sm ${scoreClass(l.nota_espana)}`}>{Number(l.nota_espana).toFixed(2)}</td>
 
-                    <td className="px-3 py-3 text-xs">
-                      <span style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.area}</span>
+                    <td className="px-3 py-2.5 text-xs">
+                      <span className="block truncate max-w-[190px]" title={l.area}>{l.area}</span>
                       {l.universidad && (
-                        <span className="block text-neutral-400 mt-0.5" style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }} title={l.universidad}>{l.universidad}</span>
+                        <div className="flex items-center gap-1 min-w-0 mt-0.5">
+                          <span className="text-neutral-400 truncate max-w-[170px]" title={l.universidad}>{l.universidad}</span>
+                          <button onClick={() => copyValue(l.universidad, "Universidad")} className="shrink-0 opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-primary transition p-0.5" title="Copiar universidad" aria-label="Copiar universidad">
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </div>
                       )}
                     </td>
 
-                    <td className="px-3 py-3 text-xs whitespace-nowrap">{l.presupuesto.toLocaleString("es-ES")} €</td>
+                    <td className="px-3 py-2.5 text-xs whitespace-nowrap">{l.presupuesto.toLocaleString("es-ES")} €</td>
 
-                    <td className="px-3 py-3 text-center">
+                    <td className="px-3 py-2.5 text-center">
                       {l.auip === "si"
                         ? <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 rounded-full px-2 py-1"><CheckCircle2 className="w-3 h-3" />Sí</span>
                         : <span className="text-neutral-300 text-xs">—</span>}
                     </td>
 
-                    <td className="px-3 py-3 text-xs" title={l.cyl || ""}>
+                    <td className="px-3 py-2.5 text-xs max-w-[150px]" title={l.cyl || ""}>
                       {l.cyl
-                        ? <span style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{l.cyl}</span>
+                        ? <span className="block truncate">{l.cyl}</span>
                         : <span className="text-neutral-300">—</span>}
                     </td>
 
-                    <td className="px-3 py-3">
-                      {l.email ? <a href={`mailto:${l.email}`} className="text-blue-600 hover:underline text-xs" style={{ overflowWrap: "break-word", wordBreak: "break-all" }}>{l.email}</a> : <span className="text-neutral-300">—</span>}
+                    <td className="px-3 py-2.5">
+                      {l.email ? (
+                        <div className="flex items-center gap-1 min-w-0">
+                          <a href={`mailto:${l.email}`} className="text-blue-600 hover:underline text-xs truncate max-w-[160px]" title={l.email}>{l.email}</a>
+                          <button onClick={() => copyValue(l.email, "Email")} className="shrink-0 opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-primary transition p-0.5" title="Copiar email" aria-label="Copiar email">
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : <span className="text-neutral-300">—</span>}
                     </td>
 
-                    <td className="px-3 py-3">
-                      {l.whatsapp ? <a href={`https://wa.me/${l.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-green-600 hover:underline text-xs whitespace-nowrap">{l.whatsapp}</a> : <span className="text-neutral-300">—</span>}
+                    <td className="px-3 py-2.5">
+                      {l.whatsapp ? (
+                        <div className="flex items-center gap-1 min-w-0">
+                          <a href={`https://wa.me/${l.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-green-600 hover:underline text-xs whitespace-nowrap">{l.whatsapp}</a>
+                          <button onClick={() => copyValue(l.whatsapp, "WhatsApp")} className="shrink-0 opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-primary transition p-0.5" title="Copiar WhatsApp" aria-label="Copiar WhatsApp">
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : <span className="text-neutral-300">—</span>}
                     </td>
 
-                    <td className="px-3 py-3"><BecasPills becas={l.becas_califica} /></td>
+                    <td className="px-3 py-2.5"><div className="max-w-[220px]"><BecasPills becas={l.becas_califica} /></div></td>
 
                     {/* ── Notas: muestra contenido inline ── */}
-                    <td className="px-3 py-3 cursor-pointer" onClick={() => openNotas(l)}>
+                    <td className="px-3 py-2.5 cursor-pointer max-w-[190px]" onClick={() => openNotas(l)}>
                       {notas.length === 0 ? (
                         <span className="text-[11px] text-neutral-300 hover:text-primary/60 transition border border-dashed border-neutral-200 hover:border-primary/30 rounded-full px-2 py-0.5">
                           + nota
@@ -704,7 +721,7 @@ export default function LeadsCalculadora() {
                       )}
                     </td>
 
-                    <td className="px-3 py-3 text-center">
+                    <td className="px-3 py-2.5 text-center">
                       <button onClick={(e) => openRowMenu(e, l)} className="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-50 hover:border-neutral-300 transition" aria-label={`Acciones de ${l.nombre}`}>
                         <MoreVertical className="w-4 h-4" />
                       </button>

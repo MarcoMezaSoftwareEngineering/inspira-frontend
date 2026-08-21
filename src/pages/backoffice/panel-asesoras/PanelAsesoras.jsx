@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { boGET, boPOST, boPATCH, boDELETE } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import { DriveIcon, DriveToast, useDriveToast, openDriveFolder } from "../driveToast";
+import { Search, Copy, MoreVertical, ChevronDown, ChevronLeft, ChevronRight, Pencil, Trash2, Eye } from "lucide-react";
 
 /* ─── Constantes ─────────────────────────────────────────────────────────── */
 const SVC_KEYS = ["master", "visa", "ee", "fp", "legal"];
@@ -11,6 +12,7 @@ const TABS = [{ id: "all", label: "Todos" }, ...SVC_KEYS.map(s => ({ id: s, labe
 const FASES_VE = ["Estrategia realizada", "Preparación documentaria", "Cita programada", "Documentos listos"];
 const UNI_EST = ["ADMITIDO","LISTA DE ESPERA ALTA","LISTA DE ESPERA MEDIA","LISTA DE ESPERA BAJA","POSTULADO","POSTULAR","NO POSTULAR AUN","PROCESO PREVIO","PENDIENTE","EXCLUIDO","FINALIZADO"];
 const ESTADOS = ["ACTIVO","NO_ACTIVO","ACTIVAR"];
+const PAGE_SIZE = 15;
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 function estadoLabel(e) { return e === "NO_ACTIVO" ? "NO ACTIVO" : e; }
@@ -19,6 +21,45 @@ function miss(v) { return !v || !String(v).trim(); }
 function fv(v) { return miss(v) ? "—" : v; }
 function mkFases() { return FASES_VE.map(l => ({ label: l, done: false, pendiente: "" })); }
 function mkPagos() { return { tipo: "", total: "", pagadas: "", pendiente: "", cuotas: "" }; }
+
+function pageList(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([1, 2, total - 1, total, current - 1, current, current + 1]);
+  const sorted = [...pages].filter(p => p >= 1 && p <= total).sort((a, b) => a - b);
+  const out = [];
+  let prev = 0;
+  for (const p of sorted) {
+    if (prev && p - prev > 1) out.push("…");
+    out.push(p);
+    prev = p;
+  }
+  return out;
+}
+
+async function copyValue(value, label) {
+  if (miss(value)) return;
+  try {
+    await navigator.clipboard.writeText(String(value));
+    dialog.toast(`${label} copiado`, "success");
+  } catch {
+    dialog.toast("No se pudo copiar", "error");
+  }
+}
+
+function CopyBtn({ value, label, className = "" }) {
+  if (miss(value)) return null;
+  return (
+    <button
+      type="button"
+      onClick={e => { e.stopPropagation(); copyValue(value, label); }}
+      title={`Copiar ${label.toLowerCase()}`}
+      aria-label={`Copiar ${label.toLowerCase()}`}
+      className={`shrink-0 w-6 h-6 inline-flex items-center justify-center rounded-md text-neutral-300 hover:text-primary hover:bg-neutral-100 transition ${className}`}
+    >
+      <Copy className="w-3 h-3" />
+    </button>
+  );
+}
 
 const SVC_COLORS = {
   master: { bg: "#EEEDFE", text: "#3C3489" },
@@ -66,7 +107,8 @@ export default function PanelAsesoras() {
   const [saving, setSaving]           = useState(false);
   const [delTarget, setDelTarget]     = useState(null);
   const [panelPage, setPanelPage]     = useState(1);
-  const PAGE_SIZE = 15;
+  const [menuFor, setMenuFor]         = useState(null);
+  const [menuPos, setMenuPos]         = useState({ top: 0, left: 0 });
   const driveToastState = useDriveToast();
 
   const load = useCallback(async () => {
@@ -81,6 +123,19 @@ export default function PanelAsesoras() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!menuFor) return;
+    function onDismiss() { setMenuFor(null); }
+    document.addEventListener("click", onDismiss);
+    window.addEventListener("resize", onDismiss);
+    window.addEventListener("scroll", onDismiss, true);
+    return () => {
+      document.removeEventListener("click", onDismiss);
+      window.removeEventListener("resize", onDismiss);
+      window.removeEventListener("scroll", onDismiss, true);
+    };
+  }, [menuFor]);
+
   /* ── Lista visible ── */
   const allItems = curTab === "all"
     ? SVC_KEYS.flatMap(s => (data[s] || []).map(c => ({ ...c, _svc: s })))
@@ -94,7 +149,7 @@ export default function PanelAsesoras() {
   const safePage    = Math.min(panelPage, totalPages);
   const pageVisible = visible.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  // Reset page cuando cambia la búsqueda o filtro
+  // Reset página cuando cambia la búsqueda o filtro
   useEffect(() => { setPanelPage(1); }, [search, filterEstado, curTab]);
 
   /* ── Contadores ── */
@@ -104,6 +159,7 @@ export default function PanelAsesoras() {
   const noact     = visible.filter(c => c.estado === "NO_ACTIVO").length;
   const activar   = visible.filter(c => c.estado === "ACTIVAR").length;
   const pend      = visible.filter(c => c.pending?.length > 0).length;
+  const hayFiltros = search || filterEstado;
 
   /* ── Acciones ── */
   async function handleDelete() {
@@ -138,33 +194,74 @@ export default function PanelAsesoras() {
 
   const keyFor = c => `${c._id}_${c._svc}`;
 
+  function openRowMenu(e, c) {
+    e.stopPropagation();
+    const r = e.currentTarget.getBoundingClientRect();
+    const menuW = 200, menuH = 190, gap = 6;
+    let left = r.right - menuW;
+    let top = r.bottom + gap;
+    if (left < 8) left = 8;
+    if (top + menuH > window.innerHeight - 8) top = r.top - menuH - gap;
+    setMenuPos({ top, left });
+    setMenuFor(keyFor(c));
+  }
+
+  const menuClient = menuFor ? visible.find(c => keyFor(c) === menuFor) : null;
+
   /* ─── Render ─── */
   return (
-    <div className="p-4 sm:p-5 max-w-4xl mx-auto space-y-3 w-full overflow-x-hidden">
+    <div className="p-4 sm:p-6 space-y-4">
       <DriveToast state={driveToastState} />
 
-      {/* Cabecera */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-lg font-semibold text-neutral-800">Panel asesoras — Inspira Legal</h1>
+      {/* ── Menú contextual "···" ── */}
+      {menuClient && (
+        <div
+          className="fixed z-[70] bg-white border border-neutral-200 rounded-xl shadow-2xl p-1.5 min-w-[190px]"
+          style={{ top: menuPos.top, left: menuPos.left }}
+          onClick={e => e.stopPropagation()}
+        >
+          <button onClick={() => { setEditTarget({ item: menuClient, svc: menuClient._svc }); setAddMode(false); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
+            <Pencil className="w-4 h-4 text-neutral-400" /> Editar expediente
+          </button>
+          <button onClick={() => { setExpandedKey(keyFor(menuClient)); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
+            <Eye className="w-4 h-4 text-neutral-400" /> Ver detalle
+          </button>
+          <button onClick={() => { copyValue(menuClient.name, "Nombre"); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
+            <Copy className="w-4 h-4 text-neutral-400" /> Copiar nombre
+          </button>
+          <div className="h-px bg-neutral-100 my-1" />
+          <button onClick={() => { setDelTarget({ id: menuClient._id, svc: menuClient._svc, name: menuClient.name }); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-red-500 hover:bg-red-50 text-left">
+            <Trash2 className="w-4 h-4" /> Eliminar cliente
+          </button>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <div className="text-[11px] font-extrabold uppercase tracking-[0.11em] text-primary mb-1.5">Operación de clientes</div>
+          <h1 className="text-[24px] sm:text-[28px] font-bold text-primary leading-tight">Panel asesoras</h1>
+          <p className="text-[13px] text-neutral-500 mt-0.5">Información completa, compacta y sin perder datos operativos.</p>
+        </div>
         <div className="flex gap-2">
           <button onClick={() => exportJSON(data)}
-            className="px-3 py-1.5 text-xs rounded-lg border border-blue-300 bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 transition-colors">
+            className="h-10 px-3.5 text-[13px] rounded-lg border border-neutral-200 bg-white text-neutral-600 font-semibold hover:bg-neutral-50 transition">
             Exportar JSON
           </button>
           <button onClick={() => { setAddMode(true); setEditTarget(null); }}
-            className="px-3 py-1.5 text-xs rounded-lg border border-green-400 bg-green-50 text-green-800 font-semibold hover:bg-green-100 transition-colors">
+            className="h-10 px-3.5 text-[13px] rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition">
             + Agregar cliente
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs de servicio */}
       <div className="flex flex-wrap gap-1.5">
         {TABS.map(t => (
           <button key={t.id} onClick={() => { setCurTab(t.id); setExpandedKey(null); }}
-            className={`px-3 py-1 rounded-full text-xs border transition-colors ${
+            className={`px-3 h-8 rounded-full text-[12px] border transition-colors ${
               curTab === t.id
-                ? "bg-neutral-200 border-neutral-400 text-neutral-800 font-semibold"
+                ? "bg-primary/10 border-primary/30 text-primary font-bold"
                 : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
             }`}>
             {t.label} <span className="opacity-60">{tabCounts[t.id]}</span>
@@ -172,28 +269,42 @@ export default function PanelAsesoras() {
         ))}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-5 gap-2">
-        {[["Total",visible.length],["Activos",act],["No activos",noact],["Por activar",activar],["Con pendientes",pend]].map(([l,n]) => (
-          <div key={l} className="bg-white border border-neutral-200 rounded-lg p-2.5">
-            <div className="text-[10px] text-neutral-400 mb-0.5">{l}</div>
-            <div className="text-xl font-semibold text-neutral-800">{n}</div>
+      {/* Métricas */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {[
+          ["Total", visible.length, "text-neutral-800"],
+          ["Activos", act, "text-emerald-600"],
+          ["No activos", noact, "text-neutral-800"],
+          ["Por activar", activar, "text-amber-600"],
+          ["Con pendientes", pend, "text-red-600"],
+        ].map(([label, n, cls]) => (
+          <div key={label} className="bg-white border border-neutral-200 rounded-xl px-3 py-2.5 shadow-sm">
+            <div className="text-[11px] uppercase tracking-wide text-neutral-400 font-bold">{label}</div>
+            <div className={`text-xl font-extrabold mt-1 ${cls}`}>{n}</div>
           </div>
         ))}
       </div>
 
-      {/* Búsqueda + filtro */}
-      <div className="flex gap-2 flex-wrap">
-        <input
-          type="text" placeholder="Buscar cliente..."
-          value={search} onChange={e => setSearch(e.target.value)}
-          className="flex-1 min-w-[160px] border border-neutral-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30"
-        />
+      {/* Filtros */}
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-3 flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+          <input
+            type="text" placeholder="Buscar cliente..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full h-10 border border-neutral-200 rounded-lg pl-9 pr-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
         <select value={filterEstado} onChange={e => setFilterEstado(e.target.value)}
-          className="border border-neutral-300 rounded-lg px-2 py-1.5 text-xs bg-white text-neutral-700">
+          className="h-10 w-full sm:w-48 border border-neutral-200 rounded-lg px-3 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-primary/30">
           <option value="">Todos los estados</option>
           {ESTADOS.map(e => <option key={e} value={e}>{estadoLabel(e)}</option>)}
         </select>
+        {hayFiltros && (
+          <button onClick={() => { setSearch(""); setFilterEstado(""); }} className="h-10 px-3 text-[13px] text-neutral-500 hover:text-primary whitespace-nowrap">
+            ✕ Limpiar filtros
+          </button>
+        )}
       </div>
 
       {/* Modal agregar */}
@@ -239,29 +350,34 @@ export default function PanelAsesoras() {
 
       {/* Confirmación eliminar */}
       {delTarget && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-3">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3.5 flex items-center gap-3 flex-wrap">
           <span className="flex-1 text-sm text-red-800">
             ¿Quitar a <b>{delTarget.name}</b> del panel? (la solicitud no se elimina)
           </span>
-          <button onClick={() => setDelTarget(null)} className="px-3 py-1 text-xs border border-neutral-300 rounded bg-white hover:bg-neutral-50">Cancelar</button>
+          <button onClick={() => setDelTarget(null)} className="h-9 px-3 text-[13px] border border-neutral-300 rounded-lg bg-white hover:bg-neutral-50">Cancelar</button>
           <button onClick={handleDelete} disabled={saving}
-            className="px-3 py-1 text-xs rounded bg-red-700 text-white font-semibold disabled:opacity-50 hover:bg-red-800">
+            className="h-9 px-3 text-[13px] rounded-lg bg-red-600 text-white font-semibold disabled:opacity-50 hover:bg-red-700">
             {saving ? "…" : "Sí, quitar"}
           </button>
         </div>
       )}
 
       {/* Lista */}
-      {loading ? (
-        <div className="text-center text-sm text-neutral-400 py-10">Cargando…</div>
-      ) : visible.length === 0 ? (
-        <div className="text-center text-sm text-neutral-400 py-10">Sin resultados</div>
-      ) : (
-        <>
-          {/* Paginador — arriba */}
-          {totalPages > 1 && <Paginator safePage={safePage} totalPages={totalPages} total={visible.length} onChange={setPanelPage} />}
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-neutral-100 bg-neutral-50/70">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-[13px] font-bold text-neutral-700">Clientes</span>
+            <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">{pageVisible.length} visibles</span>
+          </div>
+          <span className="text-[11px] text-neutral-400">Pág. {safePage}/{totalPages} · {visible.length} clientes</span>
+        </div>
 
-          <div className="flex flex-col gap-2">
+        {loading ? (
+          <div className="text-center text-sm text-neutral-400 py-10">Cargando…</div>
+        ) : visible.length === 0 ? (
+          <div className="text-center text-sm text-neutral-400 py-10">Sin resultados</div>
+        ) : (
+          <div>
             {pageVisible.map(c => {
               const key = keyFor(c);
               return (
@@ -270,54 +386,35 @@ export default function PanelAsesoras() {
                   c={c}
                   isExp={expandedKey === key}
                   onToggle={() => setExpandedKey(expandedKey === key ? null : key)}
-                  onEdit={(item) => { setEditTarget({ item, svc: item._svc }); setAddMode(false); }}
-                  onDelete={() => setDelTarget({ id: c._id, svc: c._svc, name: c.name })}
+                  onMenu={e => openRowMenu(e, c)}
                 />
               );
             })}
           </div>
+        )}
 
-          {/* Paginador — abajo */}
-          {totalPages > 1 && <Paginator safePage={safePage} totalPages={totalPages} total={visible.length} onChange={setPanelPage} />}
-        </>
-      )}
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   PAGINATOR
-═══════════════════════════════════════════════════════════════════════════ */
-function Paginator({ safePage, totalPages, total, onChange }) {
-  return (
-    <div className="flex items-center justify-between gap-2 py-1 px-1">
-      <span className="text-xs text-neutral-400">
-        Pág. {safePage}/{totalPages} · {total} cliente{total !== 1 ? "s" : ""}
-      </span>
-      <div className="flex gap-1.5 flex-wrap">
-        <button
-          onClick={() => onChange(p => Math.max(1, p - 1))}
-          disabled={safePage <= 1}
-          className="px-3 py-1 text-xs border border-neutral-200 rounded-lg disabled:opacity-30 hover:bg-neutral-50 transition">
-          ← Ant.
-        </button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-          <button key={p}
-            onClick={() => onChange(p)}
-            className={`px-3 py-1 text-xs rounded-lg border transition ${
-              p === safePage
-                ? "bg-[#023A4B] text-white border-[#023A4B] font-semibold"
-                : "border-neutral-200 hover:bg-neutral-50"
-            }`}>
-            {p}
-          </button>
-        ))}
-        <button
-          onClick={() => onChange(p => Math.min(totalPages, p + 1))}
-          disabled={safePage >= totalPages}
-          className="px-3 py-1 text-xs border border-neutral-200 rounded-lg disabled:opacity-30 hover:bg-neutral-50 transition">
-          Sig. →
-        </button>
+        {!loading && visible.length > 0 && totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center gap-3 justify-between px-4 py-3 border-t border-neutral-100 bg-neutral-50/70">
+            <span className="text-[12px] text-neutral-500">Mostrando <b className="text-neutral-700">{pageVisible.length}</b> de <b className="text-neutral-700">{visible.length}</b> clientes</span>
+            <div className="flex items-center gap-1.5">
+              <button disabled={safePage === 1} onClick={() => setPanelPage(p => p - 1)} className="w-9 h-9 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-white transition inline-flex items-center justify-center" aria-label="Página anterior">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              {pageList(safePage, totalPages).map((p, i) =>
+                p === "…"
+                  ? <span key={`e${i}`} className="w-9 h-9 inline-flex items-center justify-center text-neutral-300 text-xs">…</span>
+                  : (
+                    <button key={p} onClick={() => setPanelPage(p)} className={`w-9 h-9 rounded-lg border text-[12px] font-bold transition ${p === safePage ? "bg-primary border-primary text-white" : "border-neutral-200 text-neutral-500 hover:bg-white"}`}>
+                      {p}
+                    </button>
+                  )
+              )}
+              <button disabled={safePage === totalPages} onClick={() => setPanelPage(p => p + 1)} className="w-9 h-9 rounded-lg border border-neutral-200 disabled:opacity-40 hover:bg-white transition inline-flex items-center justify-center" aria-label="Página siguiente">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -328,15 +425,17 @@ function Paginator({ safePage, totalPages, total, onChange }) {
 ═══════════════════════════════════════════════════════════════════════════ */
 function ModalWrapper({ title, onCancel, header, children }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-xl shadow-md p-4 space-y-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h3 className="font-semibold text-sm text-neutral-800">{title}</h3>
-          {header}
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl p-6 space-y-4 max-h-[92dvh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h3 className="font-bold text-neutral-800 text-base">{title}</h3>
+            {header}
+          </div>
+          <button onClick={onCancel} className="text-neutral-400 hover:text-neutral-600 text-2xl leading-none w-11 h-11 flex items-center justify-center -mr-2 -mt-1 shrink-0">×</button>
         </div>
-        <button onClick={onCancel} className="text-neutral-400 hover:text-neutral-600 text-lg leading-none mt-0.5">✕</button>
+        <div className="border-t border-neutral-100 pt-3">{children}</div>
       </div>
-      <div className="border-t border-neutral-100 pt-3">{children}</div>
     </div>
   );
 }
@@ -344,7 +443,7 @@ function ModalWrapper({ title, onCancel, header, children }) {
 /* ═══════════════════════════════════════════════════════════════════════════
    CLIENTE CARD
 ═══════════════════════════════════════════════════════════════════════════ */
-function ClienteCard({ c, isExp, onToggle, onEdit, onDelete }) {
+function ClienteCard({ c, isExp, onToggle, onMenu }) {
   const svc = c._svc;
   const colors = SVC_COLORS[svc] || SVC_COLORS.master;
   const hasBeca = c.beca?.aprobable;
@@ -358,43 +457,38 @@ function ClienteCard({ c, isExp, onToggle, onEdit, onDelete }) {
   if (c.promedio) subtitle += ` · Prom: ${c.promedio}`;
 
   return (
-    <div className={`bg-white rounded-lg overflow-hidden border ${
-      c.portalLinked ? "border-l-[3px] border-l-violet-500 border-r border-t border-b border-neutral-200" : "border-neutral-200"
-    }`}>
+    <div className={`border-t border-neutral-100 first:border-t-0 ${c.portalLinked ? "border-l-[3px] border-l-violet-500" : ""}`}>
       {/* Fila cabecera */}
-      <div className="flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-neutral-50 select-none"
-        onClick={onToggle}>
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+      <div className="flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-neutral-50 select-none" onClick={onToggle}>
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
           style={{ background: colors.bg, color: colors.text }}>
           {ini(c.name)}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-neutral-800 flex items-center gap-1.5 flex-wrap">
-            <span className="truncate">{c.name}</span>
-            {c.portalLinked && <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-200">portal</span>}
-            {hasBeca && <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">🎓 beca</span>}
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-[13px] font-bold text-neutral-800 truncate max-w-[220px]" title={c.name}>{c.name}</span>
+            <CopyBtn value={c.name} label="Nombre" />
+            {c.portalLinked && <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-200 shrink-0">portal</span>}
+            {hasBeca && <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200 shrink-0">🎓 beca</span>}
           </div>
-          <div className="text-xs text-neutral-400 truncate mt-0.5">{subtitle}</div>
+          <div className="text-[11px] text-neutral-400 truncate mt-0.5">{subtitle}</div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${estadoBadgeCls(c.estado)}`}>
+          <span className={`text-[11px] px-2 py-1 rounded-full font-bold whitespace-nowrap ${estadoBadgeCls(c.estado)}`}>
             {estadoLabel(c.estado)}
           </span>
           {hasPend && (
-            <span className="flex items-center gap-0.5 text-[10px] text-neutral-400">
+            <span className="hidden sm:flex items-center gap-1 text-[11px] text-amber-600 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
               {c.pending.length}
             </span>
           )}
-          <button onClick={e => { e.stopPropagation(); onEdit(c); }}
-            className="px-2 py-0.5 text-[11px] rounded border border-neutral-200 bg-neutral-50 text-neutral-600 hover:bg-neutral-100">
-            Editar
+          <button onClick={onMenu} className="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-50 hover:border-neutral-300 transition" aria-label={`Acciones de ${c.name}`}>
+            <MoreVertical className="w-4 h-4" />
           </button>
-          <button onClick={e => { e.stopPropagation(); onDelete(); }}
-            className="px-2 py-0.5 text-[11px] rounded border border-red-200 bg-red-50 text-red-700 hover:bg-red-100">
-            Eliminar
+          <button onClick={onToggle} className="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-50 transition" aria-label={isExp ? "Contraer" : "Expandir"}>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-150 ${isExp ? "rotate-180" : ""}`} />
           </button>
-          <span className={`text-neutral-300 text-xs transition-transform duration-150 ml-1 ${isExp ? "rotate-180" : ""}`}>▼</span>
         </div>
       </div>
 
@@ -405,45 +499,73 @@ function ClienteCard({ c, isExp, onToggle, onEdit, onDelete }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   CLIENTE DETAIL (vista expandida)
+   CLIENTE DETAIL (vista expandida, con pestañas)
 ═══════════════════════════════════════════════════════════════════════════ */
 function ClienteDetail({ c }) {
   const svc = c._svc;
+  const hasUnis = svc === "master";
+  const tabs = [
+    { id: "res", label: "Resumen" },
+    ...(hasUnis ? [{ id: "uni", label: `Universidades (${(c.unis || []).length})` }] : []),
+    { id: "pay", label: "Pagos" },
+    { id: "pen", label: `Pendientes${c.pending?.length ? ` (${c.pending.length})` : ""}` },
+  ];
+  const [tab, setTab] = useState("res");
+
   return (
-    <div className="border-t border-neutral-100 px-4 py-3 space-y-4 text-xs">
-      {svc === "master"           && <MasterDetail c={c} />}
-      {(svc === "visa" || svc === "ee") && <VisaEeDetail c={c} />}
-      {svc === "fp"               && <FpDetail c={c} />}
-      {svc === "legal"            && <LegalDetail c={c} />}
-      <PagosSection pagos={c.pagos} />
-      {c.pending?.length > 0 && (
-        <div>
-          <SectionTitle>Pendientes generales</SectionTitle>
-          <ul className="space-y-1 mt-1">
-            {c.pending.map((p, i) => (
-              <li key={i} className="flex items-start gap-1.5">
-                <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
-                {p}
-              </li>
-            ))}
-          </ul>
+    <div className="px-4 pb-4">
+      <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
+        <div className="flex gap-1 p-1.5 border-b border-neutral-100 bg-neutral-50/70 overflow-x-auto">
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`shrink-0 px-3 h-8 rounded-lg text-[11px] font-bold whitespace-nowrap transition ${
+                tab === t.id ? "bg-primary/10 text-primary" : "text-neutral-500 hover:bg-neutral-100"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
-      )}
+
+        <div className="p-3">
+          {tab === "res" && (
+            <>
+              {svc === "master"           && <MasterResumen c={c} />}
+              {(svc === "visa" || svc === "ee") && <VisaEeResumen c={c} />}
+              {svc === "fp"               && <FpResumen c={c} />}
+              {svc === "legal"            && <LegalResumen c={c} />}
+            </>
+          )}
+          {tab === "uni" && hasUnis && <UnisTab c={c} />}
+          {tab === "pay" && <PagosSection pagos={c.pagos} />}
+          {tab === "pen" && <PendientesTab pending={c.pending} />}
+        </div>
+      </div>
     </div>
   );
 }
 
-function SectionTitle({ children }) {
-  return <div className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wide border-b border-neutral-100 pb-1 mb-2">{children}</div>;
+function InfoCard({ title, children }) {
+  return (
+    <section className="border border-neutral-200 bg-neutral-50/60 rounded-xl p-3 min-w-0">
+      <div className="text-[11px] font-bold uppercase tracking-wide text-neutral-500 mb-2">{title}</div>
+      {children}
+    </section>
+  );
 }
 
 function FieldGrid({ fields }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-      {fields.map(([label, value, isMiss]) => (
-        <div key={label}>
-          <div className="text-[10px] text-neutral-400 uppercase tracking-wide">{label}</div>
-          <div className={`text-xs mt-0.5 ${isMiss ? "text-red-500 italic" : "text-neutral-700"}`}>{fv(value)}</div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2.5">
+      {fields.map(([label, value, isMiss, copyable]) => (
+        <div key={label} className="min-w-0">
+          <div className="text-[11px] text-neutral-400 uppercase tracking-wide font-bold">{label}</div>
+          <div className="flex items-center gap-1 mt-0.5 min-w-0">
+            <span className={`text-xs truncate ${isMiss ? "text-red-500 italic" : "text-neutral-700 font-semibold"}`} title={String(fv(value))}>{fv(value)}</span>
+            {copyable && !isMiss && <CopyBtn value={value} label={label} />}
+          </div>
         </div>
       ))}
     </div>
@@ -452,20 +574,18 @@ function FieldGrid({ fields }) {
 
 function CarpetaLinks({ c }) {
   return (
-    <div className="flex gap-2 flex-wrap mt-2">
-      <button
-        title="Abrir carpeta en Drive"
-        onClick={() => openDriveFolder(() => boGET(`/backoffice/panel-asesoras/${c._id}/drive-folder-url`))}
-        className="group flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md border border-neutral-200 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 hover:border-blue-200 hover:shadow-md active:scale-95 transition-all duration-150 shrink-0"
-      >
-        <DriveIcon size={12} />
-        <span className="text-neutral-500 group-hover:text-neutral-800 transition-colors font-medium">Drive</span>
-      </button>
-    </div>
+    <button
+      title="Abrir carpeta en Drive"
+      onClick={() => openDriveFolder(() => boGET(`/backoffice/panel-asesoras/${c._id}/drive-folder-url`))}
+      className="group flex items-center gap-1.5 mt-2.5 h-8 px-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 hover:border-blue-200 hover:shadow-sm active:scale-95 transition-all duration-150 shrink-0 text-[11px]"
+    >
+      <DriveIcon size={13} />
+      <span className="text-neutral-500 group-hover:text-neutral-800 transition-colors font-semibold">Abrir Drive ↗</span>
+    </button>
   );
 }
 
-function MasterDetail({ c }) {
+function MasterResumen({ c }) {
   const p = c.pasos || {};
   const steps = [
     ["Fichero", p.fichero], ["Nota media", c.notaMedia], ["CV Europass", c.cvEuropass],
@@ -473,86 +593,92 @@ function MasterDetail({ c }) {
     ["Docs completos", c.docCompletos], ["Postulación completa", p.postulacion],
   ];
   return (
-    <>
-      <div>
-        <SectionTitle>Datos generales</SectionTitle>
-        <FieldGrid fields={[
-          ["Paquete", c.paquete],
-          ["Carpeta", c.carpeta],
-          ...(c.promedio    ? [["Promedio ponderado", c.promedio]] : []),
-          ...(c.uni_origen  ? [["Uni origen", c.uni_origen]] : []),
-          ...(c.interes     ? [["Área de interés", c.interes]] : []),
-          ...(c.masterElegido ? [["Máster elegido", c.masterElegido]] : []),
-        ]} />
-        <CarpetaLinks c={c} />
+    <div className="space-y-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <InfoCard title="Identidad">
+          <FieldGrid fields={[
+            ["Nombre completo", c.name, false, true],
+            ["Paquete", c.paquete, false, true],
+            ["Carpeta", c.carpeta, false, true],
+          ]} />
+          <CarpetaLinks c={c} />
+        </InfoCard>
+        <InfoCard title="Perfil académico">
+          <FieldGrid fields={[
+            ["Uni origen", c.uni_origen, miss(c.uni_origen), true],
+            ["Área de interés", c.interes, miss(c.interes), true],
+            ["Promedio", c.promedio, miss(c.promedio), true],
+            ["Máster elegido", c.masterElegido, miss(c.masterElegido), true],
+          ]} />
+        </InfoCard>
+        <InfoCard title="Beca">
+          {c.beca ? (
+            <div className={`rounded-lg p-2.5 -m-0.5 ${c.beca.aprobable ? "bg-fuchsia-50 border border-fuchsia-200" : "bg-white border border-neutral-200"}`}>
+              <div className={`text-xs font-bold ${c.beca.aprobable ? "text-fuchsia-700" : "text-neutral-400"}`}>
+                {c.beca.aprobable ? "🎓 Beca aprobable" : "Sin análisis aprobable"}
+              </div>
+              {c.beca.detalle && <div className="text-xs text-neutral-600 mt-1">{c.beca.detalle}</div>}
+            </div>
+          ) : <div className="text-xs text-neutral-400">Sin registro</div>}
+        </InfoCard>
       </div>
 
-      {c.beca && (
-        <div className={`rounded-lg p-2.5 ${c.beca.aprobable ? "bg-fuchsia-50 border border-fuchsia-200" : "bg-neutral-50 border border-neutral-100"}`}>
-          <div className={`text-xs font-semibold ${c.beca.aprobable ? "text-fuchsia-700" : "text-neutral-400"}`}>
-            {c.beca.aprobable ? "🎓 Beca aprobable — análisis previo realizado" : "Beca: sin análisis aprobable registrado"}
-          </div>
-          {c.beca.detalle && <div className="text-xs text-neutral-600 mt-0.5">{c.beca.detalle}</div>}
-        </div>
-      )}
-
-      <div>
-        <SectionTitle>Proceso</SectionTitle>
+      <InfoCard title={`Proceso · ${steps.filter(([, ok]) => ok).length}/${steps.length} completados`}>
         <div className="flex flex-wrap gap-1.5">
           {steps.map(([l, ok]) => (
-            <span key={l} className={`px-2 py-0.5 rounded-full text-[10px] border ${ok ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}>{l}</span>
+            <span key={l} className={`px-2 py-1 rounded-full text-[11px] font-semibold border ${ok ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}>{ok ? "✓" : "×"} {l}</span>
           ))}
         </div>
-      </div>
+      </InfoCard>
+    </div>
+  );
+}
 
-      {c.unis?.length > 0 && (
-        <div>
-          <SectionTitle>Postulaciones por universidad</SectionTitle>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="text-[10px] text-neutral-400 border-b border-neutral-100">
-                  <th className="text-left py-1 pr-3 font-semibold">Universidad</th>
-                  <th className="text-left py-1 pr-3 font-semibold">Máster</th>
-                  <th className="text-left py-1 pr-3 font-semibold">F. postulación</th>
-                  <th className="text-left py-1 pr-3 font-semibold">F. resultados</th>
-                  <th className="text-left py-1 font-semibold">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {c.unis.map((u, i) => (
-                  <tr key={u._idAcceso || i} className="border-b border-neutral-50">
-                    <td className="py-1 pr-3 font-medium">{u.u}</td>
-                    <td className="py-1 pr-3 text-neutral-400">{u.master || "—"}</td>
-                    <td className="py-1 pr-3 text-neutral-500">{u.fPost || "—"}</td>
-                    <td className="py-1 pr-3 text-neutral-500">{u.fResult || "—"}</td>
-                    <td className={`py-1 ${uniEstCls(u.est)}`}>{u.est}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </>
+function UnisTab({ c }) {
+  if (!c.unis?.length) return <div className="text-xs text-neutral-400 bg-neutral-50 rounded-lg p-4 text-center">Aún no hay universidades asociadas.</div>;
+  return (
+    <div className="overflow-x-auto border border-neutral-200 rounded-lg">
+      <table className="w-full text-[11px] border-collapse min-w-[640px]">
+        <thead className="bg-neutral-50">
+          <tr className="text-neutral-500 uppercase tracking-wide">
+            <th className="text-left px-2.5 py-2 font-bold">Universidad</th>
+            <th className="text-left px-2.5 py-2 font-bold">Máster</th>
+            <th className="text-left px-2.5 py-2 font-bold">F. postulación</th>
+            <th className="text-left px-2.5 py-2 font-bold">F. resultados</th>
+            <th className="text-left px-2.5 py-2 font-bold">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {c.unis.map((u, i) => (
+            <tr key={u._idAcceso || i} className="border-t border-neutral-100">
+              <td className="px-2.5 py-2 font-semibold text-neutral-700"><div className="flex items-center gap-1 min-w-0"><span className="truncate max-w-[160px]">{u.u}</span><CopyBtn value={u.u} label="Universidad" /></div></td>
+              <td className="px-2.5 py-2 text-neutral-500"><div className="flex items-center gap-1 min-w-0"><span className="truncate max-w-[160px]">{fv(u.master)}</span>{u.master && <CopyBtn value={u.master} label="Máster" />}</div></td>
+              <td className="px-2.5 py-2 text-neutral-500 whitespace-nowrap">{fv(u.fPost)}</td>
+              <td className="px-2.5 py-2 text-neutral-500 whitespace-nowrap">{fv(u.fResult)}</td>
+              <td className={`px-2.5 py-2 font-semibold ${uniEstCls(u.est)}`}>{u.est}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 function FasesSection({ fases }) {
   const nextUndone = fases.findIndex(f => !f.done);
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       {fases.map((f, i) => {
         const isCurrent = i === nextUndone;
         return (
-          <div key={i} className={`flex items-start gap-2 px-2.5 py-1.5 rounded-lg border ${
-            f.done ? "bg-green-50 border-green-200" : isCurrent ? "bg-amber-50 border-amber-200" : "bg-neutral-50 border-neutral-100"
+          <div key={i} className={`flex items-start gap-2 px-2.5 py-2 rounded-lg border ${
+            f.done ? "bg-green-50 border-green-200" : isCurrent ? "bg-amber-50 border-amber-200" : "bg-white border-neutral-200"
           }`}>
             <span className="text-sm mt-0.5 flex-shrink-0">{f.done ? "✅" : isCurrent ? "🔶" : "⬜"}</span>
-            <div className="flex-1">
-              <div className="text-xs font-semibold">{f.label}</div>
-              {f.pendiente ? <div className="text-[10px] text-red-600 italic mt-0.5">⚠ {f.pendiente}</div>
-                : f.done ? <div className="text-[10px] text-green-600 mt-0.5">Completada</div> : null}
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-bold text-neutral-700">{f.label}</div>
+              {f.pendiente ? <div className="text-[11px] text-red-600 italic mt-0.5">⚠ {f.pendiente}</div>
+                : f.done ? <div className="text-[11px] text-green-600 mt-0.5">Completada</div> : null}
             </div>
           </div>
         );
@@ -561,75 +687,85 @@ function FasesSection({ fases }) {
   );
 }
 
-function VisaEeDetail({ c }) {
+function VisaEeResumen({ c }) {
   const svc = c._svc;
   const isVisa = svc === "visa";
   return (
-    <>
-      <div>
-        <SectionTitle>Fases del proceso</SectionTitle>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
+      <InfoCard title="Fases del proceso">
         <FasesSection fases={c.fases || mkFases()} />
-      </div>
-      <div>
-        <SectionTitle>Datos de {isVisa ? "visa" : "estancia"}</SectionTitle>
+      </InfoCard>
+      <InfoCard title={`Datos de ${isVisa ? "visa" : "estancia"}`}>
         {isVisa ? (
           <FieldGrid fields={[
             ["Fecha cita consulado", c.fechaCita, miss(c.fechaCita)],
-            ["Carpeta", c.carpeta],
-            ["Pasaporte", c.pasaporte, miss(c.pasaporte)],
+            ["Carpeta", c.carpeta, false, true],
+            ["Pasaporte", c.pasaporte, miss(c.pasaporte), true],
             ["Fecha nacimiento", c.fNac, miss(c.fNac)],
-            ["NIE", c.nie, miss(c.nie)],
-            ["Nº expediente", c.expediente, miss(c.expediente)],
+            ["NIE", c.nie, miss(c.nie), true],
+            ["Nº expediente", c.expediente, miss(c.expediente), true],
             ["Llegada a España", c.llegada, miss(c.llegada)],
             ["Plazo máximo", c.plazoMax, miss(c.plazoMax)],
             ["Plazo ideal", c.plazoIdeal, miss(c.plazoIdeal)],
           ]} />
         ) : (
           <FieldGrid fields={[
-            ["Detalle", c.detalle],
-            ["Carpeta", c.carpeta],
+            ["Detalle", c.detalle, miss(c.detalle), true],
+            ["Carpeta", c.carpeta, false, true],
             ["Llegada a España", c.llegada, miss(c.llegada)],
             ["Plazo máximo", c.plazoMax, miss(c.plazoMax)],
             ["Plazo ideal", c.plazoIdeal, miss(c.plazoIdeal)],
-            ["Pasaporte", c.pasaporte, miss(c.pasaporte)],
+            ["Pasaporte", c.pasaporte, miss(c.pasaporte), true],
             ["Fecha nacimiento", c.fNac, miss(c.fNac)],
-            ["NIE", c.nie, miss(c.nie)],
-            ["Nº expediente", c.expediente, miss(c.expediente)],
+            ["NIE", c.nie, miss(c.nie), true],
+            ["Nº expediente", c.expediente, miss(c.expediente), true],
             ["F. presentación", c.fPresentacion, miss(c.fPresentacion)],
           ]} />
         )}
         <CarpetaLinks c={c} />
-      </div>
-    </>
-  );
-}
-
-function FpDetail({ c }) {
-  return (
-    <div>
-      <SectionTitle>FP / Grado</SectionTitle>
-      <FieldGrid fields={[
-        ["Paquete", c.paquete], ["Carpeta", c.carpeta],
-        ["Centro", c.centro],  ["Estado admisión", c.estadoAdm],
-        ["NIE", c.nie, miss(c.nie)], ["Nº expediente", c.expediente, miss(c.expediente)],
-      ]} />
-      <CarpetaLinks c={c} />
+      </InfoCard>
     </div>
   );
 }
 
-function LegalDetail({ c }) {
+function FpResumen({ c }) {
   return (
-    <div>
-      <SectionTitle>Legal / Extranjería</SectionTitle>
+    <InfoCard title="FP / Grado">
       <FieldGrid fields={[
-        ["Tipo", c.tipo], ["Resultado", c.resultado],
-        ["Asesor", c.asesor], ["Carpeta", c.carpeta],
-        ["NIE", c.nie, miss(c.nie)], ["Nº expediente", c.expediente, miss(c.expediente)],
-        ["Fecha resolución", c.resolucion, miss(c.resolucion)], ["Paquete", c.paquete],
+        ["Paquete", c.paquete, false, true], ["Carpeta", c.carpeta, false, true],
+        ["Centro", c.centro, miss(c.centro), true],  ["Estado admisión", c.estadoAdm, miss(c.estadoAdm)],
+        ["NIE", c.nie, miss(c.nie), true], ["Nº expediente", c.expediente, miss(c.expediente), true],
       ]} />
       <CarpetaLinks c={c} />
-    </div>
+    </InfoCard>
+  );
+}
+
+function LegalResumen({ c }) {
+  return (
+    <InfoCard title="Legal / Extranjería">
+      <FieldGrid fields={[
+        ["Tipo", c.tipo, miss(c.tipo)], ["Resultado", c.resultado, miss(c.resultado)],
+        ["Asesor", c.asesor, miss(c.asesor)], ["Carpeta", c.carpeta, false, true],
+        ["NIE", c.nie, miss(c.nie), true], ["Nº expediente", c.expediente, miss(c.expediente), true],
+        ["Fecha resolución", c.resolucion, miss(c.resolucion)], ["Paquete", c.paquete, false, true],
+      ]} />
+      <CarpetaLinks c={c} />
+    </InfoCard>
+  );
+}
+
+function PendientesTab({ pending }) {
+  if (!pending?.length) return <div className="text-xs text-neutral-400 bg-neutral-50 rounded-lg p-4 text-center">Sin pendientes registrados.</div>;
+  return (
+    <ul className="space-y-1.5">
+      {pending.map((p, i) => (
+        <li key={i} className="flex items-start gap-2 text-xs text-neutral-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+          <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+          {p}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -637,22 +773,21 @@ function PagosSection({ pagos }) {
   const p = pagos || mkPagos();
   const pct = p.total ? Math.min(100, Math.round((parseFloat(p.pagadas)||0) / parseFloat(p.total) * 100)) : 0;
   return (
-    <div>
-      <SectionTitle>Pagos</SectionTitle>
-      <div className="grid grid-cols-3 gap-3 mb-2">
-        {[["Tipo", p.tipo], ["Total (€)", p.total], ["Cuotas", p.cuotas]].map(([l,v]) => (
-          <div key={l}>
-            <div className="text-[10px] text-neutral-400">{l}</div>
-            <div className="text-xs text-neutral-700">{fv(v)}</div>
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {[["Tipo", p.tipo], ["Total (€)", p.total], ["Cuotas", p.cuotas], ["Pagado (€)", p.pagadas]].map(([l,v]) => (
+          <div key={l} className="border border-neutral-200 bg-neutral-50/60 rounded-lg p-2.5">
+            <div className="text-[11px] text-neutral-400 uppercase tracking-wide font-bold">{l}</div>
+            <div className="text-xs font-bold text-neutral-700 mt-0.5">{fv(v)}</div>
           </div>
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-[10px] text-neutral-400 min-w-[68px]">Pagado: {fv(p.pagadas)}</span>
-        <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden border border-neutral-200">
+        <span className="text-[11px] text-neutral-400 min-w-[68px]">Progreso</span>
+        <div className="flex-1 h-2 rounded-full bg-neutral-100 overflow-hidden border border-neutral-200">
           <div className="h-full rounded-full bg-green-600 transition-all" style={{ width: `${pct}%` }} />
         </div>
-        <span className={`text-[10px] min-w-[78px] text-right ${miss(p.pendiente) ? "text-red-500" : "text-green-700"}`}>
+        <span className={`text-[11px] font-bold min-w-[100px] text-right ${miss(p.pendiente) ? "text-red-500" : "text-green-700"}`}>
           Pendiente: {fv(p.pendiente)}
         </span>
       </div>
@@ -925,11 +1060,11 @@ function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
       {/* Botones */}
       <div className="flex justify-end gap-2 pt-2 border-t border-neutral-100">
         <button onClick={onCancel} type="button"
-          className="px-4 py-1.5 text-xs border border-neutral-200 rounded-lg text-neutral-600 hover:bg-neutral-50">
+          className="h-10 px-4 text-[13px] border border-neutral-200 rounded-lg text-neutral-600 hover:bg-neutral-50">
           Cancelar
         </button>
         <button onClick={handleSubmit} disabled={saving} type="button"
-          className="px-4 py-1.5 text-xs rounded-lg bg-primary text-white font-semibold disabled:opacity-50 hover:opacity-90">
+          className="h-10 px-4 text-[13px] rounded-lg bg-primary text-white font-semibold disabled:opacity-50 hover:opacity-90">
           {saving ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear cliente"}
         </button>
       </div>

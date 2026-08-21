@@ -12,6 +12,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
 
   function itemVisible(item) {
     if (item.adminOnly) return isAdmin;
+    if (item.anyPerm) return isAdmin || item.anyPerm.some((p) => hasPermission(p));
     if (item.perm) return hasPermission(item.perm);
     return true;
   }

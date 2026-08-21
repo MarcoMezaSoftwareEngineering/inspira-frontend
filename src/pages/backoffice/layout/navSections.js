@@ -1,12 +1,12 @@
 import {
   LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
-  GraduationCap, BookOpen, FolderOpen, CheckSquare, UserCog, Layers,
-  Tag, Mail, Settings, Scale,
+  GraduationCap, BookOpen, FolderOpen, CheckSquare, UserCog, Settings,
 } from "lucide-react";
 
-// Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos) o
-// `adminOnly: true` (fijo, no configurable). Sin ninguno de los dos, el
-// ítem es visible para cualquier rol interno logueado.
+// Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos),
+// `adminOnly: true` (fijo, no configurable) o `anyPerm: [...]` (visible para
+// admin o para quien tenga alguno de esos permisos). Sin ninguno de los tres,
+// el ítem es visible para cualquier rol interno logueado.
 // Compartido entre Sidebar (desktop) y MobileDrawer (móvil) para no duplicar.
 export const NAV_SECTIONS = [
   {
@@ -38,11 +38,16 @@ export const NAV_SECTIONS = [
   {
     label: "Configuración",
     items: [
-      { label: "Planes",            href: "/backoffice/planes", perm: "planes.ver", icon: Layers },
-      { label: "Precios/Servicios", href: "/backoffice/precios", perm: "precios.ver", icon: Tag },
-      { label: "Correos / Media",   href: "/backoffice/correos", alsoActive: ["/backoffice/media"], adminOnly: true, icon: Mail },
-      { label: "Cumplimiento legal", href: "/backoffice/legal", adminOnly: true, icon: Scale },
-      { label: "Settings",          href: "/backoffice/settings", adminOnly: true, icon: Settings },
+      {
+        label: "Configuración",
+        href: "/backoffice/configuracion",
+        anyPerm: ["planes.ver", "precios.ver"],
+        alsoActive: [
+          "/backoffice/planes", "/backoffice/precios", "/backoffice/correos",
+          "/backoffice/media", "/backoffice/legal", "/backoffice/settings",
+        ],
+        icon: Settings,
+      },
     ],
   },
 ];

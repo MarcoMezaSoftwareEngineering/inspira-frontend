@@ -9,8 +9,6 @@ import TabView from "./layout/TabView";
 import { AuthProvider } from "./context/AuthContext";
 import BackofficeLogin from "./login/BackofficeLogin";
 import Dashboard from "./dashboard/Dashboard";
-import PreciosServicios from "./precios/PreciosServicios";
-import UsuariosSettings from "./settings/UsuariosSettings";
 import Clientes from "./clientes/Clientes";
 import ChecklistServicios from "./checklist/ChecklistServicios";
 import SolicitudesList from "./solicitudes/SolicitudesList";
@@ -20,13 +18,22 @@ import DocumentosBackoffice from "./documentos/DocumentosBackoffice";
 import LeadsCalculadora from "./calculadora/LeadsCalculadora";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
-import EmailTemplates from "./correos/EmailTemplates";
-import MediaPanel from "./media/MediaPanel";
 import PresupuestosPortal from "./presupuestos/PresupuestosPortal";
-import CumplimientoLegal from "./legal/CumplimientoLegal";
 import CatalogoMasters from "./catalogo/CatalogoMasters";
-import PlanesAdmin from "./planes/PlanesAdmin";
 import TrackerUniversidades from "./tracker/TrackerUniversidades";
+import ConfiguracionPanel from "./configuracion/ConfiguracionPanel";
+
+// Módulo unificado de Configuración: las rutas antiguas siguen funcionando y
+// abren el panel en la pestaña correspondiente.
+const CONFIG_TAB_BY_PATH = {
+  "/backoffice/configuracion": "planes",
+  "/backoffice/planes": "planes",
+  "/backoffice/precios": "precios",
+  "/backoffice/correos": "correos",
+  "/backoffice/media": "media",
+  "/backoffice/legal": "legal",
+  "/backoffice/settings": "settings",
+};
 
 export default function BackofficeApp() {
   const [path, setPath] = useState(window.location.pathname);
@@ -180,38 +187,19 @@ export default function BackofficeApp() {
             {path === "/backoffice/documentos" && <DocumentosBackoffice />}
 
             {path === "/backoffice/clientes" && <Clientes />}
-            {path === "/backoffice/precios" && <ModuleGate perm="precios.ver"><PreciosServicios /></ModuleGate>}
 
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
-
-            {path === "/backoffice/legal" && <CumplimientoLegal />}
 
             {path === "/backoffice/calculadora" && <LeadsCalculadora />}
 
             {path === "/backoffice/tracker-universidades" && <ModuleGate perm="tracker.ver"><TrackerUniversidades /></ModuleGate>}
 
             {path === "/backoffice/catalogo-masters" && <ModuleGate perm="catalogo.ver"><CatalogoMasters /></ModuleGate>}
-            {path === "/backoffice/planes" && <ModuleGate perm="planes.ver"><PlanesAdmin /></ModuleGate>}
 
             {path === "/backoffice/panel-asesoras" && <ModuleGate perm="panel_asesoras.ver"><PanelAsesoras /></ModuleGate>}
 
-            {(path === "/backoffice/correos" || path === "/backoffice/media") && (
-              <ModuleGate adminOnly>
-                <TabView
-                  key="correos-media"
-                  initialTab={path === "/backoffice/media" ? 1 : 0}
-                  tabs={[
-                    { label: "Correos", content: <EmailTemplates /> },
-                    { label: "Media",   content: <MediaPanel /> },
-                  ]}
-                />
-              </ModuleGate>
-            )}
-
-            {path === "/backoffice/settings" && (
-              <ModuleGate adminOnly>
-                <UsuariosSettings />
-              </ModuleGate>
+            {CONFIG_TAB_BY_PATH[path] && (
+              <ConfiguracionPanel initialTabId={CONFIG_TAB_BY_PATH[path]} />
             )}
           </main>
         </div>

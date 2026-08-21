@@ -22,6 +22,7 @@ export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
 
   function itemVisible(item) {
     if (item.adminOnly) return isAdmin;
+    if (item.anyPerm) return isAdmin || item.anyPerm.some((p) => hasPermission(p));
     if (item.perm) return hasPermission(item.perm);
     return true;
   }

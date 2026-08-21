@@ -19,24 +19,21 @@ export default function Compare() {
   const showInspira = view === "both" || view === "inspira";
 
   return (
-    <section className="py-24 px-6" style={{ background: "#F3F7F8" }}>
-      <div className="max-w-5xl mx-auto">
-        <Reveal className="text-center mb-11">
-          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#F49E4B" }}>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#F49E4B" }} />
-            Decisión
-          </span>
-          <h2 className="font-fraunces text-3xl md:text-5xl font-bold text-primary mt-3 tracking-tight">
-            Hacerlo solo vs. hacerlo con un sistema.
-          </h2>
-          <p className="text-neutral-500 mt-4 max-w-xl mx-auto leading-relaxed">
-            La diferencia no es "tener ayuda"; es reducir incertidumbre, errores repetidos
-            y semanas perdidas comparando información dispersa.
+    <section className="compare">
+      <div className="v4-container">
+        <Reveal className="section-head">
+          <div>
+            <span className="eyebrow"><span className="dot" />Decisión</span>
+            <h2>Hacerlo solo vs. hacerlo con un sistema.</h2>
+          </div>
+          <p>
+            La diferencia no es “tener ayuda”; es reducir incertidumbre, errores
+            repetidos y semanas perdidas comparando información dispersa.
           </p>
         </Reveal>
 
-        <div className="flex justify-center mb-6">
-          <div className="flex p-1.5 rounded-2xl gap-1" style={{ background: "#edf3f4" }}>
+        <Reveal className="compare-box" delay={120}>
+          <div className="compare-toggle">
             {[
               ["both", "Comparar"],
               ["solo", "Solo"],
@@ -44,29 +41,25 @@ export default function Compare() {
             ].map(([key, label]) => (
               <button
                 key={key}
+                type="button"
+                className={view === key ? "active" : undefined}
                 onClick={() => setView(key)}
-                className={`px-4.5 py-2.5 rounded-xl text-sm font-extrabold transition-all ${
-                  view === key ? "bg-white text-primary shadow-[0_5px_14px_rgba(18,52,61,.08)]" : "text-[#678087]"
-                }`}
               >
                 {label}
               </button>
             ))}
           </div>
-        </div>
-
-        <Reveal className="bg-white border border-neutral-200 rounded-[28px] overflow-hidden" delay={120}>
-          <div className={`grid ${view === "both" ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
+          <div className={`compare-content${view === "both" ? "" : " single"}`}>
             {showSolo && (
-              <div className={`p-9 ${view === "both" ? "md:border-r border-neutral-200" : ""}`}>
-                <h3 className="text-2xl font-bold mb-5">Hacerlo solo</h3>
-                <div className="grid gap-3">
+              <div className="compare-side">
+                <h3>Hacerlo solo</h3>
+                <div className="compare-list">
                   {solo.map(([title, desc]) => (
-                    <div key={title} className="flex gap-3 items-start p-3 rounded-2xl bg-[#f8fbfb] text-sm">
-                      <span className="text-neutral-400">✕</span>
+                    <div className="compare-row" key={title}>
+                      ◯
                       <div>
-                        <b className="block mb-0.5">{title}</b>
-                        <span className="text-neutral-500">{desc}</span>
+                        <b>{title}</b>
+                        <span>{desc}</span>
                       </div>
                     </div>
                   ))}
@@ -74,15 +67,15 @@ export default function Compare() {
               </div>
             )}
             {showInspira && (
-              <div className="p-9">
-                <h3 className="text-2xl font-bold mb-5">Con Inspira</h3>
-                <div className="grid gap-3">
+              <div className="compare-side">
+                <h3>Con Inspira</h3>
+                <div className="compare-list">
                   {inspira.map(([title, desc]) => (
-                    <div key={title} className="flex gap-3 items-start p-3 rounded-2xl bg-[#f8fbfb] text-sm">
-                      <span className="font-black" style={{ color: "#1d6a4a" }}>✓</span>
+                    <div className="compare-row" key={title}>
+                      ✓
                       <div>
-                        <b className="block mb-0.5">{title}</b>
-                        <span className="text-neutral-500">{desc}</span>
+                        <b>{title}</b>
+                        <span>{desc}</span>
                       </div>
                     </div>
                   ))}

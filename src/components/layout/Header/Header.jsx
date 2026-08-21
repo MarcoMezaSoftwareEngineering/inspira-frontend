@@ -5,57 +5,55 @@ import { navigate } from "../../../services/navigate";
 import { navItems } from "./header.data";
 import MobileMenu from "./MobileMenu";
 import UserMenu from "./UserMenu";
-import LoginButton, { loginGoogle } from "./LoginButton";
+import { loginGoogle } from "./LoginButton";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [path, setPath] = useState(
+    typeof window !== "undefined" ? window.location.pathname : "/"
+  );
   const { user } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
+    const onPop = () => setPath(window.location.pathname);
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("popstate", onPop);
+    };
   }, []);
 
   const go = (e, href) => {
     e.preventDefault();
     navigate(href);
+    setPath(href);
   };
 
   return (
     <>
-      <div
-        className={`fixed left-0 right-0 z-40 px-3.5 transition-all duration-300 ${
-          scrolled ? "top-2" : "top-3"
-        }`}
-      >
-        <header
-          className={`max-w-[1180px] mx-auto border border-[#063f50]/10 bg-white/90 backdrop-blur-xl rounded-2xl shadow-[0_12px_34px_rgba(20,50,60,.08)] flex items-center justify-between transition-all duration-300 pl-4 pr-3.5 ${
-            scrolled ? "h-[60px] shadow-[0_15px_34px_rgba(20,50,60,.12)]" : "h-[68px]"
-          }`}
-        >
-          {/* Logo */}
-          <a href="/" onClick={(e) => go(e, "/")} className="flex-shrink-0 flex items-center">
-            <img src={logo} alt="Inspira" className="h-8 w-auto object-contain" />
+      <div className={`v4-nav-wrap${scrolled ? " scrolled" : ""}`}>
+        <header className="v4-nav">
+          <a href="/" onClick={(e) => go(e, "/")} className="v4-logo-brand">
+            <img src={logo} alt="Inspira Legal" />
           </a>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="v4-navlinks">
             {navItems.map((item) => {
+              // Como en el mockup: el estado activo solo se marca en las rutas
+              // internas (servicios / calculadora), nunca en "Inicio".
+              const active = item.href !== "/" && path === item.href;
               if (item.badge) {
                 return (
                   <a
                     key={item.label}
                     href={item.href}
                     onClick={(e) => go(e, item.href)}
-                    className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold text-white rounded-full transition-all hover:opacity-90 hover:scale-105"
-                    style={{ background: "#1D6A4A" }}
+                    className={`v4-pill-free${active ? " route-active" : ""}`}
                   >
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-yellow-400" />
-                    </span>
+                    <span className="v4-pulse" />
                     {item.label}
                   </a>
                 );
@@ -65,11 +63,7 @@ export default function Header() {
                   key={item.label}
                   href={item.href}
                   onClick={(e) => go(e, item.href)}
-                  className={`px-3 py-2.5 text-[13px] font-semibold rounded-lg transition-colors ${
-                    item.highlight
-                      ? "text-accent hover:text-accent-dark hover:bg-orange-50"
-                      : "text-[#34515a] hover:text-primary hover:bg-[#f2f6f7]"
-                  }`}
+                  className={active ? "route-active" : undefined}
                 >
                   {item.label}
                 </a>
@@ -77,60 +71,30 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Right: Login */}
-          <div className="hidden md:flex items-center gap-3">
-            {!user && <LoginButton />}
-            {user && <UserMenu user={user} />}
-          </div>
-
-          {/* Mobile: calculadora + login/panel + hamburguesa */}
-          <div className="md:hidden flex items-center gap-1.5">
-            <a
-              href="/calculadora-master"
-              onClick={(e) => { e.preventDefault(); navigate("/calculadora-master"); }}
-              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full whitespace-nowrap text-white"
-              style={{ background: "#1D6A4A" }}
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-yellow-400" />
-              </span>
-              Calculadora
-            </a>
+          <div className="v4-nav-actions">
             {!user && (
-              <button
-                type="button"
-                onClick={loginGoogle}
-                className="bg-[#1D6A4A] text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap"
-              >
-                Iniciar
+              <button className="v4-login-btn" type="button" onClick={loginGoogle}>
+                <span className="v4-login-long">Iniciar con Google</span>
+                <span className="v4-login-short">Iniciar</span>
               </button>
             )}
-            {user && (
-              <button
-                type="button"
-                onClick={() => navigate("/panel")}
-                className="bg-[#1D6A4A] text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap"
-              >
-                Mi Panel
-              </button>
-            )}
+            {user && <UserMenu user={user} />}
             <button
+              className="v4-menu-btn"
               type="button"
-              onClick={() => setMobileOpen(true)}
-              className="w-[38px] h-[38px] grid place-items-center rounded-xl bg-[#edf4f5] text-[#34515a]"
               aria-label="Abrir menú"
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen(true)}
             >
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 6h14M3 10h14M3 14h14" strokeLinecap="round" />
-              </svg>
+              ☰
             </button>
           </div>
         </header>
       </div>
 
-      {/* Spacer for fixed header */}
-      <div className="h-[92px]" />
+      {/* En Home el hero ya reserva el espacio del nav flotante (padding-top 160px),
+          igual que en el mockup. En el resto de rutas hace falta el spacer. */}
+      {path !== "/" && <div className="v4-route-spacer" />}
 
       <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
     </>

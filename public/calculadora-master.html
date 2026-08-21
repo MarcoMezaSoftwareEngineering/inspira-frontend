@@ -3,141 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src https://api.inspira-legal.cloud; object-src 'none'; base-uri 'none';" />
-<title>Calculadora de Máster — Inspira</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Calculadora Máster España — Inspira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--verde:#1D6A4A;--verde-claro:#E8F5EE;--amarillo:#F5C842;--amarillo-claro:#FFFBEA;--azul:#1A3557;--texto:#1A1A2E;--gris:#6B7280;--gris-claro:#F4F6F9;--borde:#E2E8F0;--rojo:#DC2626;--naranja:#F59E0B;}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(700px 460px at 88% 5%,rgba(154,206,255,.14),transparent 70%),linear-gradient(180deg,#eef6f8 0%,#f7fafb 60%,#fff 100%);min-height:100vh;color:var(--texto)}
-.hero{position:relative;text-align:center;padding:52px 24px 28px;overflow:hidden}
-.hero-badge{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--borde);color:var(--verde);font-size:10.5px;font-weight:800;padding:8px 16px;border-radius:999px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:16px;box-shadow:0 7px 18px rgba(18,52,61,.06)}
-.hero-badge:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--amarillo);box-shadow:0 0 0 5px rgba(245,200,66,.14)}
-.hero h1{font-family:'Fraunces',serif;font-weight:800;font-size:clamp(28px,4.6vw,44px);letter-spacing:-.03em;color:#0a523f;line-height:1.05;margin-bottom:12px}
-.hero p{font-size:14px;color:var(--gris);max-width:520px;margin:0 auto;line-height:1.7}
-.main{max-width:780px;margin:0 auto;padding:0 18px 64px}
-.steps-nav{display:flex;gap:6px;justify-content:center;align-items:center;margin-bottom:30px}
-.step-dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:#fff;border:1.5px solid var(--borde);color:var(--gris);transition:all .3s}
-.step-dot.active{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:0 8px 18px rgba(29,106,74,.28)}
-.step-dot.done{background:var(--verde-claro);border-color:var(--verde-claro);color:var(--verde)}
-.step-line{width:36px;height:2px;background:var(--borde);align-self:center;transition:background .3s}.step-line.done{background:var(--verde)}
-.card{background:#fff;border-radius:26px;padding:34px;box-shadow:0 20px 55px rgba(18,52,61,.09);border:1px solid var(--borde);display:none;animation:fadeUp .35s ease}.card.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.card-step-label{font-size:10.5px;font-weight:800;color:var(--verde);text-transform:uppercase;letter-spacing:.11em;margin-bottom:6px}
-.card-title{font-family:'Fraunces',serif;font-weight:700;font-size:26px;letter-spacing:-.02em;color:var(--azul);margin-bottom:5px}
-.card-sub{font-size:13px;color:var(--gris);margin-bottom:26px;line-height:1.6}
-.field{margin-bottom:19px}
-.field label{display:block;font-size:12.5px;font-weight:700;color:var(--texto);margin-bottom:7px}
-.req{color:var(--rojo);margin-left:2px}
-.field input,.field select{width:100%;padding:13px 15px;border:1.5px solid var(--borde);border-radius:13px;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--texto);background:#fff;outline:none;transition:all .18s}
-.field input:focus,.field select:focus{border-color:var(--verde);box-shadow:0 0 0 4px rgba(29,106,74,.08)}
-.hint{font-size:11.5px;color:var(--gris);margin-top:6px;line-height:1.5}.hint strong{color:var(--verde);font-weight:700}
-.hint-auip{font-size:11.5px;margin-top:8px;padding:9px 13px;border-radius:11px;display:none}
-.hint-auip.si{background:#f0fdf4;border:1px solid #22c55e;color:#166534}
-.hint-auip.no{background:#fef3c7;border:1px solid var(--naranja);color:#92400e}
-.field-error{font-size:11px;color:var(--rojo);margin-top:4px;display:none}
-.field.err input,.field.err select{border-color:var(--rojo);background:#fffafa}.field.err .field-error{display:block}
-.field.err-pills .err-label{color:var(--rojo);font-weight:700}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-input[type=range]{width:100%;height:7px;border-radius:99px;background:linear-gradient(to right,var(--verde) 0%,var(--verde) var(--pct,30%),var(--borde) var(--pct,30%));outline:none;border:none;cursor:pointer;-webkit-appearance:none;padding:0;margin-top:6px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--verde);border:3px solid #fff;box-shadow:0 3px 10px rgba(29,106,74,.35);cursor:pointer}
-.slider-val{font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--verde);margin-bottom:7px;letter-spacing:-.02em}
-.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--gris);margin-top:7px}
-.pills{display:flex;flex-wrap:wrap;gap:9px}
-.pill{padding:10px 17px;border:1.5px solid var(--borde);border-radius:999px;font-size:13px;cursor:pointer;transition:all .18s;user-select:none;background:#fff}
-.pill:hover{border-color:var(--verde);transform:translateY(-1px)}.pill.selected{background:var(--verde);color:#fff;border-color:var(--verde);box-shadow:0 8px 18px rgba(29,106,74,.18)}
-.master-pills{display:flex;flex-wrap:wrap;gap:8px}
-.master-pill{padding:9px 15px;border:1.5px solid var(--borde);border-radius:999px;font-size:12.5px;cursor:pointer;transition:all .18s;user-select:none;background:#fff}
-.master-pill:hover{border-color:var(--azul);transform:translateY(-1px)}.master-pill.selected{background:var(--azul);color:#fff;border-color:var(--azul);box-shadow:0 8px 18px rgba(26,53,87,.18)}
-.master-pill.nosabe{border-style:dashed;color:var(--gris)}
-.master-pill.nosabe.selected{background:var(--gris);border-color:var(--gris);color:#fff;border-style:solid}
-.vida-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.vida-card{padding:18px 15px;border:2px solid var(--borde);border-radius:18px;cursor:pointer;text-align:center;transition:all .22s;background:#fff}
-.vida-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(18,52,61,.07)}
-.vida-card.selected{border-color:var(--verde);background:var(--verde-claro);box-shadow:0 12px 26px rgba(29,106,74,.12)}
-.vida-icon{font-size:27px;margin-bottom:7px}.vida-nombre{font-size:13px;font-weight:700;color:var(--azul);margin-bottom:4px}.vida-desc{font-size:11px;color:var(--gris);line-height:1.5}
-.checks-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.check-item{display:flex;align-items:center;gap:9px;padding:10px 13px;border:1.5px solid var(--borde);border-radius:12px;cursor:pointer;font-size:12.5px;transition:all .18s;background:#fff}
-.check-item:hover{border-color:var(--verde);background:var(--verde-claro)}
-.check-item input[type=checkbox]{accent-color:var(--verde);width:15px;height:15px;flex-shrink:0}
-.btn-row{display:flex;gap:11px;justify-content:flex-end;margin-top:26px}
-.btn{padding:13px 26px;border-radius:13px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:800;cursor:pointer;border:none;transition:all .2s}
-.btn-back{background:var(--gris-claro);color:var(--gris)}.btn-back:hover{background:var(--borde)}
-.btn-next{background:var(--verde);color:#fff;box-shadow:0 10px 22px rgba(29,106,74,.24)}.btn-next:hover{background:#155a3d;transform:translateY(-2px)}
-.resultado{display:none;animation:fadeUp .4s ease}.resultado.active{display:block}
-.res-header{position:relative;overflow:hidden;background:linear-gradient(135deg,#063d4d,#0e7a4e 100%);border-radius:26px 26px 0 0;padding:30px 32px;color:#fff}
-.res-header:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-110px;top:-150px;background:radial-gradient(circle,rgba(245,200,66,.28),transparent 68%)}
-.res-header>*{position:relative;z-index:1}
-.res-header .saludo{font-size:12.5px;opacity:.8;margin-bottom:5px}
-.res-header h2{font-family:'Fraunces',serif;font-weight:700;font-size:28px;letter-spacing:-.02em;margin-bottom:7px}
-.res-header .res-sub{font-size:12px;opacity:.75;line-height:1.6}
-.res-body{background:#fff;border:1px solid var(--borde);border-top:none;border-radius:0 0 26px 26px;padding:30px 32px;box-shadow:0 20px 55px rgba(18,52,61,.09)}
-.sec{margin-bottom:28px}
-.sec-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--verde);margin-bottom:13px;padding-bottom:9px;border-bottom:2px solid var(--verde-claro)}
-.aviso-planb{background:linear-gradient(135deg,#fff7ed,#fffbea);border:1.5px solid var(--naranja);border-radius:16px;padding:17px 19px;font-size:12.5px;color:#78350f;line-height:1.65;margin-bottom:26px}
-.aviso-planb strong{color:#92400e}
-.unis-list{display:flex;flex-direction:column;gap:9px}
-.uni-card{display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:15px;border:1.5px solid var(--borde);background:var(--gris-claro)}
-.uni-rank{width:28px;height:28px;border-radius:50%;background:var(--verde);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.uni-info{flex:1}.uni-nombre{font-size:13px;font-weight:700;color:var(--azul)}.uni-com{font-size:11px;color:var(--gris);margin-top:2px}
-.uni-precio{font-size:12px;font-weight:700;color:var(--verde);background:var(--verde-claro);padding:5px 11px;border-radius:999px;flex-shrink:0}
-.becas-list{display:flex;flex-direction:column;gap:10px}
-.beca-card{display:flex;align-items:flex-start;gap:12px;padding:15px;border-radius:15px;border:1.5px solid}
-.beca-card.si{border-color:#22c55e;background:#f0fdf4}
-.beca-card.posible{border-color:var(--amarillo);background:var(--amarillo-claro)}
-.beca-card.alerta{border-color:var(--naranja);background:#fff7ed}
-.beca-card.no{display:none}
-.beca-icon{font-size:19px;flex-shrink:0;margin-top:2px}
-.beca-info{flex:1}.beca-nombre{font-size:12.5px;font-weight:700;color:var(--texto)}.beca-detalle{font-size:11px;color:var(--gris);margin-top:3px;line-height:1.55}
-.beca-badge{font-size:9.5px;font-weight:800;padding:4px 10px;border-radius:999px;flex-shrink:0;align-self:flex-start;white-space:nowrap}
-.beca-badge.si{background:#22c55e;color:#fff}.beca-badge.posible{background:var(--amarillo);color:var(--azul)}.beca-badge.alerta{background:var(--naranja);color:#fff}
-.com-bloque{margin-bottom:11px}.com-bloque-titulo{font-size:10.5px;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
-.com-tags{display:flex;flex-wrap:wrap;gap:7px}
-.com-tag{padding:6px 13px;border-radius:999px;font-size:11.5px;font-weight:600}
-.com-tag.ideal{background:var(--verde);color:#fff}.com-tag.ok{background:var(--verde-claro);color:var(--verde);border:1px solid var(--verde)}.com-tag.cara{background:var(--gris-claro);color:var(--gris)}
-.nota-com{font-size:11px;color:var(--gris);margin-top:9px;font-style:italic}
-.paquetes-lista{display:flex;flex-direction:column;gap:11px}
-.paq-card{border-radius:18px;padding:20px 22px;border:2px solid;position:relative;overflow:hidden}
-.paq-card.recomendado{border-color:var(--amarillo);background:linear-gradient(135deg,var(--azul) 0%,#243b6a 100%);color:#fff;box-shadow:0 16px 36px rgba(26,53,87,.2)}
-.paq-card.alternativo{border-color:var(--borde);background:var(--gris-claro)}
-.paq-card.recomendado::after{content:'⭐ RECOMENDADO';position:absolute;top:14px;right:14px;font-size:9px;font-weight:800;background:var(--amarillo);color:var(--azul);padding:4px 10px;border-radius:999px}
-.paq-nombre{font-family:'Fraunces',serif;font-weight:700;font-size:18px;letter-spacing:-.01em;margin-bottom:3px}
-.paq-precio{font-family:'Fraunces',serif;font-size:25px;font-weight:800;margin-bottom:6px;letter-spacing:-.02em}
-.paq-card.recomendado .paq-precio{color:var(--amarillo)}.paq-card.alternativo .paq-precio{color:var(--verde)}
-.paq-desc{font-size:11.5px;line-height:1.6;margin-bottom:10px}
-.paq-card.recomendado .paq-desc{opacity:.85;color:#fff}.paq-card.alternativo .paq-desc{color:var(--gris)}
-.paq-coms{display:flex;flex-wrap:wrap;gap:6px}
-.paq-com{font-size:10.5px;padding:4px 11px;border-radius:999px}
-.paq-card.recomendado .paq-com{background:rgba(255,255,255,.15);color:#fff}.paq-card.alternativo .paq-com{background:var(--verde-claro);color:var(--verde)}
-.cta-final{background:var(--amarillo-claro);border:1.5px solid var(--amarillo);border-radius:20px;padding:26px 28px;text-align:center;margin-top:26px}
-.cta-msg{font-size:13.5px;color:var(--texto);margin-bottom:16px;line-height:1.65}
-.cta-btns{display:flex;flex-direction:column;gap:11px;align-items:center}
-.btn-cta{display:inline-block;background:var(--verde);color:#fff;padding:13px 30px;border-radius:13px;font-size:13.5px;font-weight:800;text-decoration:none;border:none;cursor:pointer;box-shadow:0 10px 24px rgba(29,106,74,.3);transition:all .2s}
-.btn-cta:hover{background:#155a3d;transform:translateY(-2px)}
-.btn-cta-wpp{display:inline-block;background:#25D366;color:#fff;padding:13px 30px;border-radius:13px;font-size:13.5px;font-weight:800;text-decoration:none;border:none;cursor:pointer;box-shadow:0 10px 24px rgba(37,211,102,.3);transition:all .2s}
-.btn-cta-wpp:hover{background:#1da851;transform:translateY(-2px)}
-.cta-nota{font-size:11px;color:var(--gris);margin-top:11px}
-.cta-sep{font-size:11px;color:var(--gris);margin:5px 0}
-.paso4-required{font-size:11.5px;color:#28674c;margin-bottom:16px;padding:10px 14px;background:var(--verde-claro);border-radius:0 11px 11px 0;border-left:3px solid var(--verde)}
+/* ==========================================================================
+   Diseño calcx — calcado de inspira-legal-redesign-v4.html (vista Calculadora)
+   Estructura real de 4 pasos preservada íntegra.
+   ========================================================================== */
+:root{--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;color:#12343d;
+  background:radial-gradient(700px 460px at 88% 5%,rgba(154,206,255,.2),transparent 70%),linear-gradient(180deg,#eef6f8 0%,#f7fafb 68%,#fff 100%);
+  min-height:100vh;padding:36px 0 78px;position:relative;overflow-x:hidden}
+body:before{content:"";position:absolute;left:-180px;top:260px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(244,158,75,.1),transparent 68%);pointer-events:none}
+button,input,select,textarea{font:inherit}
+
+.calcx-container{width:min(1120px,calc(100% - 40px));margin:auto;position:relative;z-index:2}
+
+/* HERO */
+.hero{display:grid;grid-template-columns:1fr .78fr;gap:52px;align-items:end;margin-bottom:34px}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:#fff;border:1px solid #dce8eb;color:#1d6a4a;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;box-shadow:0 7px 18px rgba(18,52,61,.05)}
+.hero-badge:before{content:"";width:7px;height:7px;border-radius:50%;background:#f5c842;box-shadow:0 0 0 5px rgba(245,200,66,.12)}
+.hero h1{font-family:Fraunces,serif;font-size:clamp(38px,5vw,62px);line-height:.98;letter-spacing:-.045em;color:#074c3a;margin:15px 0 13px;font-weight:800}
+.hero h1 span{color:#f08f36}
+.hero p{font-size:12px;line-height:1.68;color:#687d84;max-width:680px;margin:0}
+.hero-aside{background:rgba(255,255,255,.86);border:1px solid #dce8eb;border-radius:20px;padding:17px;box-shadow:0 14px 36px rgba(18,52,61,.08);backdrop-filter:blur(12px)}
+.hero-aside-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hero-aside-top b{font-size:10px;color:#164a3a}
+.hero-aside-top span{font-size:8px;font-weight:900;color:#1d6a4a;background:#e8f6ee;padding:5px 7px;border-radius:999px}
+.hero-progress{height:5px;border-radius:99px;background:#e7eff1;overflow:hidden}
+.hero-progress i{display:block;height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#1d6a4a,#43a16e);transition:.35s var(--ease)}
+.hero-progress-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:8px;color:#83959a}
+
+/* LAYOUT + RAIL */
+.main{display:grid;grid-template-columns:220px 1fr;gap:15px;align-items:start}
+.steps-nav{position:sticky;top:16px;background:linear-gradient(145deg,#073948,#075667);border-radius:21px;padding:16px;color:#fff;box-shadow:0 18px 45px rgba(4,58,74,.17);overflow:hidden}
+.steps-nav:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:-120px;bottom:-110px;background:radial-gradient(circle,rgba(244,158,75,.22),transparent 67%)}
+.rail-label{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.5);position:relative;z-index:2}
+.steps-nav h3{font-family:Fraunces,serif;font-size:20px;margin:5px 0 16px;font-weight:800;position:relative;z-index:2;line-height:1.1}
+.step-dot{display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:center;padding:9px 8px;border-radius:11px;position:relative;z-index:2;transition:.18s}
+.step-dot.active{background:rgba(255,255,255,.1)}
+.step-num{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.09);display:grid;place-items:center;font-size:9px;font-weight:900}
+.step-dot.active .step-num{background:#f49e4b}
+.step-dot.done .step-num{background:#2d8a5b}
+.step-dot b{font-size:9.5px;display:block}
+.step-dot small{font-size:7.8px;color:rgba(255,255,255,.5)}
+.step-line{display:none}
+.rail-safe{margin-top:14px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px;font-size:8px;line-height:1.5;color:rgba(255,255,255,.52);position:relative;z-index:2}
+
+/* CARD */
+.card{background:rgba(255,255,255,.96);border:1px solid #dbe6e9;border-radius:24px;box-shadow:0 20px 55px rgba(18,52,61,.09);overflow:hidden;display:none;padding:25px 26px 27px}
+.card.active{display:block;animation:calcxIn .35s var(--ease)}
+@keyframes calcxIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+.card-step-label{font-size:9px;font-weight:900;color:#1d6a4a;text-transform:uppercase;letter-spacing:.1em}
+.card-title{font-family:Fraunces,serif;color:#144b3a;font-size:29px;letter-spacing:-.035em;margin:6px 0 4px;font-weight:800}
+.card-sub{font-size:10.5px;color:#71848a;margin:0 0 22px;line-height:1.55}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label{font-size:10px;font-weight:750;color:#142a31}
+.req{color:#ef5e57}
+.field input[type=text],.field input[type=email],.field input[type=tel],.field input[type=number],.field select,.g2 input,.g2 select{width:100%;height:45px;border:1px solid #d7e3e7;border-radius:11px;background:#fff;padding:0 12px;font-size:10.5px;color:#163038;outline:none;transition:.18s}
+.field input:focus,.field select:focus,.g2 input:focus,.g2 select:focus{border-color:#72aa95;box-shadow:0 0 0 4px rgba(29,106,74,.07)}
+.hint{font-size:8.8px;color:#7e9096;line-height:1.5}
+.field-error{font-size:8.8px;color:#e54642;display:none}
+.field.err input,.field.err select{border-color:#f04f49;background:#fffafa}
+.field.err .field-error{display:block}
+.field.err .err-label{color:#e54642}
 .campo-oculto{display:none}
-@media(max-width:560px){.card,.res-header,.res-body{padding:24px 18px}.g2,.vida-grid,.checks-grid{grid-template-columns:1fr}}
+
+.pills,.master-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:3px}
+.pill,.master-pill{border:1px solid #d8e3e7;background:#fff;border-radius:999px;padding:9px 12px;font-size:9.5px;color:#173039;cursor:pointer;transition:.17s;user-select:none}
+.pill:hover,.master-pill:hover{border-color:#8fb5a7;transform:translateY(-1px)}
+.pill.selected,.master-pill.selected{background:#1d6a4a;border-color:#1d6a4a;color:#fff;box-shadow:0 6px 14px rgba(29,106,74,.14)}
+.master-pill.nosabe{border-style:dashed;color:#8a5d12;border-color:#e2c07a;background:#fffaf0}
+.master-pill.nosabe.selected{background:#d29a25;border-color:#d29a25;color:#fff}
+
+.slider-val{font-family:Fraunces,serif;font-size:34px;font-weight:800;color:#1d6a4a;letter-spacing:-.04em}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;outline:none;
+  background:linear-gradient(90deg,#1d6a4a 0%,#1d6a4a var(--pct,25%),#e2ebee var(--pct,25%),#e2ebee 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #1d6a4a;box-shadow:0 4px 12px rgba(29,106,74,.28);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #1d6a4a;box-shadow:0 4px 12px rgba(29,106,74,.28);cursor:pointer}
+.slider-labels{display:flex;justify-content:space-between;font-size:8.5px;color:#83959a}
+
+.vida-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.vida-card{border:1px solid #dce7ea;border-radius:14px;padding:15px;background:#fff;cursor:pointer;transition:.18s var(--ease)}
+.vida-card:hover{border-color:#9ab8ae;transform:translateY(-2px);box-shadow:0 12px 26px rgba(18,52,61,.08)}
+.vida-card.selected{border-color:#1d6a4a;background:#f2faf6;box-shadow:0 12px 26px rgba(29,106,74,.14)}
+.vida-icon{font-size:24px;margin-bottom:7px}
+.vida-nombre{font-size:11.5px;font-weight:850;color:#144b3a;margin-bottom:4px}
+.vida-desc{font-size:9px;color:#71848a;line-height:1.5}
+
+.paso4-required{border-left:3px solid #1d6a4a;background:#eaf6f0;border-radius:0 9px 9px 0;padding:11px 12px;font-size:9.5px;line-height:1.5;color:#59746b;margin-bottom:16px}
+.hint-auip{display:none;font-size:9px;line-height:1.5;border-radius:0 9px 9px 0;padding:9px 11px;margin-top:4px}
+.hint-auip.si{display:block;border-left:3px solid #1d6a4a;background:#eaf6f0;color:#28674c}
+.hint-auip.no{display:block;border-left:3px solid #e0a52c;background:#fff8e9;color:#8a5d12}
+.checks-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check-item{display:flex;align-items:center;gap:7px;height:38px;border:1px solid #d8e3e7;border-radius:10px;padding:0 10px;font-size:9.5px;cursor:pointer;transition:.15s;background:#fff}
+.check-item:hover{border-color:#9ab8ae;background:#fbfdfd}
+.check-item input{accent-color:#1d6a4a}
+
+.btn-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:21px;padding-top:18px;border-top:1px solid #edf2f3}
+.btn{height:46px;border:0;border-radius:12px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:10.5px;font-weight:850;cursor:pointer;transition:.2s var(--ease)}
+.btn-next{background:linear-gradient(135deg,#1d6a4a,#155b3d);color:#fff;box-shadow:0 10px 22px rgba(29,106,74,.16);margin-left:auto}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 15px 28px rgba(29,106,74,.22)}
+.btn-back{background:#eef4f5;color:#526a72}
+.btn-back:hover{background:#e4edee}
+
+/* RESULTADO */
+.resultado{display:none}
+.resultado.active{display:block;animation:calcxIn .35s var(--ease)}
+.res-header{position:relative;overflow:hidden;background:linear-gradient(135deg,#073948,#075667);border-radius:18px;padding:24px;color:#fff;margin-bottom:12px}
+.res-header:after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;right:-90px;top:-130px;background:radial-gradient(circle,rgba(244,158,75,.28),transparent 67%)}
+.saludo{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.6);position:relative;z-index:2}
+.res-header h2{font-family:Fraunces,serif;font-size:30px;letter-spacing:-.035em;margin:6px 0 8px;position:relative;z-index:2;font-weight:800}
+.res-sub{font-size:9.5px;line-height:1.6;color:rgba(255,255,255,.68);max-width:640px;position:relative;z-index:2}
+.res-body{display:grid;gap:12px}
+.aviso-planb{border-left:3px solid #f06452;background:#fff0ed;border-radius:0 9px 9px 0;padding:12px 13px;font-size:9.5px;line-height:1.55;color:#bd4d3e}
+.sec{background:#fff;border:1px solid #dce7ea;border-radius:16px;padding:16px}
+.sec-title{font-family:Fraunces,serif;font-size:17px;color:#144b3a;margin-bottom:12px;font-weight:800;letter-spacing:-.02em}
+.unis-list,.becas-list,.paquetes-lista{display:grid;gap:8px}
+.uni-card{display:grid;grid-template-columns:35px 1fr auto;gap:10px;align-items:center;border:1px solid #dfe8eb;border-radius:12px;padding:10px}
+.uni-rank{width:35px;height:35px;border-radius:10px;background:#edf5f6;display:grid;place-items:center;color:#073948;font-size:11px;font-weight:900}
+.uni-nombre{font-size:10px;font-weight:800}
+.uni-com{font-size:8.5px;color:#7d8f95;margin-top:2px}
+.uni-precio{font-size:9px;font-weight:900;color:#1d6a4a;background:#e8f6ee;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.beca-card{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;border:1px solid #dfe8eb;border-radius:12px;padding:10px}
+.beca-card.si{border-color:#bfe5cf;background:#f4fbf7}
+.beca-card.alerta{border-color:#f3cfc7;background:#fff8f6}
+.beca-icon{font-size:19px;text-align:center}
+.beca-nombre{font-size:10px;font-weight:800}
+.beca-detalle{font-size:8.5px;color:#7d8f95;line-height:1.5;margin-top:2px}
+.beca-badge{font-size:8px;font-weight:900;border-radius:999px;padding:5px 8px;white-space:nowrap;background:#eef3f4;color:#6b8087}
+.beca-badge.si{background:#e8f6ee;color:#1d6a4a}
+.beca-badge.posible{background:#fff5e4;color:#a56b12}
+.beca-badge.alerta{background:#fdeae6;color:#bd4d3e}
+.com-card{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #dfe8eb;border-radius:12px;padding:10px;margin-bottom:8px;font-size:9.5px}
+.nota-com{font-size:8.5px;color:#8b9a9e;margin-top:8px}
+.paq-card{border:1px solid #dfe8eb;border-radius:13px;padding:13px}
+.paq-card.reco{border-color:#bfe5cf;background:#f4fbf7}
+.paq-nombre{font-size:11px;font-weight:850;color:#144b3a}
+.paq-precio{font-family:Fraunces,serif;font-size:22px;color:#1d6a4a;letter-spacing:-.04em;margin:4px 0;font-weight:800}
+.paq-desc{font-size:9px;color:#71848a;line-height:1.55}
+.paq-coms{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.paq-com{font-size:8px;background:#edf5f6;color:#0a4252;border-radius:999px;padding:4px 7px;font-weight:750}
+.cta-final{background:linear-gradient(145deg,#fff,#f2f8f6);border:1px solid #dce7ea;border-radius:16px;padding:18px}
+.cta-msg{font-size:10.5px;line-height:1.65;color:#3d565e;margin-bottom:14px}
+.cta-btns{display:grid;gap:8px}
+.btn-cta,.btn-cta-wpp{display:flex;align-items:center;justify-content:center;height:46px;border-radius:12px;font-size:10.5px;font-weight:850;text-decoration:none;transition:.2s var(--ease)}
+.btn-cta{background:#f49e4b;color:#fff;box-shadow:0 10px 22px rgba(244,158,75,.2)}
+.btn-cta-wpp{background:linear-gradient(135deg,#1d6a4a,#155b3d);color:#fff;box-shadow:0 10px 22px rgba(29,106,74,.16)}
+.btn-cta:hover,.btn-cta-wpp:hover{transform:translateY(-2px)}
+.cta-sep{text-align:center;font-size:8.5px;color:#8b9a9e}
+.cta-nota{font-size:8px;color:#8b9a9e;line-height:1.5;margin-top:10px}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:24px}
+  .main{grid-template-columns:1fr}
+  .steps-nav{position:static;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .steps-nav h3,.rail-label,.rail-safe{grid-column:1/-1}
+}
+@media(max-width:650px){
+  .calcx-container{width:calc(100% - 24px)}
+  .card{padding:22px 17px;border-radius:18px}
+  .g2,.vida-grid,.checks-grid{grid-template-columns:1fr}
+  .steps-nav{grid-template-columns:1fr 1fr}
+  .btn-row{flex-direction:column-reverse}
+  .btn{width:100%}
+  .btn-next{margin-left:0}
+  .uni-card,.beca-card{grid-template-columns:34px 1fr}
+  .uni-precio,.beca-badge{grid-column:2}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="hero">
-  <div class="hero-badge">Programa 360° — Máster en España</div>
-  <h1>¿A qué másteres y becas<br>puedes postular?</h1>
-  <p>4 pasos y te mostramos universidades, becas disponibles y los paquetes Inspira que mejor se adaptan a tu perfil.</p>
-</div>
-<div class="main">
-  <div class="steps-nav">
-    <div class="step-dot active" id="dot1">1</div><div class="step-line" id="line1"></div>
-    <div class="step-dot" id="dot2">2</div><div class="step-line" id="line2"></div>
-    <div class="step-dot" id="dot3">3</div><div class="step-line" id="line3"></div>
-    <div class="step-dot" id="dot4">4</div>
-  </div>
+<div class="calcx-container">
 
+  <section class="hero">
+    <div>
+      <span class="hero-badge">Calculadora Máster · Gratis</span>
+      <h1>¿A qué másteres y becas <span>puedes postular?</span></h1>
+      <p>4 pasos y te mostramos universidades, becas disponibles y los paquetes Inspira que mejor se adaptan a tu perfil. Sin costo y sin compromiso.</p>
+    </div>
+    <aside class="hero-aside">
+      <div class="hero-aside-top"><b>Tu progreso</b><span>4 pasos</span></div>
+      <div class="hero-progress"><i id="hero-bar"></i></div>
+      <div class="hero-progress-labels"><span>Perfil</span><span>Presupuesto</span><span>Becas</span><span>Contacto</span></div>
+    </aside>
+  </section>
+
+  <div class="main">
+    <aside class="steps-nav">
+      <span class="rail-label">Tu ruta</span>
+      <h3>4 etapas hasta tus resultados.</h3>
+      <div class="step-dot active" id="dot1"><div class="step-num">01</div><div><b>Perfil académico</b><small>Quién eres y qué estudiaste</small></div></div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" id="dot2"><div class="step-num">02</div><div><b>Presupuesto</b><small>Cuánto y qué tipo de vida</small></div></div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" id="dot3"><div class="step-num">03</div><div><b>Perfil para becas</b><small>AUIP · MAEC · ODS</small></div></div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot" id="dot4"><div class="step-num">04</div><div><b>Contacto</b><small>Universidad y comunidades</small></div></div>
+      <div class="rail-safe">🔒 Usamos tus datos solo para enviarte tus resultados y contactarte por WhatsApp o email.</div>
+    </aside>
+
+    <div>
   <!-- PASO 1 -->
   <div class="card active" id="paso1">
     <div class="card-step-label">Paso 1 de 4</div>
@@ -329,8 +401,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       </div>
     </div>
   </div>
+    </div>
+  </div>
 </div>
-
 <script>
 const WPP_NUMERO = "51908945354";
 const CALENDLY_URL = "https://calendly.com/administracion-inspira-legal/30min";
@@ -405,6 +478,7 @@ function irPaso(n){
   [1,2,3,4].forEach(i=>{ document.getElementById('paso'+i).classList.remove('active'); const d=document.getElementById('dot'+i); d.classList.remove('active','done'); if(i<n) d.classList.add('done'); });
   if(n<=4){ document.getElementById('paso'+n).classList.add('active'); document.getElementById('dot'+n).classList.add('active'); }
   ['line1','line2','line3'].forEach((id,i)=>document.getElementById(id).classList.toggle('done',n>i+1));
+  const bar=document.getElementById('hero-bar'); if(bar) bar.style.width=Math.min(n,4)*25+'%';
   window.parent.postMessage({type:'scrollTop'},'https://inspira-legal.cloud');
   window.scrollTo({top:0,behavior:'smooth'});
 }

@@ -17,109 +17,71 @@ const checklist = [
 
 export default function Servicios() {
   return (
-    <section className="py-24 px-6 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <Reveal className="text-center mb-14">
-          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#F49E4B" }}>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#F49E4B" }} />
-            Servicios
-          </span>
-          <h2 className="font-fraunces text-3xl md:text-5xl font-bold text-primary mt-3 tracking-tight">
-            Lo importante no es darte información. Es mover tu caso.
-          </h2>
-          <p className="text-neutral-500 mt-4 max-w-xl mx-auto leading-relaxed">
+    <section className="services">
+      <div className="v4-container">
+        <Reveal className="section-head">
+          <div>
+            <span className="eyebrow"><span className="dot" />Servicios</span>
+            <h2>Lo importante no es darte información. Es mover tu caso.</h2>
+          </div>
+          <p>
             Dos soluciones con jerarquía clara: el Programa Máster 360° como producto
             principal y la estancia por estudios como solución especializada.
           </p>
         </Reveal>
 
-        <div className="grid lg:grid-cols-[1.55fr_0.75fr] gap-5">
-          {/* Main card */}
-          <Reveal>
-          <a
+        <div className="cards">
+          <Reveal
+            as="a"
+            className="service-card main"
             href="/servicios/master"
             onClick={(e) => go(e, "/servicios/master")}
-            className="group relative rounded-[28px] border border-neutral-200 p-8 min-h-[390px] overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent/40"
-            style={{ background: "linear-gradient(145deg,#fff,#f3f8f9)" }}
           >
-            <span
-              className="inline-flex px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest"
-              style={{ background: "#fff0e2", color: "#b96114" }}
-            >
-              Más elegido
-            </span>
-            <h3 className="font-fraunces text-3xl md:text-[34px] font-bold text-primary mt-4 mb-2.5 tracking-tight">
-              Programa Máster 360°
-            </h3>
-            <p className="text-neutral-500 text-sm leading-relaxed max-w-md">
-              Desde la búsqueda personalizada hasta la matrícula: construimos tu shortlist,
-              gestionamos postulaciones, revisamos requisitos y seguimos cada hito.
+            <span className="tag">Más elegido</span>
+            <h3>Programa Máster 360°</h3>
+            <p>
+              Desde la búsqueda personalizada hasta la matrícula: construimos tu
+              shortlist, gestionamos postulaciones, revisamos requisitos y seguimos
+              cada hito.
             </p>
-
-            <div className="grid grid-cols-2 gap-2 my-5 max-w-md">
+            <div className="checklist">
               {checklist.map((c) => (
-                <div key={c} className="text-xs flex items-center gap-2">
-                  <span className="font-black" style={{ color: "#1d6a4a" }}>✓</span>
-                  {c}
-                </div>
+                <div className="checkline" key={c}>{c}</div>
               ))}
             </div>
-
-            <span
-              className="inline-flex items-center gap-2 text-white font-semibold px-5 py-3 rounded-xl text-sm"
-              style={{ background: "#F49E4B" }}
-            >
-              Explorar programa
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M3 7h8M7 3l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            <span className="btn btn-primary">
+              Explorar programa <span className="arr">→</span>
             </span>
-
-            <div
-              className="hidden md:block absolute right-6 bottom-5 w-[220px] text-white rounded-2xl p-4"
-              style={{ background: "#073948", transform: "rotate(-2deg)" }}
-            >
-              <small className="text-white/50 text-[10px]">Avance del proceso</small>
+            <div className="mini-dashboard">
+              <small>Avance del proceso</small>
               <br />
-              <strong className="text-2xl">72%</strong>
-              <div className="h-1 rounded-full mt-2 overflow-hidden bg-white/10">
-                <div className="h-full rounded-full" style={{ width: "72%", background: "#F49E4B" }} />
+              <strong>72%</strong>
+              <div className="bar">
+                <i style={{ width: "72%", background: "#f49e4b" }} />
               </div>
-              <small className="text-white/50 text-[10px] mt-2 block">Próximo: documentación final</small>
+              <small>Próximo: documentación final</small>
             </div>
-          </a>
           </Reveal>
 
-          {/* Secondary card */}
-          <Reveal delay={120}>
-          <a
+          <Reveal
+            as="a"
+            className="service-card"
             href="/servicios/estancia"
             onClick={(e) => go(e, "/servicios/estancia")}
-            className="group rounded-[28px] border border-neutral-200 p-8 transition-all duration-300 hover:shadow-xl hover:border-accent/40"
+            delay={120}
           >
-            <span
-              className="inline-flex px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest"
-              style={{ background: "#e9f6ef", color: "#1d6a4a" }}
-            >
+            <span className="tag" style={{ background: "#e9f6ef", color: "#1d6a4a" }}>
               Especializado
             </span>
-            <h3 className="font-fraunces text-2xl font-bold text-primary mt-4 mb-2.5 tracking-tight">
-              Estancia por estudios
-            </h3>
-            <p className="text-neutral-500 text-sm leading-relaxed">
+            <h3>Estancia por estudios</h3>
+            <p>
               Gestión documental y acompañamiento para tu permiso de estancia, con
               checklist y seguimiento de cada requisito.
             </p>
-            <span
-              className="inline-flex items-center gap-1.5 text-sm font-semibold mt-6"
-              style={{ color: "#F49E4B" }}
-            >
-              Ver servicio
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M3 7h8M7 3l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            <div style={{ height: "34px" }} />
+            <span style={{ fontWeight: 850, color: "#063f50", fontSize: "13px" }}>
+              Ver servicio <span className="arr">→</span>
             </span>
-          </a>
           </Reveal>
         </div>
       </div>

@@ -4,547 +4,524 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inspira – Máster en España 2026/2027</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --v: #1d6a4a; --vm: #2f8358; --vl: #e9f6ef;
-  --d: #f49e4b; --dl: #fff3e2;
-  --navy: #053747; --navy2: #075469;
-  --bg: #f8fbfb; --dark: #12343d; --gray: #687d84; --border: #dce8eb;
+/* ==========================================================================
+   Diseño svx — calcado de inspira-legal-redesign-v4.html (vista "Servicios")
+   ========================================================================== */
+:root{
+  --sv-dark:#053747;--sv-mid:#07566a;--sv-green:#1d6a4a;--sv-orange:#f49e4b;
+  --sv-ink:#12343d;--sv-muted:#687d84;--sv-line:#dce8eb;--sv-yellow:#f5c842;
+  --ease:cubic-bezier(.22,1,.36,1);
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--dark); }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--sv-ink);background:#f8fbfb;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit}
 
-/* HERO */
-.hero { position:relative; overflow:hidden; background:linear-gradient(135deg,#032f3e 0%,#075469 58%,#073f49 100%); color:white; padding:60px 20px 48px; text-align:center; }
-.hero:before { content:""; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px); background-size:46px 46px; mask-image:linear-gradient(to bottom,black,transparent 85%); -webkit-mask-image:linear-gradient(to bottom,black,transparent 85%); }
-.hero:after { content:""; position:absolute; width:520px; height:520px; border-radius:50%; right:-160px; top:-260px; background:radial-gradient(circle,rgba(154,206,255,.18),transparent 68%); }
-.hero > * { position:relative; z-index:1; }
-.hero h1 { font-family:'Fraunces',serif; font-size:clamp(30px,4.6vw,44px); font-weight:800; letter-spacing:-.03em; margin-bottom:8px; }
-.hero h1 span { color:#f5c842; }
-.hero p { opacity:.75; font-size:.98em; margin-bottom:24px; max-width:520px; margin-inline:auto; }
-.hero-badges { display:flex; justify-content:center; gap:9px; flex-wrap:wrap; }
-.badge { background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.22); backdrop-filter:blur(8px); padding:8px 15px; border-radius:999px; font-size:.75em; font-weight:700; }
+.svx-hero{position:relative;overflow:hidden;padding:66px 0 76px;background:linear-gradient(135deg,#032f3e 0%,#075469 58%,#073f49 100%);color:#fff}
+.svx-hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:linear-gradient(to bottom,black,transparent 90%);mask-image:linear-gradient(to bottom,black,transparent 90%)}
+.svx-hero:after{content:"";position:absolute;width:760px;height:760px;border-radius:50%;right:-180px;top:-330px;background:radial-gradient(circle,rgba(154,206,255,.18),rgba(154,206,255,.04) 42%,transparent 70%);animation:svxOrb 9s ease-in-out infinite alternate}
+@keyframes svxOrb{to{transform:translate(-45px,55px) scale(1.08)}}
+.svx-container{width:min(1180px,calc(100% - 40px));margin-inline:auto;position:relative;z-index:2}
+.svx-hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.svx-kicker{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(255,255,255,.07);backdrop-filter:blur(10px);font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.76)}
+.svx-kicker i{width:7px;height:7px;border-radius:50%;background:var(--sv-orange);box-shadow:0 0 0 5px rgba(244,158,75,.12)}
+.svx-hero h1{font-family:Fraunces,serif;font-size:clamp(42px,5vw,68px);line-height:.98;letter-spacing:-.045em;margin:18px 0 20px;max-width:700px;font-weight:800}
+.svx-hero h1 span{color:var(--sv-orange)}
+.svx-hero-copy{font-size:16px;line-height:1.72;color:rgba(255,255,255,.69);max-width:650px;margin:0 0 28px}
+.svx-actions{display:flex;gap:11px;flex-wrap:wrap}
+.svx-btn{position:relative;isolation:isolate;overflow:hidden;height:50px;border:1px solid transparent;border-radius:13px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:12px;font-weight:850;cursor:pointer;transition:.22s var(--ease);text-decoration:none}
+.svx-btn:before{content:"";position:absolute;z-index:-1;inset:-2px;transform:translateX(-110%) skewX(-16deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.24),transparent);transition:.55s var(--ease)}
+.svx-btn:hover:before{transform:translateX(110%) skewX(-16deg)}
+.svx-btn:hover{transform:translateY(-2px)}
+.svx-btn.primary{background:var(--sv-orange);color:#fff;box-shadow:0 14px 28px rgba(244,158,75,.22)}
+.svx-btn.ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(10px)}
+.svx-btn.green{background:var(--sv-green);color:#fff;box-shadow:0 12px 24px rgba(29,106,74,.15)}
+.svx-btn.gold{background:linear-gradient(135deg,#bd8519,#9d690d);color:#fff}
+.svx-btn.out{background:#fff;border-color:var(--sv-line);color:var(--sv-dark)}
+.svx-btn.soft{background:#eff5f6;color:var(--sv-dark)}
+.svx-btn.block{width:100%}
+.svx-proof{display:flex;gap:18px;flex-wrap:wrap;margin-top:30px;color:rgba(255,255,255,.55);font-size:10px}
+.svx-proof b{display:block;color:#fff;font-size:16px;margin-bottom:2px}
+.svx-guide{position:relative;background:rgba(255,255,255,.97);color:var(--sv-ink);border:1px solid rgba(255,255,255,.4);border-radius:26px;box-shadow:0 30px 90px rgba(0,0,0,.26);overflow:hidden;transform:perspective(1000px) rotateY(-2deg)}
+.svx-guide-top{height:58px;border-bottom:1px solid var(--sv-line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#fbfdfd}
+.svx-guide-top b{font-size:11px}
+.svx-live{font-size:9px;font-weight:850;color:#1d6a4a;background:#e9f6ef;padding:6px 8px;border-radius:999px}
+.svx-guide-body{padding:20px}
+.svx-route-step{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:12px 0;position:relative}
+.svx-route-step:not(:last-child):after{content:"";position:absolute;left:16px;top:43px;height:20px;width:1px;background:#d9e5e8}
+.svx-route-num{width:34px;height:34px;border-radius:10px;background:#edf5f6;display:grid;place-items:center;font-size:10px;font-weight:900;color:var(--sv-dark)}
+.svx-route-step.active .svx-route-num{background:var(--sv-green);color:#fff}
+.svx-route-step b{font-size:11px}
+.svx-route-step small{display:block;color:var(--sv-muted);font-size:9px;margin-top:2px}
+.svx-route-tag{font-size:8px;font-weight:850;padding:5px 7px;border-radius:999px;background:#fff0e2;color:#b96114}
+.svx-guide-result{margin-top:12px;background:linear-gradient(135deg,#073948,#075667);border-radius:16px;padding:15px;color:#fff;display:flex;align-items:end;justify-content:space-between;gap:15px}
+.svx-guide-result small{font-size:9px;color:rgba(255,255,255,.55)}
+.svx-guide-result strong{display:block;font-size:28px;letter-spacing:-.04em;color:#ffc269}
+.svx-guide-result span{font-size:9px;color:rgba(255,255,255,.65)}
+.svx-float{position:absolute;background:#fff;border:1px solid var(--sv-line);border-radius:13px;padding:9px 11px;font-size:9px;font-weight:850;color:var(--sv-dark);box-shadow:0 16px 35px rgba(2,58,75,.18);z-index:4;animation:svxFloat 4s ease-in-out infinite;white-space:nowrap}
+.svx-float.one{left:-38px;top:72px}
+.svx-float.two{right:-30px;bottom:60px;animation-delay:-1.3s}
+@keyframes svxFloat{50%{transform:translateY(-7px)}}
 
-/* CURRENCY */
-.cur-bar { background:rgba(255,255,255,.94); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; justify-content:center; align-items:center; gap:10px; position:sticky; top:0; z-index:100; }
-.cur-bar span { font-size:.75em; color:var(--gray); font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
-.cur-btn { padding:8px 16px; border-radius:999px; border:1.5px solid var(--border); background:white; font-weight:800; cursor:pointer; font-size:.75em; font-family:'Inter',sans-serif; transition:all .18s; }
-.cur-btn.active { background:var(--v); border-color:var(--v); color:white; box-shadow:0 6px 16px rgba(29,106,74,.22); }
+.svx-control-wrap{position:sticky;top:0;z-index:35;padding:14px 0;background:rgba(248,251,251,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(220,232,235,.8)}
+.svx-control{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--sv-line);border-radius:18px;padding:8px;box-shadow:0 10px 28px rgba(18,52,61,.07)}
+.svx-tabs{display:flex;gap:4px;overflow:auto;flex:1;scrollbar-width:none}
+.svx-tabs::-webkit-scrollbar{display:none}
+.svx-tab{flex:0 0 auto;height:39px;border:0;border-radius:11px;background:transparent;padding:0 13px;color:#5b7077;font-size:10px;font-weight:800;cursor:pointer;transition:.18s;white-space:nowrap}
+.svx-tab:hover{background:#f1f6f7;color:var(--sv-dark)}
+.svx-tab.active{background:var(--sv-dark);color:#fff;box-shadow:0 8px 18px rgba(5,55,71,.16)}
+.svx-currency{display:flex;align-items:center;gap:4px;padding-left:8px;border-left:1px solid var(--sv-line)}
+.svx-cur{height:34px;border:1px solid var(--sv-line);border-radius:10px;background:#fff;padding:0 9px;font-size:9px;font-weight:850;cursor:pointer;color:#61777e;white-space:nowrap}
+.svx-cur.active{background:#e9f6ef;border-color:#cce9d7;color:var(--sv-green)}
 
-/* NAV */
-.nav { background:white; padding:6px 14px; border-bottom:1px solid var(--border); display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; position:sticky; top:53px; z-index:99; box-shadow:0 8px 20px rgba(18,52,61,.04); }
-.nav::-webkit-scrollbar { display:none; }
-.nav-btn { padding:12px 17px; border:none; background:none; border-radius:12px; font-family:'Inter',sans-serif; font-weight:700; font-size:.82em; color:var(--gray); white-space:nowrap; cursor:pointer; transition:all .18s; }
-.nav-btn:hover { background:#f1f6f7; color:var(--dark); }
-.nav-btn.active { color:white; background:var(--navy); box-shadow:0 8px 18px rgba(5,55,71,.18); }
+.svx-main{padding:46px 0 88px}
+.panel{display:none}
+.panel.active{display:block;animation:svxIn .36s var(--ease)}
+@keyframes svxIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.svx-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:26px}
+.svx-head h2{font-family:Fraunces,serif;color:var(--sv-dark);font-size:clamp(34px,3.5vw,48px);letter-spacing:-.04em;line-height:1.04;margin:7px 0;font-weight:800}
+.svx-head p{max-width:520px;color:var(--sv-muted);line-height:1.65;font-size:11px;margin:0}
+.svx-label{font-size:9px;font-weight:900;color:var(--sv-orange);text-transform:uppercase;letter-spacing:.12em}
+.svx-callout{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:18px 20px;border-radius:18px;background:linear-gradient(135deg,#0d4d32,#1a7148);color:#fff;margin-bottom:20px;box-shadow:0 15px 35px rgba(29,106,74,.13)}
+.svx-call-icon{width:44px;height:44px;border-radius:13px;background:rgba(255,255,255,.11);display:grid;place-items:center;font-size:21px}
+.svx-callout h3{font-family:Fraunces,serif;font-size:20px;margin:0 0 3px;font-weight:800}
+.svx-callout p{font-size:10px;line-height:1.5;color:rgba(255,255,255,.72);margin:0}
+.svx-callout b{color:#ffd15c}
+.svx-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.svx-card-grid.two{grid-template-columns:repeat(2,1fr)}
+.svx-card{position:relative;overflow:hidden;background:#fff;border:1px solid var(--sv-line);border-radius:20px;transition:.24s var(--ease);box-shadow:0 6px 18px rgba(18,52,61,.035);display:flex;flex-direction:column}
+.svx-card:hover{transform:translateY(-4px);border-color:#bdd4d9;box-shadow:0 20px 45px rgba(18,52,61,.11)}
+.svx-card:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-115px;top:-120px;background:radial-gradient(circle,rgba(154,206,255,.2),transparent 67%);pointer-events:none}
+.svx-card-top{padding:19px 19px 17px;background:linear-gradient(135deg,#0a4252,#0b6170);color:#fff;min-height:152px;position:relative}
+.svx-card.gold .svx-card-top{background:linear-gradient(135deg,#9d690d,#bd8519)}
+.svx-card.green .svx-card-top{background:linear-gradient(135deg,#1e6744,#2f8358)}
+.svx-card.purple .svx-card-top{background:linear-gradient(135deg,#4f2691,#6739aa)}
+.svx-card.orange .svx-card-top{background:linear-gradient(135deg,#a65b19,#d17927)}
+.svx-card.soft .svx-card-top{background:linear-gradient(135deg,#0f5e46,#1b7d59)}
+.svx-card-kicker{font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:rgba(255,255,255,.7)}
+.svx-card h3{font-family:Fraunces,serif;font-size:23px;line-height:1.02;margin:8px 0 9px;font-weight:800}
+.svx-price{font-size:32px;font-weight:900;color:#ffd23f;letter-spacing:-.045em}
+.svx-price small{font-size:9px;font-weight:650;letter-spacing:0;color:rgba(255,255,255,.65)}
+.svx-card-sub{font-size:9px;margin-top:4px;color:rgba(255,255,255,.75)}
+.svx-card-body{padding:17px;display:flex;flex-direction:column;flex:1}
+.svx-card-body>p{font-size:10px;color:#596f76;line-height:1.65;margin:0 0 12px}
+.svx-feature{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #edf2f3;font-size:9.5px;color:#425b63;line-height:1.4}
+.svx-feature:last-of-type{border-bottom:0}
+.svx-check{width:17px;height:17px;border-radius:5px;background:#e4f5eb;color:#1d6a4a;display:grid;place-items:center;flex:0 0 17px;font-size:9px;font-weight:900}
+.svx-card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:12px}
+.svx-coverage{border-left:3px solid var(--sv-green);background:#ebf6f0;border-radius:0 9px 9px 0;padding:10px 11px;font-size:9px;color:#28674c;line-height:1.5;margin-bottom:10px}
+.svx-warning{border-left:3px solid #f06452;background:#fff0ed;border-radius:0 9px 9px 0;padding:10px 11px;font-size:9px;color:#bd4d3e;line-height:1.45;margin:10px 0}
+.svx-hint{border-left:3px solid #e0a52c;background:#fff8e9;border-radius:0 9px 9px 0;padding:10px 11px;font-size:9px;color:#8a5d12;line-height:1.45;margin:10px 0}
+.svx-ribbon{position:absolute;top:0;left:0;right:0;height:25px;display:grid;place-items:center;background:#d29a25;color:#fff;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;z-index:3}
+.svx-card.reco .svx-card-top{padding-top:42px}
+.svx-banner{border:1px solid #f1d28b;background:linear-gradient(90deg,#fff9eb,#fffdf8);border-radius:15px;padding:15px 16px;display:grid;grid-template-columns:auto 1fr;gap:12px;color:#8a5d12;margin-bottom:18px;align-items:center}
+.svx-banner b{font-family:Fraunces,serif;font-size:16px}
+.svx-banner p{font-size:9.5px;line-height:1.55;margin:3px 0 0}
+.svx-banner.danger{border-color:#f0b4aa;background:#fff6f4;color:#ad4938}
+.svx-subtabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.svx-subtab{height:38px;border:1px solid var(--sv-line);background:#fff;border-radius:999px;padding:0 18px;font-size:10px;font-weight:850;color:#5b7077;cursor:pointer;transition:.18s}
+.svx-subtab.active{background:var(--sv-green);border-color:var(--sv-green);color:#fff;box-shadow:0 8px 18px rgba(29,106,74,.15)}
+.svx-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.svx-leg{font-size:9px;font-weight:750;border-radius:999px;padding:8px 12px;line-height:1.4}
+.svx-leg.eco{background:#e9f6ef;color:#1d6a4a}
+.svx-leg.int{background:#f1ecfb;color:#54308f}
+.svx-leg.pre{background:#fff0e2;color:#b96114}
+.svx-unis{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.svx-uni{background:#fff;border:1px solid var(--sv-line);border-radius:18px;padding:0;position:relative;overflow:hidden;transition:.22s var(--ease)}
+.svx-uni:hover{transform:translateY(-3px);box-shadow:0 18px 38px rgba(18,52,61,.1)}
+.svx-uni-head{padding:15px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.svx-uni-head.eco{background:linear-gradient(135deg,#1e6744,#2f8358)}
+.svx-uni-head.int{background:linear-gradient(135deg,#4f2691,#6739aa)}
+.svx-uni-head.pre{background:linear-gradient(135deg,#a65b19,#d17927)}
+.svx-uni-name{font-family:Fraunces,serif;font-size:20px;font-weight:800;letter-spacing:-.03em}
+.svx-uni-tag{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.16);padding:5px 8px;border-radius:999px;white-space:nowrap}
+.svx-uni-body{padding:15px 16px}
+.svx-uni-list{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
+.svx-uni-list li{display:flex;gap:8px;align-items:center;font-size:9.5px;color:#425b63;line-height:1.35}
+.svx-uni-code{font-size:8px;font-weight:900;color:var(--sv-dark);background:#edf5f6;border-radius:6px;padding:4px 6px;min-width:52px;text-align:center;flex:0 0 auto}
+.svx-uni-foot{display:grid;gap:5px;border-top:1px solid #edf2f3;padding-top:10px;font-size:9px;color:#5c7178;line-height:1.45}
+.svx-uni-foot .warn{color:#b06000}
+.svx-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.svx-mini{background:#fff;border:1px solid var(--sv-line);border-radius:17px;padding:16px;transition:.2s}
+.svx-mini:hover{transform:translateY(-3px);box-shadow:0 15px 32px rgba(18,52,61,.08);border-color:#c8dadd}
+.svx-mini-icon{width:36px;height:36px;border-radius:11px;background:#edf5f6;color:var(--sv-dark);display:grid;place-items:center;font-size:17px;margin-bottom:11px}
+.svx-mini h4{font-size:11px;color:var(--sv-dark);margin:0 0 5px}
+.svx-mini p{font-size:9.5px;color:var(--sv-muted);line-height:1.6;margin:0}
 
-/* PANELS */
-.panel { display:none; padding:42px 20px 64px; max-width:1220px; margin:0 auto; }
-.panel.active { display:block; animation:fadeUp .3s ease; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.svx-budget{display:grid;grid-template-columns:1fr .8fr;gap:14px;align-items:start}
+.svx-budget-card{background:#fff;border:1px solid var(--sv-line);border-radius:19px;padding:18px}
+.svx-field{display:grid;gap:6px;margin-bottom:14px}
+.svx-field label{font-size:8.5px;font-weight:900;color:#71868c;text-transform:uppercase;letter-spacing:.09em}
+.svx-field select,.svx-field input,.svx-field textarea{width:100%;min-height:44px;border:1px solid var(--sv-line);border-radius:11px;padding:11px;background:#fbfdfd;outline:none;color:var(--sv-ink);font-size:10px;transition:.18s}
+.svx-field textarea{min-height:88px;resize:vertical}
+.svx-field select:focus,.svx-field input:focus,.svx-field textarea:focus{border-color:#72aa95;box-shadow:0 0 0 4px rgba(29,106,74,.07)}
+.checks{display:flex;flex-wrap:wrap;gap:7px}
+.chk{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--sv-line);background:#fff;border-radius:999px;padding:8px 12px;font-size:9px;color:#173039;cursor:pointer;transition:.16s;user-select:none}
+.chk:hover{border-color:#8fb5a7;transform:translateY(-1px)}
+.chk input{display:none}
+.chk.on{background:var(--sv-green);border-color:var(--sv-green);color:#fff;box-shadow:0 6px 14px rgba(29,106,74,.14)}
+.svx-total{font-family:Fraunces,serif;font-size:46px;color:var(--sv-green);letter-spacing:-.05em;margin:8px 0;font-weight:800}
+.bcard{display:none;background:linear-gradient(145deg,#fff,#f2f8f6);border:1px solid var(--sv-line);border-radius:19px;padding:18px;margin-bottom:14px}
+.bcard h3{font-family:Fraunces,serif;font-size:20px;color:var(--sv-dark);margin:0 0 10px;font-weight:800}
+.brow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #edf2f3;font-size:10px;color:#4d666e}
+.brow strong{font-size:14px;color:var(--sv-dark)}
+.brow.btotal{border-bottom:0}
+.brow.btotal strong{font-family:Fraunces,serif;font-size:26px;color:var(--sv-green);letter-spacing:-.04em}
+.sub-btn{width:100%;height:50px;border:0;border-radius:13px;background:linear-gradient(135deg,#1d6a4a,#155b3d);color:#fff;font-size:12px;font-weight:850;cursor:pointer;transition:.2s var(--ease);box-shadow:0 12px 26px rgba(29,106,74,.18)}
+.sub-btn:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(29,106,74,.24)}
+.sub-btn:disabled{opacity:.6;cursor:default;transform:none}
 
-/* SECTION HEADER */
-.sec-h { margin-bottom:26px; }
-.sec-h h2 { font-family:'Fraunces',serif; font-size:clamp(26px,3vw,36px); color:var(--navy); letter-spacing:-.03em; margin-bottom:8px; }
-.sec-h p { color:var(--gray); font-size:.95em; line-height:1.7; max-width:660px; }
+.svx-payments{margin-top:42px;padding-top:36px;border-top:1px solid var(--sv-line)}
+.svx-pay-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:14px}
+.svx-pay-head h3{font-family:Fraunces,serif;color:var(--sv-dark);font-size:30px;margin:0;font-weight:800}
+.svx-pay-head p{font-size:9.5px;color:var(--sv-muted);margin:0}
+.svx-pay-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.svx-pay-grid.three{grid-template-columns:repeat(3,1fr);margin-top:10px}
+.svx-pay{background:#fff;border:1px solid var(--sv-line);border-radius:15px;padding:14px}
+.svx-pay h4{font-size:10px;color:var(--sv-green);margin:0 0 6px}
+.svx-pay p{font-size:9px;line-height:1.58;color:#536a72;margin:0}
+.svx-pay small{color:#87989d}
 
-/* NOTE BOX */
-.note { background:var(--vl); border-left:4px solid var(--v); padding:14px 18px; border-radius:0 14px 14px 0; font-size:.9em; color:#28674c; margin-bottom:28px; line-height:1.65; }
-.note-warn { background:#fff0ed; border-left:4px solid #f06452; color:#bd4d3e; }
-.note-orange { background:var(--dl); border-left:4px solid var(--d); color:#8a5d12; }
+footer{padding:26px 0 40px;border-top:1px solid var(--sv-line);color:var(--sv-muted);font-size:9.5px;text-align:center;background:#fff}
 
-/* ASESORÍA / RECOMMENDED BANNER */
-.reco-banner { background:linear-gradient(135deg,#0d4d32,#1a7148); color:#fff; border-radius:22px; padding:24px 26px; margin-bottom:32px; display:flex; align-items:center; gap:20px; flex-wrap:wrap; box-shadow:0 16px 36px rgba(29,106,74,.16); }
-.reco-icon { width:52px; height:52px; border-radius:15px; background:rgba(255,255,255,.12); display:grid; place-items:center; font-size:24px; flex-shrink:0; }
-.reco-body { flex:1; min-width:220px; }
-.reco-body h3 { font-family:'Fraunces',serif; font-size:20px; margin-bottom:6px; }
-.reco-body p { font-size:.85em; line-height:1.6; color:rgba(255,255,255,.78); }
-.reco-body p b { color:#ffd15c; }
-.reco-btn { background:#f5c842; color:#173b22; padding:13px 22px; border-radius:13px; font-weight:800; text-decoration:none; font-size:.85em; white-space:nowrap; transition:all .2s; }
-.reco-btn:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(245,200,66,.32); }
-
-/* GRID */
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:20px; margin-bottom:48px; }
-
-/* CARD */
-.card { background:white; border-radius:22px; border:1px solid var(--border); overflow:hidden; position:relative; transition:transform .25s,box-shadow .25s,border-color .25s; box-shadow:0 6px 18px rgba(18,52,61,.04); }
-.card:hover { transform:translateY(-5px); box-shadow:0 20px 44px rgba(18,52,61,.11); border-color:#bcd8dc; }
-.card.featured { border-color:#d89b19; }
-.card-ribbon { position:absolute; top:0; left:0; right:0; height:27px; background:var(--d); color:white; text-align:center; font-size:.68em; font-weight:800; padding:6px 0 0; text-transform:uppercase; letter-spacing:.1em; z-index:2; }
-.card.featured .card-top { padding-top:44px; }
-.card-top { background:linear-gradient(135deg,var(--v),var(--vm)); color:white; padding:24px 22px 20px; }
-.card-top.gold { background:linear-gradient(135deg,#9d690d,#bd8519); }
-.card-top.soft { background:linear-gradient(135deg,#1e6744,#2f8358); }
-.card-top.amber { background:linear-gradient(135deg,#a65b19,#d17927); }
-.card-top.purple { background:linear-gradient(135deg,#4f2691,#6739aa); }
-.card-name { font-family:'Fraunces',serif; font-size:1.5em; font-weight:700; letter-spacing:-.02em; margin-bottom:6px; line-height:1.05; }
-.card-tag { font-size:.78em; opacity:.85; margin-bottom:16px; font-style:normal; line-height:1.5; }
-.card-price { font-family:'Fraunces',serif; font-size:2.2em; font-weight:800; color:#ffd23f; letter-spacing:-.03em; }
-.card-price-note { font-size:.75em; opacity:.68; margin-top:2px; }
-.card-body { padding:22px; }
-.card-for { background:var(--vl); border-left:3px solid var(--v); padding:11px 13px; border-radius:0 10px 10px 0; font-size:.8em; color:#28674c; font-weight:600; margin-bottom:16px; line-height:1.55; }
-.card-for.amber { background:var(--dl); border-left-color:var(--d); color:#8a5d12; }
-.feats { list-style:none; margin-bottom:14px; }
-.feats li { display:flex; gap:10px; padding:9px 0; font-size:.82em; color:#425b63; border-bottom:1px solid #edf2f3; line-height:1.5; }
-.feats li:last-child { border:none; }
-.fi { flex-shrink:0; width:19px; text-align:center; font-size:.95em; }
-.card-warn { background:#fff0ed; border-left:3px solid #f06452; padding:9px 12px; border-radius:0 9px 9px 0; font-size:.75em; color:#bd4d3e; margin-bottom:14px; line-height:1.5; }
-.card-btn { width:100%; padding:13px; border-radius:13px; border:none; font-family:'Inter',sans-serif; font-weight:800; font-size:.85em; cursor:pointer; transition:all .2s; }
-.card-btn.green { background:var(--v); color:white; }
-.card-btn.green:hover { background:var(--vm); transform:translateY(-1px); }
-.card-btn.gold { background:var(--d); color:white; }
-.card-btn.gold:hover { background:#e08a35; transform:translateY(-1px); }
-.card-btn.out { background:white; color:var(--v); border:2px solid var(--v); }
-.card-btn.out:hover { background:var(--vl); }
-
-/* REGION CARDS */
-.rgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:18px; margin-bottom:40px; }
-.rcard { background:white; border:1px solid var(--border); border-radius:18px; overflow:hidden; transition:all .2s; }
-.rcard:hover { border-color:#bcd8dc; box-shadow:0 14px 32px rgba(18,52,61,.08); transform:translateY(-3px); }
-.rhead { padding:15px 17px; display:flex; justify-content:space-between; align-items:center; }
-.rhead.eco { background:linear-gradient(135deg,#0d4d32,#1a7148); color:white; }
-.rhead.int { background:linear-gradient(135deg,#4f2691,#6739aa); color:white; }
-.rhead.pre { background:linear-gradient(135deg,#a65b19,#d17927); color:white; }
-.rname { font-family:'Fraunces',serif; font-size:1.15em; font-weight:700; letter-spacing:-.01em; }
-.rtag { font-size:.68em; font-weight:800; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.2); }
-.rbody { padding:16px 17px; }
-.ulist { list-style:none; margin-bottom:12px; }
-.ulist li { display:flex; gap:8px; padding:6px 0; font-size:.8em; border-bottom:1px dashed #eef1f2; color:#425b63; align-items:center; }
-.ulist li:last-child { border:none; }
-.utag { flex-shrink:0; background:var(--vl); color:var(--v); padding:2px 8px; border-radius:8px; font-size:.68em; font-weight:800; }
-.rfooter { font-size:.78em; color:var(--gray); padding-top:10px; border-top:1px solid #edf2f3; display:flex; flex-direction:column; gap:5px; }
-.rfooter strong { color:var(--dark); }
-
-/* LEGEND */
-.legend { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:22px; }
-.leg { font-size:.78em; font-weight:700; padding:8px 14px; border-radius:999px; }
-.leg.eco { background:#e9f6ef; color:#1a7148; }
-.leg.int { background:#f1e9fb; color:#6739aa; }
-.leg.pre { background:#fbeee0; color:#a65b19; }
-
-/* BUDGET FORM */
-.bwrap { max-width:720px; margin:0 auto; }
-.fg { margin-bottom:20px; }
-.fl { font-weight:700; font-size:.85em; margin-bottom:9px; display:block; color:var(--dark); }
-.fc { width:100%; padding:13px 15px; border:1.5px solid var(--border); border-radius:13px; font-family:'Inter',sans-serif; font-size:.88em; background:white; outline:none; transition:all .18s; }
-.fc:focus { border-color:var(--v); box-shadow:0 0 0 4px rgba(29,106,74,.08); }
-.fta { min-height:100px; resize:vertical; }
-.checks { display:flex; flex-wrap:wrap; gap:8px; }
-.chk { display:flex; align-items:center; gap:8px; padding:9px 15px; border:1.5px solid var(--border); border-radius:999px; cursor:pointer; font-size:.85em; transition:all .18s; user-select:none; }
-.chk:hover { border-color:var(--v); background:var(--vl); }
-.chk.on { border-color:var(--v); background:var(--v); color:white; font-weight:700; }
-.chk input { display:none; }
-.bcard { background:var(--vl); border:1.5px solid var(--v); border-radius:18px; padding:26px; margin-top:26px; display:none; }
-.bcard h3 { font-family:'Fraunces',serif; color:var(--v); margin-bottom:16px; font-size:1.2em; }
-.brow { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(29,106,74,.12); font-size:.9em; }
-.btotal { font-size:1.15em; font-weight:800; color:var(--v); padding-top:12px; }
-.sub-btn { width:100%; padding:16px; background:var(--v); color:white; border:none; border-radius:14px; font-size:1em; font-weight:800; cursor:pointer; font-family:'Inter',sans-serif; margin-top:20px; transition:all .2s; }
-.sub-btn:hover { background:var(--vm); transform:translateY(-2px); box-shadow:0 12px 26px rgba(29,106,74,.22); }
-
-/* PAYMENTS */
-.pay-block { background:white; border:1px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:20px; }
-.pay-head { background:linear-gradient(135deg,#1a7148,#2f8358); color:white; padding:16px 24px; font-family:'Fraunces',serif; font-size:1.2em; display:flex; align-items:center; gap:10px; }
-.pay-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); }
-.pay-grid.three { grid-template-columns:repeat(3,1fr); }
-.pay-item { padding:22px 24px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
-.pay-item:last-child { border-right:0; }
-.pay-title { display:block; font-weight:800; color:var(--v); margin-bottom:10px; font-size:.92em; }
-.pay-text { font-size:.85em; color:#425b63; line-height:1.7; }
-.pay-btn { display:inline-block; margin-top:10px; padding:10px 20px; background:var(--v); color:white; border-radius:11px; font-weight:700; text-decoration:none; font-size:.84em; transition:all .18s; }
-.pay-btn:hover { background:var(--vm); transform:translateY(-1px); }
-
-footer { background:var(--navy); color:rgba(255,255,255,.6); text-align:center; padding:22px; font-size:.78em; }
-
-@media(max-width:900px) {
-  .pay-grid.three { grid-template-columns:1fr 1fr; }
+@media(max-width:1060px){
+  .svx-hero-grid{grid-template-columns:1fr .85fr;gap:36px}
+  .svx-card-grid{grid-template-columns:1fr 1fr}
+  .svx-card-grid .svx-card:last-child:nth-child(odd){grid-column:1/-1}
+  .svx-mini-grid,.svx-pay-grid,.svx-unis{grid-template-columns:1fr 1fr}
 }
-@media(max-width:640px) {
-  .hero h1 { font-size:1.7em; }
-  .reco-banner { flex-direction:column; align-items:flex-start; }
-  .reco-btn { width:100%; text-align:center; }
-  .grid { grid-template-columns:1fr; }
-  .panel { padding:28px 14px 48px; }
-  .pay-item { border-right:0; }
-  .pay-grid.three { grid-template-columns:1fr; }
+@media(max-width:900px){
+  .svx-hero{padding-top:44px}
+  .svx-hero-grid{grid-template-columns:1fr}
+  .svx-guide{max-width:620px}
+  .svx-control{align-items:stretch;flex-direction:column}
+  .svx-currency{border-left:0;border-top:1px solid var(--sv-line);padding:7px 0 0;justify-content:flex-end}
+  .svx-head{display:block}
+  .svx-head p{margin-top:8px}
+  .svx-budget{grid-template-columns:1fr}
 }
+@media(max-width:650px){
+  .svx-container{width:calc(100% - 24px)}
+  .svx-card-grid,.svx-card-grid.two,.svx-mini-grid,.svx-pay-grid,.svx-pay-grid.three,.svx-unis{grid-template-columns:1fr}
+  .svx-callout{grid-template-columns:auto 1fr}
+  .svx-callout .svx-btn{grid-column:1/-1;width:100%}
+  .svx-float{display:none}
+  .svx-hero h1{font-size:38px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <h1>Inspira<span>✈</span></h1>
-  <p>Programa <em>Estudia y Trabaja en España 360°</em> · Máster 2026/2027</p>
-  <div class="hero-badges">
-    <span class="badge">98% admitidos</span>
-    <span class="badge">Especialistas en Extranjería</span>
-    <span class="badge">Todas las universidades españolas</span>
+<section class="svx-hero">
+  <div class="svx-container svx-hero-grid">
+    <div>
+      <div class="svx-kicker"><i></i>Servicios de admisión y acompañamiento</div>
+      <h1>Nuestros servicios <span>de Máster</span></h1>
+      <p class="svx-hero-copy">Elige cuánto acompañamiento necesitas: desde una sesión puntual hasta la gestión completa de búsqueda, documentación, postulaciones, subsanaciones y matrícula en España. Programa <em>Estudia y Trabaja en España 360°</em> · Máster 2026/2027.</p>
+      <div class="svx-actions">
+        <button class="svx-btn primary" type="button" onclick="go('completos',document.querySelector('[data-tab=completos]'))">Explorar paquetes <span>→</span></button>
+        <a class="svx-btn ghost" href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" rel="noopener">Reservar diagnóstico <span>↗</span></a>
+      </div>
+      <div class="svx-proof">
+        <span><b>98%</b>admitidos</span>
+        <span><b>+80</b>universidades</span>
+        <span><b>6 categorías</b>de servicio</span>
+        <span><b>3 monedas</b>EUR · USD · PEN</span>
+      </div>
+    </div>
+    <div style="position:relative">
+      <div class="svx-float one">✓ Diagnóstico incluido en packs</div>
+      <div class="svx-float two">Upgrade sin penalización</div>
+      <div class="svx-guide">
+        <div class="svx-guide-top"><b>Tu ruta con Inspira</b><span class="svx-live">● Activa</span></div>
+        <div class="svx-guide-body">
+          <div class="svx-route-step active"><div class="svx-route-num">01</div><div><b>Diagnóstico 1:1</b><small>Definimos tu punto de partida</small></div><span class="svx-route-tag pv" data-e="25">€25</span></div>
+          <div class="svx-route-step"><div class="svx-route-num">02</div><div><b>Elige cobertura</b><small>Completo, parcial o individual</small></div><span class="svx-route-tag">Flexible</span></div>
+          <div class="svx-route-step"><div class="svx-route-num">03</div><div><b>Postulación y seguimiento</b><small>Hasta matrícula y carta de admisión</small></div><span class="svx-route-tag">Acompañado</span></div>
+          <div class="svx-guide-result">
+            <div><small>Servicio de entrada</small><strong class="pv" data-e="25">€25</strong><span>Diagnóstico 1:1 · 30 min</span></div>
+            <a class="svx-btn primary" style="height:40px" href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" rel="noopener">Reservar →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="svx-control-wrap">
+  <div class="svx-container">
+    <div class="svx-control">
+      <div class="svx-tabs">
+        <button class="svx-tab nav-btn active" data-tab="asesorias" onclick="go('asesorias',this)">🔒 Asesorías</button>
+        <button class="svx-tab nav-btn" data-tab="completos" onclick="go('completos',this)">✅ Paquetes completos</button>
+        <button class="svx-tab nav-btn" data-tab="parciales" onclick="go('parciales',this)">🔶 Paquetes parciales</button>
+        <button class="svx-tab nav-btn" data-tab="individuales" onclick="go('individuales',this)">🔍 Individuales</button>
+        <button class="svx-tab nav-btn" data-tab="universidades" onclick="go('universidades',this)">🏛 Universidades</button>
+        <button class="svx-tab nav-btn" data-tab="presupuesto" onclick="go('presupuesto',this)">💬 Presupuesto</button>
+      </div>
+      <div class="svx-currency">
+        <button class="svx-cur cur-btn active" onclick="setCur('eur',this)">EUR €</button>
+        <button class="svx-cur cur-btn" onclick="setCur('usd',this)">USD $</button>
+        <button class="svx-cur cur-btn" onclick="setCur('pen',this)">PEN S/</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="cur-bar">
-  <span>Ver precios en:</span>
-  <button class="cur-btn active" onclick="setCur('eur',this)">🇪🇺 EUR €</button>
-  <button class="cur-btn" onclick="setCur('usd',this)">🇺🇸 USD $</button>
-  <button class="cur-btn" onclick="setCur('pen',this)">🇵🇪 PEN S/</button>
-</div>
+<main class="svx-main">
+  <div class="svx-container">
 
-<div class="nav">
-  <button class="nav-btn active" onclick="go('asesorias',this)">🔒 Asesorías</button>
-  <button class="nav-btn" onclick="go('completos',this)">✅ Paquetes Completos</button>
-  <button class="nav-btn" onclick="go('parciales',this)">🔶 Paquetes Parciales</button>
-  <button class="nav-btn" onclick="go('individuales',this)">🔍 Servicios Individuales</button>
-  <button class="nav-btn" onclick="go('universidades',this)">🏛️ Universidades</button>
-  <button class="nav-btn" onclick="go('presupuesto',this)">💬 Presupuesto</button>
-</div>
-
-<!-- ── ASESORÍAS ── -->
-<div id="p-asesorias" class="panel active">
-
-  <!-- CAMINO NORMAL BANNER -->
-  <div class="reco-banner">
-    <div class="reco-icon">🧭</div>
-    <div class="reco-body">
-      <h3>El camino recomendado</h3>
-      <p>
-        <b>Paso 1:</b> Reserva tu Diagnóstico 1:1 (€25 / S/ 100) → <b>Paso 2:</b> Elige y contrata tu paquete.<br>
-        💡 Si contratas un paquete completo directamente, el Diagnóstico ya está incluido.
-      </p>
-    </div>
-    <a href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" class="reco-btn">
-      📅 Reservar ahora →
-    </a>
-  </div>
-
-  <!-- 3 TARJETAS -->
-  <div class="grid" style="margin-bottom:36px;">
-
-    <!-- DIAGNÓSTICO -->
-    <div class="card">
-      <div class="card-top gold">
-        <div class="card-tag" style="text-transform:uppercase;letter-spacing:.08em;font-size:.68em;font-weight:800;margin-bottom:6px;">Paso 1 recomendado · Previo al paquete</div>
-        <div class="card-name">Diagnóstico 1:1</div>
-        <div style="display:flex;align-items:baseline;gap:8px;">
-          <span class="card-price" id="p-diag">€25</span>
-          <span class="card-price-note">/ S/ 100</span>
-        </div>
-        <div class="card-price-note" style="margin-top:4px;">30 minutos · Sesión 1:1</div>
-      </div>
-      <div class="card-body">
-        <div class="card-for">
-          Sesión de diagnóstico <strong>previa a contratar cualquier paquete</strong>. Analizamos tu perfil, situación académica y objetivos para recomendarte el paquete más adecuado para ti.
-        </div>
-        <ul class="feats">
-          <li><span class="fi">✔</span>Revisión de título de acceso y expediente</li>
-          <li><span class="fi">✔</span>Análisis de viabilidad de tu perfil</li>
-          <li><span class="fi">✔</span>Evaluación de requisitos y plazos</li>
-          <li><span class="fi">✔</span>Recomendación del paquete más adecuado</li>
-          <li><span class="fi">✔</span>Su valor (€25) se aplica al paquete que contrates</li>
-        </ul>
-        <div class="card-for amber">
-          💡 Si después contratas un paquete completo, los €25 se descuentan del total.
-        </div>
-        <a href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" class="card-btn gold" style="display:block;text-align:center;text-decoration:none;">
-          📅 Reservar Diagnóstico →
-        </a>
-      </div>
-    </div>
-
-    <!-- CONSULTA PUNTUAL -->
-    <div class="card">
-      <div class="card-top soft">
-        <div class="card-tag" style="text-transform:uppercase;letter-spacing:.08em;font-size:.68em;font-weight:800;margin-bottom:6px;">En proceso · Dudas puntuales</div>
-        <div class="card-name">Consulta Puntual Acompañada</div>
-        <div style="display:flex;align-items:baseline;gap:8px;">
-          <span class="card-price" id="p-punt">€29</span>
-          <span class="card-price-note">orientación estratégica</span>
-        </div>
-        <div class="card-price-note" style="margin-top:4px;">30 minutos · Sesión 1:1</div>
-      </div>
-      <div class="card-body">
-        <div class="card-for">
-          Para quienes <strong>ya están en proceso</strong> y tienen dudas puntuales. No sabes si lo que estás haciendo es correcto, o quieres confirmar tus próximos pasos antes de postular.
-        </div>
-        <ul class="feats">
-          <li><span class="fi">✔</span>Revisión rápida de tu situación actual</li>
-          <li><span class="fi">✔</span>Explicación clara de etapas del proceso</li>
-          <li><span class="fi">✔</span>Orientación sobre plazos, decisiones y errores frecuentes</li>
-          <li><span class="fi">✔</span>Recomendaciones prácticas para tu caso</li>
-        </ul>
-        <div class="card-warn">
-          ⚠️ No incluye revisión documentaria ni postulación.
-        </div>
-        <a href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" class="card-btn green" style="display:block;text-align:center;text-decoration:none;">
-          📅 Reservar Consulta →
-        </a>
-      </div>
-    </div>
-
-    <!-- SESIÓN ACOMPAÑADA -->
-    <div class="card">
-      <div class="card-top purple">
-        <div class="card-tag" style="text-transform:uppercase;letter-spacing:.08em;font-size:.68em;font-weight:800;margin-bottom:6px;">En vivo · Pantalla compartida</div>
-        <div class="card-name">Sesión Acompañada</div>
-        <div style="display:flex;align-items:baseline;gap:8px;">
-          <span class="card-price" id="p-acomp">€45</span>
-          <span class="card-price-note">revisión o postulación en vivo</span>
-        </div>
-        <div class="card-price-note" style="margin-top:4px;">30 minutos · Pantalla compartida</div>
-      </div>
-      <div class="card-body">
-        <div class="card-for">
-          Sesión en vivo con <strong>pantalla compartida</strong>. El especialista te guía en tiempo real mientras revisas documentos, navegas portales universitarios o completas una postulación en ese momento.
-        </div>
-        <ul class="feats">
-          <li><span class="fi">✔</span>Revisión de documentos en tiempo real</li>
-          <li><span class="fi">✔</span>Navegación guiada por portales universitarios</li>
-          <li><span class="fi">✔</span>Postulación asistida en vivo si es necesario</li>
-          <li><span class="fi">✔</span>Resolución de dudas operativas al momento</li>
-        </ul>
-        <div class="card-for" style="background:#f1e9fb;color:#4f2691;">
-          💡 Ideal si quieres revisar algo urgente o postular en ese momento con guía.
-        </div>
-        <a href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" class="card-btn" style="display:block;text-align:center;text-decoration:none;background:#6739aa;color:white;">
-          📅 Reservar Sesión →
-        </a>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- MEDIOS DE PAGO -->
-  <div class="pay-block">
-    <div class="pay-head">💸 Medios de Pago</div>
-    <div class="pay-grid">
-
-      <div class="pay-item">
-        <span class="pay-title">🏦 Interbank — Transferencia</span>
-        <div class="pay-text">
-          <strong>Proyecta Producciones Group</strong><br>
-          Cuenta Corriente Soles<br>
-          N° Cuenta: <strong>200 300 532 988 2</strong><br>
-          CCI: <strong>003 200 0030 0532 9882 31</strong>
-        </div>
+    <!-- ── ASESORÍAS ── -->
+    <section id="p-asesorias" class="panel active">
+      <div class="svx-head">
+        <div><span class="svx-label">Empieza aquí</span><h2>Asesorías según el momento en que estás.</h2></div>
+        <p>No necesitas contratar un paquete para resolver una duda concreta. Las asesorías separan diagnóstico, orientación puntual y acompañamiento en vivo.</p>
       </div>
 
-      <div class="pay-item">
-        <span class="pay-title">📱 Plin</span>
-        <div class="pay-text">
-          Enviar al número:<br>
-          <strong style="font-size:1.15em;">908 945 354</strong><br>
-          <span style="color:#8a9a9f;">Disponible desde cualquier banco</span>
+      <div class="svx-callout">
+        <div class="svx-call-icon">🧭</div>
+        <div>
+          <h3>El camino recomendado</h3>
+          <p><b>Paso 1:</b> reserva tu Diagnóstico 1:1 (€25 / S/ 100) → <b>Paso 2:</b> elige y contrata tu paquete. Si contratas un paquete completo directamente, el Diagnóstico ya está incluido.</p>
+        </div>
+        <a class="svx-btn primary" href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" rel="noopener">📅 Reservar ahora →</a>
+      </div>
+
+      <div class="svx-card-grid">
+        <article class="svx-card gold">
+          <div class="svx-card-top">
+            <div class="svx-card-kicker">Paso 1 recomendado · previo al paquete</div>
+            <h3>Diagnóstico 1:1</h3>
+            <div class="svx-price"><span id="p-diag">€25</span> <small>/ S/ 100</small></div>
+            <div class="svx-card-sub">30 minutos · Sesión 1:1</div>
+          </div>
+          <div class="svx-card-body">
+            <p>Sesión de diagnóstico <b>previa a contratar cualquier paquete.</b> Analizamos tu perfil, situación académica y objetivos para recomendarte el paquete más adecuado para ti.</p>
+            <div class="svx-feature"><span class="svx-check">✓</span>Revisión de título de acceso y expediente</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Análisis de viabilidad de tu perfil</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Evaluación de requisitos y plazos</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Recomendación del paquete más adecuado</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Su valor (€25) se aplica al paquete que contrates</div>
+            <div class="svx-hint">💡 Si después contratas un paquete completo, los €25 se descuentan del total.</div>
+            <div class="svx-card-foot"><a class="svx-btn gold block" href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" rel="noopener">📅 Reservar Diagnóstico →</a></div>
+          </div>
+        </article>
+
+        <article class="svx-card green">
+          <div class="svx-card-top">
+            <div class="svx-card-kicker">En proceso · dudas puntuales</div>
+            <h3>Consulta Puntual Acompañada</h3>
+            <div class="svx-price"><span id="p-punt">€29</span> <small>orientación estratégica</small></div>
+            <div class="svx-card-sub">30 minutos · Sesión 1:1</div>
+          </div>
+          <div class="svx-card-body">
+            <p>Para quienes <b>ya están en proceso</b> y tienen dudas puntuales. No sabes si lo que estás haciendo es correcto, o quieres confirmar tus próximos pasos antes de postular.</p>
+            <div class="svx-feature"><span class="svx-check">✓</span>Revisión rápida de tu situación actual</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Explicación clara de etapas del proceso</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Orientación sobre plazos, decisiones y errores frecuentes</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Recomendaciones prácticas para tu caso</div>
+            <div class="svx-warning">⚠️ No incluye revisión documentaria ni postulación.</div>
+            <div class="svx-card-foot"><a class="svx-btn green block" href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" rel="noopener">📅 Reservar Consulta →</a></div>
+          </div>
+        </article>
+
+        <article class="svx-card purple">
+          <div class="svx-card-top">
+            <div class="svx-card-kicker">En vivo · pantalla compartida</div>
+            <h3>Sesión Acompañada</h3>
+            <div class="svx-price"><span id="p-acomp">€45</span> <small>revisión o postulación en vivo</small></div>
+            <div class="svx-card-sub">30 minutos · Pantalla compartida</div>
+          </div>
+          <div class="svx-card-body">
+            <p>Sesión en vivo con <b>pantalla compartida.</b> El especialista te guía en tiempo real mientras revisas documentos, navegas portales universitarios o completas una postulación en ese momento.</p>
+            <div class="svx-feature"><span class="svx-check">✓</span>Revisión de documentos en tiempo real</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Navegación guiada por portales universitarios</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Postulación asistida en vivo si es necesario</div>
+            <div class="svx-feature"><span class="svx-check">✓</span>Resolución de dudas operativas al momento</div>
+            <div class="svx-hint" style="border-left-color:#6739aa;background:#f1e9fb;color:#4f2691">💡 Ideal si quieres revisar algo urgente o postular en ese momento con guía.</div>
+            <div class="svx-card-foot"><a class="svx-btn block" style="background:#6739aa;color:#fff" href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" rel="noopener">📅 Reservar Sesión →</a></div>
+          </div>
+        </article>
+      </div>
+
+      <section class="svx-payments">
+        <div class="svx-pay-head">
+          <div><span class="svx-label">Pago y reserva</span><h3>Métodos de pago</h3></div>
+          <p>Opciones locales, internacionales y reserva de asesoría.</p>
+        </div>
+        <div class="svx-pay-grid">
+          <article class="svx-pay"><h4>🏦 Interbank — Transferencia</h4><p><b>Proyecta Producciones Group</b><br>Cuenta Corriente Soles<br>N° Cuenta: <b>200 300 532 988 2</b><br>CCI: <b>003 200 0030 0532 9882 31</b></p></article>
+          <article class="svx-pay"><h4>📱 Plin</h4><p>Enviar al número:<br><b style="font-size:12px">908 945 354</b><br><small>Disponible desde cualquier banco.</small></p></article>
+          <article class="svx-pay"><h4>🌎 Desde el extranjero</h4><p>Paga vía <b>PayPal</b> o solicita un <b>link de pago</b> personalizado.<br><small>Escríbenos para generarte el link.</small></p></article>
+          <article class="svx-pay"><h4>🗓 Separa tu asesoría</h4><p>Reserva directamente tu sesión de 30 minutos en el calendario de Inspira.</p><a class="svx-btn green" style="height:36px;margin-top:9px" href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" rel="noopener">Reservar →</a></article>
+        </div>
+        <div class="svx-pay-grid three">
+          <article class="svx-pay"><h4>✂️ Fraccionamiento en 2 partes</h4><p>Paga el <b>50% al contratar</b> y el 50% restante al inicio del proceso de postulación.<br><small>Disponible para todos los paquetes.</small></p></article>
+          <article class="svx-pay"><h4>💳 3 cuotas sin intereses</h4><p>Pago al contado en <b>3 cuotas sin intereses</b> mediante <b>Mercado Pago</b>, con cualquier tarjeta de crédito.<br><small>Solicita tu link de pago.</small></p></article>
+          <article class="svx-pay"><h4>🔼 Upgrade sin penalización</h4><p>Empieza con un paquete base y <b>amplía pagando solo la diferencia</b>. Tu inversión inicial siempre se aplica al plan superior.<br><small>Sin penalización por cambiar.</small></p></article>
+        </div>
+      </section>
+    </section>
+
+    <!-- ── COMPLETOS ── -->
+    <section id="p-completos" class="panel">
+      <div class="svx-head">
+        <div><span class="svx-label">De principio a fin</span><h2>Paquetes completos.</h2></div>
+        <p>Todo el proceso de principio a fin, acompañamiento hasta tu carta de admisión. Solo varía la cobertura geográfica. Siempre puedes añadir comunidades pagando la diferencia al plan superior.</p>
+      </div>
+      <div class="svx-callout">
+        <div class="svx-call-icon">💡</div>
+        <div>
+          <h3>Todos los paquetes completos incluyen</h3>
+          <p>Asesoría inicial 1:1 · Búsqueda personalizada · Documentación PRO · Postulación a becas · Postulamos en <b>todas las fases</b> (enero a septiembre, o hasta obtener admisión) · Matrícula y carta de admisión oficial.</p>
         </div>
       </div>
+      <div class="svx-banner">
+        <div style="font-size:21px">🔼</div>
+        <div><b>Flexibilidad total — amplía cuando quieras</b><p>¿Empezaste con un paquete y quieres más comunidades? Puedes añadirlas en cualquier momento pagando solo la diferencia al plan superior. Tu inversión nunca se pierde. Ej: tienes Full Económico (€359) y quieres añadir Madrid → pagas la diferencia al plan Premium o Madrid + Cataluña.</p></div>
+      </div>
+      <div class="svx-card-grid" id="g-completos"></div>
+    </section>
 
-      <div class="pay-item">
-        <span class="pay-title">🌎 Desde el extranjero</span>
-        <div class="pay-text">
-          Paga vía <strong>PayPal</strong> o solicita un <strong>link de pago</strong> personalizado.<br>
-          <span style="color:#8a9a9f;">Escríbenos para generarte el link.</span>
+    <!-- ── PARCIALES ── -->
+    <section id="p-parciales" class="panel">
+      <div class="svx-head">
+        <div><span class="svx-label">Cuando ya avanzaste</span><h2>Paquetes parciales.</h2></div>
+        <p>Para quienes ya tienen parte del proceso avanzada. Exclusivos para Andalucía.</p>
+      </div>
+      <div class="svx-banner danger">
+        <div style="font-size:21px">🏰</div>
+        <div><b>Solo aplican para Andalucía</b><p>Para otras comunidades revisa los Paquetes Completos. No incluyen todas las etapas: solo las indicadas en cada pack.</p></div>
+      </div>
+      <div class="svx-card-grid two" id="g-parciales"></div>
+    </section>
+
+    <!-- ── INDIVIDUALES ── -->
+    <section id="p-individuales" class="panel">
+      <div class="svx-head">
+        <div><span class="svx-label">Solo lo que necesitas</span><h2>Servicios individuales.</h2></div>
+        <p>Servicios a la carta, sin paquete. Para quien ya tiene parte del proceso avanzado o quiere un servicio específico.</p>
+      </div>
+      <div class="svx-banner danger">
+        <div style="font-size:21px">⚠️</div>
+        <div><b>Son servicios independientes</b><p>No se descuentan si luego contratas un paquete completo.</p></div>
+      </div>
+
+      <div class="svx-subtabs">
+        <button id="st-combo" class="svx-subtab active" onclick="showSub('combo')">🎯 Servicios combo</button>
+        <button id="st-solo" class="svx-subtab" onclick="showSub('solo')">🔧 Servicios individuales</button>
+      </div>
+
+      <div id="sub-combo">
+        <div class="svx-banner">
+          <div style="font-size:21px">💡</div>
+          <div><b>Cómo elegir</b><p>Los combos agrupan varios servicios a mejor precio. Puedes contratar <b>Solo Búsqueda primero</b> y con el informe decidir qué combo necesitas, o ir directo al que más se ajusta.</p></div>
+        </div>
+        <div class="svx-card-grid" id="g-combos"></div>
+      </div>
+
+      <div id="sub-solo" style="display:none">
+        <div class="svx-banner danger">
+          <div style="font-size:21px">⚙️</div>
+          <div><b>Alcance de un servicio suelto</b><p>Aplica a <b>1 universidad</b> (2 según complejidad). Si necesitas más, se presupuesta aparte.</p></div>
+        </div>
+        <div class="svx-card-grid" id="g-solos"></div>
+      </div>
+    </section>
+
+    <!-- ── UNIVERSIDADES ── -->
+    <section id="p-universidades" class="panel">
+      <div class="svx-head">
+        <div><span class="svx-label">Cobertura real</span><h2>Universidades y comunidades.</h2></div>
+        <p>Consulta las universidades, tasas reales y fases de postulación en cada comunidad. La diferencia no es solo el número de universidades: también cambia la complejidad de portales y cronogramas.</p>
+      </div>
+      <div class="svx-legend">
+        <span class="svx-leg eco">🟢 Económicas: Andalucía · Galicia · Castilla y León · Cantabria · Asturias · Castilla-La Mancha · Navarra</span>
+        <span class="svx-leg int">🟣 Intermedias: La Rioja · País Vasco · Murcia · Extremadura · Valencia · Aragón</span>
+        <span class="svx-leg pre">🟠 Premium: Madrid · Cataluña</span>
+      </div>
+      <div class="svx-unis" id="g-regiones"></div>
+    </section>
+
+    <!-- ── PRESUPUESTO ── -->
+    <section id="p-presupuesto" class="panel">
+      <div class="svx-head">
+        <div><span class="svx-label">Arma una referencia</span><h2>Presupuesto personalizado.</h2></div>
+        <p>Cuéntanos qué necesitas y te enviamos una propuesta a medida en menos de 24 horas. El importe es orientativo y solo suma servicios de Inspira: no incluye tasas universitarias ni gastos migratorios.</p>
+      </div>
+      <div class="svx-budget">
+        <div class="svx-budget-card">
+          <div class="svx-field">
+            <label>¿En qué comunidades quieres postular?</label>
+            <div class="checks" id="c-comunidades">
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Andalucía</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Madrid</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Cataluña</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Valencia</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>País Vasco</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Galicia</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Castilla y León</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Murcia</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Aragón</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Extremadura</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Asturias</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Cantabria</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>La Rioja</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Navarra</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>No sé, oriéntenme</label>
+            </div>
+          </div>
+          <div class="svx-field">
+            <label>¿Cuántas universidades aproximadamente?</label>
+            <select id="c-cant" onchange="calcBudget()">
+              <option value="">Selecciona...</option>
+              <option value="219">1 a 5 universidades</option>
+              <option value="310">6 a 12 universidades</option>
+              <option value="449">13 a 25 universidades</option>
+              <option value="700">26 a 50 universidades</option>
+              <option value="1100">Más de 50 (Todo España)</option>
+            </select>
+          </div>
+          <div class="svx-field">
+            <label>¿Qué necesitas?</label>
+            <div class="checks" id="c-servicios">
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Todo incluido</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Solo búsqueda</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Solo documentación</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Solo postulación</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Subsanaciones</label>
+              <label class="chk" onclick="event.preventDefault();tog(this)"><input>Matrícula/visado</label>
+            </div>
+          </div>
+          <div class="svx-field"><label>Tu nombre</label><input id="c-nom" placeholder="Nombre completo"></div>
+          <div class="svx-field"><label>WhatsApp o email</label><input id="c-con" placeholder="+51 999... o tu@email.com"></div>
+          <div class="svx-field"><label>Cuéntanos tu situación (opcional)</label><textarea id="c-sit" placeholder="Ej: Ya tengo mi título apostillado, sé qué máster quiero..."></textarea></div>
+        </div>
+        <div>
+          <div class="bcard" id="bcard">
+            <h3>💰 Estimación orientativa</h3>
+            <div id="brows"></div>
+          </div>
+          <div class="svx-budget-card" style="background:linear-gradient(145deg,#fff,#f2f8f6)">
+            <span class="svx-label">Siguiente paso</span>
+            <div class="svx-total">24 h</div>
+            <p style="font-size:9.5px;color:var(--sv-muted);line-height:1.6">Recibirás una propuesta personalizada en menos de 24 horas con la cobertura, las fases disponibles y las opciones de pago que apliquen a tu caso.</p>
+            <button class="sub-btn" style="margin-top:12px" onclick="enviar()">📩 Solicitar presupuesto personalizado</button>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="pay-item">
-        <span class="pay-title">📅 Separa tu asesoría</span>
-        <div class="pay-text" style="margin-bottom:4px;">
-          Reserva directamente tu sesión de 30 minutos en el calendario de Inspira.
-        </div>
-        <a href="https://calendly.com/administracion-inspira-legal/30min" target="_blank" class="pay-btn">
-          Reservar en Calendly →
-        </a>
-      </div>
-
-    </div>
   </div>
+</main>
 
-  <!-- FACILIDADES DE PAGO -->
-  <div class="pay-block">
-    <div class="pay-head">💳 Facilidades de Pago</div>
-    <div class="pay-grid three">
-
-      <div class="pay-item">
-        <span class="pay-title">✂️ Fraccionamiento en 2 partes</span>
-        <div class="pay-text">
-          Paga el <strong>50% al contratar</strong> y el 50% restante al inicio del proceso de postulación.<br>
-          <span style="color:#8a9a9f;">Disponible para todos los paquetes.</span>
-        </div>
-      </div>
-
-      <div class="pay-item">
-        <span class="pay-title">💳 3 cuotas sin intereses</span>
-        <div class="pay-text">
-          Pago al contado en <strong>3 cuotas sin intereses</strong> mediante <strong>Mercado Pago</strong>.<br>
-          Con cualquier tarjeta de crédito.<br>
-          <span style="color:#8a9a9f;">Solicita tu link de pago.</span>
-        </div>
-      </div>
-
-      <div class="pay-item">
-        <span class="pay-title">🔼 Upgrade sin penalización</span>
-        <div class="pay-text">
-          Empieza con un paquete base y <strong>amplía pagando solo la diferencia</strong>. Tu inversión inicial siempre se aplica al plan superior.<br>
-          <span style="color:#8a9a9f;">Sin penalización por cambiar.</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-<!-- ── COMPLETOS ── -->
-<div id="p-completos" class="panel">
-
-  <div class="note">
-    💡 <strong>Todos los paquetes completos incluyen:</strong> Asesoría inicial 1:1 · Búsqueda personalizada · Documentación PRO · Postulación a becas · Nosotros postulamos en <strong>todas las fases</strong> (enero a septiembre, o hasta obtener admisión) · Matrícula y carta de admisión oficial.
-  </div>
-
-  <div class="sec-h">
-    <h2>Paquetes Completos</h2>
-    <p>Todo el proceso de principio a fin, acompañamiento hasta tu carta de admisión. Solo varía la cobertura geográfica. <strong>Siempre puedes añadir comunidades</strong> pagando la diferencia al plan superior.</p>
-  </div>
-
-  <div class="reco-banner" style="background:linear-gradient(90deg,#fff8e8,#fffdf8);color:#8a5d12;box-shadow:none;border:1.5px solid #e8c87a;">
-    <div class="reco-icon" style="background:var(--dl);font-size:1.6em;">🔼</div>
-    <div class="reco-body">
-      <h3 style="color:#8a5d12;font-size:1.05em;">Flexibilidad total — amplía cuando quieras</h3>
-      <p style="color:#8a5d12;">
-        ¿Empezaste con un paquete y quieres más comunidades? <b style="color:#8a5d12;">Puedes añadirlas en cualquier momento pagando solo la diferencia</b> al plan superior. Tu inversión nunca se pierde.<br>
-        Ej: tienes Full Económico (€359) y quieres añadir Madrid → pagas diferencia al plan Premium o Madrid+Cataluña.
-      </p>
-    </div>
-  </div>
-
-  <div class="grid" id="g-completos"></div>
-</div>
-
-<!-- ── PARCIALES ── -->
-<div id="p-parciales" class="panel">
-  <div class="sec-h">
-    <h2>Paquetes Parciales</h2>
-    <p>Para quienes ya tienen parte del proceso avanzada. Exclusivos para Andalucía.</p>
-  </div>
-  <div class="note note-warn">
-    🏰 <strong>Solo aplican para Andalucía.</strong> Para otras comunidades, revisa los Paquetes Completos. No incluyen todas las etapas — solo las indicadas en cada pack.
-  </div>
-  <div class="grid" id="g-parciales"></div>
-</div>
-
-<!-- ── INDIVIDUALES ── -->
-<div id="p-individuales" class="panel">
-  <div class="sec-h">
-    <h2>Servicios Individuales</h2>
-    <p>Servicios a la carta, sin paquete. Para quien ya tiene parte del proceso avanzado o quiere un servicio específico.</p>
-  </div>
-  <div class="note note-warn">
-    ⚠️ Estos servicios son <strong>independientes</strong>. No se descuentan si luego contratas un paquete completo.
-  </div>
-
-  <!-- SUB-TABS -->
-  <div style="display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;">
-    <button id="st-combo" onclick="showSub('combo')"
-      style="padding:11px 24px;border-radius:999px;border:2px solid var(--v);background:var(--v);color:white;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;font-size:.85em;transition:all .2s;">
-      🎯 Servicios Combo
-    </button>
-    <button id="st-solo" onclick="showSub('solo')"
-      style="padding:11px 24px;border-radius:999px;border:2px solid var(--border);background:white;color:var(--gray);font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;font-size:.85em;transition:all .2s;">
-      🔧 Servicios Individuales
-    </button>
-  </div>
-
-  <!-- COMBOS -->
-  <div id="sub-combo">
-    <div class="note">
-      💡 Los combos agrupan varios servicios a mejor precio. Puedes contratar <strong>Solo Búsqueda primero</strong> y con el informe decidir qué combo necesitas, o ir directo al que más se ajusta.
-    </div>
-    <div class="grid" id="g-combos"></div>
-  </div>
-
-  <!-- INDIVIDUALES SOLOS -->
-  <div id="sub-solo" style="display:none;">
-    <div class="note note-warn">
-      ⚙️ Un servicio específico solo. Aplica a <strong>1 universidad</strong> (2 según complejidad). Si necesitas más, se presupuesta aparte.
-    </div>
-    <div class="grid" id="g-solos"></div>
-  </div>
-</div>
-
-<!-- ── UNIVERSIDADES ── -->
-<div id="p-universidades" class="panel">
-  <div class="sec-h">
-    <h2>Universidades por Comunidad</h2>
-    <p>Consulta las universidades, tasas reales y fases de postulación en cada comunidad.</p>
-  </div>
-  <div class="legend">
-    <span class="leg eco">🟢 Económicas: Andalucía · Galicia · Castilla y León · Cantabria · Asturias · Castilla-La Mancha · Navarra</span>
-    <span class="leg int">🟣 Intermedias: La Rioja · País Vasco · Murcia · Extremadura · Valencia · Aragón</span>
-    <span class="leg pre">🟠 Premium: Madrid · Cataluña</span>
-  </div>
-  <div class="rgrid" id="g-regiones"></div>
-</div>
-
-<!-- ── PRESUPUESTO ── -->
-<div id="p-presupuesto" class="panel">
-  <div class="sec-h">
-    <h2>Presupuesto Personalizado</h2>
-    <p>Cuéntanos qué necesitas y te enviamos una propuesta a medida en menos de 24 horas.</p>
-  </div>
-  <div class="bwrap">
-    <div class="fg">
-      <label class="fl">¿En qué comunidades quieres postular?</label>
-      <div class="checks" id="c-comunidades">
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Andalucía</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Madrid</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Cataluña</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Valencia</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>País Vasco</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Galicia</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Castilla y León</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Murcia</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Aragón</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Extremadura</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Asturias</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Cantabria</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>La Rioja</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Navarra</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>No sé, oriéntenme</label>
-      </div>
-    </div>
-    <div class="fg">
-      <label class="fl">¿Cuántas universidades aproximadamente?</label>
-      <select class="fc" id="c-cant" onchange="calcBudget()">
-        <option value="">Selecciona...</option>
-        <option value="219">1 a 5 universidades</option>
-        <option value="310">6 a 12 universidades</option>
-        <option value="449">13 a 25 universidades</option>
-        <option value="700">26 a 50 universidades</option>
-        <option value="1100">Más de 50 (Todo España)</option>
-      </select>
-    </div>
-    <div class="fg">
-      <label class="fl">¿Qué necesitas?</label>
-      <div class="checks" id="c-servicios">
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Todo incluido</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Solo búsqueda</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Solo documentación</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Solo postulación</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Subsanaciones</label>
-        <label class="chk" onclick="event.preventDefault();tog(this)"><input>Matrícula/visado</label>
-      </div>
-    </div>
-    <div class="fg"><label class="fl">Tu nombre</label><input class="fc" id="c-nom" placeholder="Nombre completo"></div>
-    <div class="fg"><label class="fl">WhatsApp o email</label><input class="fc" id="c-con" placeholder="+51 999... o tu@email.com"></div>
-    <div class="fg"><label class="fl">Cuéntanos tu situación (opcional)</label><textarea class="fc fta" id="c-sit" placeholder="Ej: Ya tengo mi título apostillado, sé qué máster quiero..."></textarea></div>
-    <div class="bcard" id="bcard">
-      <h3>💰 Estimación orientativa</h3>
-      <div id="brows"></div>
-    </div>
-    <button class="sub-btn" onclick="enviar()">📩 Solicitar presupuesto personalizado</button>
-  </div>
-</div>
-
-<footer>Tasas fijas: 1 EUR = $1.09 USD | 1 EUR = S/ 4.10 PEN · Actualizado Abril 2026 · Inspira – Especialistas en Extranjería</footer>
+<footer>Tasas fijas: 1 EUR = $1.09 USD | 1 EUR = S/ 4.10 PEN · Actualizado Abril 2026 · Inspira — Especialistas en Extranjería</footer>
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────
@@ -888,23 +865,24 @@ const REGIONES = [
 // ── RENDER ────────────────────────────────────────────────────────────────
 
 function card(d, cta) {
-  const tc = d.top === 'gold' ? 'gold' : d.top === 'soft' ? 'soft' : d.top === 'amber' ? 'amber' : '';
+  const tc = d.top === 'gold' ? 'gold' : d.top === 'soft' ? 'soft' : d.top === 'amber' ? 'orange' : 'green';
   return `
-    <div class="card${d.featured?' featured':''}">
-      ${d.featured ? '<div class="card-ribbon">⭐ Recomendado</div>' : ''}
-      <div class="card-top ${tc}">
-        <div class="card-name">${d.name}</div>
-        <div class="card-tag">${d.tag}</div>
-        <div class="card-price pv" data-e="${d.eur}">${p(d.eur)}</div>
-        <div class="card-price-note">inversión</div>
+    <article class="svx-card ${tc}${d.featured?' reco':''}">
+      ${d.featured ? '<div class="svx-ribbon">★ Recomendado</div>' : ''}
+      <div class="svx-card-top">
+        <div class="svx-card-kicker">${d.tag}</div>
+        <h3>${d.name}</h3>
+        <div class="svx-price"><span class="pv" data-e="${d.eur}">${p(d.eur)}</span> <small>inversión</small></div>
       </div>
-      <div class="card-body">
-        <div class="card-for">${d.for}</div>
-        <ul class="feats">${d.feats.map(f=>`<li><span class="fi">${f[0]}</span>${f[1]}</li>`).join('')}</ul>
-        ${d.warn ? `<div class="card-warn">⚠️ ${d.warn}</div>` : ''}
-        <button class="card-btn ${d.btn}" onclick="alert('Pronto habilitaremos el checkout. Escríbenos para contratar: ${d.name}.')">${cta}</button>
+      <div class="svx-card-body">
+        <div class="svx-coverage">${d.for}</div>
+        ${d.feats.map(f=>`<div class="svx-feature"><span class="svx-check">${f[0]}</span>${f[1]}</div>`).join('')}
+        ${d.warn ? `<div class="svx-warning">⚠️ ${d.warn}</div>` : ''}
+        <div class="svx-card-foot">
+          <button class="svx-btn ${d.btn} block" onclick="alert('Pronto habilitaremos el checkout. Escríbenos para contratar: ${d.name}.')">${cta}</button>
+        </div>
       </div>
-    </div>`;
+    </article>`;
 }
 
 function renderAll() {
@@ -927,35 +905,29 @@ function showSub(sub) {
   const isCombo = sub === 'combo';
   document.getElementById('sub-combo').style.display = isCombo ? 'block' : 'none';
   document.getElementById('sub-solo').style.display  = isCombo ? 'none' : 'block';
-  const btnCombo = document.getElementById('st-combo');
-  const btnSolo  = document.getElementById('st-solo');
-  btnCombo.style.background    = isCombo ? 'var(--v)' : 'white';
-  btnCombo.style.color         = isCombo ? 'white' : 'var(--gray)';
-  btnCombo.style.borderColor   = isCombo ? 'var(--v)' : 'var(--border)';
-  btnSolo.style.background     = isCombo ? 'white' : 'var(--v)';
-  btnSolo.style.color          = isCombo ? 'var(--gray)' : 'white';
-  btnSolo.style.borderColor    = isCombo ? 'var(--border)' : 'var(--v)';
+  document.getElementById('st-combo').classList.toggle('active', isCombo);
+  document.getElementById('st-solo').classList.toggle('active', !isCombo);
 }
 
 function renderRegiones() {
   const label = {eco:'Económica', int:'Intermedia', pre:'Premium'};
   document.getElementById('g-regiones').innerHTML = REGIONES.map(r=>`
-    <div class="rcard">
-      <div class="rhead ${r.t}">
-        <span class="rname">${r.name}</span>
-        <span class="rtag">${r.unis.length} univ · ${label[r.t]}</span>
+    <article class="svx-uni">
+      <div class="svx-uni-head ${r.t}">
+        <span class="svx-uni-name">${r.name}</span>
+        <span class="svx-uni-tag">${r.unis.length} univ · ${label[r.t]}</span>
       </div>
-      <div class="rbody">
-        <ul class="ulist">
-          ${r.unis.map(u=>`<li><span class="utag">${u.c}</span>${u.n}</li>`).join('')}
+      <div class="svx-uni-body">
+        <ul class="svx-uni-list">
+          ${r.unis.map(u=>`<li><span class="svx-uni-code">${u.c}</span>${u.n}</li>`).join('')}
         </ul>
-        <div class="rfooter">
+        <div class="svx-uni-foot">
           <span>💶 Tasas universitarias: <strong>${r.tasas}</strong></span>
           <span>📅 Fases: ${r.fases}</span>
-          <span style="color:#b06000;">🔖 ${r.reconoc}</span>
+          <span class="warn">🔖 ${r.reconoc}</span>
         </div>
       </div>
-    </div>`).join('');
+    </article>`).join('');
 }
 
 // ── INTERACTIONS ──────────────────────────────────────────────────────────

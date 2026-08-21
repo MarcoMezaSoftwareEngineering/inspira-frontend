@@ -8,7 +8,7 @@ import CtaFinal from "./sections/CtaFinal";
 
 export default function Home() {
   return (
-    <div className="w-full">
+    <main className="v4-home">
       <Hero />
       <QuickCalc />
       <Metrics />
@@ -16,6 +16,6 @@ export default function Home() {
       <Servicios />
       <Compare />
       <CtaFinal />
-    </div>
+    </main>
   );
 }

@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function Reveal({ children, className = "", as: Tag = "div", delay = 0, style = {} }) {
+/**
+ * Réplica del patrón [data-reveal] del mockup v4: fade-up al entrar en viewport.
+ * Los estilos viven en src/styles/v4.css (.v4-home [data-reveal] / .in).
+ */
+export default function Reveal({
+  children,
+  className = "",
+  as: Tag = "div",
+  delay = 0,
+  style,
+  ...rest
+}) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
@@ -25,13 +36,10 @@ export default function Reveal({ children, className = "", as: Tag = "div", dela
   return (
     <Tag
       ref={ref}
-      className={className}
-      style={{
-        ...style,
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(18px)",
-        transition: `opacity .65s cubic-bezier(.22,1,.36,1) ${delay}ms, transform .65s cubic-bezier(.22,1,.36,1) ${delay}ms`,
-      }}
+      data-reveal=""
+      className={`${className}${visible ? " in" : ""}`}
+      style={delay ? { ...style, transitionDelay: `${delay}ms` } : style}
+      {...rest}
     >
       {children}
     </Tag>

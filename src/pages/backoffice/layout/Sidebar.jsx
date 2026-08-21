@@ -1,6 +1,11 @@
 import { useRef, useState } from "react";
 import { navigate } from "../../../services/navigate";
 import { useAuth } from "../context/AuthContext";
+import {
+  LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
+  GraduationCap, BookOpen, FolderOpen, CheckSquare, UserCog, Layers,
+  Tag, Mail, Settings,
+} from "lucide-react";
 
 // Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos) o
 // `adminOnly: true` (fijo, no configurable). Sin ninguno de los dos, el
@@ -9,36 +14,36 @@ const NAV_SECTIONS = [
   {
     label: "Principal",
     items: [
-      { label: "Dashboard",   href: "/backoffice/dashboard", perm: "dashboard.ver" },
-      { label: "Agenda",      href: "/backoffice/agenda" },
-      { label: "Solicitudes", href: "/backoffice/solicitudes" },
+      { label: "Dashboard",   href: "/backoffice/dashboard", perm: "dashboard.ver", icon: LayoutDashboard },
+      { label: "Agenda",      href: "/backoffice/agenda", icon: Calendar },
+      { label: "Solicitudes", href: "/backoffice/solicitudes", icon: FileText },
     ],
   },
   {
     label: "Comercial",
     items: [
-      { label: "Presupuestos Portal",   href: "/backoffice/presupuestos" },
-      { label: "Calculadora — Leads",   href: "/backoffice/calculadora" },
-      { label: "Clientes",              href: "/backoffice/clientes" },
-      { label: "Tracker Universidades", href: "/backoffice/tracker-universidades", perm: "tracker.ver" },
+      { label: "Presupuestos Portal",   href: "/backoffice/presupuestos", icon: Calculator },
+      { label: "Calculadora — Leads",   href: "/backoffice/calculadora", icon: TrendingUp },
+      { label: "Clientes",              href: "/backoffice/clientes", icon: Users },
+      { label: "Tracker Universidades", href: "/backoffice/tracker-universidades", perm: "tracker.ver", icon: GraduationCap },
     ],
   },
   {
     label: "Operación",
     items: [
-      { label: "Catálogo Másteres",      href: "/backoffice/catalogo-masters", perm: "catalogo.ver" },
-      { label: "Documentos",             href: "/backoffice/documentos" },
-      { label: "Checklist / Instructivos", href: "/backoffice/checklist-servicios", alsoActive: ["/backoffice/instructivos"], perm: "checklist.ver" },
-      { label: "Panel Asesoras",         href: "/backoffice/panel-asesoras", perm: "panel_asesoras.ver" },
+      { label: "Catálogo Másteres",      href: "/backoffice/catalogo-masters", perm: "catalogo.ver", icon: BookOpen },
+      { label: "Documentos",             href: "/backoffice/documentos", icon: FolderOpen },
+      { label: "Checklist / Instructivos", href: "/backoffice/checklist-servicios", alsoActive: ["/backoffice/instructivos"], perm: "checklist.ver", icon: CheckSquare },
+      { label: "Panel Asesoras",         href: "/backoffice/panel-asesoras", perm: "panel_asesoras.ver", icon: UserCog },
     ],
   },
   {
     label: "Configuración",
     items: [
-      { label: "Planes",            href: "/backoffice/planes", perm: "planes.ver" },
-      { label: "Precios/Servicios", href: "/backoffice/precios", perm: "precios.ver" },
-      { label: "Correos / Media",   href: "/backoffice/correos", alsoActive: ["/backoffice/media"], adminOnly: true },
-      { label: "Settings",          href: "/backoffice/settings", adminOnly: true },
+      { label: "Planes",            href: "/backoffice/planes", perm: "planes.ver", icon: Layers },
+      { label: "Precios/Servicios", href: "/backoffice/precios", perm: "precios.ver", icon: Tag },
+      { label: "Correos / Media",   href: "/backoffice/correos", alsoActive: ["/backoffice/media"], adminOnly: true, icon: Mail },
+      { label: "Settings",          href: "/backoffice/settings", adminOnly: true, icon: Settings },
     ],
   },
 ];
@@ -110,10 +115,11 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
   return (
     <aside
       ref={asideRef}
-      className="shrink-0 flex flex-col bg-primary text-white h-full overflow-hidden relative"
+      className="shrink-0 flex flex-col text-white h-full overflow-hidden relative"
       style={{
         width: open ? `${width}px` : "0px",
         transition: "width 260ms ease-in-out",
+        background: "linear-gradient(180deg,#124f35 0%,#0b3f2a 100%)",
       }}
     >
       <div ref={innerRef} className="flex flex-col h-full" style={{ minWidth: `${width}px` }}>
@@ -163,7 +169,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
             if (visibleItems.length === 0) return null;
             return (
             <div key={section.label}>
-              <p className="px-3 mb-1 text-[10px] font-bold uppercase tracking-widest text-white/35 select-none">
+              <p className="px-3 mb-1 text-[9px] font-extrabold uppercase tracking-[0.15em] text-white/35 select-none">
                 {section.label}
               </p>
               <div className="space-y-0.5">
@@ -172,19 +178,21 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
                     path === it.href ||
                     path.startsWith(it.href + "/") ||
                     (it.alsoActive || []).some((p) => path === p || path.startsWith(p + "/"));
+                  const Icon = it.icon;
                   return (
                     <a
                       key={it.href}
                       href={it.href}
                       onClick={(e) => handleNavClick(it.href, e)}
                       className={[
-                        "block w-full text-left px-3 py-2.5 rounded-lg transition-colors text-sm no-underline",
+                        "flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-[11px] transition-colors text-[13px] font-medium no-underline",
                         active
-                          ? "bg-white/15 font-semibold text-white"
-                          : "text-white/75 hover:bg-white/10 hover:text-white",
+                          ? "bg-white/[0.14] font-semibold text-white shadow-[inset_3px_0_0_#67d49a]"
+                          : "text-white/75 hover:bg-white/[0.08] hover:text-white",
                       ].join(" ")}
                     >
-                      {it.label}
+                      {Icon && <Icon className="w-[17px] h-[17px] shrink-0 opacity-90" strokeWidth={1.8} />}
+                      <span className="truncate">{it.label}</span>
                     </a>
                   );
                 })}

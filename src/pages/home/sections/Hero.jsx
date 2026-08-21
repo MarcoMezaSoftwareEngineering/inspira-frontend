@@ -1,4 +1,5 @@
 import { navigate } from "../../../services/navigate";
+import Reveal from "../../../components/common/Reveal";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -49,9 +50,9 @@ export default function Hero() {
 
       <div className="max-w-[1180px] mx-auto relative z-10 grid lg:grid-cols-[1.04fr_0.96fr] gap-12 lg:gap-16 items-center">
         {/* Left: copy */}
-        <div>
+        <Reveal>
           <div className="inline-flex items-center gap-2 border border-white/20 bg-white/10 backdrop-blur-sm text-white/80 text-xs font-semibold uppercase tracking-widest px-4 py-2 rounded-full mb-6">
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#F49E4B" }} />
+            <span className="w-[7px] h-[7px] rounded-full" style={{ background: "#F49E4B", animation: "inspira-pulse 1.7s infinite" }} />
             Programa 360° · Másteres en España 2026/2027
           </div>
 
@@ -97,10 +98,10 @@ export default function Hero() {
             <span><b className="text-white text-sm font-semibold">+100</b> becas logradas</span>
             <span><b className="text-white text-sm font-semibold">360°</b> acompañamiento</span>
           </div>
-        </div>
+        </Reveal>
 
         {/* Right: app mockup card */}
-        <div className="relative hidden sm:block">
+        <Reveal className="relative hidden sm:block" delay={120}>
           <div
             className="absolute -left-9 top-12 z-10 bg-white border border-neutral-200 rounded-2xl px-4 py-3 text-xs font-extrabold text-primary shadow-xl whitespace-nowrap"
             style={{ animation: "inspira-float 4.2s ease-in-out infinite" }}
@@ -148,7 +149,14 @@ export default function Hero() {
                 className="mt-4 rounded-2xl p-4 text-white relative overflow-hidden"
                 style={{ background: "linear-gradient(135deg,#072f3b,#0b5665)" }}
               >
-                <div className="flex items-center justify-between gap-4">
+                <div
+                  className="absolute top-0 left-[-30%] w-[28%] h-full pointer-events-none"
+                  style={{
+                    background: "linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent)",
+                    animation: "inspira-scan 3.5s infinite",
+                  }}
+                />
+                <div className="flex items-center justify-between gap-4 relative">
                   <div>
                     <small className="text-white/60 text-[10px]">Coincidencias encontradas</small>
                     <br />
@@ -187,10 +195,17 @@ export default function Hero() {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
 
-      <style>{`@keyframes inspira-float { 50% { transform: translateY(-8px); } }`}</style>
+      <style>{`
+        @keyframes inspira-float { 50% { transform: translateY(-8px); } }
+        @keyframes inspira-scan { to { left: 110%; } }
+        @keyframes inspira-pulse {
+          70% { box-shadow: 0 0 0 8px rgba(245,200,66,0); }
+          100% { box-shadow: 0 0 0 0 rgba(245,200,66,0); }
+        }
+      `}</style>
     </section>
   );
 }

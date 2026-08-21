@@ -1,4 +1,5 @@
 import { navigate } from "../../../services/navigate";
+import Reveal from "../../../components/common/Reveal";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -8,7 +9,7 @@ const go = (e, href) => {
 export default function CtaFinal() {
   return (
     <section className="py-24 px-6 bg-white">
-      <div
+      <Reveal
         className="max-w-6xl mx-auto rounded-[32px] p-9 md:p-14 relative overflow-hidden grid md:grid-cols-[1fr_auto] gap-8 items-center"
         style={{ background: "linear-gradient(135deg, #023A4B 0%, #054A5E 100%)" }}
       >
@@ -51,7 +52,7 @@ export default function CtaFinal() {
             <path d="M4 9h10M10 5l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </a>
-      </div>
+      </Reveal>
     </section>
   );
 }

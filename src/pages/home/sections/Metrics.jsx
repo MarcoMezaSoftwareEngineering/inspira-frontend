@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Reveal from "../../../components/common/Reveal";
 
 const metrics = [
   { n: 98, suffix: "%", label: "Tasa de admisión", width: 98 },
@@ -82,18 +83,19 @@ export default function Metrics() {
   return (
     <section className="pt-4 pb-16 md:pb-20 px-6 bg-white">
       <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {metrics.map((m) => (
-          <article
-            key={m.label}
-            className="border border-neutral-200 rounded-[20px] p-5"
-            style={{ background: "linear-gradient(180deg,#fff,#fbfdfd)" }}
-          >
-            <div className="font-fraunces text-[36px] md:text-[42px] tracking-tight text-primary">
-              {m.display ?? <Counter n={m.n} prefix={m.prefix} suffix={m.suffix} />}
-            </div>
-            <span className="block mt-1 text-neutral-500 text-xs">{m.label}</span>
-            <Bar width={m.width} />
-          </article>
+        {metrics.map((m, i) => (
+          <Reveal key={m.label} delay={i * 80}>
+            <article
+              className="border border-neutral-200 rounded-[20px] p-5"
+              style={{ background: "linear-gradient(180deg,#fff,#fbfdfd)" }}
+            >
+              <div className="font-fraunces text-[36px] md:text-[42px] tracking-tight text-primary">
+                {m.display ?? <Counter n={m.n} prefix={m.prefix} suffix={m.suffix} />}
+              </div>
+              <span className="block mt-1 text-neutral-500 text-xs">{m.label}</span>
+              <Bar width={m.width} />
+            </article>
+          </Reveal>
         ))}
       </div>
     </section>

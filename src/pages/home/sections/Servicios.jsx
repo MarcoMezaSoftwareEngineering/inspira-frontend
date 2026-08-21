@@ -1,4 +1,5 @@
 import { navigate } from "../../../services/navigate";
+import Reveal from "../../../components/common/Reveal";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -18,7 +19,7 @@ export default function Servicios() {
   return (
     <section className="py-24 px-6 bg-white">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
+        <Reveal className="text-center mb-14">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#F49E4B" }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#F49E4B" }} />
             Servicios
@@ -30,10 +31,11 @@ export default function Servicios() {
             Dos soluciones con jerarquía clara: el Programa Máster 360° como producto
             principal y la estancia por estudios como solución especializada.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid lg:grid-cols-[1.55fr_0.75fr] gap-5">
           {/* Main card */}
+          <Reveal>
           <a
             href="/servicios/master"
             onClick={(e) => go(e, "/servicios/master")}
@@ -86,8 +88,10 @@ export default function Servicios() {
               <small className="text-white/50 text-[10px] mt-2 block">Próximo: documentación final</small>
             </div>
           </a>
+          </Reveal>
 
           {/* Secondary card */}
+          <Reveal delay={120}>
           <a
             href="/servicios/estancia"
             onClick={(e) => go(e, "/servicios/estancia")}
@@ -116,6 +120,7 @@ export default function Servicios() {
               </svg>
             </span>
           </a>
+          </Reveal>
         </div>
       </div>
     </section>

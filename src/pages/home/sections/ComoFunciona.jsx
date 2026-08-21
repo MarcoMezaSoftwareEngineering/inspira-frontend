@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Reveal from "../../../components/common/Reveal";
 
 const steps = [
   {
@@ -114,7 +115,7 @@ export default function ComoFunciona() {
   return (
     <section className="py-24 px-6" style={{ background: "#F4F8FC" }}>
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-end justify-between gap-8 mb-11 flex-wrap">
+        <Reveal className="flex items-end justify-between gap-8 mb-11 flex-wrap">
           <div>
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#F49E4B" }}>
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#F49E4B" }} />
@@ -128,7 +129,7 @@ export default function ComoFunciona() {
             8 pasos claros para llegar desde el primer contacto hasta tu máster en España,
             con seguimiento en cada etapa.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid lg:grid-cols-[0.72fr_1.28fr] gap-10 items-start">
           {/* Step list */}
@@ -157,7 +158,7 @@ export default function ComoFunciona() {
           </div>
 
           {/* Stage panel */}
-          <div
+          <Reveal
             className="rounded-[30px] p-8 text-white relative overflow-hidden min-h-[420px]"
             style={{ background: "linear-gradient(145deg,#073948,#075667)" }}
           >
@@ -195,7 +196,7 @@ export default function ComoFunciona() {
                 ))}
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

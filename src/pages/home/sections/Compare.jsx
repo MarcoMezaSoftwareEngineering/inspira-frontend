@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Reveal from "../../../components/common/Reveal";
 
 const solo = [
   ["Cientos de programas", "Revisas requisitos uno por uno."],
@@ -20,7 +21,7 @@ export default function Compare() {
   return (
     <section className="py-24 px-6" style={{ background: "#F3F7F8" }}>
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-11">
+        <Reveal className="text-center mb-11">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#F49E4B" }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#F49E4B" }} />
             Decisión
@@ -32,7 +33,7 @@ export default function Compare() {
             La diferencia no es "tener ayuda"; es reducir incertidumbre, errores repetidos
             y semanas perdidas comparando información dispersa.
           </p>
-        </div>
+        </Reveal>
 
         <div className="flex justify-center mb-6">
           <div className="flex p-1.5 rounded-2xl gap-1" style={{ background: "#edf3f4" }}>
@@ -54,7 +55,7 @@ export default function Compare() {
           </div>
         </div>
 
-        <div className="bg-white border border-neutral-200 rounded-[28px] overflow-hidden">
+        <Reveal className="bg-white border border-neutral-200 rounded-[28px] overflow-hidden" delay={120}>
           <div className={`grid ${view === "both" ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
             {showSolo && (
               <div className={`p-9 ${view === "both" ? "md:border-r border-neutral-200" : ""}`}>
@@ -89,7 +90,7 @@ export default function Compare() {
               </div>
             )}
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

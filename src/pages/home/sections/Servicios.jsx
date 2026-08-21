@@ -37,15 +37,16 @@ export default function Servicios() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <span
-            className="text-sm font-semibold uppercase tracking-widest"
+            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
             style={{ color: "#F49E4B" }}
           >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#F49E4B" }} />
             Servicios
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mt-2">
+          <h2 className="font-fraunces text-3xl md:text-5xl font-bold text-primary mt-3 tracking-tight">
             ¿Qué quieres lograr?
           </h2>
-          <p className="text-neutral-500 mt-3">
+          <p className="text-neutral-500 mt-4">
             Elige el servicio que mejor se adapta a tu objetivo.
           </p>
         </div>
@@ -56,17 +57,20 @@ export default function Servicios() {
               key={s.label}
               href={s.href}
               onClick={(e) => go(e, s.href)}
-              className="group relative bg-white rounded-2xl border border-neutral-200 p-8 hover:border-accent/40 hover:shadow-xl transition-all"
+              className="group relative bg-white rounded-3xl border border-neutral-200 p-8 hover:border-accent/40 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
             >
               {s.badge && (
-                <span className="absolute top-5 right-5 text-xs font-semibold text-white px-3 py-1 rounded-full" style={{ background: "#F49E4B" }}>
+                <span className="absolute top-5 right-5 text-xs font-bold text-white px-3 py-1.5 rounded-full" style={{ background: "#F49E4B" }}>
                   {s.badge}
                 </span>
               )}
-              <div className="text-primary mb-5 group-hover:text-accent transition-colors">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-primary transition-colors group-hover:bg-accent group-hover:text-white"
+                style={{ background: "#EEF5F6" }}
+              >
                 {s.icon}
               </div>
-              <h3 className="text-xl font-bold text-primary mb-2 group-hover:text-accent transition-colors">
+              <h3 className="font-fraunces text-2xl font-bold text-primary mb-2 group-hover:text-accent transition-colors tracking-tight">
                 {s.label}
               </h3>
               <p className="text-neutral-500 text-sm leading-relaxed mb-5">{s.desc}</p>
@@ -82,37 +86,47 @@ export default function Servicios() {
 
         {/* Calculadora CTA */}
         <div
-          className="rounded-2xl p-10 text-center relative overflow-hidden"
+          className="rounded-3xl p-10 md:p-14 text-center relative overflow-hidden"
           style={{
             background: "linear-gradient(135deg, #023A4B 0%, #054A5E 100%)",
           }}
         >
           <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+              maskImage: "radial-gradient(circle at center, black, transparent 75%)",
+              WebkitMaskImage: "radial-gradient(circle at center, black, transparent 75%)",
+            }}
+          />
+          <div
             className="absolute top-0 right-0 rounded-full pointer-events-none"
             style={{
-              width: "300px",
-              height: "300px",
+              width: "340px",
+              height: "340px",
               background: "radial-gradient(circle, #9ACEFF 0%, transparent 70%)",
-              opacity: 0.08,
+              opacity: 0.1,
               transform: "translate(30%, -50%)",
             }}
           />
           <div className="relative z-10">
-            <div className="text-white/50 text-sm mb-2 uppercase tracking-widest font-semibold">
+            <div className="text-white/50 text-xs mb-3 uppercase tracking-widest font-bold">
               Herramienta gratuita
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
+            <h3 className="font-fraunces text-2xl md:text-4xl font-bold text-white mb-3 tracking-tight">
               ¿No sabes a qué másteres puedes postular?
             </h3>
-            <p className="text-white/55 mb-8 max-w-lg mx-auto">
+            <p className="text-white/55 mb-8 max-w-lg mx-auto leading-relaxed">
               Usa nuestra calculadora gratuita y descubre universidades, becas disponibles
               y los paquetes más adecuados para tu perfil.
             </p>
             <a
               href="/calculadora-master"
               onClick={(e) => go(e, "/calculadora-master")}
-              className="inline-flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl transition-all hover:scale-105 hover:shadow-xl"
-              style={{ background: "#F49E4B" }}
+              className="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-2xl transition-all hover:scale-105 hover:shadow-xl"
+              style={{ background: "#F49E4B", boxShadow: "0 14px 30px rgba(244,158,75,.25)" }}
             >
               Calculadora Máster Gratis
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5">

@@ -47,15 +47,16 @@ export default function ComoFunciona() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <span
-            className="text-sm font-semibold uppercase tracking-widest"
+            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
             style={{ color: "#F49E4B" }}
           >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#F49E4B" }} />
             Proceso
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mt-2">
+          <h2 className="font-fraunces text-3xl md:text-5xl font-bold text-primary mt-3 tracking-tight">
             ¿Cómo funciona Inspira?
           </h2>
-          <p className="text-neutral-500 mt-3 max-w-xl mx-auto">
+          <p className="text-neutral-500 mt-4 max-w-xl mx-auto leading-relaxed">
             8 pasos claros para llegar desde el primer contacto hasta tu máster en España.
           </p>
         </div>
@@ -64,10 +65,10 @@ export default function ComoFunciona() {
           {steps.map((step) => (
             <div
               key={step.n}
-              className="relative p-6 rounded-2xl border border-neutral-200 hover:border-accent/40 hover:shadow-lg transition-all group cursor-default"
+              className="relative p-6 rounded-3xl border border-neutral-200 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-default bg-white"
             >
               <div
-                className="text-6xl font-bold leading-none mb-3 select-none"
+                className="font-fraunces text-6xl font-bold leading-none mb-3 select-none tracking-tight"
                 style={{ color: "#E8F4FF" }}
               >
                 {step.n}

@@ -84,14 +84,14 @@ export default function PoliticaPrivacidad() {
               "Nombre, país, correo electrónico, número de WhatsApp, carrera, promedio académico y escala de notas, universidad de origen, presupuesto, preferencias de comunidad autónoma y de máster, y condición de funcionario público o de pertenencia a una universidad AUIP.",
               "Calcular tu equivalencia de nota, estimar costos, mostrarte universidades y becas compatibles con tu perfil y enviarte el resultado. Si lo autorizas por separado, contactarte para orientarte sobre nuestros servicios.",
               "Tu consentimiento, otorgado al marcar la casilla antes de enviar el formulario.",
-              "24 meses desde el último contacto, o hasta que retires tu consentimiento.",
+              "Hasta que solicites la supresión de tus datos o te opongas al tratamiento; revisamos periódicamente la vigencia del interés.",
             ],
             [
               "Solicitud de presupuesto",
               "Nombre, un dato de contacto (correo o WhatsApp), comunidades y servicios de interés y la descripción de tu situación que decidas escribir.",
               "Elaborar y enviarte una propuesta económica y responder tu consulta.",
               "Tu consentimiento y, cuando pides un presupuesto, la ejecución de medidas precontractuales a tu solicitud.",
-              "24 meses desde el último contacto.",
+              "Hasta que solicites la supresión de tus datos o te opongas al tratamiento; revisamos periódicamente la vigencia del interés.",
             ],
             [
               "Cuenta de cliente e inicio de sesión con Google",

@@ -108,6 +108,14 @@ export default function ServiciosList({ servicios, loading, onEditar, onChecklis
                       Inactivo
                     </span>
                   )}
+                  {s.es_reserva_cita && (
+                    <span
+                      className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-primary"
+                      title="El precio de este servicio es el que se cobra al reservar una cita"
+                    >
+                      Precio de citas
+                    </span>
+                  )}
                 </div>
 
                 {s.descripcion && (

@@ -146,6 +146,28 @@ export default function ServicioForm({
               </label>
             </div>
           )}
+
+          {/* Precio de citas */}
+          {modo === "editar" && (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-200">
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  id="es_reserva_cita"
+                  type="checkbox"
+                  checked={!!form.es_reserva_cita}
+                  onChange={(e) => setForm((f) => ({ ...f, es_reserva_cita: e.target.checked }))}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-neutral-300 peer-checked:bg-primary rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
+              </label>
+              <label htmlFor="es_reserva_cita" className="text-xs text-neutral-600 cursor-pointer select-none">
+                Usar este precio para reservar citas
+                <span className="block text-[10px] text-neutral-400">
+                  Es el monto que se cobra al agendar una cita (debe estar en soles, PEN). Solo un servicio puede tenerlo activo.
+                </span>
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Botones */}

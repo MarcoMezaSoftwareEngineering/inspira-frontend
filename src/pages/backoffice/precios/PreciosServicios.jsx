@@ -14,6 +14,7 @@ const ESTADO_FORM_INICIAL = {
   moneda: "EUR",
   monto: "",
   activo: true,
+  es_reserva_cita: false,
 };
 
 export default function PreciosServicios() {
@@ -56,6 +57,7 @@ export default function PreciosServicios() {
       moneda: s.precio_actual?.moneda || "EUR",
       monto: s.precio_actual?.monto ?? "",
       activo: s.activo,
+      es_reserva_cita: !!s.es_reserva_cita,
     });
   }
 
@@ -107,6 +109,7 @@ export default function PreciosServicios() {
             nombre: form.nombre.trim(),
             descripcion: form.descripcion.trim(),
             activo: form.activo,
+            es_reserva_cita: form.es_reserva_cita,
           }
         );
 

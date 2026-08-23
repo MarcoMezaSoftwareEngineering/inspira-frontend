@@ -99,30 +99,34 @@ export default function Agenda() {
   const todayKey = toDateKey(new Date());
 
   return (
-    <div className="p-4 sm:p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-5 max-w-[1640px] mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-primary">Agenda</h1>
-          <p className="text-xs text-neutral-500 mt-0.5">Sincronizado con Calendly</p>
+          <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.14em] text-primary-light mb-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,.15)]" />
+            Calendly sincronizado
+          </div>
+          <h1 className="font-fraunces text-2xl sm:text-3xl font-extrabold text-primary tracking-tight leading-none">Agenda</h1>
+          <p className="text-xs text-neutral-400 mt-1">Primero las citas. Después, la disponibilidad.</p>
         </div>
         {/* Tabs */}
-        <div className="flex rounded-lg border border-neutral-200 overflow-hidden text-sm font-medium">
+        <div className="flex p-1 rounded-2xl border border-neutral-200 bg-white/80 shadow-sm text-xs font-bold overflow-x-auto">
           <button
             onClick={() => setTab("micalendario")}
-            className={`px-4 py-2 transition-colors ${tab === "micalendario" ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
+            className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors ${tab === "micalendario" ? "bg-primary text-white shadow" : "text-neutral-500 hover:bg-neutral-50 hover:text-primary"}`}
           >
             Mi calendario
           </button>
           <button
             onClick={() => setTab("reuniones")}
-            className={`px-4 py-2 transition-colors ${tab === "reuniones" ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
+            className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors ${tab === "reuniones" ? "bg-primary text-white shadow" : "text-neutral-500 hover:bg-neutral-50 hover:text-primary"}`}
           >
             Reuniones (Calendly)
           </button>
           <button
             onClick={() => setTab("disponibilidad")}
-            className={`px-4 py-2 transition-colors ${tab === "disponibilidad" ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}
+            className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors ${tab === "disponibilidad" ? "bg-primary text-white shadow" : "text-neutral-500 hover:bg-neutral-50 hover:text-primary"}`}
           >
             Disponibilidad (Calendly)
           </button>
@@ -136,23 +140,23 @@ export default function Agenda() {
       {tab === "reuniones" && (
         <>
           {/* Controles */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex rounded-lg border border-neutral-200 overflow-hidden text-xs">
+          <div className="flex items-center gap-2 flex-wrap bg-white/80 border border-neutral-200 rounded-2xl shadow-sm p-3">
+            <div className="flex p-0.5 rounded-xl border border-neutral-200 overflow-hidden text-xs bg-white">
               {DAYS_OPTIONS.map((opt) => (
                 <button key={opt.value} onClick={() => setDays(opt.value)}
-                  className={`px-3 py-1.5 transition-colors ${days === opt.value ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}>
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${days === opt.value ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}>
                   {opt.label}
                 </button>
               ))}
             </div>
             {data?.booking_url && (
               <button onClick={copyBookingLink}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${copied ? "bg-green-50 border-green-300 text-green-700" : "bg-white border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary"}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${copied ? "bg-green-50 border-green-300 text-green-700" : "bg-white border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary"}`}>
                 {copied ? "✓ Copiado" : "Copiar link de reserva"}
               </button>
             )}
             <button onClick={() => loadEvents(days)}
-              className="px-3 py-1.5 rounded-lg text-xs border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
+              className="px-3 py-1.5 rounded-xl text-xs font-bold border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
               Actualizar
             </button>
           </div>
@@ -178,7 +182,7 @@ export default function Agenda() {
           {availLoading ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="bg-white border border-neutral-200 rounded-xl p-5 h-48 animate-pulse" />
+                <div key={i} className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5 h-48 animate-pulse" />
               ))}
             </div>
           ) : availError ? (
@@ -436,29 +440,63 @@ function MiCalendarioTab() {
     }
   }
 
+  // ── Datos derivados para la cabecera tipo "hero" y las métricas ──
+  const reservasActivas = reservas.filter((r) => r.estado !== "CANCELADA");
+  const reservasFuturas = reservasActivas
+    .filter((r) => !esPasado(r.fecha, r.hora_inicio))
+    .sort((a, b) => (a.fecha + a.hora_inicio).localeCompare(b.fecha + b.hora_inicio));
+  const proxima = reservasFuturas[0] || null;
+  const cola = reservasFuturas.slice(1, 4);
+
+  const todosSlots = Array.from(slotMap.values()).flat();
+  const slotsLibres = todosSlots.filter((s) => s.estado === "LIBRE");
+  const slotsOcupados = todosSlots.filter((s) => s.estado === "OCUPADO" || s.estado === "RESERVADO");
+  const horasLibres = (slotsLibres.length * 0.5).toLocaleString("es-PE", { maximumFractionDigits: 1 });
+  const ocupacionPct = todosSlots.length ? Math.round((slotsOcupados.length / todosSlots.length) * 100) : 0;
+  const pagosPendientes = reservas.filter((r) => r.pago_estado === "PENDIENTE").length;
+
+  const horasLibresPorDia = weekDays.map((d) => {
+    const fecha = toISODate(d);
+    const n = slotsLibres.filter((s) => s.fecha === fecha).length;
+    return { fecha, dia: WEEKDAY_SHORT[d.getDay()], horas: n * 0.5 };
+  });
+
+  function minutosHasta(fecha, hora) {
+    const [h, m] = hora.split(":").map(Number);
+    const target = new Date(fecha + "T00:00:00");
+    target.setHours(h, m, 0, 0);
+    return Math.round((target - new Date()) / 60000);
+  }
+  function countdownLabel(fecha, hora) {
+    const min = minutosHasta(fecha, hora);
+    if (min <= 0) return "ahora";
+    const h = Math.floor(min / 60), m = min % 60;
+    return h > 0 ? `en ${h} h ${m} min` : `en ${m} min`;
+  }
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Toolbar: navegación de semana + acciones */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white/80 border border-neutral-200 rounded-2xl shadow-sm p-3">
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={() => setWeekStart((d) => addDays(d, -7))}
-            className="w-8 h-8 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors">
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors bg-white">
             ‹
           </button>
-          <div className="text-sm font-semibold text-neutral-800 capitalize min-w-[150px] text-center">
+          <div className="text-xs font-extrabold text-neutral-800 capitalize min-w-[150px] text-center">
             {rangeLabel(weekDays)}
           </div>
           <button onClick={() => setWeekStart((d) => addDays(d, 7))}
-            className="w-8 h-8 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors">
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors bg-white">
             ›
           </button>
           <button onClick={() => setWeekStart(startOfDay(new Date()))}
-            className="ml-1 px-3 py-1.5 rounded-full text-xs font-medium border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
+            className="ml-1 px-3 py-2 rounded-xl text-xs font-bold border border-neutral-200 text-neutral-600 hover:bg-neutral-50 bg-white">
             Hoy
           </button>
           {esAdmin && (
             <select value={filtro} onChange={(e) => setFiltro(e.target.value)}
-              className="ml-1 border border-neutral-200 rounded-full px-3 py-1.5 text-xs font-medium text-neutral-700 focus:outline-none focus:border-primary">
+              className="ml-1 border border-neutral-200 rounded-xl px-3 py-2 text-xs font-bold text-neutral-700 focus:outline-none focus:border-primary bg-white">
               <option value="todos">👥 Todo el equipo</option>
               {asesores.map((a) => (
                 <option key={a.id_usuario} value={a.id_usuario}>{a.nombre}</option>
@@ -468,8 +506,9 @@ function MiCalendarioTab() {
         </div>
         <button onClick={() => setShowBulk((v) => !v)} disabled={combinado}
           title={combinado ? "Elige un asesor específico para crear horarios" : undefined}
-          className="px-4 py-1.5 rounded-full bg-accent text-white text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">
-          + Generar varios horarios
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-extrabold shadow-[0_9px_24px_rgba(238,166,108,.24)] transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          style={{ background: "linear-gradient(135deg,#efaa72,#f4be91)" }}>
+          <span className="text-base leading-none">+</span> Generar varios horarios
         </button>
       </div>
 
@@ -502,6 +541,106 @@ function MiCalendarioTab() {
       )}
 
       {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">Error: {error}</div>}
+
+      {/* ===== Hero: próxima cita + cola de próximas ===== */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1.6fr_.8fr] gap-4">
+        {/* Próxima cita */}
+        <div className="relative bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="absolute w-56 h-56 rounded-full -top-28 -right-20 pointer-events-none"
+            style={{ background: "radial-gradient(circle,rgba(104,211,155,.20),transparent 67%)" }} />
+          <div className="relative flex items-start justify-between gap-3 px-5 pt-5 pb-3">
+            <div>
+              <div className="text-[9px] font-extrabold uppercase tracking-[.12em] text-neutral-400 mb-1">Siguiente cita</div>
+              <h3 className="text-sm font-bold text-neutral-800">Lo que requiere atención ahora</h3>
+            </div>
+            {proxima && !pagoEsRedundante(proxima.estado, proxima.pago_estado) && (
+              <Pill tone={pagoTone(proxima.pago_estado)}>Pago {proxima.pago_estado.toLowerCase()}</Pill>
+            )}
+          </div>
+
+          {!proxima ? (
+            <div className="px-5 pb-6 text-sm text-neutral-400">No hay próximas citas confirmadas esta semana.</div>
+          ) : (
+            <div className="relative px-5 pb-5 grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-4">
+              <div className="rounded-2xl p-4 text-white flex flex-col justify-between overflow-hidden relative min-h-[140px]"
+                style={{ background: "radial-gradient(circle at 100% 0%,rgba(113,221,164,.38),transparent 36%), linear-gradient(155deg,#0d4b31,#173e2f)" }}>
+                <small className="text-[9px] uppercase tracking-[.12em] font-extrabold text-white/55">
+                  {new Date(proxima.fecha + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "short" })}
+                </small>
+                <div className="font-fraunces text-3xl font-extrabold tracking-tight">{proxima.hora_inicio}</div>
+                <div className="text-[10px] text-white/70">{countdownLabel(proxima.fecha, proxima.hora_inicio)} · 30 min</div>
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h4 className="text-lg font-extrabold text-neutral-800 tracking-tight truncate">{proxima.cliente?.nombre || "Sin nombre"}</h4>
+                  {proxima.asesor && <Pill tone="primary">{proxima.asesor.nombre}</Pill>}
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-neutral-500 mb-3">
+                  {proxima.cliente?.email_contacto && <span>{proxima.cliente.email_contacto}</span>}
+                  {proxima.cliente?.telefono && <span>{proxima.cliente.telefono}</span>}
+                </div>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  <Pill tone="neutral">{proxima.monto} {proxima.moneda}</Pill>
+                  <Pill tone={reservaTone(proxima.estado)}>{proxima.estado.toLowerCase().replaceAll("_", " ")}</Pill>
+                  {!proxima.meet_url && <Pill tone="amber">Sin Meet</Pill>}
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {proxima.meet_url ? (
+                    <a href={proxima.meet_url} target="_blank" rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-primary text-white rounded-lg text-[11px] font-bold hover:opacity-90">Unirse</a>
+                  ) : (
+                    <EditMeetBtn reserva={proxima} onChanged={cargar} />
+                  )}
+                  <CancelBtn reserva={proxima} onChanged={cargar} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Cola de próximas */}
+        <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 flex flex-col">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-[9px] font-extrabold uppercase tracking-[.12em] text-neutral-400 mb-1">Después</div>
+              <h3 className="text-sm font-bold text-neutral-800">Próximas citas</h3>
+            </div>
+          </div>
+          {cola.length === 0 ? (
+            <p className="text-xs text-neutral-400 flex-1 flex items-center justify-center py-6">Sin más citas en cola.</p>
+          ) : (
+            <div className="space-y-1.5">
+              {cola.map((r) => (
+                <div key={r.id_reserva} className="grid grid-cols-[46px_1fr_auto] gap-2.5 items-center p-2 rounded-xl hover:bg-neutral-50 transition-colors">
+                  <div className="text-xs font-extrabold text-primary leading-tight">
+                    {r.hora_inicio}
+                    <small className="block text-[8px] text-neutral-400 font-semibold">{r.fecha.slice(5)}</small>
+                  </div>
+                  <div className="min-w-0">
+                    <strong className="block text-[11px] text-neutral-800 truncate">{r.cliente?.nombre || "Sin nombre"}</strong>
+                    <span className="block text-[9px] text-neutral-400 truncate">{r.asesor?.nombre || ""}</span>
+                  </div>
+                  <span className={`text-[8px] font-extrabold px-2 py-1 rounded-full whitespace-nowrap ${
+                    pagoEsRedundante(r.estado, r.pago_estado) === false && r.pago_estado === "PENDIENTE"
+                      ? "text-amber-700 bg-amber-50" : "text-emerald-700 bg-emerald-50"
+                  }`}>
+                    {r.pago_estado === "APROBADO" ? "Pagada" : r.pago_estado.toLowerCase()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ===== Métricas ===== */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <MetricTile icon="📅" tone="green" value={reservasActivas.length} label="Citas esta semana" />
+        <MetricTile icon="⏱️" tone="orange" value={`${horasLibres} h`} label="Disponibilidad libre" />
+        <MetricTile icon="💳" tone="yellow" value={pagosPendientes} label="Pagos pendientes" />
+        <MetricTile icon="📊" tone="gray" value={`${ocupacionPct}%`} label="Ocupación semanal" />
+      </div>
 
       {/* Calendario semanal */}
       <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
@@ -635,20 +774,75 @@ function MiCalendarioTab() {
         </p>
       </div>
 
-      {/* Citas confirmadas */}
-      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5">
-        <h3 className="text-sm font-semibold text-neutral-700 mb-4">
-          {combinado ? "Citas confirmadas del equipo esta semana" : "Citas confirmadas y pagadas esta semana"}
-        </h3>
-        {reservas.length === 0 ? (
-          <p className="text-sm text-neutral-400 text-center py-6">No hay citas en este rango.</p>
-        ) : (
-          <div className="space-y-3">
-            {reservas.map((r) => (
-              <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} mostrarAsesor={combinado} />
+      {/* ===== Citas confirmadas + capacidad del equipo ===== */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1.45fr_.8fr] gap-4">
+        <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5">
+          <h3 className="text-sm font-semibold text-neutral-700 mb-4">
+            {combinado ? "Citas confirmadas del equipo esta semana" : "Citas confirmadas y pagadas esta semana"}
+          </h3>
+          {reservas.length === 0 ? (
+            <p className="text-sm text-neutral-400 text-center py-6">No hay citas en este rango.</p>
+          ) : (
+            <div className="space-y-3">
+              {reservas.map((r) => (
+                <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} mostrarAsesor={combinado} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden relative">
+          <div className="absolute w-56 h-56 rounded-full -top-28 -right-20 pointer-events-none"
+            style={{ background: "radial-gradient(circle,rgba(104,211,155,.20),transparent 67%)" }} />
+          <div className="relative px-5 pt-5 pb-3">
+            <div className="text-[9px] font-extrabold uppercase tracking-[.12em] text-neutral-400 mb-1">Capacidad</div>
+            <h3 className="text-sm font-bold text-neutral-800">Disponibilidad del equipo</h3>
+          </div>
+
+          <div className="relative mx-4 mb-4 p-4 rounded-2xl text-white"
+            style={{ background: "radial-gradient(circle at 90% 0%,rgba(117,223,167,.30),transparent 38%), linear-gradient(145deg,#124f35,#0d3a29)" }}>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <strong className="text-xs">Ocupación semanal</strong>
+              <span className="text-[9px] text-emerald-200 bg-white/10 border border-white/10 rounded-full px-2 py-1">Objetivo 70%</span>
+            </div>
+            <div className="h-2 bg-white/15 rounded-full overflow-hidden mb-2">
+              <div className="h-full rounded-full" style={{ width: `${Math.min(100, ocupacionPct)}%`, background: "linear-gradient(90deg,#70dba3,#b7f3d2)" }} />
+            </div>
+            <div className="flex justify-between text-white/60 text-[9px]">
+              <span>{ocupacionPct}% ocupado</span>
+              <span>{horasLibres} h libres</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 px-4 pb-4">
+            {horasLibresPorDia.slice(0, 4).map((d) => (
+              <div key={d.fecha} className="border border-neutral-200 rounded-xl p-2.5">
+                <strong className="block text-sm text-neutral-800">{d.horas.toLocaleString("es-PE", { maximumFractionDigits: 1 })} h</strong>
+                <span className="text-[9px] text-neutral-400 capitalize">{d.dia} libre</span>
+              </div>
             ))}
           </div>
-        )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MetricTile({ icon, tone, value, label }) {
+  const tones = {
+    green: "bg-secondary text-primary",
+    orange: "bg-orange-50 text-orange-600",
+    yellow: "bg-amber-50 text-amber-600",
+    gray: "bg-neutral-100 text-neutral-500",
+  };
+  return (
+    <div className="flex items-center gap-3 bg-white/80 border border-neutral-200 rounded-2xl shadow-sm p-3.5 hover:-translate-y-0.5 transition-transform">
+      <div className={`w-9 h-9 rounded-xl grid place-items-center text-base flex-shrink-0 ${tones[tone] || tones.gray}`}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <strong className="block text-lg font-extrabold text-neutral-800 leading-none tracking-tight">{value}</strong>
+        <span className="block mt-1 text-[9px] font-semibold text-neutral-400 truncate">{label}</span>
       </div>
     </div>
   );
@@ -672,26 +866,65 @@ function reservaTone(estado) {
   return { CONFIRMADA: "primary", COMPLETADA: "neutral", CANCELADA: "red", PENDIENTE_PAGO: "amber", EXPIRADA: "neutral" }[estado] || "neutral";
 }
 
+// El estado de la reserva ya implica un pago_estado la mayoría de las veces
+// (PENDIENTE_PAGO/EXPIRADA -> PENDIENTE, CONFIRMADA/COMPLETADA -> APROBADO).
+// Repetirlo en un segundo pill no suma nada; solo vale mostrarlo cuando el
+// pago cuenta algo que el estado de la reserva no dice por sí solo (p.ej.
+// una cita CANCELADA cuyo pago fue REEMBOLSADO, o una EXPIRADA cuyo pago fue
+// RECHAZADO en vez de simplemente nunca completado).
+const PAGO_IMPLICITO_POR_ESTADO = {
+  PENDIENTE_PAGO: "PENDIENTE",
+  EXPIRADA: "PENDIENTE",
+  CONFIRMADA: "APROBADO",
+  COMPLETADA: "APROBADO",
+};
+function pagoEsRedundante(estadoReserva, pagoEstado) {
+  return PAGO_IMPLICITO_POR_ESTADO[estadoReserva] === pagoEstado;
+}
+
+async function editarMeetReserva(r, onChanged, setEditando) {
+  const url = await dialog.prompt("Enlace de Google Meet:", r.meet_url || "", "Editar enlace de reunión");
+  if (url === null) return;
+  setEditando?.(true);
+  const res = await boPATCH(`/backoffice/agenda/reservas/${r.id_reserva}`, { meet_url: url });
+  setEditando?.(false);
+  if (res?.ok === false) return dialog.toast(res.msg || "No se pudo actualizar", "error");
+  onChanged();
+}
+
+async function cancelarReserva(r, onChanged) {
+  const ok = await dialog.confirm(`¿Cancelar la cita de ${r.cliente?.nombre || r.cliente?.email_contacto}? Esto libera el horario.`, "Cancelar cita");
+  if (!ok) return;
+  const res = await boPATCH(`/backoffice/agenda/reservas/${r.id_reserva}`, { estado: "CANCELADA" });
+  if (res?.ok === false) return dialog.toast(res.msg || "No se pudo cancelar", "error");
+  onChanged();
+}
+
+function EditMeetBtn({ reserva, onChanged, className }) {
+  const [editando, setEditando] = useState(false);
+  return (
+    <button onClick={() => editarMeetReserva(reserva, onChanged, setEditando)} disabled={editando}
+      className={className || "px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[11px] font-bold hover:bg-amber-100 disabled:opacity-50"}>
+      {editando ? "Guardando…" : "Añadir Meet"}
+    </button>
+  );
+}
+
+function CancelBtn({ reserva, onChanged, className }) {
+  if (reserva.estado === "CANCELADA") return null;
+  return (
+    <button onClick={() => cancelarReserva(reserva, onChanged)}
+      className={className || "px-3 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[11px] font-bold hover:bg-red-50"}>
+      Cancelar
+    </button>
+  );
+}
+
 function ReservaCard({ reserva: r, onChanged, mostrarAsesor }) {
   const [editando, setEditando] = useState(false);
 
-  async function editarMeet() {
-    const url = await dialog.prompt("Enlace de Google Meet:", r.meet_url || "", "Editar enlace de reunión");
-    if (url === null) return;
-    setEditando(true);
-    const res = await boPATCH(`/backoffice/agenda/reservas/${r.id_reserva}`, { meet_url: url });
-    setEditando(false);
-    if (res?.ok === false) return dialog.toast(res.msg || "No se pudo actualizar", "error");
-    onChanged();
-  }
-
-  async function cancelar() {
-    const ok = await dialog.confirm(`¿Cancelar la cita de ${r.cliente?.nombre || r.cliente?.email_contacto}? Esto libera el horario.`, "Cancelar cita");
-    if (!ok) return;
-    const res = await boPATCH(`/backoffice/agenda/reservas/${r.id_reserva}`, { estado: "CANCELADA" });
-    if (res?.ok === false) return dialog.toast(res.msg || "No se pudo cancelar", "error");
-    onChanged();
-  }
+  function editarMeet() { return editarMeetReserva(r, onChanged, setEditando); }
+  function cancelar() { return cancelarReserva(r, onChanged); }
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 border border-neutral-100 rounded-xl p-3 hover:border-neutral-200 transition-colors">
@@ -704,8 +937,13 @@ function ReservaCard({ reserva: r, onChanged, mostrarAsesor }) {
         <div className="text-xs text-neutral-500">{r.cliente?.email_contacto}{r.cliente?.telefono ? ` · ${r.cliente.telefono}` : ""}</div>
         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
           <Pill tone="neutral">{r.monto} {r.moneda}</Pill>
-          <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
+          {!pagoEsRedundante(r.estado, r.pago_estado) && (
+            <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
+          )}
           <Pill tone={reservaTone(r.estado)}>{r.estado.toLowerCase().replaceAll("_", " ")}</Pill>
+          {r.estado === "PENDIENTE_PAGO" && r.hold_expira_en && (
+            <Pill tone="amber">vence {new Date(r.hold_expira_en).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", timeZone: "America/Lima" })}</Pill>
+          )}
           {mostrarAsesor && r.asesor && <Pill tone="primary">{r.asesor.nombre}</Pill>}
         </div>
       </div>

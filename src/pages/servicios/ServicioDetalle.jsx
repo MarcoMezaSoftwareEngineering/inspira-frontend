@@ -13,6 +13,7 @@ import { procesoDe } from "../../config/serviciosProceso";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import Icono from "../../components/common/Icono";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 import { navigate } from "../../services/navigate";
 import NotFound from "../NotFound";
 
@@ -254,6 +255,7 @@ export default function ServicioDetalle({ id }) {
           </section>
         )}
       </div>
+      <SigueExplorando destinos={["asistente","casos","calculadora","servicios"]} />
     </div>
   );
 }

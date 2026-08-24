@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import logo from "../../../assets/images/logo.png";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
-import { navItems } from "./header.data";
+import { navItems, navSecundarios } from "./header.data";
+import { promoVigente } from "../../../config/asesorias";
 import MobileMenu from "./MobileMenu";
 import MegaMenu from "./MegaMenu";
 import Icono from "../../common/Icono";
@@ -46,6 +47,30 @@ export default function Header() {
 
   return (
     <>
+      {/* Barra fina: aviso de la promo + enlaces secundarios */}
+      <div className={`v4-topbar${scrolled ? " oculta" : ""}`}>
+        <div className="v4-topbar-inner">
+          {promoVigente() ? (
+            <span className="v4-topbar-promo">
+              <Icono nombre="destello" size={13} />
+              Asesoría de orientación gratuita hasta el 22 de septiembre
+            </span>
+          ) : (
+            <span className="v4-topbar-promo">
+              <Icono nombre="destello" size={13} />
+              Abogados especialistas en extranjería española
+            </span>
+          )}
+          <nav className="v4-topbar-links">
+            {navSecundarios.map((s) => (
+              <a key={s.href} href={s.href} onClick={(e) => go(e, s.href)}>
+                {s.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+
       <div className={`v4-nav-wrap${scrolled ? " scrolled" : ""}`}>
         <header className="v4-nav">
           <a href="/" onClick={(e) => go(e, "/")} className="v4-logo-brand">

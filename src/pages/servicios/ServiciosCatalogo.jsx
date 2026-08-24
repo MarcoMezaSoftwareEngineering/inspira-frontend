@@ -11,12 +11,32 @@ import {
 import { ASESORIA } from "../../config/contacto";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 import Icono from "../../components/common/Icono";
 import { navigate } from "../../services/navigate";
 
 const go = (e, href) => {
   e.preventDefault();
   navigate(href);
+};
+
+// Icono representativo de cada subgrupo, para que el catálogo respire.
+const ICONO_GRUPO = {
+  estudios: "birrete",
+  rapidos: "maletin",
+  especializados: "balanza",
+  "otros-extranjeria": "bandera",
+  gestiones: "huella",
+  master: "birrete",
+  "becas-homologacion": "documento",
+  adicionales: "avion",
+};
+
+// Cada categoría enlaza con su página de ruta, para no dejar callejones.
+const RUTA_DE_CATEGORIA = {
+  extranjeria: { href: "/ruta/rapidas", label: "Ver vías rápidas de residencia" },
+  "tramites-espana": { href: "/ruta/en-espana", label: "Ya estoy en España" },
+  educativa: { href: "/ruta/estudios", label: "Ver la ruta de estudios" },
 };
 
 function ServicioCard({ servicio }) {
@@ -142,24 +162,41 @@ export default function ServiciosCatalogo() {
             id={cat.id}
             className={`scroll-mt-40 ${i > 0 ? "mt-20" : ""}`}
           >
-            <div className="mb-8 max-w-2xl">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-accent">
-                {cat.titulo}
-              </span>
-              <p className="mt-2 text-lg leading-relaxed text-neutral-700">
-                {cat.descripcion}
-              </p>
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-accent">
+                  {cat.titulo}
+                </span>
+                <p className="mt-2 text-lg leading-relaxed text-neutral-700">
+                  {cat.descripcion}
+                </p>
+              </div>
+              {RUTA_DE_CATEGORIA[cat.id] && (
+                <a
+                  href={RUTA_DE_CATEGORIA[cat.id].href}
+                  onClick={(e) => go(e, RUTA_DE_CATEGORIA[cat.id].href)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-sm font-bold text-primary transition hover:bg-sky hover:text-primary-dark"
+                >
+                  {RUTA_DE_CATEGORIA[cat.id].label}
+                  <span aria-hidden>→</span>
+                </a>
+              )}
             </div>
 
             {cat.grupos.map((grupo) => (
               <div key={grupo.id} className="mb-10">
-                <div className="mb-4 flex flex-wrap items-baseline gap-x-3">
-                  <h3 className="font-fraunces text-2xl font-bold text-primary">
-                    {grupo.titulo}
-                  </h3>
-                  {grupo.nota && (
-                    <span className="text-sm text-neutral-500">{grupo.nota}</span>
-                  )}
+                <div className="mb-4 flex items-start gap-3">
+                  <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-light text-sky-dark">
+                    <Icono nombre={ICONO_GRUPO[grupo.id] || "documento"} size={20} />
+                  </span>
+                  <div>
+                    <h3 className="font-fraunces text-xl font-bold text-primary md:text-2xl">
+                      {grupo.titulo}
+                    </h3>
+                    {grupo.nota && (
+                      <span className="text-sm text-neutral-500">{grupo.nota}</span>
+                    )}
+                  </div>
                 </div>
                 <div
                   className={`grid gap-4 ${
@@ -194,6 +231,7 @@ export default function ServiciosCatalogo() {
           </div>
         </section>
       </div>
+      <SigueExplorando destinos={["asistente","calculadora","casos","eventos"]} />
     </div>
   );
 }

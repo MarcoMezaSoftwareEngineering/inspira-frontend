@@ -20,6 +20,8 @@ import BarraInferior from "./components/layout/BarraInferior";
 import Eventos from "./pages/eventos/Eventos";
 import CasosExito from "./pages/casos/CasosExito";
 import Asistente from "./pages/asistente/Asistente";
+import RutaLanding from "./pages/rutas/RutaLanding";
+import { getRuta } from "./config/rutas";
 import Nosotros from "./pages/nosotros/Nosotros";
 import Tienda from "./pages/tienda/Tienda";
 import BlogIndex from "./pages/blog/BlogIndex";
@@ -95,6 +97,36 @@ const SEO_PAGES = {
     description:
       "Admisiones a máster, visas aprobadas, apelaciones ganadas y estancias por estudios concedidas. Expedientes reales gestionados por Inspira Legal.",
     path: "/casos-de-exito",
+  },
+  "/ruta/estudios": {
+    title: "Migrar a España por estudios – La vía más efectiva",
+    description:
+      "Máster, grado o FP: entra legalmente, trabaja 30 h semanales y construye tu residencia. Matrículas desde 700 € en universidades públicas españolas.",
+    path: "/ruta/estudios",
+  },
+  "/ruta/rapidas": {
+    title: "Vías rápidas para vivir en España – Nómada digital, PAC y no lucrativa",
+    description:
+      "Si trabajas en remoto, tienes una oferta cualificada o medios propios, puedes vivir legalmente en España sin estudiar. Plazos de resolución cortos y cómputo para la nacionalidad.",
+    path: "/ruta/rapidas",
+  },
+  "/ruta/en-espana": {
+    title: "Trámites en España – Renovaciones, arraigos, nacionalidad y gestiones",
+    description:
+      "Ya estás en España: modificaciones, prórrogas, arraigos, nacionalidad en 2 años, TIE, empadronamiento, seguridad social y certificado digital.",
+    path: "/ruta/en-espana",
+  },
+  "/ruta/denegado": {
+    title: "Me denegaron el visado – Recurso de reposición y plan alternativo",
+    description:
+      "Analizamos tu resolución de denegación, evaluamos la viabilidad del recurso de reposición y, si no procede, reconducimos tu caso hacia la estancia por estudios.",
+    path: "/ruta/denegado",
+  },
+  "/ruta/tramites": {
+    title: "Adelanta tus trámites – Homologación y preparación universitaria",
+    description:
+      "Aún no migras pero quieres avanzar: homologa tu bachillerato o tu título universitario y prepárate para postular a la universidad española a tiempo.",
+    path: "/ruta/tramites",
   },
   "/asistente": {
     title: "Asistente Inspira – ¿Qué trámite me corresponde para España?",
@@ -241,6 +273,11 @@ const PUBLIC_PATHS = [
   "/eventos",
   "/casos-de-exito",
   "/asistente",
+  "/ruta/estudios",
+  "/ruta/rapidas",
+  "/ruta/en-espana",
+  "/ruta/denegado",
+  "/ruta/tramites",
   "/calculadora-master",
   "/panel",
   "/reservar",
@@ -278,6 +315,8 @@ export default function App() {
     ? path.slice("/servicios/".length)
     : null;
   const isServicioDetalle = !!getServicio(servicioId)?.detalle;
+  const rutaId = path.startsWith("/ruta/") ? path.slice("/ruta/".length) : null;
+  const isRuta = !!getRuta(rutaId);
   const isNotFound =
     !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle;
 
@@ -301,6 +340,7 @@ export default function App() {
       {path === "/servicios/master" && <PortalServiciosMaster />}
       {path === "/servicios/estancia" && <EstanciaLanding />}
       {isServicioDetalle && <ServicioDetalle id={servicioId} />}
+      {isRuta && <RutaLanding id={rutaId} />}
       {path === "/nosotros" && <Nosotros />}
       {path === "/tienda" && <Tienda />}
       {path === "/eventos" && <Eventos />}

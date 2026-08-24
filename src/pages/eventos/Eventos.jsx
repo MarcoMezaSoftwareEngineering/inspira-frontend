@@ -2,6 +2,7 @@
 import { eventosActivos } from "../../config/eventos";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -145,6 +146,7 @@ export default function Eventos() {
           </div>
         </div>
       )}
+      <SigueExplorando destinos={["estudios","calculadora","asistente","casos"]} />
     </div>
   );
 }

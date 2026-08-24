@@ -2,6 +2,7 @@
 import { EQUIPO } from "../../config/equipo";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 
 const go = (e, href) => {
@@ -114,6 +115,7 @@ export default function Nosotros() {
           Reservar asesoría →
         </a>
       </section>
+      <SigueExplorando destinos={["casos","servicios","eventos","asistente"]} />
     </div>
   );
 }

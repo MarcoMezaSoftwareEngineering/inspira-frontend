@@ -6,6 +6,7 @@ import { CATEGORIAS_CASOS, CASOS } from "../../config/casos";
 import { TESTIMONIOS } from "../../config/testimonios";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 
 export default function CasosExito() {
   const [filtro, setFiltro] = useState("todos");
@@ -155,6 +156,7 @@ export default function CasosExito() {
           <BotonAsesoria />
         </div>
       </section>
+      <SigueExplorando destinos={["estudios","rapidas","enEspana","asistente"]} />
     </div>
   );
 }

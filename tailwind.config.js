@@ -31,11 +31,12 @@ export default {
         white: "#FFFFFF",
       },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["Montserrat", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
         // `fraunces` se mantiene como alias del display para no tocar las
         // decenas de clases font-fraunces ya existentes.
-        fraunces: ["Outfit", "Plus Jakarta Sans", "ui-sans-serif", "sans-serif"],
-        display:  ["Outfit", "Plus Jakarta Sans", "ui-sans-serif", "sans-serif"],
+        fraunces: ["Merriweather", "Georgia", "serif"],
+        display:  ["Merriweather", "Georgia", "serif"],
+        serif:    ["Merriweather", "Georgia", "serif"],
       },
     },
   },

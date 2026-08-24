@@ -1056,6 +1056,37 @@ export const CATEGORIAS = [
             },
           },
           {
+            id: "seguro-medico",
+            nombre: "Gestión de Seguro Médico",
+            resumen:
+              "Contratación del seguro médico válido y obligatorio para tu visado o tu estancia.",
+            detalle: {
+              titulo: "Gestión de seguro médico para España",
+              gancho:
+                "Un seguro mal elegido es de las causas más frecuentes de denegación.",
+              intro:
+                "El consulado y Extranjería exigen una cobertura muy concreta: sin copagos, sin carencias, con repatriación y equivalente a la sanidad pública española. Te orientamos y gestionamos la contratación del seguro que sí cumple.",
+              bloques: [
+                {
+                  titulo: "Qué revisamos y gestionamos",
+                  items: [
+                    "Verificación de que la póliza cumple los requisitos de tu consulado o de Extranjería.",
+                    "Cobertura sin copagos ni periodos de carencia.",
+                    "Repatriación y cobertura equivalente a la sanidad pública española.",
+                    "Contratación y obtención del certificado en el formato que piden.",
+                    "Ajuste de fechas de vigencia al periodo exigido para tu trámite.",
+                  ],
+                },
+              ],
+              faq: [
+                {
+                  q: "¿Me sirve el seguro de viaje que ya tengo?",
+                  a: "Casi nunca. Los seguros de viaje habituales tienen copagos, carencias o coberturas limitadas que no cumplen lo que exige la administración española. Lo revisamos antes de que pagues nada.",
+                },
+              ],
+            },
+          },
+          {
             id: "apostillas",
             nombre: "Apostillas",
             resumen: "Apostillado de documentos para que tengan validez internacional.",

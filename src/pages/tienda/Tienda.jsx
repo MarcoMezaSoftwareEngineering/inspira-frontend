@@ -5,6 +5,7 @@
 import { PRODUCTOS } from "../../config/tienda";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -112,6 +113,7 @@ export default function Tienda() {
           .
         </p>
       </div>
+      <SigueExplorando destinos={["calculadora","asistente","blog","servicios"]} />
     </div>
   );
 }

@@ -2,16 +2,16 @@ import { useState } from "react";
 import { navigate } from "../../../services/navigate";
 import Icono from "../../../components/common/Icono";
 
-// El rango real de un máster en España: desde ~700 € de matrícula en una
-// pública hasta 80.000 € en programas privados de alta gama.
+// Rango real de un máster en España: desde ~700 € de matrícula en una
+// pública hasta 10.000 € o más en programas privados.
 const MIN = 700;
-const MAX = 80000;
+const MAX = 10000;
 
 const formatear = (v) =>
-  v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)} k€` : `${v} €`;
+  v >= MAX ? "10 k€ o más" : `${v.toLocaleString("es-ES")} €`;
 
 export default function QuickCalc() {
-  const [budget, setBudget] = useState(6000);
+  const [budget, setBudget] = useState(3500);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -71,7 +71,7 @@ export default function QuickCalc() {
               />
               <div className="range-meta">
                 <span>700 €</span>
-                <span>80 k€</span>
+                <span>10 k€ o más</span>
               </div>
             </div>
           </div>

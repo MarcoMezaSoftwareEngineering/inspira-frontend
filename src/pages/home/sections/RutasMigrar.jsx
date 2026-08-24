@@ -1,4 +1,5 @@
 import Reveal from "../../../components/common/Reveal";
+import Icono from "../../../components/common/Icono";
 import { navigate } from "../../../services/navigate";
 
 const go = (e, href) => {
@@ -7,48 +8,61 @@ const go = (e, href) => {
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
-// Punto de entrada intuitivo: el visitante se reconoce en una situación
-// antes de tener que saber cómo se llama su trámite.
+// Punto de entrada intuitivo: el visitante se reconoce en una situación y
+// entra a la página de esa ruta, no al catálogo completo.
 const rutas = [
   {
+    icono: "birrete",
     emoji: "🎓",
     titulo: "Quiero estudiar en España",
     texto:
-      "Máster, grado o carrera técnica, con el permiso de estudios que te deja trabajar 30 h semanales.",
+      "Máster, grado o carrera técnica, con el permiso que te deja trabajar 30 h semanales. Matrículas desde 700 €.",
     items: ["Visa de Estudios", "Estancia por Estudios", "Máster · Grado · FP"],
-    href: "/servicios#estudios",
+    href: "/ruta/estudios",
     destacado: true,
   },
   {
+    icono: "maletin",
     emoji: "💼",
     titulo: "Tengo una oferta o trabajo en remoto",
     texto:
-      "Procesos rápidos para perfiles cualificados: resoluciones ágiles y permiso para tu familia.",
-    items: ["Visado PAC", "Nómada Digital", "Residencia No Lucrativa"],
-    href: "/servicios#rapidos",
+      "Vías más fáciles y rápidas: resoluciones en semanas, permiso para tu familia y cómputo para la nacionalidad.",
+    items: ["Nómada Digital", "Visado PAC", "No Lucrativa", "Doctorado"],
+    href: "/ruta/rapidas",
   },
   {
+    icono: "bandera",
     emoji: "🇪🇸",
     titulo: "Ya estoy en España",
     texto:
-      "Renovaciones, cambios de situación, arraigos y la nacionalidad en solo 2 años.",
-    items: ["Nacionalidad", "Arraigos", "Modificatorias"],
-    href: "/servicios#otros-extranjeria",
+      "Renovaciones, cambios de situación, arraigos, nacionalidad en 2 años y todas las gestiones del día a día.",
+    items: ["Nacionalidad", "Arraigos", "TIE", "Empadronamiento"],
+    href: "/ruta/en-espana",
   },
   {
+    icono: "documento",
     emoji: "📄",
     titulo: "Me denegaron un trámite",
     texto:
-      "Analizamos la resolución y te decimos con honestidad si el recurso es viable.",
-    items: ["Recurso de Reposición", "Plan B: Estancia por Estudios"],
-    href: "/servicios/recurso-reposicion",
+      "Analizamos la resolución y te decimos con honestidad si el recurso es viable. Los plazos son cortos.",
+    items: ["Recurso de Reposición", "Plan B"],
+    href: "/ruta/denegado",
     urgente: true,
+  },
+  {
+    icono: "libro",
+    emoji: "📚",
+    titulo: "Aún no migro, pero quiero avanzar",
+    texto:
+      "Homologa tus estudios y prepárate para la universidad española. Lo que más tarda conviene empezarlo ya.",
+    items: ["Homologaciones", "Grado y Máster", "Apostillas"],
+    href: "/ruta/tramites",
   },
 ];
 
 export default function RutasMigrar() {
   return (
-    <section className="rutas">
+    <section className="rutas" id="rutas">
       <div className="v4-container">
         <Reveal className="section-head">
           <div>
@@ -56,8 +70,8 @@ export default function RutasMigrar() {
             <h2>¿Por dónde empieza tu caso?</h2>
           </div>
           <p>
-            No necesitas saber cómo se llama tu trámite. Elige la situación en la
-            que estás y te llevamos a la vía correcta.
+            No necesitas saber cómo se llama tu trámite. Elige la situación en
+            la que estás y te llevamos a la vía correcta.
           </p>
         </Reveal>
 
@@ -71,9 +85,11 @@ export default function RutasMigrar() {
               }`}
               href={r.href}
               onClick={(e) => go(e, r.href)}
-              delay={i * 90}
+              delay={i * 80}
             >
-              <span className="ruta-emoji" aria-hidden>{r.emoji}</span>
+              <span className="ruta-icon">
+                <Icono nombre={r.icono} size={24} />
+              </span>
               <h3>{r.titulo}</h3>
               <p>{r.texto}</p>
               <div className="ruta-tags">

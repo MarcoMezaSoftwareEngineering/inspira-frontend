@@ -2,6 +2,7 @@
 import { POSTS } from "./blog.data";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -93,6 +94,7 @@ export default function BlogIndex() {
           ))}
         </div>
       </div>
+      <SigueExplorando destinos={["asistente","servicios","casos","tienda"]} />
     </div>
   );
 }

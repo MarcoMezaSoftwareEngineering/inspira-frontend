@@ -8,6 +8,7 @@ import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
+import SigueExplorando from "../../components/layout/SigueExplorando";
 import { CALENDLY_URL } from "../../config/contacto";
 
 const go = (e, href) => {
@@ -323,6 +324,7 @@ export default function Asistente() {
           </div>
         </div>
       </section>
+      <SigueExplorando destinos={["servicios","calculadora","casos","eventos"]} />
     </div>
   );
 }

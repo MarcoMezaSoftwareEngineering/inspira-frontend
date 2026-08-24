@@ -21,6 +21,7 @@ import Eventos from "./pages/eventos/Eventos";
 import CasosExito from "./pages/casos/CasosExito";
 import Asistente from "./pages/asistente/Asistente";
 import RutaLanding from "./pages/rutas/RutaLanding";
+import Plataforma from "./pages/plataforma/Plataforma";
 import { getRuta } from "./config/rutas";
 import Nosotros from "./pages/nosotros/Nosotros";
 import Tienda from "./pages/tienda/Tienda";
@@ -127,6 +128,12 @@ const SEO_PAGES = {
     description:
       "Aún no migras pero quieres avanzar: homologa tu bachillerato o tu título universitario y prepárate para postular a la universidad española a tiempo.",
     path: "/ruta/tramites",
+  },
+  "/plataforma": {
+    title: "Nuestro sistema – Panel privado y expediente digital | Inspira Legal",
+    description:
+      "Somos una firma con plataforma propia: accedes con credenciales a un panel donde vive tu expediente, subes documentos, tu asesor los valida y el sistema te avisa en cada hito.",
+    path: "/plataforma",
   },
   "/asistente": {
     title: "Asistente Inspira – ¿Qué trámite me corresponde para España?",
@@ -273,6 +280,7 @@ const PUBLIC_PATHS = [
   "/eventos",
   "/casos-de-exito",
   "/asistente",
+  "/plataforma",
   "/ruta/estudios",
   "/ruta/rapidas",
   "/ruta/en-espana",
@@ -346,6 +354,7 @@ export default function App() {
       {path === "/eventos" && <Eventos />}
       {path === "/casos-de-exito" && <CasosExito />}
       {path === "/asistente" && <Asistente />}
+      {path === "/plataforma" && <Plataforma />}
       {path === "/blog" && <BlogIndex />}
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}

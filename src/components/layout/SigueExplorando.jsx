@@ -24,6 +24,7 @@ export const DESTINOS = {
   tienda: { icono: "libro", titulo: "Tiendita", texto: "Ebooks, guías y recursos descargables.", href: "/tienda" },
   blog: { icono: "documento", titulo: "Blog", texto: "Guías de extranjería y estudios en España.", href: "/blog" },
   servicios: { icono: "brujula", titulo: "Todos los servicios", texto: "El catálogo completo, trámite por trámite.", href: "/servicios" },
+  plataforma: { icono: "laptop", titulo: "Nuestro sistema", texto: "Panel privado, checklist y avisos automáticos.", href: "/plataforma" },
   nosotros: { icono: "usuarios", titulo: "Conoce al equipo", texto: "Los abogados que llevan tu expediente.", href: "/nosotros" },
 };
 

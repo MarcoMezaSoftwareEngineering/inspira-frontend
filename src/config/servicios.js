@@ -35,6 +35,12 @@ export const DIFERENCIALES = [
     titulo: "Procesos 100% digitales",
     texto:
       "Presentación telemática con firma digital del abogado vía MERCURIO: sin citas presenciales, sin colas, sin desplazamientos.",
+    icono: "destello",
+  },
+  {
+    titulo: "Sistema propio, no un chat",
+    texto:
+      "Tu expediente vive en nuestra plataforma: panel privado con credenciales, checklist de documentos validado por tu asesor y avisos automáticos en cada hito.",
     icono: "laptop",
   },
   {

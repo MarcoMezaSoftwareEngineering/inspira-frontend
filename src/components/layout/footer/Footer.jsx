@@ -13,6 +13,7 @@ const enlacesExplora = [
   { label: "Máster en España (360°)", href: "/servicios/master" },
   { label: "Visa y estancia por estudios", href: "/servicios/estancia" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
+  { label: "Nuestro sistema", href: "/plataforma" },
   { label: "Eventos gratuitos", href: "/eventos" },
   { label: "Tiendita", href: "/tienda" },
   { label: "Blog", href: "/blog" },

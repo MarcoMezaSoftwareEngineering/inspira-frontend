@@ -875,6 +875,10 @@ function reservaTone(estado) {
 const PAGO_IMPLICITO_POR_ESTADO = {
   PENDIENTE_PAGO: "PENDIENTE",
   EXPIRADA: "PENDIENTE",
+  // Una cita cancelada que nunca se pagó no necesita el pill "Pago pendiente";
+  // si en cambio se pagó y se devolvió, pago_estado será REEMBOLSADO y sí se
+  // muestra, que es justo el caso en que aporta información.
+  CANCELADA: "PENDIENTE",
   CONFIRMADA: "APROBADO",
   COMPLETADA: "APROBADO",
 };

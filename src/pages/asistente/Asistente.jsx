@@ -6,7 +6,7 @@
 import { useState } from "react";
 import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
-import ComprarProducto from "../../components/common/ComprarProducto";
+import { whatsappUrl } from "../../config/contacto";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
@@ -295,27 +295,25 @@ export default function Asistente() {
                 InspiraGPT: tu asistente de extranjería 24/7
               </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">
-                La versión conversacional, entrenada con nuestras guías y con
-                el criterio de nuestro equipo legal. Pregunta cualquier duda de
-                extranjería y estudios en España a cualquier hora.
-                <b className="text-primary"> Pago único, acceso permanente.</b>
+                Estamos construyendo la versión conversacional, entrenada con
+                nuestras guías y con el criterio de nuestro equipo legal.
+                Mientras tanto, el orientador de arriba es gratuito y ya te
+                dice qué vía te corresponde.
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <ComprarProducto
-                  idProducto="asistente-ia"
-                  nombre="InspiraGPT — Asistente de extranjería"
-                  precio={99}
-                  precioRef="25 US$"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-extrabold text-white transition hover:bg-accent-dark"
-                >
-                  Obtener acceso · S/ 99
-                </ComprarProducto>
+                <span className="inline-flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-sm font-extrabold text-primary">
+                  <Icono nombre="reloj" size={16} />
+                  En construcción
+                </span>
                 <a
-                  href="/tienda"
-                  onClick={(e) => go(e, "/tienda")}
+                  href={whatsappUrl(
+                    "Hola Inspira, quiero que me avisen cuando InspiraGPT esté disponible."
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-sm font-bold text-primary hover:underline"
                 >
-                  Ver más recursos →
+                  Avísame cuando esté listo →
                 </a>
               </div>
             </div>

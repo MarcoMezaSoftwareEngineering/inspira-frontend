@@ -1,4 +1,8 @@
 // src/config/tienda.js
+// `disponible: false` => la tarjeta muestra "Muy pronto" y NO se puede pagar.
+// Solo poner `disponible: true` cuando el producto exista y su entrega esté
+// configurada en inspira-backend/src/modules/pagos/productos.catalogo.js
+// (campo `entrega.url`). Nunca cobrar por algo que no se pueda entregar.
 // Productos digitales de la Tiendita.
 // Los productos de pago se venden por Hotmart: pega la URL de la página de
 // pago de cada producto en `hotmartUrl`. Mientras esté en null, el botón
@@ -18,6 +22,7 @@ export const PRODUCTOS = [
   },
   {
     id: "becas-actualizadas",
+    disponible: false,
     precioPen: 59,
     nombre: "Becas en España actualizadas",
     descripcion:
@@ -30,6 +35,7 @@ export const PRODUCTOS = [
   },
   {
     id: "ebook-master",
+    disponible: false,
     precioPen: 99,
     nombre: "Ebook + video: pasos para estudiar un Máster en España",
     descripcion:
@@ -42,6 +48,7 @@ export const PRODUCTOS = [
   },
   {
     id: "ebook-fp",
+    disponible: false,
     precioPen: 39,
     nombre: "Ebook: estudia una Formación Profesional gratis en España",
     descripcion:
@@ -56,6 +63,7 @@ export const PRODUCTOS = [
     // Producto de suscripción pendiente de construir: ver la nota del equipo
     // sobre el asistente de IA (requiere backend + pasarela de suscripción).
     id: "asistente-ia",
+    disponible: false,
     precioPen: 99,
     nombre: "InspiraGPT — tu asistente de extranjería 24/7",
     descripcion:
@@ -68,6 +76,7 @@ export const PRODUCTOS = [
   },
   {
     id: "videos-cv",
+    disponible: false,
     precioPen: 99,
     nombre: "Serie de videos: mejora tu CV y tu perfil",
     descripcion:

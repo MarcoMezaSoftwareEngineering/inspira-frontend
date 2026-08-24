@@ -106,11 +106,12 @@ export default function BlogPost({ slug }) {
             clara para tu trámite.
           </p>
           <a
-            href="/reservar"
-            onClick={(e) => go(e, "/reservar")}
+            href={CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-5 inline-block rounded-xl bg-accent px-6 py-3 font-bold text-white transition hover:bg-accent-dark"
           >
-            Reservar asesoría →
+            📅 Agenda tu asesoría →
           </a>
         </div>
       </article>

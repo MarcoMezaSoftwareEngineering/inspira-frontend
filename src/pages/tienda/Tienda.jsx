@@ -28,7 +28,7 @@ function BotonProducto({ producto }) {
     );
   }
   // Producto de pago con checkout propio (Mercado Pago)
-  if (producto.precioPen) {
+  if (producto.precioPen && producto.disponible) {
     return (
       <ComprarProducto
         idProducto={producto.id}
@@ -125,11 +125,12 @@ export default function Tienda() {
           Los pagos se procesan de forma segura y el acceso al contenido es
           inmediato tras la compra. ¿Dudas con un producto?{" "}
           <a
-            href="/reservar"
-            onClick={(e) => go(e, "/reservar")}
+            href={CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="font-semibold text-primary hover:underline"
           >
-            Escríbenos o reserva una asesoría
+            Agenda una asesoría
           </a>
           .
         </p>

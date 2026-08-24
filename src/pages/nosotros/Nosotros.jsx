@@ -107,13 +107,9 @@ export default function Nosotros() {
           Reserva tu primera asesoría y conoce al equipo que va a acompañar tu
           proceso de principio a fin.
         </p>
-        <a
-          href="/reservar"
-          onClick={(e) => go(e, "/reservar")}
-          className="mt-6 inline-block rounded-xl bg-accent px-6 py-3 font-bold text-white transition hover:bg-accent-dark"
-        >
-          Reservar asesoría →
-        </a>
+        <div className="mt-6 flex justify-center">
+          <BotonAsesoria>Agenda tu asesoría</BotonAsesoria>
+        </div>
       </section>
       <SigueExplorando destinos={["casos","servicios","eventos","asistente"]} />
     </div>

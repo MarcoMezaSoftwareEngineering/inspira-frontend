@@ -32,10 +32,12 @@ export default function MobileMenu({ open, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
+    <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-xl p-5 flex flex-col gap-4">
+      {/* Ancho algo mayor y scroll interno: el catálogo completo cabe sin
+          comprimirse, y la sección de usuario queda anclada abajo. */}
+      <div className="absolute left-0 top-0 flex h-full w-[min(21rem,88vw)] flex-col gap-3 overflow-y-auto bg-white p-5 shadow-xl">
         <MobileMenuHeader onClose={onClose} />
 
         <MobileMenuNavLinks onClose={onClose} />

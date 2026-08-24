@@ -241,6 +241,120 @@
 .v4-home .mini-dashboard .bar { height: 5px; border-radius: 99px; margin: 8px 0; overflow: hidden; background: rgba(255, 255, 255, .12); }
 .v4-home .mini-dashboard .bar i { display: block; height: 100%; border-radius: 99px; }
 
+
+/* ── SERVICIOS: pie "también hacemos…" ──────────────────────────────── */
+.v4-home .services-more { margin-top: 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; border: 1px dashed var(--line); border-radius: 20px; padding: 20px 24px; background: var(--surface); }
+.v4-home .services-more p { margin: 0; color: var(--muted); font-size: 13px; max-width: 560px; line-height: 1.6; }
+
+/* ── ASESORÍAS ───────────────────────────────────────────────────────── */
+.v4-home .asesorias { background: var(--surface); }
+.v4-home .asesoria-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+.v4-home .asesoria-grid.dos { grid-template-columns: repeat(2, 1fr); max-width: 860px; margin-inline: auto; }
+.v4-home .asesoria-card { position: relative; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-radius: 26px; padding: 30px 26px; transition: .25s var(--ease); }
+.v4-home .asesoria-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+.v4-home .asesoria-card.destacada { border: 2px solid var(--accent); box-shadow: 0 16px 40px rgba(250,148,58,.16); }
+.v4-home .asesoria-tag { position: absolute; top: -12px; left: 26px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; }
+.v4-home .asesoria-icon { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 15px; background: var(--sky-soft); color: var(--sky-2); margin-bottom: 16px; }
+.v4-home .asesoria-card.destacada .asesoria-icon { background: #fff1e2; color: var(--accent); }
+.v4-home .asesoria-dur { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.v4-home .asesoria-card h3 { font-family: Outfit, sans-serif; font-size: 25px; color: var(--primary); margin: 8px 0 12px; letter-spacing: -.03em; font-weight: 800; }
+.v4-home .asesoria-precio { font-family: Outfit, sans-serif; font-size: 38px; font-weight: 900; color: var(--primary); letter-spacing: -.04em; line-height: 1; }
+.v4-home .asesoria-precio small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0; margin-top: 6px; }
+.v4-home .asesoria-card > p { color: var(--muted); font-size: 13px; line-height: 1.65; margin: 16px 0 0; }
+.v4-home .asesoria-card ul { list-style: none; padding: 0; margin: 16px 0 22px; display: grid; gap: 9px; flex: 1; }
+.v4-home .asesoria-card li { font-size: 12.5px; color: var(--ink); display: flex; gap: 9px; line-height: 1.5; }
+.v4-home .asesoria-card li:before { content: "✓"; color: var(--sky-2); font-weight: 900; flex: 0 0 auto; }
+.v4-home .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: #fff; }
+.v4-home .btn-outline:hover { background: var(--surface-2); transform: translateY(-2px); }
+.v4-home .asesoria-previa { margin-top: 22px; display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap; border: 1px dashed var(--line); background: #fff; border-radius: 20px; padding: 20px 26px; }
+.v4-home .asesoria-previa-tag { display: inline-flex; align-items: center; gap: 7px; background: #eaf7f0; color: var(--green); font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; }
+.v4-home .asesoria-previa-txt p { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 680px; }
+.v4-home .asesoria-previa-txt b { color: var(--ink); }
+.v4-home .asesoria-previa-link { font-weight: 850; font-size: 13.5px; color: var(--green) !important; white-space: nowrap; }
+.v4-home .asesoria-previa-link:hover .arr { transform: translateX(4px); display: inline-block; }
+
+/* ── RUTAS (¿por dónde empieza tu caso?) ─────────────────────────────── */
+.v4-home .rutas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.v4-home .ruta-card { display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); border-radius: 24px; background: #fff; padding: 26px 22px; transition: .25s var(--ease); }
+.v4-home .ruta-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--sky); }
+.v4-home .ruta-card.destacada { background: linear-gradient(160deg, #013446, #02506b); border-color: transparent; }
+.v4-home .ruta-card.destacada h3 { color: #fff; }
+.v4-home .ruta-card.destacada .ruta-link { color: var(--sky); }
+.v4-home .ruta-card.destacada p { color: rgba(255,255,255,.72); }
+.v4-home .ruta-card.destacada .ruta-tags span { background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); }
+.v4-home .ruta-card.urgente { border-color: #f6d9bb; background: linear-gradient(180deg, #fffaf5, #fff); }
+.v4-home .ruta-emoji { font-size: 30px; line-height: 1; }
+.v4-home .ruta-card h3 { font-family: Outfit, sans-serif; font-size: 18px; font-weight: 850; color: var(--primary); margin: 4px 0 0; letter-spacing: -.02em; }
+.v4-home .ruta-card p { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0; flex: 1; }
+.v4-home .ruta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.v4-home .ruta-tags span { font-size: 10.5px; font-weight: 700; background: var(--surface-2); color: #2c5f7a; padding: 5px 9px; border-radius: 999px; }
+.v4-home .ruta-link { font-size: 12.5px; font-weight: 850; color: var(--primary); }
+.v4-home .ruta-card:hover .arr { transform: translateX(4px); display: inline-block; }
+
+/* ── POR QUÉ INSPIRA ─────────────────────────────────────────────────── */
+.v4-home .porque { background: var(--surface); }
+.v4-home .porque-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.v4-home .porque-card { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 24px; transition: .25s var(--ease); }
+.v4-home .porque-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.v4-home .porque-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: var(--sky-soft); color: var(--sky-2); }
+.v4-home .porque-card h3 { font-family: Outfit, sans-serif; font-size: 16px; font-weight: 850; color: var(--primary); margin: 12px 0 6px; }
+.v4-home .porque-card p { color: var(--muted); font-size: 12.5px; line-height: 1.6; margin: 0; }
+.v4-home .becas-banner { margin-top: 20px; background: linear-gradient(135deg, #013446, #02506b); border-radius: 28px; padding: 36px 40px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; }
+.v4-home .becas-banner h3 { font-family: Outfit, sans-serif; color: #fff; font-size: 26px; line-height: 1.25; letter-spacing: -.03em; margin: 10px 0 10px; font-weight: 800; max-width: 720px; }
+.v4-home .becas-banner p { color: rgba(255,255,255,.66); font-size: 13px; line-height: 1.65; margin: 0; max-width: 620px; }
+
+/* ── TESTIMONIOS ─────────────────────────────────────────────────────── */
+.v4-home .testimonials { background: #fff; }
+.v4-home .testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.v4-home .testimonial-card { border: 1px solid var(--line); border-radius: 24px; background: #fff; padding: 26px; display: flex; flex-direction: column; gap: 14px; transition: .25s var(--ease); }
+.v4-home .testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.v4-home .testimonial-card .t-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.v4-home .testimonial-card .fuente { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--surface-2); padding: 5px 10px; border-radius: 999px; }
+.v4-home .testimonial-card .stars { color: var(--sun); letter-spacing: 3px; font-size: 14px; }
+.v4-home .testimonial-card .quote { color: var(--ink); line-height: 1.65; font-size: 14px; margin: 0; flex: 1; }
+.v4-home .testimonial-card .who { display: flex; align-items: center; gap: 11px; }
+.v4-home .testimonial-card .avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #013446, #02506b); color: #fff; font-weight: 900; font-size: 15px; }
+.v4-home .testimonial-card .who b { display: block; font-size: 13px; }
+.v4-home .testimonial-card .who span { color: var(--muted); font-size: 11px; }
+.v4-home .testimonial-card.cta-card { background: linear-gradient(160deg, #013446, #02506b); justify-content: center; }
+.v4-home .testimonial-card.cta-card h3 { font-family: Outfit, sans-serif; color: #fff; font-size: 24px; letter-spacing: -.03em; margin: 0; font-weight: 800; }
+.v4-home .testimonial-card.cta-card p { color: rgba(255,255,255,.7); font-size: 13px; line-height: 1.6; margin: 0; }
+.v4-home .testimonial-card.cta-card .btn { align-self: flex-start; }
+
+/* ── FAQ ─────────────────────────────────────────────────────────────── */
+.v4-home .faq { background: var(--surface); }
+.v4-home .faq-list { display: grid; gap: 10px; }
+.v4-home .faq-item { border: 1px solid var(--line); border-radius: 18px; background: #fff; padding: 20px 24px; transition: .2s; }
+.v4-home .faq-item[open] { box-shadow: 0 10px 30px rgba(1,52,70,.08); border-color: var(--sky); }
+.v4-home .faq-item summary { cursor: pointer; list-style: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; font-weight: 800; font-size: 15px; color: var(--primary); }
+.v4-home .faq-item summary::-webkit-details-marker { display: none; }
+.v4-home .faq-plus { color: var(--accent); font-size: 20px; line-height: 1; transition: .25s var(--ease); flex: 0 0 auto; }
+.v4-home .faq-item[open] .faq-plus { transform: rotate(45deg); }
+.v4-home .faq-item p { color: var(--muted); font-size: 13.5px; line-height: 1.72; margin: 14px 0 0; max-width: 860px; }
+.v4-home .faq-cta { margin-top: 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; border: 1px dashed var(--line); border-radius: 20px; padding: 22px 26px; background: #fff; }
+.v4-home .faq-cta p { margin: 0; font-weight: 800; color: var(--primary); font-size: 15px; }
+
+/* ── RESPONSIVE de estas secciones ───────────────────────────────────── */
+@media (max-width: 960px) {
+  .v4-home .rutas-grid { grid-template-columns: 1fr 1fr; }
+  .v4-home .porque-grid { grid-template-columns: 1fr 1fr; }
+  .v4-home .testimonial-grid { grid-template-columns: 1fr; }
+  .v4-home .becas-banner { grid-template-columns: 1fr; padding: 28px; }
+  .v4-home .asesoria-grid, .v4-home .asesoria-grid.dos { grid-template-columns: 1fr; max-width: 560px; margin-inline: auto; }
+}
+
+@media (max-width: 620px) {
+  .v4-home .rutas-grid { grid-template-columns: 1fr; }
+  .v4-home .porque-grid { grid-template-columns: 1fr; }
+  .v4-home .becas-banner h3 { font-size: 22px; }
+  .v4-home .becas-banner { padding: 24px 20px; }
+  .v4-home .faq-item summary { font-size: 14px; }
+  .v4-home .faq-cta { flex-direction: column; align-items: stretch; text-align: center; }
+  .v4-home .services-more { flex-direction: column; align-items: stretch; text-align: center; }
+  .v4-home .asesoria-previa { flex-direction: column; align-items: stretch; }
+  .v4-home .asesoria-card { padding: 26px 20px; }
+}
+
 /* ── RECORRIDO INTERACTIVO ────────────────────────────── */
 .v4-home .recorrido { background: linear-gradient(180deg, var(--surface) 0%, #fff 100%); }
 .v4-home .rec-timeline { position: relative; margin-bottom: 26px; }

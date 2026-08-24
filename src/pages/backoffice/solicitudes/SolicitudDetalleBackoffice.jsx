@@ -1,5 +1,5 @@
 // src/pages/backoffice/solicitudes/SolicitudDetalleBackoffice.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
 import FormularioDatosAcademicosAdmin from "./FormularioDatosAcademicosAdmin";
 import EleccionMastersAdmin from "./EleccionMastersAdmin";
@@ -18,48 +18,6 @@ import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
 
 const RING_R = 13;
 const RING_C = 2 * Math.PI * RING_R;
-
-function calcClienteEstado(detalle) {
-  const c  = detalle?.cliente || {};
-  const ex = c.datos_extra || {};
-  const df = detalle?.datos_formulario || {};
-
-  const tituloUniv = df.carrera_titulo      || ex.carrera_titulo      || "";
-  const uniOrigen  = df.universidad_origen  || ex.universidad_origen  || "";
-  const inicioEst  = ex.inicio_estudios     || df.inicio_estudios     || "";
-  const finEst     = ex.fin_estudios        || df.fin_estudios        || "";
-
-  const tieneCore = !!(
-    c.nombre && c.pasaporte && c.pais_origen &&
-    ex.fecha_nacimiento && ex.pasaporte_vencimiento &&
-    tituloUniv && uniOrigen && inicioEst && finEst
-  );
-  if (!tieneCore) return "pendiente";
-
-  const d = new Date(ex.pasaporte_vencimiento);
-  if (!isNaN(d)) {
-    const meses = (d - new Date()) / (1000 * 60 * 60 * 24 * 30);
-    if (meses < 18) return "observado";
-  }
-  return "completado";
-}
-
-const CAMPOS_REQUERIDOS_FORMULARIO = [
-  "promedio_peru", "ubicacion_grupo", "otra_maestria_tiene",
-  "experiencia_anios", "ingles_situacion",
-  "beca_desea", "duracion_preferida", "practicas_preferencia",
-];
-
-function formCompleto(datos) {
-  const base = CAMPOS_REQUERIDOS_FORMULARIO.every(
-    (c) => datos[c] !== undefined && datos[c] !== null && datos[c] !== ""
-  );
-  if (!base) return false;
-  if (datos.experiencia_anios && datos.experiencia_anios !== "sin") {
-    if (!datos.experiencia_vinculada) return false;
-  }
-  return true;
-}
 
 function BlqHead({ numero, titulo, estado, open, onToggle }) {
   // Vista de sección única: solo se muestra la cabecera del bloque activo.
@@ -153,61 +111,13 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     }, 50);
   }
 
-  const checklistStats = useMemo(() => {
-    const allItems = Object.values(checklistPorEtapa).flat();
-    const total = allItems.length;
-    if (total === 0) return { estado: "pendiente" };
-    const aprobados = allItems.filter((it) =>
-      ["aprobado", "no_aplica"].includes((it.estado_item || "").toLowerCase())
-    ).length;
-    const hayObservados = allItems.some((it) => (it.estado_item || "").toLowerCase() === "observado");
-    return { estado: hayObservados ? "observado" : aprobados === total ? "completado" : "pendiente" };
-  }, [checklistPorEtapa]);
-
   const [progRefreshKey,   setProgRefreshKey]   = useState(0);
   const [eleccionResetKey, setEleccionResetKey] = useState(0);
-  const [eleccionEnPicker, setEleccionEnPicker] = useState(false);
 
-  const { bloques, isVisado } = useMemo(() => {
-    if (!detalle) return { bloques: [], isVisado: false };
-    const tituloLower = String(detalle.titulo || "").toLowerCase().trim();
-    const visado =
-      Number(detalle.id_tipo_solicitud) === 15 ||
-      tituloLower === "visado" ||
-      tituloLower.includes("visado");
-
-    const datos = detalle.datos_formulario || {};
-    const tieneForm = formCompleto(datos);
-    const elecciones = Array.isArray(detalle.eleccion_masters) ? detalle.eleccion_masters : [];
-    const hayEleccion = elecciones.length > 0;
-    const adminDecidioTodo = hayEleccion && elecciones.every((e) => e.plan_incluido !== null && e.plan_incluido !== undefined);
-    const clienteEstado = calcClienteEstado(detalle);
-
-    const lista = visado
-      ? [
-          { id: "cliente",      numero: "1", label: "Encabezado del cliente",   estado: clienteEstado },
-          { id: "checklist",    numero: "2", label: "Documentos requeridos",    estado: checklistStats.estado },
-          { id: "solvencia",    numero: "3", label: "Tipo de medios económicos", estado: "inactivo" },
-          { id: "diagnostico",  numero: "4", label: "Sesión diagnóstico",       estado: "inactivo" },
-          { id: "seguimiento",  numero: "5", label: "Sesión seguimiento",       estado: "inactivo" },
-          { id: "formulario",   numero: "6", label: "Formulario de visado",     estado: "inactivo" },
-          { id: "precita",      numero: "7", label: "Sesión pre-cita",          estado: "inactivo" },
-          { id: "cita",         numero: "8", label: "Cita BLS / Consulado",     estado: "inactivo" },
-          { id: "cierre",       numero: "9", label: "Cierre del expediente",    estado: "inactivo" },
-          { id: "portales",     numero: "P", label: "Portales · Claves",        estado: "pendiente" },
-        ]
-      : [
-          { id: "cliente",      numero: "1", label: "Encabezado cliente",      estado: clienteEstado },
-          { id: "checklist",    numero: "2", label: "Documentos",              estado: checklistStats.estado },
-          { id: "formulario",   numero: "3", label: "Formulario académico",    estado: tieneForm ? "completado" : "pendiente" },
-          { id: "informe",      numero: "4", label: "Informe IA másteres",     estado: (detalle.informe_fecha_subida || tieneForm) ? "completado" : "pendiente" },
-          { id: "eleccion",     numero: "5", label: "Elección del cliente",    estado: !hayEleccion ? "pendiente" : adminDecidioTodo ? "completado" : "revision" },
-          { id: "programacion", numero: "6", label: "Postulaciones · Portales", estado: "pendiente" },
-          { id: "portales",     numero: "7", label: "Portales y justificantes", estado: "pendiente" },
-          { id: "cierre",       numero: "8", label: "Cierre y derivación",     estado: "pendiente" },
-        ];
-    return { bloques: lista, isVisado: visado };
-  }, [detalle, checklistStats, eleccionEnPicker]); // eslint-disable-line
+  // Los 8 bloques y su estado vienen calculados del servidor.
+  const bloques  = detalle?.estado_expediente?.bloques ?? [];
+  const isVisado = bloques.some((b) => b.id === "solvencia");
+  const estadoDe = (id) => bloques.find((b) => b.id === id)?.estado ?? "pendiente";
 
   // Cargar expediente + sesiones de Visado
   useEffect(() => {
@@ -243,23 +153,22 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   function handleEleccionesActualizadas(nuevasElecciones) {
     setDetalle((prev) => ({ ...prev, eleccion_masters: nuevasElecciones }));
     setProgRefreshKey((k) => k + 1);
-    setEleccionEnPicker(false);
+    cargar({ silencioso: true });
   }
 
   async function handleInformeRegenerado() {
     setEleccionResetKey((k) => k + 1);
-    setEleccionEnPicker(true);
     try {
       const r = await boPATCH(`/backoffice/solicitudes/${detalle.id_solicitud}/eleccion-plan`, { eleccion_masters: [] });
-      if (r.ok) setDetalle((prev) => ({ ...prev, eleccion_masters: [] }));
+      if (r.ok) {
+        setDetalle((prev) => ({ ...prev, eleccion_masters: [] }));
+        cargar({ silencioso: true });
+      }
     } catch { /* silencioso */ }
   }
 
-  const pct = useMemo(() => {
-    if (!bloques.length) return 0;
-    const done = bloques.filter((b) => b.estado === "completado").length;
-    return Math.round((done / bloques.length) * 100);
-  }, [bloques]);
+  const pct      = detalle?.estado_expediente?.pct ?? 0;
+  const etiqueta = detalle?.estado_expediente?.etiqueta ?? "sin iniciar";
 
   if (loading) {
     return (
@@ -280,12 +189,6 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   }
 
   if (!detalle) return null;
-
-  const datos = detalle.datos_formulario || {};
-  const tieneFormulario = formCompleto(datos);
-  const eleccionesBody = Array.isArray(detalle.eleccion_masters) ? detalle.eleccion_masters : [];
-  const tieneEleccion = eleccionesBody.length > 0;
-  const adminDecidioTodoBody = tieneEleccion && eleccionesBody.every((e) => e.plan_incluido !== null && e.plan_incluido !== undefined);
 
   function dotColor(estado) {
     if (estado === "completado") return "bg-[#1D6A4A]";
@@ -345,7 +248,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           </div>
           <div>
             <p className="text-[13px] font-bold text-[#1D6A4A]">Progreso</p>
-            <p className="text-[11px] text-[#6B7280]">en curso</p>
+            <p className="text-[11px] text-[#6B7280]">{etiqueta}</p>
           </div>
         </div>
 
@@ -386,7 +289,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
           {/* B1 — Encabezado del cliente */}
           <div id="bloque-cliente" className="scroll-mt-4">
-            <BlqHead numero="1" titulo="Encabezado del cliente" estado={calcClienteEstado(detalle)}
+            <BlqHead numero="1" titulo="Encabezado del cliente" estado={estadoDe("cliente")}
               open={isOpen("cliente")} onToggle={() => toggleBloque("cliente")} />
             {isOpen("cliente") && (
               <CBox>
@@ -407,7 +310,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
           {/* B2 — Documentos requeridos */}
           <div id="bloque-checklist" className="scroll-mt-4">
-            <BlqHead numero="2" titulo="Documentos requeridos" estado={checklistStats.estado}
+            <BlqHead numero="2" titulo="Documentos requeridos" estado={estadoDe("checklist")}
               open={isOpen("checklist")} onToggle={() => toggleBloque("checklist")} />
             {isOpen("checklist") && (
               <CBox>
@@ -537,7 +440,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                 <BlqHead
                   numero="3"
                   titulo="Formulario de datos académicos"
-                  estado={tieneFormulario ? "completado" : "pendiente"}
+                  estado={estadoDe("formulario")}
                   open={isOpen("formulario")} onToggle={() => toggleBloque("formulario")}
                 />
                 {isOpen("formulario") && (
@@ -560,7 +463,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                 <BlqHead
                   numero="4"
                   titulo="Informe de búsqueda de másteres"
-                  estado={(detalle.informe_fecha_subida || tieneFormulario) ? "completado" : "pendiente"}
+                  estado={estadoDe("informe")}
                   open={isOpen("informe")} onToggle={() => toggleBloque("informe")}
                 />
                 {isOpen("informe") && (
@@ -577,7 +480,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                 <BlqHead
                   numero="5"
                   titulo="Elección de másteres (cliente)"
-                  estado={!tieneEleccion ? "pendiente" : adminDecidioTodoBody ? "completado" : "revision"}
+                  estado={estadoDe("eleccion")}
                   open={isOpen("eleccion")} onToggle={() => toggleBloque("eleccion")}
                 />
                 {isOpen("eleccion") && (
@@ -596,7 +499,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
               {/* B6 — Programación de postulaciones */}
               <div id="bloque-programacion" className="scroll-mt-4">
-                <BlqHead numero="6" titulo="Programación de postulaciones" estado="pendiente"
+                <BlqHead numero="6" titulo="Programación de postulaciones" estado={estadoDe("programacion")}
                   open={isOpen("programacion")} onToggle={() => toggleBloque("programacion")} />
                 {isOpen("programacion") && (
                   <CBox>
@@ -609,7 +512,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
               {/* B7 — Portales y justificantes */}
               <div id="bloque-portales" className="scroll-mt-4">
-                <BlqHead numero="7" titulo="Portales, claves y justificantes" estado="pendiente"
+                <BlqHead numero="7" titulo="Portales, claves y justificantes" estado={estadoDe("portales")}
                   open={isOpen("portales")} onToggle={() => toggleBloque("portales")} />
                 {isOpen("portales") && (
                   <CBox>
@@ -622,7 +525,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
               {/* B8 — Cierre de servicio */}
               <div id="bloque-cierre" className="scroll-mt-4">
-                <BlqHead numero="8" titulo="Cierre de servicio y derivación" estado="pendiente"
+                <BlqHead numero="8" titulo="Cierre de servicio y derivación" estado={estadoDe("cierre")}
                   open={isOpen("cierre")} onToggle={() => toggleBloque("cierre")} />
                 {isOpen("cierre") && (
                   <CBox>

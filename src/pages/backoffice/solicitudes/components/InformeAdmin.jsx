@@ -115,7 +115,7 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
         <p className="text-[11px] text-neutral-500 leading-tight mt-0.5 truncate">
           {master.universidad.nombre_completo}
           {master.universidad.ciudad ? ` · ${master.universidad.ciudad}` : ""}
-          {master.universidad.comunidad ? ` · ${master.universidad.comunidad}` : ""}
+          {master.universidad.comunidad ? ` · ${master.universidad.comunidad?.nombre ?? master.universidad.comunidad}` : ""}
         </p>
         <div className="flex flex-wrap gap-1 mt-1.5">
           {precioFinal && (

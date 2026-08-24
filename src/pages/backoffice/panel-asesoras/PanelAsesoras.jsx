@@ -14,6 +14,12 @@ const UNI_EST = ["ADMITIDO","LISTA DE ESPERA ALTA","LISTA DE ESPERA MEDIA","LIST
 const ESTADOS = ["ACTIVO","NO_ACTIVO","ACTIVAR"];
 const PAGE_SIZE = 15;
 
+// El backoffice enruta por pathname + popstate (ver BackofficeApp.navigate).
+function irAExpediente(idSolicitud) {
+  window.history.pushState({}, "", `/backoffice/solicitudes/${idSolicitud}`);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
+
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 function estadoLabel(e) { return e === "NO_ACTIVO" ? "NO ACTIVO" : e; }
 function ini(name) { return (name || "?").split(" ").slice(0,2).map(w => w[0]).join("").toUpperCase(); }
@@ -221,7 +227,10 @@ export default function PanelAsesoras() {
           onClick={e => e.stopPropagation()}
         >
           <button onClick={() => { setEditTarget({ item: menuClient, svc: menuClient._svc }); setAddMode(false); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
-            <Pencil className="w-4 h-4 text-neutral-400" /> Editar expediente
+            <Pencil className="w-4 h-4 text-neutral-400" /> Editar datos del panel
+          </button>
+          <button onClick={() => { irAExpediente(menuClient._id); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
+            <Eye className="w-4 h-4 text-neutral-400" /> Abrir expediente #{menuClient._id}
           </button>
           <button onClick={() => { setExpandedKey(keyFor(menuClient)); setMenuFor(null); }} className="w-full min-h-[38px] flex items-center gap-2.5 px-3 rounded-lg text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
             <Eye className="w-4 h-4 text-neutral-400" /> Ver detalle
@@ -455,6 +464,7 @@ function ClienteCard({ c, isExp, onToggle, onMenu }) {
     subtitle += lastDone ? ` · ${lastDone.label}` : " · Sin iniciar";
   }
   if (c.promedio) subtitle += ` · Prom: ${c.promedio}`;
+  if (c.progreso) subtitle += ` · ${c.progreso.pct}% ${c.progreso.etiqueta}`;
 
   return (
     <div className={`border-t border-neutral-100 first:border-t-0 ${c.portalLinked ? "border-l-[3px] border-l-violet-500" : ""}`}>
@@ -547,21 +557,53 @@ function ClienteDetail({ c }) {
   );
 }
 
-function InfoCard({ title, children }) {
+function InfoCard({ title, right, children }) {
   return (
     <section className="border border-neutral-200 bg-neutral-50/60 rounded-xl p-3 min-w-0">
-      <div className="text-[11px] font-bold uppercase tracking-wide text-neutral-500 mb-2">{title}</div>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="text-[11px] font-bold uppercase tracking-wide text-neutral-500">{title}</div>
+        {right}
+      </div>
       {children}
     </section>
+  );
+}
+
+function ProgresoBar({ progreso }) {
+  const pct = progreso?.pct ?? 0;
+  return (
+    <div className="flex items-center gap-2 w-[130px] shrink-0" title={`Expediente ${progreso?.etiqueta || ""}`}>
+      <div className="flex-1 h-1.5 rounded-full bg-neutral-200 overflow-hidden">
+        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-[11px] font-bold text-neutral-600 tabular-nums">{pct}%</span>
+    </div>
+  );
+}
+
+function ExpedienteLink({ c }) {
+  return (
+    <button
+      title="Abrir el expediente completo"
+      onClick={() => irAExpediente(c._id)}
+      className="group flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-primary/5 hover:border-primary/30 hover:shadow-sm active:scale-95 transition-all duration-150 shrink-0 text-[11px]"
+    >
+      <span className="text-neutral-500 group-hover:text-primary transition-colors font-semibold">
+        Expediente #{c._id} ↗
+      </span>
+    </button>
   );
 }
 
 function FieldGrid({ fields }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2.5">
-      {fields.map(([label, value, isMiss, copyable]) => (
+      {fields.map(([label, value, isMiss, copyable, manual]) => (
         <div key={label} className="min-w-0">
-          <div className="text-[11px] text-neutral-400 uppercase tracking-wide font-bold">{label}</div>
+          <div className="text-[11px] text-neutral-400 uppercase tracking-wide font-bold">
+            {label}
+            {manual && <span className="ml-1 text-amber-500" title="Valor forzado a mano">✎</span>}
+          </div>
           <div className="flex items-center gap-1 mt-0.5 min-w-0">
             <span className={`text-xs truncate ${isMiss ? "text-red-500 italic" : "text-neutral-700 font-semibold"}`} title={String(fv(value))}>{fv(value)}</span>
             {copyable && !isMiss && <CopyBtn value={value} label={label} />}
@@ -577,7 +619,7 @@ function CarpetaLinks({ c }) {
     <button
       title="Abrir carpeta en Drive"
       onClick={() => openDriveFolder(() => boGET(`/backoffice/panel-asesoras/${c._id}/drive-folder-url`))}
-      className="group flex items-center gap-1.5 mt-2.5 h-8 px-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 hover:border-blue-200 hover:shadow-sm active:scale-95 transition-all duration-150 shrink-0 text-[11px]"
+      className="group flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 hover:border-blue-200 hover:shadow-sm active:scale-95 transition-all duration-150 shrink-0 text-[11px]"
     >
       <DriveIcon size={13} />
       <span className="text-neutral-500 group-hover:text-neutral-800 transition-colors font-semibold">Abrir Drive ↗</span>
@@ -586,29 +628,38 @@ function CarpetaLinks({ c }) {
 }
 
 function MasterResumen({ c }) {
-  const p = c.pasos || {};
+  const p  = c.pasos  || {};
+  const og = c.origen || {};
+  // Todo esto se deriva del expediente; ✎ marca lo que la asesora forzó a mano.
   const steps = [
-    ["Fichero", p.fichero], ["Nota media", c.notaMedia], ["CV Europass", c.cvEuropass],
-    ["Informe búsqueda", p.informe], ["Escogió máster", p.escogio],
-    ["Docs completos", c.docCompletos], ["Postulación completa", p.postulacion],
+    ["Fichero", p.fichero, og.fichero],
+    ["Nota media", c.notaMedia, og.notaMedia],
+    ["CV Europass", c.cvEuropass, og.cvEuropass],
+    ["Informe búsqueda", p.informe, og.informe],
+    ["Escogió máster", p.escogio, og.escogio],
+    ["Docs completos", c.docCompletos, og.docCompletos],
+    ["Postulación completa", p.postulacion, og.postulacion],
   ];
   return (
     <div className="space-y-2.5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <InfoCard title="Identidad">
+        <InfoCard title="Identidad" right={<ProgresoBar progreso={c.progreso} />}>
           <FieldGrid fields={[
             ["Nombre completo", c.name, false, true],
             ["Paquete", c.paquete, false, true],
             ["Carpeta", c.carpeta, false, true],
           ]} />
-          <CarpetaLinks c={c} />
+          <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+            <CarpetaLinks c={c} />
+            <ExpedienteLink c={c} />
+          </div>
         </InfoCard>
         <InfoCard title="Perfil académico">
           <FieldGrid fields={[
-            ["Uni origen", c.uni_origen, miss(c.uni_origen), true],
-            ["Área de interés", c.interes, miss(c.interes), true],
-            ["Promedio", c.promedio, miss(c.promedio), true],
-            ["Máster elegido", c.masterElegido, miss(c.masterElegido), true],
+            ["Uni origen", c.uni_origen, miss(c.uni_origen), true, og.uni_origen === "manual"],
+            ["Área de interés", c.interes, miss(c.interes), true, og.interes === "manual"],
+            ["Promedio", c.promedio, miss(c.promedio), true, og.promedio === "manual"],
+            ["Máster elegido", c.masterElegido, miss(c.masterElegido), true, og.masterElegido === "manual"],
           ]} />
         </InfoCard>
         <InfoCard title="Beca">
@@ -625,8 +676,17 @@ function MasterResumen({ c }) {
 
       <InfoCard title={`Proceso · ${steps.filter(([, ok]) => ok).length}/${steps.length} completados`}>
         <div className="flex flex-wrap gap-1.5">
-          {steps.map(([l, ok]) => (
-            <span key={l} className={`px-2 py-1 rounded-full text-[11px] font-semibold border ${ok ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}>{ok ? "✓" : "×"} {l}</span>
+          {steps.map(([l, ok, origen]) => (
+            <span
+              key={l}
+              title={origen === "manual" ? "Forzado a mano" : "Derivado del expediente"}
+              className={`px-2 py-1 rounded-full text-[11px] font-semibold border ${
+                ok ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"
+              } ${origen === "manual" ? "ring-1 ring-amber-300" : ""}`}
+            >
+              {ok ? "✓" : "×"} {l}
+              {origen === "manual" && <span className="ml-1 text-amber-600">✎</span>}
+            </span>
           ))}
         </div>
       </InfoCard>
@@ -798,6 +858,16 @@ function PagosSection({ pagos }) {
 /* ═══════════════════════════════════════════════════════════════════════════
    CLIENTE FORM (compartido para crear y editar)
 ═══════════════════════════════════════════════════════════════════════════ */
+// Los campos que el expediente puede deducir tienen tres estados en el modal:
+// "auto" (derivado), "si" y "no" (override manual de la asesora).
+function triInicial(item, campo, valor) {
+  return item?.origen?.[campo] === "manual" ? (valor ? "si" : "no") : "auto";
+}
+// Los campos de texto quedan vacios cuando estan en automatico.
+function textoInicial(item, campo, valor) {
+  return item?.origen?.[campo] === "manual" ? (valor || "") : "";
+}
+
 function buildInitialForm(item) {
   return {
     name:         item?.name         || "",
@@ -807,20 +877,20 @@ function buildInitialForm(item) {
     carpeta:      item?.carpeta      || "",
     driveUrl:     item?.driveUrl     || "",
     portalUrl:    item?.portalUrl    || "",
-    promedio:     item?.promedio     || "",
-    interes:      item?.interes      || "",
-    uni_origen:   item?.uni_origen   || "",
-    masterElegido:item?.masterElegido|| "",
+    promedio:     textoInicial(item, "promedio", item?.promedio),
+    interes:      textoInicial(item, "interes", item?.interes),
+    uni_origen:   textoInicial(item, "uni_origen", item?.uni_origen),
+    masterElegido:textoInicial(item, "masterElegido", item?.masterElegido),
     portalLinked: item?.portalLinked || false,
     beca_aprobable: item?.beca?.aprobable || false,
     beca_detalle:   item?.beca?.detalle   || "",
-    notaMedia:  item?.notaMedia  || false,
-    cvEuropass: item?.cvEuropass || false,
-    docCompletos: item?.docCompletos || false,
-    fichero:    item?.pasos?.fichero    || false,
-    informe:    item?.pasos?.informe    || false,
-    escogio:    item?.pasos?.escogio    || false,
-    postulacion:item?.pasos?.postulacion || false,
+    notaMedia:    triInicial(item, "notaMedia", item?.notaMedia),
+    cvEuropass:   triInicial(item, "cvEuropass", item?.cvEuropass),
+    docCompletos: triInicial(item, "docCompletos", item?.docCompletos),
+    fichero:      triInicial(item, "fichero", item?.pasos?.fichero),
+    informe:      triInicial(item, "informe", item?.pasos?.informe),
+    escogio:      triInicial(item, "escogio", item?.pasos?.escogio),
+    postulacion:  triInicial(item, "postulacion", item?.pasos?.postulacion),
     fechaCita:  item?.fechaCita  || "",
     pasaporte:  item?.pasaporte  || "",
     fNac:       item?.fNac       || "",
@@ -851,6 +921,9 @@ function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
   function setUniField(i, k, v)  { setUnis(u => u.map((x, idx) => idx === i ? { ...x, [k]: v } : x)); }
   function remUni(i) { setUnis(u => u.filter((_, idx) => idx !== i)); }
 
+  // "auto" -> null (el backend lo deriva del expediente)
+  const tri = (v) => (v === "auto" ? null : v === "si");
+
   async function handleSubmit() {
     if (!form.name?.trim()) { dialog.toast("El nombre es obligatorio", "error"); return; }
 
@@ -872,8 +945,11 @@ function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
       promedio: form.promedio, interes: form.interes,
       uni_origen: form.uni_origen, masterElegido: form.masterElegido,
       portalLinked: form.portalLinked,
-      notaMedia: form.notaMedia, cvEuropass: form.cvEuropass, docCompletos: form.docCompletos,
-      pasos: { fichero: form.fichero, informe: form.informe, escogio: form.escogio, postulacion: form.postulacion },
+      notaMedia: tri(form.notaMedia), cvEuropass: tri(form.cvEuropass), docCompletos: tri(form.docCompletos),
+      pasos: {
+        fichero: tri(form.fichero), informe: tri(form.informe),
+        escogio: tri(form.escogio), postulacion: tri(form.postulacion),
+      },
       beca: { aprobable: form.beca_aprobable, detalle: form.beca_detalle },
       fases,
       fechaCita: form.fechaCita, pasaporte: form.pasaporte, fNac: form.fNac,
@@ -889,6 +965,8 @@ function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
 
   const inp = "w-full border border-neutral-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30 bg-white";
   const lab = "block text-[10px] text-neutral-400 uppercase tracking-wide mb-0.5";
+  // Dejar el campo vacio lo devuelve a automatico; el placeholder enseña que valor daria.
+  const autoPh = (v) => (v ? `Auto: ${v}` : "Automático");
 
   return (
     <div className="space-y-4 text-xs">
@@ -946,21 +1024,28 @@ function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
           <div className="grid grid-cols-3 gap-3">
             <label>
               <span className={lab}>Área de interés</span>
-              <input className={inp} value={form.interes} onChange={e => set("interes", e.target.value)} />
+              <input className={inp} value={form.interes} onChange={e => set("interes", e.target.value)}
+                placeholder={autoPh(item?.auto?.interes)} />
             </label>
             <label>
               <span className={lab}>Uni de origen</span>
-              <input className={inp} value={form.uni_origen} onChange={e => set("uni_origen", e.target.value)} />
+              <input className={inp} value={form.uni_origen} onChange={e => set("uni_origen", e.target.value)}
+                placeholder={autoPh(item?.auto?.uni_origen)} />
             </label>
             <label>
               <span className={lab}>Promedio ponderado</span>
-              <input className={inp} value={form.promedio} onChange={e => set("promedio", e.target.value)} placeholder="ej: 15.67" />
+              <input className={inp} value={form.promedio} onChange={e => set("promedio", e.target.value)}
+                placeholder={autoPh(item?.auto?.promedio)} />
             </label>
           </div>
           <label>
             <span className={lab}>Máster elegido</span>
-            <input className={inp} value={form.masterElegido} onChange={e => set("masterElegido", e.target.value)} />
+            <input className={inp} value={form.masterElegido} onChange={e => set("masterElegido", e.target.value)}
+              placeholder={autoPh(item?.auto?.masterElegido)} />
           </label>
+          <p className="text-[10px] text-neutral-400 -mt-2">
+            Estos cuatro campos salen del expediente. Escribe algo solo para forzarlo; déjalo vacío para volver a automático.
+          </p>
           <div className="grid grid-cols-2 gap-3">
             <label>
               <span className={lab}>¿Beca aprobable?</span>
@@ -976,15 +1061,29 @@ function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
           </div>
           <div>
             <div className={lab}>Proceso</div>
-            <div className="flex flex-wrap gap-3 mt-1.5">
+            <p className="text-[10px] text-neutral-400 mb-1.5">
+              En automático cada paso se deduce del expediente. Usa Sí/No solo cuando necesites forzarlo.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[
                 ["fichero","Fichero"], ["notaMedia","Nota media"], ["cvEuropass","CV Europass"],
                 ["informe","Informe búsqueda"], ["escogio","Escogió máster"],
                 ["docCompletos","Docs completos"], ["postulacion","Postulación completa"],
               ].map(([k,l]) => (
-                <label key={k} className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={!!form[k]} onChange={e => set(k, e.target.checked)} className="w-3.5 h-3.5" />
-                  <span>{l}</span>
+                <label key={k} className="min-w-0">
+                  <span className={lab}>
+                    {l}
+                    {form[k] === "auto" && item && (
+                      <span className="ml-1 normal-case tracking-normal text-neutral-400">
+                        ({item?.auto?.[k] ? "sí" : "no"})
+                      </span>
+                    )}
+                  </span>
+                  <select className={inp} value={form[k]} onChange={e => set(k, e.target.value)}>
+                    <option value="auto">Automático</option>
+                    <option value="si">Sí</option>
+                    <option value="no">No</option>
+                  </select>
                 </label>
               ))}
             </div>

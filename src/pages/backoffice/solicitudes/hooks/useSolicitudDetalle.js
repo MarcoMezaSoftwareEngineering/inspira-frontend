@@ -12,8 +12,8 @@ export function useSolicitudDetalle(idSolicitud) {
   const [asesoresSeleccionados, setAsesoresSeleccionados] = useState([]);
   const [guardandoAsesores, setGuardandoAsesores] = useState(false);
 
-  async function cargar() {
-    setLoading(true);
+  async function cargar({ silencioso = false } = {}) {
+    if (!silencioso) setLoading(true);
     setError("");
     try {
       // 1) Checklist + solicitud (API admin)
@@ -54,7 +54,7 @@ export function useSolicitudDetalle(idSolicitud) {
       console.error(e);
       setError("Error al cargar la información de la solicitud.");
     } finally {
-      setLoading(false);
+      if (!silencioso) setLoading(false);
     }
   }
 

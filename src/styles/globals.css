@@ -39,3 +39,9 @@ html, body, #root {
   from { transform: scale(0.95) translateY(32px); opacity: 0; }
   to   { transform: scale(1)    translateY(0);    opacity: 1; }
 }
+
+/* ── Checklist de servicios (backoffice) ────────────────────────────── */
+@keyframes bo-rise {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}

@@ -39,8 +39,15 @@ export default function AsesoriaCTA() {
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && setAbierto(false);
+    // Cualquier parte de la web puede abrir el panel con este evento
+    // (lo usa la barra de navegación inferior).
+    const onAbrir = () => setAbierto(true);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("inspira:abrir-asesoria", onAbrir);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("inspira:abrir-asesoria", onAbrir);
+    };
   }, []);
 
   const cerrar = () => {

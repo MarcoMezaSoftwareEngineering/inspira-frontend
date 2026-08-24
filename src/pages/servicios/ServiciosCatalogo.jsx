@@ -10,6 +10,7 @@ import {
 } from "../../config/servicios";
 import { ASESORIA } from "../../config/contacto";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
+import PageHero from "../../components/layout/PageHero";
 import Icono from "../../components/common/Icono";
 import { navigate } from "../../services/navigate";
 
@@ -17,19 +18,6 @@ const go = (e, href) => {
   e.preventDefault();
   navigate(href);
 };
-
-function PrecioBanner() {
-  return (
-    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-white">
-      <span className="text-sm text-white/70">Primera asesoría:</span>
-      <span className="text-lg font-bold">{PRECIO_ASESORIA.eur}</span>
-      <span className="text-white/40">·</span>
-      <span className="text-lg font-bold">{PRECIO_ASESORIA.usd}</span>
-      <span className="text-white/40">·</span>
-      <span className="text-lg font-bold">{PRECIO_ASESORIA.pen}</span>
-    </div>
-  );
-}
 
 function ServicioCard({ servicio }) {
   const body = (
@@ -85,30 +73,25 @@ export default function ServiciosCatalogo() {
 
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="w-full px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
+      <PageHero
+        etiqueta="Todos nuestros servicios"
+        icono="brujula"
+        titulo="Tu camino a España,"
+        destacado="trámite por trámite"
+        descripcion="Extranjería, asesoría educativa y gestiones en España. Cada paquete se arma a tu medida: el único precio fijo es tu primera asesoría."
+        accesos={[
+          { icono: "birrete", label: "Máster en España", href: "/servicios/master" },
+          { icono: "pasaporte", label: "Visa de Estudios", href: "/servicios/visa-estudios" },
+          { icono: "documento", label: "Homologaciones", href: "/servicios#becas-homologacion" },
+          { icono: "robot", label: "¿Cuál me toca?", href: "/asistente" },
+        ]}
       >
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
-            Todos nuestros servicios
-          </span>
-          <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
-            Tu camino a España,
-            <br />
-            <span style={{ color: "#FA943A" }}>trámite por trámite</span>
-          </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-white/65">
-            Extranjería, asesoría educativa y gestiones en España. Cada paquete se
-            arma a tu medida: el único precio fijo es tu primera asesoría.
-          </p>
-          <PrecioBanner />
-          <div className="mt-7 flex justify-center">
-            <BotonAsesoria />
-          </div>
-        </div>
-      </section>
+        <BotonAsesoria>Agenda tu asesoría 1:1</BotonAsesoria>
+        <span className="text-sm text-white/65">
+          {ASESORIA.duracion} · {PRECIO_ASESORIA.eur} · {PRECIO_ASESORIA.usd} ·{" "}
+          {PRECIO_ASESORIA.pen}
+        </span>
+      </PageHero>
 
       {/* Diferenciales */}
       <section className="border-b border-neutral-200 bg-secondary-light px-6 py-10">

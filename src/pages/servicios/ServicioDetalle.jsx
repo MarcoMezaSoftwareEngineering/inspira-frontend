@@ -12,6 +12,7 @@ import { ASESORIA } from "../../config/contacto";
 import { procesoDe } from "../../config/serviciosProceso";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import Icono from "../../components/common/Icono";
+import PageHero from "../../components/layout/PageHero";
 import { navigate } from "../../services/navigate";
 import NotFound from "../NotFound";
 
@@ -33,37 +34,31 @@ export default function ServicioDetalle({ id }) {
 
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="w-full px-6 py-16 md:py-20"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
+      <PageHero
+        etiqueta={servicio.categoria}
+        icono="brujula"
+        titulo={d.titulo}
+        descripcion={d.intro}
+        volver={{ label: servicio.categoria, href: `/servicios#${servicio.categoriaId}` }}
+        accesos={[
+          { icono: "robot", label: "¿Es mi trámite?", href: "/asistente" },
+          { icono: "estrella", label: "Casos de éxito", href: "/casos-de-exito" },
+          { icono: "brujula", label: "Todos los servicios", href: "/servicios" },
+        ]}
       >
-        <div className="mx-auto max-w-4xl">
-          <a
-            href={`/servicios#${servicio.categoriaId}`}
-            onClick={(e) => go(e, `/servicios#${servicio.categoriaId}`)}
-            className="text-sm font-semibold text-white/60 transition hover:text-white"
-          >
-            ← {servicio.categoria}
-          </a>
-          <h1 className="mt-4 text-3xl font-bold leading-tight text-white md:text-5xl">
-            {d.titulo}
-          </h1>
-          <p className="mt-4 text-xl font-semibold" style={{ color: "#FA943A" }}>
-            {d.gancho}
-          </p>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
-            {d.intro}
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <BotonAsesoria>Agenda tu asesoría diagnóstica</BotonAsesoria>
-            <span className="text-sm text-white/60">
-              {ASESORIA.duracion} · {PRECIO_ASESORIA.eur} · {PRECIO_ASESORIA.usd} ·{" "}
-              {PRECIO_ASESORIA.pen}
-            </span>
-          </div>
-        </div>
-      </section>
+        <BotonAsesoria>Agenda tu asesoría 1:1</BotonAsesoria>
+        <span className="text-sm text-white/65">
+          {ASESORIA.duracion} · {PRECIO_ASESORIA.eur} · {PRECIO_ASESORIA.usd} ·{" "}
+          {PRECIO_ASESORIA.pen}
+        </span>
+      </PageHero>
+
+      {/* Gancho del servicio */}
+      <div className="border-b border-neutral-200 bg-secondary-light px-6 py-5">
+        <p className="mx-auto max-w-4xl text-center text-lg font-bold text-primary">
+          {d.gancho}
+        </p>
+      </div>
 
       <div className="mx-auto max-w-4xl px-6 py-14">
         {/* Bloques de contenido */}

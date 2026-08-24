@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CATEGORIAS_CASOS, CASOS } from "../../config/casos";
 import { TESTIMONIOS } from "../../config/testimonios";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
+import PageHero from "../../components/layout/PageHero";
 
 export default function CasosExito() {
   const [filtro, setFiltro] = useState("todos");
@@ -13,27 +14,20 @@ export default function CasosExito() {
 
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="relative w-full overflow-hidden px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
+      <PageHero
+        etiqueta="Casos de éxito"
+        icono="estrella"
+        titulo="Expedientes reales,"
+        destacado="resultados reales"
+        descripcion="Admisiones a máster, visas aprobadas, apelaciones ganadas y estancias concedidas. Esto es lo que hacemos todos los días."
+        accesos={[
+          { icono: "pasaporte", label: "Visa de Estudios", href: "/servicios/visa-estudios" },
+          { icono: "balanza", label: "Recurso de Reposición", href: "/servicios/recurso-reposicion" },
+          { icono: "usuarios", label: "Conoce al equipo", href: "/nosotros" },
+        ]}
       >
-        <div className="pointer-events-none absolute -left-20 bottom-0 h-80 w-80 rounded-full bg-accent/15 blur-3xl" />
-        <div className="relative mx-auto max-w-4xl text-center">
-          <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
-            Casos de éxito
-          </span>
-          <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
-            Expedientes reales,
-            <br />
-            <span style={{ color: "#FA943A" }}>resultados reales</span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/70">
-            Admisiones a máster, visas aprobadas, apelaciones ganadas y estancias
-            concedidas. Esto es lo que hacemos todos los días.
-          </p>
-        </div>
-      </section>
+        <BotonAsesoria>Quiero ser el siguiente</BotonAsesoria>
+      </PageHero>
 
       {/* Categorías */}
       <section className="mx-auto max-w-5xl px-6 py-14">

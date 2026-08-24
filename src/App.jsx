@@ -16,6 +16,7 @@ import ServicioDetalle from "./pages/servicios/ServicioDetalle";
 import { getServicio } from "./config/servicios";
 import AsesoriaCTA from "./components/common/AsesoriaCTA";
 import BarraProgreso from "./components/common/BarraProgreso";
+import BarraInferior from "./components/layout/BarraInferior";
 import Eventos from "./pages/eventos/Eventos";
 import CasosExito from "./pages/casos/CasosExito";
 import Asistente from "./pages/asistente/Asistente";
@@ -335,6 +336,15 @@ export default function App() {
 
       {/* Invitación permanente a la primera asesoría (no en el panel privado) */}
       {!isPanel && <AsesoriaCTA />}
+
+      {/* Navegación inferior tipo app (móvil y tablet) */}
+      {!isPanel && (
+        <BarraInferior
+          onReservar={() =>
+            window.dispatchEvent(new CustomEvent("inspira:abrir-asesoria"))
+          }
+        />
+      )}
 
       {/* Banner de cookies: siempre montado, decide él si se muestra */}
       <CookieConsent />

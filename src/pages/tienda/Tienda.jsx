@@ -4,6 +4,7 @@
 // internas. Un producto de pago sin hotmartUrl se muestra como "Muy pronto".
 import { PRODUCTOS } from "../../config/tienda";
 import { navigate } from "../../services/navigate";
+import PageHero from "../../components/layout/PageHero";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -52,27 +53,18 @@ function BotonProducto({ producto }) {
 export default function Tienda() {
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="w-full px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
-      >
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
-            Tiendita
-          </span>
-          <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
-            Recursos digitales para
-            <br />
-            <span style={{ color: "#FA943A" }}>avanzar por tu cuenta</span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/65">
-            Guías, herramientas y accesos con compra directa e inmediata. Empieza
-            hoy con lo que necesitas — y cuando quieras acompañamiento completo,
-            aquí estamos.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        etiqueta="Tiendita"
+        icono="libro"
+        titulo="Recursos digitales para"
+        destacado="avanzar por tu cuenta"
+        descripcion="Guías, herramientas y accesos con compra directa e inmediata. Empieza hoy con lo que necesitas — y cuando quieras acompañamiento completo, aquí estamos."
+        accesos={[
+          { icono: "euro", label: "Calculadora gratis", href: "/calculadora-master" },
+          { icono: "robot", label: "Asistente IA", href: "/asistente" },
+          { icono: "brujula", label: "Servicios completos", href: "/servicios" },
+        ]}
+      />
 
       {/* Productos */}
       <div className="mx-auto max-w-5xl px-6 py-16">

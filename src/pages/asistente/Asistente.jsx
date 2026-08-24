@@ -7,6 +7,7 @@ import { useState } from "react";
 import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import { navigate } from "../../services/navigate";
+import PageHero from "../../components/layout/PageHero";
 import { CALENDLY_URL } from "../../config/contacto";
 
 const go = (e, href) => {
@@ -168,28 +169,17 @@ export default function Asistente() {
 
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="relative w-full overflow-hidden px-6 py-16 md:py-20"
-        style={{ background: "linear-gradient(150deg, #012938 0%, #013446 50%, #02506B 100%)" }}
-      >
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-sky/20 blur-3xl" />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white/85">
-            <Icono nombre="robot" size={16} />
-            Asistente Inspira
-          </span>
-          <h1 className="mb-4 font-fraunces text-3xl font-extrabold leading-tight text-white md:text-5xl">
-            ¿No sabes qué trámite
-            <br />
-            <span style={{ color: "#88C4FC" }}>te corresponde?</span>
-          </h1>
-          <p className="mx-auto max-w-xl text-base leading-relaxed text-white/70 md:text-lg">
-            Responde tres preguntas y te decimos cuál es tu vía. Gratis, en
-            menos de un minuto.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        etiqueta="Asistente Inspira"
+        icono="robot"
+        titulo="¿No sabes qué trámite"
+        destacado="te corresponde?"
+        descripcion="Responde tres preguntas y te decimos cuál es tu vía. Gratis, en menos de un minuto."
+        accesos={[
+          { icono: "brujula", label: "Ver todos los servicios", href: "/servicios" },
+          { icono: "estrella", label: "Casos de éxito", href: "/casos-de-exito" },
+        ]}
+      />
 
       {/* Asistente */}
       <section className="mx-auto max-w-3xl px-5 py-12 md:py-16">

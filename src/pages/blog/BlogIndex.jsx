@@ -1,6 +1,7 @@
 // src/pages/blog/BlogIndex.jsx
 import { POSTS } from "./blog.data";
 import { navigate } from "../../services/navigate";
+import PageHero from "../../components/layout/PageHero";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -20,26 +21,18 @@ export default function BlogIndex() {
 
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="w-full px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
-      >
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
-            Blog
-          </span>
-          <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
-            Guías claras para
-            <br />
-            <span style={{ color: "#FA943A" }}>migrar y estudiar en España</span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/65">
-            Extranjería, visados, nacionalidad y vida académica en España,
-            explicados por el equipo legal de Inspira.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        etiqueta="Blog"
+        icono="libro"
+        titulo="Guías claras para"
+        destacado="migrar y estudiar en España"
+        descripcion="Extranjería, visados, nacionalidad y vida académica en España, explicados por el equipo legal de Inspira."
+        accesos={[
+          { icono: "robot", label: "Asistente IA", href: "/asistente" },
+          { icono: "brujula", label: "Servicios", href: "/servicios" },
+          { icono: "estrella", label: "Casos de éxito", href: "/casos-de-exito" },
+        ]}
+      />
 
       <div className="mx-auto max-w-5xl px-6 py-16">
         {/* Post destacado */}

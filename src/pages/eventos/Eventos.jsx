@@ -1,6 +1,7 @@
 // src/pages/eventos/Eventos.jsx
 import { eventosActivos } from "../../config/eventos";
 import { navigate } from "../../services/navigate";
+import PageHero from "../../components/layout/PageHero";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -14,31 +15,18 @@ export default function Eventos() {
 
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="relative w-full overflow-hidden px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
-      >
-        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-accent/20 blur-3xl" />
-        <div className="relative mx-auto max-w-4xl text-center">
-          <span className="mb-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-1.5 text-sm font-extrabold text-white">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-            </span>
-            Evento gratuito
-          </span>
-          <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
-            Estudia en España
-            <br />
-            <span style={{ color: "#FA943A" }}>en 5 pasos</span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/70">
-            El primer evento gratuito de Inspira para que estudies en España
-            Rumbo al 2027. Sin costo, sin letra pequeña.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        etiqueta="Evento gratuito"
+        icono="calendario"
+        titulo="Estudia en España"
+        destacado="en 5 pasos"
+        descripcion="El primer evento gratuito de Inspira para que estudies en España Rumbo al 2027. Sin costo, sin letra pequeña."
+        accesos={[
+          { icono: "birrete", label: "Máster en España", href: "/servicios/master" },
+          { icono: "brujula", label: "Todos los servicios", href: "/servicios" },
+          { icono: "robot", label: "Asistente IA", href: "/asistente" },
+        ]}
+      />
 
       {!principal ? (
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">

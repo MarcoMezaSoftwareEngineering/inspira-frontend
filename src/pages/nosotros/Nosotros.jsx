@@ -1,6 +1,8 @@
 // src/pages/nosotros/Nosotros.jsx
 import { EQUIPO } from "../../config/equipo";
 import { navigate } from "../../services/navigate";
+import PageHero from "../../components/layout/PageHero";
+import BotonAsesoria from "../../components/common/BotonAsesoria";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -10,28 +12,20 @@ const go = (e, href) => {
 export default function Nosotros() {
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section
-        className="w-full px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
+      <PageHero
+        etiqueta="Nosotros"
+        icono="usuarios"
+        titulo="El equipo que mueve"
+        destacado="tu caso"
+        descripcion="Somos un equipo de abogados asociados especializados en extranjería española y asesoría educativa para latinoamericanos. Combinamos derecho migratorio con herramientas digitales para que cada trámite sea claro, medible y acompañado."
+        accesos={[
+          { icono: "estrella", label: "Casos de éxito", href: "/casos-de-exito" },
+          { icono: "brujula", label: "Nuestros servicios", href: "/servicios" },
+          { icono: "calendario", label: "Eventos gratuitos", href: "/eventos" },
+        ]}
       >
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
-            Nosotros
-          </span>
-          <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
-            El equipo que mueve
-            <br />
-            <span style={{ color: "#FA943A" }}>tu caso</span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/65">
-            Somos un equipo de abogados asociados especializados en extranjería
-            española y asesoría educativa para latinoamericanos. Combinamos derecho
-            migratorio con herramientas digitales para que cada trámite sea claro,
-            medible y acompañado.
-          </p>
-        </div>
-      </section>
+        <BotonAsesoria>Habla con el equipo</BotonAsesoria>
+      </PageHero>
 
       {/* Equipo */}
       <section className="mx-auto max-w-5xl px-6 py-16">

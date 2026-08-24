@@ -1,5 +1,6 @@
 import Reveal from "../../../components/common/Reveal";
 import { DIFERENCIALES } from "../../../config/servicios";
+import Icono from "../../../components/common/Icono";
 import BotonAsesoria from "../../../components/common/BotonAsesoria";
 
 export default function PorQue() {
@@ -21,7 +22,7 @@ export default function PorQue() {
         <div className="porque-grid">
           {DIFERENCIALES.map((v, i) => (
             <Reveal className="porque-card" key={v.titulo} delay={i * 80}>
-              <span className="porque-icon" aria-hidden>{v.icono}</span>
+              <span className="porque-icon"><Icono nombre={v.icono} size={24} /></span>
               <h3>{v.titulo}</h3>
               <p>{v.texto}</p>
             </Reveal>

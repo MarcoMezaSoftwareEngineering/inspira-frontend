@@ -23,25 +23,25 @@ export const DIFERENCIALES = [
     titulo: "Solo asumimos casos viables",
     texto:
       "Tras evaluar tu caso asumimos únicamente los expedientes con posibilidades reales de éxito. Si tu vía no es la correcta, te lo decimos.",
-    icono: "🎯",
+    icono: "brujula",
   },
   {
     titulo: "Abogados especialistas en extranjería",
     texto:
       "Tu expediente lo lleva un abogado colegiado especializado en derecho migratorio español, no un gestor.",
-    icono: "⚖️",
+    icono: "balanza",
   },
   {
     titulo: "Procesos 100% digitales",
     texto:
       "Presentación telemática con firma digital del abogado vía MERCURIO: sin citas presenciales, sin colas, sin desplazamientos.",
-    icono: "💻",
+    icono: "laptop",
   },
   {
     titulo: "Acompañamiento hasta la resolución",
     texto:
       "Seguimiento del expediente, requerimientos y subsanaciones incluidos hasta la resolución final del procedimiento.",
-    icono: "🤝",
+    icono: "escudo",
   },
 ];
 

@@ -1,21 +1,38 @@
 // src/components/common/ReservaLateral.jsx
-// Pestaña fija al costado derecho: siempre visible, abre el panel de reserva.
+// Tarjeta fija al costado derecho, siempre visible en escritorio: recuerda la
+// asesoría 1:1 de 30 min. En móvil se colapsa a una pestaña estrecha.
+import Icono from "./Icono";
+import { ASESORIA_PRINCIPAL } from "../../config/asesorias";
+
 export default function ReservaLateral({ onAbrir }) {
   return (
-    <button
-      type="button"
-      onClick={onAbrir}
-      aria-label="Reservar asesoría ahora"
-      className="fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 items-center gap-2 rounded-l-xl px-3 py-4 text-xs font-extrabold uppercase tracking-widest text-white shadow-lg transition-all hover:pr-5 lg:flex"
-      style={{
-        background: "linear-gradient(180deg, #F5871F, #DB6F0C)",
-        writingMode: "vertical-rl",
-      }}
-    >
-      <span style={{ writingMode: "horizontal-tb" }} aria-hidden>
-        📅
-      </span>
-      Reserva ahora
-    </button>
+    <div className="reserva-lateral">
+      {/* Escritorio: tarjeta con el precio a la vista */}
+      <button
+        type="button"
+        onClick={onAbrir}
+        className="reserva-lateral-card"
+        aria-label="Reservar asesoría de 30 minutos"
+      >
+        <span className="rl-icon">
+          <Icono nombre="calendario" size={20} />
+        </span>
+        <span className="rl-txt">
+          <small>Asesoría 1:1 · {ASESORIA_PRINCIPAL.duracion}</small>
+          <b>Reserva ahora</b>
+          <em>{ASESORIA_PRINCIPAL.precio}</em>
+        </span>
+      </button>
+
+      {/* Móvil: pestaña estrecha */}
+      <button
+        type="button"
+        onClick={onAbrir}
+        className="reserva-lateral-tab"
+        aria-label="Reservar asesoría"
+      >
+        <Icono nombre="calendario" size={17} />
+      </button>
+    </div>
   );
 }

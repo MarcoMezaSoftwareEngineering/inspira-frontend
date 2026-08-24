@@ -10,6 +10,7 @@ import {
 } from "../../config/servicios";
 import { ASESORIA } from "../../config/contacto";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
+import Icono from "../../components/common/Icono";
 import { navigate } from "../../services/navigate";
 
 const go = (e, href) => {
@@ -87,7 +88,7 @@ export default function ServiciosCatalogo() {
       {/* Hero */}
       <section
         className="w-full px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #0F2C52 0%, #17406F 100%)" }}
+        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
       >
         <div className="mx-auto max-w-4xl text-center">
           <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
@@ -96,7 +97,7 @@ export default function ServiciosCatalogo() {
           <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
             Tu camino a España,
             <br />
-            <span style={{ color: "#F5871F" }}>trámite por trámite</span>
+            <span style={{ color: "#FA943A" }}>trámite por trámite</span>
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-white/65">
             Extranjería, asesoría educativa y gestiones en España. Cada paquete se
@@ -114,8 +115,8 @@ export default function ServiciosCatalogo() {
         <div className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {DIFERENCIALES.map((v) => (
             <div key={v.titulo}>
-              <span className="text-2xl" aria-hidden>
-                {v.icono}
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sky-dark">
+                <Icono nombre={v.icono} size={20} />
               </span>
               <h3 className="mt-2 text-sm font-bold text-neutral-900">
                 {v.titulo}

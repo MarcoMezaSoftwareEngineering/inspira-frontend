@@ -16,7 +16,7 @@ export default function CasosExito() {
       {/* Hero */}
       <section
         className="relative w-full overflow-hidden px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #0F2C52 0%, #17406F 100%)" }}
+        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
       >
         <div className="pointer-events-none absolute -left-20 bottom-0 h-80 w-80 rounded-full bg-accent/15 blur-3xl" />
         <div className="relative mx-auto max-w-4xl text-center">
@@ -26,7 +26,7 @@ export default function CasosExito() {
           <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
             Expedientes reales,
             <br />
-            <span style={{ color: "#F5871F" }}>resultados reales</span>
+            <span style={{ color: "#FA943A" }}>resultados reales</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/70">
             Admisiones a máster, visas aprobadas, apelaciones ganadas y estancias

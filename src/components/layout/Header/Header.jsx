@@ -5,6 +5,7 @@ import { navigate } from "../../../services/navigate";
 import { navItems } from "./header.data";
 import MobileMenu from "./MobileMenu";
 import MegaMenu from "./MegaMenu";
+import Icono from "../../common/Icono";
 import UserMenu from "./UserMenu";
 import { loginGoogle } from "./LoginButton";
 
@@ -70,6 +71,19 @@ export default function Header() {
                     className={item.cta ? "v4-nav-cta" : undefined}
                   >
                     {item.cta && "📅 "}
+                    {item.label}
+                  </a>
+                );
+              }
+              if (item.ia) {
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={(e) => go(e, item.href)}
+                    className={`v4-pill-ia${active ? " route-active" : ""}`}
+                  >
+                    <Icono nombre="robot" size={16} />
                     {item.label}
                   </a>
                 );

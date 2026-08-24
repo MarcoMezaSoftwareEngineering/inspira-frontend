@@ -13,7 +13,7 @@ export default function Nosotros() {
       {/* Hero */}
       <section
         className="w-full px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #0F2C52 0%, #17406F 100%)" }}
+        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
       >
         <div className="mx-auto max-w-4xl text-center">
           <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
@@ -22,7 +22,7 @@ export default function Nosotros() {
           <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
             El equipo que mueve
             <br />
-            <span style={{ color: "#F5871F" }}>tu caso</span>
+            <span style={{ color: "#FA943A" }}>tu caso</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/65">
             Somos un equipo de abogados asociados especializados en extranjería
@@ -52,7 +52,7 @@ export default function Nosotros() {
             >
               <div
                 className="mb-4 flex h-20 w-20 items-center justify-center rounded-full text-xl font-extrabold text-white"
-                style={{ background: "linear-gradient(135deg, #0F2C52, #17406F)" }}
+                style={{ background: "linear-gradient(135deg, #013446, #02506B)" }}
               >
                 {persona.iniciales}
               </div>

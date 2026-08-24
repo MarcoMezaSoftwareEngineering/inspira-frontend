@@ -9,7 +9,9 @@ import {
   DIFERENCIALES,
 } from "../../config/servicios";
 import { ASESORIA } from "../../config/contacto";
+import { procesoDe } from "../../config/serviciosProceso";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
+import Icono from "../../components/common/Icono";
 import { navigate } from "../../services/navigate";
 import NotFound from "../NotFound";
 
@@ -24,6 +26,7 @@ export default function ServicioDetalle({ id }) {
   if (!servicio?.detalle) return <NotFound />;
 
   const d = servicio.detalle;
+  const proceso = procesoDe(servicio.id);
   const relacionados = TODOS_SERVICIOS.filter(
     (s) => s.categoriaId === servicio.categoriaId && s.id !== servicio.id
   ).slice(0, 3);
@@ -33,7 +36,7 @@ export default function ServicioDetalle({ id }) {
       {/* Hero */}
       <section
         className="w-full px-6 py-16 md:py-20"
-        style={{ background: "linear-gradient(135deg, #0F2C52 0%, #17406F 100%)" }}
+        style={{ background: "linear-gradient(135deg, #013446 0%, #02506B 100%)" }}
       >
         <div className="mx-auto max-w-4xl">
           <a
@@ -46,7 +49,7 @@ export default function ServicioDetalle({ id }) {
           <h1 className="mt-4 text-3xl font-bold leading-tight text-white md:text-5xl">
             {d.titulo}
           </h1>
-          <p className="mt-4 text-xl font-semibold" style={{ color: "#F5871F" }}>
+          <p className="mt-4 text-xl font-semibold" style={{ color: "#FA943A" }}>
             {d.gancho}
           </p>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
@@ -84,6 +87,45 @@ export default function ServicioDetalle({ id }) {
             </ul>
           </section>
         ))}
+
+        {/* Proceso paso a paso, propio de este servicio */}
+        <section className="mb-12">
+          <h2 className="font-fraunces text-2xl font-bold text-primary">
+            Cómo es el proceso, paso a paso
+          </h2>
+          <p className="mt-2 text-sm text-neutral-600">
+            Así trabajamos este trámite en concreto — cada servicio tiene su
+            propio camino.
+          </p>
+          <ol className="mt-6 space-y-3">
+            {proceso.map((paso, i) => (
+              <li
+                key={paso.titulo}
+                className="group relative flex gap-4 rounded-2xl border border-neutral-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-sky-dark/50 hover:shadow-md"
+              >
+                <div className="flex flex-col items-center">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-light text-primary transition group-hover:bg-accent group-hover:text-white">
+                    <Icono nombre={paso.icono} size={20} />
+                  </span>
+                  {i < proceso.length - 1 && (
+                    <span className="mt-1 w-px flex-1 bg-neutral-200" />
+                  )}
+                </div>
+                <div className="pb-1">
+                  <span className="text-[11px] font-extrabold uppercase tracking-widest text-accent">
+                    Paso {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="mt-0.5 font-bold text-neutral-900">
+                    {paso.titulo}
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-neutral-700">
+                    {paso.texto}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
 
         {/* Dirigido a */}
         {d.dirigidoA && (
@@ -166,8 +208,8 @@ export default function ServicioDetalle({ id }) {
                 key={v.titulo}
                 className="rounded-2xl border border-neutral-200 bg-white p-5"
               >
-                <span className="text-2xl" aria-hidden>
-                  {v.icono}
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-light text-primary">
+                  <Icono nombre={v.icono} size={21} />
                 </span>
                 <h3 className="mt-2 font-bold text-neutral-900">{v.titulo}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">

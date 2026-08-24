@@ -63,7 +63,7 @@ export default function AsesoriaCTA() {
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-4 opacity-0"
         }`}
-        style={{ background: "linear-gradient(135deg, #F5871F, #DB6F0C)" }}
+        style={{ background: "linear-gradient(135deg, #FA943A, #E07A1C)" }}
       >
         <span className="relative flex h-2.5 w-2.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
@@ -91,7 +91,7 @@ export default function AsesoriaCTA() {
 
             <div
               className="px-7 pb-6 pt-8 text-white"
-              style={{ background: "linear-gradient(135deg, #0F2C52, #17406F)" }}
+              style={{ background: "linear-gradient(135deg, #013446, #02506B)" }}
             >
               <span className="inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">
                 Reserva tu asesoría

@@ -2,18 +2,24 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
-      // Paleta tomada del material gráfico de la marca: azul marino
-      // corporativo + naranja de acento.
+      // Paleta EXACTA del logo: azul petróleo #013446, celeste #88C4FC y
+      // naranja #FA943A, más un amarillo de apoyo del material gráfico.
       colors: {
-        primary:        "#0F2C52",
-        "primary-light": "#17406F",
-        "primary-dark":  "#0A1F3C",
+        primary:        "#013446",
+        "primary-light": "#02506B",
+        "primary-dark":  "#01222E",
 
-        secondary:        "#E6EEF8",
-        "secondary-light": "#F3F7FC",
+        secondary:        "#E3F0FE",
+        "secondary-light": "#F2F8FF",
 
-        accent:      "#F5871F",
-        "accent-dark": "#DB6F0C",
+        sky:          "#88C4FC",
+        "sky-dark":   "#4E9EE8",
+        "sky-light":  "#E3F0FE",
+
+        accent:      "#FA943A",
+        "accent-dark": "#E07A1C",
+
+        sun:         "#F9C846",
 
         neutral: {
           900: "#1A1A1A",
@@ -25,8 +31,11 @@ export default {
         white: "#FFFFFF",
       },
       fontFamily: {
-        sans:     ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
-        fraunces: ["Fraunces", "serif"],
+        sans: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        // `fraunces` se mantiene como alias del display para no tocar las
+        // decenas de clases font-fraunces ya existentes.
+        fraunces: ["Outfit", "Plus Jakarta Sans", "ui-sans-serif", "sans-serif"],
+        display:  ["Outfit", "Plus Jakarta Sans", "ui-sans-serif", "sans-serif"],
       },
     },
   },

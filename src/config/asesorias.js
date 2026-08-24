@@ -17,37 +17,24 @@ export const PROMO_GRATIS = {
 export const promoVigente = () =>
   PROMO_GRATIS.activa && new Date() <= new Date(`${PROMO_GRATIS.hasta}T23:59:59`);
 
+// La asesoría 1:1 de 30 minutos es EL producto de entrada: va primera y
+// destacada. La gratuita de 12 min es solo un paso previo opcional.
 export const OPCIONES_ASESORIA = [
   {
-    id: "gratis-12",
-    nombre: "Asesoría de orientación",
-    duracion: "12 minutos",
-    precio: "Gratis",
-    precioAlt: null,
-    promo: true,
-    descripcion:
-      "Una primera orientación con un especialista para saber si tu caso es viable y qué vía te conviene explorar.",
-    incluye: [
-      "Orientación sobre tu situación concreta",
-      "Te decimos qué vía explorar",
-      "Sin compromiso de contratación",
-    ],
-    url: CALENDLY_URL,
-  },
-  {
     id: "personalizada-30",
-    nombre: "Asesoría personalizada",
+    nombre: "Asesoría personalizada 1:1",
     duracion: "30 minutos",
     precio: "25 €",
     precioAlt: "S/ 100 · 28 US$",
     destacada: true,
+    icono: "balanza",
     descripcion:
-      "El diagnóstico completo con un abogado especialista: analizamos tu caso y sales con un plan de acción.",
+      "El diagnóstico completo con un abogado especialista: analizamos tu caso a fondo y sales con un plan de acción concreto.",
     incluye: [
       "Diagnóstico jurídico de tu caso",
       "Análisis de requisitos, plazos y medios económicos",
       "Definimos tu mejor vía: visado, estancia o residencia",
-      "Plan de acción con próximos pasos",
+      "Plan de acción con próximos pasos y documentos",
     ],
     url: CALENDLY_URL,
   },
@@ -57,6 +44,7 @@ export const OPCIONES_ASESORIA = [
     duracion: "50 minutos",
     precio: "45 €",
     precioAlt: "S/ 180",
+    icono: "documento",
     descripcion:
       "Para casos con varias variables: denegatorias previas, familia, doble vía o expedientes ya iniciados.",
     incluye: [
@@ -67,4 +55,25 @@ export const OPCIONES_ASESORIA = [
     ],
     url: CALENDLY_URL,
   },
+  {
+    id: "gratis-12",
+    nombre: "Orientación previa",
+    duracion: "12 minutos",
+    precio: "Gratis",
+    precioAlt: null,
+    promo: true,
+    secundaria: true,
+    icono: "chat",
+    descripcion:
+      "¿Prefieres un primer contacto antes de decidir? Te orientamos brevemente sobre qué vía explorar.",
+    incluye: [
+      "Orientación general sobre tu situación",
+      "Te indicamos qué vía explorar",
+      "Sin diagnóstico jurídico ni plan de acción",
+    ],
+    url: CALENDLY_URL,
+  },
 ];
+
+// La opción que se promociona por defecto en toda la web.
+export const ASESORIA_PRINCIPAL = OPCIONES_ASESORIA[0];

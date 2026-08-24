@@ -18,6 +18,7 @@ import AsesoriaCTA from "./components/common/AsesoriaCTA";
 import BarraProgreso from "./components/common/BarraProgreso";
 import Eventos from "./pages/eventos/Eventos";
 import CasosExito from "./pages/casos/CasosExito";
+import Asistente from "./pages/asistente/Asistente";
 import Nosotros from "./pages/nosotros/Nosotros";
 import Tienda from "./pages/tienda/Tienda";
 import BlogIndex from "./pages/blog/BlogIndex";
@@ -93,6 +94,12 @@ const SEO_PAGES = {
     description:
       "Admisiones a máster, visas aprobadas, apelaciones ganadas y estancias por estudios concedidas. Expedientes reales gestionados por Inspira Legal.",
     path: "/casos-de-exito",
+  },
+  "/asistente": {
+    title: "Asistente Inspira – ¿Qué trámite me corresponde para España?",
+    description:
+      "Responde tres preguntas y descubre gratis qué vía migratoria te corresponde para vivir en España: visa de estudios, estancia, nómada digital, arraigo o nacionalidad.",
+    path: "/asistente",
   },
   "/calculadora-master": {
     title: "¿Cuánto cuesta un Máster en España? Calculadora Gratis",
@@ -232,6 +239,7 @@ const PUBLIC_PATHS = [
   "/blog",
   "/eventos",
   "/casos-de-exito",
+  "/asistente",
   "/calculadora-master",
   "/panel",
   "/reservar",
@@ -296,6 +304,7 @@ export default function App() {
       {path === "/tienda" && <Tienda />}
       {path === "/eventos" && <Eventos />}
       {path === "/casos-de-exito" && <CasosExito />}
+      {path === "/asistente" && <Asistente />}
       {path === "/blog" && <BlogIndex />}
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}

@@ -20,7 +20,7 @@ export const TITULAR = {
   ruc: "20610501941",
   // Domicilio fiscal declarado en SUNAT (obligatorio: deber de información al consumidor)
   domicilioFiscal:
-    "Cal. Fermín Tanguis Nro. 279, Urb. Ingeniería, San Martín de Porres, Lima, Perú",
+    "Av. Dos de Mayo N.° 1545, Oficina 204, San Isidro, Lima, Perú",
   pais: "Perú",
   // Representante legal / responsable del sitio
   representanteLegal: "COMPLETAR: Nombres y apellidos del representante legal",

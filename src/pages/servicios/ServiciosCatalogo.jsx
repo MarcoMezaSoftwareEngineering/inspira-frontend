@@ -11,6 +11,7 @@ import {
 import { ASESORIA } from "../../config/contacto";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import PageHero from "../../components/layout/PageHero";
+import ExploradorServicios from "./ExploradorServicios";
 import SigueExplorando from "../../components/layout/SigueExplorando";
 import Icono from "../../components/common/Icono";
 import { navigate } from "../../services/navigate";
@@ -112,6 +113,8 @@ export default function ServiciosCatalogo() {
           {PRECIO_ASESORIA.pen}
         </span>
       </PageHero>
+
+      <ExploradorServicios />
 
       {/* Diferenciales */}
       <section className="border-b border-neutral-200 bg-secondary-light px-6 py-10">

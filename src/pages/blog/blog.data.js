@@ -1,0 +1,140 @@
+// src/pages/blog/blog.data.js
+// Entradas del blog. Cada post es contenido estático versionado en el repo:
+// para publicar una entrada nueva basta con añadir un objeto aquí.
+// `content` es una lista de bloques: h2 (subtítulo), p (párrafo), ul (lista).
+
+export const POSTS = [
+  {
+    slug: "visa-estudios-vs-estancia-por-estudios",
+    titulo: "Visa de Estudios vs. Estancia por Estudios: mismo permiso, distinto proceso",
+    extracto:
+      "Las dos vías llevan al mismo permiso para estudiar en España, pero se tramitan en lugares distintos y con tiempos distintos. Te explicamos cuál conviene según tu situación.",
+    fecha: "2026-08-24",
+    categoria: "Extranjería",
+    minutos: 6,
+    content: [
+      { type: "p", text: "Si quieres estudiar en España más de 90 días necesitas una autorización de estancia por estudios. Lo que casi nadie te explica es que hay dos caminos para conseguirla, y elegir bien puede ahorrarte meses y mucho estrés." },
+      { type: "h2", text: "Opción 1: Visa de Estudios (desde tu país)" },
+      { type: "p", text: "Es la vía clásica: presentas tu solicitud ante el consulado español de tu país con la carta de admisión de tu centro de estudios, seguro médico, medios económicos y antecedentes penales apostillados. El consulado resuelve normalmente en 1 a 2 meses y viajas a España ya con tu visado pegado en el pasaporte." },
+      { type: "ul", items: [
+        "Se tramita ante el consulado español de tu país de residencia.",
+        "Necesitas antecedentes penales y certificado médico apostillados.",
+        "Entras a España con el estatus de estudiante ya resuelto.",
+      ] },
+      { type: "h2", text: "Opción 2: Estancia por Estudios (ya en España)" },
+      { type: "p", text: "La segunda vía consiste en entrar a España como turista (los latinoamericanos de la mayoría de países no necesitan visado para estancias cortas) y, estando en situación regular, presentar la solicitud de estancia por estudios ante la Oficina de Extranjería. Debes presentarla con suficiente antelación y cumplir requisitos equivalentes." },
+      { type: "ul", items: [
+        "Se tramita ante extranjería, ya estando en España.",
+        "Evitas la cita consular, que en algunos países tarda meses.",
+        "Requiere planificar bien los plazos: hay ventanas concretas para presentar.",
+      ] },
+      { type: "h2", text: "¿Cuál te conviene?" },
+      { type: "p", text: "Depende de tus tiempos, de la carga de tu consulado y de cuándo empieza tu programa. En una primera asesoría revisamos tu calendario académico, tu situación documental y te decimos con claridad cuál de los dos procesos maximiza tus probabilidades." },
+    ],
+  },
+  {
+    slug: "residencia-nomada-digital-espana",
+    titulo: "Residencia de Nómada Digital en España: requisitos reales en 2026",
+    extracto:
+      "Trabajar en remoto desde España legalmente es posible con la residencia de nómada digital. Es un proceso rápido, pero con requisitos exigentes. Esto es lo que de verdad piden.",
+    fecha: "2026-08-24",
+    categoria: "Extranjería",
+    minutos: 5,
+    content: [
+      { type: "p", text: "La Ley de Startups abrió la puerta a que teletrabajadores de empresas extranjeras vivan legalmente en España. La residencia de nómada digital es de los procesos más rápidos de extranjería, pero no es para todos: los requisitos económicos y laborales son altos." },
+      { type: "h2", text: "Los requisitos que sí o sí debes cumplir" },
+      { type: "ul", items: [
+        "Trabajar para una empresa extranjera (o tener clientes mayoritariamente fuera de España si eres freelance).",
+        "Antigüedad mínima de 3 meses con esa empresa y que la empresa lleve al menos 1 año operando.",
+        "Ingresos de al menos el 200% del salario mínimo interprofesional español.",
+        "Titulación universitaria o experiencia profesional mínima de 3 años.",
+        "Seguro médico y antecedentes penales limpios.",
+      ] },
+      { type: "h2", text: "¿Por qué se considera un proceso rápido?" },
+      { type: "p", text: "Si la solicitud se presenta en España, la administración debe resolver en unos 20 días hábiles, y aplica el silencio administrativo positivo: si no responden en plazo, se entiende concedida. Además la residencia inicial es de hasta 3 años, renovable, y computa para la nacionalidad." },
+      { type: "h2", text: "El error más común" },
+      { type: "p", text: "Presentar contratos o certificados laborales que no acreditan bien la relación con la empresa extranjera. La mayoría de denegatorias que vemos vienen de documentación laboral mal armada, no de incumplir requisitos. Una revisión profesional del expediente antes de presentar marca la diferencia." },
+    ],
+  },
+  {
+    slug: "nacionalidad-espanola-latinoamericanos-2-anos",
+    titulo: "Nacionalidad española para latinoamericanos: la vía de los 2 años",
+    extracto:
+      "Los ciudadanos de países iberoamericanos pueden pedir la nacionalidad española con solo 2 años de residencia legal. Te contamos cómo funciona el proceso completo.",
+    fecha: "2026-08-24",
+    categoria: "Nacionalidad",
+    minutos: 6,
+    content: [
+      { type: "p", text: "Mientras la regla general exige 10 años de residencia legal en España para pedir la nacionalidad, los nacionales de países iberoamericanos —incluido todo Latinoamérica— solo necesitan 2 años. Es una de las mayores ventajas migratorias que tenemos como latinoamericanos." },
+      { type: "h2", text: "Qué cuenta (y qué no) como residencia legal" },
+      { type: "p", text: "Los 2 años deben ser de residencia legal, continuada e inmediatamente anterior a la solicitud. Ojo: la estancia por estudios NO computa como residencia a estos efectos — por eso muchos estudiantes hacen primero la modificatoria de estudiante a residente, y desde ahí empiezan a contar sus 2 años." },
+      { type: "h2", text: "Los exámenes: CCSE y DELE" },
+      { type: "ul", items: [
+        "CCSE (Prueba Cervantes): examen de conocimientos constitucionales y socioculturales de España.",
+        "DELE A2 o superior: solo para quienes no tienen el español como lengua materna — los latinoamericanos hispanohablantes están exentos.",
+      ] },
+      { type: "h2", text: "El proceso paso a paso" },
+      { type: "ul", items: [
+        "Reunir certificados: antecedentes penales del país de origen apostillados, empadronamiento, TIE vigente.",
+        "Aprobar la prueba CCSE del Instituto Cervantes.",
+        "Presentar la solicitud telemática ante el Ministerio de Justicia.",
+        "Jura o promesa de la nacionalidad una vez concedida, e inscripción en el Registro Civil.",
+      ] },
+      { type: "p", text: "Los plazos de resolución varían, pero un expediente bien presentado desde el inicio evita los requerimientos que suelen añadir meses al proceso." },
+    ],
+  },
+  {
+    slug: "master-en-espana-guia-de-pasos",
+    titulo: "Estudiar un Máster en España: la guía de pasos completa",
+    extracto:
+      "Desde elegir universidad hasta aterrizar en España: el orden correcto de los pasos, los plazos reales y los errores que retrasan la admisión.",
+    fecha: "2026-08-24",
+    categoria: "Asesoría educativa",
+    minutos: 7,
+    content: [
+      { type: "p", text: "Cada año acompañamos a decenas de latinoamericanos a estudiar su máster en España. El proceso es totalmente alcanzable, pero tiene un orden y unos plazos que conviene respetar. Esta es la ruta completa." },
+      { type: "h2", text: "1. Elige programa con estrategia (12-9 meses antes)" },
+      { type: "p", text: "España tiene más de 1,100 másteres oficiales entre universidades públicas y privadas. La clave no es postular a muchos, sino a los correctos: los que aceptan tu titulación, encajan con tu perfil y tienen costos que puedes asumir. Las públicas pueden costar desde 1,500 € el año para extranjeros en algunas comunidades." },
+      { type: "h2", text: "2. Prepara la documentación académica (9-6 meses antes)" },
+      { type: "ul", items: [
+        "Título y certificado de notas apostillados.",
+        "En algunos casos, equivalencia de notas medias del Ministerio de Universidades.",
+        "CV académico y carta de motivación adaptados al programa.",
+      ] },
+      { type: "h2", text: "3. Postula y asegura tu plaza (6-4 meses antes)" },
+      { type: "p", text: "Cada universidad tiene su propio calendario de admisión, y muchas abren varios periodos. Postular en el primer periodo aumenta tus opciones de plaza y de beca. Al ser admitido, la mayoría pide una reserva de plaza para emitir tu carta de admisión." },
+      { type: "h2", text: "4. Tramita tu visado (4-2 meses antes)" },
+      { type: "p", text: "Con la carta de admisión inicias el visado de estudios en tu consulado, o planificas la estancia por estudios desde España. Aquí entran el seguro médico, los medios económicos y los antecedentes penales apostillados." },
+      { type: "h2", text: "5. Aterriza con todo en orden" },
+      { type: "p", text: "Ya en España: TIE (toma de huellas), empadronamiento y, si vas a trabajar en prácticas, alta en la seguridad social. Nada de esto es difícil si llega en el orden correcto — y para eso estamos." },
+    ],
+  },
+  {
+    slug: "homologacion-titulo-universitario-espana",
+    titulo: "Homologación y equivalencia de tu título universitario en España",
+    extracto:
+      "¿Necesitas homologar tu título para estudiar o trabajar en España? No siempre. Te explicamos cuándo hace falta, qué vía elegir y cuánto tarda de verdad.",
+    fecha: "2026-08-24",
+    categoria: "Asesoría educativa",
+    minutos: 5,
+    content: [
+      { type: "p", text: "Una de las dudas más frecuentes de quienes migran a España con estudios terminados: ¿tengo que homologar mi título? La respuesta corta: depende de para qué lo quieras usar." },
+      { type: "h2", text: "¿Cuándo NO necesitas homologar?" },
+      { type: "p", text: "Para estudiar un máster oficial, la mayoría de universidades españolas aceptan títulos latinoamericanos sin homologar: basta una comprobación de equivalencia que hace la propia universidad. Si tu objetivo es solo estudiar un postgrado, probablemente no necesites homologación." },
+      { type: "h2", text: "¿Cuándo SÍ la necesitas?" },
+      { type: "ul", items: [
+        "Para ejercer una profesión regulada (medicina, enfermería, abogacía, arquitectura, etc.).",
+        "Para oposiciones y empleo público.",
+        "Cuando un empleador exige el título homologado o la equivalencia oficial.",
+      ] },
+      { type: "h2", text: "Homologación vs. Equivalencia" },
+      { type: "p", text: "La homologación equipara tu título a uno español concreto que habilita para una profesión regulada. La equivalencia lo reconoce a nivel académico (área y nivel de grado) sin habilitar profesión. Elegir mal la vía es el error que más expedientes retrasa." },
+      { type: "h2", text: "Plazos reales" },
+      { type: "p", text: "Los expedientes ante el Ministerio pueden tardar bastantes meses, y cualquier defecto documental (apostillas, traducciones, certificados de plan de estudios) genera requerimientos que suman más tiempo. Presentar el expediente completo y bien armado desde el día uno es la mejor inversión." },
+      { type: "h2", text: "¿Y la secundaria?" },
+      { type: "p", text: "Si lo que necesitas es homologar tus estudios de secundaria al Bachillerato español (por ejemplo para estudiar un grado o una FP), el trámite es distinto y también lo gestionamos." },
+    ],
+  },
+];
+
+export const getPost = (slug) => POSTS.find((p) => p.slug === slug);

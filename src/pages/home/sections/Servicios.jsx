@@ -25,8 +25,9 @@ export default function Servicios() {
             <h2>Lo importante no es darte información. Es mover tu caso.</h2>
           </div>
           <p>
-            Dos soluciones con jerarquía clara: el Programa Máster 360° como producto
-            principal y la estancia por estudios como solución especializada.
+            Migrar a España por estudios es nuestro destino principal — y lo rodeamos
+            de todo lo demás: extranjería, nacionalidad, homologaciones y gestiones
+            en España.
           </p>
         </Reveal>
 
@@ -73,10 +74,10 @@ export default function Servicios() {
             <span className="tag" style={{ background: "#e9f6ef", color: "#1d6a4a" }}>
               Especializado
             </span>
-            <h3>Estancia por estudios</h3>
+            <h3>Visa y estancia por estudios</h3>
             <p>
-              Gestión documental y acompañamiento para tu permiso de estancia, con
-              checklist y seguimiento de cada requisito.
+              Mismo permiso, distinto proceso: desde tu consulado o ya en España.
+              Gestión documental completa con seguimiento de cada requisito.
             </p>
             <div style={{ height: "34px" }} />
             <span style={{ fontWeight: 850, color: "#063f50", fontSize: "13px" }}>
@@ -84,6 +85,20 @@ export default function Servicios() {
             </span>
           </Reveal>
         </div>
+
+        <Reveal className="services-more" delay={160}>
+          <p>
+            También: residencia nómada digital, visado PAC, nacionalidad española,
+            arraigos, homologaciones, TIE, empadronamiento y más.
+          </p>
+          <a
+            className="btn btn-primary"
+            href="/servicios"
+            onClick={(e) => go(e, "/servicios")}
+          >
+            Ver todos los servicios <span className="arr">→</span>
+          </a>
+        </Reveal>
       </div>
     </section>
   );

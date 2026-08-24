@@ -8,6 +8,16 @@ const ir = (e, href) => {
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
+const enlacesExplora = [
+  { label: "Todos los servicios", href: "/servicios" },
+  { label: "Máster en España (360°)", href: "/servicios/master" },
+  { label: "Visa y estancia por estudios", href: "/servicios/estancia" },
+  { label: "Tiendita", href: "/tienda" },
+  { label: "Blog", href: "/blog" },
+  { label: "Nosotros", href: "/nosotros" },
+  { label: "Reservar asesoría", href: "/reservar" },
+];
+
 const enlacesLegales = [
   { label: "Aviso de Privacidad", href: RUTAS_LEGALES.privacidad },
   { label: "Política de Cookies", href: RUTAS_LEGALES.cookies },
@@ -29,7 +39,7 @@ export default function Footer() {
   return (
     <footer className="mt-16 border-t border-neutral-200 bg-white">
       <div className="mx-auto max-w-6xl px-5 py-12">
-        <div className="grid gap-10 md:grid-cols-3">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           {/* Identificación del titular */}
           <div>
             <p className="font-fraunces text-lg font-semibold text-primary">
@@ -60,6 +70,24 @@ export default function Footer() {
               {TITULAR.nombreComercial} es el nombre comercial de{" "}
               {TITULAR.razonSocial}.
             </p>
+          </div>
+
+          {/* Navegación del sitio */}
+          <div>
+            <p className="text-sm font-semibold text-neutral-900">Explora</p>
+            <ul className="mt-3 space-y-1.5 text-sm">
+              {enlacesExplora.map((l) => (
+                <li key={l.href}>
+                  <a
+                    href={l.href}
+                    onClick={(e) => ir(e, l.href)}
+                    className="text-neutral-700 hover:text-primary hover:underline"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Contacto */}

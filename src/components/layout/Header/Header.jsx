@@ -4,6 +4,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 import { navItems } from "./header.data";
 import MobileMenu from "./MobileMenu";
+import MegaMenu from "./MegaMenu";
 import UserMenu from "./UserMenu";
 import { loginGoogle } from "./LoginButton";
 
@@ -45,6 +46,20 @@ export default function Header() {
               // Como en el mockup: el estado activo solo se marca en las rutas
               // internas (servicios / calculadora), nunca en "Inicio".
               const active = item.href !== "/" && path === item.href;
+              if (item.mega) {
+                return (
+                  <div className="v4-mega-wrap" key={item.label}>
+                    <a
+                      href={item.href}
+                      onClick={(e) => go(e, item.href)}
+                      className={`v4-mega-trigger${active ? " route-active" : ""}`}
+                    >
+                      {item.label} <span className="caret">▼</span>
+                    </a>
+                    <MegaMenu onNavigate={(href) => setPath(href)} />
+                  </div>
+                );
+              }
               if (item.badge) {
                 return (
                   <a

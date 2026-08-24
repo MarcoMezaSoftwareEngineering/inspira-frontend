@@ -1,6 +1,8 @@
 import { navigate } from "../../../services/navigate";
 
-export default function NavItem({ item }) {
+// Item del menú móvil. Los items con `children` se muestran como grupo
+// expandido (título + sub-enlaces), no como dropdown.
+export default function NavItem({ item, onClick }) {
   const base = "block py-2 text-sm font-semibold transition-colors";
   const normal = "text-primary hover:text-accent";
   const highlight = "text-accent hover:text-accent-dark";
@@ -8,6 +10,8 @@ export default function NavItem({ item }) {
   const go = (e, href) => {
     e.preventDefault();
     navigate(href);
+    window.scrollTo({ top: 0, behavior: "instant" });
+    onClick?.();
   };
 
   if (!item.children) {
@@ -44,31 +48,23 @@ export default function NavItem({ item }) {
   }
 
   return (
-    <li className="relative group">
-      {/* ✅ ahora también navega SPA */}
-      <a
-        href={item.href}
-        onClick={(e) => go(e, item.href)}
-        className={`${base} ${normal}`}
-      >
+    <li>
+      <span className="block pt-2 pb-1 text-[11px] font-extrabold uppercase tracking-widest text-accent">
         {item.label}
-      </a>
-
-      <div className="absolute left-0 top-full hidden min-w-56 rounded-xl border border-neutral-200 bg-white shadow-lg group-hover:block">
-        <ul className="py-2">
-          {item.children.map((child) => (
-            <li key={child.label}>
-              <a
-                href={child.href}
-                onClick={(e) => go(e, child.href)}
-                className="block px-4 py-2 text-sm text-neutral-900 hover:bg-secondary-light"
-              >
-                {child.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+      </span>
+      <ul className="border-l-2 border-secondary pl-3">
+        {item.children.map((child) => (
+          <li key={child.label}>
+            <a
+              href={child.href}
+              onClick={(e) => go(e, child.href)}
+              className="block py-1.5 text-sm text-neutral-900 hover:text-primary"
+            >
+              {child.label}
+            </a>
+          </li>
+        ))}
+      </ul>
     </li>
   );
 }

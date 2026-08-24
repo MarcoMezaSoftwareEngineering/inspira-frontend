@@ -11,6 +11,12 @@ import BackofficeApp from "./pages/backoffice/BackofficeApp";
 import CalculadoraMaster from "./pages/calculadora/CalculadoraMaster";
 import PanelCliente from "./pages/panel/PanelCliente";
 import ReservarCita from "./pages/reservar/ReservarCita";
+import ServiciosCatalogo from "./pages/servicios/ServiciosCatalogo";
+import Nosotros from "./pages/nosotros/Nosotros";
+import Tienda from "./pages/tienda/Tienda";
+import BlogIndex from "./pages/blog/BlogIndex";
+import BlogPost from "./pages/blog/BlogPost";
+import { getPost } from "./pages/blog/blog.data";
 import { PagoExitoso, PagoFallido, PagoPendiente } from "./pages/pago/PagoResultado";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +51,30 @@ const SEO_PAGES = {
     description:
       "Gestiona tu visa de estancia, renovación o permiso de residencia en España. Expertos en extranjería para latinoamericanos. Sin sorpresas.",
     path: "/servicios/estancia",
+  },
+  "/servicios": {
+    title: "Servicios de Extranjería y Estudios en España – Inspira Legal",
+    description:
+      "Visa de estudios, nómada digital, visado PAC, nacionalidad, homologaciones, máster y más. Todos nuestros servicios para migrar a España, con primera asesoría desde 25 €.",
+    path: "/servicios",
+  },
+  "/nosotros": {
+    title: "Nosotros – El equipo de Inspira Legal",
+    description:
+      "Conoce a los abogados asociados de Inspira Legal: especialistas en extranjería española y asesoría educativa para latinoamericanos.",
+    path: "/nosotros",
+  },
+  "/tienda": {
+    title: "Tiendita – Recursos digitales de Inspira Legal",
+    description:
+      "Ebooks, videos y herramientas para estudiar y migrar a España por tu cuenta: becas actualizadas, guía de máster, formación profesional y más.",
+    path: "/tienda",
+  },
+  "/blog": {
+    title: "Blog – Guías para migrar y estudiar en España",
+    description:
+      "Guías claras de extranjería, visados, nacionalidad y vida académica en España, escritas por el equipo legal de Inspira.",
+    path: "/blog",
   },
   "/calculadora-master": {
     title: "¿Cuánto cuesta un Máster en España? Calculadora Gratis",
@@ -106,8 +136,8 @@ const SCHEMA_ORG = {
   serviceType: ["Asesoría académica", "Gestión de visas", "Trámites de extranjería"],
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Cal. Fermín Tanguis Nro. 279, Urb. Ingeniería",
-    addressLocality: "San Martín de Porres, Lima",
+    streetAddress: "Av. Dos de Mayo N.° 1545, Oficina 204",
+    addressLocality: "San Isidro, Lima",
     addressCountry: "PE",
   },
   contactPoint: {
@@ -145,7 +175,18 @@ const PRIVATE_PATHS = ["/panel", "/auth/success"];
 function RouteSEO({ path }) {
   const isPrivate =
     PRIVATE_PATHS.includes(path) || path.startsWith("/backoffice");
-  const config = SEO_PAGES[path];
+  let config = SEO_PAGES[path];
+  // Entradas del blog: SEO dinámico a partir del post
+  if (!config && path.startsWith("/blog/")) {
+    const post = getPost(path.slice("/blog/".length));
+    if (post) {
+      config = {
+        title: `${post.titulo} – Inspira Legal`,
+        description: post.extracto,
+        path,
+      };
+    }
+  }
   useSEO(isPrivate ? { noIndex: true } : (config || { noIndex: true }));
   return null;
 }
@@ -154,8 +195,12 @@ function RouteSEO({ path }) {
 const PUBLIC_PATHS = [
   "/",
   "/auth/success",
+  "/servicios",
   "/servicios/master",
   "/servicios/estancia",
+  "/nosotros",
+  "/tienda",
+  "/blog",
   "/calculadora-master",
   "/panel",
   "/reservar",
@@ -188,7 +233,8 @@ export default function App() {
   }
 
   const isPanel = path.startsWith("/panel");
-  const isNotFound = !PUBLIC_PATHS.includes(path);
+  const isBlogPost = path.startsWith("/blog/") && !!getPost(path.slice("/blog/".length));
+  const isNotFound = !PUBLIC_PATHS.includes(path) && !isBlogPost;
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -203,8 +249,13 @@ export default function App() {
 
       {path === "/" && <Home />}
       {path === "/auth/success" && <AuthSuccess />}
+      {path === "/servicios" && <ServiciosCatalogo />}
       {path === "/servicios/master" && <PortalServiciosMaster />}
       {path === "/servicios/estancia" && <EstanciaLanding />}
+      {path === "/nosotros" && <Nosotros />}
+      {path === "/tienda" && <Tienda />}
+      {path === "/blog" && <BlogIndex />}
+      {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}
       {path === "/panel" && <PanelCliente />}
       {path === "/reservar" && <ReservarCita />}

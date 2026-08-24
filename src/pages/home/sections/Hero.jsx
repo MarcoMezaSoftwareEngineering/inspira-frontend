@@ -13,16 +13,17 @@ export default function Hero() {
         <Reveal>
           <div className="eyebrow">
             <span className="dot" />
-            Programa 360° · España 2026/27
+            Extranjería y estudios · España 2026/27
           </div>
           <h1>
-            Encuentra el máster correcto.
+            Migra a España
             <br />
-            <span>Nosotros hacemos el resto.</span>
+            <span>por estudios.</span>
           </h1>
           <p className="lead">
-            Selección, postulación, documentación y acompañamiento para convertir tu
-            objetivo de estudiar en España en un proceso claro, medible y acompañado.
+            Visa de estudios, máster, estancia y todo el camino legal hasta instalarte.
+            Y si tu ruta es otra — nómada digital, visado PAC o nacionalidad — también
+            la conocemos de memoria.
           </p>
           <div className="actions">
             <a
@@ -34,10 +35,10 @@ export default function Hero() {
             </a>
             <a
               className="btn btn-ghost"
-              href="/servicios/master"
-              onClick={(e) => go(e, "/servicios/master")}
+              href="/servicios"
+              onClick={(e) => go(e, "/servicios")}
             >
-              Ver Programa 360° <span className="arr">↗</span>
+              Ver todos los servicios <span className="arr">↗</span>
             </a>
           </div>
           <div className="proof-inline">

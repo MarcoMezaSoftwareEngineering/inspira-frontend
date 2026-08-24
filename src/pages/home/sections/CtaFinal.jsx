@@ -1,5 +1,8 @@
 import { navigate } from "../../../services/navigate";
 import Reveal from "../../../components/common/Reveal";
+import BotonAsesoria from "../../../components/common/BotonAsesoria";
+import { PRECIO_ASESORIA } from "../../../config/servicios";
+import { ASESORIA } from "../../../config/contacto";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -12,21 +15,28 @@ export default function CtaFinal() {
       <div className="v4-container">
         <Reveal className="cta-box">
           <div>
-            <span className="eyebrow"><span className="dot" />Empieza gratis</span>
-            <h2>Descubre qué opciones encajan contigo.</h2>
+            <span className="eyebrow"><span className="dot" />Primera asesoría</span>
+            <h2>Tu mejor decisión empieza aquí.</h2>
             <p>
-              Usa la calculadora como primera puerta de entrada y convierte tus datos
-              en una ruta de estudio más concreta.
+              {ASESORIA.duracion} con un abogado especialista en extranjería.
+              {" "}{ASESORIA.modalidad}. Sales con un diagnóstico de tu caso y un
+              plan de acción concreto — por {PRECIO_ASESORIA.eur},{" "}
+              {PRECIO_ASESORIA.usd} o {PRECIO_ASESORIA.pen}.
+            </p>
+            <p style={{ marginTop: "14px", fontSize: "13px" }}>
+              ¿Prefieres empezar gratis?{" "}
+              <a
+                href="/calculadora-master"
+                onClick={(e) => go(e, "/calculadora-master")}
+                style={{ color: "#f49e4b", fontWeight: 800 }}
+              >
+                Usa la calculadora de máster →
+              </a>
             </p>
           </div>
-          <a
-            className="btn btn-primary"
-            href="/calculadora-master"
-            onClick={(e) => go(e, "/calculadora-master")}
-            style={{ zIndex: 2 }}
-          >
-            Abrir calculadora <span className="arr">→</span>
-          </a>
+          <div style={{ zIndex: 2 }}>
+            <BotonAsesoria>Elegir día y hora</BotonAsesoria>
+          </div>
         </Reveal>
       </div>
     </section>

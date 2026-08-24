@@ -12,6 +12,9 @@ import CalculadoraMaster from "./pages/calculadora/CalculadoraMaster";
 import PanelCliente from "./pages/panel/PanelCliente";
 import ReservarCita from "./pages/reservar/ReservarCita";
 import ServiciosCatalogo from "./pages/servicios/ServiciosCatalogo";
+import ServicioDetalle from "./pages/servicios/ServicioDetalle";
+import { getServicio } from "./config/servicios";
+import AsesoriaCTA from "./components/common/AsesoriaCTA";
 import Nosotros from "./pages/nosotros/Nosotros";
 import Tienda from "./pages/tienda/Tienda";
 import BlogIndex from "./pages/blog/BlogIndex";
@@ -176,6 +179,17 @@ function RouteSEO({ path }) {
   const isPrivate =
     PRIVATE_PATHS.includes(path) || path.startsWith("/backoffice");
   let config = SEO_PAGES[path];
+  // Páginas de servicio: SEO dinámico a partir del catálogo
+  if (!config && path.startsWith("/servicios/")) {
+    const s = getServicio(path.slice("/servicios/".length));
+    if (s?.detalle) {
+      config = {
+        title: `${s.detalle.titulo} – Inspira Legal`,
+        description: `${s.detalle.gancho} ${s.resumen}`.slice(0, 300),
+        path,
+      };
+    }
+  }
   // Entradas del blog: SEO dinámico a partir del post
   if (!config && path.startsWith("/blog/")) {
     const post = getPost(path.slice("/blog/".length));
@@ -234,7 +248,12 @@ export default function App() {
 
   const isPanel = path.startsWith("/panel");
   const isBlogPost = path.startsWith("/blog/") && !!getPost(path.slice("/blog/".length));
-  const isNotFound = !PUBLIC_PATHS.includes(path) && !isBlogPost;
+  const servicioId = path.startsWith("/servicios/")
+    ? path.slice("/servicios/".length)
+    : null;
+  const isServicioDetalle = !!getServicio(servicioId)?.detalle;
+  const isNotFound =
+    !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle;
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -252,6 +271,7 @@ export default function App() {
       {path === "/servicios" && <ServiciosCatalogo />}
       {path === "/servicios/master" && <PortalServiciosMaster />}
       {path === "/servicios/estancia" && <EstanciaLanding />}
+      {isServicioDetalle && <ServicioDetalle id={servicioId} />}
       {path === "/nosotros" && <Nosotros />}
       {path === "/tienda" && <Tienda />}
       {path === "/blog" && <BlogIndex />}
@@ -280,6 +300,9 @@ export default function App() {
 
       {/* El footer identifica al proveedor en todas las páginas públicas */}
       {!isPanel && <Footer />}
+
+      {/* Invitación permanente a la primera asesoría (no en el panel privado) */}
+      {!isPanel && <AsesoriaCTA />}
 
       {/* Banner de cookies: siempre montado, decide él si se muestra */}
       <CookieConsent />

@@ -2,7 +2,14 @@
 // Catálogo completo de servicios, organizado por categorías con anclas
 // (#extranjeria, #tramites-espana, #educativa) para el mega-menú del header.
 import { useEffect } from "react";
-import { CATEGORIAS, PRECIO_ASESORIA } from "../../config/servicios";
+import {
+  CATEGORIAS,
+  PRECIO_ASESORIA,
+  DIFERENCIALES,
+  hrefServicio,
+} from "../../config/servicios";
+import { ASESORIA } from "../../config/contacto";
+import BotonAsesoria from "../../components/common/BotonAsesoria";
 import { navigate } from "../../services/navigate";
 
 const go = (e, href) => {
@@ -40,13 +47,13 @@ function ServicioCard({ servicio }) {
         {servicio.resumen}
       </p>
       <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary">
-        {servicio.href ? "Ver servicio" : "Reservar asesoría"}
+        Ver servicio
         <span aria-hidden>→</span>
       </span>
     </>
   );
 
-  const destino = servicio.href || "/reservar";
+  const destino = hrefServicio(servicio);
   return (
     <a
       id={servicio.id}
@@ -96,6 +103,28 @@ export default function ServiciosCatalogo() {
             arma a tu medida: el único precio fijo es tu primera asesoría.
           </p>
           <PrecioBanner />
+          <div className="mt-7 flex justify-center">
+            <BotonAsesoria />
+          </div>
+        </div>
+      </section>
+
+      {/* Diferenciales */}
+      <section className="border-b border-neutral-200 bg-secondary-light px-6 py-10">
+        <div className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {DIFERENCIALES.map((v) => (
+            <div key={v.titulo}>
+              <span className="text-2xl" aria-hidden>
+                {v.icono}
+              </span>
+              <h3 className="mt-2 text-sm font-bold text-neutral-900">
+                {v.titulo}
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-neutral-600">
+                {v.texto}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -173,15 +202,10 @@ export default function ServiciosCatalogo() {
             {PRECIO_ASESORIA.descripcion}
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="/reservar"
-              onClick={(e) => go(e, "/reservar")}
-              className="rounded-xl bg-accent px-6 py-3 font-bold text-white transition hover:bg-accent-dark"
-            >
-              Reservar primera asesoría →
-            </a>
+            <BotonAsesoria />
             <span className="text-sm text-white/70">
-              {PRECIO_ASESORIA.eur} · {PRECIO_ASESORIA.usd} · {PRECIO_ASESORIA.pen}
+              {ASESORIA.duracion} · {PRECIO_ASESORIA.eur} · {PRECIO_ASESORIA.usd} ·{" "}
+              {PRECIO_ASESORIA.pen}
             </span>
           </div>
         </section>

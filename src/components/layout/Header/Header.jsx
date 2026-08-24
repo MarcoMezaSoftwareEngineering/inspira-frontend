@@ -60,6 +60,20 @@ export default function Header() {
                   </div>
                 );
               }
+              if (item.externo) {
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={item.cta ? "v4-nav-cta" : undefined}
+                  >
+                    {item.cta && "📅 "}
+                    {item.label}
+                  </a>
+                );
+              }
               if (item.badge) {
                 return (
                   <a

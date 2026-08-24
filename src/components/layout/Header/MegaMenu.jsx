@@ -1,7 +1,8 @@
 // src/components/layout/Header/MegaMenu.jsx
 // Mega-menú de servicios del header (solo escritorio). Muestra una selección
 // de servicios por categoría; el catálogo completo vive en /servicios.
-import { CATEGORIAS, PRECIO_ASESORIA } from "../../../config/servicios";
+import { CATEGORIAS, PRECIO_ASESORIA, hrefServicio } from "../../../config/servicios";
+import { CALENDLY_URL } from "../../../config/contacto";
 import { navigate } from "../../../services/navigate";
 
 // Ids de los servicios destacados en el menú, por categoría.
@@ -51,7 +52,7 @@ export default function MegaMenu({ onNavigate }) {
           <div className="v4-mega-col" key={cat.id}>
             <h4>{cat.titulo}</h4>
             {items.map((s) => {
-              const href = s.href || `/servicios#${s.id}`;
+              const href = hrefServicio(s);
               return (
                 <a key={s.id} href={href} onClick={(e) => go(e, href)}>
                   {s.nombre}
@@ -74,8 +75,8 @@ export default function MegaMenu({ onNavigate }) {
           Primera asesoría: <b>{PRECIO_ASESORIA.eur}</b> · <b>{PRECIO_ASESORIA.usd}</b> ·{" "}
           <b>{PRECIO_ASESORIA.pen}</b> — cada paquete es personalizado.
         </span>
-        <a href="/reservar" onClick={(e) => go(e, "/reservar")}>
-          <b>Reservar →</b>
+        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
+          <b>📅 Agendar asesoría →</b>
         </a>
       </div>
     </div>

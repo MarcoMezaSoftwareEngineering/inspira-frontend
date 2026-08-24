@@ -15,6 +15,25 @@ export default function NavItem({ item, onClick }) {
   };
 
   if (!item.children) {
+    if (item.externo) {
+      return (
+        <li>
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClick}
+            className={
+              item.cta
+                ? "mt-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-accent-dark"
+                : `${base} ${normal}`
+            }
+          >
+            {item.cta && "📅"} {item.label}
+          </a>
+        </li>
+      );
+    }
     if (item.badge) {
       return (
         <li>

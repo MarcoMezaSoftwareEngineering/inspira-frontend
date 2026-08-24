@@ -1,23 +1,27 @@
 // Navegación principal. El item con `mega: true` despliega el mega-menú de
 // servicios (los grupos salen de config/servicios.js); `children` se usa como
-// versión compacta en el menú móvil.
+// versión compacta en el menú móvil. `externo` abre en pestaña nueva.
+import { CALENDLY_URL } from "../../../config/contacto";
+
 export const navItems = [
   {
-    label: "Servicios",
+    label: "Migra a España",
     href: "/servicios",
     mega: true,
     children: [
       { label: "Todos los servicios", href: "/servicios" },
-      { label: "Extranjería", href: "/servicios#extranjeria" },
-      { label: "Trámites en España", href: "/servicios#tramites-espana" },
-      { label: "Asesoría educativa", href: "/servicios#educativa" },
+      { label: "Visa de Estudios", href: "/servicios/visa-estudios" },
+      { label: "Estancia por Estudios", href: "/servicios/estancia-estudios" },
       { label: "Máster en España (360°)", href: "/servicios/master" },
-      { label: "Visa y estancia por estudios", href: "/servicios/estancia" },
+      { label: "Formación Profesional", href: "/servicios/formacion-profesional" },
+      { label: "Nómada Digital · Visado PAC", href: "/servicios#rapidos" },
+      { label: "Nacionalidad y arraigos", href: "/servicios#otros-extranjeria" },
+      { label: "Trámites en España", href: "/servicios#tramites-espana" },
     ],
   },
   { label: "Tiendita", href: "/tienda" },
   { label: "Blog", href: "/blog" },
   { label: "Nosotros", href: "/nosotros" },
   { label: "Calculadora Gratis", href: "/calculadora-master", badge: true },
-  { label: "Reservar cita", href: "/reservar" },
+  { label: "Agenda tu asesoría", href: CALENDLY_URL, externo: true, cta: true },
 ];

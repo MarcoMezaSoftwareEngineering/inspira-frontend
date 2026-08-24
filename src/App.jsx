@@ -15,6 +15,9 @@ import ServiciosCatalogo from "./pages/servicios/ServiciosCatalogo";
 import ServicioDetalle from "./pages/servicios/ServicioDetalle";
 import { getServicio } from "./config/servicios";
 import AsesoriaCTA from "./components/common/AsesoriaCTA";
+import BarraProgreso from "./components/common/BarraProgreso";
+import Eventos from "./pages/eventos/Eventos";
+import CasosExito from "./pages/casos/CasosExito";
 import Nosotros from "./pages/nosotros/Nosotros";
 import Tienda from "./pages/tienda/Tienda";
 import BlogIndex from "./pages/blog/BlogIndex";
@@ -78,6 +81,18 @@ const SEO_PAGES = {
     description:
       "Guías claras de extranjería, visados, nacionalidad y vida académica en España, escritas por el equipo legal de Inspira.",
     path: "/blog",
+  },
+  "/eventos": {
+    title: "Eventos gratuitos – Estudia en España en 5 pasos",
+    description:
+      "El primer evento gratuito de Inspira para que estudies en España Rumbo al 2027: los 5 pasos, los plazos reales y descuento en paquetes para asistentes.",
+    path: "/eventos",
+  },
+  "/casos-de-exito": {
+    title: "Casos de éxito – Visas, admisiones y apelaciones ganadas",
+    description:
+      "Admisiones a máster, visas aprobadas, apelaciones ganadas y estancias por estudios concedidas. Expedientes reales gestionados por Inspira Legal.",
+    path: "/casos-de-exito",
   },
   "/calculadora-master": {
     title: "¿Cuánto cuesta un Máster en España? Calculadora Gratis",
@@ -215,6 +230,8 @@ const PUBLIC_PATHS = [
   "/nosotros",
   "/tienda",
   "/blog",
+  "/eventos",
+  "/casos-de-exito",
   "/calculadora-master",
   "/panel",
   "/reservar",
@@ -258,6 +275,7 @@ export default function App() {
   return (
     <div className="min-h-screen w-full bg-white">
       <RouteSEO path={path} />
+      {!isPanel && <BarraProgreso />}
 
       {/* Schema.org según ruta */}
       {path === "/" && <SEOSchema schema={SCHEMA_ORG} id="org" />}
@@ -266,6 +284,8 @@ export default function App() {
 
       {!isPanel && !isNotFound && <Header />}
 
+      {/* `key` fuerza el remontaje al navegar: cada página entra con animación */}
+      <div key={path} className={isPanel ? undefined : "v4-page-enter"}>
       {path === "/" && <Home />}
       {path === "/auth/success" && <AuthSuccess />}
       {path === "/servicios" && <ServiciosCatalogo />}
@@ -274,6 +294,8 @@ export default function App() {
       {isServicioDetalle && <ServicioDetalle id={servicioId} />}
       {path === "/nosotros" && <Nosotros />}
       {path === "/tienda" && <Tienda />}
+      {path === "/eventos" && <Eventos />}
+      {path === "/casos-de-exito" && <CasosExito />}
       {path === "/blog" && <BlogIndex />}
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}
@@ -297,6 +319,7 @@ export default function App() {
           <NotFound />
         </>
       )}
+      </div>
 
       {/* El footer identifica al proveedor en todas las páginas públicas */}
       {!isPanel && <Footer />}

@@ -346,4 +346,23 @@
     <priority>0.6</priority>
   </url>
 
+<url>
+    <loc>https://inspira-legal.cloud/eventos</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://inspira-legal.cloud/casos-de-exito</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://inspira-legal.cloud/blog/residencia-doctorado-espana-nacionalidad</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>

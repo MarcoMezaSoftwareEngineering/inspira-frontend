@@ -55,7 +55,7 @@ export default function Tienda() {
       {/* Hero */}
       <section
         className="w-full px-6 py-20"
-        style={{ background: "linear-gradient(135deg, #023A4B 0%, #054A5E 100%)" }}
+        style={{ background: "linear-gradient(135deg, #0F2C52 0%, #17406F 100%)" }}
       >
         <div className="mx-auto max-w-4xl text-center">
           <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/75">
@@ -64,7 +64,7 @@ export default function Tienda() {
           <h1 className="mb-5 text-4xl font-bold leading-tight text-white md:text-5xl">
             Recursos digitales para
             <br />
-            <span style={{ color: "#F49E4B" }}>avanzar por tu cuenta</span>
+            <span style={{ color: "#F5871F" }}>avanzar por tu cuenta</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-white/65">
             Guías, herramientas y accesos con compra directa e inmediata. Empieza

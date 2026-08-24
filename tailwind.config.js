@@ -2,16 +2,18 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
+      // Paleta tomada del material gráfico de la marca: azul marino
+      // corporativo + naranja de acento.
       colors: {
-        primary:        "#1a5c3a",
-        "primary-light": "#154f31",
-        "primary-dark":  "#0d3320",
+        primary:        "#0F2C52",
+        "primary-light": "#17406F",
+        "primary-dark":  "#0A1F3C",
 
-        secondary:        "#e8f5ee",
-        "secondary-light": "#f0faf4",
+        secondary:        "#E6EEF8",
+        "secondary-light": "#F3F7FC",
 
-        accent:      "#F49E4B",
-        "accent-dark": "#D88436",
+        accent:      "#F5871F",
+        "accent-dark": "#DB6F0C",
 
         neutral: {
           900: "#1A1A1A",

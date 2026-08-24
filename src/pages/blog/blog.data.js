@@ -5,6 +5,34 @@
 
 export const POSTS = [
   {
+    slug: "residencia-doctorado-espana-nacionalidad",
+    titulo: "Nuevo: el doctorado en España ya es residencia — y cuenta para la nacionalidad",
+    extracto:
+      "Cambio importante para investigadores latinoamericanos: la vía del doctorado dejó de ser una simple estancia por estudios y pasó a ser residencia, con todo lo que eso implica.",
+    fecha: "2026-08-24",
+    categoria: "Extranjería",
+    minutos: 5,
+    novedad: true,
+    content: [
+      { type: "p", text: "Es una de las noticias más relevantes del año para quienes vienen a investigar a España, y sorprendentemente poca gente la conoce todavía: cursar un doctorado en España ya no te deja en una simple estancia por estudios. Ahora califica como residencia." },
+      { type: "h2", text: "¿Por qué importa tanto esta diferencia?" },
+      { type: "p", text: "Durante años, el gran problema de estudiar en España era que el tiempo no contaba. La estancia por estudios NO computa para solicitar la nacionalidad española: podías pasar cinco años estudiando y llegar al final con el contador en cero. Por eso muchos estudiantes hacían primero la modificación a residencia, y solo desde ahí empezaban a sumar." },
+      { type: "h2", text: "Qué cambia con la residencia para doctorado" },
+      { type: "ul", items: [
+        "El tiempo de tu doctorado computa como residencia legal en España.",
+        "Ese cómputo cuenta para la nacionalidad española por residencia.",
+        "Para latinoamericanos, el plazo de nacionalidad es de solo 2 años, no 10.",
+        "Mejores condiciones de permanencia y de acceso al mercado laboral que la estancia ordinaria.",
+        "Posibilidad de autorización para cónyuge e hijos.",
+      ] },
+      { type: "h2", text: "La cuenta que conviene hacer" },
+      { type: "p", text: "Si eres latinoamericano y tu doctorado dura tres o cuatro años, el propio programa puede cubrir de sobra los dos años de residencia legal que la ley exige a los iberoamericanos para pedir la nacionalidad. Es decir: terminas tu doctorado y, cumpliendo el resto de requisitos, puedes estar en condiciones de solicitar el pasaporte español." },
+      { type: "h2", text: "Qué hay que hacer bien desde el principio" },
+      { type: "p", text: "La clave está en tramitar la vía correcta desde el inicio. Presentar el expediente como estancia por estudios cuando podrías haber accedido a la residencia para doctorado significa perder años de cómputo — y eso, después, no se recupera. En la asesoría diagnóstica revisamos tu carta de admisión, tu programa y tu financiación para determinar exactamente qué vía te corresponde." },
+      { type: "p", text: "Si estás admitido a un programa de doctorado en España, o lo estás considerando, conviene revisar tu caso antes de presentar nada." },
+    ],
+  },
+  {
     slug: "visa-estudios-vs-estancia-por-estudios",
     titulo: "Visa de Estudios vs. Estancia por Estudios: mismo permiso, distinto proceso",
     extracto:

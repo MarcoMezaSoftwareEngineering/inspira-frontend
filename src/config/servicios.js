@@ -294,23 +294,44 @@ export const CATEGORIAS = [
             id: "residencia-doctorado",
             nombre: "Residencia Española para Doctorado",
             resumen:
-              "Residencia para doctorandos admitidos en programas de doctorado en España.",
+              "Ahora es residencia, no estancia: el tiempo de tu doctorado computa para la nacionalidad española.",
+            etiqueta: "Novedad",
             detalle: {
               titulo: "Residencia para Doctorado en España",
               gancho:
-                "Tu programa de doctorado, con un permiso que reconoce tu perfil investigador.",
+                "Ya es residencia — y eso significa que tu doctorado cuenta para la nacionalidad.",
               intro:
-                "Los doctorandos e investigadores tienen una vía propia dentro del sistema migratorio español, con condiciones más favorables que la estancia por estudios ordinaria y mejores opciones de permanencia posterior.",
+                "Es el cambio más relevante del año para investigadores latinoamericanos: la vía del doctorado dejó de ser una simple estancia por estudios y pasó a ser residencia. La diferencia es enorme, porque la estancia por estudios no computa para la nacionalidad y la residencia sí.",
               bloques: [
                 {
-                  titulo: "Incluye",
+                  titulo: "Por qué es tan importante",
+                  items: [
+                    "El tiempo de tu doctorado computa como residencia legal en España.",
+                    "Ese cómputo cuenta para la nacionalidad española por residencia.",
+                    "Para latinoamericanos bastan 2 años de residencia legal, no 10.",
+                    "Mejores condiciones de permanencia y acceso al mercado laboral.",
+                    "Posibilidad de autorización para cónyuge e hijos.",
+                  ],
+                },
+                {
+                  titulo: "Qué gestionamos",
                   items: [
                     "Análisis de tu carta de admisión y del convenio con la universidad o centro investigador.",
-                    "Estrategia sobre la vía más conveniente según tu financiación y tu programa.",
+                    "Determinación de la vía correcta según tu financiación y tu programa.",
                     "Preparación y presentación telemática del expediente.",
                     "Autorización para familiares.",
                     "Seguimiento hasta la resolución final.",
                   ],
+                },
+              ],
+              faq: [
+                {
+                  q: "¿Puedo pedir la nacionalidad al terminar el doctorado?",
+                  a: "Si tu programa dura tres o cuatro años, el propio doctorado puede cubrir de sobra los 2 años de residencia legal que se exigen a los iberoamericanos. Cumpliendo el resto de requisitos (CCSE, antecedentes, empadronamiento), puedes estar en condiciones de solicitarla al terminar.",
+                },
+                {
+                  q: "¿Qué pasa si ya tramité una estancia por estudios?",
+                  a: "Presentar la vía equivocada significa perder años de cómputo, y eso después no se recupera. Si ya estás en estancia, revisamos si procede una modificación — cuanto antes, mejor.",
                 },
               ],
             },

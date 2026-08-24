@@ -50,6 +50,19 @@ export const PRODUCTOS = [
     hotmartUrl: null, // COMPLETAR: URL de pago de Hotmart
   },
   {
+    // Producto de suscripción pendiente de construir: ver la nota del equipo
+    // sobre el asistente de IA (requiere backend + pasarela de suscripción).
+    id: "asistente-ia",
+    nombre: "InspiraGPT — tu asistente de extranjería 24/7",
+    descripcion:
+      "Asistente de IA entrenado con nuestras guías de extranjería y estudios en España. Resuelve dudas de trámites a cualquier hora, con suscripción mensual.",
+    precio: "Próximamente",
+    tipo: "Suscripción",
+    emoji: "🤖",
+    href: null,
+    hotmartUrl: null,
+  },
+  {
     id: "videos-cv",
     nombre: "Serie de videos: mejora tu CV y tu perfil",
     descripcion:

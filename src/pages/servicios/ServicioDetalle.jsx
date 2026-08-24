@@ -33,7 +33,7 @@ export default function ServicioDetalle({ id }) {
       {/* Hero */}
       <section
         className="w-full px-6 py-16 md:py-20"
-        style={{ background: "linear-gradient(135deg, #023A4B 0%, #054A5E 100%)" }}
+        style={{ background: "linear-gradient(135deg, #0F2C52 0%, #17406F 100%)" }}
       >
         <div className="mx-auto max-w-4xl">
           <a
@@ -46,7 +46,7 @@ export default function ServicioDetalle({ id }) {
           <h1 className="mt-4 text-3xl font-bold leading-tight text-white md:text-5xl">
             {d.titulo}
           </h1>
-          <p className="mt-4 text-xl font-semibold" style={{ color: "#F49E4B" }}>
+          <p className="mt-4 text-xl font-semibold" style={{ color: "#F5871F" }}>
             {d.gancho}
           </p>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">

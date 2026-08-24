@@ -1,32 +1,12 @@
 import Reveal from "../../../components/common/Reveal";
+import { TESTIMONIOS } from "../../../config/testimonios";
+import { navigate } from "../../../services/navigate";
 
-// ⚠️ TESTIMONIOS DE EJEMPLO — reemplazar con opiniones reales de clientes
-// (con su autorización) antes de considerarlos definitivos. Publicar reseñas
-// inventadas como si fueran reales infringe la normativa de INDECOPI sobre
-// publicidad (ver inspira-backend/docs/legal/09-claims-publicitarios.md).
-const testimonios = [
-  {
-    nombre: "Alejandra R.",
-    origen: "Lima, Perú",
-    servicio: "Máster en España",
-    texto:
-      "Llegué sin saber ni por dónde empezar y salí con admisión en una universidad pública de Madrid. Me acompañaron en cada paso, desde la postulación hasta la visa.",
-  },
-  {
-    nombre: "Diego C.",
-    origen: "Arequipa, Perú",
-    servicio: "Estancia por estudios",
-    texto:
-      "Lo que más valoro es la claridad: siempre supe qué documento faltaba y qué venía después. Mi estancia por estudios salió aprobada sin requerimientos.",
-  },
-  {
-    nombre: "Valeria M.",
-    origen: "Bogotá, Colombia",
-    servicio: "Nómada digital",
-    texto:
-      "Mi residencia de nómada digital fue aprobada en tiempo récord. El expediente estaba tan bien armado que no hubo ni una sola observación.",
-  },
-];
+const go = (e, href) => {
+  e.preventDefault();
+  navigate(href);
+  window.scrollTo({ top: 0, behavior: "instant" });
+};
 
 export default function Testimonios() {
   return (
@@ -34,31 +14,51 @@ export default function Testimonios() {
       <div className="v4-container">
         <Reveal className="section-head">
           <div>
-            <span className="eyebrow"><span className="dot" />Opiniones</span>
-            <h2>Historias que ya están en España.</h2>
+            <span className="eyebrow"><span className="dot" />Opiniones reales</span>
+            <h2>Lo que dicen quienes ya lo lograron.</h2>
           </div>
           <p>
-            Cada proceso es distinto, pero el resultado que buscamos es el mismo:
-            que llegues con todo en orden.
+            Reseñas publicadas por nuestros propios clientes en Facebook y
+            Google. Cada proceso es distinto, pero el objetivo es el mismo.
           </p>
         </Reveal>
 
-        <div className="testimonial-grid">
-          {testimonios.map((t, i) => (
-            <Reveal className="testimonial-card" key={t.nombre} delay={i * 100}>
-              <div className="stars" aria-label="5 de 5 estrellas">★★★★★</div>
+        <div className="testimonial-grid dos">
+          {TESTIMONIOS.map((t, i) => (
+            <Reveal className="testimonial-card" key={t.nombre} delay={i * 120}>
+              <div className="t-head">
+                <div className="stars" aria-label={`${t.estrellas} de 5 estrellas`}>
+                  {"★".repeat(t.estrellas)}
+                </div>
+                <span className="fuente">{t.fuente}</span>
+              </div>
               <p className="quote">“{t.texto}”</p>
               <div className="who">
                 <div className="avatar">{t.nombre[0]}</div>
                 <div>
                   <b>{t.nombre}</b>
                   <span>
-                    {t.origen} · {t.servicio}
+                    {t.servicio} · {t.fecha}
                   </span>
                 </div>
               </div>
             </Reveal>
           ))}
+
+          <Reveal className="testimonial-card cta-card" delay={240}>
+            <h3>Tu caso puede ser el siguiente.</h3>
+            <p>
+              Mira los expedientes que hemos resuelto: admisiones, visas,
+              apelaciones ganadas y estancias aprobadas.
+            </p>
+            <a
+              href="/casos-de-exito"
+              onClick={(e) => go(e, "/casos-de-exito")}
+              className="btn btn-primary"
+            >
+              Ver casos de éxito <span className="arr">→</span>
+            </a>
+          </Reveal>
         </div>
       </div>
     </section>

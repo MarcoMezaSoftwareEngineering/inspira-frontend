@@ -19,6 +19,8 @@ export const navItems = [
       { label: "Trámites en España", href: "/servicios#tramites-espana" },
     ],
   },
+  { label: "Casos de éxito", href: "/casos-de-exito" },
+  { label: "Eventos", href: "/eventos" },
   { label: "Tiendita", href: "/tienda" },
   { label: "Blog", href: "/blog" },
   { label: "Nosotros", href: "/nosotros" },

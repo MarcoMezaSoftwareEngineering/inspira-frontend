@@ -12,10 +12,11 @@ const enlacesExplora = [
   { label: "Todos los servicios", href: "/servicios" },
   { label: "Máster en España (360°)", href: "/servicios/master" },
   { label: "Visa y estancia por estudios", href: "/servicios/estancia" },
+  { label: "Casos de éxito", href: "/casos-de-exito" },
+  { label: "Eventos gratuitos", href: "/eventos" },
   { label: "Tiendita", href: "/tienda" },
   { label: "Blog", href: "/blog" },
   { label: "Nosotros", href: "/nosotros" },
-  { label: "Reservar asesoría", href: "/reservar" },
 ];
 
 const enlacesLegales = [

@@ -3,6 +3,14 @@
 // para publicar una entrada nueva basta con añadir un objeto aquí.
 // `content` es una lista de bloques: h2 (subtítulo), p (párrafo), ul (lista).
 
+// Firma por defecto de las entradas. Para firmar una entrada con otra
+// persona, añade `autor: { ... }` en ese post concreto.
+export const AUTOR_POR_DEFECTO = {
+  nombre: "Carina Meza",
+  cargo: "Abogada asociada · Extranjería española",
+  iniciales: "CM",
+};
+
 export const POSTS = [
   {
     slug: "residencia-doctorado-espana-nacionalidad",
@@ -253,5 +261,7 @@ export const POSTS = [
     ],
   },
 ];
+
+export const autorDe = (post) => post?.autor || AUTOR_POR_DEFECTO;
 
 export const getPost = (slug) => POSTS.find((p) => p.slug === slug);

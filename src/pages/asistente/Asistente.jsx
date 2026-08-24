@@ -6,6 +6,7 @@
 import { useState } from "react";
 import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
+import ComprarProducto from "../../components/common/ComprarProducto";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
@@ -289,23 +290,34 @@ export default function Asistente() {
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-sky-dark">
               <Icono nombre="destello" size={20} />
             </span>
-            <div>
+            <div className="flex-1">
               <h3 className="font-bold text-neutral-900">
-                Pronto: InspiraGPT, tu asistente 24/7
+                InspiraGPT: tu asistente de extranjería 24/7
               </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">
-                Estamos preparando la versión conversacional con suscripción
-                mensual: podrás preguntar cualquier duda de extranjería y
-                estudios en España a cualquier hora, entrenada con nuestras
-                guías y con el criterio de nuestro equipo legal.
+                La versión conversacional, entrenada con nuestras guías y con
+                el criterio de nuestro equipo legal. Pregunta cualquier duda de
+                extranjería y estudios en España a cualquier hora.
+                <b className="text-primary"> Pago único, acceso permanente.</b>
               </p>
-              <a
-                href="/tienda"
-                onClick={(e) => go(e, "/tienda")}
-                className="mt-3 inline-block text-sm font-bold text-primary hover:underline"
-              >
-                Verlo en la Tiendita →
-              </a>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <ComprarProducto
+                  idProducto="asistente-ia"
+                  nombre="InspiraGPT — Asistente de extranjería"
+                  precio={99}
+                  precioRef="25 US$"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-extrabold text-white transition hover:bg-accent-dark"
+                >
+                  Obtener acceso · S/ 99
+                </ComprarProducto>
+                <a
+                  href="/tienda"
+                  onClick={(e) => go(e, "/tienda")}
+                  className="text-sm font-bold text-primary hover:underline"
+                >
+                  Ver más recursos →
+                </a>
+              </div>
             </div>
           </div>
         </div>

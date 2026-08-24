@@ -22,6 +22,8 @@ export const promoVigente = () =>
 export const OPCIONES_ASESORIA = [
   {
     id: "personalizada-30",
+    idPago: "asesoria-30",
+    precioPen: 100,
     nombre: "Asesoría personalizada 1:1",
     duracion: "30 minutos",
     precio: "25 €",
@@ -40,6 +42,8 @@ export const OPCIONES_ASESORIA = [
   },
   {
     id: "personalizada-50",
+    idPago: "asesoria-50",
+    precioPen: 180,
     nombre: "Asesoría ampliada",
     duracion: "50 minutos",
     precio: "45 €",

@@ -1,6 +1,7 @@
 import Reveal from "../../../components/common/Reveal";
 import Icono from "../../../components/common/Icono";
 import { OPCIONES_ASESORIA, promoVigente } from "../../../config/asesorias";
+import ComprarProducto from "../../../components/common/ComprarProducto";
 
 export default function Asesorias() {
   const promo = promoVigente();
@@ -47,15 +48,28 @@ export default function Asesorias() {
                   <li key={it}>{it}</li>
                 ))}
               </ul>
-              <a
-                href={o.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`btn ${o.destacada ? "btn-primary" : "btn-outline"}`}
-              >
-                <Icono nombre="calendario" size={17} />
-                Reservar <span className="arr">→</span>
-              </a>
+              <div className="asesoria-acciones">
+                <a
+                  href={o.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`btn ${o.destacada ? "btn-primary" : "btn-outline"}`}
+                >
+                  <Icono nombre="calendario" size={17} />
+                  Elegir día y hora <span className="arr">→</span>
+                </a>
+                {o.idPago && (
+                  <ComprarProducto
+                    idProducto={o.idPago}
+                    nombre={`${o.nombre} · ${o.duracion}`}
+                    precio={o.precioPen}
+                    precioRef={o.precio}
+                    className="asesoria-pagar"
+                  >
+                    Pagar S/ {o.precioPen} aquí
+                  </ComprarProducto>
+                )}
+              </div>
             </Reveal>
           ))}
         </div>

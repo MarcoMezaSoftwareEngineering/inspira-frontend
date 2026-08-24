@@ -810,3 +810,60 @@
   .v4-home .sistema-grid { grid-template-columns: 1fr; gap: 36px; }
   .v4-home .sistema-mock { transform: none; max-width: 520px; }
 }
+
+/* ── CARRUSEL DE CATEGORÍAS (/servicios) ────────────────────────────── */
+.cat-slider { background: linear-gradient(180deg, #f4f9fe 0%, #fff 100%); border-bottom: 1px solid #d8e7f5; padding: 34px 0 40px; font-family: Montserrat, sans-serif; }
+.cat-slider-inner { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
+.cat-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.cat-tab { display: flex; align-items: center; gap: 10px; background: #fff; border: 1.5px solid #d8e7f5; border-radius: 16px; padding: 14px 16px; cursor: pointer; text-align: left; transition: .28s cubic-bezier(.22,1,.36,1); }
+.cat-tab:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(1,52,70,.1); }
+.cat-tab span { flex: 1; font-size: 13.5px; font-weight: 800; color: #013446; line-height: 1.25; }
+.cat-tab em { font-style: normal; font-family: Merriweather, Georgia, serif; font-size: 17px; font-weight: 900; color: #62808f; }
+.cat-tab svg { flex: 0 0 auto; color: #4e9ee8; }
+.cat-tab.activo { border-color: transparent; }
+.cat-tab.activo.c-sky { background: #013446; }
+.cat-tab.activo.c-orange { background: #b3641a; }
+.cat-tab.activo.c-sun { background: #8d6a06; }
+.cat-tab.activo span, .cat-tab.activo em, .cat-tab.activo svg { color: #fff; }
+
+.cat-panel { border-radius: 26px; padding: 30px 32px; border: 1.5px solid #d8e7f5; background: #fff; animation: cat-in .45s cubic-bezier(.22,1,.36,1) both; }
+@keyframes cat-in { from { opacity: 0; transform: translateY(16px) scale(.99); } to { opacity: 1; transform: none; } }
+.cat-panel.c-sky { background: linear-gradient(140deg, #e3f0fe 0%, #fff 60%); }
+.cat-panel.c-orange { background: linear-gradient(140deg, #fff1e2 0%, #fff 60%); }
+.cat-panel.c-sun { background: linear-gradient(140deg, #fef6dd 0%, #fff 60%); }
+.cat-panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 22px; }
+.cat-badge { display: inline-flex; align-items: center; gap: 7px; background: #fff; border-radius: 999px; padding: 6px 13px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+.cat-panel.c-sky .cat-badge { color: #17608f; }
+.cat-panel.c-orange .cat-badge { color: #b3641a; }
+.cat-panel.c-sun .cat-badge { color: #8d6a06; }
+.cat-panel-head h3 { font-family: Merriweather, Georgia, serif; font-size: clamp(21px, 2.4vw, 29px); font-weight: 900; color: #013446; letter-spacing: -.02em; margin: 12px 0 8px; }
+.cat-panel-head p { color: #62808f; font-size: 13.5px; line-height: 1.65; margin: 0; max-width: 620px; }
+.cat-cta { display: inline-flex; align-items: center; gap: 8px; background: #013446; color: #fff !important; text-decoration: none; font-size: 13px; font-weight: 800; padding: 12px 18px; border-radius: 13px; white-space: nowrap; transition: .22s cubic-bezier(.22,1,.36,1); }
+.cat-cta:hover { background: #fa943a; transform: translateY(-2px); box-shadow: 0 12px 24px rgba(250,148,58,.3); }
+.cat-cta:hover .arr { transform: translateX(4px); }
+.cat-cta .arr { transition: .22s; }
+
+.cat-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; }
+.cat-grupo h4 { font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .09em; color: #62808f; margin: 0 0 9px; padding-bottom: 7px; border-bottom: 1.5px solid rgba(1,52,70,.1); }
+.cat-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cat-chip { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #d8e7f5; border-radius: 999px; padding: 7px 13px; font-size: 12px; font-weight: 650; color: #2c4a58; text-decoration: none; transition: .2s cubic-bezier(.22,1,.36,1); }
+.cat-chip:hover { border-color: #fa943a; background: #fa943a; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 18px rgba(250,148,58,.28); }
+.cat-chip em { font-style: normal; font-size: 8.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; background: #e3f0fe; color: #17608f; padding: 2px 6px; border-radius: 999px; }
+.cat-chip:hover em { background: rgba(255,255,255,.28); color: #fff; }
+
+.cat-dots { display: flex; justify-content: center; gap: 7px; margin-top: 16px; }
+.cat-dots button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px; background: #cfdce8; cursor: pointer; transition: .25s cubic-bezier(.22,1,.36,1); }
+.cat-dots button.activo { width: 26px; background: #fa943a; }
+
+@media (max-width: 860px) {
+  .cat-tabs { grid-template-columns: 1fr; gap: 8px; }
+  .cat-tab { padding: 12px 14px; }
+  .cat-panel { padding: 22px 20px; border-radius: 22px; }
+  .cat-panel-head { flex-direction: column; align-items: stretch; gap: 16px; }
+  .cat-cta { justify-content: center; }
+}
+
+/* Acciones de la tarjeta de asesoría: agendar o pagar en la web */
+.v4-home .asesoria-acciones { display: grid; gap: 8px; }
+.v4-home .asesoria-pagar { display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--primary); font-family: Montserrat, sans-serif; font-size: 12.5px; font-weight: 800; padding: 9px 12px; border-radius: 11px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: .2s; }
+.v4-home .asesoria-pagar:hover { background: var(--surface-2); text-decoration: none; }

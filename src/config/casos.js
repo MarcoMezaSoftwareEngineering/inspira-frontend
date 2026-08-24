@@ -3,14 +3,17 @@
 // publica en sus redes. Se usa solo el nombre de pila, como en el material
 // original: no publicar apellidos ni documentos sin autorización escrita.
 //
-// ⚠️ Los contadores que se muestran salen de este array: si añades casos,
-// las cifras se actualizan solas y siguen siendo sustanciables.
+// Las cifras de CIFRAS son las declaradas por la empresa sobre el total de
+// expedientes gestionados; las fichas de CASOS son la muestra pública.
+// ⚠️ Claims publicitarios: la empresa debe poder sustanciar estas cifras
+// ante INDECOPI (ver inspira-backend/docs/legal/09-claims-publicitarios.md).
 
 export const CATEGORIAS_CASOS = [
   {
     id: "admitidos-master",
     titulo: "Admitidos a máster",
     icono: "birrete",
+    cifra: "+2.000",
     descripcion:
       "Cartas de admisión conseguidas en universidades españolas públicas y privadas.",
   },
@@ -18,29 +21,25 @@ export const CATEGORIAS_CASOS = [
     id: "visas-aprobadas",
     titulo: "Visas aprobadas",
     icono: "pasaporte",
+    cifra: "+500",
     descripcion:
       "Visados de estudios resueltos favorablemente en consulados de España.",
+  },
+  {
+    id: "extranjeria-aprobada",
+    titulo: "Extranjería aprobada",
+    icono: "bandera",
+    cifra: "+350",
+    descripcion:
+      "Estancias, residencias, renovaciones y modificaciones resueltas favorablemente.",
   },
   {
     id: "apelaciones-ganadas",
     titulo: "Apelaciones ganadas",
     icono: "balanza",
+    cifra: "+200",
     descripcion:
       "Recursos de reposición que revirtieron una denegación de visado.",
-  },
-  {
-    id: "estancias-aprobadas",
-    titulo: "Estancias aprobadas",
-    icono: "bandera",
-    descripcion:
-      "Estancias por estudios concedidas por Extranjería, presentadas de forma telemática.",
-  },
-  {
-    id: "extranjeria-aprobada",
-    titulo: "Extranjería aprobada",
-    icono: "documento",
-    descripcion:
-      "Residencias, renovaciones, modificaciones y nacionalidades resueltas favorablemente.",
   },
 ];
 

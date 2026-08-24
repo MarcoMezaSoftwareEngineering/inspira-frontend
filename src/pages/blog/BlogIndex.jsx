@@ -1,5 +1,5 @@
 // src/pages/blog/BlogIndex.jsx
-import { POSTS } from "./blog.data";
+import { POSTS, autorDe } from "./blog.data";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
@@ -78,7 +78,7 @@ export default function BlogIndex() {
                   {post.categoria}
                 </span>
                 <span className="text-neutral-500">
-                  {fechaLarga(post.fecha)} · {post.minutos} min
+                  {fechaLarga(post.fecha)} · {post.minutos} min · {autorDe(post).nombre}
                 </span>
               </div>
               <h3 className="mt-3 text-xl font-bold leading-snug text-neutral-900">

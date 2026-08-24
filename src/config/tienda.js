@@ -18,6 +18,7 @@ export const PRODUCTOS = [
   },
   {
     id: "becas-actualizadas",
+    precioPen: 59,
     nombre: "Becas en España actualizadas",
     descripcion:
       "Acceso al listado curado y actualizado de becas activas en España, con requisitos, montos y fechas de cierre.",
@@ -29,6 +30,7 @@ export const PRODUCTOS = [
   },
   {
     id: "ebook-master",
+    precioPen: 99,
     nombre: "Ebook + video: pasos para estudiar un Máster en España",
     descripcion:
       "Guía completa en ebook y video grabado con todos los pasos: elección del máster, postulación, visa y llegada a España.",
@@ -40,6 +42,7 @@ export const PRODUCTOS = [
   },
   {
     id: "ebook-fp",
+    precioPen: 39,
     nombre: "Ebook: estudia una Formación Profesional gratis en España",
     descripcion:
       "Cómo encontrar tu centro para estudiar una carrera técnica (FP) gratuita en España: requisitos, plazos y estrategia.",
@@ -53,17 +56,19 @@ export const PRODUCTOS = [
     // Producto de suscripción pendiente de construir: ver la nota del equipo
     // sobre el asistente de IA (requiere backend + pasarela de suscripción).
     id: "asistente-ia",
+    precioPen: 99,
     nombre: "InspiraGPT — tu asistente de extranjería 24/7",
     descripcion:
-      "Asistente de IA entrenado con nuestras guías de extranjería y estudios en España. Resuelve dudas de trámites a cualquier hora, con suscripción mensual.",
-    precio: "Próximamente",
-    tipo: "Suscripción",
+      "Asistente de IA entrenado con nuestras guías de extranjería y estudios en España. Resuelve dudas de trámites a cualquier hora. Pago único, acceso permanente.",
+    precio: "25 US$",
+    tipo: "Acceso permanente",
     emoji: "🤖",
     href: null,
     hotmartUrl: null,
   },
   {
     id: "videos-cv",
+    precioPen: 99,
     nombre: "Serie de videos: mejora tu CV y tu perfil",
     descripcion:
       "Serie de videos prácticos para pulir tu CV y tu perfil académico-profesional antes de postular a universidades y becas.",

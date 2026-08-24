@@ -125,7 +125,7 @@ export default function CasosExito() {
 
       {/* Contadores por categoría (también filtran) */}
       <section className="mx-auto max-w-5xl px-6 py-12">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORIAS_CASOS.map((c) => {
             const n = CASOS.filter((x) => x.categoria === c.id).length;
             return (
@@ -142,8 +142,8 @@ export default function CasosExito() {
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-light text-sky-dark">
                   <Icono nombre={c.icono} size={20} />
                 </span>
-                <p className="mt-3 font-display text-2xl font-black text-primary">
-                  {n > 0 ? n : "—"}
+                <p className="mt-3 font-display text-3xl font-black text-primary">
+                  {c.cifra}
                 </p>
                 <h2 className="text-[13px] font-bold leading-snug text-neutral-900">
                   {c.titulo}
@@ -151,10 +151,20 @@ export default function CasosExito() {
                 <p className="mt-1.5 text-[11.5px] leading-relaxed text-neutral-600">
                   {c.descripcion}
                 </p>
+                {n > 0 && (
+                  <span className="mt-2.5 inline-block rounded-full bg-secondary px-2.5 py-1 text-[10px] font-extrabold uppercase text-primary">
+                    {n} {n === 1 ? "ficha publicada" : "fichas publicadas"}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
+        <p className="mt-5 text-center text-[11.5px] leading-relaxed text-neutral-500">
+          Cifras acumuladas de expedientes gestionados por Inspira Legal. Los
+          resultados dependen del perfil de cada solicitante y de la decisión de
+          las universidades y autoridades competentes.
+        </p>
       </section>
 
       {/* Fichas */}

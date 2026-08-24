@@ -1,5 +1,5 @@
 // src/pages/blog/BlogPost.jsx
-import { getPost, POSTS } from "./blog.data";
+import { getPost, POSTS, autorDe } from "./blog.data";
 import { navigate } from "../../services/navigate";
 import NotFound from "../NotFound";
 
@@ -46,6 +46,7 @@ function Bloque({ bloque }) {
 export default function BlogPost({ slug }) {
   const post = getPost(slug);
   if (!post) return <NotFound />;
+  const autor = autorDe(post);
 
   const relacionados = POSTS.filter((p) => p.slug !== slug).slice(0, 2);
 
@@ -75,6 +76,17 @@ export default function BlogPost({ slug }) {
         <p className="mt-4 text-lg leading-relaxed text-neutral-700">
           {post.extracto}
         </p>
+
+        {/* Firma del autor */}
+        <div className="mt-7 flex items-center gap-3 rounded-2xl border border-neutral-200 bg-secondary-light p-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-white">
+            {autor.iniciales}
+          </span>
+          <div>
+            <p className="text-sm font-bold text-neutral-900">{autor.nombre}</p>
+            <p className="text-xs text-neutral-600">{autor.cargo}</p>
+          </div>
+        </div>
 
         <hr className="mt-8 border-neutral-200" />
 

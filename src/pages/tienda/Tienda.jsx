@@ -4,6 +4,7 @@
 // internas. Un producto de pago sin hotmartUrl se muestra como "Muy pronto".
 import { PRODUCTOS } from "../../config/tienda";
 import { navigate } from "../../services/navigate";
+import ComprarProducto from "../../components/common/ComprarProducto";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
 
@@ -26,7 +27,20 @@ function BotonProducto({ producto }) {
       </a>
     );
   }
-  // Producto de pago con checkout de Hotmart
+  // Producto de pago con checkout propio (Mercado Pago)
+  if (producto.precioPen) {
+    return (
+      <ComprarProducto
+        idProducto={producto.id}
+        nombre={producto.nombre}
+        precio={producto.precioPen}
+        precioRef={producto.precio}
+      >
+        Comprar ahora →
+      </ComprarProducto>
+    );
+  }
+  // Producto externo (Hotmart), si algún día se usa
   if (producto.hotmartUrl) {
     return (
       <a
@@ -39,7 +53,6 @@ function BotonProducto({ producto }) {
       </a>
     );
   }
-  // Aún sin enlace de pago
   return (
     <button
       type="button"
@@ -89,9 +102,17 @@ export default function Tienda() {
               <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-700">
                 {producto.descripcion}
               </p>
-              <div className="mt-4 text-2xl font-extrabold text-primary">
-                {producto.precio || (
-                  <span className="text-green-700">Gratis</span>
+              <div className="mt-4">
+                <span className="font-display text-2xl font-extrabold text-primary">
+                  {producto.precioPen ? `S/ ${producto.precioPen}` : null}
+                  {!producto.precioPen && !producto.precio && (
+                    <span className="text-green-700">Gratis</span>
+                  )}
+                </span>
+                {producto.precioPen && producto.precio && (
+                  <span className="ml-2 text-sm text-neutral-500">
+                    ≈ {producto.precio}
+                  </span>
                 )}
               </div>
               <BotonProducto producto={producto} />

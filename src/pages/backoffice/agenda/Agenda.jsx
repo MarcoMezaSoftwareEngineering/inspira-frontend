@@ -99,111 +99,114 @@ export default function Agenda() {
   const todayKey = toDateKey(new Date());
 
   return (
-    <div className="p-4 sm:p-6 space-y-5 max-w-[1640px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.14em] text-primary-light mb-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,.15)]" />
+    <div className="h-full flex flex-col min-h-0">
+      {/* Topbar */}
+      <header className="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
+        <div className="min-w-[220px]">
+          <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
+            <span className="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse" />
             Calendly sincronizado
           </div>
-          <h1 className="font-fraunces text-2xl sm:text-3xl font-extrabold text-primary tracking-tight leading-none">Agenda</h1>
-          <p className="text-xs text-neutral-400 mt-1">Primero las citas. Después, la disponibilidad.</p>
+          <h1 className="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
+          <p className="text-[11px] text-neutral-400 mt-0.5">Citas, disponibilidad y carga del equipo en una sola vista.</p>
         </div>
         {/* Tabs */}
-        <div className="flex p-1 rounded-2xl border border-neutral-200 bg-white/80 shadow-sm text-xs font-bold overflow-x-auto">
+        <div className="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
           <button
             onClick={() => setTab("micalendario")}
-            className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors ${tab === "micalendario" ? "bg-primary text-white shadow" : "text-neutral-500 hover:bg-neutral-50 hover:text-primary"}`}
+            className={`px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors ${tab === "micalendario" ? "bg-primary-dark text-white shadow" : "text-neutral-500 hover:bg-white hover:text-primary-dark"}`}
           >
             Mi calendario
           </button>
           <button
             onClick={() => setTab("reuniones")}
-            className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors ${tab === "reuniones" ? "bg-primary text-white shadow" : "text-neutral-500 hover:bg-neutral-50 hover:text-primary"}`}
+            className={`px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors ${tab === "reuniones" ? "bg-primary-dark text-white shadow" : "text-neutral-500 hover:bg-white hover:text-primary-dark"}`}
           >
             Reuniones (Calendly)
           </button>
           <button
             onClick={() => setTab("disponibilidad")}
-            className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors ${tab === "disponibilidad" ? "bg-primary text-white shadow" : "text-neutral-500 hover:bg-neutral-50 hover:text-primary"}`}
+            className={`px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors ${tab === "disponibilidad" ? "bg-primary-dark text-white shadow" : "text-neutral-500 hover:bg-white hover:text-primary-dark"}`}
           >
             Disponibilidad (Calendly)
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* ===== TAB MI CALENDARIO (sistema propio) ===== */}
-      {tab === "micalendario" && <MiCalendarioTab />}
+      {/* Workspace */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {/* ===== TAB MI CALENDARIO (sistema propio) ===== */}
+        {tab === "micalendario" && <MiCalendarioTab />}
 
-      {/* ===== TAB REUNIONES ===== */}
-      {tab === "reuniones" && (
-        <>
-          {/* Controles */}
-          <div className="flex items-center gap-2 flex-wrap bg-white/80 border border-neutral-200 rounded-2xl shadow-sm p-3">
-            <div className="flex p-0.5 rounded-xl border border-neutral-200 overflow-hidden text-xs bg-white">
-              {DAYS_OPTIONS.map((opt) => (
-                <button key={opt.value} onClick={() => setDays(opt.value)}
-                  className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${days === opt.value ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}>
-                  {opt.label}
+        {/* ===== TAB REUNIONES ===== */}
+        {tab === "reuniones" && (
+          <div className="h-full overflow-y-auto p-4 sm:p-5 space-y-4">
+            {/* Controles */}
+            <div className="flex items-center gap-2 flex-wrap bg-white/80 border border-neutral-200 rounded-2xl shadow-sm p-3">
+              <div className="flex p-0.5 rounded-xl border border-neutral-200 overflow-hidden text-xs bg-white">
+                {DAYS_OPTIONS.map((opt) => (
+                  <button key={opt.value} onClick={() => setDays(opt.value)}
+                    className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${days === opt.value ? "bg-primary text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {data?.booking_url && (
+                <button onClick={copyBookingLink}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${copied ? "bg-green-50 border-green-300 text-green-700" : "bg-white border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary"}`}>
+                  {copied ? "✓ Copiado" : "Copiar link de reserva"}
                 </button>
-              ))}
-            </div>
-            {data?.booking_url && (
-              <button onClick={copyBookingLink}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${copied ? "bg-green-50 border-green-300 text-green-700" : "bg-white border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary"}`}>
-                {copied ? "✓ Copiado" : "Copiar link de reserva"}
+              )}
+              <button onClick={() => loadEvents(days)}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
+                Actualizar
               </button>
+            </div>
+
+            {loading ? <LoadingSkeleton /> : error ? (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">Error: {error}</div>
+            ) : Object.keys(grouped).length === 0 ? (
+              <EmptyState bookingUrl={data?.booking_url} onCopy={copyBookingLink} copied={copied} />
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(grouped).map(([dateKey, events]) => (
+                  <DaySection key={dateKey} dateKey={dateKey} isToday={dateKey === todayKey}
+                    events={events} isAdmin={isAdmin} onCancel={openCancelModal} />
+                ))}
+              </div>
             )}
-            <button onClick={() => loadEvents(days)}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
-              Actualizar
-            </button>
           </div>
+        )}
 
-          {loading ? <LoadingSkeleton /> : error ? (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">Error: {error}</div>
-          ) : Object.keys(grouped).length === 0 ? (
-            <EmptyState bookingUrl={data?.booking_url} onCopy={copyBookingLink} copied={copied} />
-          ) : (
-            <div className="space-y-6">
-              {Object.entries(grouped).map(([dateKey, events]) => (
-                <DaySection key={dateKey} dateKey={dateKey} isToday={dateKey === todayKey}
-                  events={events} isAdmin={isAdmin} onCancel={openCancelModal} />
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* ===== TAB DISPONIBILIDAD ===== */}
-      {tab === "disponibilidad" && (
-        <div className="space-y-5">
-          {availLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {[...Array(2)].map((_, i) => (
-                <div key={i} className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5 h-48 animate-pulse" />
-              ))}
-            </div>
-          ) : availError ? (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
-              Error: {availError}
-            </div>
-          ) : avail && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Horario semanal */}
-              <WeeklyScheduleCard schedule={avail.schedule} />
-              {/* Slots disponibles */}
-              <AvailableSlotsCard
-                slots={avail.available_slots}
-                copiedSlot={copiedSlot}
-                onCopySlot={copySlotLink}
-                onRefresh={() => { setAvail(null); loadAvailability(); }}
-              />
-            </div>
-          )}
-        </div>
-      )}
+        {/* ===== TAB DISPONIBILIDAD ===== */}
+        {tab === "disponibilidad" && (
+          <div className="h-full overflow-y-auto p-4 sm:p-5 space-y-5">
+            {availLoading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {[...Array(2)].map((_, i) => (
+                  <div key={i} className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5 h-48 animate-pulse" />
+                ))}
+              </div>
+            ) : availError ? (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+                Error: {availError}
+              </div>
+            ) : avail && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Horario semanal */}
+                <WeeklyScheduleCard schedule={avail.schedule} />
+                {/* Slots disponibles */}
+                <AvailableSlotsCard
+                  slots={avail.available_slots}
+                  copiedSlot={copiedSlot}
+                  onCopySlot={copySlotLink}
+                  onRefresh={() => { setAvail(null); loadAvailability(); }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Modal cancelación — doble confirmación */}
       {cancelModal && (
@@ -279,16 +282,18 @@ export default function Agenda() {
 const HOUR_START = 7;   // 07:00
 const HOUR_END = 21;    // 21:00 (el último renglón es 20:30–21:00)
 const ROWS = (HOUR_END - HOUR_START) * 2;
-const ROW_H = 30; // px por cada media hora
+const ROW_H = 29; // px por cada media hora
 
-const ESTADO_BLOCK_STYLE = {
-  LIBRE:     "bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-red-100 hover:border-red-300 hover:text-red-700",
-  RESERVADO: "bg-amber-100 border-amber-300 text-amber-800 cursor-default",
-  OCUPADO:   "bg-primary text-white border-primary cursor-default",
-  BLOQUEADO: "bg-neutral-200 border-neutral-300 text-neutral-500 hover:bg-primary/10 hover:border-primary hover:text-primary",
-};
 const ESTADO_DOT = { LIBRE: "bg-emerald-400", RESERVADO: "bg-amber-400", OCUPADO: "bg-primary", BLOQUEADO: "bg-neutral-300" };
 const ESTADO_LABEL = { LIBRE: "Libre — clic para borrar", RESERVADO: "Reservado (pago en curso)", OCUPADO: "Ocupado — cita confirmada", BLOQUEADO: "Bloqueado — clic para liberar" };
+const ESTADO_NOMBRE = { LIBRE: "Libre", RESERVADO: "Reservado", OCUPADO: "Ocupado", BLOQUEADO: "Bloqueado" };
+// Tonos de evento inspirados en el mock: verde=libre, ámbar=reservado, verde sólido=ocupado, gris=bloqueado.
+const EVENT_TONE = {
+  LIBRE:     "bg-[#dff7eb] text-[#0c6545] border-[#bce8d2]",
+  RESERVADO: "bg-[#fff0e4] text-[#a75928] border-[#f7d5bd]",
+  OCUPADO:   "bg-[#145f43] text-white border-[#145f43]",
+  BLOQUEADO: "bg-neutral-100 text-neutral-500 border-neutral-300",
+};
 
 const WEEKDAY_SHORT = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 
@@ -325,6 +330,7 @@ function MiCalendarioTab() {
 
   const [asesores, setAsesores] = useState([]);
   const [filtro, setFiltro] = useState(esAdmin ? "todos" : "yo"); // "todos" | "yo" | id_usuario
+  const [viewMode, setViewMode] = useState("semana"); // "semana" | "dia"
 
   const [slotMap, setSlotMap] = useState(new Map()); // "fecha|hora" -> slot[]
   const [reservas, setReservas] = useState([]);
@@ -440,13 +446,11 @@ function MiCalendarioTab() {
     }
   }
 
-  // ── Datos derivados para la cabecera tipo "hero" y las métricas ──
+  // ── Datos derivados para las métricas, capacidad y panel lateral ──
   const reservasActivas = reservas.filter((r) => r.estado !== "CANCELADA");
-  const reservasFuturas = reservasActivas
-    .filter((r) => !esPasado(r.fecha, r.hora_inicio))
-    .sort((a, b) => (a.fecha + a.hora_inicio).localeCompare(b.fecha + b.hora_inicio));
-  const proxima = reservasFuturas[0] || null;
-  const cola = reservasFuturas.slice(1, 4);
+  const reservasOrdenadas = [...reservasActivas].sort(
+    (a, b) => (a.fecha + a.hora_inicio).localeCompare(b.fecha + b.hora_inicio)
+  );
 
   const todosSlots = Array.from(slotMap.values()).flat();
   const slotsLibres = todosSlots.filter((s) => s.estado === "LIBRE");
@@ -455,395 +459,334 @@ function MiCalendarioTab() {
   const ocupacionPct = todosSlots.length ? Math.round((slotsOcupados.length / todosSlots.length) * 100) : 0;
   const pagosPendientes = reservas.filter((r) => r.pago_estado === "PENDIENTE").length;
 
-  const horasLibresPorDia = weekDays.map((d) => {
-    const fecha = toISODate(d);
-    const n = slotsLibres.filter((s) => s.fecha === fecha).length;
-    return { fecha, dia: WEEKDAY_SHORT[d.getDay()], horas: n * 0.5 };
-  });
+  // Cruce slot -> reserva, para mostrar el nombre del cliente dentro del bloque del calendario.
+  const reservaPorClave = new Map();
+  for (const r of reservas) {
+    const k = combinado && r.asesor ? `${r.fecha}|${r.hora_inicio}|${r.asesor.id_usuario}` : `${r.fecha}|${r.hora_inicio}`;
+    reservaPorClave.set(k, r);
+  }
+  function claveDeSlot(slot) {
+    return combinado && slot.asesor ? `${slot.fecha}|${slot.hora_inicio}|${slot.asesor.id_usuario}` : `${slot.fecha}|${slot.hora_inicio}`;
+  }
 
-  function minutosHasta(fecha, hora) {
-    const [h, m] = hora.split(":").map(Number);
-    const target = new Date(fecha + "T00:00:00");
-    target.setHours(h, m, 0, 0);
-    return Math.round((target - new Date()) / 60000);
+  // Días a mostrar en el grid: semana completa o solo el primer día del rango (vista "Día")
+  const displayedDays = viewMode === "dia" ? weekDays.slice(0, 1) : weekDays;
+  const stepDias = viewMode === "dia" ? 1 : 7;
+  const hoyEnRango = displayedDays.some((d) => toISODate(d) === todayKey);
+  const nowLineTop = ((nowMin - HOUR_START * 60) / 30) * ROW_H;
+  const mostrarNowLine = hoyEnRango && nowMin >= HOUR_START * 60 && nowMin <= HOUR_END * 60;
+
+  function rangoTexto() {
+    if (viewMode === "semana") return rangeLabel(weekDays);
+    const d = weekDays[0];
+    return d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "short", year: "numeric" });
   }
-  function countdownLabel(fecha, hora) {
-    const min = minutosHasta(fecha, hora);
-    if (min <= 0) return "ahora";
-    const h = Math.floor(min / 60), m = min % 60;
-    return h > 0 ? `en ${h} h ${m} min` : `en ${m} min`;
-  }
+
+  const tituloCalendario = combinado
+    ? "Todo el equipo"
+    : filtro === "yo"
+      ? "Tu calendario"
+      : asesores.find((a) => String(a.id_usuario) === String(filtro))?.nombre || "Tu calendario";
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar: navegación de semana + acciones */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white/80 border border-neutral-200 rounded-2xl shadow-sm p-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={() => setWeekStart((d) => addDays(d, -7))}
-            className="w-9 h-9 flex items-center justify-center rounded-xl border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors bg-white">
+    <div className="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+      {/* Toolbar: navegación + filtro + vista + acciones */}
+      <div className="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
+        <div className="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
+          <button onClick={() => setWeekStart((d) => addDays(d, -stepDias))}
+            className="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">
             ‹
           </button>
-          <div className="text-xs font-extrabold text-neutral-800 capitalize min-w-[150px] text-center">
-            {rangeLabel(weekDays)}
+          <div className="text-[11.5px] font-extrabold text-neutral-800 capitalize min-w-[150px] text-center">
+            {rangoTexto()}
           </div>
-          <button onClick={() => setWeekStart((d) => addDays(d, 7))}
-            className="w-9 h-9 flex items-center justify-center rounded-xl border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors bg-white">
+          <button onClick={() => setWeekStart((d) => addDays(d, stepDias))}
+            className="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">
             ›
           </button>
           <button onClick={() => setWeekStart(startOfDay(new Date()))}
-            className="ml-1 px-3 py-2 rounded-xl text-xs font-bold border border-neutral-200 text-neutral-600 hover:bg-neutral-50 bg-white">
+            className="h-[34px] px-3 rounded-[10px] text-[11px] font-extrabold border border-neutral-200 text-neutral-600 hover:bg-secondary-light hover:text-primary hover:border-primary/30 bg-white flex-shrink-0">
             Hoy
           </button>
           {esAdmin && (
-            <select value={filtro} onChange={(e) => setFiltro(e.target.value)}
-              className="ml-1 border border-neutral-200 rounded-xl px-3 py-2 text-xs font-bold text-neutral-700 focus:outline-none focus:border-primary bg-white">
-              <option value="todos">👥 Todo el equipo</option>
-              {asesores.map((a) => (
-                <option key={a.id_usuario} value={a.id_usuario}>{a.nombre}</option>
-              ))}
-            </select>
-          )}
-        </div>
-        <button onClick={() => setShowBulk((v) => !v)} disabled={combinado}
-          title={combinado ? "Elige un asesor específico para crear horarios" : undefined}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-extrabold shadow-[0_9px_24px_rgba(238,166,108,.24)] transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-          style={{ background: "linear-gradient(135deg,#efaa72,#f4be91)" }}>
-          <span className="text-base leading-none">+</span> Generar varios horarios
-        </button>
-      </div>
-
-      {/* Panel "generar varios de una vez" (colapsable) */}
-      {showBulk && !combinado && (
-        <form onSubmit={crearBulk} className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 flex flex-wrap items-end gap-3">
-          <label className="text-xs text-neutral-500">
-            Fecha
-            <input type="date" value={bulkFecha} onChange={(e) => setBulkFecha(e.target.value)} required
-              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-          </label>
-          <label className="text-xs text-neutral-500">
-            Desde
-            <input type="time" step="1800" value={bulkDesde} onChange={(e) => setBulkDesde(e.target.value)} required
-              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-          </label>
-          <label className="text-xs text-neutral-500">
-            Hasta
-            <input type="time" step="1800" value={bulkHasta} onChange={(e) => setBulkHasta(e.target.value)} required
-              className="block mt-1 border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-          </label>
-          <button type="submit" disabled={creando}
-            className="px-4 py-1.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-light disabled:opacity-50 transition-colors">
-            {creando ? "Creando…" : "Generar bloques de 30 min"}
-          </button>
-          <p className="basis-full text-[11px] text-neutral-400">
-            También puedes hacer clic directo en una celda vacía del calendario para crear un solo horario de 30 min.
-          </p>
-        </form>
-      )}
-
-      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">Error: {error}</div>}
-
-      {/* ===== Hero: próxima cita + cola de próximas ===== */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1.6fr_.8fr] gap-4">
-        {/* Próxima cita */}
-        <div className="relative bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="absolute w-56 h-56 rounded-full -top-28 -right-20 pointer-events-none"
-            style={{ background: "radial-gradient(circle,rgba(104,211,155,.20),transparent 67%)" }} />
-          <div className="relative flex items-start justify-between gap-3 px-5 pt-5 pb-3">
-            <div>
-              <div className="text-[9px] font-extrabold uppercase tracking-[.12em] text-neutral-400 mb-1">Siguiente cita</div>
-              <h3 className="text-sm font-bold text-neutral-800">Lo que requiere atención ahora</h3>
-            </div>
-            {proxima && !pagoEsRedundante(proxima.estado, proxima.pago_estado) && (
-              <Pill tone={pagoTone(proxima.pago_estado)}>Pago {proxima.pago_estado.toLowerCase()}</Pill>
-            )}
-          </div>
-
-          {!proxima ? (
-            <div className="px-5 pb-6 text-sm text-neutral-400">No hay próximas citas confirmadas esta semana.</div>
-          ) : (
-            <div className="relative px-5 pb-5 grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-4">
-              <div className="rounded-2xl p-4 text-white flex flex-col justify-between overflow-hidden relative min-h-[140px]"
-                style={{ background: "radial-gradient(circle at 100% 0%,rgba(113,221,164,.38),transparent 36%), linear-gradient(155deg,#0d4b31,#173e2f)" }}>
-                <small className="text-[9px] uppercase tracking-[.12em] font-extrabold text-white/55">
-                  {new Date(proxima.fecha + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "short" })}
-                </small>
-                <div className="font-fraunces text-3xl font-extrabold tracking-tight">{proxima.hora_inicio}</div>
-                <div className="text-[10px] text-white/70">{countdownLabel(proxima.fecha, proxima.hora_inicio)} · 30 min</div>
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <h4 className="text-lg font-extrabold text-neutral-800 tracking-tight truncate">{proxima.cliente?.nombre || "Sin nombre"}</h4>
-                  {proxima.asesor && <Pill tone="primary">{proxima.asesor.nombre}</Pill>}
-                </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-neutral-500 mb-3">
-                  {proxima.cliente?.email_contacto && <span>{proxima.cliente.email_contacto}</span>}
-                  {proxima.cliente?.telefono && <span>{proxima.cliente.telefono}</span>}
-                </div>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  <Pill tone="neutral">{proxima.monto} {proxima.moneda}</Pill>
-                  <Pill tone={reservaTone(proxima.estado)}>{proxima.estado.toLowerCase().replaceAll("_", " ")}</Pill>
-                  {!proxima.meet_url && <Pill tone="amber">Sin Meet</Pill>}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {proxima.meet_url ? (
-                    <a href={proxima.meet_url} target="_blank" rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-primary text-white rounded-lg text-[11px] font-bold hover:opacity-90">Unirse</a>
-                  ) : (
-                    <EditMeetBtn reserva={proxima} onChanged={cargar} />
-                  )}
-                  <CancelBtn reserva={proxima} onChanged={cargar} />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Cola de próximas */}
-        <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 flex flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="text-[9px] font-extrabold uppercase tracking-[.12em] text-neutral-400 mb-1">Después</div>
-              <h3 className="text-sm font-bold text-neutral-800">Próximas citas</h3>
-            </div>
-          </div>
-          {cola.length === 0 ? (
-            <p className="text-xs text-neutral-400 flex-1 flex items-center justify-center py-6">Sin más citas en cola.</p>
-          ) : (
-            <div className="space-y-1.5">
-              {cola.map((r) => (
-                <div key={r.id_reserva} className="grid grid-cols-[46px_1fr_auto] gap-2.5 items-center p-2 rounded-xl hover:bg-neutral-50 transition-colors">
-                  <div className="text-xs font-extrabold text-primary leading-tight">
-                    {r.hora_inicio}
-                    <small className="block text-[8px] text-neutral-400 font-semibold">{r.fecha.slice(5)}</small>
-                  </div>
-                  <div className="min-w-0">
-                    <strong className="block text-[11px] text-neutral-800 truncate">{r.cliente?.nombre || "Sin nombre"}</strong>
-                    <span className="block text-[9px] text-neutral-400 truncate">{r.asesor?.nombre || ""}</span>
-                  </div>
-                  <span className={`text-[8px] font-extrabold px-2 py-1 rounded-full whitespace-nowrap ${
-                    pagoEsRedundante(r.estado, r.pago_estado) === false && r.pago_estado === "PENDIENTE"
-                      ? "text-amber-700 bg-amber-50" : "text-emerald-700 bg-emerald-50"
-                  }`}>
-                    {r.pago_estado === "APROBADO" ? "Pagada" : r.pago_estado.toLowerCase()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ===== Métricas ===== */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-        <MetricTile icon="📅" tone="green" value={reservasActivas.length} label="Citas esta semana" />
-        <MetricTile icon="⏱️" tone="orange" value={`${horasLibres} h`} label="Disponibilidad libre" />
-        <MetricTile icon="💳" tone="yellow" value={pagosPendientes} label="Pagos pendientes" />
-        <MetricTile icon="📊" tone="gray" value={`${ocupacionPct}%`} label="Ocupación semanal" />
-      </div>
-
-      {/* Calendario semanal */}
-      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
-          <h3 className="text-sm font-semibold text-neutral-700">
-            {combinado ? "Todo el equipo" : "Tu semana"}
-          </h3>
-          <div className="flex gap-3 text-[10px] text-neutral-500">
-            {Object.entries(ESTADO_DOT).map(([k, dot]) => (
-              <span key={k} className="flex items-center gap-1">
-                <span className={`w-2.5 h-2.5 rounded-full ${dot}`} />
-                {k === "LIBRE" ? "Libre" : k === "RESERVADO" ? "Reservado" : k === "OCUPADO" ? "Ocupado" : "Bloqueado"}
-              </span>
-            ))}
-          </div>
-        </div>
-        {combinado && (
-          <p className="text-[11px] text-neutral-400 px-4 pt-1.5">
-            Cuando dos asesores tienen horario a la misma hora, verás varios bloques juntos en esa celda.
-          </p>
-        )}
-
-        {/* Contenedor con scroll interno propio: el encabezado de días queda fijo arriba
-            y el eje de horas queda fijo a la izquierda, sin que la página entera se desplace. */}
-        <div className="mt-3 max-h-[55vh] min-h-[320px] overflow-auto">
-          <div className="min-w-[640px]">
-            {/* Encabezado de días */}
-            <div className="grid sticky top-0 z-20 bg-white border-b border-neutral-100" style={{ gridTemplateColumns: "52px repeat(7, 1fr)" }}>
-              <div className="sticky left-0 bg-white z-10" />
-              {weekDays.map((d) => {
-                const key = toISODate(d);
-                const isToday = key === todayKey;
-                return (
-                  <div key={key} className="flex flex-col items-center py-2.5">
-                    <span className="text-[10px] uppercase tracking-wide text-neutral-400">{WEEKDAY_SHORT[d.getDay()]}</span>
-                    <span className={`mt-1 w-7 h-7 flex items-center justify-center rounded-full text-sm font-semibold ${isToday ? "bg-primary text-white" : "text-neutral-700"}`}>
-                      {d.getDate()}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Grid de horas × días */}
-            {loading ? (
-              <div className="p-10 text-center text-sm text-neutral-400">Cargando…</div>
-            ) : (
-              <div className="relative grid" style={{ gridTemplateColumns: "52px repeat(7, 1fr)", gridTemplateRows: `repeat(${ROWS}, ${ROW_H}px)` }}>
-                {/* Líneas de hora + etiquetas (columna fija al hacer scroll horizontal) */}
-                {Array.from({ length: ROWS }, (_, row) => (
-                  <div key={`label-${row}`}
-                    className="sticky left-0 z-10 bg-white text-[10px] text-neutral-400 text-right pr-2 border-t border-neutral-100 -translate-y-1/2"
-                    style={{ gridColumn: 1, gridRow: row + 1 }}>
-                    {row % 2 === 0 ? rowLabel(row) : ""}
-                  </div>
+            <div className="relative min-w-[170px] max-w-[240px] flex-1">
+              <select value={filtro} onChange={(e) => setFiltro(e.target.value)}
+                className="w-full h-[34px] border border-neutral-200 rounded-[10px] px-3 text-[11px] font-bold text-neutral-700 focus:outline-none focus:border-primary bg-white appearance-none">
+                <option value="todos">Todo el equipo</option>
+                <option value="yo">Yo</option>
+                {asesores.map((a) => (
+                  <option key={a.id_usuario} value={a.id_usuario}>{a.nombre}</option>
                 ))}
+              </select>
+            </div>
+          )}
+        </div>
 
-                {/* Celdas por día */}
-                {weekDays.map((d, dayIdx) => {
-                  const fecha = toISODate(d);
-                  return Array.from({ length: ROWS }, (_, row) => {
-                    const hora = rowLabel(row);
-                    const key = `${fecha}|${hora}`;
-                    const arr = slotMap.get(key) || [];
-                    const pasado = esPasado(fecha, hora);
+        <div className="hidden lg:flex items-center bg-white border border-neutral-200 rounded-2xl shadow-sm px-1.5 min-h-[46px]">
+          <div className="flex gap-0.5 bg-neutral-100 p-[3px] rounded-[10px]">
+            <button onClick={() => setViewMode("semana")}
+              className={`px-2.5 py-[7px] rounded-[8px] text-[10.5px] font-extrabold transition-colors ${viewMode === "semana" ? "bg-white text-primary-dark shadow-sm" : "text-neutral-500"}`}>
+              Semana
+            </button>
+            <button onClick={() => setViewMode("dia")}
+              className={`px-2.5 py-[7px] rounded-[8px] text-[10.5px] font-extrabold transition-colors ${viewMode === "dia" ? "bg-white text-primary-dark shadow-sm" : "text-neutral-500"}`}>
+              Día
+            </button>
+          </div>
+        </div>
 
-                    if (arr.length === 0) {
-                      return (
-                        <button
-                          key={key}
-                          disabled={pasado || busyCell === key || combinado}
-                          onClick={() => crearSlotRapido(fecha, hora)}
-                          title={pasado || combinado ? "" : `Crear horario ${hora}`}
-                          className={`border-t border-l border-neutral-100 transition-colors ${
-                            pasado || combinado ? "bg-neutral-50/60 cursor-default" : "hover:bg-primary/5 cursor-pointer"
-                          } ${busyCell === key ? "bg-primary/10" : ""}`}
-                          style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}
-                        />
-                      );
-                    }
+        <div className="relative">
+          <button onClick={() => setShowBulk((v) => !v)} disabled={combinado}
+            title={combinado ? "Elige un asesor específico para crear horarios" : undefined}
+            className="w-full lg:w-auto h-full min-h-[46px] flex items-center justify-center gap-1.5 px-[17px] rounded-2xl text-white text-[11px] font-extrabold shadow-[0_10px_24px_rgba(229,147,87,.22)] transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap"
+            style={{ background: "radial-gradient(circle at 85% 15%,rgba(255,255,255,.28),transparent 30%), linear-gradient(135deg,#efaa73,#f5c49e)" }}>
+            + Generar horarios
+          </button>
 
-                    if (arr.length === 1) {
-                      const slot = arr[0];
-                      return (
-                        <div key={key} className="relative group border-t border-l border-neutral-100" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
-                          <button
-                            onClick={() => onClickSlot(slot)}
-                            title={`${ESTADO_LABEL[slot.estado]}${slot.asesor ? ` — ${slot.asesor.nombre}` : ""}`}
-                            className={`absolute inset-0.5 rounded-md border text-[10px] font-semibold flex items-center justify-center transition-colors ${ESTADO_BLOCK_STYLE[slot.estado]}`}
-                          >
-                            {combinado && slot.asesor ? iniciales(slot.asesor.nombre) : hora}
-                          </button>
-                          {slot.estado === "LIBRE" && (
-                            <button
-                              onClick={(e) => bloquearSlot(slot, e)}
-                              title="Bloquear este horario"
-                              className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white border border-neutral-300 text-neutral-500 text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:border-primary hover:text-primary transition-opacity"
-                            >
-                              🔒
-                            </button>
-                          )}
-                        </div>
-                      );
-                    }
+          {/* Panel "generar varios de una vez" — popover anclado al botón */}
+          {showBulk && !combinado && (
+            <>
+              <div className="fixed inset-0 z-20" onClick={() => setShowBulk(false)} />
+              <form onSubmit={crearBulk}
+                className="absolute right-0 top-[calc(100%+8px)] z-30 w-[290px] bg-white border border-neutral-200 rounded-2xl shadow-xl p-4 flex flex-col gap-3">
+                <label className="text-xs text-neutral-500">
+                  Fecha
+                  <input type="date" value={bulkFecha} onChange={(e) => setBulkFecha(e.target.value)} required
+                    className="block mt-1 w-full border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                </label>
+                <div className="flex gap-2">
+                  <label className="text-xs text-neutral-500 flex-1">
+                    Desde
+                    <input type="time" step="1800" value={bulkDesde} onChange={(e) => setBulkDesde(e.target.value)} required
+                      className="block mt-1 w-full border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </label>
+                  <label className="text-xs text-neutral-500 flex-1">
+                    Hasta
+                    <input type="time" step="1800" value={bulkHasta} onChange={(e) => setBulkHasta(e.target.value)} required
+                      className="block mt-1 w-full border border-neutral-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </label>
+                </div>
+                <button type="submit" disabled={creando}
+                  className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-light disabled:opacity-50 transition-colors">
+                  {creando ? "Creando…" : "Generar bloques de 30 min"}
+                </button>
+                <p className="text-[10.5px] text-neutral-400">
+                  También puedes hacer clic directo en una celda vacía del calendario para crear un solo horario de 30 min.
+                </p>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
 
-                    // Varios asesores con horario a la misma hora -> mini bloques lado a lado (cruce visible)
-                    return (
-                      <div key={key} className="flex gap-0.5 p-0.5 border-t border-l border-neutral-100" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
-                        {arr.map((slot) => (
-                          <button
-                            key={slot.id_slot}
-                            onClick={() => onClickSlot(slot)}
-                            title={`${slot.asesor?.nombre || ""} — ${ESTADO_LABEL[slot.estado]}`}
-                            className={`flex-1 rounded border text-[8px] font-bold flex items-center justify-center transition-colors ${ESTADO_BLOCK_STYLE[slot.estado]}`}
-                          >
-                            {iniciales(slot.asesor?.nombre)}
-                          </button>
-                        ))}
-                      </div>
-                    );
-                  });
+      {error && <div className="flex-none bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs">Error: {error}</div>}
+
+      {/* ===== Calendario + panel lateral ===== */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_336px] gap-3">
+        {/* Calendario */}
+        <section className="min-w-0 min-h-0 flex flex-col bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="flex-none flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-neutral-100">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-[34px] h-[34px] rounded-[11px] bg-secondary text-primary grid place-items-center flex-shrink-0 text-base">📅</div>
+              <div className="min-w-0">
+                <strong className="block text-[12.5px] text-neutral-800 truncate">{tituloCalendario}</strong>
+                <span className="block text-[9.5px] text-neutral-400 mt-0.5">{viewMode === "dia" ? "Vista diaria" : "Semana actual"} · hora local</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 flex-wrap justify-end">
+              {Object.entries(ESTADO_DOT).map(([k, dot]) => (
+                <span key={k} className="flex items-center gap-1 text-[9.5px] text-neutral-500">
+                  <span className={`w-[7px] h-[7px] rounded-full ${dot}`} />
+                  {ESTADO_NOMBRE[k]}
+                </span>
+              ))}
+            </div>
+          </div>
+          {combinado && (
+            <p className="flex-none text-[10.5px] text-neutral-400 px-3.5 pt-1.5">
+              Cuando dos asesores tienen horario a la misma hora, verás varios bloques juntos en esa celda.
+            </p>
+          )}
+
+          <div className="flex-1 min-h-0 overflow-auto">
+            <div style={{ minWidth: displayedDays.length > 1 ? 700 : 260 }}>
+              {/* Encabezado de días */}
+              <div className="grid sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-neutral-100" style={{ gridTemplateColumns: `52px repeat(${displayedDays.length}, minmax(90px,1fr))` }}>
+                <div className="sticky left-0 bg-white z-10" />
+                {displayedDays.map((d) => {
+                  const key = toISODate(d);
+                  const isToday = key === todayKey;
+                  return (
+                    <div key={key} className={`flex flex-col items-center gap-1 py-2.5 ${isToday ? "bg-gradient-to-b from-secondary-light to-transparent" : ""}`}>
+                      <span className="text-[9px] uppercase tracking-[.12em] text-neutral-400 font-extrabold">{WEEKDAY_SHORT[d.getDay()]}</span>
+                      <span className={`w-7 h-7 flex items-center justify-center rounded-full text-[11px] font-extrabold ${isToday ? "bg-primary-dark text-white shadow" : "text-neutral-700"}`}>
+                        {d.getDate()}
+                      </span>
+                    </div>
+                  );
                 })}
               </div>
-            )}
+
+              {/* Grid de horas × días */}
+              {loading ? (
+                <div className="p-10 text-center text-sm text-neutral-400">Cargando…</div>
+              ) : (
+                <div className="relative grid" style={{ gridTemplateColumns: `52px repeat(${displayedDays.length}, minmax(90px,1fr))`, gridTemplateRows: `repeat(${ROWS}, ${ROW_H}px)` }}>
+                  {mostrarNowLine && (
+                    <div className="absolute right-0 h-px bg-[#f17860] z-[6] pointer-events-none" style={{ left: 52, top: nowLineTop }}>
+                      <span className="absolute -left-[4px] -top-[3px] w-[7px] h-[7px] rounded-full bg-[#f17860]" />
+                    </div>
+                  )}
+                  {/* Líneas de hora + etiquetas (columna fija al hacer scroll horizontal) */}
+                  {Array.from({ length: ROWS }, (_, row) => (
+                    <div key={`label-${row}`}
+                      className="sticky left-0 z-10 bg-white text-[9px] text-neutral-400 font-semibold text-right pr-2 border-t border-neutral-100 -translate-y-1/2"
+                      style={{ gridColumn: 1, gridRow: row + 1 }}>
+                      {row % 2 === 0 ? rowLabel(row) : ""}
+                    </div>
+                  ))}
+
+                  {/* Celdas por día */}
+                  {displayedDays.map((d, dayIdx) => {
+                    const fecha = toISODate(d);
+                    return Array.from({ length: ROWS }, (_, row) => {
+                      const hora = rowLabel(row);
+                      const key = `${fecha}|${hora}`;
+                      const arr = slotMap.get(key) || [];
+                      const pasado = esPasado(fecha, hora);
+
+                      if (arr.length === 0) {
+                        return (
+                          <button
+                            key={key}
+                            disabled={pasado || busyCell === key || combinado}
+                            onClick={() => crearSlotRapido(fecha, hora)}
+                            title={pasado || combinado ? "" : `Crear horario ${hora}`}
+                            className={`border-t border-l border-neutral-100 transition-colors ${
+                              pasado || combinado ? "bg-neutral-50/60 cursor-default" : "hover:bg-secondary-light cursor-pointer"
+                            } ${busyCell === key ? "bg-primary/10" : ""}`}
+                            style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}
+                          />
+                        );
+                      }
+
+                      if (arr.length === 1) {
+                        const slot = arr[0];
+                        const reservaDelSlot = (slot.estado === "RESERVADO" || slot.estado === "OCUPADO")
+                          ? reservaPorClave.get(claveDeSlot(slot)) : null;
+                        const titulo = reservaDelSlot?.cliente?.nombre || ESTADO_NOMBRE[slot.estado];
+                        const subtitulo = combinado && slot.asesor ? `${hora} · ${slot.asesor.nombre}` : hora;
+                        return (
+                          <div key={key} className="relative group border-t border-l border-neutral-100 p-[3px]" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
+                            <button
+                              onClick={() => onClickSlot(slot)}
+                              title={`${ESTADO_LABEL[slot.estado]}${slot.asesor ? ` — ${slot.asesor.nombre}` : ""}`}
+                              className={`w-full h-full rounded-[9px] border px-1.5 flex flex-col justify-center overflow-hidden text-left shadow-sm transition-transform hover:-translate-y-px ${EVENT_TONE[slot.estado]} ${slot.estado === "LIBRE" || slot.estado === "BLOQUEADO" ? "cursor-pointer" : "cursor-default"}`}
+                            >
+                              <b className="block text-[9px] font-extrabold leading-tight truncate">{titulo}</b>
+                              <small className="block text-[8px] opacity-75 leading-tight truncate">{subtitulo}</small>
+                            </button>
+                            {slot.estado === "LIBRE" && (
+                              <button
+                                onClick={(e) => bloquearSlot(slot, e)}
+                                title="Bloquear este horario"
+                                className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-white border border-neutral-300 text-neutral-500 text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 hover:border-primary hover:text-primary transition-opacity"
+                              >
+                                🔒
+                              </button>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      // Varios asesores con horario a la misma hora -> mini bloques lado a lado (cruce visible)
+                      return (
+                        <div key={key} className="flex gap-0.5 p-[3px] border-t border-l border-neutral-100" style={{ gridColumn: dayIdx + 2, gridRow: row + 1 }}>
+                          {arr.map((slot) => (
+                            <button
+                              key={slot.id_slot}
+                              onClick={() => onClickSlot(slot)}
+                              title={`${slot.asesor?.nombre || ""} — ${ESTADO_LABEL[slot.estado]}`}
+                              className={`flex-1 rounded-[7px] border text-[8px] font-extrabold flex items-center justify-center transition-colors ${EVENT_TONE[slot.estado]}`}
+                            >
+                              {iniciales(slot.asesor?.nombre)}
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    });
+                  })}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        <p className="text-[10px] text-neutral-400 px-4 py-3 border-t border-neutral-100">
-          {combinado
-            ? "Elige un asesor en el selector de arriba para crear o modificar horarios."
-            : "Clic en una celda vacía para crear un horario · clic en uno libre para borrarlo (🔒 para bloquearlo) · clic en uno bloqueado para liberarlo."}
-        </p>
-      </div>
 
-      {/* ===== Citas confirmadas + capacidad del equipo ===== */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1.45fr_.8fr] gap-4">
-        <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-5">
-          <h3 className="text-sm font-semibold text-neutral-700 mb-4">
-            {combinado ? "Citas confirmadas del equipo esta semana" : "Citas confirmadas y pagadas esta semana"}
-          </h3>
-          {reservas.length === 0 ? (
-            <p className="text-sm text-neutral-400 text-center py-6">No hay citas en este rango.</p>
-          ) : (
-            <div className="space-y-3">
-              {reservas.map((r) => (
-                <ReservaCard key={r.id_reserva} reserva={r} onChanged={cargar} mostrarAsesor={combinado} />
-              ))}
-            </div>
-          )}
-        </div>
+          <div className="flex-none px-3.5 py-2 border-t border-neutral-100 text-[9.5px] text-neutral-400">
+            {combinado
+              ? "Elige un asesor en el selector de arriba para crear o modificar horarios."
+              : "Clic en una celda vacía para crear un horario · clic en uno libre para borrarlo (🔒 para bloquearlo) · clic en uno bloqueado para liberarlo."}
+          </div>
+        </section>
 
-        <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden relative">
-          <div className="absolute w-56 h-56 rounded-full -top-28 -right-20 pointer-events-none"
-            style={{ background: "radial-gradient(circle,rgba(104,211,155,.20),transparent 67%)" }} />
-          <div className="relative px-5 pt-5 pb-3">
-            <div className="text-[9px] font-extrabold uppercase tracking-[.12em] text-neutral-400 mb-1">Capacidad</div>
-            <h3 className="text-sm font-bold text-neutral-800">Disponibilidad del equipo</h3>
+        {/* Panel lateral */}
+        <aside className="min-w-0 min-h-0 grid grid-rows-[auto_auto_minmax(0,1fr)] gap-2.5 overflow-hidden">
+          <div className="grid grid-cols-2 gap-2">
+            <StatTile k="Citas esta semana" value={reservasActivas.length} note={combinado ? "en todo el equipo" : "tuyas"} />
+            <StatTile k="Disponibilidad libre" value={`${horasLibres} h`} note={combinado ? "en todo el equipo" : "tuya"} />
+            <StatTile k="Pagos pendientes" value={pagosPendientes} note="requieren revisión" />
+            <StatTile k="Ocupación semanal" value={`${ocupacionPct}%`} note="objetivo 70%" />
           </div>
 
-          <div className="relative mx-4 mb-4 p-4 rounded-2xl text-white"
-            style={{ background: "radial-gradient(circle at 90% 0%,rgba(117,223,167,.30),transparent 38%), linear-gradient(145deg,#124f35,#0d3a29)" }}>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <strong className="text-xs">Ocupación semanal</strong>
-              <span className="text-[9px] text-emerald-200 bg-white/10 border border-white/10 rounded-full px-2 py-1">Objetivo 70%</span>
+          <div className="relative overflow-hidden rounded-2xl p-4 text-white"
+            style={{ background: "radial-gradient(circle at 95% 0%,rgba(122,232,174,.32),transparent 35%), linear-gradient(145deg,#125a40,#0b432f)" }}>
+            <div className="flex items-center justify-between gap-2">
+              <b className="text-xs">Capacidad semanal</b>
+              <span className="text-[8.5px] text-emerald-200 bg-white/10 border border-white/10 rounded-full px-2 py-1">Objetivo 70%</span>
             </div>
-            <div className="h-2 bg-white/15 rounded-full overflow-hidden mb-2">
-              <div className="h-full rounded-full" style={{ width: `${Math.min(100, ocupacionPct)}%`, background: "linear-gradient(90deg,#70dba3,#b7f3d2)" }} />
+            <div className="h-[7px] bg-white/15 rounded-full overflow-hidden my-2.5">
+              <div className="h-full rounded-full" style={{ width: `${Math.min(100, ocupacionPct)}%`, background: "linear-gradient(90deg,#6ee0aa,#b9f1d2)" }} />
             </div>
-            <div className="flex justify-between text-white/60 text-[9px]">
+            <div className="flex justify-between text-white/60 text-[8.5px]">
               <span>{ocupacionPct}% ocupado</span>
               <span>{horasLibres} h libres</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 px-4 pb-4">
-            {horasLibresPorDia.slice(0, 4).map((d) => (
-              <div key={d.fecha} className="border border-neutral-200 rounded-xl p-2.5">
-                <strong className="block text-sm text-neutral-800">{d.horas.toLocaleString("es-PE", { maximumFractionDigits: 1 })} h</strong>
-                <span className="text-[9px] text-neutral-400 capitalize">{d.dia} libre</span>
+          <section className="min-h-0 flex flex-col bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="flex-none flex items-center justify-between gap-2 px-3.5 py-2.5 border-b border-neutral-100">
+              <div>
+                <span className="block text-[8.5px] uppercase tracking-[.12em] text-neutral-400 font-extrabold mb-0.5">Prioridad</span>
+                <b className="text-[12px] text-neutral-800">Próximas citas</b>
               </div>
-            ))}
-          </div>
-        </div>
+              <span className="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">
+                {reservasOrdenadas.length}
+              </span>
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto p-1.5">
+              {reservasOrdenadas.length === 0 ? (
+                <p className="text-[10px] text-neutral-400 text-center py-6">No hay citas en este rango.</p>
+              ) : (
+                reservasOrdenadas.map((r) => (
+                  <ApptRow key={r.id_reserva} reserva={r} onChanged={cargar} mostrarAsesor={combinado}
+                    pasada={esPasado(r.fecha, r.hora_inicio)} />
+                ))
+              )}
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
   );
 }
 
-function MetricTile({ icon, tone, value, label }) {
-  const tones = {
-    green: "bg-secondary text-primary",
-    orange: "bg-orange-50 text-orange-600",
-    yellow: "bg-amber-50 text-amber-600",
-    gray: "bg-neutral-100 text-neutral-500",
-  };
+function StatTile({ k, value, note }) {
   return (
-    <div className="flex items-center gap-3 bg-white/80 border border-neutral-200 rounded-2xl shadow-sm p-3.5 hover:-translate-y-0.5 transition-transform">
-      <div className={`w-9 h-9 rounded-xl grid place-items-center text-base flex-shrink-0 ${tones[tone] || tones.gray}`}>
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <strong className="block text-lg font-extrabold text-neutral-800 leading-none tracking-tight">{value}</strong>
-        <span className="block mt-1 text-[9px] font-semibold text-neutral-400 truncate">{label}</span>
-      </div>
+    <div className="relative min-h-[68px] bg-white border border-neutral-200 rounded-2xl shadow-sm p-3 overflow-hidden">
+      <div className="absolute w-16 h-16 rounded-full -right-5 -top-5 pointer-events-none"
+        style={{ background: "radial-gradient(circle,rgba(111,224,171,.14),transparent 70%)" }} />
+      <span className="relative block text-[9px] font-bold text-neutral-400">{k}</span>
+      <strong className="relative block text-lg font-extrabold text-neutral-800 leading-tight mt-1 tracking-tight">{value}</strong>
+      <em className="relative block not-italic text-[8.5px] text-neutral-400 mt-0.5 truncate">{note}</em>
     </div>
   );
 }
@@ -862,10 +805,6 @@ function Pill({ tone, children }) {
 function pagoTone(estado) {
   return { APROBADO: "green", PENDIENTE: "amber", RECHAZADO: "red", REEMBOLSADO: "neutral" }[estado] || "neutral";
 }
-function reservaTone(estado) {
-  return { CONFIRMADA: "primary", COMPLETADA: "neutral", CANCELADA: "red", PENDIENTE_PAGO: "amber", EXPIRADA: "neutral" }[estado] || "neutral";
-}
-
 // El estado de la reserva ya implica un pago_estado la mayoría de las veces
 // (PENDIENTE_PAGO/EXPIRADA -> PENDIENTE, CONFIRMADA/COMPLETADA -> APROBADO).
 // Repetirlo en un segundo pill no suma nada; solo vale mostrarlo cuando el
@@ -924,54 +863,66 @@ function CancelBtn({ reserva, onChanged, className }) {
   );
 }
 
-function ReservaCard({ reserva: r, onChanged, mostrarAsesor }) {
-  const [editando, setEditando] = useState(false);
-
-  function editarMeet() { return editarMeetReserva(r, onChanged, setEditando); }
-  function cancelar() { return cancelarReserva(r, onChanged); }
+// Fila compacta de cita (estilo ".appt" del mock). Clic para expandir y ver
+// chips + acciones reales (Unirse / Editar Meet / Cancelar) sin salir de la lista.
+function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }) {
+  const [abierta, setAbierta] = useState(false);
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 border border-neutral-100 rounded-xl p-3 hover:border-neutral-200 transition-colors">
-      <div className="w-24 flex-shrink-0">
-        <div className="text-sm font-bold text-primary">{r.hora_inicio}</div>
-        <div className="text-[10px] text-neutral-400">{r.fecha}</div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-neutral-800">{r.cliente?.nombre || "Sin nombre"}</div>
-        <div className="text-xs text-neutral-500">{r.cliente?.email_contacto}{r.cliente?.telefono ? ` · ${r.cliente.telefono}` : ""}</div>
-        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-          <Pill tone="neutral">{r.monto} {r.moneda}</Pill>
-          {!pagoEsRedundante(r.estado, r.pago_estado) && (
-            <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
-          )}
-          <Pill tone={reservaTone(r.estado)}>{r.estado.toLowerCase().replaceAll("_", " ")}</Pill>
-          {r.estado === "PENDIENTE_PAGO" && r.hold_expira_en && (
-            <Pill tone="amber">vence {new Date(r.hold_expira_en).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", timeZone: "America/Lima" })}</Pill>
-          )}
-          {mostrarAsesor && r.asesor && <Pill tone="primary">{r.asesor.nombre}</Pill>}
+    <article className={`rounded-xl transition-colors ${abierta ? "bg-neutral-50" : "hover:bg-neutral-50"} ${pasada ? "opacity-55" : ""}`}>
+      <button onClick={() => setAbierta((v) => !v)}
+        className="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+        <div>
+          <b className="block text-[11px] text-neutral-800">{r.hora_inicio}</b>
+          <span className="block text-[8.5px] text-neutral-400">{r.fecha.slice(5)}</span>
         </div>
-      </div>
-      <div className="flex gap-2 flex-shrink-0">
-        {r.meet_url ? (
-          <a href={r.meet_url} target="_blank" rel="noopener noreferrer"
-            className="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-medium hover:bg-blue-100">
-            Unirse
-          </a>
-        ) : (
-          <span className="px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs">Sin Meet</span>
-        )}
-        <button onClick={editarMeet} disabled={editando}
-          className="px-3 py-1.5 bg-white border border-neutral-200 text-neutral-600 rounded-lg text-xs hover:border-neutral-300 disabled:opacity-50">
-          Editar link
-        </button>
-        {r.estado !== "CANCELADA" && (
-          <button onClick={cancelar}
-            className="px-3 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-xs hover:bg-red-50">
-            Cancelar
-          </button>
-        )}
-      </div>
-    </div>
+        <div className="min-w-0">
+          <b className="block text-[10.5px] text-neutral-800 truncate">{r.cliente?.nombre || "Sin nombre"}</b>
+          <span className="block text-[9px] text-neutral-400 truncate mt-0.5">
+            {r.hora_inicio}{mostrarAsesor && r.asesor ? ` · ${r.asesor.nombre}` : ""}
+          </span>
+          <span className={`inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold ${
+            r.estado === "CANCELADA" ? "bg-red-50 text-red-500"
+              : !pagoEsRedundante(r.estado, r.pago_estado) && r.pago_estado === "PENDIENTE" ? "bg-[#fff2e7] text-[#b46a37]"
+              : "bg-[#edf8f2] text-[#277553]"
+          }`}>
+            {r.estado === "CANCELADA" ? "Cancelada" : r.estado === "CONFIRMADA" || r.estado === "COMPLETADA" ? "Confirmada" : "Pago pendiente"}
+          </span>
+        </div>
+      </button>
+
+      {abierta && (
+        <div className="px-2.5 pb-2.5">
+          <div className="flex items-center gap-1.5 flex-wrap mb-2">
+            <Pill tone="neutral">{r.monto} {r.moneda}</Pill>
+            {!pagoEsRedundante(r.estado, r.pago_estado) && (
+              <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
+            )}
+            {r.estado === "PENDIENTE_PAGO" && r.hold_expira_en && (
+              <Pill tone="amber">vence {new Date(r.hold_expira_en).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", timeZone: "America/Lima" })}</Pill>
+            )}
+          </div>
+          {r.cliente?.email_contacto && (
+            <p className="text-[10px] text-neutral-500 mb-2 truncate">
+              {r.cliente.email_contacto}{r.cliente?.telefono ? ` · ${r.cliente.telefono}` : ""}
+            </p>
+          )}
+          <div className="flex gap-1.5 flex-wrap">
+            {r.meet_url ? (
+              <a href={r.meet_url} target="_blank" rel="noopener noreferrer"
+                className="px-2.5 py-1.5 bg-primary text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">
+                Unirse
+              </a>
+            ) : (
+              <EditMeetBtn reserva={r} onChanged={onChanged}
+                className="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10.5px] font-bold hover:bg-amber-100" />
+            )}
+            <CancelBtn reserva={r} onChanged={onChanged}
+              className="px-2.5 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[10.5px] font-bold hover:bg-red-50" />
+          </div>
+        </div>
+      )}
+    </article>
   );
 }
 

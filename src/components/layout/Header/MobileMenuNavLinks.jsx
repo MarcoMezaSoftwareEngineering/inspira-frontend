@@ -3,7 +3,7 @@
 // COMPLETO por categoría y subgrupo (igual que el mega-menú de escritorio),
 // con acordeones para que quepa sin comprimir nada.
 import { useState } from "react";
-import { navItems } from "./header.data";
+import { navItemsMovil } from "./header.data";
 import { CATEGORIAS, hrefServicio } from "../../../config/servicios";
 import { navigate } from "../../../services/navigate";
 import Icono from "../../common/Icono";
@@ -33,7 +33,7 @@ export default function MobileMenuNavLinks({ onClose }) {
     onClose?.();
   };
 
-  const resto = navItems.filter((i) => !i.mega);
+  const resto = navItemsMovil;
 
   return (
     <div className="flex flex-col gap-1 overflow-y-auto">

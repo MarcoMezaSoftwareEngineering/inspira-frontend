@@ -12,6 +12,9 @@ import { loginGoogle } from "./LoginButton";
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Desplegable abierto (label del item). Controlado por estado y no solo por
+  // :hover, para que también funcione con clic, teclado y en pantallas táctiles.
+  const [abierto, setAbierto] = useState(null);
   const [path, setPath] = useState(
     typeof window !== "undefined" ? window.location.pathname : "/"
   );
@@ -19,12 +22,18 @@ export default function Header() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
-    const onPop = () => setPath(window.location.pathname);
+    const onPop = () => {
+      setPath(window.location.pathname);
+      setAbierto(null);
+    };
+    const onKey = (e) => e.key === "Escape" && setAbierto(null);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("popstate", onPop);
+    window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("popstate", onPop);
+      window.removeEventListener("keydown", onKey);
     };
   }, []);
 
@@ -32,6 +41,7 @@ export default function Header() {
     e.preventDefault();
     navigate(href);
     setPath(href);
+    setAbierto(null);
   };
 
   return (
@@ -48,16 +58,60 @@ export default function Header() {
               // internas (servicios / calculadora), nunca en "Inicio".
               const active = item.href !== "/" && path === item.href;
               if (item.mega) {
+                const open = abierto === item.label;
                 return (
-                  <div className="v4-mega-wrap" key={item.label}>
-                    <a
-                      href={item.href}
-                      onClick={(e) => go(e, item.href)}
+                  <div
+                    className={`v4-mega-wrap${open ? " abierto" : ""}`}
+                    key={item.label}
+                    onMouseEnter={() => setAbierto(item.label)}
+                    onMouseLeave={() => setAbierto(null)}
+                  >
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      onClick={() => setAbierto(open ? null : item.label)}
                       className={`v4-mega-trigger${active ? " route-active" : ""}`}
                     >
                       {item.label} <span className="caret">▼</span>
-                    </a>
-                    <MegaMenu onNavigate={(href) => setPath(href)} />
+                    </button>
+                    <MegaMenu
+                      onNavigate={(href) => {
+                        setPath(href);
+                        setAbierto(null);
+                      }}
+                    />
+                  </div>
+                );
+              }
+              if (item.submenu) {
+                const open = abierto === item.label;
+                return (
+                  <div
+                    className={`v4-sub-wrap${open ? " abierto" : ""}`}
+                    key={item.label}
+                    onMouseEnter={() => setAbierto(item.label)}
+                    onMouseLeave={() => setAbierto(null)}
+                  >
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      onClick={() => setAbierto(open ? null : item.label)}
+                      className="v4-mega-trigger"
+                    >
+                      {item.label} <span className="caret">▼</span>
+                    </button>
+                    <div className="v4-sub">
+                      {item.submenu.map((s) => (
+                        <a
+                          key={s.href}
+                          href={s.href}
+                          onClick={(e) => go(e, s.href)}
+                        >
+                          <Icono nombre={s.icono} size={17} />
+                          {s.label}
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 );
               }

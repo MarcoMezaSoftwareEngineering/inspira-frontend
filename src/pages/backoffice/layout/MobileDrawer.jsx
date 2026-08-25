@@ -52,7 +52,7 @@ export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
         }}
       >
         <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 shrink-0">
-          <span className="text-sm font-bold">Inspira Backoffice</span>
+          <span className="text-sm font-bold">Inspira Core</span>
           <button
             onClick={onClose}
             aria-label="Cerrar menú"

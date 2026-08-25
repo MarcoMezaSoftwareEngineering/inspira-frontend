@@ -81,7 +81,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
             onClick={(e) => handleNavClick("/backoffice/dashboard", e)}
             className="text-sm font-bold leading-tight hover:text-white/90 transition truncate"
           >
-            Inspira Backoffice
+            Inspira Core
           </a>
 
           <div className="flex items-center gap-1 shrink-0">

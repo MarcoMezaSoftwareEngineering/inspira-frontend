@@ -15,7 +15,7 @@ export default function MobileAppBar({ onMenuToggle, user }) {
         <Menu className="w-6 h-6" strokeWidth={2} />
       </button>
 
-      <span className="text-white text-sm font-bold">Inspira Backoffice</span>
+      <span className="text-white text-sm font-bold">Inspira Core</span>
 
       <div className="w-9 h-9 rounded-full bg-white/16 text-white text-xs font-bold flex items-center justify-center shrink-0 select-none">
         {initials(user)}

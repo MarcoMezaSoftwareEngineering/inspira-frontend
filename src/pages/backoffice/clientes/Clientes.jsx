@@ -1,6 +1,7 @@
 // src/pages/backoffice/clientes/Clientes.jsx
 import { useEffect, useRef, useState } from "react";
 import { boGET, boPOST, boPUT } from "../../../services/backofficeApi";
+import AltaRapida from "./AltaRapida";
 import { dialog } from "../../../services/dialogService";
 import ClientesTable from "./ClientesTable";
 import ClienteForm from "./ClienteForm";
@@ -43,6 +44,7 @@ function Toast({ msg, tipo, onClose }) {
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
+  const [altaAbierta, setAltaAbierta] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [q, setQ] = useState("");
@@ -229,18 +231,38 @@ export default function Clientes() {
           <p className="text-sm text-neutral-500">Buscar y gestionar clientes de la plataforma.</p>
         </div>
         {isAdmin && (
-          <button
-            type="button"
-            onClick={() => openModal("nuevo")}
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity shadow-sm"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Nuevo cliente
-          </button>
+          <div className="shrink-0 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setAltaAbierta((v) => !v)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity shadow-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              {altaAbierta ? "Cerrar" : "Nuevo cliente"}
+            </button>
+            {/* El alta suelta se conserva para cuando de verdad solo se quiere
+                registrar a alguien sin contratarle nada todavia. */}
+            <button
+              type="button"
+              onClick={() => openModal("nuevo")}
+              className="text-[12px] font-semibold text-neutral-500 hover:text-primary transition-colors"
+            >
+              Solo ficha
+            </button>
+          </div>
         )}
       </div>
+
+      {altaAbierta && (
+        <div className="bg-white border-2 border-primary/20 rounded-2xl shadow-sm p-5">
+          <AltaRapida
+            onCancelar={() => setAltaAbierta(false)}
+            onCreado={() => { setAltaAbierta(false); cargar(); }}
+          />
+        </div>
+      )}
 
       {/* Buscador global (debounce, sin botón) */}
       <div className="relative">

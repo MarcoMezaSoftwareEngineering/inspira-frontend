@@ -23,7 +23,7 @@ export default function Topbar({ user, onLogout, onMenuToggle }) {
           </svg>
         </button>
 
-        <span className="text-primary font-semibold text-sm hidden sm:block">Inspira Backoffice</span>
+        <span className="text-primary font-semibold text-sm hidden sm:block">Inspira Core</span>
       </div>
 
       <div className="flex items-center gap-3">

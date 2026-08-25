@@ -9,7 +9,7 @@ export const navItems = [
   { label: "Migra a España", href: "/servicios", mega: true },
   { label: "Casos de éxito", href: "/casos-de-exito" },
   { label: "Nuestro sistema", href: "/plataforma" },
-  { label: "InspiraGPT", href: "/asistente-ia", ia: true },
+  { label: "Asistente gratis", href: "/asistente", ia: true },
   { label: "Calculadora gratis", href: "/calculadora-master", badge: true },
   { label: "Agenda tu asesoría", href: CALENDLY_URL, externo: true, cta: true },
 ];
@@ -25,7 +25,7 @@ export const navSecundarios = [
 // El menú móvil lista todo en plano (el catálogo de servicios lo pinta
 // MobileMenuNavLinks a partir de config/servicios.js).
 export const navItemsMovil = [
-  { label: "InspiraGPT", href: "/asistente-ia", ia: true },
+  { label: "Asistente gratis", href: "/asistente", ia: true },
   { label: "Calculadora gratis", href: "/calculadora-master" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
   { label: "Nuestro sistema", href: "/plataforma" },

@@ -18,7 +18,6 @@ export const DESTINOS = {
   denegado: { icono: "documento", titulo: "Me denegaron", texto: "Recurso de reposición y plan alternativo.", href: "/ruta/denegado" },
   tramites: { icono: "libro", titulo: "Adelanta trámites", texto: "Homologa tus estudios antes de migrar.", href: "/ruta/tramites" },
   asistente: { icono: "robot", titulo: "Asistente gratuito", texto: "Responde 3 preguntas y sabrás cuál es tu vía.", href: "/asistente", destacado: true },
-  inspiragpt: { icono: "chat", titulo: "InspiraGPT", texto: "Chat con IA sobre tus trámites, 30 días por S/ 100.", href: "/asistente-ia", destacado: true },
   calculadora: { icono: "euro", titulo: "Calculadora gratis", texto: "Cuánto cuesta de verdad tu máster en España.", href: "/calculadora-master", destacado: true },
   casos: { icono: "estrella", titulo: "Casos de éxito", texto: "Visas, admisiones y apelaciones ganadas.", href: "/casos-de-exito" },
   eventos: { icono: "calendario", titulo: "Eventos gratuitos", texto: "Estudia en España en 5 pasos, rumbo al 2027.", href: "/eventos" },

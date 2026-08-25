@@ -60,22 +60,6 @@ export const PRODUCTOS = [
     hotmartUrl: null, // COMPLETAR: URL de pago de Hotmart
   },
   {
-    // Producto de suscripción pendiente de construir: ver la nota del equipo
-    // sobre el asistente de IA (requiere backend + pasarela de suscripción).
-    id: "asistente-ia",
-    disponible: true,
-    precioPen: 100,
-    href: "/asistente-ia",
-    nombre: "InspiraGPT — tu asistente de extranjería 24/7",
-    descripcion:
-      "Asistente de IA entrenado con nuestras guías de extranjería y estudios en España. Resuelve dudas de trámites a cualquier hora, durante 30 días.",
-    precio: "25 €",
-    tipo: "30 días de acceso",
-    emoji: "🤖",
-    href: null,
-    hotmartUrl: null,
-  },
-  {
     id: "videos-cv",
     disponible: false,
     precioPen: 99,

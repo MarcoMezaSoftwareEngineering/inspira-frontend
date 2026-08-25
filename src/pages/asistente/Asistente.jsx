@@ -6,7 +6,6 @@
 import { useState } from "react";
 import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
-import { whatsappUrl } from "../../config/contacto";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
@@ -281,42 +280,6 @@ export default function Asistente() {
                 </button>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Próximamente: versión conversacional */}
-        <div className="mt-8 rounded-2xl border border-dashed border-neutral-300 bg-secondary-light p-6">
-          <div className="flex items-start gap-4">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-sky-dark">
-              <Icono nombre="destello" size={20} />
-            </span>
-            <div className="flex-1">
-              <h3 className="font-bold text-neutral-900">
-                InspiraGPT: tu asistente de extranjería 24/7
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">
-                Estamos construyendo la versión conversacional, entrenada con
-                nuestras guías y con el criterio de nuestro equipo legal.
-                Mientras tanto, el orientador de arriba es gratuito y ya te
-                dice qué vía te corresponde.
-              </p>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-sm font-extrabold text-primary">
-                  <Icono nombre="reloj" size={16} />
-                  En construcción
-                </span>
-                <a
-                  href={whatsappUrl(
-                    "Hola Inspira, quiero que me avisen cuando InspiraGPT esté disponible."
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-bold text-primary hover:underline"
-                >
-                  Avísame cuando esté listo →
-                </a>
-              </div>
-            </div>
           </div>
         </div>
 

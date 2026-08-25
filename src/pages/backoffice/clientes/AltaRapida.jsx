@@ -41,12 +41,22 @@ function Campo({ label, valor, onChange, tipo = "text", ancho, requerido, placeh
   );
 }
 
-export default function AltaRapida({ onCreado, onCancelar }) {
-  const [opciones, setOpciones] = useState({ servicios: [], paquetes: [], asesores: [] });
+/**
+ * @param cliente  si viene, se le anade un servicio a ese cliente en vez de
+ *                 crear uno nuevo: los datos personales se dan por sabidos.
+ */
+export default function AltaRapida({ onCreado, onCancelar, cliente }) {
+  const [opciones, setOpciones] = useState({ servicios: [], paquetes: {}, asesores: [] });
+  const soloServicio = !!cliente;
   const [f, setF] = useState({
-    nombre: "", email_contacto: "", telefono: "", dni: "", pasaporte: "",
-    pais_origen: "", canal_origen: "Manual", servicio: "", paquete: "",
-    id_asesor_asignado: "", notas: "",
+    nombre: cliente?.nombre || "",
+    email_contacto: cliente?.email || "",
+    telefono: cliente?.telefono || "",
+    dni: cliente?.dni || "",
+    pasaporte: cliente?.pasaporte || "",
+    pais_origen: cliente?.pais_origen || "",
+    canal_origen: cliente?.origen || "Manual",
+    servicio: "", paquete: "", id_asesor_asignado: "", notas: "",
   });
   const [comunidades, setComunidades] = useState([]);
   const [guardando, setGuardando] = useState(false);
@@ -54,9 +64,12 @@ export default function AltaRapida({ onCreado, onCancelar }) {
 
   useEffect(() => {
     boGET("/backoffice/alta-rapida/opciones").then((r) => {
-      if (r.ok) setOpciones({ servicios: r.servicios || [], paquetes: r.paquetes || [], asesores: r.asesores || [] });
+      if (r.ok) setOpciones({ servicios: r.servicios || [], paquetes: r.paquetes || {}, asesores: r.asesores || [] });
     });
   }, []);
+
+  // Cada servicio tiene sus propios paquetes: el visado sólo admite tres.
+  const paquetesDelServicio = opciones.paquetes?.[f.servicio] || [];
 
   const set = (k) => (v) => { setMsg(null); setF((p) => ({ ...p, [k]: v })); };
   const esMaster = f.servicio === "master";
@@ -86,13 +99,17 @@ export default function AltaRapida({ onCreado, onCancelar }) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="font-serif text-[17px] text-[#1A3557]">Alta rápida</p>
+        <p className="font-serif text-[17px] text-[#1A3557]">
+          {soloServicio ? `Añadir servicio a ${cliente.nombre}` : "Alta rápida"}
+        </p>
         <p className="text-[12.5px] text-neutral-500 mt-0.5 leading-relaxed">
-          Cliente y proceso en un solo paso. Si el correo ya existe, se le añade el
-          proceso al cliente que ya está — no se duplica.
+          {soloServicio
+            ? "Sus datos ya están; sólo hace falta decir qué contrata."
+            : "Cliente y proceso en un solo paso. Si el correo ya existe, se le añade el proceso al cliente que ya está — no se duplica."}
         </p>
       </div>
 
+      {!soloServicio && (
       <div>
         <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
           Datos del cliente
@@ -107,6 +124,7 @@ export default function AltaRapida({ onCreado, onCancelar }) {
           <Campo label="Origen" opciones={ORIGENES} valor={f.canal_origen} onChange={set("canal_origen")} />
         </div>
       </div>
+      )}
 
       <div>
         <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
@@ -131,7 +149,7 @@ export default function AltaRapida({ onCreado, onCancelar }) {
 
         {f.servicio && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-            <Campo label="Paquete" opciones={opciones.paquetes} valor={f.paquete} onChange={set("paquete")} />
+            <Campo label="Paquete" opciones={paquetesDelServicio} valor={f.paquete} onChange={set("paquete")} />
             <Campo
               label="Responsable"
               opciones={opciones.asesores.map((a) => ({ valor: String(a.id_usuario), etiqueta: a.nombre }))}
@@ -195,7 +213,7 @@ export default function AltaRapida({ onCreado, onCancelar }) {
           type="button" onClick={crear} disabled={!listo || guardando}
           className="text-[12.5px] font-semibold px-5 py-2.5 rounded-lg bg-[#1D6A4A] text-white hover:bg-[#15533a] disabled:opacity-40 transition-colors"
         >
-          {guardando ? "Creando…" : "Crear cliente y proceso"}
+          {guardando ? "Creando…" : soloServicio ? "Añadir servicio" : "Crear cliente y proceso"}
         </button>
         {onCancelar && (
           <button type="button" onClick={onCancelar}
@@ -204,7 +222,9 @@ export default function AltaRapida({ onCreado, onCancelar }) {
           </button>
         )}
         {!listo && (
-          <p className="text-[11.5px] text-neutral-400">Faltan nombre, correo y servicio</p>
+          <p className="text-[11.5px] text-neutral-400">
+            {soloServicio ? "Elige un servicio" : "Faltan nombre, correo y servicio"}
+          </p>
         )}
       </div>
     </div>

@@ -7,6 +7,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import AltaRapida from "../clientes/AltaRapida";
+import TrackerUniversidades from "../tracker/TrackerUniversidades";
+import PanelAsesoras from "../panel-asesoras/PanelAsesoras";
 
 const COLOR_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -17,11 +19,29 @@ const COLOR_SERVICIO = {
 };
 const CORTO = { master: "Máster", visa: "Visado", ee: "Estancia", fp: "FP", legal: "Extranjería" };
 
-/* Selector de etapa. Se guarda al soltar, sin confirmar: mover de etapa es un
-   gesto que se hace decenas de veces al día y un diálogo lo haría inservible. */
+// Los colores salen de las hojas de seguimiento del equipo: verde admitido,
+// morado lista de espera, marrón cita completada, rojo excluido. En una tabla
+// de noventa filas el color es lo que se lee, no el texto.
+const TONOS = {
+  neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
+  sky:     "bg-sky-50 text-sky-800 border-sky-200",
+  blue:    "bg-[#1A3557] text-white border-[#1A3557]",
+  amber:   "bg-amber-50 text-amber-800 border-amber-300",
+  violet:  "bg-violet-100 text-violet-800 border-violet-300",
+  brown:   "bg-[#6B4423] text-white border-[#6B4423]",
+  green:   "bg-[#1D6A4A] text-white border-[#1D6A4A]",
+  red:     "bg-red-100 text-red-800 border-red-300",
+  slate:   "bg-slate-200 text-slate-700 border-slate-300",
+};
+
+/* La etapa se ve como etiqueta de color y se cambia pulsandola. El <select>
+   va superpuesto y transparente: conserva el desplegable nativo —que en movil
+   es el que mejor funciona— sin renunciar al color, que es lo que hace legible
+   la tabla de un vistazo. */
 function Etapa({ p, onCambiar }) {
   const [guardando, setGuardando] = useState(false);
-  const pct = p.etapa_total > 1 ? Math.round((p.etapa_indice / (p.etapa_total - 1)) * 100) : 0;
+  const def = (p.pipeline || []).find((e) => e.valor === p.etapa);
+  const tono = TONOS[def?.tono || "neutral"];
 
   async function cambiar(nueva) {
     if (nueva === p.etapa) return;
@@ -31,20 +51,28 @@ function Etapa({ p, onCambiar }) {
   }
 
   return (
-    <div className="min-w-0">
+    <div className="relative inline-block">
+      <span
+        className={`inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-wide
+          px-2 py-1 rounded border whitespace-nowrap ${tono}
+          ${p.etapa_deducida ? "border-dashed opacity-80" : ""}
+          ${guardando ? "opacity-50" : ""}`}
+        title={p.etapa_deducida ? "Deducida del expediente, nadie la ha confirmado" : undefined}
+      >
+        {p.etapa}
+        <svg className="w-2.5 h-2.5 opacity-60" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </span>
       <select
         value={p.etapa}
         disabled={guardando}
         onChange={(e) => cambiar(e.target.value)}
-        className={`w-full max-w-[150px] text-[11.5px] font-semibold rounded-md border px-1.5 py-1 bg-white
-          ${p.etapa_deducida ? "border-dashed border-neutral-300 text-neutral-500" : "border-neutral-300 text-neutral-800"}
-          focus:outline-none focus:border-[#1D6A4A] disabled:opacity-50`}
+        aria-label="Cambiar etapa"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       >
-        {(p.pipeline || [p.etapa]).map((e) => <option key={e} value={e}>{e}</option>)}
+        {(p.pipeline || []).map((e) => <option key={e.valor} value={e.valor}>{e.valor}</option>)}
       </select>
-      <div className="h-1 w-full max-w-[150px] bg-neutral-200 rounded-full mt-1 overflow-hidden">
-        <div className="h-full bg-[#1D6A4A] rounded-full transition-all" style={{ width: `${pct}%` }} />
-      </div>
     </div>
   );
 }
@@ -142,6 +170,11 @@ export default function Procesos({ onAbrirProceso }) {
   const [altaAbierta, setAltaAbierta] = useState(false);
   const [pagoDe, setPagoDe] = useState(null);
 
+  // Un solo panel: la tabla general y los seguimientos por servicio son
+  // pestanas, no secciones distintas del menu. Es el mismo dato mirado de
+  // otra forma, y tenerlos separados obligaba a saltar entre pantallas.
+  const [pestana, setPestana] = useState("todos");
+
   // Volcado de la respuesta al estado. Aparte de la peticion para que tanto el
   // efecto como el refresco manual usen exactamente el mismo tratamiento.
   const aplicar = useCallback((r) => {
@@ -171,7 +204,7 @@ export default function Procesos({ onAbrirProceso }) {
     // Optimista: la fila se mueve al instante y se revierte si falla.
     setProcesos((prev) => prev.map((x) =>
       x.id_solicitud === p.id_solicitud
-        ? { ...x, etapa: nueva, etapa_deducida: false, etapa_indice: (x.pipeline || []).indexOf(nueva) }
+        ? { ...x, etapa: nueva, etapa_deducida: false }
         : x));
     const r = await boPATCH(`/backoffice/procesos/${p.id_solicitud}/etapa`, { etapa: nueva, servicio: p.servicio });
     if (!r.ok) { setError(r.msg || "No se pudo cambiar la etapa"); cargar(); }
@@ -225,12 +258,45 @@ export default function Procesos({ onAbrirProceso }) {
         </button>
       </div>
 
+      {/* Pestañas */}
+      <div className="flex gap-1 border-b border-neutral-200 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: "none" }}>
+        {[
+          { id: "todos",  txt: "Todos los procesos" },
+          { id: "master", txt: "Seguimiento máster" },
+          { id: "visa",   txt: "Seguimiento visado" },
+        ].map((t) => (
+          <button
+            key={t.id} type="button" onClick={() => setPestana(t.id)}
+            className={`shrink-0 px-3 py-2 text-[12.5px] font-semibold border-b-2 -mb-px transition-colors ${
+              pestana === t.id
+                ? "border-[#1D6A4A] text-[#1D6A4A]"
+                : "border-transparent text-neutral-500 hover:text-neutral-800"
+            }`}
+          >
+            {t.txt}
+          </button>
+        ))}
+      </div>
+
       {altaAbierta && (
         <div className="bg-white border-2 border-[#1D6A4A]/25 rounded-xl p-4">
           <AltaRapida onCancelar={() => setAltaAbierta(false)}
             onCreado={() => { setAltaAbierta(false); cargar(); }} />
         </div>
       )}
+
+      {/* Los seguimientos por servicio reutilizan las pantallas que ya existian:
+          el tracker de universidades y el panel de asesoras. No se han
+          reescrito, solo han dejado de vivir en su propia entrada de menu. */}
+      {pestana === "master" && (
+        <div className="-mx-1"><TrackerUniversidades /></div>
+      )}
+      {pestana === "visa" && (
+        <div className="-mx-1"><PanelAsesoras servicioInicial="visa" /></div>
+      )}
+
+      {pestana === "todos" && (<>
 
       {/* Resumen en una sola fila, deslizable en móvil */}
       <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
@@ -263,7 +329,7 @@ export default function Procesos({ onAbrirProceso }) {
         {servicio && (
           <select className={sel} value={etapa} onChange={(e) => setEtapa(e.target.value)}>
             <option value="">Etapa</option>
-            {etapasDelFiltro.map((e) => <option key={e} value={e}>{e}</option>)}
+            {etapasDelFiltro.map((e) => <option key={e.valor} value={e.valor}>{e.valor}</option>)}
           </select>
         )}
         <select className={sel} value={responsable} onChange={(e) => setResponsable(e.target.value)}>
@@ -388,6 +454,8 @@ export default function Procesos({ onAbrirProceso }) {
           </div>
         </div>
       )}
+
+      </>)}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Calendar, FileText, Calculator, Users, Settings,
+  LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users, Settings,
 } from "lucide-react";
 
 // Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos),
@@ -14,27 +14,37 @@ import {
 //
 // Las rutas antiguas siguen funcionando: solo dejan de tener entrada propia
 // en el menu. Nada se ha borrado.
+// Ocho destinos. Se probo con seis y se quedo corto: el tracker de
+// universidades y los leads son herramientas de uso diario, no configuracion,
+// y esconderlas bajo otra seccion las volvia inencontrables.
+//
+// Lo que si desaparecio del menu son las vistas duplicadas: Solicitudes vive
+// dentro de Procesos, y Catalogo, Documentos y Checklist bajo Configuracion.
+// Ninguna ruta se ha borrado.
+// Un solo panel. Los seguimientos por servicio (tracker de master, tracker de
+// visado, panel de asesoras) NO son secciones aparte: son pestanas dentro de
+// Procesos, porque son el mismo dato mirado por servicio.
+//
+// Ninguna ruta se ha borrado: las antiguas siguen respondiendo.
 export const NAV_SECTIONS = [
   {
     label: null,
     items: [
       { label: "Dashboard", href: "/backoffice/dashboard", perm: "dashboard.ver", icon: LayoutDashboard },
-      { label: "Clientes",  href: "/backoffice/clientes", icon: Users },
       {
         label: "Procesos",
         href: "/backoffice/procesos",
-        // Solicitudes y Panel Asesoras siguen accesibles y marcan este item
-        // como activo mientras dure la migracion.
-        alsoActive: ["/backoffice/solicitudes", "/backoffice/panel-asesoras", "/backoffice/tracker-universidades"],
+        alsoActive: [
+          "/backoffice/solicitudes",
+          "/backoffice/panel-asesoras",
+          "/backoffice/tracker-universidades",
+        ],
         icon: FileText,
       },
-      { label: "Agenda",    href: "/backoffice/agenda", icon: Calendar },
-      {
-        label: "Finanzas",
-        href: "/backoffice/presupuestos",
-        alsoActive: ["/backoffice/calculadora"],
-        icon: Calculator,
-      },
+      { label: "Clientes", href: "/backoffice/clientes", icon: Users },
+      { label: "Agenda",   href: "/backoffice/agenda", icon: Calendar },
+      { label: "Leads",    href: "/backoffice/calculadora", icon: TrendingUp },
+      { label: "Finanzas", href: "/backoffice/presupuestos", icon: Calculator },
       {
         label: "Configuración",
         href: "/backoffice/configuracion",

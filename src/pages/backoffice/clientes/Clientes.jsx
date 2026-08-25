@@ -7,6 +7,7 @@ import ClientesTable from "./ClientesTable";
 import ClienteForm from "./ClienteForm";
 import ServiciosClienteModal from "./ServiciosClienteModal";
 import PerfilClienteModal from "./PerfilClienteModal";
+import FichaCliente from "./FichaCliente";
 import { useAuth } from "../context/AuthContext";
 
 const FORM_INICIAL = {
@@ -45,6 +46,8 @@ function Toast({ msg, tipo, onClose }) {
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [altaAbierta, setAltaAbierta] = useState(false);
+  // Ficha completa: sustituye a la lista mientras esta abierta.
+  const [fichaDe, setFichaDe] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [q, setQ] = useState("");
@@ -129,8 +132,10 @@ export default function Clientes() {
     setClienteServicios(c);
   }
 
+  // Abrir un cliente lleva a su ficha completa —servicios, pagos y notas—
+  // en vez del modal reducido, que solo mostraba sus datos.
   function onVerPerfilCliente(c) {
-    setClientePerfil(c);
+    setFichaDe(c.id_cliente);
   }
 
   async function onSubmitForm(e) {
@@ -220,6 +225,19 @@ export default function Clientes() {
 
     setToast({ msg: "Cliente purgado. Sus datos han sido eliminados.", tipo: "ok" });
     cargar();
+  }
+
+
+  // La ficha completa sustituye a la lista mientras esta abierta: es una
+  // pantalla, no un modal, porque hay demasiado que mirar.
+  if (fichaDe) {
+    return (
+      <FichaCliente
+        idCliente={fichaDe}
+        onVolver={() => { setFichaDe(null); cargar(); }}
+        onAbrirProceso={(id) => { window.location.href = `/backoffice/solicitudes/${id}`; }}
+      />
+    );
   }
 
   return (

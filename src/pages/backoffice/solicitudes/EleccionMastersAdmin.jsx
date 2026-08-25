@@ -64,6 +64,55 @@ function MasterPickCard({ r, selected, prioridad, onToggle }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
+/**
+ * Alta manual de un máster.
+ *
+ * El informe de compatibilidad sólo conoce el catálogo, y la realidad se sale
+ * de él: una universidad abre un programa nuevo, el cliente encuentra uno por
+ * su cuenta, o llega una modificatoria después de haber elegido. Sin esto
+ * había que dejarlo fuera del bloque —y por tanto fuera del tracker.
+ */
+function FormManual({ onAnadir, onCancelar, guardando }) {
+  const [f, setF] = useState({ nombre_limpio: "", universidad: "", ciudad: "" });
+  const listo = f.nombre_limpio.trim() && f.universidad.trim();
+
+  const campo = "w-full text-[12px] border border-neutral-200 rounded-lg px-2.5 py-1.5 text-neutral-800 placeholder:text-neutral-300 outline-none focus:border-[#1A3557] transition";
+
+  return (
+    <div className="bg-white border border-dashed border-[#1A3557]/30 rounded-xl px-3 py-3 space-y-2">
+      <p className="text-[9px] font-bold uppercase tracking-widest text-[#1A3557] font-mono">
+        + Máster fuera del catálogo
+      </p>
+      <div className="grid sm:grid-cols-3 gap-2">
+        <input className={campo} placeholder="Nombre del máster *" value={f.nombre_limpio}
+          onChange={(e) => setF({ ...f, nombre_limpio: e.target.value })} />
+        <input className={campo} placeholder="Universidad *" value={f.universidad}
+          onChange={(e) => setF({ ...f, universidad: e.target.value })} />
+        <input className={campo} placeholder="Ciudad" value={f.ciudad}
+          onChange={(e) => setF({ ...f, ciudad: e.target.value })} />
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button" disabled={!listo || guardando}
+          onClick={() => { onAnadir(f); setF({ nombre_limpio: "", universidad: "", ciudad: "" }); }}
+          className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#142a45] disabled:opacity-40 transition"
+        >
+          {guardando ? "Guardando…" : "Añadir al bloque"}
+        </button>
+        {onCancelar && (
+          <button type="button" onClick={onCancelar}
+            className="text-[11px] font-semibold text-neutral-500 hover:text-neutral-800">
+            Cancelar
+          </button>
+        )}
+        <span className="text-[10px] text-neutral-400 ml-auto">
+          Se sincroniza con el tracker igual que los del informe
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function EleccionMastersAdmin({ elecciones, idSolicitud, onEleccionesActualizadas, resetKey }) {
   const [filas, setFilas]           = useState(() => normalizar(elecciones));
   const [guardando, setGuardando]   = useState(false);
@@ -74,6 +123,7 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
   const [informe, setInforme]             = useState(null);
   const [loadingInf, setLoadingInf]       = useState(false);
   const [selAdmin, setSelAdmin]           = useState([]); // selección admin en modo picker
+  const [manualAbierto, setManualAbierto] = useState(false);
 
   function normalizar(raw) {
     if (!Array.isArray(raw) || raw.length === 0) return [];
@@ -137,6 +187,40 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
     await guardar(selAdmin, nota);
     setFilas(selAdmin.map((s, i) => ({ ...s, prioridad: i + 1 })));
     setModoSeleccion(false);
+  }
+
+  /**
+   * Los del catálogo traen un id_master positivo de CatMaster. A los manuales
+   * se les da uno negativo: no puede chocar con el catálogo, y el sync al
+   * tracker lo acepta igual porque allí id_master es una relación blanda.
+   */
+  async function anadirManual(datos) {
+    const minimo = Math.min(0, ...filas.map((f) => Number(f.id_master) || 0));
+    const nuevas = [
+      ...filas,
+      {
+        id_master: minimo - 1,
+        nombre_limpio: datos.nombre_limpio.trim(),
+        universidad: datos.universidad.trim(),
+        ciudad: datos.ciudad.trim(),
+        score: null,
+        prioridad: filas.length + 1,
+        comentario: "",
+        plan_incluido: null,
+        manual: true,
+      },
+    ];
+    setFilas(nuevas);
+    setModoSeleccion(false);
+    await guardar(nuevas, nota);
+  }
+
+  // Quitar sólo vale para los manuales: los del informe se rehacen desde el
+  // picker, y borrarlos de aquí dejaría el tracker descuadrado sin avisar.
+  async function quitarManual(idx) {
+    const nuevas = filas.filter((_, i) => i !== idx).map((f, i) => ({ ...f, prioridad: i + 1 }));
+    setFilas(nuevas);
+    await guardar(nuevas, nota);
   }
 
   // ── Modo B: toggle plan_incluido ──────────────────────────────────────────────
@@ -278,16 +362,33 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
 
   if (filas.length === 0) {
     return (
-      <p className="text-sm text-neutral-500">
-        El cliente aún no ha registrado másteres preferidos en este bloque.{" "}
-        <button
-          type="button"
-          onClick={() => setModoSeleccion(true)}
-          className="underline text-[#1A3557] hover:text-[#1D6A4A] transition"
-        >
-          Seleccionar desde el backoffice
-        </button>
-      </p>
+      <div className="space-y-2">
+        <p className="text-sm text-neutral-500">
+          El cliente aún no ha registrado másteres preferidos en este bloque.{" "}
+          <button
+            type="button"
+            onClick={() => setModoSeleccion(true)}
+            className="underline text-[#1A3557] hover:text-[#1D6A4A] transition"
+          >
+            Seleccionar desde el backoffice
+          </button>
+          {" · "}
+          <button
+            type="button"
+            onClick={() => setManualAbierto(true)}
+            className="underline text-[#1A3557] hover:text-[#1D6A4A] transition"
+          >
+            añadir uno manualmente
+          </button>
+        </p>
+        {manualAbierto && (
+          <FormManual
+            guardando={guardando}
+            onAnadir={anadirManual}
+            onCancelar={() => setManualAbierto(false)}
+          />
+        )}
+      </div>
     );
   }
 
@@ -355,6 +456,11 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-semibold text-[#1A3557] leading-snug truncate">
                 {fila.nombre_limpio || fila.programa || "(Sin título)"}
+                {fila.manual && (
+                  <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500 align-middle">
+                    manual
+                  </span>
+                )}
               </p>
               {(fila.universidad || fila.ciudad || fila.score || fila.comentario) && (
                 <p className="text-[11px] text-neutral-500 truncate">
@@ -387,10 +493,36 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
               >
                 No
               </button>
+              {fila.manual && (
+                <button
+                  type="button" onClick={() => quitarManual(idx)} disabled={guardando}
+                  aria-label="Quitar máster manual"
+                  className="text-[13px] leading-none text-neutral-300 hover:text-red-600 px-1 transition"
+                >
+                  ×
+                </button>
+              )}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Alta manual: el informe no lo cubre todo */}
+      {manualAbierto ? (
+        <FormManual
+          guardando={guardando}
+          onAnadir={anadirManual}
+          onCancelar={() => setManualAbierto(false)}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setManualAbierto(true)}
+          className="w-full text-[11.5px] font-semibold text-neutral-500 hover:text-[#1A3557] border border-dashed border-neutral-300 hover:border-[#1A3557]/40 rounded-xl py-2 transition"
+        >
+          + Añadir un máster que no esté en el informe
+        </button>
+      )}
 
       {/* Totales */}
       <div className="flex gap-4 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-xl text-xs">

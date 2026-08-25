@@ -74,6 +74,7 @@ export default function TrackerMaster({ onAbrirProceso }) {
   const [datos, setDatos] = useState({ filas: [], sin_postulacion: [], estados: [], resumen: {} });
   const [cargando, setCargando] = useState(true);
   const [q, setQ] = useState("");
+  const [uni, setUni] = useState("");
   const [nuevaUni, setNuevaUni] = useState({});
 
   const cargar = useCallback(() => (
@@ -112,23 +113,39 @@ export default function TrackerMaster({ onAbrirProceso }) {
     if (r.ok) cargar();
   }
 
+  // Las universidades del desplegable salen de la propia hoja, con cuántos
+  // van a cada una: un catálogo fijo se quedaría corto en cuanto alguien
+  // escriba una nueva.
+  const universidades = useMemo(() => {
+    const c = new Map();
+    datos.filas.forEach((f) => {
+      const u = (f.universidad || "").trim();
+      if (u) c.set(u, (c.get(u) || 0) + 1);
+    });
+    return [...c.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [datos.filas]);
+
   // Se agrupa por cliente: la hoja se lee por persona, no por universidad
   // suelta, y así se ve de un golpe a cuántos sitios va cada uno.
   const porCliente = useMemo(() => {
     const t = q.trim().toLowerCase();
     const g = new Map();
     datos.filas.forEach((f) => {
+      if (uni && (f.universidad || "").trim() !== uni) return;
       if (t && !`${f.cliente} ${f.universidad} ${f.master}`.toLowerCase().includes(t)) return;
       if (!g.has(f.id_solicitud)) g.set(f.id_solicitud, { cliente: f.cliente, paquete: f.paquete, responsable: f.responsable, filas: [] });
       g.get(f.id_solicitud).filas.push(f);
     });
     return [...g.entries()];
-  }, [datos.filas, q]);
+  }, [datos.filas, q, uni]);
 
   const sinPost = useMemo(() => {
+    // Con un filtro de universidad puesto, quien no tiene ninguna postulación
+    // no pinta nada en la lista: se está mirando esa universidad.
+    if (uni) return [];
     const t = q.trim().toLowerCase();
     return (datos.sin_postulacion || []).filter((s) => !t || s.cliente.toLowerCase().includes(t));
-  }, [datos.sin_postulacion, q]);
+  }, [datos.sin_postulacion, q, uni]);
 
   const r = datos.resumen || {};
   const input = "text-[12px] text-neutral-700 border border-neutral-300 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]";
@@ -151,8 +168,30 @@ export default function TrackerMaster({ onAbrirProceso }) {
         ))}
       </div>
 
-      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cliente, universidad o máster…"
-        className={`${input} w-full`} />
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cliente, universidad o máster…"
+          className={`${input} flex-1`} />
+        <select value={uni} onChange={(e) => setUni(e.target.value)} aria-label="Filtrar por universidad"
+          className={`${input} sm:max-w-[300px]`}>
+          <option value="">Todas las universidades ({universidades.length})</option>
+          {universidades.map(([u, n]) => (
+            <option key={u} value={u}>{u} · {n}</option>
+          ))}
+        </select>
+      </div>
+
+      {uni && (
+        <div className="flex items-center gap-2 text-[11.5px] text-neutral-600">
+          <span className="font-semibold text-[#1A3557]">{uni}</span>
+          <span className="text-neutral-400">
+            · {porCliente.length} cliente{porCliente.length === 1 ? "" : "s"} postulando
+          </span>
+          <button type="button" onClick={() => setUni("")}
+            className="ml-auto font-semibold text-neutral-500 hover:text-primary">
+            quitar filtro
+          </button>
+        </div>
+      )}
 
       {cargando ? (
         <p className="text-[13px] text-neutral-400 py-8 text-center">Cargando…</p>

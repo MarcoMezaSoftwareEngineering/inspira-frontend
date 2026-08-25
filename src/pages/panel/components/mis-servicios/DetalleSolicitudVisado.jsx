@@ -9,7 +9,7 @@ import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
 import { estadoVisado, TONOS } from "../../../../lib/visaFlujoInterno";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 const DOT_COLORS = {
   completado: "bg-emerald-500",
@@ -106,12 +106,66 @@ function SesionView({ sesion, etiqueta, vacio, pie }) {
   );
 }
 
+/* Documento que Inspira ya dejó listo. La descarga va con el token del panel,
+   así que no basta un <a href>: se pide, se convierte en blob y se guarda. */
+function DescargaDoc({ slot, doc, idSolicitud }) {
+  const [bajando, setBajando] = useState(false);
+  const [error, setError] = useState("");
+
+  async function descargar() {
+    setBajando(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const r = await fetch(`${API_URL}/solicitudes/${idSolicitud}/visa-documentos/${slot}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) throw new Error("No se pudo descargar");
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.nombre || "documento";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      setError(e.message || "Error al descargar");
+    } finally {
+      setBajando(false);
+    }
+  }
+
+  const esPdf = (doc.mime || "").includes("pdf");
+
+  return (
+    <div className="flex items-center gap-3 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5">
+      <span className="shrink-0 text-xl">{esPdf ? "📕" : "📄"}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-semibold text-neutral-800 truncate">{doc.etiqueta || doc.nombre}</p>
+        {doc.etiqueta && doc.nombre && (
+          <p className="text-[11px] text-neutral-400 truncate">{doc.nombre}</p>
+        )}
+        {error && <p className="text-[11px] text-red-600 mt-0.5">{error}</p>}
+      </div>
+      <button
+        type="button"
+        onClick={descargar}
+        disabled={bajando}
+        className="shrink-0 text-[12px] font-semibold px-3 py-1.5 rounded-lg border-2 border-[#1D6A4A] text-[#1D6A4A] hover:bg-[#1D6A4A] hover:text-white transition-all disabled:opacity-50"
+      >
+        {bajando ? "…" : "Descargar"}
+      </button>
+    </div>
+  );
+}
+
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const [detalle, setDetalle] = useState(null);
   const [checklist, setChecklist] = useState([]);
-  const [instructivos, setInstructivos] = useState([]);
   const [visaExp, setVisaExp] = useState(null);
+  const [sesiones, setSesiones] = useState([]);
+  const [visaDocs, setVisaDocs] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("docs");
@@ -152,17 +206,14 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
       const rExp = await apiGET(`/solicitudes/${idSolicitud}/visa-expediente`);
       if (rExp.ok) setVisaExp(rExp.expediente || null);
 
-      const rInst = await apiGET(`/solicitudes/${idSolicitud}/instructivos`);
-      if (rInst.ok) {
-        const base = (API_URL || "").replace(/\/+$/, "");
-        setInstructivos((rInst.instructivos || []).map((i) => {
-          const rawUrl = i.url || i.archivo_url || "";
-          const isAbsolute = /^https?:\/\//i.test(rawUrl);
-          return { label: i.label, url: isAbsolute ? rawUrl : `${base}/${rawUrl.replace(/^\/+/, "")}` };
-        }));
-      } else {
-        setInstructivos([]);
-      }
+      const rSes = await apiGET(`/solicitudes/${idSolicitud}/sesiones`);
+      if (rSes.ok) setSesiones(rSes.sesiones || []);
+
+      // Lo que Inspira ya le dejó listo: acta de la sesión, declaración
+      // jurada y formulario. El cliente no ve los generadores, sólo esto.
+      const rDocs = await apiGET(`/solicitudes/${idSolicitud}/visa-documentos`);
+      if (rDocs.ok) setVisaDocs(rDocs.documentos || {});
+
     } catch (e) {
       console.error(e);
       if (!silent) setError("Error al cargar información.");
@@ -199,11 +250,11 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const estadoBloque = (key) => {
     switch (key) {
       case "datos": return datosCompletos ? "completado" : "pendiente";
+      case "sesion": return sesionDiag?.estado === "COMPLETADA" ? "completado" : "pendiente";
+      case "economicos": return viaElegida && djCompleta ? "completado" : "pendiente";
       case "docs": return checklist.length ? docsEstado : "pendiente";
-      case "solvencia": return visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE" ? "completado" : "pendiente";
-      case "economicos": return djCompleta ? "completado" : "pendiente";
-      case "cita": return ["AGENDADA", "CONFIRMADA", "REALIZADA"].includes(visaExp?.cita_estado) ? "completado" : "pendiente";
-      case "formulario": return visaExp?.formulario_estado === "FIRMADO" ? "completado" : "pendiente";
+      case "entregables": return (visaDocs?.dj || visaDocs?.formulario) ? "completado" : "pendiente";
+      case "estado": return visaExp?.visado_resultado === "FAVORABLE" ? "completado" : "pendiente";
       default: return "pendiente";
     }
   };
@@ -216,6 +267,8 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     return perfiles.every((p) => (p.trabajaActual ? p.empresa || p.cargo : p.ultEmpEmpresa));
   })();
 
+  const sesionDiag = sesiones.find((x) => x.tipo === "DIAGNOSTICO") || null;
+  const viaElegida = visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE";
   const SOLV_SUB = { PROPIOS: "Medios propios", AVAL: "Con avalista", MIXTO: "Mixto" };
   const FORM_SUB = {
     EN_PREPARACION: "En preparación", ENVIADO: "Listo para tu revisión", FIRMADO: "Firmado",
@@ -226,13 +279,17 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   // La cita de BLS va segunda a proposito: su fecha marca el calendario de
   // todo lo demas. Y medios y datos economicos van ANTES de documentos porque
   // lo que se marca ahi es justo lo que decide QUE documentos se piden.
+  // Los 6 bloques del cliente. Se corresponden uno a uno con los del panel del
+  // asesor, salvo lo que es puramente interno: el checklist de gestión, el
+  // estado del proceso y las notas no se le muestran. Y de la declaración
+  // jurada y el formulario ve el documento terminado, nunca el generador.
   const navSections = [
-    { id: "datos",      num: 1, titulo: "Tus datos",                subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
-    { id: "cita",       num: 2, titulo: "Cita BLS",                 subtitulo: estadoVisado(visaExp || {}).texto },
-    { id: "solvencia",  num: 3, titulo: "Mis medios económicos",    subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
-    { id: "economicos", num: 4, titulo: "Datos económicos",         subtitulo: "Situación laboral e ingresos" },
-    { id: "docs",       num: 5, titulo: "Documentos",               subtitulo: docsBloqueados ? "Se activa al elegir tus medios" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
-    { id: "formulario", num: 6, titulo: "Formulario hecho por Inspira", subtitulo: FORM_SUB[visaExp?.formulario_estado] || "Lo preparamos nosotros" },
+    { id: "datos",       num: 1, titulo: "Mis datos",              subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
+    { id: "sesion",      num: 2, titulo: "Mi sesión de diagnóstico", subtitulo: sesionDiag?.fecha || "Por agendar" },
+    { id: "economicos",  num: 3, titulo: "Mis medios económicos",   subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
+    { id: "docs",        num: 4, titulo: "Mis documentos",          subtitulo: docsBloqueados ? "Se activa al elegir tus medios" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
+    { id: "entregables", num: 5, titulo: "Preparado por Inspira",   subtitulo: (visaDocs?.dj || visaDocs?.formulario) ? "Ya tienes documentos" : "Lo preparamos nosotros" },
+    { id: "estado",      num: 6, titulo: "Estado de mi visa",       subtitulo: estadoVisado(visaExp || {}).texto },
   ].map((x) => ({ ...x, estado: estadoBloque(x.id) }));
 
   const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
@@ -242,12 +299,82 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
   function renderBody(key) {
     switch (key) {
-      case "cita": {
+      case "sesion":
+        return (
+          <div className="space-y-3">
+            <Aviso tono="ok" icono="⭐">
+              Esta es la <b>única sesión obligatoria</b>. Aquí definimos tu ruta y,
+              sobre todo, tu estrategia de medios económicos.
+            </Aviso>
+
+            <SesionView
+              sesion={sesionDiag}
+              etiqueta="Tu sesión de diagnóstico"
+              vacio="Te confirmamos por WhatsApp · 30 min"
+            />
+
+            <Tarjeta titulo="Qué veremos juntos">
+              <ul className="space-y-2">
+                {[
+                  "Definimos tu <b>ruta</b> y tu <b>estrategia de medios económicos</b>",
+                  "Revisamos tu caso: ingresos propios, aval, ventas o donaciones",
+                  "Aclaramos qué documentos aplican a tu situación",
+                  "Resolvemos todas tus dudas del proceso",
+                ].map((t) => (
+                  <li key={t} className="flex gap-2 text-[13px] text-neutral-700 leading-relaxed">
+                    <span className="shrink-0 text-[#1D6A4A] font-bold">✓</span>
+                    <span dangerouslySetInnerHTML={{ __html: t }} />
+                  </li>
+                ))}
+              </ul>
+            </Tarjeta>
+
+            {visaDocs?.diagnostico && (
+              <Tarjeta titulo="Resumen de la reunión">
+                <DescargaDoc slot="diagnostico" doc={visaDocs.diagnostico} idSolicitud={idSolicitud} />
+              </Tarjeta>
+            )}
+          </div>
+        );
+
+      case "entregables": {
+        const dj = visaDocs?.dj;
+        const form = visaDocs?.formulario;
+        return (
+          <div className="space-y-3">
+            <Aviso tono="info" icono="📝">
+              Tu <b>declaración jurada</b> y tu <b>formulario oficial</b> los redacta
+              Inspira con los datos que cargaste. Cuando estén revisados aparecerán aquí
+              para que los descargues, los imprimas y los firmes.
+            </Aviso>
+
+            {!dj && !form ? (
+              <SesionView sesion={null} etiqueta="Tus documentos"
+                vacio="Todavía no hay nada listo. Te avisaremos en cuanto lo esté." />
+            ) : (
+              <Tarjeta titulo="Listos para descargar">
+                <div className="space-y-2">
+                  {dj && <DescargaDoc slot="dj" doc={dj} idSolicitud={idSolicitud} />}
+                  {form && <DescargaDoc slot="formulario" doc={form} idSolicitud={idSolicitud} />}
+                </div>
+              </Tarjeta>
+            )}
+
+            {form && (
+              <Aviso tono="warn" icono="✍️">
+                El formulario se firma <b>a mano</b>, en bolígrafo azul o negro, el día de
+                tu cita. No lo firmes antes de revisarlo con tu asesor.
+              </Aviso>
+            )}
+          </div>
+        );
+      }
+
+      case "estado": {
         const ev = estadoVisado(visaExp || {});
         const req = visaExp?.requerimiento_estado;
         return (
           <div className="space-y-3">
-            {/* Dónde está su visado, de un vistazo */}
             <div className={`rounded-2xl border px-4 py-3 ${TONOS[ev.tono]}`}>
               <p className="text-[9px] font-bold uppercase tracking-widest opacity-70">Estado de tu visado</p>
               <p className="text-[17px] font-bold mt-0.5">{ev.icono} {ev.texto}</p>
@@ -270,8 +397,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                   </p>
                 )}
                 <p className="text-[12px] text-neutral-500 mt-2">
-                  Tu asesor te está acompañando en esto. Súbelo cuanto antes en el bloque
-                  de documentos.
+                  Súbelo cuanto antes en <b>Mis documentos</b>. Tu asesor te acompaña en esto.
                 </p>
               </Tarjeta>
             )}
@@ -281,11 +407,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                 Ya presentamos lo que pedían. Ahora toca esperar la resolución.
               </Aviso>
             )}
-
-            <p className="text-[13.5px] text-neutral-500 leading-relaxed">
-              Tu visa se tramita en el Consulado de España a través de BLS International.
-              La fecha de esta cita marca el calendario de todo lo demás.
-            </p>
 
             <SesionView
               sesion={visaExp?.cita_estado && visaExp.cita_estado !== "PENDIENTE" ? {
@@ -306,7 +427,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
               </Aviso>
             )}
 
-            {/* Resolución */}
             {visaExp?.visado_resultado === "FAVORABLE" && (
               <Tarjeta titulo="Resolución" borde="border-emerald-200">
                 <p className="text-[15px] font-bold text-[#1D6A4A]">🎉 ¡Visa concedida!</p>
@@ -328,20 +448,17 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                 )}
                 {visaExp.via_posterior === "APELACION" && (
                   <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
-                    ⚖️ Estamos <b>presentando una apelación</b>. Tu asesor te contará los plazos
-                    y qué esperar.
+                    ⚖️ Estamos <b>presentando una apelación</b>. Tu asesor te contará los plazos.
                   </p>
                 )}
                 {visaExp.via_posterior === "ESTANCIA_ESTUDIOS" && (
                   <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
                     ↪️ Estamos reconduciendo tu caso por la vía de <b>estancia por estudios</b>.
-                    Tu asesor te explicará los siguientes pasos.
                   </p>
                 )}
                 {!visaExp.via_posterior && (
                   <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
-                    Tu asesor está estudiando las opciones y te contactará para explicarte
-                    los siguientes pasos.
+                    Tu asesor está estudiando las opciones y te contactará.
                   </p>
                 )}
               </Tarjeta>
@@ -355,56 +472,18 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                 </Aviso>
                 <Aviso tono="warn" icono="✈️">
                   <b>No compres tu vuelo</b> todavía: sólo reserva con tarifa flexible.
-                  Se compra cuando la visa esté aprobada.
                 </Aviso>
               </>
+            )}
+
+            {visaExp?.cierre_estado === "CERRADO" && (
+              <Aviso tono="ok" icono="🏁">
+                Tu expediente está <b>cerrado</b>. ¡Gracias por confiar en Inspira!
+              </Aviso>
             )}
           </div>
         );
       }
-
-      case "formulario":
-        return (
-          <div className="space-y-3">
-            <Aviso tono="info" icono="📝">
-              El <b>impreso oficial de solicitud</b> lo prepara Inspira con los datos
-              que cargaste en el bloque 1. Tú no tienes que rellenar nada: sólo
-              revisarlo y firmarlo a mano el día de tu cita.
-            </Aviso>
-
-            <SesionView
-              sesion={visaExp?.formulario_estado && visaExp.formulario_estado !== "EN_PREPARACION"
-                ? { estado: visaExp.formulario_estado === "FIRMADO" ? "COMPLETADA" : "PROGRAMADA",
-                    fecha: FORM_LABEL[visaExp.formulario_estado] }
-                : null}
-              etiqueta="Estado de tu formulario"
-              vacio="Lo estamos preparando con tus datos"
-            />
-
-            {visaExp?.formulario_estado === "ENVIADO" && (
-              <Aviso tono="warn" icono="👀">
-                Ya está listo. <b>Revisa que todos tus datos sean correctos</b> y
-                confírmalo con tu asesor antes de firmarlo.
-              </Aviso>
-            )}
-
-            {instructivos.length > 0 && (
-              <Tarjeta titulo="Instructivos y plantillas">
-                <ul className="space-y-2">
-                  {instructivos.map((doc) => (
-                    <li key={doc.url} className="flex items-center justify-between gap-3 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5">
-                      <span className="text-[13px] font-medium text-neutral-700 truncate">📄 {doc.label}</span>
-                      <a href={doc.url} target="_blank" rel="noreferrer" download
-                        className="shrink-0 text-[12px] font-semibold px-3 py-1.5 rounded-lg border-2 border-[#1D6A4A] text-[#1D6A4A] hover:bg-[#1D6A4A] hover:text-white transition-all">
-                        Descargar
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </Tarjeta>
-            )}
-          </div>
-        );
 
       default:
         return null;
@@ -585,21 +664,24 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
           {/* Contenido de la sección activa (llena el área) */}
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <SeccionSiempreAbiertoCtx.Provider value={true}>
+              {/* Medios y datos economicos van juntos: lo que se marca aqui es
+                  lo que decide que documentos se piden en el bloque siguiente. */}
               {activeSection === "economicos" ? (
                 <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
-                  <VisaDeclaracionCliente
-                    idSolicitud={idSolicitud}
-                    expediente={visaExp}
-                    onGuardado={() => cargarTodo({ silent: true })}
-                  />
-                </SeccionPanel>
-              ) : activeSection === "solvencia" ? (
-                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
-                  <VisaMediosEconomicos
-                    idSolicitud={idSolicitud}
-                    expediente={visaExp}
-                    onGuardado={() => cargarTodo({ silent: true })}
-                  />
+                  <div className="space-y-4">
+                    <VisaMediosEconomicos
+                      idSolicitud={idSolicitud}
+                      expediente={visaExp}
+                      onGuardado={() => cargarTodo({ silent: true })}
+                    />
+                    <div className="border-t border-neutral-200 pt-4">
+                      <VisaDeclaracionCliente
+                        idSolicitud={idSolicitud}
+                        expediente={visaExp}
+                        onGuardado={() => cargarTodo({ silent: true })}
+                      />
+                    </div>
+                  </div>
                 </SeccionPanel>
               ) : activeSection === "datos" ? (
                 <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>

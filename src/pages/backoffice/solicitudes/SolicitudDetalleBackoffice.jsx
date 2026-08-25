@@ -16,6 +16,8 @@ import VisaImpresoAdmin from "./components/visa/VisaImpresoAdmin";
 import VisaRecordatoriosAdmin from "./components/visa/VisaRecordatoriosAdmin";
 import VisaFlujoInternoAdmin from "./components/visa/VisaFlujoInternoAdmin";
 import VisaEstadoVisadoAdmin from "./components/visa/VisaEstadoVisadoAdmin";
+import VisaSubirDocumento from "./components/visa/VisaSubirDocumento";
+import MarcadoPorCliente from "./components/visa/MarcadoPorCliente";
 import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
 import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
@@ -105,6 +107,13 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   // Datos de Visado (Fase 2)
   const [visaExp, setVisaExp] = useState(null);
   const [visaSesiones, setVisaSesiones] = useState([]);
+  // Qué documentos terminados ya tiene subidos el cliente (acta, DJ, formulario).
+  const [visaDocs, setVisaDocs] = useState({});
+
+  async function cargarVisaDocs() {
+    const r = await boGET(`/backoffice/solicitudes/${idSolicitud}/visa-documentos`);
+    if (r.ok) setVisaDocs(r.documentos || {});
+  }
 
   function toggleBloque(id) {
     setActiveBloque(id);
@@ -131,41 +140,43 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   // (declaración jurada, impreso oficial) dependen del expediente, que esta
   // pantalla ya tiene cargado. Calcularlo allí obligaría a arrastrar el
   // expediente a todas las consultas de solicitudes.
+  // Los 8 bloques del asesor (0-7). Se corresponden con los 6 del cliente; los
+  // que faltan alli son los internos: el checklist de gestion y el estado del
+  // proceso. Y de la declaracion jurada y el formulario, el cliente ve el
+  // documento terminado que se le sube, nunca el generador.
   const bloques = useMemo(() => {
     if (!isVisado) return bloquesServidor;
     const hecho = (v) => (v ? "completado" : "pendiente");
-    const ses = (tipo) =>
-      visaSesiones.find((x) => x.tipo === tipo)?.estado === "COMPLETADA" ? "completado" : "pendiente";
+    const diag = visaSesiones.find((x) => x.tipo === "DIAGNOSTICO");
     const via = visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE";
     return [
-      { id: "cliente",     numero: "1",  label: "Cliente y flujo interno", estado: estadoDe("cliente") },
-      { id: "checklist",   numero: "2",  label: "Documentos requeridos",   estado: estadoDe("checklist") },
-      { id: "solvencia",   numero: "3",  label: "Medios económicos",       estado: hecho(via) },
-      { id: "declaracion", numero: "3b", label: "Declaración jurada",      estado: hecho(visaExp?.dj_borrador || visaExp?.dj_datos) },
-      { id: "impreso",     numero: "3c", label: "Impreso oficial",         estado: hecho(visaExp?.formulario_estado === "FIRMADO") },
-      { id: "diagnostico", numero: "4",  label: "Sesión diagnóstico",      estado: ses("DIAGNOSTICO") },
-      { id: "seguimiento", numero: "5",  label: "Sesión seguimiento",      estado: ses("SEGUIMIENTO") },
-      { id: "formulario",  numero: "6",  label: "Formulario de visado",    estado: hecho(visaExp?.formulario_estado === "FIRMADO") },
-      { id: "precita",     numero: "7",  label: "Sesión pre-cita",         estado: ses("PRECITA") },
-      { id: "cita",        numero: "8",  label: "Estado del visado",       estado: hecho(visaExp?.visado_resultado === "FAVORABLE") },
-      { id: "cierre",      numero: "9",  label: "Cierre del expediente",   estado: hecho(visaExp?.cierre_estado === "CERRADO") },
-      { id: "portales",    numero: "P",  label: "Portales · Claves",       estado: "pendiente" },
+      { id: "proceso",     numero: "0", label: "Checklist y estado",   estado: hecho(visaExp?.visado_resultado === "FAVORABLE") },
+      { id: "cliente",     numero: "1", label: "Datos del cliente",    estado: estadoDe("cliente") },
+      { id: "diagnostico", numero: "2", label: "Sesion diagnostico",   estado: hecho(diag?.estado === "COMPLETADA") },
+      { id: "solvencia",   numero: "3", label: "Datos economicos",     estado: hecho(via) },
+      { id: "checklist",   numero: "4", label: "Documentos",           estado: estadoDe("checklist") },
+      { id: "declaracion", numero: "5", label: "Declaracion jurada",   estado: hecho(visaExp?.dj_borrador || visaExp?.dj_datos) },
+      { id: "impreso",     numero: "6", label: "Formulario",           estado: hecho(visaExp?.formulario_estado === "FIRMADO") },
+      { id: "cierre",      numero: "7", label: "Cierre del expediente", estado: hecho(visaExp?.cierre_estado === "CERRADO") },
+      { id: "portales",    numero: "P", label: "Portales - Claves",    estado: "pendiente" },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisado, bloquesServidor, visaExp, visaSesiones]);
 
-  // Cargar expediente + sesiones de Visado
+  // Cargar expediente, sesiones y documentos entregables del visado
   useEffect(() => {
     if (!detalle || !isVisado) return;
     let cancel = false;
     (async () => {
-      const [e, s] = await Promise.all([
+      const [e, ses, docs] = await Promise.all([
         boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/visa-expediente`),
         boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/sesiones`),
+        boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/visa-documentos`),
       ]);
       if (cancel) return;
       if (e.ok) setVisaExp(e.expediente || null);
-      if (s.ok) setVisaSesiones(s.sesiones || []);
+      if (ses.ok) setVisaSesiones(ses.sesiones || []);
+      if (docs.ok) setVisaDocs(docs.documentos || {});
     })();
     return () => { cancel = true; };
   }, [detalle, isVisado]);
@@ -432,9 +443,31 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-3 sm:p-[22px] pb-20">
 
+          {/* B0 — Checklist y estado del proceso (sólo visado, sólo interno) */}
+          {isVisado && (
+            <div id="bloque-proceso" className="scroll-mt-4">
+              <BlqHead numero="0" titulo="Checklist y estado del proceso"
+                estado={visaExp?.visado_resultado === "FAVORABLE" ? "completado" : "pendiente"}
+                open={isOpen("proceso")} onToggle={() => toggleBloque("proceso")} />
+              {isOpen("proceso") && (
+                <CBox>
+                  <div className="p-5 space-y-5">
+                    <VisaFlujoInternoAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    <div className="border-t border-[#E2E8F0] pt-5">
+                      <VisaEstadoVisadoAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    </div>
+                    <div className="border-t border-[#E2E8F0] pt-5">
+                      <VisaRecordatoriosAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    </div>
+                  </div>
+                </CBox>
+              )}
+            </div>
+          )}
+
           {/* B1 — Encabezado del cliente */}
           <div id="bloque-cliente" className="scroll-mt-4">
-            <BlqHead numero="1" titulo="Encabezado del cliente" estado={estadoDe("cliente")}
+            <BlqHead numero="1" titulo={isVisado ? "Datos del cliente y credenciales BLS" : "Encabezado del cliente"} estado={estadoDe("cliente")}
               open={isOpen("cliente")} onToggle={() => toggleBloque("cliente")} />
             {isOpen("cliente") && (
               <CBox>
@@ -445,21 +478,16 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   }
                 />
                 {isVisado && (
-                  <>
-                    <div className="border-t border-[#E2E8F0] p-5 space-y-4">
-                      <VisaFlujoInternoAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
-                      <VisaRecordatoriosAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
-                    </div>
-                    <div className="border-t border-[#E2E8F0]">
-                      <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
-                    </div>
-                  </>
+                  <div className="border-t border-[#E2E8F0]">
+                    <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                  </div>
                 )}
               </CBox>
             )}
           </div>
 
-          {/* B2 — Documentos requeridos */}
+          {/* B2 — Documentos requeridos (en visado se renderiza en su orden, más abajo) */}
+          {!isVisado && (
           <div id="bloque-checklist" className="scroll-mt-4">
             <BlqHead numero="2" titulo="Documentos requeridos" estado={estadoDe("checklist")}
               open={isOpen("checklist")} onToggle={() => toggleBloque("checklist")} />
@@ -477,52 +505,13 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               </CBox>
             )}
           </div>
+          )}
 
           {isVisado ? (
             <>
-              {/* B3 — Tipo de medios económicos */}
-              <div id="bloque-solvencia" className="scroll-mt-4">
-                <BlqHead numero="3" titulo="Tipo de medios económicos"
-                  estado={(visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE") ? "completado" : "pendiente"}
-                  open={isOpen("solvencia")} onToggle={() => toggleBloque("solvencia")} />
-                {isOpen("solvencia") && (
-                  <CBox>
-                    <VisaSolvenciaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
-                  </CBox>
-                )}
-              </div>
-
-              {/* B3b — Declaración jurada de solvencia */}
-              <div id="bloque-declaracion" className="scroll-mt-4">
-                <BlqHead numero="3b" titulo="Declaración jurada de solvencia"
-                  estado={visaExp?.dj_borrador || visaExp?.dj_datos ? "completado" : "pendiente"}
-                  open={isOpen("declaracion")} onToggle={() => toggleBloque("declaracion")} />
-                {isOpen("declaracion") && (
-                  <CBox>
-                    <div className="p-5">
-                      <VisaDeclaracionAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
-                    </div>
-                  </CBox>
-                )}
-              </div>
-
-              {/* B3c — Impreso oficial de solicitud */}
-              <div id="bloque-impreso" className="scroll-mt-4">
-                <BlqHead numero="3c" titulo="Impreso oficial de visado"
-                  estado={visaExp?.formulario_estado === "FIRMADO" ? "completado" : "pendiente"}
-                  open={isOpen("impreso")} onToggle={() => toggleBloque("impreso")} />
-                {isOpen("impreso") && (
-                  <CBox>
-                    <div className="p-5">
-                      <VisaImpresoAdmin expediente={visaExp} />
-                    </div>
-                  </CBox>
-                )}
-              </div>
-
-              {/* B4 — Sesión diagnóstico */}
+              {/* B2 — Sesión de diagnóstico y estrategia */}
               <div id="bloque-diagnostico" className="scroll-mt-4">
-                <BlqHead numero="4" titulo="Sesión de diagnóstico"
+                <BlqHead numero="2" titulo="Sesión de diagnóstico y estrategia"
                   estado={sesionEstadoBloque("DIAGNOSTICO")}
                   open={isOpen("diagnostico")} onToggle={() => toggleBloque("diagnostico")} />
                 {isOpen("diagnostico") && (
@@ -530,68 +519,106 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                     <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="DIAGNOSTICO"
                       sesion={sesionPorTipo("DIAGNOSTICO")} onSaved={onSesionGuardada}
                       solvencia={visaExp?.tipo_solvencia || "PENDIENTE"} onSolvencia={cambiarSolvencia}
-                      agenda={["Revisar situación migratoria actual", "Evaluar viabilidad del expediente", "Definir tipo de medios económicos (propios o aval)", "Identificar documentos complejos y plazos", "Instrucciones certificado médico y antecedentes penales"]} />
-                  </CBox>
-                )}
-              </div>
-
-              {/* B5 — Sesión seguimiento */}
-              <div id="bloque-seguimiento" className="scroll-mt-4">
-                <BlqHead numero="5" titulo="Sesión de seguimiento"
-                  estado={sesionEstadoBloque("SEGUIMIENTO")}
-                  open={isOpen("seguimiento")} onToggle={() => toggleBloque("seguimiento")} />
-                {isOpen("seguimiento") && (
-                  <CBox>
-                    <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="SEGUIMIENTO"
-                      sesion={sesionPorTipo("SEGUIMIENTO")} onSaved={onSesionGuardada}
-                      agenda={["Revisión de documentos ya reunidos", "Observaciones pendientes por subsanar", "Estado de la solvencia económica y apostillas", "Definir fecha estimada para formulario y cita"]} />
-                  </CBox>
-                )}
-              </div>
-
-              {/* B6 — Formulario de visado */}
-              <div id="bloque-formulario" className="scroll-mt-4">
-                <BlqHead numero="6" titulo="Formulario de visado"
-                  estado={visaExp?.formulario_estado === "FIRMADO" ? "completado" : visaExp?.formulario_estado === "ENVIADO" ? "revision" : "pendiente"}
-                  open={isOpen("formulario")} onToggle={() => toggleBloque("formulario")} />
-                {isOpen("formulario") && (
-                  <CBox>
-                    <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} mode="estado" />
-                  </CBox>
-                )}
-              </div>
-
-              {/* B7 — Sesión pre-cita */}
-              <div id="bloque-precita" className="scroll-mt-4">
-                <BlqHead numero="7" titulo="Sesión pre-cita"
-                  estado={sesionEstadoBloque("PRECITA")}
-                  open={isOpen("precita")} onToggle={() => toggleBloque("precita")} />
-                {isOpen("precita") && (
-                  <CBox>
-                    <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="PRECITA"
-                      sesion={sesionPorTipo("PRECITA")} onSaved={onSesionGuardada}
-                      agenda={["Verificar que todos los documentos estén aprobados", "Confirmar expediente original completo (original + copia)", "Recordar efectivo para la tasa consular", "Instrucciones logísticas: dirección BLS, hora, qué llevar", "Recordar no comprar billete de avión aún (solo reserva)"]} />
-                  </CBox>
-                )}
-              </div>
-
-              {/* B8 — Cita BLS / Consulado */}
-              <div id="bloque-cita" className="scroll-mt-4">
-                <BlqHead numero="8" titulo="Cita BLS / Consulado España"
-                  estado={visaExp?.cita_estado === "REALIZADA" ? "completado" : (visaExp?.cita_estado && visaExp.cita_estado !== "PENDIENTE") ? "revision" : "pendiente"}
-                  open={isOpen("cita")} onToggle={() => toggleBloque("cita")} />
-                {isOpen("cita") && (
-                  <CBox>
-                    <div className="p-5">
-                      <VisaEstadoVisadoAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                      agenda={["Revisar situación migratoria actual", "Evaluar viabilidad del expediente", "Definir tipo de medios económicos (propios, aval o mixto)", "Identificar documentos complejos y plazos", "Instrucciones certificado médico y antecedentes penales"]} />
+                    <div className="border-t border-[#E2E8F0] p-5">
+                      <VisaSubirDocumento
+                        idSolicitud={detalle.id_solicitud} slot="diagnostico"
+                        titulo="Documento de la reunión"
+                        pista="Acta, resumen o grabación de la sesión. Es lo que verá el cliente en su portal."
+                        documento={visaDocs.diagnostico} onCambio={cargarVisaDocs}
+                      />
                     </div>
                   </CBox>
                 )}
               </div>
 
-              {/* B9 — Cierre del expediente */}
+              {/* B3 — Datos y medios económicos */}
+              <div id="bloque-solvencia" className="scroll-mt-4">
+                <BlqHead numero="3" titulo="Datos y medios económicos"
+                  estado={(visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE") ? "completado" : "pendiente"}
+                  open={isOpen("solvencia")} onToggle={() => toggleBloque("solvencia")} />
+                {isOpen("solvencia") && (
+                  <CBox>
+                    <VisaSolvenciaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    <div className="border-t border-[#E2E8F0] p-5">
+                      <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
+                        Lo que marcó el cliente
+                      </p>
+                      <MarcadoPorCliente expediente={visaExp} />
+                    </div>
+                  </CBox>
+                )}
+              </div>
+
+              {/* B4 — Documentos requeridos */}
+              <div id="bloque-checklist" className="scroll-mt-4">
+                <BlqHead numero="4" titulo="Documentos requeridos" estado={estadoDe("checklist")}
+                  open={isOpen("checklist")} onToggle={() => toggleBloque("checklist")} />
+                {isOpen("checklist") && (
+                  <CBox>
+                    <div className="p-5">
+                      <ChecklistSolicitudAdmin
+                        detalle={detalle}
+                        checklistPorEtapa={checklistPorEtapa}
+                        recargar={cargar}
+                        isVisado={isVisado}
+                        tipoSolvencia={visaExp?.tipo_solvencia || "PENDIENTE"}
+                      />
+                    </div>
+                  </CBox>
+                )}
+              </div>
+
+              {/* B5 — Declaración jurada */}
+              <div id="bloque-declaracion" className="scroll-mt-4">
+                <BlqHead numero="5" titulo="Declaración jurada de solvencia"
+                  estado={visaDocs.dj ? "completado" : (visaExp?.dj_borrador || visaExp?.dj_datos) ? "revision" : "pendiente"}
+                  open={isOpen("declaracion")} onToggle={() => toggleBloque("declaracion")} />
+                {isOpen("declaracion") && (
+                  <CBox>
+                    <div className="p-5 space-y-5">
+                      <VisaSubirDocumento
+                        idSolicitud={detalle.id_solicitud} slot="dj"
+                        titulo="Declaración jurada final (la que ve el cliente)"
+                        pista="Genera el borrador abajo, revísalo, expórtalo y súbelo aquí ya firmado o listo."
+                        documento={visaDocs.dj} onCambio={cargarVisaDocs}
+                      />
+                      <div className="border-t border-[#E2E8F0] pt-5">
+                        <VisaDeclaracionAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                      </div>
+                    </div>
+                  </CBox>
+                )}
+              </div>
+
+              {/* B6 — Formulario de visado */}
+              <div id="bloque-impreso" className="scroll-mt-4">
+                <BlqHead numero="6" titulo="Formulario de visado"
+                  estado={visaDocs.formulario ? "completado" : visaExp?.formulario_estado === "ENVIADO" ? "revision" : "pendiente"}
+                  open={isOpen("impreso")} onToggle={() => toggleBloque("impreso")} />
+                {isOpen("impreso") && (
+                  <CBox>
+                    <div className="p-5 space-y-5">
+                      <VisaSubirDocumento
+                        idSolicitud={detalle.id_solicitud} slot="formulario"
+                        titulo="Formulario final (el que ve el cliente)"
+                        pista="Genera el impreso abajo, revísalo y súbelo aquí para que el cliente lo descargue."
+                        documento={visaDocs.formulario} onCambio={cargarVisaDocs}
+                      />
+                      <div className="border-t border-[#E2E8F0] pt-5">
+                        <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} mode="estado" />
+                      </div>
+                      <div className="border-t border-[#E2E8F0] pt-5">
+                        <VisaImpresoAdmin expediente={visaExp} />
+                      </div>
+                    </div>
+                  </CBox>
+                )}
+              </div>
+
+              {/* B7 — Cierre del expediente */}
               <div id="bloque-cierre" className="scroll-mt-4">
-                <BlqHead numero="9" titulo="Cierre del expediente"
+                <BlqHead numero="7" titulo="Cierre del expediente"
                   estado={visaExp?.cierre_estado === "CERRADO" ? "completado" : visaExp?.cierre_estado === "CANCELADO" ? "observado" : "pendiente"}
                   open={isOpen("cierre")} onToggle={() => toggleBloque("cierre")} />
                 {isOpen("cierre") && (

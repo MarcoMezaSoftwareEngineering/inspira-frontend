@@ -56,8 +56,11 @@ function Grupo({ g, onFusionado, isAdmin, avisar }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
       <div className="px-3.5 py-2 border-b border-neutral-100 flex items-center gap-2">
+        {/* El motivo puede venir compuesto ("teléfono · correo") cuando la
+            misma persona coincide por varias señales: el color lo marca la
+            primera, que es la más fuerte. */}
         <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${
-          TONO_MOTIVO[g.motivo] || TONO_MOTIVO["Mismo nombre"]
+          TONO_MOTIVO[g.motivo.split(" · ")[0]] || TONO_MOTIVO["Mismo nombre"]
         }`}>
           {g.motivo}
         </span>

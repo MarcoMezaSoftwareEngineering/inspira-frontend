@@ -8,7 +8,8 @@
 //
 // pdf-lib se importa de forma diferida: pesa ~450 KB y sólo hace falta al
 // pulsar "Generar", no cada vez que se abre el expediente.
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { boPATCH, boFetch } from "../../../../../services/backofficeApi";
 import { esVersionCaducada, recargarUnaVez } from "../../../../../lib/versionNueva";
 import { Campo, Selecc, SubLabel } from "./visaWidgets";
 
@@ -19,6 +20,21 @@ function aDMY(v) {
   if (!v) return "";
   const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);
   return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
+}
+
+/* dd/mm/yyyy → yyyy-mm-dd. Se guarda siempre en ISO aunque el impreso se
+   rellene en formato español: si no, la columna acaba con dos formatos
+   mezclados según quién la tocó por última vez. */
+function aISO(v) {
+  if (!v) return "";
+  const m = String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  return m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : String(v);
+}
+
+/* Hoy, en el formato del impreso. */
+function hoyDMY() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
 
 /* El cliente escribe sus apellidos y nombres por separado en su portal, que es
@@ -54,15 +70,21 @@ function desdeExpediente(exp = {}, dj = {}, cliente = {}) {
     expedidoPor: exp.pais_expedicion || "PERÚ",
     domicilio: exp.domicilio || "", correo: exp.correo || "", telefono: exp.telefono || "",
     profesion: exp.profesion || "",
-    entrada: aDMY(exp.viaje_fecha_prevista), entradas: "Múltiples",
-    domesp: exp.domicilio_espana || "", nie: "",
+    entrada: aDMY(exp.viaje_fecha_prevista),
+    entradas: exp.impreso_entradas || "Múltiples",
+    domesp: exp.domicilio_espana || "", nie: exp.impreso_nie || "",
     centroNombre: exp.centro_nombre || estudios.universidad || "",
     centroDir: exp.centro_direccion || "", centroTel: exp.centro_telefono || "",
     centroMail: exp.centro_correo || "",
     iniEst: aDMY(exp.centro_inicio), finEst: aDMY(exp.centro_fin),
-    lugarFecha: dj.firma?.ciudad
-      ? `${dj.firma.ciudad}${dj.firma.dia ? `, ${dj.firma.dia} de ${dj.firma.mes || ""} de ${dj.firma.anio || ""}` : ""}`
-      : "",
+    // Lo guardado manda; luego la firma de la DJ; y si no hay nada, la fecha
+    // de hoy con la ciudad del cliente. El impreso se firma el día que se
+    // imprime, así que dejarlo en blanco solo obligaba a escribirlo a mano.
+    lugarFecha:
+      exp.impreso_lugar_fecha ||
+      (dj.firma?.ciudad
+        ? `${dj.firma.ciudad}${dj.firma.dia ? `, ${dj.firma.dia} de ${dj.firma.mes || ""} de ${dj.firma.anio || ""}` : ""}`
+        : [est.ciudad || cliente.ciudad || "", hoyDMY()].filter(Boolean).join(", ")),
   };
 }
 
@@ -83,7 +105,7 @@ const OBLIGATORIOS = [
   ["lugarFecha", "30. Lugar y fecha"],
 ];
 
-export default function VisaImpresoAdmin({ expediente, cliente }) {
+export default function VisaImpresoAdmin({ expediente, cliente, idSolicitud, onSaved, onDocumentoGuardado }) {
   // `expediente` puede llegar null en la primera carga; el fallback va dentro
   // del useMemo para no crear un objeto nuevo en cada render.
   const inicial = useMemo(() => {
@@ -93,6 +115,36 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
 
   const [f, setF] = useState(inicial);
   const [tocado, setTocado] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+
+  /* Lo que se escribe aquí se guarda; antes vivía sólo en la memoria del
+     navegador y una recarga se lo llevaba por delante.
+     Se persisten ÚNICAMENTE los campos que esta pantalla posee. Los demás
+     (nombre, pasaporte, fechas del viaje…) los gobierna el bloque 1 y
+     reescribirlos desde aquí, ya reformateados, los estropearía. */
+  const guardarPropios = useCallback(async (datos) => {
+    if (!idSolicitud) return;
+    setGuardando(true);
+    try {
+      const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/visa-expediente`, {
+        centro_nombre: datos.centroNombre || null,
+        centro_direccion: datos.centroDir || null,
+        centro_telefono: datos.centroTel || null,
+        centro_correo: datos.centroMail || null,
+        centro_inicio: aISO(datos.iniEst) || null,
+        centro_fin: aISO(datos.finEst) || null,
+        impreso_lugar_fecha: datos.lugarFecha || null,
+        impreso_nie: datos.nie || null,
+        impreso_entradas: datos.entradas || null,
+      });
+      if (r?.ok) onSaved?.(r.expediente);
+    } finally {
+      setGuardando(false);
+    }
+  }, [idSolicitud, onSaved]);
+
+  // Se guarda al salir del campo, como el resto de las tablas editables.
+  const alSalir = () => guardarPropios(f);
   const [estado, setEstado] = useState(null); // {tipo, texto}
   const [generando, setGenerando] = useState(false);
 
@@ -100,10 +152,11 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
 
   const set = (k) => (v) => { setTocado(true); setEstado(null); setF((p) => ({ ...p, [k]: v })); };
 
-  async function generar() {
-    setGenerando(true);
-    setEstado({ tipo: "trabajando", texto: "Generando el impreso oficial…" });
-    try {
+  /* Construye el PDF y devuelve los bytes. Separado de lo que se hace luego
+     con ellos: el mismo documento se descarga o se archiva en el expediente
+     del cliente, y no tendría sentido armarlo dos veces distintas. */
+  async function construirPDF() {
+    {
       const [{ PDFDocument, rgb }, resp] = await Promise.all([
         import("pdf-lib"),
         fetch(RUTA_PDF),
@@ -179,15 +232,23 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
 
       form.updateFieldAppearances();
       const bytes = await pdf.save();
-      const blob = new Blob([bytes], { type: "application/pdf" });
       const nombre = (f.apellidos || f.nombres || "solicitud").split(" ")[0].toLowerCase();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Solicitud-visado-${nombre}.pdf`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      return {
+        blob: new Blob([bytes], { type: "application/pdf" }),
+        nombre: `Solicitud-visado-${nombre}.pdf`,
+      };
+    }
+  }
 
-      setEstado({ tipo: "ok", texto: "Impreso generado y descargado. Revísalo antes de imprimir; la firma (punto 31) va manuscrita." });
+  /* Antes de armar el PDF se guarda lo escrito: si algo falla a media
+     generación, al menos los datos ya no se pierden. */
+  async function conPDF(quehacer, textoTrabajando) {
+    setGenerando(true);
+    setEstado({ tipo: "trabajando", texto: textoTrabajando });
+    try {
+      await guardarPropios(f);
+      const { blob, nombre } = await construirPDF();
+      await quehacer(blob, nombre);
     } catch (e) {
       // El código que arma el PDF se descarga al pulsar el botón, no antes.
       // Si mientras tanto se publicó una versión nueva, ese archivo pudo
@@ -206,6 +267,43 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
     } finally {
       setGenerando(false);
     }
+  }
+
+  function descargar() {
+    return conPDF((blob, nombre) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = nombre;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      setEstado({
+        tipo: "ok",
+        texto: "Impreso generado y descargado. Revísalo antes de imprimir; la firma (punto 31) va manuscrita.",
+      });
+    }, "Generando el impreso oficial…");
+  }
+
+  /* Lo deja en la ranura "formulario" del expediente, que es la que el cliente
+     ve en su portal. Descargarlo sólo lo deja en el ordenador de quien pulsó
+     el botón; archivarlo aquí es lo que hace que el cliente pueda cogerlo y
+     que quede constancia de la versión entregada. */
+  function archivar() {
+    return conPDF(async (blob, nombre) => {
+      const datos = new FormData();
+      datos.append("archivo", new File([blob], nombre, { type: "application/pdf" }));
+      const r = await boFetch(`/backoffice/solicitudes/${idSolicitud}/visa-documentos/formulario`, {
+        method: "POST", body: datos,
+      });
+      const j = await r?.json().catch(() => null);
+      if (!r?.ok || j?.ok === false) {
+        throw new Error(j?.msg || "No se pudo archivar el impreso");
+      }
+      onDocumentoGuardado?.();
+      setEstado({
+        tipo: "ok",
+        texto: "Impreso archivado en los documentos del cliente. Ya puede descargarlo desde su portal.",
+      });
+    }, "Generando y archivando…");
   }
 
   const color = {
@@ -293,7 +391,7 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
           <Selecc label="22. Entradas" value={f.entradas} onChange={set("entradas")}
             options={["Una", "Dos", "Múltiples"].map((v) => ({ value: v, label: v }))} />
           <Campo label="23. Domicilio en España" value={f.domesp} onChange={set("domesp")} />
-          <Campo label="24. NIE (si procede)" value={f.nie} onChange={set("nie")} placeholder="opcional" />
+          <Campo label="24. NIE (si procede)" value={f.nie} onChange={set("nie")} onBlur={alSalir} placeholder="opcional" />
         </div>
         <p className="text-[11px] text-neutral-400 mt-2">
           18. Residente en país distinto: se marca <b>No</b>. · 20. Motivo: se marca <b>Estudios</b>.
@@ -303,19 +401,19 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
       <div>
         <SubLabel>28 · Centro de estudios</SubLabel>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-          <Campo label="Nombre del centro" value={f.centroNombre} onChange={set("centroNombre")} />
-          <Campo label="Dirección postal" value={f.centroDir} onChange={set("centroDir")} />
-          <Campo label="Teléfono" value={f.centroTel} onChange={set("centroTel")} />
-          <Campo label="Correo electrónico" value={f.centroMail} onChange={set("centroMail")} />
-          <Campo label="Inicio de estudios" value={f.iniEst} onChange={set("iniEst")} placeholder="07/09/2026" />
-          <Campo label="Fin de estudios" value={f.finEst} onChange={set("finEst")} placeholder="08/07/2027" />
+          <Campo label="Nombre del centro" value={f.centroNombre} onChange={set("centroNombre")} onBlur={alSalir} />
+          <Campo label="Dirección postal" value={f.centroDir} onChange={set("centroDir")} onBlur={alSalir} />
+          <Campo label="Teléfono" value={f.centroTel} onChange={set("centroTel")} onBlur={alSalir} />
+          <Campo label="Correo electrónico" value={f.centroMail} onChange={set("centroMail")} onBlur={alSalir} />
+          <Campo label="Inicio de estudios" value={f.iniEst} onChange={set("iniEst")} onBlur={alSalir} placeholder="07/09/2026" />
+          <Campo label="Fin de estudios" value={f.finEst} onChange={set("finEst")} onBlur={alSalir} placeholder="08/07/2027" />
         </div>
       </div>
 
       <div>
         <SubLabel>30 · Lugar y fecha</SubLabel>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <Campo label="Lugar y fecha" value={f.lugarFecha} onChange={set("lugarFecha")} placeholder="Lima, 4 de agosto de 2026" />
+          <Campo label="Lugar y fecha" value={f.lugarFecha} onChange={set("lugarFecha")} onBlur={alSalir} placeholder="Lima, 4 de agosto de 2026" />
         </div>
         <p className="text-[11px] text-neutral-400 mt-2">
           ✍️ El punto 31 (firma) queda en blanco para la firma manuscrita del solicitante.
@@ -324,12 +422,24 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
 
       <div className="flex items-center gap-3 flex-wrap">
         <button
-          type="button" onClick={generar} disabled={generando}
+          type="button" onClick={descargar} disabled={generando}
           className="inline-flex items-center gap-2 text-[12px] font-semibold px-5 py-2 rounded-lg bg-[#023A4B] text-white hover:bg-[#035670] disabled:opacity-50 transition-colors"
         >
           {generando && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
           {faltan.length ? "📄 Generar igualmente (incompleto)" : "📄 Generar impreso oficial (PDF)"}
         </button>
+        {idSolicitud && (
+          <button
+            type="button" onClick={archivar} disabled={generando}
+            title="Lo guarda en el expediente para que el cliente pueda descargarlo"
+            className="inline-flex items-center gap-2 text-[12px] font-semibold px-4 py-2 rounded-lg border-[1.5px] border-[#023A4B] text-[#023A4B] hover:bg-[#023A4B]/5 disabled:opacity-50 transition-colors"
+          >
+            📥 Guardar en los documentos del cliente
+          </button>
+        )}
+        {guardando && (
+          <span className="text-[11px] text-neutral-400 font-mono">guardando…</span>
+        )}
         <a
           href={RUTA_PDF} target="_blank" rel="noreferrer"
           className="text-[11.5px] font-semibold text-neutral-500 hover:text-[#023A4B] underline"

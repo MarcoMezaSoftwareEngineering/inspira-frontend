@@ -618,7 +618,12 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                         <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} mode="estado" />
                       </div>
                       <div className="border-t border-[#E2E8F0] pt-5">
-                        <VisaImpresoAdmin expediente={visaExp} cliente={detalle.cliente} />
+                        <VisaImpresoAdmin
+                          expediente={visaExp} cliente={detalle.cliente}
+                          idSolicitud={detalle.id_solicitud}
+                          onSaved={setVisaExp}
+                          onDocumentoGuardado={cargarVisaDocs}
+                        />
                       </div>
                     </div>
                   </CBox>

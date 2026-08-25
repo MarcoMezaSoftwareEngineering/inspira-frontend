@@ -4,6 +4,7 @@ import { boGET, boPOST, boPUT } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
 import { dialog } from "../../../services/dialogService";
 import ClientesLista from "./ClientesLista";
+import Duplicados from "./Duplicados";
 import ClienteForm from "./ClienteForm";
 import ServiciosClienteModal from "./ServiciosClienteModal";
 import PerfilClienteModal from "./PerfilClienteModal";
@@ -49,6 +50,7 @@ export default function Clientes() {
   const [orden, setOrden] = useState("recientes");
   // Ficha completa: sustituye a la lista mientras esta abierta.
   const [fichaDe, setFichaDe] = useState(null);
+  const [verDuplicados, setVerDuplicados] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [q, setQ] = useState("");
@@ -242,6 +244,21 @@ export default function Clientes() {
     );
   }
 
+  if (verDuplicados) {
+    return (
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+        <Duplicados
+          isAdmin={isAdmin}
+          avisar={(msg, tipo) => setToast({ msg, tipo })}
+          onVolver={() => { setVerDuplicados(false); cargar(); }}
+        />
+        {toast && (
+          <Toast msg={toast.msg} tipo={toast.tipo} onClose={() => setToast(null)} />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 sm:p-6 space-y-4 max-w-6xl mx-auto">
       {/* Cabecera */}
@@ -270,6 +287,13 @@ export default function Clientes() {
               className="text-[12px] font-semibold text-neutral-500 hover:text-primary transition-colors"
             >
               Solo ficha
+            </button>
+            <button
+              type="button"
+              onClick={() => setVerDuplicados(true)}
+              className="text-[12px] font-semibold text-neutral-500 hover:text-primary transition-colors"
+            >
+              Duplicados
             </button>
           </div>
         )}

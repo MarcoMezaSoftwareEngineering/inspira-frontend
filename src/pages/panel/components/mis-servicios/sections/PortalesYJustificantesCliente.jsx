@@ -32,20 +32,7 @@ function AccesoCard({ item }) {
       </div>
 
       {(item.usuario_login || item.password) && (
-        <div className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2.5 space-y-1.5">
-          {item.usuario_login && (
-            <p className="text-xs text-neutral-700">
-              <span className="font-semibold">Usuario:</span>{" "}
-              <span className="font-mono">{item.usuario_login}</span>
-            </p>
-          )}
-          {item.password && (
-            <details className="text-xs">
-              <summary className="cursor-pointer text-sm font-semibold text-[#023A4B] select-none">Ver contraseña</summary>
-              <p className="mt-1.5 font-mono text-sm bg-white border border-neutral-200 rounded px-2 py-1">{item.password}</p>
-            </details>
-          )}
-        </div>
+        <Credenciales usuario={item.usuario_login} password={item.password} url={item.url_acceso} />
       )}
 
       {item.justificantes && item.justificantes.length > 0 && (
@@ -62,6 +49,83 @@ function AccesoCard({ item }) {
             ))}
           </ul>
         </div>
+      )}
+    </div>
+  );
+}
+
+
+/* Credenciales del cliente. Son suyas y siempre puede verlas, pero se tratan
+   como dato sensible: ocultas por defecto, y el "copiar" evita que tenga que
+   leerlas en voz alta o dejarlas a la vista mientras las teclea. */
+function Credenciales({ usuario, password, url }) {
+  const [visible, setVisible] = useState(false);
+  const [copiado, setCopiado] = useState("");
+
+  async function copiar(valor, que) {
+    try {
+      await navigator.clipboard.writeText(valor);
+      setCopiado(que);
+      setTimeout(() => setCopiado(""), 1800);
+    } catch {
+      // Algunos navegadores lo bloquean fuera de HTTPS o sin gesto directo.
+      setCopiado("error");
+      setTimeout(() => setCopiado(""), 2500);
+    }
+  }
+
+  const btn =
+    "shrink-0 text-[11px] font-semibold px-2 py-1 rounded-md border border-neutral-200 " +
+    "bg-white text-neutral-600 hover:border-[#1D6A4A] hover:text-[#1D6A4A] transition-colors";
+
+  return (
+    <div className="bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-3 space-y-2">
+      <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">
+        Tus accesos
+      </p>
+
+      {usuario && (
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Usuario</p>
+            <p className="text-[13px] font-mono text-neutral-800 truncate">{usuario}</p>
+          </div>
+          <button type="button" className={btn} onClick={() => copiar(usuario, "usuario")}>
+            {copiado === "usuario" ? "✓" : "Copiar"}
+          </button>
+        </div>
+      )}
+
+      {password && (
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Contraseña</p>
+            <p className="text-[13px] font-mono text-neutral-800 truncate">
+              {visible ? password : "•".repeat(Math.min(password.length, 12))}
+            </p>
+          </div>
+          <button type="button" className={btn} onClick={() => setVisible((v) => !v)}>
+            {visible ? "Ocultar" : "Mostrar"}
+          </button>
+          <button type="button" className={btn} onClick={() => copiar(password, "pass")}>
+            {copiado === "pass" ? "✓" : "Copiar"}
+          </button>
+        </div>
+      )}
+
+      {url && (
+        <a
+          href={url} target="_blank" rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#046C8C] hover:underline"
+        >
+          Abrir plataforma ↗
+        </a>
+      )}
+
+      {copiado === "error" && (
+        <p className="text-[11px] text-amber-700">
+          Tu navegador bloqueó el copiado. Selecciona el texto y cópialo a mano.
+        </p>
       )}
     </div>
   );
@@ -152,8 +216,9 @@ function SubSeccion({ codigo, titulo, descripcion, items }) {
   if (!items || items.length === 0) return null;
   return (
     <div>
-      <p className="text-sm font-bold text-neutral-700 mb-3">{codigo} {titulo}</p>
-      <div className="space-y-3">
+      <p className="text-sm font-bold text-neutral-700">{codigo} {titulo}</p>
+      {descripcion && <p className="text-xs text-neutral-500 mb-3 mt-0.5">{descripcion}</p>}
+      <div className="space-y-3 mt-3">
         {items.map((p) => <AccesoCard key={p.id_acceso} item={p} />)}
       </div>
     </div>

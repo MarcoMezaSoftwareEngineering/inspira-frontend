@@ -12,6 +12,7 @@ import InformeBusqueda from "./sections/InformeBusqueda";
 import EleccionMastersCliente from "./sections/EleccionMastersCliente";
 import ProgramacionPostulacionesCliente from "./sections/ProgramacionPostulacionesCliente";
 import PortalesYJustificantesCliente from "./sections/PortalesYJustificantesCliente";
+import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
@@ -305,16 +306,24 @@ export default function DetalleSolicitud({ solicitudBase, onVolver }) {
       show:     !esVisado,
     },
     {
-      id:       "portales",
+      id:       "docsproceso",
       num:      7,
-      titulo:   "Portales y claves",
+      titulo:   "Documentos del proceso",
+      subtitulo: null,
+      estado:   null,
+      show:     true,
+    },
+    {
+      id:       "portales",
+      num:      8,
+      titulo:   "Accesos y credenciales",
       subtitulo: null,
       estado:   null,
       show:     true,
     },
     {
       id:       "cierre",
-      num:      8,
+      num:      9,
       titulo:   "Cierre",
       subtitulo: null,
       estado:   null,
@@ -481,6 +490,10 @@ export default function DetalleSolicitud({ solicitudBase, onVolver }) {
                   resetKey={seleccionKey}
                   reloadKey={postulacionesKey}
                 />
+              )}
+
+              {activeSection === "docsproceso" && (
+                <DocumentosProceso idSolicitud={idSolicitud} modo="cliente" />
               )}
 
               {activeSection === "portales" && (

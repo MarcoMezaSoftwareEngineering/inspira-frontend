@@ -19,6 +19,7 @@ import VisaEstadoVisadoAdmin from "./components/visa/VisaEstadoVisadoAdmin";
 import VisaSubirDocumento from "./components/visa/VisaSubirDocumento";
 import MarcadoPorCliente from "./components/visa/MarcadoPorCliente";
 import NotasExpediente from "./components/visa/NotasExpediente";
+import DocumentosProceso from "../../../components/common/DocumentosProceso";
 import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
 import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
@@ -146,7 +147,15 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   // proceso. Y de la declaracion jurada y el formulario, el cliente ve el
   // documento terminado que se le sube, nunca el generador.
   const bloques = useMemo(() => {
-    if (!isVisado) return bloquesServidor;
+    if (!isVisado) {
+      // El bloque de documentos del proceso vive solo en el frontend: el
+      // servidor calcula la lista sin saber de el.
+      const i = bloquesServidor.findIndex((b) => b.id === "portales");
+      if (i < 0) return bloquesServidor;
+      const copia = [...bloquesServidor];
+      copia.splice(i, 0, { id: "docsproceso", numero: "D", label: "Documentos del proceso", estado: "pendiente" });
+      return copia;
+    }
     const hecho = (v) => (v ? "completado" : "pendiente");
     const diag = visaSesiones.find((x) => x.tipo === "DIAGNOSTICO");
     const via = visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE";
@@ -707,6 +716,20 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               </div>
 
               {/* B7 — Portales y justificantes */}
+              {/* Documentos del proceso: lo que se genera durante el tramite.
+                  Aparte del checklist para que no se pierda entre lo pendiente. */}
+              <div id="bloque-docsproceso" className="scroll-mt-4">
+                <BlqHead numero="D" titulo="Documentos del proceso" estado="pendiente"
+                  open={isOpen("docsproceso")} onToggle={() => toggleBloque("docsproceso")} />
+                {isOpen("docsproceso") && (
+                  <CBox>
+                    <div className="p-5">
+                      <DocumentosProceso idSolicitud={detalle.id_solicitud} modo="asesor" />
+                    </div>
+                  </CBox>
+                )}
+              </div>
+
               <div id="bloque-portales" className="scroll-mt-4">
                 <BlqHead numero="7" titulo="Portales, claves y justificantes" estado={estadoDe("portales")}
                   open={isOpen("portales")} onToggle={() => toggleBloque("portales")} />

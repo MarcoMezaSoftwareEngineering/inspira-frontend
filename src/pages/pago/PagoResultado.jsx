@@ -2,6 +2,7 @@
 // Páginas informativas de retorno desde Mercado Pago (back_urls).
 // La confirmación real de la cita/servicio la realiza el webhook del backend.
 import { navigate } from "../../services/navigate";
+import { CALENDLY_URL } from "../../config/contacto";
 
 function Layout({ emoji, titulo, mensaje, acciones }) {
   return (
@@ -63,7 +64,7 @@ export function PagoFallido() {
       mensaje="El pago no se realizó y el horario quedó liberado. Puedes intentarlo de nuevo cuando quieras."
       acciones={
         <>
-          <button type="button" className={btnPrimario} onClick={() => navigate("/reservar")}>
+          <button type="button" className={btnPrimario} onClick={() => { window.location.href = CALENDLY_URL; }}>
             Volver a reservar
           </button>
           <button type="button" className={btnSecundario} onClick={() => navigate("/")}>

@@ -20,6 +20,7 @@ import BarraInferior from "./components/layout/BarraInferior";
 import Eventos from "./pages/eventos/Eventos";
 import CasosExito from "./pages/casos/CasosExito";
 import Asistente from "./pages/asistente/Asistente";
+import AsistenteIA from "./pages/asistente/AsistenteIA";
 import RutaLanding from "./pages/rutas/RutaLanding";
 import Plataforma from "./pages/plataforma/Plataforma";
 import { getRuta } from "./config/rutas";
@@ -134,6 +135,12 @@ const SEO_PAGES = {
     description:
       "Somos una firma con plataforma propia: accedes con credenciales a un panel donde vive tu expediente, subes documentos, tu asesor los valida y el sistema te avisa en cada hito.",
     path: "/plataforma",
+  },
+  "/asistente-ia": {
+    title: "InspiraGPT – Asistente de extranjería y estudios en España",
+    description:
+      "Chat con InspiraGPT: resuelve dudas de visados, homologaciones, residencias y estudios en España a cualquier hora. Entrenado con las guías del equipo legal de Inspira.",
+    path: "/asistente-ia",
   },
   "/asistente": {
     title: "Asistente Inspira – ¿Qué trámite me corresponde para España?",
@@ -280,6 +287,7 @@ const PUBLIC_PATHS = [
   "/eventos",
   "/casos-de-exito",
   "/asistente",
+  "/asistente-ia",
   "/plataforma",
   "/ruta/estudios",
   "/ruta/rapidas",
@@ -288,7 +296,6 @@ const PUBLIC_PATHS = [
   "/ruta/tramites",
   "/calculadora-master",
   "/panel",
-  "/reservar",
   "/pago-exitoso",
   "/pago-fallido",
   "/pago-pendiente",
@@ -354,6 +361,7 @@ export default function App() {
       {path === "/eventos" && <Eventos />}
       {path === "/casos-de-exito" && <CasosExito />}
       {path === "/asistente" && <Asistente />}
+      {path === "/asistente-ia" && <AsistenteIA />}
       {path === "/plataforma" && <Plataforma />}
       {path === "/blog" && <BlogIndex />}
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}

@@ -7,8 +7,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import AltaRapida from "../clientes/AltaRapida";
-import TrackerUniversidades from "../tracker/TrackerUniversidades";
-import PanelAsesoras from "../panel-asesoras/PanelAsesoras";
 
 const COLOR_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -161,7 +159,6 @@ export default function Procesos({ onAbrirProceso }) {
   const [error, setError] = useState("");
 
   const [q, setQ] = useState("");
-  const [servicio, setServicio] = useState("");
   const [etapa, setEtapa] = useState("");
   const [responsable, setResponsable] = useState("");
   const [soloAtencion, setSoloAtencion] = useState(false);
@@ -173,7 +170,7 @@ export default function Procesos({ onAbrirProceso }) {
   // Un solo panel: la tabla general y los seguimientos por servicio son
   // pestanas, no secciones distintas del menu. Es el mismo dato mirado de
   // otra forma, y tenerlos separados obligaba a saltar entre pantallas.
-  const [pestana, setPestana] = useState("todos");
+  const [pestana, setPestana] = useState("metricas");
 
   // Volcado de la respuesta al estado. Aparte de la peticion para que tanto el
   // efecto como el refresco manual usen exactamente el mismo tratamiento.
@@ -214,7 +211,8 @@ export default function Procesos({ onAbrirProceso }) {
     const texto = q.trim().toLowerCase();
     return procesos.filter((p) => {
       if (!verCerrados && p.cerrado) return false;
-      if (servicio && p.servicio !== servicio) return false;
+      // La pestana ES el filtro de servicio.
+      if (pestana !== "metricas" && p.servicio !== pestana) return false;
       if (etapa && p.etapa !== etapa) return false;
       if (responsable && String(p.id_responsable) !== responsable) return false;
       if (soloAtencion) {
@@ -225,7 +223,7 @@ export default function Procesos({ onAbrirProceso }) {
       if (texto && !`${p.cliente} ${p.email} ${p.subtipo}`.toLowerCase().includes(texto)) return false;
       return true;
     });
-  }, [procesos, q, servicio, etapa, responsable, soloAtencion, verCerrados]);
+  }, [procesos, pestana, q, etapa, responsable, soloAtencion, verCerrados]);
 
   const resumen = useMemo(() => ({
     activos: procesos.filter((p) => !p.cerrado).length,
@@ -236,7 +234,8 @@ export default function Procesos({ onAbrirProceso }) {
     debiendo: procesos.filter((p) => p.pago?.pendiente > 0).length,
   }), [procesos]);
 
-  const etapasDelFiltro = servicio ? (filtros.etapas?.[servicio] || []) : [];
+  const svcActivo = pestana !== "metricas" ? pestana : null;
+  const etapasDelFiltro = svcActivo ? (filtros.etapas?.[svcActivo] || []) : [];
   const sel = "text-[12px] text-neutral-700 border border-neutral-300 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]";
 
   return (
@@ -261,22 +260,29 @@ export default function Procesos({ onAbrirProceso }) {
       {/* Pestañas */}
       <div className="flex gap-1 border-b border-neutral-200 overflow-x-auto [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: "none" }}>
-        {[
-          { id: "todos",  txt: "Todos los procesos" },
-          { id: "master", txt: "Seguimiento máster" },
-          { id: "visa",   txt: "Seguimiento visado" },
-        ].map((t) => (
+        {[{ clave: "metricas", label: "Métricas" }, ...(filtros.servicios || [])].map((sv) => {
+          const t = { id: sv.clave, txt: sv.label };
+          const n = sv.clave === "metricas"
+            ? null
+            : procesos.filter((p) => p.servicio === sv.clave && !p.cerrado).length;
+          return (
           <button
             key={t.id} type="button" onClick={() => setPestana(t.id)}
-            className={`shrink-0 px-3 py-2 text-[12.5px] font-semibold border-b-2 -mb-px transition-colors ${
+            className={`shrink-0 flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-semibold border-b-2 -mb-px transition-colors ${
               pestana === t.id
                 ? "border-[#1D6A4A] text-[#1D6A4A]"
                 : "border-transparent text-neutral-500 hover:text-neutral-800"
             }`}
           >
             {t.txt}
+            {n !== null && (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                pestana === t.id ? "bg-[#1D6A4A] text-white" : "bg-neutral-100 text-neutral-500"
+              }`}>{n}</span>
+            )}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       {altaAbierta && (
@@ -286,52 +292,64 @@ export default function Procesos({ onAbrirProceso }) {
         </div>
       )}
 
-      {/* Los seguimientos por servicio reutilizan las pantallas que ya existian:
-          el tracker de universidades y el panel de asesoras. No se han
-          reescrito, solo han dejado de vivir en su propia entrada de menu. */}
-      {pestana === "master" && (
-        <div className="-mx-1"><TrackerUniversidades /></div>
-      )}
-      {pestana === "visa" && (
-        <div className="-mx-1"><PanelAsesoras servicioInicial="visa" /></div>
+      {/* MÉTRICAS · sin tabla: es la vista de "cómo vamos", no de trabajar */}
+      {pestana === "metricas" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[
+              { n: resumen.activos,    t: "Procesos activos",   c: "text-[#1A3557]", d: "En marcha ahora mismo" },
+              { n: resumen.vencidos,   t: "Vencidos",           c: "text-red-600",   d: "Su fecha ya pasó" },
+              { n: resumen.semana,     t: "Esta semana",        c: "text-amber-600", d: "Vencen en 7 días o menos" },
+              { n: resumen.observados, t: "Con observaciones",  c: "text-red-600",   d: "Documentos que corregir" },
+              { n: resumen.sinResp,    t: "Sin responsable",    c: "text-amber-600", d: "Nadie los está llevando" },
+              { n: resumen.debiendo,   t: "Con deuda",          c: "text-red-600",   d: "Queda dinero por cobrar" },
+            ].map((c) => (
+              <div key={c.t} className="bg-white border border-neutral-200 rounded-xl px-4 py-3">
+                <p className={`text-[26px] font-bold leading-none ${c.c}`}>{c.n}</p>
+                <p className="text-[12.5px] font-semibold text-neutral-700 mt-1.5">{c.t}</p>
+                <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">{c.d}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Reparto por servicio: pulsando se va a esa pestaña */}
+          <div className="bg-white border border-neutral-200 rounded-xl p-4">
+            <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-3">
+              Procesos activos por servicio
+            </p>
+            <div className="space-y-2">
+              {(filtros.servicios || []).map((sv) => {
+                const delSvc = procesos.filter((p) => p.servicio === sv.clave && !p.cerrado);
+                const pct = resumen.activos ? Math.round((delSvc.length / resumen.activos) * 100) : 0;
+                return (
+                  <button key={sv.clave} type="button" onClick={() => setPestana(sv.clave)}
+                    className="w-full text-left group">
+                    <div className="flex items-center gap-2 text-[12.5px]">
+                      <span className="font-semibold text-neutral-700 group-hover:text-[#1D6A4A]">{sv.label}</span>
+                      <span className="ml-auto font-bold text-neutral-800">{delSvc.length}</span>
+                      <span className="text-neutral-400 w-9 text-right">{pct}%</span>
+                    </div>
+                    <div className="h-1.5 bg-neutral-100 rounded-full mt-1 overflow-hidden">
+                      <div className="h-full bg-[#1D6A4A] rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
-      {pestana === "todos" && (<>
-
-      {/* Resumen en una sola fila, deslizable en móvil */}
-      <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
-        {[
-          { n: resumen.activos, t: "Activos", c: "text-[#1A3557]" },
-          { n: resumen.vencidos, t: "Vencidos", c: "text-red-600" },
-          { n: resumen.semana, t: "Esta semana", c: "text-amber-600" },
-          { n: resumen.observados, t: "Observados", c: "text-red-600" },
-          { n: resumen.sinResp, t: "Sin asignar", c: "text-amber-600" },
-          { n: resumen.debiendo, t: "Debiendo", c: "text-red-600" },
-        ].map((c) => (
-          <button
-            key={c.t} type="button" onClick={() => setSoloAtencion(true)}
-            className="shrink-0 bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-left hover:border-neutral-300 min-w-[84px]"
-          >
-            <p className={`text-[17px] font-bold leading-none ${c.c}`}>{c.n}</p>
-            <p className="text-[10px] text-neutral-500 mt-0.5 whitespace-nowrap">{c.t}</p>
-          </button>
-        ))}
-      </div>
+      {pestana !== "metricas" && (<>
 
       {/* Filtros en una línea */}
       <div className="flex flex-wrap items-center gap-1.5">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar…"
           className={`${sel} flex-1 min-w-[140px]`} />
-        <select className={sel} value={servicio} onChange={(e) => { setServicio(e.target.value); setEtapa(""); }}>
-          <option value="">Servicio</option>
-          {filtros.servicios?.map((s) => <option key={s.clave} value={s.clave}>{s.label}</option>)}
+        <select className={sel} value={etapa} onChange={(e) => setEtapa(e.target.value)}>
+          <option value="">Todas las etapas</option>
+          {etapasDelFiltro.map((e) => <option key={e.valor} value={e.valor}>{e.valor}</option>)}
         </select>
-        {servicio && (
-          <select className={sel} value={etapa} onChange={(e) => setEtapa(e.target.value)}>
-            <option value="">Etapa</option>
-            {etapasDelFiltro.map((e) => <option key={e.valor} value={e.valor}>{e.valor}</option>)}
-          </select>
-        )}
         <select className={sel} value={responsable} onChange={(e) => setResponsable(e.target.value)}>
           <option value="">Responsable</option>
           {filtros.responsables?.map((r) => <option key={r.id} value={String(r.id)}>{r.nombre}</option>)}

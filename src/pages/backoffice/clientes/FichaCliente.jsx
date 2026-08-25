@@ -50,6 +50,8 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
   const [nota, setNota] = useState("");
   const [guardandoNota, setGuardandoNota] = useState(false);
   const [anadiendo, setAnadiendo] = useState(false);
+  const [cobrando, setCobrando] = useState(false);
+  const [cobro, setCobro] = useState({ monto: "", moneda: "EUR", id_solicitud: "", cobrado: true, vence: "" });
 
   const cargar = useCallback(() => {
     return boGET(`/backoffice/ficha-cliente/${idCliente}`).then((r) => {
@@ -67,16 +69,30 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
     });
   }, [idCliente]);
 
-  // La nota se cuelga del proceso más reciente: no hay tabla de notas por
-  // cliente, y crearla duplicaría lo que ya existe por expediente.
+  // La nota es del cliente, no de un proceso suyo: lo que se anota de alguien
+  // ("no contesta", "quiere esperar al año que viene") no pertenece a un
+  // trámite concreto.
   async function anadirNota() {
     const texto = nota.trim();
-    const proceso = datos?.procesos?.[0];
-    if (!texto || !proceso) return;
+    if (!texto) return;
     setGuardandoNota(true);
-    const r = await boPOST(`/backoffice/solicitudes/${proceso.id_solicitud}/notas`, { texto });
+    const r = await boPOST(`/backoffice/ficha-cliente/${idCliente}/notas`, { texto });
     setGuardandoNota(false);
     if (r.ok) { setNota(""); cargar(); }
+  }
+
+  async function registrarCobro() {
+    const r = await boPOST(`/backoffice/procesos/${cobro.id_solicitud}/pago`, {
+      monto: cobro.monto,
+      moneda: cobro.moneda,
+      estado_pago: cobro.cobrado ? "aprobado" : "pendiente",
+      fecha_vencimiento: cobro.vence || undefined,
+    });
+    if (r.ok) {
+      setCobrando(false);
+      setCobro({ monto: "", moneda: "EUR", id_solicitud: "", cobrado: true, vence: "" });
+      cargar();
+    }
   }
 
   if (cargando) return <p className="text-[13px] text-neutral-400 py-10 text-center">Cargando ficha…</p>;
@@ -169,29 +185,45 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
             )}
           </Bloque>
 
-          <Bloque titulo="Notas">
-            <div className="flex gap-2 mb-3">
-              <input
-                value={nota} onChange={(e) => setNota(e.target.value)}
-                placeholder={procesos.length ? "Escribe una nota…" : "Necesita al menos un proceso"}
-                disabled={!procesos.length}
-                className="flex-1 text-[12.5px] border border-neutral-300 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A] disabled:bg-neutral-50"
+          <Bloque titulo={`Notas · ${notas.length}`}>
+            <div className="rounded-lg border border-neutral-200 bg-white p-2.5 mb-3">
+              <textarea
+                rows={3}
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+                placeholder="Qué se habló, qué se acordó, qué hay que vigilar…"
+                className="w-full text-[13px] text-neutral-800 bg-transparent border-none outline-none resize-y placeholder:text-neutral-300"
               />
-              <button type="button" onClick={anadirNota} disabled={!nota.trim() || guardandoNota || !procesos.length}
-                className="shrink-0 text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[#1D6A4A] text-white disabled:opacity-40">
-                {guardandoNota ? "…" : "Añadir"}
-              </button>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={anadirNota} disabled={!nota.trim() || guardandoNota}
+                  className="text-[12px] font-semibold px-4 py-1.5 rounded-lg bg-[#1D6A4A] text-white disabled:opacity-40">
+                  {guardandoNota ? "Guardando…" : "Añadir nota"}
+                </button>
+                <p className="text-[11px] text-neutral-400">Sólo la ve el equipo</p>
+              </div>
             </div>
+
             {notas.length === 0 ? (
-              <p className="text-[12.5px] text-neutral-400">Sin notas todavía.</p>
+              <p className="text-[12.5px] text-neutral-400 py-4 text-center">
+                Nada anotado todavía sobre este cliente.
+              </p>
             ) : (
-              <div className="space-y-2 max-h-[280px] overflow-y-auto">
+              <div className="space-y-2.5 max-h-[440px] overflow-y-auto pr-1">
                 {notas.map((n) => (
-                  <div key={n.id_nota} className="border-l-2 border-neutral-200 pl-2.5">
-                    <p className="text-[11px] text-neutral-400">
-                      <b className="text-neutral-600">{n.autor}</b> · {fecha(n.created_at)}
-                    </p>
-                    <p className="text-[12.5px] text-neutral-700 whitespace-pre-wrap leading-relaxed">{n.texto}</p>
+                  <div key={n.id_nota} className="rounded-lg border border-neutral-200 bg-neutral-50/60 p-2.5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="w-5 h-5 rounded-full bg-[#023A4B] text-white grid place-items-center text-[8.5px] font-bold shrink-0">
+                        {String(n.autor || "?").split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() || "").join("")}
+                      </span>
+                      <span className="text-[11.5px] font-semibold text-neutral-700">{n.autor}</span>
+                      <span className="text-[10.5px] text-neutral-400">{fecha(n.created_at)}</span>
+                      {n.id_solicitud && (
+                        <span className="text-[9.5px] font-semibold text-neutral-400 bg-white border border-neutral-200 rounded px-1.5 py-0.5">
+                          de un proceso
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[13px] text-neutral-700 whitespace-pre-wrap leading-relaxed">{n.texto}</p>
                   </div>
                 ))}
               </div>
@@ -210,7 +242,52 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
             </div>
           </Bloque>
 
-          <Bloque titulo="Finanzas">
+          <Bloque
+            titulo="Finanzas"
+            extra={
+              procesos.length > 0 && (
+                <button type="button" onClick={() => setCobrando((v) => !v)}
+                  className="text-[11.5px] font-semibold text-[#1D6A4A] hover:underline">
+                  {cobrando ? "Cancelar" : "+ Registrar cobro"}
+                </button>
+              )
+            }
+          >
+            {cobrando && (
+              <div className="rounded-lg border-2 border-[#1D6A4A]/25 p-2.5 mb-3 space-y-2">
+                <div className="flex gap-2">
+                  <input type="number" placeholder="Importe" value={cobro.monto}
+                    onChange={(e) => setCobro({ ...cobro, monto: e.target.value })}
+                    className="w-24 text-[12px] border border-neutral-300 rounded-lg px-2 py-1.5" />
+                  <select value={cobro.moneda} onChange={(e) => setCobro({ ...cobro, moneda: e.target.value })}
+                    className="text-[12px] border border-neutral-300 rounded-lg px-2 py-1.5">
+                    <option>EUR</option><option>PEN</option><option>USD</option>
+                  </select>
+                </div>
+                <select value={cobro.id_solicitud} onChange={(e) => setCobro({ ...cobro, id_solicitud: e.target.value })}
+                  className="w-full text-[12px] border border-neutral-300 rounded-lg px-2 py-1.5">
+                  <option value="">¿De qué servicio?</option>
+                  {procesos.map((p) => (
+                    <option key={p.id_solicitud} value={p.id_solicitud}>{p.servicio_label} · {p.paquete || "sin paquete"}</option>
+                  ))}
+                </select>
+                <label className="flex items-center gap-1.5 text-[12px] text-neutral-600">
+                  <input type="checkbox" checked={cobro.cobrado}
+                    onChange={(e) => setCobro({ ...cobro, cobrado: e.target.checked })} />
+                  Ya cobrado
+                </label>
+                {!cobro.cobrado && (
+                  <input type="date" value={cobro.vence}
+                    onChange={(e) => setCobro({ ...cobro, vence: e.target.value })}
+                    className="w-full text-[12px] border border-neutral-300 rounded-lg px-2 py-1.5" />
+                )}
+                <button type="button" onClick={registrarCobro}
+                  disabled={!cobro.monto || !cobro.id_solicitud}
+                  className="w-full text-[12px] font-semibold py-1.5 rounded-lg bg-[#1D6A4A] text-white disabled:opacity-40">
+                  Guardar cobro
+                </button>
+              </div>
+            )}
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div>
                 <p className="text-[17px] font-bold text-[#1D6A4A] leading-none">{finanzas.cobrado.toFixed(0)}</p>

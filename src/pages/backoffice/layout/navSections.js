@@ -1,5 +1,6 @@
 import {
-  LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users, Settings,
+  LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
+  GraduationCap, Settings,
 } from "lucide-react";
 
 // Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos),
@@ -26,6 +27,11 @@ import {
 // Procesos, porque son el mismo dato mirado por servicio.
 //
 // Ninguna ruta se ha borrado: las antiguas siguen respondiendo.
+// El tracker de universidades es seccion propia: es una herramienta de trabajo
+// distinta —una hoja de seguimiento por universidad— y meterla dentro de
+// Procesos la volvia inencontrable.
+//
+// Ninguna ruta se ha borrado: las antiguas siguen respondiendo.
 export const NAV_SECTIONS = [
   {
     label: null,
@@ -34,14 +40,17 @@ export const NAV_SECTIONS = [
       {
         label: "Procesos",
         href: "/backoffice/procesos",
-        alsoActive: [
-          "/backoffice/solicitudes",
-          "/backoffice/panel-asesoras",
-          "/backoffice/tracker-universidades",
-        ],
+        alsoActive: ["/backoffice/solicitudes"],
         icon: FileText,
       },
       { label: "Clientes", href: "/backoffice/clientes", icon: Users },
+      {
+        label: "Tracker Universidades",
+        href: "/backoffice/tracker-universidades",
+        alsoActive: ["/backoffice/panel-asesoras"],
+        perm: "tracker.ver",
+        icon: GraduationCap,
+      },
       { label: "Agenda",   href: "/backoffice/agenda", icon: Calendar },
       { label: "Leads",    href: "/backoffice/calculadora", icon: TrendingUp },
       { label: "Finanzas", href: "/backoffice/presupuestos", icon: Calculator },

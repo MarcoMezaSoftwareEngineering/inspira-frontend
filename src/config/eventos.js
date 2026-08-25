@@ -12,10 +12,14 @@ export const EVENTOS = [
     subtitulo: "Estudia en España en 5 pasos — Rumbo al 2027",
     resumen:
       "El primer evento gratuito de Inspira para que entiendas, de principio a fin, cómo se estudia en España: los 5 pasos, los plazos reales y los errores que dejan a la gente fuera un año entero.",
-    formato: "Online y gratuito",
+    formato: "Charla virtual y gratuita",
     precio: "Gratis",
     cupo: "Cupos limitados",
-    fechaTexto: "Próxima edición — Rumbo a septiembre 2027",
+    fecha: "2026-09-19",
+    fechaTexto: "Sábado 19 de septiembre · virtual",
+    // Beneficio principal: quien asiste entra a la presencial de noviembre.
+    accesoPresencial:
+      "Los asistentes obtienen acceso a nuestra charla presencial de noviembre.",
     agenda: [
       {
         paso: "01",
@@ -49,6 +53,7 @@ export const EVENTOS = [
       },
     ],
     beneficios: [
+      "Acceso a la charla PRESENCIAL de noviembre, solo para asistentes.",
       "Descuento en nuestros paquetes para quienes asistan.",
       "Calendario completo Rumbo al 2027 en PDF.",
       "Sesión de preguntas en vivo con el equipo legal.",

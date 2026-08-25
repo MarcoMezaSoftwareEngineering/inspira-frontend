@@ -1,5 +1,6 @@
 // src/components/legal/CookieConsent.jsx
 import { useEffect, useState } from "react";
+import { inicializarAnalytics } from "../../lib/analytics";
 import { CATEGORIAS, INVENTARIO } from "../../config/cookies";
 import { RUTAS_LEGALES } from "../../config/legal";
 import {
@@ -35,6 +36,7 @@ export default function CookieConsent() {
 
   useEffect(() => {
     // Ejecuta los tags ya consentidos en visitas anteriores.
+    inicializarAnalytics(); // se registra; solo carga si hay consentimiento
     inicializarConsentimiento();
 
     const abrirPanel = () => {

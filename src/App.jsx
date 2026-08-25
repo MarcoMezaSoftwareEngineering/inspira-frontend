@@ -1,21 +1,22 @@
 // F:\PROGRAMACION\paginaweb_insipira\inspira-frontend\src\App.jsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { Header } from "./components/layout/Header";
 import Home from "./pages/home/Home";
 import AuthSuccess from "./pages/auth/AuthSuccess";
 import MasterLanding from "./pages/servicios/master/MasterLanding";
-import PortalServiciosMaster from "./pages/servicios/master/PortalServiciosMaster";
+const PortalServiciosMaster = lazy(() => import("./pages/servicios/master/PortalServiciosMaster"));
 import EstanciaLanding from "./pages/servicios/estancia/EstanciaLanding";
-import BackofficeApp from "./pages/backoffice/BackofficeApp";
-import CalculadoraMaster from "./pages/calculadora/CalculadoraMaster";
-import PanelCliente from "./pages/panel/PanelCliente";
-import ReservarCita from "./pages/reservar/ReservarCita";
+const BackofficeApp = lazy(() => import("./pages/backoffice/BackofficeApp"));
+const CalculadoraMaster = lazy(() => import("./pages/calculadora/CalculadoraMaster"));
+const PanelCliente = lazy(() => import("./pages/panel/PanelCliente"));
+const ReservarCita = lazy(() => import("./pages/reservar/ReservarCita"));
 import ServiciosCatalogo from "./pages/servicios/ServiciosCatalogo";
 import ServicioDetalle from "./pages/servicios/ServicioDetalle";
 import { getServicio } from "./config/servicios";
 import AsesoriaCTA from "./components/common/AsesoriaCTA";
 import BarraProgreso from "./components/common/BarraProgreso";
+import { registrarVista } from "./lib/analytics";
 import BarraInferior from "./components/layout/BarraInferior";
 import Eventos from "./pages/eventos/Eventos";
 import CasosExito from "./pages/casos/CasosExito";
@@ -307,12 +308,17 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  // Vista de página en navegación SPA (solo si hay consentimiento analítico).
+  useEffect(() => {
+    registrarVista(path);
+  }, [path]);
+
   if (path.startsWith("/backoffice")) {
     return (
-      <>
+      <Suspense fallback={<div className="min-h-screen" />}>
         <BackofficeApp />
         <CookieConsent />
-      </>
+      </Suspense>
     );
   }
 
@@ -341,6 +347,7 @@ export default function App() {
 
       {/* `key` fuerza el remontaje al navegar: cada página entra con animación */}
       <div key={path} className={isPanel ? undefined : "v4-page-enter"}>
+      <Suspense fallback={<div className="min-h-[60vh]" />}>
       {path === "/" && <Home />}
       {path === "/auth/success" && <AuthSuccess />}
       {path === "/servicios" && <ServiciosCatalogo />}
@@ -377,6 +384,7 @@ export default function App() {
           <NotFound />
         </>
       )}
+      </Suspense>
       </div>
 
       {/* El footer identifica al proveedor en todas las páginas públicas */}

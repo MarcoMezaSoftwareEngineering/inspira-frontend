@@ -7,10 +7,12 @@ import { getNodo, getResultado } from "../../config/diagnostico";
 import { getServicio, hrefServicio } from "../../config/servicios";
 import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
+import EnviarPlan from "../../components/common/EnviarPlan";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
 import { navigate } from "../../services/navigate";
 import { CALENDLY_URL, whatsappUrl } from "../../config/contacto";
+import { registrarEvento } from "../../lib/analytics";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -38,7 +40,13 @@ export default function Asistente() {
       ...h,
       { nodoId, pregunta: nodo.pregunta, resp: op.txt },
     ]);
-    if (op.res) setResultadoId(op.res);
+    if (op.res) {
+      setResultadoId(op.res);
+      registrarEvento("diagnostico_completado", {
+        via: getResultado(op.res)?.via,
+        pasos: historial.length + 1,
+      });
+    }
     else setNodoId(op.ir);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -273,6 +281,9 @@ export default function Asistente() {
                 </p>
               </div>
             </div>
+
+            {/* Captura de correo: el visitante se lleva su plan */}
+            <EnviarPlan resultado={resultado} respuestas={historial} />
 
             {/* Servicios que lo resuelven */}
             {resultado.servicios?.length > 0 && (

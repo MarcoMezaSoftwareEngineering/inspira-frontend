@@ -1,5 +1,5 @@
 // src/pages/blog/BlogPost.jsx
-import { getPost, POSTS, autorDe } from "./blog.data";
+import { getPost, POSTS, autorDe, portadaDe } from "./blog.data";
 import { navigate } from "../../services/navigate";
 import NotFound from "../NotFound";
 
@@ -70,7 +70,15 @@ export default function BlogPost({ slug }) {
           </span>
         </div>
 
-        <h1 className="mt-4 font-fraunces text-3xl font-bold leading-tight text-primary md:text-4xl">
+        <img
+          src={portadaDe(post)}
+          alt=""
+          width="1200"
+          height="600"
+          className="mt-5 aspect-[2/1] w-full rounded-2xl object-cover"
+        />
+
+        <h1 className="mt-6 font-fraunces text-3xl font-bold leading-tight text-primary md:text-4xl">
           {post.titulo}
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-neutral-700">

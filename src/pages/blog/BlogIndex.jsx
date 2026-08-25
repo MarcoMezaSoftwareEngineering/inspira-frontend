@@ -1,5 +1,5 @@
 // src/pages/blog/BlogIndex.jsx
-import { POSTS, autorDe } from "./blog.data";
+import { POSTS, autorDe, portadaDe } from "./blog.data";
 import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
@@ -41,8 +41,17 @@ export default function BlogIndex() {
           <a
             href={`/blog/${destacado.slug}`}
             onClick={(e) => go(e, `/blog/${destacado.slug}`)}
-            className="block rounded-3xl border border-neutral-200 bg-secondary-light p-8 transition hover:-translate-y-1 hover:shadow-lg md:p-10"
+            className="group block overflow-hidden rounded-3xl border border-neutral-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
           >
+            <img
+              src={portadaDe(destacado)}
+              alt=""
+              width="1200"
+              height="600"
+              loading="eager"
+              className="h-52 w-full object-cover md:h-64"
+            />
+            <div className="p-8 md:p-10">
             <div className="flex flex-wrap items-center gap-3 text-xs font-extrabold uppercase tracking-wide">
               <span className="rounded-full bg-accent px-3 py-1 text-white">
                 Destacado
@@ -61,6 +70,7 @@ export default function BlogIndex() {
             <span className="mt-5 inline-flex items-center gap-1.5 font-bold text-primary">
               Leer artículo <span aria-hidden>→</span>
             </span>
+            </div>
           </a>
         )}
 
@@ -71,8 +81,17 @@ export default function BlogIndex() {
               key={post.slug}
               href={`/blog/${post.slug}`}
               onClick={(e) => go(e, `/blog/${post.slug}`)}
-              className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
             >
+              <img
+                src={portadaDe(post)}
+                alt=""
+                width="1200"
+                height="600"
+                loading="lazy"
+                className="h-40 w-full object-cover"
+              />
+              <div className="flex flex-1 flex-col p-6">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="font-extrabold uppercase tracking-wide text-accent">
                   {post.categoria}
@@ -90,6 +109,7 @@ export default function BlogIndex() {
               <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary">
                 Leer artículo <span aria-hidden>→</span>
               </span>
+              </div>
             </a>
           ))}
         </div>

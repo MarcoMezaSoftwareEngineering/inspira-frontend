@@ -4,6 +4,7 @@ import Asesorias from "./sections/Asesorias";
 import RutasMigrar from "./sections/RutasMigrar";
 import Metrics from "./sections/Metrics";
 import Servicios from "./sections/Servicios";
+import Calendario from "./sections/Calendario";
 import PorQue from "./sections/PorQue";
 import Sistema from "./sections/Sistema";
 import Testimonios from "./sections/Testimonios";
@@ -23,6 +24,7 @@ export default function Home() {
       <RutasMigrar />
       <Metrics />
       <Servicios />
+      <Calendario />
       <PorQue />
       <Sistema />
       <Testimonios />

@@ -867,3 +867,43 @@
 .v4-home .asesoria-acciones { display: grid; gap: 8px; }
 .v4-home .asesoria-pagar { display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--primary); font-family: Montserrat, sans-serif; font-size: 12.5px; font-weight: 800; padding: 9px 12px; border-radius: 11px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: .2s; }
 .v4-home .asesoria-pagar:hover { background: var(--surface-2); text-decoration: none; }
+
+/* ── CALENDARIO RUMBO A 2027 ─────────────────────────────────────────── */
+.v4-home .calendario { background: var(--surface); }
+.v4-home .cal-hoy { display: flex; align-items: center; gap: 16px; background: linear-gradient(135deg, #013446, #02506b); border-radius: 20px; padding: 20px 24px; margin-bottom: 22px; color: #fff; }
+.v4-home .cal-hoy.urgente { background: linear-gradient(135deg, #b3641a, #e07a1c); }
+.v4-home .cal-hoy-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,.15); color: var(--sun); flex: 0 0 auto; }
+.v4-home .cal-hoy-label { display: block; font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.62); }
+.v4-home .cal-hoy b { display: block; font-family: Merriweather, Georgia, serif; font-size: 19px; font-weight: 900; margin: 3px 0 4px; }
+.v4-home .cal-hoy p { margin: 0; font-size: 13px; color: rgba(255,255,255,.78); line-height: 1.5; }
+
+.v4-home .cal-linea { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.v4-home .cal-etapa { position: relative; display: flex; flex-direction: column; gap: 7px; background: #fff; border: 1.5px solid var(--line); border-radius: 22px; padding: 22px 20px; transition: .25s var(--ease); }
+.v4-home .cal-etapa:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.v4-home .cal-etapa.activa { border-color: var(--accent); box-shadow: 0 14px 34px rgba(250,148,58,.18); }
+.v4-home .cal-etapa.urgente { border-color: #f3d3b4; background: linear-gradient(180deg, #fffaf5, #fff); }
+.v4-home .cal-etapa.paralelo { background: linear-gradient(180deg, var(--sky-soft), #fff); }
+.v4-home .cal-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.v4-home .cal-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: var(--sky-soft); color: var(--sky-2); }
+.v4-home .cal-etapa.activa .cal-icon { background: var(--accent); color: #fff; }
+.v4-home .cal-badge { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; background: var(--accent); color: #fff; padding: 4px 9px; border-radius: 999px; }
+.v4-home .cal-badge.paralelo { background: var(--sky-soft); color: #17608f; }
+.v4-home .cal-periodo { font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; color: var(--accent); margin-top: 4px; }
+.v4-home .cal-etapa h3 { font-family: Merriweather, Georgia, serif; font-size: 16px; font-weight: 900; color: var(--primary); margin: 0; letter-spacing: -.02em; }
+.v4-home .cal-etapa p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); flex: 1; }
+.v4-home .cal-consejo { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; line-height: 1.5; color: var(--ink); background: var(--surface); border-radius: 11px; padding: 9px 11px; }
+.v4-home .cal-consejo svg { color: var(--accent); flex: 0 0 auto; margin-top: 1px; }
+
+.v4-home .cal-pie { margin-top: 22px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; border: 1px dashed var(--line); border-radius: 20px; padding: 20px 26px; background: #fff; }
+.v4-home .cal-pie p { margin: 0; font-size: 14px; color: var(--muted); }
+.v4-home .cal-pie b { color: var(--primary); }
+.v4-home .cal-pie-acciones { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.v4-home .cal-pie-link { font-size: 13.5px; font-weight: 850; color: var(--primary); }
+.v4-home .cal-pie-link:hover .arr { transform: translateX(4px); display: inline-block; }
+
+@media (max-width: 1000px) { .v4-home .cal-linea { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) {
+  .v4-home .cal-linea { grid-template-columns: 1fr; }
+  .v4-home .cal-hoy { flex-direction: column; align-items: flex-start; text-align: left; }
+  .v4-home .cal-pie { flex-direction: column; align-items: stretch; }
+}

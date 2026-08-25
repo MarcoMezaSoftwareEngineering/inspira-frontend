@@ -262,6 +262,9 @@ export const POSTS = [
   },
 ];
 
+/** Portada de la entrada: public/blog/<slug>.jpg (las genera scripts/blogimg.py). */
+export const portadaDe = (post) => `/blog/${post.slug}.jpg`;
+
 export const autorDe = (post) => post?.autor || AUTOR_POR_DEFECTO;
 
 export const getPost = (slug) => POSTS.find((p) => p.slug === slug);

@@ -94,8 +94,25 @@ export const INVENTARIO = [
   },
   {
     categoria: "analitica",
-    estado: "no_usado",
-    items: [],
+    estado: "activo",
+    items: [
+      {
+        nombre: "_ga",
+        tipo: "Cookie de tercero (Google Analytics 4)",
+        titular: "Google Ireland Limited",
+        finalidad:
+          "Distinguir visitantes de forma seudonimizada para medir de manera agregada cómo se usa el sitio. Se carga únicamente si aceptas la categoría de analítica; con la IP anonimizada.",
+        duracion: "2 años",
+      },
+      {
+        nombre: "_ga_<ID>",
+        tipo: "Cookie de tercero (Google Analytics 4)",
+        titular: "Google Ireland Limited",
+        finalidad:
+          "Mantener el estado de la sesión de medición en Google Analytics 4.",
+        duracion: "2 años",
+      },
+    ],
   },
   {
     categoria: "marketing",

@@ -13,6 +13,7 @@ import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
 import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
 import VisaDeclaracionAdmin from "./components/visa/VisaDeclaracionAdmin";
 import VisaImpresoAdmin from "./components/visa/VisaImpresoAdmin";
+import VisaRecordatoriosAdmin from "./components/visa/VisaRecordatoriosAdmin";
 import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
 import VisaCitaAdmin from "./components/visa/VisaCitaAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
@@ -302,9 +303,14 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   }
                 />
                 {isVisado && (
-                  <div className="border-t border-[#E2E8F0]">
-                    <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
-                  </div>
+                  <>
+                    <div className="border-t border-[#E2E8F0] p-5">
+                      <VisaRecordatoriosAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    </div>
+                    <div className="border-t border-[#E2E8F0]">
+                      <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    </div>
+                  </>
                 )}
               </CBox>
             )}

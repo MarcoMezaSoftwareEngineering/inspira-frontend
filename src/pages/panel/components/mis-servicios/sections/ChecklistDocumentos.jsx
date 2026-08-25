@@ -385,6 +385,25 @@ export default function ChecklistDocumentos({
           </div>
         )}
 
+        {/* Cómo subir. Va arriba del todo: es la duda que más frena a la
+            gente antes de empezar a cargar archivos. */}
+        {!bloqueado && total > 0 && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-3 mb-4">
+            <span className="shrink-0 text-base leading-none mt-0.5">📤</span>
+            <div className="text-[12.5px] text-sky-900 leading-relaxed space-y-1">
+              <p><b>Sube todo lo que tengas</b>, aunque no estés seguro de si sirve.</p>
+              <p>
+                Si un documento no encaja en ningún campo de esta lista, súbelo en{" "}
+                <b>«Otros documentos»</b> — ahí caben varios archivos.
+              </p>
+              <p>
+                Si algo <b>no lo tienes</b>, no subas nada en su lugar: déjalo vacío.
+                Tus asesores revisarán qué falta y te lo dirán.
+              </p>
+            </div>
+          </div>
+        )}
+
         {!bloqueado && total > 0 && (
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <p className="text-sm text-neutral-500">

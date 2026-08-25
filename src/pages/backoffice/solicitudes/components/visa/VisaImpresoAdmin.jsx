@@ -9,6 +9,7 @@
 // pdf-lib se importa de forma diferida: pesa ~450 KB y sólo hace falta al
 // pulsar "Generar", no cada vez que se abre el expediente.
 import { useEffect, useMemo, useState } from "react";
+import { esVersionCaducada, recargarUnaVez } from "../../../../../lib/versionNueva";
 import { Campo, Selecc, SubLabel } from "./visaWidgets";
 
 const RUTA_PDF = "/formularios/solicitud-visado-nacional.pdf";
@@ -188,7 +189,20 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
 
       setEstado({ tipo: "ok", texto: "Impreso generado y descargado. Revísalo antes de imprimir; la firma (punto 31) va manuscrita." });
     } catch (e) {
-      setEstado({ tipo: "error", texto: `No se pudo generar: ${e.message}` });
+      // El código que arma el PDF se descarga al pulsar el botón, no antes.
+      // Si mientras tanto se publicó una versión nueva, ese archivo pudo
+      // cambiar de nombre: no es culpa de los datos ni del impreso.
+      if (esVersionCaducada(e)) {
+        setEstado({
+          tipo: "error",
+          texto: "Se publicó una versión nueva de la aplicación mientras tenías " +
+                 "esta pantalla abierta. Recarga la página y vuelve a darle; " +
+                 "no perderás lo que has escrito.",
+        });
+        recargarUnaVez();
+      } else {
+        setEstado({ tipo: "error", texto: `No se pudo generar: ${e.message}` });
+      }
     } finally {
       setGenerando(false);
     }

@@ -1,12 +1,12 @@
 // src/config/tienda.js
-// `disponible: false` => la tarjeta muestra "Muy pronto" y NO se puede pagar.
-// Solo poner `disponible: true` cuando el producto exista y su entrega esté
-// configurada en inspira-backend/src/modules/pagos/productos.catalogo.js
-// (campo `entrega.url`). Nunca cobrar por algo que no se pueda entregar.
-// Productos digitales de la Tiendita.
-// Los productos de pago se venden por Hotmart: pega la URL de la página de
-// pago de cada producto en `hotmartUrl`. Mientras esté en null, el botón
-// muestra "Muy pronto" deshabilitado.
+// Productos digitales de la Tiendita. El cobro es por Mercado Pago (sin
+// plataforma externa). `disponible: false` => la tarjeta muestra "Muy
+// pronto" y no se puede pagar. Solo poner `disponible: true` cuando:
+// 1) el contenido (ebook, video, acceso) ya exista, y
+// 2) su entrega esté configurada en
+//    inspira-backend/src/modules/pagos/productos.catalogo.js (campo
+//    `entrega.url`, hoy vacío en todos).
+// Nunca cobrar por algo que no se pueda entregar.
 
 export const PRODUCTOS = [
   {
@@ -18,7 +18,6 @@ export const PRODUCTOS = [
     tipo: "Herramienta",
     emoji: "🧮",
     href: "/calculadora-master", // producto interno gratuito
-    hotmartUrl: null,
   },
   {
     id: "becas-actualizadas",
@@ -31,7 +30,6 @@ export const PRODUCTOS = [
     tipo: "Acceso digital",
     emoji: "🎓",
     href: null,
-    hotmartUrl: null, // COMPLETAR: URL de pago de Hotmart
   },
   {
     id: "ebook-master",
@@ -44,7 +42,6 @@ export const PRODUCTOS = [
     tipo: "Ebook + video",
     emoji: "📘",
     href: null,
-    hotmartUrl: null, // COMPLETAR: URL de pago de Hotmart
   },
   {
     id: "ebook-fp",
@@ -57,7 +54,6 @@ export const PRODUCTOS = [
     tipo: "Ebook",
     emoji: "📗",
     href: null,
-    hotmartUrl: null, // COMPLETAR: URL de pago de Hotmart
   },
   {
     id: "videos-cv",
@@ -70,6 +66,5 @@ export const PRODUCTOS = [
     tipo: "Serie de videos",
     emoji: "🎬",
     href: null,
-    hotmartUrl: null, // COMPLETAR: URL de pago de Hotmart
   },
 ];

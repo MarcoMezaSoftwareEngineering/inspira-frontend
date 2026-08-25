@@ -1,6 +1,7 @@
 // src/pages/blog/BlogPost.jsx
 import { getPost, POSTS, autorDe, portadaDe } from "./blog.data";
 import { navigate } from "../../services/navigate";
+import { CALENDLY_URL } from "../../config/contacto";
 import NotFound from "../NotFound";
 
 const go = (e, href) => {

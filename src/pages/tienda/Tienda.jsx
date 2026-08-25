@@ -1,12 +1,16 @@
 // src/pages/tienda/Tienda.jsx
-// Tiendita de productos digitales. Los productos de pago se venden vía
-// Hotmart (URL en config/tienda.js); los gratuitos enlazan a herramientas
-// internas. Un producto de pago sin hotmartUrl se muestra como "Muy pronto".
+// La tiendita todavía no tiene productos de pago listos para vender (ver
+// config/tienda.js: solo la calculadora es gratuita, el resto sigue sin
+// contenido ni entrega configurada en el backend), así que en vez de
+// exponer un checkout a medio construir mostramos un adelanto de lo que
+// viene y desviamos a lo que SÍ funciona hoy (calculadora gratis,
+// asistente, asesoría).
 import { PRODUCTOS } from "../../config/tienda";
-import { navigate } from "../../services/navigate";
-import ComprarProducto from "../../components/common/ComprarProducto";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
+import BotonAsesoria from "../../components/common/BotonAsesoria";
+import Icono from "../../components/common/Icono";
+import { navigate } from "../../services/navigate";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -14,65 +18,15 @@ const go = (e, href) => {
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
-function BotonProducto({ producto }) {
-  // Producto interno gratuito
-  if (producto.href) {
-    return (
-      <a
-        href={producto.href}
-        onClick={(e) => go(e, producto.href)}
-        className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 font-bold text-white transition hover:bg-primary-dark"
-      >
-        Usar gratis →
-      </a>
-    );
-  }
-  // Producto de pago con checkout propio (Mercado Pago)
-  if (producto.precioPen && producto.disponible) {
-    return (
-      <ComprarProducto
-        idProducto={producto.id}
-        nombre={producto.nombre}
-        precio={producto.precioPen}
-        precioRef={producto.precio}
-      >
-        Comprar ahora →
-      </ComprarProducto>
-    );
-  }
-  // Producto externo (Hotmart), si algún día se usa
-  if (producto.hotmartUrl) {
-    return (
-      <a
-        href={producto.hotmartUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-accent px-5 py-3 font-bold text-white transition hover:bg-accent-dark"
-      >
-        Comprar ahora →
-      </a>
-    );
-  }
-  return (
-    <button
-      type="button"
-      disabled
-      className="mt-5 inline-flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-neutral-200 px-5 py-3 font-bold text-neutral-500"
-    >
-      Muy pronto
-    </button>
-  );
-}
-
 export default function Tienda() {
   return (
     <div className="w-full">
       <PageHero
         etiqueta="Tiendita"
-        icono="libro"
-        titulo="Recursos digitales para"
-        destacado="avanzar por tu cuenta"
-        descripcion="Guías, herramientas y accesos con compra directa e inmediata. Empieza hoy con lo que necesitas — y cuando quieras acompañamiento completo, aquí estamos."
+        icono="reloj"
+        titulo="Estamos preparando"
+        destacado="tu tiendita"
+        descripcion="Muy pronto vas a poder comprar guías, ebooks y accesos con pago directo e inmediato, sin trámites. Mientras la terminamos, la calculadora gratuita y el asistente ya están disponibles."
         accesos={[
           { icono: "euro", label: "Calculadora gratis", href: "/calculadora-master" },
           { icono: "robot", label: "Asistente IA", href: "/asistente" },
@@ -80,60 +34,73 @@ export default function Tienda() {
         ]}
       />
 
-      {/* Productos */}
       <div className="mx-auto max-w-5xl px-6 py-16">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {PRODUCTOS.map((producto) => (
-            <div
-              key={producto.id}
-              className="flex flex-col rounded-3xl border border-neutral-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-4xl" aria-hidden>
-                  {producto.emoji}
-                </span>
-                <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-primary">
-                  {producto.tipo}
-                </span>
-              </div>
-              <h3 className="mt-4 text-lg font-bold leading-snug text-neutral-900">
-                {producto.nombre}
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-700">
-                {producto.descripcion}
-              </p>
-              <div className="mt-4">
-                <span className="font-display text-2xl font-extrabold text-primary">
-                  {producto.precioPen ? `S/ ${producto.precioPen}` : null}
-                  {!producto.precioPen && !producto.precio && (
-                    <span className="text-green-700">Gratis</span>
-                  )}
-                </span>
-                {producto.precioPen && producto.precio && (
-                  <span className="ml-2 text-sm text-neutral-500">
-                    ≈ {producto.precio}
-                  </span>
-                )}
-              </div>
-              <BotonProducto producto={producto} />
-            </div>
-          ))}
+        {/* Bloque "en construcción" */}
+        <div className="relative overflow-hidden rounded-3xl bg-primary px-8 py-14 text-center text-white sm:px-14">
+          <div
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent/30 blur-3xl"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-white/10 blur-3xl"
+            aria-hidden
+          />
+          <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-secondary">
+            <Icono nombre="destello" size={26} />
+          </div>
+          <h2 className="relative mt-5 font-display text-2xl font-extrabold sm:text-3xl">
+            En construcción
+          </h2>
+          <p className="relative mx-auto mt-3 max-w-lg text-sm leading-relaxed text-white/80 sm:text-base">
+            Estamos afinando el pago directo de cada recurso para que la
+            compra sea inmediata y segura. No falta mucho.
+          </p>
         </div>
 
-        {/* Nota de compra */}
-        <p className="mt-10 text-center text-sm text-neutral-500">
-          Los pagos se procesan de forma segura y el acceso al contenido es
-          inmediato tras la compra. ¿Dudas con un producto?{" "}
-          <a
-            href={CALENDLY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-primary hover:underline"
-          >
-            Agenda una asesoría
-          </a>
-          .
+        {/* Adelanto del catálogo */}
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {PRODUCTOS.map((producto) => {
+            const disponible = Boolean(producto.href);
+            return (
+              <div
+                key={producto.id}
+                className={`flex items-start gap-4 rounded-2xl border border-neutral-200 bg-white p-5 ${
+                  disponible ? "" : "opacity-70"
+                }`}
+              >
+                <span className="text-3xl" aria-hidden>
+                  {producto.emoji}
+                </span>
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold leading-snug text-neutral-900">
+                    {producto.nombre}
+                  </h3>
+                  {disponible ? (
+                    <a
+                      href={producto.href}
+                      onClick={(e) => go(e, producto.href)}
+                      className="mt-2 inline-block text-xs font-extrabold uppercase tracking-wide text-primary hover:underline"
+                    >
+                      Ya disponible →
+                    </a>
+                  ) : (
+                    <span className="mt-2 inline-block rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-primary">
+                      Próximamente
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <p className="mt-12 text-center text-sm text-neutral-500">
+          ¿No quieres esperar? Agenda una asesoría y te ayudamos ahora mismo.
         </p>
+        <div className="mt-4 flex justify-center">
+          <BotonAsesoria variante="oscuro">Agenda una asesoría</BotonAsesoria>
+        </div>
       </div>
       <SigueExplorando destinos={["calculadora","asistente","blog","servicios"]} />
     </div>

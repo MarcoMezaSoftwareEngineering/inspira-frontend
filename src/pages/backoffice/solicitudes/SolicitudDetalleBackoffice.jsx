@@ -11,6 +11,8 @@ import ChecklistSolicitudAdmin from "./components/ChecklistSolicitudAdmin";
 import InformeAdmin from "./components/InformeAdmin";
 import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
 import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
+import VisaDeclaracionAdmin from "./components/visa/VisaDeclaracionAdmin";
+import VisaImpresoAdmin from "./components/visa/VisaImpresoAdmin";
 import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
 import VisaCitaAdmin from "./components/visa/VisaCitaAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
@@ -337,6 +339,34 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                 {isOpen("solvencia") && (
                   <CBox>
                     <VisaSolvenciaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                  </CBox>
+                )}
+              </div>
+
+              {/* B3b — Declaración jurada de solvencia */}
+              <div id="bloque-declaracion" className="scroll-mt-4">
+                <BlqHead numero="3b" titulo="Declaración jurada de solvencia"
+                  estado={visaExp?.dj_borrador || visaExp?.dj_datos ? "completado" : "pendiente"}
+                  open={isOpen("declaracion")} onToggle={() => toggleBloque("declaracion")} />
+                {isOpen("declaracion") && (
+                  <CBox>
+                    <div className="p-5">
+                      <VisaDeclaracionAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    </div>
+                  </CBox>
+                )}
+              </div>
+
+              {/* B3c — Impreso oficial de solicitud */}
+              <div id="bloque-impreso" className="scroll-mt-4">
+                <BlqHead numero="3c" titulo="Impreso oficial de visado"
+                  estado={visaExp?.formulario_estado === "FIRMADO" ? "completado" : "pendiente"}
+                  open={isOpen("impreso")} onToggle={() => toggleBloque("impreso")} />
+                {isOpen("impreso") && (
+                  <CBox>
+                    <div className="p-5">
+                      <VisaImpresoAdmin expediente={visaExp} />
+                    </div>
                   </CBox>
                 )}
               </div>

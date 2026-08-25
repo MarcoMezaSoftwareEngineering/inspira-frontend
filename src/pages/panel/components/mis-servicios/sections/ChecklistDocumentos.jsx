@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { apiDELETE, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
+import { requisitosDe, NOTA_APOSTILLA } from "./visaRequisitos";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -128,6 +129,7 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
   const docs = it.documentos || [];
   const hayDocs = docs.length > 0;
   const cfg = getCfg(it.estado_item);
+  const requisitos = requisitosDe(it.item?.nombre_item);
   const itemAprobado = (it.estado_item || "").toLowerCase() === "aprobado";
   const [subiendo, setSubiendo] = useState(false);
   const [deleting, setDeleting] = useState(null);
@@ -193,6 +195,22 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
         <p className="text-xs text-neutral-500 leading-snug -mt-1">
           {it.item.descripcion}
         </p>
+      )}
+
+      {/* Requisitos exactos: formato, vigencia, apostilla. Plegado por defecto
+          para no enterrar el estado del documento bajo un muro de texto. */}
+      {requisitos && (
+        <details className="group -mt-0.5">
+          <summary className="cursor-pointer select-none text-[11.5px] font-semibold text-[#046C8C] hover:underline list-none">
+            <span className="group-open:hidden">Ver requisitos ▾</span>
+            <span className="hidden group-open:inline">Ocultar requisitos ▴</span>
+          </summary>
+          <ul className="mt-2 space-y-1 border-l-2 border-neutral-200 pl-3">
+            {requisitos.map((r) => (
+              <li key={r} className="text-[11.5px] text-neutral-600 leading-snug">· {r}</li>
+            ))}
+          </ul>
+        </details>
       )}
 
       {/* Comentario del asesor */}
@@ -396,6 +414,13 @@ export default function ChecklistDocumentos({
             </div>
           </div>
         ))}
+
+        {!bloqueado && gruposOrdenados.length > 0 && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-3 mt-4">
+            <span className="shrink-0 text-base leading-none mt-0.5">🌐</span>
+            <p className="text-[12.5px] text-sky-900 leading-relaxed">{NOTA_APOSTILLA}</p>
+          </div>
+        )}
       </SeccionPanel>
     </>
   );

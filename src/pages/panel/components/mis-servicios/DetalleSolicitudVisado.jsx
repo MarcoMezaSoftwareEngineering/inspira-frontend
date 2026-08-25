@@ -6,6 +6,7 @@ import SeccionPanel from "./sections/SeccionPanel";
 import ChecklistDocumentos from "./sections/ChecklistDocumentos";
 import VisaDatosCliente from "./sections/VisaDatosCliente";
 import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
+import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -104,6 +105,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("docs");
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
   const idSolicitud = solicitudBase.id_solicitud;
 
@@ -195,6 +197,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
       case "datos": return datosCompletos ? "completado" : "pendiente";
       case "docs": return checklist.length ? docsEstado : "pendiente";
       case "solvencia": return visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE" ? "completado" : "pendiente";
+      case "economicos": return djCompleta ? "completado" : "pendiente";
       case "diagnostico": return sesionEstado("DIAGNOSTICO");
       case "seguimiento": return sesionEstado("SEGUIMIENTO");
       case "formulario": return visaExp?.formulario_estado === "FIRMADO" ? "completado" : "pendiente";
@@ -205,18 +208,27 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     }
   };
 
+  // La DJ se da por aportada cuando el declarante tiene su situacion laboral
+  // descrita: es el minimo que el asesor necesita para redactar el documento.
+  const djCompleta = (() => {
+    const perfiles = visaExp?.dj_datos?.perfiles;
+    if (!Array.isArray(perfiles) || !perfiles.length) return false;
+    return perfiles.every((p) => (p.trabajaActual ? p.empresa || p.cargo : p.ultEmpEmpresa));
+  })();
+
   const SOLV_SUB = { PROPIOS: "Medios propios", AVAL: "Con avalista", MIXTO: "Mixto" };
 
   const navSections = [
     { id: "datos", num: 1, titulo: "Mis datos personales", subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
     { id: "docs", num: 2, titulo: "Mis documentos", subtitulo: docsBloqueados ? "Se activa tras el diagnóstico" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
     { id: "solvencia", num: 3, titulo: "Mis medios económicos", subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
-    { id: "diagnostico", num: 4, titulo: "Sesión de diagnóstico", subtitulo: "Evaluación inicial" },
-    { id: "seguimiento", num: 5, titulo: "Sesión de seguimiento", subtitulo: "Avance de documentos" },
-    { id: "formulario", num: 6, titulo: "Formulario de visado", subtitulo: "Preparado por Inspira" },
-    { id: "precita", num: 7, titulo: "Sesión pre-cita", subtitulo: "Verificación final" },
-    { id: "cita", num: 8, titulo: "Cita BLS / Consulado", subtitulo: "Presentación presencial" },
-    { id: "cierre", num: 9, titulo: "Resultado y cierre", subtitulo: "Cierre del expediente" },
+    { id: "economicos", num: 4, titulo: "Mis datos económicos", subtitulo: "Situación laboral e ingresos" },
+    { id: "diagnostico", num: 5, titulo: "Sesión de diagnóstico", subtitulo: "Evaluación inicial" },
+    { id: "seguimiento", num: 6, titulo: "Sesión de seguimiento", subtitulo: "Avance de documentos" },
+    { id: "formulario", num: 7, titulo: "Formulario de visado", subtitulo: "Preparado por Inspira" },
+    { id: "precita", num: 8, titulo: "Sesión pre-cita", subtitulo: "Verificación final" },
+    { id: "cita", num: 9, titulo: "Cita BLS / Consulado", subtitulo: "Presentación presencial" },
+    { id: "cierre", num: 10, titulo: "Resultado y cierre", subtitulo: "Cierre del expediente" },
   ].map((s) => ({ ...s, estado: estadoBloque(s.id) }));
 
   const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
@@ -313,6 +325,12 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   }
 
   const sec = navSections.find((s) => s.id === activeSection) || navSections[0];
+  const indiceActivo = Math.max(0, navSections.findIndex((s) => s.id === sec.id));
+
+  function irBloque(paso) {
+    const destino = navSections[indiceActivo + paso];
+    if (destino) { setActiveSection(destino.id); setMenuAbierto(false); }
+  }
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -321,12 +339,14 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
       <div className="shrink-0 flex items-center gap-3 mb-3">
         <button
           onClick={onVolver}
-          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] px-3.5 py-2 rounded-xl bg-[#023A4B] text-white text-xs font-semibold hover:bg-[#035670] active:scale-95 transition-all shadow-sm group"
+          aria-label="Volver a mis servicios"
+          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] min-w-[44px] justify-center px-3 sm:px-3.5 py-2 rounded-xl bg-[#023A4B] text-white text-xs font-semibold hover:bg-[#035670] active:scale-95 transition-all shadow-sm group"
         >
           <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
-          Mis servicios
+          {/* En teléfono basta la flecha: el rótulo se come 90 px de ancho. */}
+          <span className="hidden sm:inline">Mis servicios</span>
         </button>
 
         {loading && (
@@ -343,15 +363,19 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
         )}
 
         {!loading && !error && detalle && (
-          <div className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-4 py-2.5 flex items-center gap-4">
+          <div className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-3 sm:px-4 py-2.5 flex items-center gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-bold text-[#046C8C] uppercase tracking-widest leading-none">
                 Solicitud #{detalle.id_solicitud}
               </p>
-              <p className="text-sm font-bold text-neutral-900 leading-snug truncate mt-0.5">
+              <p className="text-[13px] sm:text-sm font-bold text-neutral-900 leading-snug truncate mt-0.5">
                 🇪🇸 {detalle.tipo?.nombre || "Visa de Estudios"} · {cli.nombre || ""}
               </p>
             </div>
+            {/* En móvil no cabe la barra: se resume en el porcentaje. */}
+            <span className="sm:hidden shrink-0 text-[11px] font-bold text-[#1D6A4A] bg-emerald-50 border border-emerald-200 rounded-full px-2 py-1">
+              {pct}%
+            </span>
             <div className="shrink-0 hidden sm:block w-32">
               <div className="flex justify-between text-[10px] mb-1">
                 <span className="text-neutral-500 font-medium">Progreso</span>
@@ -369,26 +393,91 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
       {!loading && !error && detalle && (
         <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
 
-          {/* Móvil: tab bar horizontal */}
-          <div className="md:hidden shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 flex gap-1 overflow-x-auto">
-            {navSections.map((s) => (
+          {/* Móvil: selector de bloque. Con 10 bloques una tira deslizable
+              obliga a buscar a ciegas; un desplegable los muestra todos de
+              una vez, con su estado, y deja avanzar paso a paso. */}
+          <div className="md:hidden shrink-0 space-y-2">
+            <div className="flex items-center gap-2">
               <button
-                key={s.id}
                 type="button"
-                onClick={() => setActiveSection(s.id)}
-                className={`shrink-0 flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all ${
-                  activeSection === s.id ? "bg-[#023A4B] text-white" : "text-neutral-600 hover:bg-neutral-100"
-                }`}
+                onClick={() => irBloque(-1)}
+                disabled={indiceActivo <= 0}
+                className="shrink-0 w-11 h-11 rounded-xl border border-neutral-200 bg-white grid place-items-center text-neutral-500 disabled:opacity-30 active:scale-95 transition-all"
+                aria-label="Bloque anterior"
               >
-                <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${
-                  activeSection === s.id ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
-                }`}>{s.num}</span>
-                {s.titulo}
-                {s.estado && (
-                  <span className={`w-1.5 h-1.5 rounded-full ${activeSection === s.id ? "bg-white/40" : (DOT_COLORS[s.estado] || "bg-neutral-300")}`} />
-                )}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
               </button>
-            ))}
+
+              <button
+                type="button"
+                onClick={() => setMenuAbierto((v) => !v)}
+                className="flex-1 min-w-0 flex items-center gap-2.5 bg-white border border-neutral-200 rounded-xl shadow-sm px-3 py-2.5 text-left"
+                aria-expanded={menuAbierto}
+              >
+                <span className="shrink-0 w-7 h-7 rounded-lg bg-[#046C8C]/10 text-[#046C8C] grid place-items-center text-[11px] font-black">
+                  {sec.num}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13px] font-bold text-neutral-900 truncate">{sec.titulo}</span>
+                  <span className="block text-[10.5px] text-neutral-400 truncate">
+                    Bloque {indiceActivo + 1} de {navSections.length}
+                  </span>
+                </span>
+                {sec.estado && (
+                  <span className={`shrink-0 w-2 h-2 rounded-full ${DOT_COLORS[sec.estado] || "bg-neutral-300"}`} />
+                )}
+                <svg className={`shrink-0 w-4 h-4 text-neutral-400 transition-transform ${menuAbierto ? "rotate-180" : ""}`}
+                  fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => irBloque(1)}
+                disabled={indiceActivo >= navSections.length - 1}
+                className="shrink-0 w-11 h-11 rounded-xl border border-neutral-200 bg-white grid place-items-center text-neutral-500 disabled:opacity-30 active:scale-95 transition-all"
+                aria-label="Bloque siguiente"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
+
+            {menuAbierto && (
+              <div className="bg-white border border-neutral-200 rounded-2xl shadow-lg p-1.5 max-h-[60vh] overflow-y-auto">
+                {navSections.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => { setActiveSection(s.id); setMenuAbierto(false); }}
+                    className={`w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-left transition-colors ${
+                      activeSection === s.id ? "bg-[#023A4B]" : "active:bg-neutral-100"
+                    }`}
+                  >
+                    <span className={`shrink-0 w-7 h-7 rounded-lg grid place-items-center text-[11px] font-black ${
+                      activeSection === s.id ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
+                    }`}>{s.num}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className={`block text-[13px] font-semibold truncate ${activeSection === s.id ? "text-white" : "text-neutral-800"}`}>
+                        {s.titulo}
+                      </span>
+                      <span className={`block text-[10.5px] truncate ${activeSection === s.id ? "text-white/60" : "text-neutral-400"}`}>
+                        {s.subtitulo}
+                      </span>
+                    </span>
+                    {s.estado && (
+                      <span className={`shrink-0 w-2 h-2 rounded-full ${
+                        activeSection === s.id ? "bg-white/40" : (DOT_COLORS[s.estado] || "bg-neutral-300")
+                      }`} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Desktop: sidebar vertical */}
@@ -409,7 +498,15 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
           {/* Contenido de la sección activa (llena el área) */}
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <SeccionSiempreAbiertoCtx.Provider value={true}>
-              {activeSection === "solvencia" ? (
+              {activeSection === "economicos" ? (
+                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
+                  <VisaDeclaracionCliente
+                    idSolicitud={idSolicitud}
+                    expediente={visaExp}
+                    onGuardado={() => cargarTodo({ silent: true })}
+                  />
+                </SeccionPanel>
+              ) : activeSection === "solvencia" ? (
                 <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
                   <VisaMediosEconomicos
                     idSolicitud={idSolicitud}

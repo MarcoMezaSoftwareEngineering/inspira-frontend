@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import AltaRapida from "../clientes/AltaRapida";
 import ProximasFechas from "./ProximasFechas";
+import TrackerVisa from "./TrackerVisa";
 
 const COLOR_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -349,7 +350,13 @@ export default function Procesos({ onAbrirProceso }) {
         <ProximasFechas onAbrirProceso={onAbrirProceso} />
       )}
 
-      {!["metricas", "fechas"].includes(pestana) && (<>
+      {/* Visado tiene su propia hoja de seguimiento, con las columnas con las
+          que ya trabaja el equipo y edicion en la celda. */}
+      {pestana === "visa" && (
+        <TrackerVisa onAbrirProceso={onAbrirProceso} />
+      )}
+
+      {!["metricas", "fechas", "visa"].includes(pestana) && (<>
 
       {/* Filtros en una línea */}
       <div className="flex flex-wrap items-center gap-1.5">

@@ -1,10 +1,11 @@
 // src/pages/panel/components/mis-servicios/DetalleSolicitudVisado.jsx
 import { useEffect, useMemo, useState } from "react";
 import { apiGET } from "../../../../services/api";
-import { formatearFecha } from "./utils";
 import { SeccionSiempreAbiertoCtx } from "./sections/SeccionPanel";
 import SeccionPanel from "./sections/SeccionPanel";
 import ChecklistDocumentos from "./sections/ChecklistDocumentos";
+import VisaDatosCliente from "./sections/VisaDatosCliente";
+import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -48,18 +49,6 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
 }
 
 // ── Helpers de contenido ──────────────────────────────────────────────────────
-function CampoLectura({ label, value }) {
-  const vacio = value === null || value === undefined || value === "";
-  return (
-    <div className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2">
-      <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">{label}</p>
-      <p className={`text-[12px] font-semibold ${vacio ? "text-neutral-300 italic" : "text-neutral-800"}`}>
-        {vacio ? "N/D" : value}
-      </p>
-    </div>
-  );
-}
-
 function BloqueInfo({ icon, children }) {
   return (
     <div className="text-center py-8 px-2">
@@ -175,9 +164,16 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
   const cli = detalle?.cliente || {};
   const extra = cli.datos_extra || {};
-  const datos = detalle?.datos_formulario || {};
 
-  const datosCompletos = !!(cli.nombre && cli.pasaporte && (extra.fecha_nacimiento || extra.pasaporte_vencimiento));
+  // El Bloque 1 lo completa el cliente sobre el expediente. Se considera listo
+  // cuando estan los datos que el consulado exige si o si en el impreso.
+  const datosCompletos = !!(
+    visaExp?.num_pasaporte &&
+    visaExp?.venc_pasaporte &&
+    visaExp?.fecha_nacimiento &&
+    visaExp?.domicilio &&
+    visaExp?.centro_direccion
+  );
 
   const total = checklist.length;
   const docsListas = checklist.filter((it) => ["aprobado", "no_aplica"].includes((it.estado_item || "").toLowerCase())).length;
@@ -209,10 +205,12 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     }
   };
 
+  const SOLV_SUB = { PROPIOS: "Medios propios", AVAL: "Con avalista", MIXTO: "Mixto" };
+
   const navSections = [
-    { id: "datos", num: 1, titulo: "Mis datos personales", subtitulo: "Datos de tu expediente" },
+    { id: "datos", num: 1, titulo: "Mis datos personales", subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
     { id: "docs", num: 2, titulo: "Mis documentos", subtitulo: docsBloqueados ? "Se activa tras el diagnóstico" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
-    { id: "solvencia", num: 3, titulo: "Mi tipo de solvencia", subtitulo: "Medios propios o aval" },
+    { id: "solvencia", num: 3, titulo: "Mis medios económicos", subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
     { id: "diagnostico", num: 4, titulo: "Sesión de diagnóstico", subtitulo: "Evaluación inicial" },
     { id: "seguimiento", num: 5, titulo: "Sesión de seguimiento", subtitulo: "Avance de documentos" },
     { id: "formulario", num: 6, titulo: "Formulario de visado", subtitulo: "Preparado por Inspira" },
@@ -224,76 +222,10 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
   const pct = Math.round((bloquesDone / navSections.length) * 100);
 
-  const SOLV_LABEL = { PROPIOS: "🙋 Medios propios", AVAL: "👨‍👩‍👧 Con aval / tercero", PENDIENTE: "Pendiente de definir" };
   const FORM_LABEL = { EN_PREPARACION: "En preparación", ENVIADO: "Enviado para tu revisión", FIRMADO: "Firmado" };
 
   function renderBody(key) {
     switch (key) {
-      case "datos":
-        return (
-          <div className="space-y-3">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A]">Datos personales</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <CampoLectura label="Nombre" value={cli.nombre} />
-              <CampoLectura label="Fecha nacimiento" value={extra.fecha_nacimiento ? formatearFecha(extra.fecha_nacimiento) : null} />
-              <CampoLectura label="Nacionalidad" value={extra.nacionalidad || datos.nacionalidad} />
-              <CampoLectura label="País de origen" value={cli.pais_origen} />
-            </div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] pt-1">Documento de viaje</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <CampoLectura label="N° pasaporte" value={cli.pasaporte} />
-              <CampoLectura label="Emisión" value={extra.pasaporte_emision ? formatearFecha(extra.pasaporte_emision) : null} />
-              <CampoLectura label="Válido hasta" value={extra.pasaporte_vencimiento ? formatearFecha(extra.pasaporte_vencimiento) : null} />
-              <CampoLectura label="DNI" value={cli.dni} />
-            </div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] pt-1">Contacto</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <CampoLectura label="Teléfono / WhatsApp" value={cli.telefono} />
-              <CampoLectura label="Correo" value={cli.email_contacto} />
-            </div>
-            {(visaExp?.centro_nombre || visaExp?.centro_direccion) && (
-              <>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] pt-1">Centro de estudios</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  <CampoLectura label="Centro" value={visaExp.centro_nombre} />
-                  <CampoLectura label="Dirección" value={visaExp.centro_direccion} />
-                  <CampoLectura label="Inicio" value={visaExp.centro_inicio} />
-                  <CampoLectura label="Fin" value={visaExp.centro_fin} />
-                </div>
-              </>
-            )}
-            <p className="text-[11px] text-neutral-400 pt-1">Si necesitas corregir algún dato, contacta a tu asesor.</p>
-          </div>
-        );
-
-      case "solvencia":
-        return visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE" ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
-            <p className="text-[14px] font-bold text-[#1D6A4A] mb-2">{SOLV_LABEL[visaExp.tipo_solvencia]}</p>
-            <p className="text-[13px] text-neutral-600 leading-relaxed mb-2">
-              {visaExp.tipo_solvencia === "AVAL"
-                ? "Necesitas que un familiar con residencia en España o ingresos verificables respalde tu solicitud. Tu asesor te explicará los detalles."
-                : "Acreditas tu solvencia con tu propia cuenta bancaria (saldo aproximado de 7.200 € en los últimos 6 meses)."}
-            </p>
-            {visaExp.tipo_solvencia === "AVAL" && (
-              <>
-                <Linea label="Aval" value={visaExp.aval_nombre} />
-                <Linea label="Vínculo" value={visaExp.aval_vinculo} />
-                <Linea label="País" value={visaExp.aval_pais} />
-                <Linea label="Monto acreditado" value={visaExp.aval_monto} />
-                <Linea label="Banco" value={visaExp.aval_banco} />
-              </>
-            )}
-            <p className="text-[12px] text-neutral-500 mt-2">En el Bloque 2 verás los documentos que corresponden a esta variante.</p>
-          </div>
-        ) : (
-          <BloqueInfo icon="💰">
-            Tu asesor definirá contigo si acreditarás tu solvencia con <strong>medios propios</strong> (tu propia cuenta bancaria)
-            o <strong>con aval / tercero</strong> (un familiar que acredita los fondos). Una vez definido, verás en el Bloque 2
-            exactamente qué documentos necesitas.
-          </BloqueInfo>
-        );
-
       case "diagnostico":
         return <SesionView sesion={sesionPorTipo("DIAGNOSTICO")} icon="🔍"
           vacio="En esta sesión evaluamos tu caso, definimos el tipo de solvencia y te explicamos todos los documentos que necesitas y sus plazos. Tu asesor te compartirá aquí la fecha y el enlace de la reunión." />;
@@ -477,7 +409,25 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
           {/* Contenido de la sección activa (llena el área) */}
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <SeccionSiempreAbiertoCtx.Provider value={true}>
-              {activeSection === "docs" ? (
+              {activeSection === "solvencia" ? (
+                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
+                  <VisaMediosEconomicos
+                    idSolicitud={idSolicitud}
+                    expediente={visaExp}
+                    onGuardado={() => cargarTodo({ silent: true })}
+                  />
+                </SeccionPanel>
+              ) : activeSection === "datos" ? (
+                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
+                  <VisaDatosCliente
+                    idSolicitud={idSolicitud}
+                    expediente={visaExp}
+                    cliente={cli}
+                    extra={extra}
+                    onGuardado={() => cargarTodo({ silent: true })}
+                  />
+                </SeccionPanel>
+              ) : activeSection === "docs" ? (
                 <ChecklistDocumentos
                   checklist={checklist}
                   cargarTodo={cargarTodo}

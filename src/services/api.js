@@ -61,6 +61,10 @@ export function apiPATCH(url, body) {
   return makeRequest("PATCH", url, body);
 }
 
+export function apiPUT(url, body) {
+  return makeRequest("PUT", url, body);
+}
+
 export async function apiUpload(path, formData) {
   const r = await fetch(API_URL + path, {
     method: "POST",

@@ -9,6 +9,7 @@ import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import AltaRapida from "../clientes/AltaRapida";
 import ProximasFechas from "./ProximasFechas";
 import TrackerVisa from "./TrackerVisa";
+import TrackerMaster from "./TrackerMaster";
 
 const COLOR_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -394,7 +395,11 @@ export default function Procesos({ onAbrirProceso }) {
         <TrackerVisa onAbrirProceso={onAbrirProceso} />
       )}
 
-      {!["metricas", "fechas", "visa"].includes(pestana) && (<>
+      {pestana === "master" && (
+        <TrackerMaster onAbrirProceso={onAbrirProceso} />
+      )}
+
+      {!["metricas", "fechas", "visa", "master"].includes(pestana) && (<>
 
       {/* Filtros en una línea */}
       <div className="flex flex-wrap items-center gap-1.5">

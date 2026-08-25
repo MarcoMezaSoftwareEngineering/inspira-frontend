@@ -7,6 +7,7 @@ import ChecklistDocumentos from "./sections/ChecklistDocumentos";
 import VisaDatosCliente from "./sections/VisaDatosCliente";
 import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
+import { estadoVisado, TONOS } from "../../../../lib/visaFlujoInterno";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -216,10 +217,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   })();
 
   const SOLV_SUB = { PROPIOS: "Medios propios", AVAL: "Con avalista", MIXTO: "Mixto" };
-  const CITA_SUB = {
-    AGENDADA: "Agendada", CONFIRMADA: "Confirmada",
-    REALIZADA: "Ya presentada", REAGENDAR: "Hay que reagendar",
-  };
   const FORM_SUB = {
     EN_PREPARACION: "En preparación", ENVIADO: "Listo para tu revisión", FIRMADO: "Firmado",
   };
@@ -231,7 +228,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   // lo que se marca ahi es justo lo que decide QUE documentos se piden.
   const navSections = [
     { id: "datos",      num: 1, titulo: "Tus datos",                subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
-    { id: "cita",       num: 2, titulo: "Cita BLS",                 subtitulo: CITA_SUB[visaExp?.cita_estado] || "Sin fecha aún" },
+    { id: "cita",       num: 2, titulo: "Cita BLS",                 subtitulo: estadoVisado(visaExp || {}).texto },
     { id: "solvencia",  num: 3, titulo: "Mis medios económicos",    subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
     { id: "economicos", num: 4, titulo: "Datos económicos",         subtitulo: "Situación laboral e ingresos" },
     { id: "docs",       num: 5, titulo: "Documentos",               subtitulo: docsBloqueados ? "Se activa al elegir tus medios" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
@@ -245,13 +242,51 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
   function renderBody(key) {
     switch (key) {
-      case "cita":
+      case "cita": {
+        const ev = estadoVisado(visaExp || {});
+        const req = visaExp?.requerimiento_estado;
         return (
           <div className="space-y-3">
+            {/* Dónde está su visado, de un vistazo */}
+            <div className={`rounded-2xl border px-4 py-3 ${TONOS[ev.tono]}`}>
+              <p className="text-[9px] font-bold uppercase tracking-widest opacity-70">Estado de tu visado</p>
+              <p className="text-[17px] font-bold mt-0.5">{ev.icono} {ev.texto}</p>
+            </div>
+
+            {/* Un requerimiento exige que actúe él, y con plazo: va antes que nada. */}
+            {req === "SOLICITADO" && (
+              <Tarjeta titulo="Te han pedido subsanar algo" borde="border-red-300">
+                <p className="text-[13px] text-neutral-700 leading-relaxed">
+                  El consulado solicitó documentación o aclaraciones adicionales.
+                </p>
+                {visaExp?.requerimiento_detalle && (
+                  <p className="text-[13px] text-neutral-800 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-2 leading-relaxed">
+                    <b>Qué piden:</b> {visaExp.requerimiento_detalle}
+                  </p>
+                )}
+                {visaExp?.requerimiento_plazo && (
+                  <p className="text-[13px] font-bold text-red-700 mt-2">
+                    ⏰ Plazo para responder: {visaExp.requerimiento_plazo}
+                  </p>
+                )}
+                <p className="text-[12px] text-neutral-500 mt-2">
+                  Tu asesor te está acompañando en esto. Súbelo cuanto antes en el bloque
+                  de documentos.
+                </p>
+              </Tarjeta>
+            )}
+
+            {req === "SUBSANADO" && (
+              <Aviso tono="ok" icono="✅">
+                Ya presentamos lo que pedían. Ahora toca esperar la resolución.
+              </Aviso>
+            )}
+
             <p className="text-[13.5px] text-neutral-500 leading-relaxed">
               Tu visa se tramita en el Consulado de España a través de BLS International.
               La fecha de esta cita marca el calendario de todo lo demás.
             </p>
+
             <SesionView
               sesion={visaExp?.cita_estado && visaExp.cita_estado !== "PENDIENTE" ? {
                 estado: visaExp.cita_estado,
@@ -263,27 +298,70 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
               vacio="La agendamos contigo y te confirmamos aquí"
               pie="📍 BLS International · llega 15 min antes"
             />
+
             {visaExp?.cita_estado === "REAGENDAR" && (
               <Aviso tono="warn" icono="🔁">
                 Hay que <b>reagendar</b> tu cita. Tu asesor te contactará con las
                 nuevas fechas disponibles.
               </Aviso>
             )}
-            {visaExp?.cita_resultado && (
-              <Tarjeta titulo="Resultado">
-                <p className="text-[13px] text-neutral-700">{visaExp.cita_resultado}</p>
+
+            {/* Resolución */}
+            {visaExp?.visado_resultado === "FAVORABLE" && (
+              <Tarjeta titulo="Resolución" borde="border-emerald-200">
+                <p className="text-[15px] font-bold text-[#1D6A4A]">🎉 ¡Visa concedida!</p>
+                {visaExp.visado_resultado_fecha && (
+                  <p className="text-[12.5px] text-neutral-500 mt-1">Resuelta el {visaExp.visado_resultado_fecha}</p>
+                )}
+                <p className="text-[13px] text-neutral-600 mt-2 leading-relaxed">
+                  Tu asesor te indicará cómo recoger el pasaporte y te orientará sobre tu
+                  llegada a España (NIE, TIE y empadronamiento).
+                </p>
               </Tarjeta>
             )}
-            <Aviso tono="ok" icono="🎒">
-              Lleva: expediente original + copia, pasaporte, foto y{" "}
-              <b>efectivo para la tasa consular</b>.
-            </Aviso>
-            <Aviso tono="warn" icono="✈️">
-              <b>No compres tu vuelo</b> todavía: sólo reserva con tarifa flexible.
-              Se compra cuando la visa esté aprobada.
-            </Aviso>
+
+            {visaExp?.visado_resultado === "DENEGADO" && (
+              <Tarjeta titulo="Resolución" borde="border-red-300">
+                <p className="text-[15px] font-bold text-red-700">Resolución desfavorable</p>
+                {visaExp.visado_resultado_fecha && (
+                  <p className="text-[12.5px] text-neutral-500 mt-1">Notificada el {visaExp.visado_resultado_fecha}</p>
+                )}
+                {visaExp.via_posterior === "APELACION" && (
+                  <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
+                    ⚖️ Estamos <b>presentando una apelación</b>. Tu asesor te contará los plazos
+                    y qué esperar.
+                  </p>
+                )}
+                {visaExp.via_posterior === "ESTANCIA_ESTUDIOS" && (
+                  <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
+                    ↪️ Estamos reconduciendo tu caso por la vía de <b>estancia por estudios</b>.
+                    Tu asesor te explicará los siguientes pasos.
+                  </p>
+                )}
+                {!visaExp.via_posterior && (
+                  <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
+                    Tu asesor está estudiando las opciones y te contactará para explicarte
+                    los siguientes pasos.
+                  </p>
+                )}
+              </Tarjeta>
+            )}
+
+            {!visaExp?.visado_resultado && (
+              <>
+                <Aviso tono="ok" icono="🎒">
+                  Lleva: expediente original + copia, pasaporte, foto y{" "}
+                  <b>efectivo para la tasa consular</b>.
+                </Aviso>
+                <Aviso tono="warn" icono="✈️">
+                  <b>No compres tu vuelo</b> todavía: sólo reserva con tarifa flexible.
+                  Se compra cuando la visa esté aprobada.
+                </Aviso>
+              </>
+            )}
           </div>
         );
+      }
 
       case "formulario":
         return (

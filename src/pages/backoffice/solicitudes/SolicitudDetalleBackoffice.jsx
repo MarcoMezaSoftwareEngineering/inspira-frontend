@@ -14,8 +14,9 @@ import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
 import VisaDeclaracionAdmin from "./components/visa/VisaDeclaracionAdmin";
 import VisaImpresoAdmin from "./components/visa/VisaImpresoAdmin";
 import VisaRecordatoriosAdmin from "./components/visa/VisaRecordatoriosAdmin";
+import VisaFlujoInternoAdmin from "./components/visa/VisaFlujoInternoAdmin";
+import VisaEstadoVisadoAdmin from "./components/visa/VisaEstadoVisadoAdmin";
 import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
-import VisaCitaAdmin from "./components/visa/VisaCitaAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
 import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
 
@@ -304,7 +305,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                 />
                 {isVisado && (
                   <>
-                    <div className="border-t border-[#E2E8F0] p-5">
+                    <div className="border-t border-[#E2E8F0] p-5 space-y-4">
+                      <VisaFlujoInternoAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
                       <VisaRecordatoriosAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
                     </div>
                     <div className="border-t border-[#E2E8F0]">
@@ -439,7 +441,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   open={isOpen("cita")} onToggle={() => toggleBloque("cita")} />
                 {isOpen("cita") && (
                   <CBox>
-                    <VisaCitaAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    <div className="p-5">
+                      <VisaEstadoVisadoAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
+                    </div>
                   </CBox>
                 )}
               </div>

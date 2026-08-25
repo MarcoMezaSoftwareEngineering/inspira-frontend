@@ -1,15 +1,16 @@
 // src/pages/asistente/Asistente.jsx
-// Pestaña del asistente de IA. Hoy funciona como un orientador guiado que
-// responde con el contenido propio del catálogo (sin llamadas externas):
-// hace preguntas, deduce la vía que encaja y deriva a la asesoría 1:1.
-// La versión conversacional por suscripción es la fase siguiente.
+// Diagnóstico guiado: el visitante avanza por preguntas encadenadas y termina
+// con un plan personalizado (vía, plazos, documentos y servicios). Todo el
+// contenido vive en config/diagnostico.js; aquí solo está la experiencia.
 import { useState } from "react";
+import { getNodo, getResultado } from "../../config/diagnostico";
+import { getServicio, hrefServicio } from "../../config/servicios";
 import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
-import { navigate } from "../../services/navigate";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
-import { CALENDLY_URL } from "../../config/contacto";
+import { navigate } from "../../services/navigate";
+import { CALENDLY_URL, whatsappUrl } from "../../config/contacto";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -17,287 +18,365 @@ const go = (e, href) => {
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
-// Árbol de decisión: cada respuesta lleva a otra pregunta o a un resultado.
-const ARBOL = {
-  inicio: {
-    pregunta: "¿Dónde estás ahora mismo?",
-    opciones: [
-      { txt: "En mi país de origen", ir: "objetivo" },
-      { txt: "Ya estoy en España", ir: "enEspana" },
-    ],
-  },
-  objetivo: {
-    pregunta: "¿Qué quieres hacer en España?",
-    opciones: [
-      { txt: "Estudiar (máster, grado o FP)", ir: "estudiar" },
-      { txt: "Trabajar con una oferta cualificada", res: "pac" },
-      { txt: "Trabajar en remoto para el extranjero", res: "nomada" },
-      { txt: "Vivir sin trabajar, con mis propios medios", res: "noLucrativa" },
-    ],
-  },
-  estudiar: {
-    pregunta: "¿Ya tienes carta de admisión de un centro español?",
-    opciones: [
-      { txt: "Sí, ya tengo la admisión", ir: "admitido" },
-      { txt: "Todavía no, necesito elegir programa", res: "asesoriaEducativa" },
-      { txt: "Me denegaron el visado", res: "recurso" },
-    ],
-  },
-  admitido: {
-    pregunta: "¿Cómo prefieres tramitar tu permiso?",
-    opciones: [
-      { txt: "Desde mi país, en el consulado", res: "visaEstudios" },
-      { txt: "Viajando primero y tramitando allá", res: "estanciaEstudios" },
-      { txt: "No sé cuál me conviene", res: "diagnostico" },
-    ],
-  },
-  enEspana: {
-    pregunta: "¿Cuál es tu situación?",
-    opciones: [
-      { txt: "Tengo estancia por estudios y quiero quedarme", res: "modificatoria" },
-      { txt: "Llevo años y quiero la nacionalidad", res: "nacionalidad" },
-      { txt: "Estoy en situación irregular", res: "arraigos" },
-      { txt: "Necesito renovar o hacer un trámite", res: "tramites" },
-    ],
-  },
-};
-
-const RESULTADOS = {
-  visaEstudios: {
-    icono: "pasaporte",
-    titulo: "Visa de Estudios",
-    texto:
-      "Tramitas desde tu país ante el consulado español y viajas con el visado ya resuelto. Te acompañamos en la acreditación económica, el seguro médico, los formularios y la cita consular.",
-    href: "/servicios/visa-estudios",
-  },
-  estanciaEstudios: {
-    icono: "bandera",
-    titulo: "Estancia por Estudios",
-    texto:
-      "Entras como turista y regularizas tu situación ante Extranjería. Proceso 100% digital vía MERCURIO, sin citas ni colas, con permiso para trabajar 30 h semanales.",
-    href: "/servicios/estancia-estudios",
-  },
-  diagnostico: {
-    icono: "balanza",
-    titulo: "Necesitas un diagnóstico",
-    texto:
-      "Elegir entre visado y estancia depende de tus fechas de clase, de la carga de tu consulado y de tu situación documental. Es exactamente lo que resolvemos en la asesoría de 30 minutos.",
-    href: "/servicios#estudios",
-  },
-  asesoriaEducativa: {
-    icono: "birrete",
-    titulo: "Asesoría educativa",
-    texto:
-      "Primero hay que elegir bien el programa: máster, grado o formación profesional. Analizamos tu perfil, tu presupuesto y tus plazos, y armamos tu shortlist con becas incluidas.",
-    href: "/servicios#educativa",
-  },
-  recurso: {
-    icono: "documento",
-    titulo: "Recurso de Reposición",
-    texto:
-      "Analizamos la resolución de denegación y te decimos con honestidad si el recurso es viable. Si no lo es, reconducimos tu caso hacia una estancia por estudios.",
-    href: "/servicios/recurso-reposicion",
-  },
-  pac: {
-    icono: "maletin",
-    titulo: "Visado PAC — Profesional Altamente Cualificado",
-    texto:
-      "Con una oferta cualificada en una empresa española, esta es la vía más ágil: plazos cortos, silencio administrativo positivo y autorización para tu familia.",
-    href: "/servicios/visado-pac",
-  },
-  nomada: {
-    icono: "laptop",
-    titulo: "Residencia de Nómada Digital",
-    texto:
-      "Para teletrabajadores de empresas extranjeras. Requisitos exigentes de ingresos y antigüedad, pero residencia de hasta 3 años que computa para la nacionalidad.",
-    href: "/servicios/nomada-digital",
-  },
-  noLucrativa: {
-    icono: "casa",
-    titulo: "Residencia No Lucrativa",
-    texto:
-      "Vives en España con tus propios medios económicos, sin ejercer actividad laboral. Vía predecible siempre que la acreditación económica esté impecable.",
-    href: "/servicios/no-lucrativa",
-  },
-  modificatoria: {
-    icono: "brujula",
-    titulo: "Modificatoria de Estudiante a Residente",
-    texto:
-      "Clave: la estancia por estudios NO computa para la nacionalidad, la residencia sí. Este trámite convierte tus años de estudio en el punto de partida real.",
-    href: "/servicios/modificatoria-residente",
-  },
-  nacionalidad: {
-    icono: "bandera",
-    titulo: "Nacionalidad española",
-    texto:
-      "Como latinoamericano solo necesitas 2 años de residencia legal, frente a los 10 de la regla general. Verificamos qué años te computan y preparamos el expediente.",
-    href: "/servicios/nacionalidad",
-  },
-  arraigos: {
-    icono: "escudo",
-    titulo: "Arraigos",
-    texto:
-      "Hay varios tipos de arraigo y elegir el correcto lo cambia todo: social, laboral, familiar o para la formación. Determinamos cuál encaja con tu situación real.",
-    href: "/servicios/arraigos",
-  },
-  tramites: {
-    icono: "huella",
-    titulo: "Trámites en España",
-    texto:
-      "TIE, empadronamiento, certificado digital, canje de licencia, seguridad social, prórrogas y renovaciones. Gestionamos las citas y la documentación.",
-    href: "/servicios#tramites-espana",
-  },
-};
+// Profundidad típica del árbol: sirve para la barra de progreso.
+const PASOS_ESTIMADOS = 4;
 
 export default function Asistente() {
-  const [nodo, setNodo] = useState("inicio");
-  const [resultado, setResultado] = useState(null);
-  const [historial, setHistorial] = useState([]);
+  const [nodoId, setNodoId] = useState("inicio");
+  const [historial, setHistorial] = useState([]); // [{nodoId, pregunta, resp}]
+  const [resultadoId, setResultadoId] = useState(null);
+
+  const nodo = getNodo(nodoId);
+  const resultado = resultadoId ? getResultado(resultadoId) : null;
+  const paso = historial.length + 1;
+  const progreso = resultado
+    ? 100
+    : Math.min(90, ((paso - 1) / PASOS_ESTIMADOS) * 100);
 
   const responder = (op) => {
-    setHistorial((h) => [...h, { pregunta: ARBOL[nodo].pregunta, resp: op.txt }]);
-    if (op.res) setResultado(RESULTADOS[op.res]);
-    else setNodo(op.ir);
+    setHistorial((h) => [
+      ...h,
+      { nodoId, pregunta: nodo.pregunta, resp: op.txt },
+    ]);
+    if (op.res) setResultadoId(op.res);
+    else setNodoId(op.ir);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const atras = () => {
+    const ultimo = historial[historial.length - 1];
+    if (!ultimo) return;
+    if (resultado) setResultadoId(null);
+    setNodoId(ultimo.nodoId);
+    setHistorial((h) => h.slice(0, -1));
   };
 
   const reiniciar = () => {
-    setNodo("inicio");
-    setResultado(null);
+    setNodoId("inicio");
     setHistorial([]);
+    setResultadoId(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const actual = ARBOL[nodo];
+  const resumenWhatsApp = resultado
+    ? `Hola Inspira. Hice el diagnóstico en la web y me salió: ${resultado.via}.\n\n` +
+      historial.map((h) => `· ${h.pregunta} ${h.resp}`).join("\n") +
+      `\n\nQuiero agendar mi asesoría.`
+    : "";
 
   return (
     <div className="w-full">
       <PageHero
-        etiqueta="Asistente Inspira"
-        icono="robot"
-        titulo="¿No sabes qué trámite"
-        destacado="te corresponde?"
-        descripcion="Responde tres preguntas y te decimos cuál es tu vía. Gratis, en menos de un minuto."
+        etiqueta="Diagnóstico gratuito"
+        icono="brujula"
+        titulo="Cuéntanos tu caso"
+        destacado="y te decimos cuál es tu vía"
+        descripcion="Unas pocas preguntas y sales con un plan: la vía que te corresponde, los plazos reales, los documentos que necesitas y por dónde empezar. Gratis y sin registro."
         accesos={[
           { icono: "brujula", label: "Ver todos los servicios", href: "/servicios" },
           { icono: "estrella", label: "Casos de éxito", href: "/casos-de-exito" },
+          { icono: "euro", label: "Calculadora gratis", href: "/calculadora-master" },
         ]}
       />
 
-      {/* Asistente */}
-      <section className="mx-auto max-w-3xl px-5 py-12 md:py-16">
-        <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-lg">
-          {/* Cabecera tipo chat */}
-          <div className="flex items-center gap-3 border-b border-neutral-200 bg-secondary-light px-5 py-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
-              <Icono nombre="robot" size={20} />
+      <section className="mx-auto max-w-3xl px-5 py-10 md:py-14">
+        {/* Progreso */}
+        <div className="mb-5">
+          <div className="mb-2 flex items-center justify-between text-[11px] font-extrabold uppercase tracking-widest">
+            <span className="text-neutral-500">
+              {resultado ? "Diagnóstico listo" : `Paso ${paso}`}
             </span>
-            <div>
-              <p className="text-sm font-extrabold text-neutral-900">
-                Asistente Inspira
-              </p>
-              <p className="flex items-center gap-1.5 text-xs text-green-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
-                En línea
-              </p>
-            </div>
+            <span className="text-accent">{Math.round(progreso)}%</span>
           </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full transition-all duration-500 ease-out"
+              style={{
+                width: `${progreso}%`,
+                background: "linear-gradient(90deg, #88C4FC, #FA943A)",
+              }}
+            />
+          </div>
+        </div>
 
-          <div className="px-5 py-6 md:px-7">
-            {/* Historial */}
+        {/* Respuestas dadas */}
+        {historial.length > 0 && (
+          <div className="mb-5 flex flex-wrap gap-2">
             {historial.map((h, i) => (
-              <div key={i} className="mb-4">
-                <p className="text-sm text-neutral-500">{h.pregunta}</p>
-                <p className="mt-1 inline-block rounded-2xl rounded-tr-sm bg-primary px-4 py-2 text-sm font-semibold text-white">
-                  {h.resp}
-                </p>
-              </div>
+              <span
+                key={i}
+                className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-[11.5px] font-semibold text-primary"
+              >
+                <Icono nombre="escudo" size={12} />
+                {h.resp}
+              </span>
             ))}
+          </div>
+        )}
 
-            {!resultado ? (
-              <>
-                <p className="text-lg font-bold text-neutral-900">
-                  {actual.pregunta}
+        {!resultado ? (
+          /* ── Pregunta ─────────────────────────────────────── */
+          <div
+            key={nodoId}
+            className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-lg"
+            style={{ animation: "v4-fade-up .4s cubic-bezier(.22,1,.36,1) both" }}
+          >
+            <div className="border-b border-neutral-200 bg-secondary-light px-6 py-5">
+              <p className="text-[11px] font-extrabold uppercase tracking-widest text-accent">
+                {nodo.titulo}
+              </p>
+              <h2 className="mt-1.5 font-display text-xl font-bold leading-snug text-primary md:text-2xl">
+                {nodo.pregunta}
+              </h2>
+              {nodo.ayuda && (
+                <p className="mt-2 text-[13px] leading-relaxed text-neutral-600">
+                  {nodo.ayuda}
                 </p>
-                <div className="mt-4 grid gap-2.5">
-                  {actual.opciones.map((op) => (
-                    <button
-                      key={op.txt}
-                      type="button"
-                      onClick={() => responder(op)}
-                      className="flex items-center justify-between gap-3 rounded-2xl border-2 border-neutral-200 px-5 py-4 text-left text-sm font-semibold text-neutral-900 transition hover:-translate-y-0.5 hover:border-accent hover:bg-accent/5 hover:shadow-md"
-                    >
-                      {op.txt}
-                      <span className="text-accent" aria-hidden>→</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div>
-                <p className="text-sm font-semibold text-neutral-500">
-                  Según lo que nos cuentas, tu vía es:
-                </p>
-                <div className="mt-3 rounded-2xl border-2 border-accent bg-accent/5 p-6">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-white">
-                    <Icono nombre={resultado.icono} size={24} />
+              )}
+            </div>
+
+            <div className="grid gap-2.5 px-5 py-5 sm:px-6">
+              {nodo.opciones.map((op) => (
+                <button
+                  key={op.txt}
+                  type="button"
+                  onClick={() => responder(op)}
+                  className="group flex items-center gap-4 rounded-2xl border-2 border-neutral-200 px-4 py-4 text-left transition hover:-translate-y-0.5 hover:border-accent hover:bg-accent/5 hover:shadow-md"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-light text-sky-dark transition group-hover:bg-accent group-hover:text-white">
+                    <Icono nombre={op.icono} size={20} />
                   </span>
-                  <h2 className="mt-4 font-fraunces text-2xl font-extrabold text-primary">
-                    {resultado.titulo}
-                  </h2>
-                  <p className="mt-2 leading-relaxed text-neutral-700">
-                    {resultado.texto}
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <a
-                      href={resultado.href}
-                      onClick={(e) => go(e, resultado.href)}
-                      className="rounded-xl bg-primary px-5 py-3 text-sm font-extrabold text-white transition hover:bg-primary-light"
-                    >
-                      Ver este servicio →
-                    </a>
-                    <a
-                      href={CALENDLY_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-xl bg-accent px-5 py-3 text-sm font-extrabold text-white transition hover:bg-accent-dark"
-                    >
-                      Confirmarlo con un abogado →
-                    </a>
-                  </div>
-                </div>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[14.5px] font-bold text-neutral-900">
+                      {op.txt}
+                    </span>
+                    {op.desc && (
+                      <span className="mt-0.5 block text-[12.5px] leading-snug text-neutral-600">
+                        {op.desc}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className="shrink-0 text-accent transition group-hover:translate-x-1"
+                    aria-hidden
+                  >
+                    →
+                  </span>
+                </button>
+              ))}
+            </div>
 
-                <p className="mt-5 text-xs leading-relaxed text-neutral-500">
-                  Esta orientación es automática y no sustituye el diagnóstico
-                  jurídico de un abogado. Tu caso concreto puede tener matices
-                  que solo se ven en una asesoría personalizada.
-                </p>
-
+            {historial.length > 0 && (
+              <div className="border-t border-neutral-100 px-6 py-3">
                 <button
                   type="button"
-                  onClick={reiniciar}
-                  className="mt-5 text-sm font-semibold text-primary hover:underline"
+                  onClick={atras}
+                  className="text-[13px] font-semibold text-neutral-500 transition hover:text-primary"
                 >
-                  ↺ Empezar de nuevo
+                  ← Volver a la pregunta anterior
                 </button>
               </div>
             )}
           </div>
-        </div>
+        ) : (
+          /* ── Resultado ────────────────────────────────────── */
+          <div
+            key={resultadoId}
+            style={{ animation: "v4-fade-up .45s cubic-bezier(.22,1,.36,1) both" }}
+          >
+            {/* Cabecera del plan */}
+            <div className="overflow-hidden rounded-3xl border border-neutral-200 shadow-lg">
+              <div className="relative overflow-hidden bg-primary px-6 py-7 text-white md:px-8">
+                <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-sky/20 blur-3xl" />
+                <div className="relative">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wide">
+                    <Icono nombre="destello" size={12} />
+                    Tu vía recomendada
+                  </span>
+                  <div className="mt-4 flex items-start gap-4">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+                      <Icono nombre={resultado.icono} size={26} />
+                    </span>
+                    <div>
+                      <h2 className="font-display text-2xl font-black leading-tight md:text-3xl">
+                        {resultado.titulo}
+                      </h2>
+                      <p className="mt-2 leading-relaxed text-white/75">
+                        {resultado.resumen}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-        {/* CTA */}
-        <div className="mt-10 text-center">
-          <h2 className="font-fraunces text-2xl font-extrabold text-primary">
-            ¿Prefieres hablar con una persona?
-          </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-neutral-700">
-            La asesoría 1:1 de 30 minutos con un abogado especialista es donde
-            de verdad se resuelve tu caso.
-          </p>
-          <div className="mt-5 flex justify-center">
-            <BotonAsesoria>Agenda tu asesoría 1:1</BotonAsesoria>
+              {/* Plazos */}
+              <div className="grid gap-px bg-neutral-200 sm:grid-cols-2">
+                {[
+                  { i: "reloj", k: "Plazo del trámite", v: resultado.plazo },
+                  { i: "calendario", k: "Cuándo empezar", v: resultado.empezar },
+                ].map((d) => (
+                  <div key={d.k} className="flex gap-3 bg-white px-6 py-4">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-light text-sky-dark">
+                      <Icono nombre={d.i} size={17} />
+                    </span>
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-wide text-neutral-500">
+                        {d.k}
+                      </p>
+                      <p className="text-[13px] font-semibold leading-snug text-neutral-900">
+                        {d.v}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Por qué */}
+              <div className="border-t border-neutral-200 bg-white px-6 py-5 md:px-8">
+                <p className="font-display text-sm font-bold text-primary">
+                  Por qué esta vía encaja contigo
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {resultado.porQue.map((p) => (
+                    <li
+                      key={p}
+                      className="flex gap-2.5 text-[13.5px] leading-relaxed text-neutral-700"
+                    >
+                      <span className="font-bold text-accent" aria-hidden>
+                        ✓
+                      </span>
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Documentos */}
+              <div className="border-t border-neutral-200 bg-secondary-light px-6 py-5 md:px-8">
+                <p className="flex items-center gap-2 font-display text-sm font-bold text-primary">
+                  <Icono nombre="documento" size={16} />
+                  Lo que vas a necesitar
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {resultado.documentos.map((d) => (
+                    <span
+                      key={d}
+                      className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-[12.5px] text-neutral-700"
+                    >
+                      {d}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-3 text-[11.5px] leading-relaxed text-neutral-500">
+                  Lista orientativa: los requisitos exactos dependen de tu
+                  consulado y de tu caso concreto.
+                </p>
+              </div>
+            </div>
+
+            {/* Servicios que lo resuelven */}
+            {resultado.servicios?.length > 0 && (
+              <div className="mt-6">
+                <p className="mb-3 font-display text-sm font-bold text-primary">
+                  Servicios que resuelven esto
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {resultado.servicios.map((sid) => {
+                    const s = getServicio(sid);
+                    if (!s) return null;
+                    return (
+                      <a
+                        key={sid}
+                        href={hrefServicio(s)}
+                        onClick={(e) => go(e, hrefServicio(s))}
+                        className="group flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-md"
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-light text-sky-dark">
+                          <Icono nombre="brujula" size={16} />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-[13.5px] font-bold text-neutral-900">
+                            {s.nombre}
+                          </span>
+                          <span className="mt-0.5 block text-[12px] leading-snug text-neutral-600">
+                            {s.resumen}
+                          </span>
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Acciones */}
+            <div className="mt-7 rounded-3xl bg-secondary-light p-6 text-center md:p-8">
+              <h3 className="font-display text-xl font-bold text-primary md:text-2xl">
+                Confírmalo con un abogado
+              </h3>
+              <p className="mx-auto mt-2 max-w-md text-[13.5px] leading-relaxed text-neutral-700">
+                Este diagnóstico es automático y orienta, pero no sustituye la
+                revisión de tu caso. En 30 minutos un especialista te confirma
+                la vía y te arma el plan definitivo.
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <BotonAsesoria>Agenda tu asesoría 1:1</BotonAsesoria>
+                <a
+                  href={whatsappUrl(resumenWhatsApp)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border-2 border-primary px-6 py-3.5 font-extrabold text-primary transition hover:bg-white"
+                >
+                  <Icono nombre="chat" size={18} />
+                  Enviar mi resultado por WhatsApp
+                </a>
+              </div>
+              <div className="mt-5 flex flex-wrap justify-center gap-4 text-[13px]">
+                <a
+                  href={resultado.href}
+                  onClick={(e) => go(e, resultado.href)}
+                  className="font-bold text-primary hover:underline"
+                >
+                  Ver el servicio en detalle →
+                </a>
+                <button
+                  type="button"
+                  onClick={reiniciar}
+                  className="font-semibold text-neutral-500 hover:text-primary"
+                >
+                  ↺ Empezar de nuevo
+                </button>
+                <button
+                  type="button"
+                  onClick={atras}
+                  className="font-semibold text-neutral-500 hover:text-primary"
+                >
+                  ← Cambiar mi última respuesta
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Alternativa siempre visible */}
+        {!resultado && (
+          <p className="mt-6 text-center text-[13px] text-neutral-600">
+            ¿Prefieres saltarte esto y hablar directamente con un abogado?{" "}
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-primary hover:underline"
+            >
+              Agenda tu asesoría
+            </a>
+          </p>
+        )}
       </section>
-      <SigueExplorando destinos={["servicios","calculadora","casos","eventos"]} />
+
+      <SigueExplorando
+        destinos={["servicios", "casos", "calculadora", "eventos"]}
+      />
     </div>
   );
 }

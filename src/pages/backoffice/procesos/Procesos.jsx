@@ -78,6 +78,24 @@ function Etapa({ p, onCambiar }) {
   );
 }
 
+/* Plazo legal del proceso. Estancia y extranjeria no tienen expediente donde
+   anotar sus fechas de caducidad, y son las que no se pueden pasar. */
+function PlazoLegal({ proceso, onGuardar }) {
+  const [v, setV] = useState(proceso.fecha_limite || "");
+  return (
+    <input
+      value={v}
+      placeholder="—"
+      onChange={(e) => setV(e.target.value)}
+      onBlur={() => { if (v !== (proceso.fecha_limite || "")) onGuardar(proceso, v); }}
+      onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+      title={proceso.fecha_limite_nota || "Fecha límite o plazo legal"}
+      className="w-24 text-[11px] text-neutral-700 bg-transparent border border-transparent rounded px-1.5 py-1
+        hover:border-neutral-200 focus:border-[#1D6A4A] focus:bg-white outline-none placeholder:text-neutral-300"
+    />
+  );
+}
+
 function Proximo({ p }) {
   if (!p) return <span className="text-[11px] text-neutral-300">—</span>;
   const tono = p.vencido ? "text-red-700" : p.urgente ? "text-amber-700" : "text-neutral-500";
@@ -205,6 +223,13 @@ export default function Procesos({ onAbrirProceso }) {
     boGET("/backoffice/procesos").then(aplicar);
     boGET("/backoffice/procesos/metodos-pago").then((r) => r.ok && setMetodos(r.metodos || []));
   }, [aplicar]);
+
+  async function guardarPlazo(p, valor) {
+    setProcesos((prev) => prev.map((x) =>
+      x.id_solicitud === p.id_solicitud ? { ...x, fecha_limite: valor } : x));
+    const r = await boPATCH(`/backoffice/procesos/${p.id_solicitud}/plazo`, { fecha_limite: valor });
+    if (!r.ok) { setError(r.msg || "No se pudo guardar el plazo"); cargar(); }
+  }
 
   async function cambiarEtapa(p, nueva) {
     // Optimista: la fila se mueve al instante y se revierte si falla.
@@ -502,6 +527,9 @@ export default function Procesos({ onAbrirProceso }) {
                     <td className="px-2.5 py-2 text-[11.5px] text-neutral-600">
                       {p.responsable || <span className="text-amber-600 font-semibold">sin asignar</span>}
                     </td>
+                    <td className="px-2.5 py-2">
+                      <PlazoLegal proceso={p} onGuardar={guardarPlazo} />
+                    </td>
                     <td className="px-2.5 py-2"><Proximo p={p.proximo} /></td>
                     <td className="px-2.5 py-2">
                       {p.pago.sin_registro ? (
@@ -527,7 +555,7 @@ export default function Procesos({ onAbrirProceso }) {
                   </tr>
                   {pagoDe === p.id_solicitud && (
                     <tr key={`pago-${p.id_solicitud}`}>
-                      <td colSpan={8} className="p-0">
+                      <td colSpan={9} className="p-0">
                         <NuevoPago proceso={p} metodos={metodos}
                           onHecho={() => { setPagoDe(null); cargar(); }}
                           onCerrar={() => setPagoDe(null)} />

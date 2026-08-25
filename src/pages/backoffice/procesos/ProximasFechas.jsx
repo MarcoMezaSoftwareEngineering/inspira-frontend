@@ -25,13 +25,13 @@ function cuando(f) {
 /* Agrupa por cercanía: es como se mira una lista de plazos, no por fecha
    exacta sino por "esto es de ahora" o "esto ya se pasó". */
 function grupoDe(f) {
-  if (f.vencido) return "Vencidas";
+  if (f.vencido) return "Se pasaron esta semana";
   if (f.dias === 0) return "Hoy";
   if (f.dias <= 7) return "Esta semana";
   if (f.dias <= 30) return "Este mes";
   return "Más adelante";
 }
-const ORDEN_GRUPOS = ["Vencidas", "Hoy", "Esta semana", "Este mes", "Más adelante"];
+const ORDEN_GRUPOS = ["Se pasaron esta semana", "Hoy", "Esta semana", "Este mes", "Más adelante"];
 
 export default function ProximasFechas({ onAbrirProceso }) {
   const [datos, setDatos] = useState({ fechas: [], resumen: {}, tipos: [] });
@@ -40,8 +40,11 @@ export default function ProximasFechas({ onAbrirProceso }) {
   const [verVencidas, setVerVencidas] = useState(true);
   const [horizonte, setHorizonte] = useState(90);
 
+  // Vencidas: solo la ultima semana. Esto es un visualizador de lo que hay que
+  // atender; una fecha de hace tres semanas ya no se persigue y solo esconde
+  // lo que si urge.
   const cargar = useCallback((dias) => {
-    return boGET(`/backoffice/vencimientos?dias=${dias}&atras=60`).then((r) => {
+    return boGET(`/backoffice/vencimientos?dias=${dias}&atras=7`).then((r) => {
       if (r.ok) setDatos(r);
       setCargando(false);
     });
@@ -81,7 +84,7 @@ export default function ProximasFechas({ onAbrirProceso }) {
         </select>
         <label className="flex items-center gap-1 text-[11.5px] text-neutral-600">
           <input type="checkbox" checked={verVencidas} onChange={(e) => setVerVencidas(e.target.checked)} />
-          Ver vencidas
+          Ver las que se pasaron
         </label>
         <span className="text-[11px] text-neutral-400 ml-auto">{visibles.length} fechas</span>
       </div>
@@ -92,9 +95,10 @@ export default function ProximasFechas({ onAbrirProceso }) {
         <div className="py-10 text-center">
           <p className="text-[13px] font-semibold text-neutral-600">No hay nada en este plazo</p>
           <p className="text-[12px] text-neutral-400 mt-1 max-w-md mx-auto leading-relaxed">
-            Las fechas salen de las citas, los plazos de subsanación, los cierres de
-            postulación de cada universidad, las sesiones y los vencimientos de cuota.
-            Si esperabas ver algo, comprueba que esté cargado en su proceso.
+            Se muestran las citas de visado, los plazos de subsanación, los plazos
+            legales de estancia y extranjería, los cierres de postulación de cada
+            universidad, las sesiones y los vencimientos de cuota. Las que ya se
+            pasaron sólo aparecen si fue en la última semana.
           </p>
         </div>
       ) : (
@@ -102,7 +106,7 @@ export default function ProximasFechas({ onAbrirProceso }) {
           {grupos.map(([nombre, lista]) => (
             <div key={nombre}>
               <p className={`text-[9px] font-bold uppercase tracking-widest font-mono mb-2 ${
-                nombre === "Vencidas" ? "text-red-600" : nombre === "Hoy" ? "text-amber-600" : "text-neutral-400"
+                nombre === "Se pasaron esta semana" ? "text-red-600" : nombre === "Hoy" ? "text-amber-600" : "text-neutral-400"
               }`}>
                 {nombre} · {lista.length}
               </p>

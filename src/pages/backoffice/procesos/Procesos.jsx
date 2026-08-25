@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import AltaRapida from "../clientes/AltaRapida";
+import ProximasFechas from "./ProximasFechas";
 
 const COLOR_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -260,9 +261,13 @@ export default function Procesos({ onAbrirProceso }) {
       {/* Pestañas */}
       <div className="flex gap-1 border-b border-neutral-200 overflow-x-auto [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: "none" }}>
-        {[{ clave: "metricas", label: "Métricas" }, ...(filtros.servicios || [])].map((sv) => {
+        {[
+          { clave: "metricas", label: "Métricas" },
+          { clave: "fechas", label: "Próximas fechas" },
+          ...(filtros.servicios || []),
+        ].map((sv) => {
           const t = { id: sv.clave, txt: sv.label };
-          const n = sv.clave === "metricas"
+          const n = ["metricas", "fechas"].includes(sv.clave)
             ? null
             : procesos.filter((p) => p.servicio === sv.clave && !p.cerrado).length;
           return (
@@ -340,7 +345,11 @@ export default function Procesos({ onAbrirProceso }) {
         </div>
       )}
 
-      {pestana !== "metricas" && (<>
+      {pestana === "fechas" && (
+        <ProximasFechas onAbrirProceso={onAbrirProceso} />
+      )}
+
+      {!["metricas", "fechas"].includes(pestana) && (<>
 
       {/* Filtros en una línea */}
       <div className="flex flex-wrap items-center gap-1.5">

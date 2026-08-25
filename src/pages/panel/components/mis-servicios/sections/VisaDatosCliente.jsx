@@ -37,6 +37,9 @@ const CAMPOS = [
   "centro_direccion", "centro_telefono", "centro_correo",
   "tipo_estudios", "semestres_total", "centro_inicio", "centro_fin",
 ];
+// Todos estos datos van al impreso oficial: si falta uno, el consulado
+// rechaza el formulario. Por eso no hay campos opcionales aqui.
+const OPCIONALES = new Set([]);
 const CAMPOS_FECHA = [
   "exp_pasaporte", "venc_pasaporte", "fecha_nacimiento",
   "viaje_fecha_prevista", "centro_inicio", "centro_fin",
@@ -99,14 +102,18 @@ function Grupo({ titulo, children }) {
   );
 }
 
-function Campo({ label, valor, onChange, tipo = "text", ancho, pista, opciones, disabled, placeholder }) {
+function Campo({ label, valor, onChange, tipo = "text", ancho, pista, opciones, disabled, placeholder, falta }) {
   const clase = ancho === "full" ? "sm:col-span-2" : "";
   const estilo =
     "w-full bg-transparent border-none outline-none p-0 text-[13.5px] font-semibold text-neutral-800 " +
     "placeholder:font-normal placeholder:text-neutral-300 disabled:text-neutral-400";
   return (
-    <div className={`${clase} bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5 focus-within:border-[#046C8C] focus-within:bg-white transition-colors`}>
-      <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">{label}</label>
+    <div className={`${clase} rounded-xl px-3 py-2.5 border transition-colors focus-within:border-[#046C8C] focus-within:bg-white ${
+      falta ? "bg-amber-50/60 border-amber-300" : "bg-neutral-50 border-neutral-200"
+    }`}>
+      <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">
+        {label}{falta && <span className="text-amber-600 ml-1">· falta</span>}
+      </label>
       {opciones ? (
         <select className={estilo} value={valor} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
           <option value="">Elige…</option>
@@ -184,10 +191,11 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
     });
   }, [expediente, cliente, extra]);
 
-  const completados = useMemo(
-    () => CAMPOS.filter((k) => String(form[k] || "").trim() !== "").length,
+  const faltantes = useMemo(
+    () => CAMPOS.filter((k) => !OPCIONALES.has(k) && String(form[k] || "").trim() === ""),
     [form]
   );
+  const completados = CAMPOS.length - faltantes.length;
 
   function set(campo, valor) {
     setSucio(true);
@@ -255,6 +263,22 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
         </Aviso>
       )}
 
+      {/* Aviso permanente mientras falte algo. Estos datos van al impreso
+          oficial: uno vacio significa formulario rechazado en el consulado. */}
+      {!bloqueado && faltantes.length > 0 && (
+        <Aviso tono="warn" icono="⚠️">
+          Te faltan <b>{faltantes.length} de {CAMPOS.length} datos</b> por completar.
+          Todos son obligatorios: con ellos emitimos tu formulario oficial, y si falta
+          alguno el consulado no lo acepta.
+        </Aviso>
+      )}
+
+      {!bloqueado && faltantes.length === 0 && (
+        <Aviso tono="ok" icono="✅">
+          Tienes <b>todos tus datos completos</b>. Si algo cambia, edítalo y vuelve a guardar.
+        </Aviso>
+      )}
+
       {pestana === 1 ? (
         <>
           {!bloqueado && (
@@ -265,25 +289,25 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
           )}
 
           <Grupo titulo="Datos personales">
-            <Campo label="N.º de DNI" valor={form.dni} onChange={(v) => set("dni", v)} disabled={inhabilitado} />
-            <Campo label="N.º de pasaporte" valor={form.num_pasaporte} onChange={(v) => set("num_pasaporte", v)} disabled={inhabilitado} />
-            <Campo label="Expedición pasaporte" tipo="date" valor={form.exp_pasaporte} onChange={(v) => set("exp_pasaporte", v)} disabled={inhabilitado} />
-            <Campo label="Vence pasaporte" tipo="date" valor={form.venc_pasaporte} onChange={(v) => set("venc_pasaporte", v)} disabled={inhabilitado} />
-            <Campo label="País de origen" valor={form.pais_nacimiento} onChange={(v) => set("pais_nacimiento", v)} disabled={inhabilitado} />
-            <Campo label="Lugar de nacimiento" valor={form.lugar_nacimiento} onChange={(v) => set("lugar_nacimiento", v)} disabled={inhabilitado} />
-            <Campo label="Fecha de nacimiento" tipo="date" valor={form.fecha_nacimiento} onChange={(v) => set("fecha_nacimiento", v)} disabled={inhabilitado} />
-            <Campo label="Estado civil" opciones={ESTADOS_CIVILES} valor={form.estado_civil} onChange={(v) => set("estado_civil", v)} disabled={inhabilitado} />
-            <Campo label="Profesión actual" ancho="full" valor={form.profesion} onChange={(v) => set("profesion", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("dni")} label="N.º de DNI" valor={form.dni} onChange={(v) => set("dni", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("num_pasaporte")} label="N.º de pasaporte" valor={form.num_pasaporte} onChange={(v) => set("num_pasaporte", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("exp_pasaporte")} label="Expedición pasaporte" tipo="date" valor={form.exp_pasaporte} onChange={(v) => set("exp_pasaporte", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("venc_pasaporte")} label="Vence pasaporte" tipo="date" valor={form.venc_pasaporte} onChange={(v) => set("venc_pasaporte", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("pais_nacimiento")} label="País de origen" valor={form.pais_nacimiento} onChange={(v) => set("pais_nacimiento", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("lugar_nacimiento")} label="Lugar de nacimiento" valor={form.lugar_nacimiento} onChange={(v) => set("lugar_nacimiento", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("fecha_nacimiento")} label="Fecha de nacimiento" tipo="date" valor={form.fecha_nacimiento} onChange={(v) => set("fecha_nacimiento", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("estado_civil")} label="Estado civil" opciones={ESTADOS_CIVILES} valor={form.estado_civil} onChange={(v) => set("estado_civil", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("profesion")} label="Profesión actual" ancho="full" valor={form.profesion} onChange={(v) => set("profesion", v)} disabled={inhabilitado} />
           </Grupo>
 
           <Grupo titulo="Contacto">
-            <Campo label="Domicilio" ancho="full" valor={form.domicilio} onChange={(v) => set("domicilio", v)} disabled={inhabilitado} />
-            <Campo label="Correo" tipo="email" valor={form.correo} onChange={(v) => set("correo", v)} disabled={inhabilitado} />
-            <Campo label="Celular" tipo="tel" valor={form.telefono} onChange={(v) => set("telefono", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("domicilio")} label="Domicilio" ancho="full" valor={form.domicilio} onChange={(v) => set("domicilio", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("correo")} label="Correo" tipo="email" valor={form.correo} onChange={(v) => set("correo", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("telefono")} label="Celular" tipo="tel" valor={form.telefono} onChange={(v) => set("telefono", v)} disabled={inhabilitado} />
           </Grupo>
 
           <Grupo titulo="Tu viaje a España">
-            <Campo label="Fecha prevista a España" tipo="date" valor={form.viaje_fecha_prevista} onChange={(v) => set("viaje_fecha_prevista", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("viaje_fecha_prevista")} label="Fecha prevista a España" tipo="date" valor={form.viaje_fecha_prevista} onChange={(v) => set("viaje_fecha_prevista", v)} disabled={inhabilitado} />
             <Campo
               label="Domicilio en España" ancho="full"
               pista="Puede ser la dirección de la universidad"
@@ -292,13 +316,13 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
           </Grupo>
 
           <Grupo titulo="Universidad y estudios">
-            <Campo label="Dirección de la universidad" ancho="full" valor={form.centro_direccion} onChange={(v) => set("centro_direccion", v)} disabled={inhabilitado} />
-            <Campo label="Teléfono de la universidad" tipo="tel" valor={form.centro_telefono} onChange={(v) => set("centro_telefono", v)} disabled={inhabilitado} />
-            <Campo label="Correo de la universidad" tipo="email" valor={form.centro_correo} onChange={(v) => set("centro_correo", v)} disabled={inhabilitado} />
-            <Campo label="Tipo de estudios" opciones={TIPOS_ESTUDIO} valor={form.tipo_estudios} onChange={(v) => set("tipo_estudios", v)} disabled={inhabilitado} />
-            <Campo label="Semestres en total" tipo="number" valor={form.semestres_total} onChange={(v) => set("semestres_total", v)} disabled={inhabilitado} />
-            <Campo label="Inicio de estudios" tipo="date" valor={form.centro_inicio} onChange={(v) => set("centro_inicio", v)} disabled={inhabilitado} />
-            <Campo label="Fin de estudios" tipo="date" valor={form.centro_fin} onChange={(v) => set("centro_fin", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("centro_direccion")} label="Dirección de la universidad" ancho="full" valor={form.centro_direccion} onChange={(v) => set("centro_direccion", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("centro_telefono")} label="Teléfono de la universidad" tipo="tel" valor={form.centro_telefono} onChange={(v) => set("centro_telefono", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("centro_correo")} label="Correo de la universidad" tipo="email" valor={form.centro_correo} onChange={(v) => set("centro_correo", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("tipo_estudios")} label="Tipo de estudios" opciones={TIPOS_ESTUDIO} valor={form.tipo_estudios} onChange={(v) => set("tipo_estudios", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("semestres_total")} label="Semestres en total" tipo="number" valor={form.semestres_total} onChange={(v) => set("semestres_total", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("centro_inicio")} label="Inicio de estudios" tipo="date" valor={form.centro_inicio} onChange={(v) => set("centro_inicio", v)} disabled={inhabilitado} />
+            <Campo falta={faltantes.includes("centro_fin")} label="Fin de estudios" tipo="date" valor={form.centro_fin} onChange={(v) => set("centro_fin", v)} disabled={inhabilitado} />
           </Grupo>
         </>
       ) : (

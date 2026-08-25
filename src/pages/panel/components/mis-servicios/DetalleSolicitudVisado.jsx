@@ -245,7 +245,12 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     return docsListas === checklist.length ? "completado" : "pendiente";
   }, [checklist, docsListas]);
 
-  const docsBloqueados = (visaExp?.tipo_solvencia || "PENDIENTE") === "PENDIENTE";
+  // Los documentos NO se bloquean nunca. Quien decide su via de medios
+  // economicos es el propio cliente, y no tiene sentido que deba esperar a que
+  // un asesor confirme nada para empezar a subir lo que ya tiene a mano.
+  // La lista de solvencia se afina sola cuando elige, pero el resto del
+  // checklist esta disponible desde el primer dia.
+  const docsBloqueados = false;
 
   const estadoBloque = (key) => {
     switch (key) {
@@ -287,7 +292,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     { id: "datos",       num: 1, titulo: "Mis datos",              subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
     { id: "sesion",      num: 2, titulo: "Mi sesión de diagnóstico", subtitulo: sesionDiag?.fecha || "Por agendar" },
     { id: "economicos",  num: 3, titulo: "Mis medios económicos",   subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
-    { id: "docs",        num: 4, titulo: "Mis documentos",          subtitulo: docsBloqueados ? "Se activa al elegir tus medios" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
+    { id: "docs",        num: 4, titulo: "Mis documentos",          subtitulo: total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
     { id: "entregables", num: 5, titulo: "Preparado por Inspira",   subtitulo: (visaDocs?.dj || visaDocs?.formulario) ? "Ya tienes documentos" : "Lo preparamos nosotros" },
     { id: "estado",      num: 6, titulo: "Estado de mi visa",       subtitulo: estadoVisado(visaExp || {}).texto },
   ].map((x) => ({ ...x, estado: estadoBloque(x.id) }));
@@ -329,11 +334,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
               </ul>
             </Tarjeta>
 
-            {visaDocs?.diagnostico && (
-              <Tarjeta titulo="Resumen de la reunión">
-                <DescargaDoc slot="diagnostico" doc={visaDocs.diagnostico} idSolicitud={idSolicitud} />
-              </Tarjeta>
-            )}
           </div>
         );
 

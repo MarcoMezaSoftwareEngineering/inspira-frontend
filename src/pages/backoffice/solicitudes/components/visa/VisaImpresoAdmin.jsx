@@ -20,12 +20,29 @@ function aDMY(v) {
   return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
 }
 
+/* En Perú y buena parte de Latinoamérica el nombre completo viene como
+   "NOMBRES APELLIDO1 APELLIDO2". El impreso los pide separados, así que se
+   parte por la cola: los dos últimos trozos son los apellidos. No es infalible
+   —hay nombres compuestos y apellidos de una sola palabra— por eso los campos
+   quedan editables y se marcan para que el asesor los revise. */
+function partirNombre(completo) {
+  const partes = String(completo || "").trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return { nombres: "", apellidos: "" };
+  if (partes.length === 1) return { nombres: partes[0], apellidos: "" };
+  if (partes.length === 2) return { nombres: partes[0], apellidos: partes[1] };
+  return {
+    nombres: partes.slice(0, partes.length - 2).join(" "),
+    apellidos: partes.slice(-2).join(" "),
+  };
+}
+
 /* Siembra el impreso con lo que el expediente ya sabe. */
-function desdeExpediente(exp = {}, dj = {}) {
+function desdeExpediente(exp = {}, dj = {}, cliente = {}) {
   const est = dj.est || {};
   const estudios = dj.estudios || {};
+  const partido = partirNombre(est.nombre || cliente.nombre || "");
   return {
-    apellidos: "", nombres: est.nombre || "",
+    apellidos: partido.apellidos, nombres: partido.nombres,
     fnac: aDMY(exp.fecha_nacimiento), lugarnac: exp.lugar_nacimiento || "",
     paisnac: exp.pais_nacimiento || "", nacionalidad: exp.nacionalidad || "PERUANA",
     sexo: exp.sexo || "", civil: exp.estado_civil || "",
@@ -48,13 +65,28 @@ function desdeExpediente(exp = {}, dj = {}) {
 
 const ESTADOS_CIVILES = ["", "Soltero/a", "Casado/a", "Unión registrada", "Separado/a", "Divorciado/a", "Viudo/a"];
 
-export default function VisaImpresoAdmin({ expediente }) {
+// Campos que el impreso oficial no admite vacíos.
+const OBLIGATORIOS = [
+  ["apellidos", "1. Apellidos"], ["nombres", "3. Nombres"],
+  ["fnac", "4. Fecha de nacimiento"], ["lugarnac", "5. Lugar de nacimiento"],
+  ["paisnac", "6. País de nacimiento"], ["nacionalidad", "7. Nacionalidad"],
+  ["sexo", "8. Sexo"], ["civil", "9. Estado civil"],
+  ["pasaporte", "13. N.º pasaporte"], ["pasexp", "14. Fecha expedición"],
+  ["pasvenc", "15. Válido hasta"], ["domicilio", "17. Domicilio"],
+  ["profesion", "19. Profesión"], ["entrada", "21. Fecha de entrada"],
+  ["domesp", "23. Domicilio en España"],
+  ["centroNombre", "28. Centro de estudios"], ["centroDir", "28. Dirección del centro"],
+  ["iniEst", "28. Inicio de estudios"], ["finEst", "28. Fin de estudios"],
+  ["lugarFecha", "30. Lugar y fecha"],
+];
+
+export default function VisaImpresoAdmin({ expediente, cliente }) {
   // `expediente` puede llegar null en la primera carga; el fallback va dentro
   // del useMemo para no crear un objeto nuevo en cada render.
   const inicial = useMemo(() => {
     const exp = expediente || {};
-    return desdeExpediente(exp, exp.dj_datos || {});
-  }, [expediente]);
+    return desdeExpediente(exp, exp.dj_datos || {}, cliente || {});
+  }, [expediente, cliente]);
 
   const [f, setF] = useState(inicial);
   const [tocado, setTocado] = useState(false);
@@ -166,15 +198,46 @@ export default function VisaImpresoAdmin({ expediente }) {
     trabajando: "border-sky-200 bg-sky-50 text-sky-800",
   };
 
+  const faltan = OBLIGATORIOS.filter(([k]) => !String(f[k] || "").trim());
+  const llenos = OBLIGATORIOS.length - faltan.length;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
-        <span className="text-base leading-none">🔒</span>
-        <p className="text-[12px] text-amber-900 leading-relaxed">
-          Sección interna. Rellena el <b>Impreso oficial de Solicitud de Visado Nacional</b> con
-          los datos del expediente. El punto 2 (apellidos de nacimiento) y la columna de la
-          Administración quedan siempre vacíos.
+      <div className="flex items-start gap-2.5 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2.5">
+        <span className="text-base leading-none">⚙️</span>
+        <p className="text-[12px] text-sky-900 leading-relaxed">
+          El impreso <b>se rellena solo</b> con los datos que el cliente cargó en su portal
+          y con los de la declaración jurada. Aquí sólo revisas y corriges lo que haga
+          falta. El punto 2 (apellidos de nacimiento) y la columna de la Administración
+          quedan siempre vacíos, y el 31 (firma) va manuscrito.
         </p>
+      </div>
+
+      {/* Qué falta antes de generar. Un campo vacío en el impreso es un
+          formulario devuelto en ventanilla, así que se avisa por adelantado. */}
+      <div className={`rounded-lg border px-3 py-2.5 ${
+        faltan.length ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50"
+      }`}>
+        <p className={`text-[12.5px] font-semibold ${faltan.length ? "text-amber-900" : "text-emerald-800"}`}>
+          {faltan.length
+            ? `Faltan ${faltan.length} de ${OBLIGATORIOS.length} datos obligatorios`
+            : `Los ${OBLIGATORIOS.length} datos obligatorios están completos`}
+        </p>
+        {faltan.length > 0 && (
+          <>
+            <p className="text-[11.5px] text-amber-800 mt-1 leading-relaxed">
+              Se autocompletaron {llenos}. Los que faltan no los ha cargado el cliente
+              todavía, o hay que escribirlos aquí:
+            </p>
+            <ul className="mt-1.5 flex flex-wrap gap-1.5">
+              {faltan.map(([k, etiqueta]) => (
+                <li key={k} className="text-[10.5px] font-semibold text-amber-800 bg-white border border-amber-200 rounded-full px-2 py-0.5">
+                  {etiqueta}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
 
       <div>
@@ -197,7 +260,9 @@ export default function VisaImpresoAdmin({ expediente }) {
           <Campo label="16. Expedido por (país)" value={f.expedidoPor} onChange={set("expedidoPor")} />
         </div>
         <p className="text-[11px] text-neutral-400 mt-2">
-          12. Tipo de documento: se marca <b>Pasaporte ordinario</b> automáticamente.
+          12. Tipo de documento: se marca <b>Pasaporte ordinario</b> automáticamente. ·
+          Apellidos y nombres se separan solos del nombre completo suponiendo{" "}
+          <b>dos apellidos al final</b>: revísalo si el cliente tiene nombre compuesto.
         </p>
       </div>
 
@@ -247,7 +312,7 @@ export default function VisaImpresoAdmin({ expediente }) {
           className="inline-flex items-center gap-2 text-[12px] font-semibold px-5 py-2 rounded-lg bg-[#023A4B] text-white hover:bg-[#035670] disabled:opacity-50 transition-colors"
         >
           {generando && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-          📄 Generar impreso oficial (PDF)
+          {faltan.length ? "📄 Generar igualmente (incompleto)" : "📄 Generar impreso oficial (PDF)"}
         </button>
         <a
           href={RUTA_PDF} target="_blank" rel="noreferrer"

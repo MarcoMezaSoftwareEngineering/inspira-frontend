@@ -17,12 +17,6 @@ export default function VisaSolvenciaAdmin({ idSolicitud, expediente, onSaved })
     });
   }, [expediente]);
 
-  async function setTipo(nuevo) {
-    if (nuevo === tipo) return;
-    const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/visa-expediente`, { tipo_solvencia: nuevo });
-    if (r.ok) onSaved?.(r.expediente);
-  }
-
   async function guardarAval() {
     setSaving(true);
     try {
@@ -35,36 +29,45 @@ export default function VisaSolvenciaAdmin({ idSolicitud, expediente, onSaved })
 
   function set(k, v) { setAval((p) => ({ ...p, [k]: v })); }
 
-  const opt = (val, icon, titulo, sub) => {
-    const on = tipo === val;
-    const color = val === "PROPIOS" ? "#1D6A4A" : "#7D3C98";
-    return (
-      <button type="button" onClick={() => setTipo(val)}
-        className={`flex-1 text-center rounded-xl border-2 px-3 py-3 transition-all ${on ? "" : "border-[#E2E8F0] bg-white"}`}
-        style={on ? { borderColor: color, background: `${color}10` } : {}}>
-        <span className="block text-xl mb-1">{icon}</span>
-        <span className="block text-[12px] font-bold" style={{ color: on ? color : "#1A3557" }}>{titulo}</span>
-        <span className="block text-[10px] text-neutral-500 mt-0.5">{sub}</span>
-      </button>
-    );
+  // La via la elige EL CLIENTE desde su portal. Aqui es solo lectura: si el
+  // asesor pudiera cambiarla, le estaria pisando su decision y moviendole los
+  // documentos que ya esta subiendo.
+  const VIAS = {
+    PROPIOS:   { icono: "🙋", titulo: "Medios propios", sub: "Con su propio dinero e ingresos", color: "#1D6A4A" },
+    AVAL:      { icono: "👪", titulo: "Con avalista",   sub: "Un familiar directo lo financia", color: "#7D3C98" },
+    MIXTO:     { icono: "🤝", titulo: "Mixto",          sub: "Su dinero + un avalista",         color: "#B9770E" },
+    PENDIENTE: { icono: "⏳", titulo: "Sin elegir",     sub: "Todavia no ha decidido",          color: "#6B7280" },
   };
+  const via = VIAS[tipo] || VIAS.PENDIENTE;
 
   return (
     <div className="px-5 py-4">
-      <p className="text-[12px] text-neutral-500 mb-3">
-        Define cómo el cliente acredita su solvencia. Cambia los documentos del Bloque 2. También puedes definirla en el Bloque 4 (Sesión de diagnóstico).
+      <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
+        Via elegida por el cliente
       </p>
-      <div className="flex gap-2">
-        {opt("PROPIOS", "🙋", "Medios propios", "Cuenta bancaria propia · 6 meses · ~7.200 €")}
-        {opt("AVAL", "👨‍👩‍👧", "Con aval / tercero", "Patrocinador · Vínculo familiar")}
+
+      <div className="rounded-xl border-2 px-4 py-3 flex items-center gap-3"
+        style={{ borderColor: `${via.color}55`, background: `${via.color}0F` }}>
+        <span className="text-2xl shrink-0">{via.icono}</span>
+        <div className="min-w-0">
+          <p className="text-[14px] font-bold" style={{ color: via.color }}>{via.titulo}</p>
+          <p className="text-[11.5px] text-neutral-500">{via.sub}</p>
+        </div>
       </div>
+
+      <p className="text-[11.5px] text-neutral-500 mt-2 leading-relaxed">
+        La elige el cliente desde su portal y no se toca desde aqui. Lo que le
+        planteaste en el diagnostico se registra en el bloque 2, como recordatorio.
+      </p>
+
       {tipo === "PENDIENTE" && (
-        <p className="text-[11px] text-[#9A7D0A] bg-[#FEF9E7] border border-[#F9E79F] rounded-lg px-3 py-2 mt-3">
-          Aún sin definir. Mientras tanto el Bloque 2 (Documentos) permanece bloqueado para el cliente.
+        <p className="text-[11.5px] text-[#9A7D0A] bg-[#FEF9E7] border border-[#F9E79F] rounded-lg px-3 py-2 mt-3 leading-relaxed">
+          Aun no ha elegido. Puede subir documentos igualmente: solo se le afina la
+          lista de solvencia cuando decida.
         </p>
       )}
 
-      {tipo === "AVAL" && (
+      {(tipo === "AVAL" || tipo === "MIXTO") && (
         <>
           <SubLabel>Datos del aval</SubLabel>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

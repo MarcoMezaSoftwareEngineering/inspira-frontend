@@ -18,6 +18,7 @@ import VisaFlujoInternoAdmin from "./components/visa/VisaFlujoInternoAdmin";
 import VisaEstadoVisadoAdmin from "./components/visa/VisaEstadoVisadoAdmin";
 import VisaSubirDocumento from "./components/visa/VisaSubirDocumento";
 import MarcadoPorCliente from "./components/visa/MarcadoPorCliente";
+import NotasExpediente from "./components/visa/NotasExpediente";
 import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
 import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
@@ -158,7 +159,6 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       { id: "declaracion", numero: "5", label: "Declaracion jurada",   estado: hecho(visaExp?.dj_borrador || visaExp?.dj_datos) },
       { id: "impreso",     numero: "6", label: "Formulario",           estado: hecho(visaExp?.formulario_estado === "FIRMADO") },
       { id: "cierre",      numero: "7", label: "Cierre del expediente", estado: hecho(visaExp?.cierre_estado === "CERRADO") },
-      { id: "portales",    numero: "P", label: "Portales - Claves",    estado: "pendiente" },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisado, bloquesServidor, visaExp, visaSesiones]);
@@ -189,11 +189,6 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       const otras = prev.filter((s) => s.tipo !== sesion.tipo);
       return [...otras, sesion];
     });
-  }
-
-  async function cambiarSolvencia(nuevo) {
-    const r = await boPATCH(`/backoffice/solicitudes/${detalle.id_solicitud}/visa-expediente`, { tipo_solvencia: nuevo });
-    if (r.ok) setVisaExp(r.expediente);
   }
 
   function handleEleccionesActualizadas(nuevasElecciones) {
@@ -459,6 +454,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                     <div className="border-t border-[#E2E8F0] pt-5">
                       <VisaRecordatoriosAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} />
                     </div>
+                    <div className="border-t border-[#E2E8F0] pt-5">
+                      <NotasExpediente idSolicitud={detalle.id_solicitud} />
+                    </div>
                   </div>
                 </CBox>
               )}
@@ -518,13 +516,15 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                   <CBox>
                     <VisaSesionAdmin idSolicitud={detalle.id_solicitud} tipo="DIAGNOSTICO"
                       sesion={sesionPorTipo("DIAGNOSTICO")} onSaved={onSesionGuardada}
-                      solvencia={visaExp?.tipo_solvencia || "PENDIENTE"} onSolvencia={cambiarSolvencia}
-                      agenda={["Revisar situación migratoria actual", "Evaluar viabilidad del expediente", "Definir tipo de medios económicos (propios, aval o mixto)", "Identificar documentos complejos y plazos", "Instrucciones certificado médico y antecedentes penales"]} />
+                      recomendada={visaExp?.solvencia_recomendada}
+                      onRecomendar={setVisaExp}
+                      eleccionCliente={visaExp?.tipo_solvencia}
+                      agenda={["Revisar situación migratoria actual", "Evaluar viabilidad del expediente", "Plantear la estrategia de medios económicos (propios, aval o mixto)", "Identificar documentos complejos y plazos", "Instrucciones certificado médico y antecedentes penales"]} />
                     <div className="border-t border-[#E2E8F0] p-5">
                       <VisaSubirDocumento
                         idSolicitud={detalle.id_solicitud} slot="diagnostico"
-                        titulo="Documento de la reunión"
-                        pista="Acta, resumen o grabación de la sesión. Es lo que verá el cliente en su portal."
+                        titulo="Toma de notas de la reunión (interna)"
+                        pista="Acta, resumen o grabación de Meet. Es material de trabajo del equipo: el cliente NO lo ve."
                         documento={visaDocs.diagnostico} onCambio={cargarVisaDocs}
                       />
                     </div>
@@ -609,7 +609,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                         <VisaFormularioAdmin idSolicitud={detalle.id_solicitud} expediente={visaExp} onSaved={setVisaExp} mode="estado" />
                       </div>
                       <div className="border-t border-[#E2E8F0] pt-5">
-                        <VisaImpresoAdmin expediente={visaExp} />
+                        <VisaImpresoAdmin expediente={visaExp} cliente={detalle.cliente} />
                       </div>
                     </div>
                   </CBox>
@@ -628,18 +628,6 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                 )}
               </div>
 
-              {/* Portales · Claves (herramienta interna del asesor) */}
-              <div id="bloque-portales" className="scroll-mt-4">
-                <BlqHead numero="P" titulo="Portales, claves y justificantes" estado="pendiente"
-                  open={isOpen("portales")} onToggle={() => toggleBloque("portales")} />
-                {isOpen("portales") && (
-                  <CBox>
-                    <div className="p-5">
-                      <PortalesYJustificantesAdmin idSolicitud={detalle.id_solicitud} />
-                    </div>
-                  </CBox>
-                )}
-              </div>
             </>
           ) : (
             <>

@@ -36,14 +36,14 @@ export default function VisaSolvenciaAdmin({ idSolicitud, expediente, onSaved })
     PROPIOS:   { icono: "🙋", titulo: "Medios propios", sub: "Con su propio dinero e ingresos", color: "#1D6A4A" },
     AVAL:      { icono: "👪", titulo: "Con avalista",   sub: "Un familiar directo lo financia", color: "#7D3C98" },
     MIXTO:     { icono: "🤝", titulo: "Mixto",          sub: "Su dinero + un avalista",         color: "#B9770E" },
-    PENDIENTE: { icono: "⏳", titulo: "Sin elegir",     sub: "Todavia no ha decidido",          color: "#6B7280" },
+    PENDIENTE: { icono: "⏳", titulo: "Sin elegir",     sub: "Todavía no ha decidido",          color: "#6B7280" },
   };
   const via = VIAS[tipo] || VIAS.PENDIENTE;
 
   return (
     <div className="px-5 py-4">
       <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
-        Via elegida por el cliente
+        Vía elegida por el cliente
       </p>
 
       <div className="rounded-xl border-2 px-4 py-3 flex items-center gap-3"
@@ -56,13 +56,13 @@ export default function VisaSolvenciaAdmin({ idSolicitud, expediente, onSaved })
       </div>
 
       <p className="text-[11.5px] text-neutral-500 mt-2 leading-relaxed">
-        La elige el cliente desde su portal y no se toca desde aqui. Lo que le
-        planteaste en el diagnostico se registra en el bloque 2, como recordatorio.
+        La elige el cliente desde su portal y no se toca desde aquí. Lo que le
+        planteaste en el diagnóstico se registra en el bloque 2, como recordatorio.
       </p>
 
       {tipo === "PENDIENTE" && (
         <p className="text-[11.5px] text-[#9A7D0A] bg-[#FEF9E7] border border-[#F9E79F] rounded-lg px-3 py-2 mt-3 leading-relaxed">
-          Aun no ha elegido. Puede subir documentos igualmente: solo se le afina la
+          Aún no ha elegido. Puede subir documentos igualmente: sólo se le afina la
           lista de solvencia cuando decida.
         </p>
       )}

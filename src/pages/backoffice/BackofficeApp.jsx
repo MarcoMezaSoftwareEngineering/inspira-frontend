@@ -18,6 +18,7 @@ import DocumentosBackoffice from "./documentos/DocumentosBackoffice";
 import LeadsCalculadora from "./calculadora/LeadsCalculadora";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
+import Procesos from "./procesos/Procesos";
 import PresupuestosPortal from "./presupuestos/PresupuestosPortal";
 import CatalogoMasters from "./catalogo/CatalogoMasters";
 import TrackerUniversidades from "./tracker/TrackerUniversidades";
@@ -156,6 +157,13 @@ export default function BackofficeApp() {
 
             {path === "/backoffice/agenda" && <Agenda />}
 
+            {/* PROCESOS — vista central, sustituye a Solicitudes y Panel Asesoras */}
+            {path === "/backoffice/procesos" && (
+              <Procesos
+                onAbrirProceso={(id) => navigate(`/backoffice/solicitudes/${id}`)}
+              />
+            )}
+
             {/* LISTA DE SOLICITUDES */}
             {path === "/backoffice/solicitudes" && (
               <SolicitudesList
@@ -169,7 +177,7 @@ export default function BackofficeApp() {
             {isDetalleSolicitud && idSolicitudDetalle && (
               <SolicitudDetalleBackoffice
                 idSolicitud={idSolicitudDetalle}
-                onVolver={() => navigate("/backoffice/solicitudes")}
+                onVolver={() => navigate("/backoffice/procesos")}
               />
             )}
 

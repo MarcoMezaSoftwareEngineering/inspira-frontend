@@ -1,6 +1,5 @@
 import {
-  LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
-  GraduationCap, BookOpen, FolderOpen, CheckSquare, UserCog, Settings,
+  LayoutDashboard, Calendar, FileText, Calculator, Users, Settings,
 } from "lucide-react";
 
 // Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos),
@@ -8,43 +7,42 @@ import {
 // admin o para quien tenga alguno de esos permisos). Sin ninguno de los tres,
 // el ítem es visible para cualquier rol interno logueado.
 // Compartido entre Sidebar (desktop) y MobileDrawer (móvil) para no duplicar.
+// Un solo bloque, seis destinos. Antes eran once items repartidos en cuatro
+// grupos, y varios eran vistas distintas de lo mismo: Solicitudes, Panel
+// Asesoras y Tracker leen todos la tabla `Solicitud`. Ahora hay un unico
+// sitio donde estan los procesos, y lo demas se agrupa por para que sirve.
+//
+// Las rutas antiguas siguen funcionando: solo dejan de tener entrada propia
+// en el menu. Nada se ha borrado.
 export const NAV_SECTIONS = [
   {
-    label: "Principal",
+    label: null,
     items: [
-      { label: "Dashboard",   href: "/backoffice/dashboard", perm: "dashboard.ver", icon: LayoutDashboard },
-      { label: "Agenda",      href: "/backoffice/agenda", icon: Calendar },
-      { label: "Solicitudes", href: "/backoffice/solicitudes", icon: FileText },
-    ],
-  },
-  {
-    label: "Comercial",
-    items: [
-      { label: "Presupuestos Portal",   href: "/backoffice/presupuestos", icon: Calculator },
-      { label: "Calculadora — Leads",   href: "/backoffice/calculadora", icon: TrendingUp },
-      { label: "Clientes",              href: "/backoffice/clientes", icon: Users },
-      { label: "Tracker Universidades", href: "/backoffice/tracker-universidades", perm: "tracker.ver", icon: GraduationCap },
-    ],
-  },
-  {
-    label: "Operación",
-    items: [
-      { label: "Catálogo Másteres",      href: "/backoffice/catalogo-masters", perm: "catalogo.ver", icon: BookOpen },
-      { label: "Documentos",             href: "/backoffice/documentos", icon: FolderOpen },
-      { label: "Checklist / Instructivos", href: "/backoffice/checklist-servicios", alsoActive: ["/backoffice/instructivos"], perm: "checklist.ver", icon: CheckSquare },
-      { label: "Panel Asesoras",         href: "/backoffice/panel-asesoras", perm: "panel_asesoras.ver", icon: UserCog },
-    ],
-  },
-  {
-    label: "Configuración",
-    items: [
+      { label: "Dashboard", href: "/backoffice/dashboard", perm: "dashboard.ver", icon: LayoutDashboard },
+      { label: "Clientes",  href: "/backoffice/clientes", icon: Users },
+      {
+        label: "Procesos",
+        href: "/backoffice/procesos",
+        // Solicitudes y Panel Asesoras siguen accesibles y marcan este item
+        // como activo mientras dure la migracion.
+        alsoActive: ["/backoffice/solicitudes", "/backoffice/panel-asesoras", "/backoffice/tracker-universidades"],
+        icon: FileText,
+      },
+      { label: "Agenda",    href: "/backoffice/agenda", icon: Calendar },
+      {
+        label: "Finanzas",
+        href: "/backoffice/presupuestos",
+        alsoActive: ["/backoffice/calculadora"],
+        icon: Calculator,
+      },
       {
         label: "Configuración",
         href: "/backoffice/configuracion",
-        anyPerm: ["planes.ver", "precios.ver"],
         alsoActive: [
           "/backoffice/planes", "/backoffice/precios", "/backoffice/correos",
           "/backoffice/media", "/backoffice/legal", "/backoffice/settings",
+          "/backoffice/catalogo-masters", "/backoffice/documentos",
+          "/backoffice/checklist-servicios", "/backoffice/instructivos",
         ],
         icon: Settings,
       },

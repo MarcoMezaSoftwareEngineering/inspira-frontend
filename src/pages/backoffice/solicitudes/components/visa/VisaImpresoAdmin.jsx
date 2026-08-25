@@ -20,11 +20,11 @@ function aDMY(v) {
   return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
 }
 
-/* En Perú y buena parte de Latinoamérica el nombre completo viene como
-   "NOMBRES APELLIDO1 APELLIDO2". El impreso los pide separados, así que se
-   parte por la cola: los dos últimos trozos son los apellidos. No es infalible
-   —hay nombres compuestos y apellidos de una sola palabra— por eso los campos
-   quedan editables y se marcan para que el asesor los revise. */
+/* El cliente escribe sus apellidos y nombres por separado en su portal, que es
+   como los pide el impreso: los dos apellidos juntos en la primera línea y los
+   nombres en la segunda. Esta partición es sólo el último recurso para
+   expedientes antiguos que sólo tienen el nombre completo; adivina suponiendo
+   dos apellidos al final, así que puede fallar con nombres compuestos. */
 function partirNombre(completo) {
   const partes = String(completo || "").trim().split(/\s+/).filter(Boolean);
   if (partes.length === 0) return { nombres: "", apellidos: "" };
@@ -40,9 +40,11 @@ function partirNombre(completo) {
 function desdeExpediente(exp = {}, dj = {}, cliente = {}) {
   const est = dj.est || {};
   const estudios = dj.estudios || {};
+  // Lo que escribió el cliente manda; sólo si no hay nada se adivina.
   const partido = partirNombre(est.nombre || cliente.nombre || "");
   return {
-    apellidos: partido.apellidos, nombres: partido.nombres,
+    apellidos: exp.apellidos || partido.apellidos,
+    nombres:   exp.nombres   || partido.nombres,
     fnac: aDMY(exp.fecha_nacimiento), lugarnac: exp.lugar_nacimiento || "",
     paisnac: exp.pais_nacimiento || "", nacionalidad: exp.nacionalidad || "PERUANA",
     sexo: exp.sexo || "", civil: exp.estado_civil || "",
@@ -261,8 +263,8 @@ export default function VisaImpresoAdmin({ expediente, cliente }) {
         </div>
         <p className="text-[11px] text-neutral-400 mt-2">
           12. Tipo de documento: se marca <b>Pasaporte ordinario</b> automáticamente. ·
-          Apellidos y nombres se separan solos del nombre completo suponiendo{" "}
-          <b>dos apellidos al final</b>: revísalo si el cliente tiene nombre compuesto.
+          Los apellidos van <b>juntos en la línea 1</b>, tal como los escribió el
+          cliente en su portal.
         </p>
       </div>
 

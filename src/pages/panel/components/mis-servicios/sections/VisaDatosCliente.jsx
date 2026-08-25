@@ -29,6 +29,7 @@ const TIPOS_ESTUDIO = ["Grado", "Máster", "FP", "Doctorado", "Otro"];
 /* Campos que viajan al backend. El orden no importa; la lista sí: es el
    contrato con CAMPOS_CLIENTE de visa.service.js. */
 const CAMPOS = [
+  "apellidos", "nombres",
   "dni", "num_pasaporte", "exp_pasaporte", "venc_pasaporte",
   "pais_nacimiento", "lugar_nacimiento", "fecha_nacimiento",
   "estado_civil", "profesion",
@@ -52,6 +53,10 @@ function estadoInicial(exp, cli, extra) {
   // Prioridad: lo ya guardado en el expediente; si está vacío, lo que se conozca
   // del perfil del cliente. Así no se le pide dos veces lo mismo.
   const base = {
+    // Van separados porque el impreso oficial los pide en dos líneas: los dos
+    // apellidos juntos en la primera, los nombres en la segunda.
+    apellidos:        e.apellidos        || "",
+    nombres:          e.nombres          || "",
     dni:              e.dni              || c.dni            || "",
     num_pasaporte:    e.num_pasaporte    || c.pasaporte      || "",
     exp_pasaporte:    e.exp_pasaporte    || x.pasaporte_emision     || "",
@@ -289,6 +294,17 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
           )}
 
           <Grupo titulo="Datos personales">
+            <Campo
+              falta={faltantes.includes("apellidos")} label="Apellidos" ancho="full"
+              placeholder="Tus dos apellidos, juntos"
+              pista="Van juntos en una sola línea, como aparecen en tu pasaporte"
+              valor={form.apellidos} onChange={(v) => set("apellidos", v)} disabled={inhabilitado}
+            />
+            <Campo
+              falta={faltantes.includes("nombres")} label="Nombres" ancho="full"
+              placeholder="Tus nombres, como en el pasaporte"
+              valor={form.nombres} onChange={(v) => set("nombres", v)} disabled={inhabilitado}
+            />
             <Campo falta={faltantes.includes("dni")} label="N.º de DNI" valor={form.dni} onChange={(v) => set("dni", v)} disabled={inhabilitado} />
             <Campo falta={faltantes.includes("num_pasaporte")} label="N.º de pasaporte" valor={form.num_pasaporte} onChange={(v) => set("num_pasaporte", v)} disabled={inhabilitado} />
             <Campo falta={faltantes.includes("exp_pasaporte")} label="Expedición pasaporte" tipo="date" valor={form.exp_pasaporte} onChange={(v) => set("exp_pasaporte", v)} disabled={inhabilitado} />

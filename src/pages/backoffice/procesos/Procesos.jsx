@@ -169,6 +169,12 @@ export default function Procesos({ onAbrirProceso }) {
   const [altaAbierta, setAltaAbierta] = useState(false);
   const [pagoDe, setPagoDe] = useState(null);
 
+  // Cierre en lote. La mayoria de lo cargado ya termino —el cliente ya entro o
+  // ya tiene su visa— y cerrarlos de uno en uno son decenas de clics.
+  const [seleccion, setSeleccion] = useState(new Set());
+  const [antiguos, setAntiguos] = useState(false);
+  const [cerrando, setCerrando] = useState(false);
+
   // Un solo panel: la tabla general y los seguimientos por servicio son
   // pestanas, no secciones distintas del menu. Es el mismo dato mirado de
   // otra forma, y tenerlos separados obligaba a saltar entre pantallas.
@@ -209,6 +215,10 @@ export default function Procesos({ onAbrirProceso }) {
     if (!r.ok) { setError(r.msg || "No se pudo cambiar la etapa"); cargar(); }
   }
 
+  // Se fija una sola vez al montar: leer el reloj durante el render hace que
+  // el resultado cambie en cada pasada sin que nada haya cambiado de verdad.
+  const [corteAntiguos] = useState(() => Date.now() - 4 * 30 * 86400000);
+
   const visibles = useMemo(() => {
     const texto = q.trim().toLowerCase();
     return procesos.filter((p) => {
@@ -217,6 +227,9 @@ export default function Procesos({ onAbrirProceso }) {
       if (pestana !== "metricas" && p.servicio !== pestana) return false;
       if (etapa && p.etapa !== etapa) return false;
       if (responsable && String(p.id_responsable) !== responsable) return false;
+      // Cuatro meses es el corte practico: un proceso de master o visado que
+      // sigue "activo" pasado ese tiempo casi siempre es que nadie lo cerro.
+      if (antiguos && new Date(p.creado).getTime() > corteAntiguos) return false;
       if (soloAtencion) {
         const urge = p.docs_observados > 0 || p.proximo?.vencido || p.proximo?.urgente
           || !p.responsable || p.pago?.vencido;
@@ -225,7 +238,7 @@ export default function Procesos({ onAbrirProceso }) {
       if (texto && !`${p.cliente} ${p.email} ${p.subtipo}`.toLowerCase().includes(texto)) return false;
       return true;
     });
-  }, [procesos, pestana, q, etapa, responsable, soloAtencion, verCerrados]);
+  }, [procesos, pestana, q, etapa, responsable, soloAtencion, verCerrados, antiguos, corteAntiguos]);
 
   const resumen = useMemo(() => ({
     activos: procesos.filter((p) => !p.cerrado).length,
@@ -237,6 +250,31 @@ export default function Procesos({ onAbrirProceso }) {
   }), [procesos]);
 
   const svcActivo = pestana !== "metricas" ? pestana : null;
+  function alternarUno(id) {
+    setSeleccion((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  }
+
+  function alternarTodos() {
+    setSeleccion((prev) =>
+      prev.size === visibles.length ? new Set() : new Set(visibles.map((p) => p.id_solicitud))
+    );
+  }
+
+  async function cerrarLote(nuevaEtapa) {
+    if (!seleccion.size || cerrando) return;
+    setCerrando(true);
+    const r = await boPATCH("/backoffice/procesos/lote/etapa", {
+      ids: [...seleccion], etapa: nuevaEtapa, servicio: pestana,
+    });
+    setCerrando(false);
+    if (r.ok) { setSeleccion(new Set()); cargar(); }
+    else setError(r.msg || "No se pudieron actualizar");
+  }
+
   const etapasDelFiltro = svcActivo ? (filtros.etapas?.[svcActivo] || []) : [];
   const sel = "text-[12px] text-neutral-700 border border-neutral-300 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]";
 
@@ -375,11 +413,36 @@ export default function Procesos({ onAbrirProceso }) {
           Necesita atención
         </label>
         <label className="flex items-center gap-1 text-[11.5px] text-neutral-600 whitespace-nowrap">
+          <input type="checkbox" checked={antiguos} onChange={(e) => setAntiguos(e.target.checked)} />
+          Más de 4 meses
+        </label>
+        <label className="flex items-center gap-1 text-[11.5px] text-neutral-600 whitespace-nowrap">
           <input type="checkbox" checked={verCerrados} onChange={(e) => setVerCerrados(e.target.checked)} />
           Cerrados
         </label>
         <span className="text-[11px] text-neutral-400 ml-auto">{visibles.length}/{procesos.length}</span>
       </div>
+
+      {seleccion.size > 0 && (
+        <div className="flex items-center gap-2 flex-wrap bg-[#023A4B] text-white rounded-xl px-3 py-2.5">
+          <span className="text-[12.5px] font-semibold">
+            {seleccion.size} seleccionado{seleccion.size > 1 ? "s" : ""}
+          </span>
+          <button type="button" onClick={() => cerrarLote("Finalizado")} disabled={cerrando}
+            className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-white text-[#023A4B] disabled:opacity-50">
+            {cerrando ? "Guardando…" : "Marcar como finalizado"}
+          </button>
+          <button type="button" onClick={() => cerrarLote(pestana === "visa" ? "Suspendida" : "Suspendido")}
+            disabled={cerrando}
+            className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border border-white/40 text-white disabled:opacity-50">
+            Suspender
+          </button>
+          <button type="button" onClick={() => setSeleccion(new Set())}
+            className="text-[12px] text-white/70 hover:text-white ml-auto">
+            Quitar selección
+          </button>
+        </div>
+      )}
 
       {error && <p className="text-[12.5px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
 
@@ -393,6 +456,11 @@ export default function Procesos({ onAbrirProceso }) {
           <table className="w-full text-left hidden lg:table">
             <thead>
               <tr className="bg-neutral-50 border-b border-neutral-200">
+                <th className="px-2.5 py-2 w-8">
+                  <input type="checkbox" aria-label="Seleccionar todos"
+                    checked={visibles.length > 0 && seleccion.size === visibles.length}
+                    onChange={alternarTodos} />
+                </th>
                 {["Cliente", "Servicio", "Etapa", "Responsable", "Próximo", "Pago", ""].map((h) => (
                   <th key={h} className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 px-2.5 py-2">{h}</th>
                 ))}
@@ -401,7 +469,15 @@ export default function Procesos({ onAbrirProceso }) {
             <tbody>
               {visibles.map((p) => (
                 <>
-                  <tr key={p.id_solicitud} className="border-b border-neutral-100 hover:bg-neutral-50/60">
+                  <tr key={p.id_solicitud}
+                    className={`border-b border-neutral-100 hover:bg-neutral-50/60 ${
+                      seleccion.has(p.id_solicitud) ? "bg-[#E8F5EE]" : ""
+                    }`}>
+                    <td className="px-2.5 py-2">
+                      <input type="checkbox" aria-label={`Seleccionar ${p.cliente}`}
+                        checked={seleccion.has(p.id_solicitud)}
+                        onChange={() => alternarUno(p.id_solicitud)} />
+                    </td>
                     <td className="px-2.5 py-2">
                       <p className="text-[12.5px] font-semibold text-neutral-800 leading-tight">{p.cliente}</p>
                       <p className="text-[10.5px] text-neutral-400 truncate max-w-[170px]">{p.subtipo || p.email}</p>
@@ -446,7 +522,7 @@ export default function Procesos({ onAbrirProceso }) {
                   </tr>
                   {pagoDe === p.id_solicitud && (
                     <tr key={`pago-${p.id_solicitud}`}>
-                      <td colSpan={7} className="p-0">
+                      <td colSpan={8} className="p-0">
                         <NuevoPago proceso={p} metodos={metodos}
                           onHecho={() => { setPagoDe(null); cargar(); }}
                           onCerrar={() => setPagoDe(null)} />

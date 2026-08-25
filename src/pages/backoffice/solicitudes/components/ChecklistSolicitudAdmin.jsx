@@ -30,9 +30,12 @@ export default function ChecklistSolicitudAdmin({
   const [viewingDoc, setViewingDoc] = useState(null);
   const driveToastState = useDriveToast();
 
-  // Oculta el set de solvencia que no corresponde a la variante activa.
+  // Oculta el set de solvencia que no corresponde a la vía activa. En MIXTO
+  // se muestran ambos: el cliente pone parte del dinero y el avalista el
+  // resto, así que el consulado exige las dos series completas.
   const variante = tipoSolvencia === "AVAL" ? "aval" : "propios";
   function visiblePorSolvencia(it) {
+    if (tipoSolvencia === "MIXTO") return true;
     const g = it.item?.grupo;
     if (g === "solvencia_propios") return variante === "propios";
     if (g === "solvencia_aval") return variante === "aval";

@@ -50,44 +50,54 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
 }
 
 // ── Helpers de contenido ──────────────────────────────────────────────────────
-function BloqueInfo({ icon, children }) {
+function Aviso({ tono = "info", icono, children }) {
+  const tonos = {
+    info: "bg-sky-50 border-sky-200 text-sky-900",
+    ok:   "bg-emerald-50 border-emerald-200 text-emerald-900",
+    warn: "bg-amber-50 border-amber-200 text-amber-900",
+  };
   return (
-    <div className="text-center py-8 px-2">
-      <span className="block text-4xl mb-3">{icon}</span>
-      <div className="text-[13px] text-neutral-500 leading-relaxed max-w-md mx-auto">{children}</div>
+    <div className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] leading-relaxed ${tonos[tono]}`}>
+      <span className="shrink-0 text-base leading-none mt-0.5">{icono}</span>
+      <div>{children}</div>
     </div>
   );
 }
 
-function Linea({ label, value }) {
-  if (!value) return null;
+function Tarjeta({ titulo, children, borde }) {
   return (
-    <p className="text-[13px] text-neutral-600 leading-relaxed">
-      <span className="font-semibold text-neutral-800">{label}:</span> {value}
-    </p>
+    <div className={`bg-white border rounded-2xl shadow-sm p-4 ${borde || "border-neutral-200"}`}>
+      {titulo && (
+        <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-2.5">{titulo}</p>
+      )}
+      {children}
+    </div>
   );
 }
 
-function SesionView({ sesion, icon, vacio }) {
-  if (!sesion || sesion.estado === "PENDIENTE") {
-    return <BloqueInfo icon={icon}>{vacio}</BloqueInfo>;
-  }
-  const programada = sesion.estado === "PROGRAMADA";
+/* Tarjeta de cita o sesión. Sin fecha muestra el hueco, no un vacío mudo. */
+function SesionView({ sesion, etiqueta, vacio, pie }) {
+  const agendada = sesion && sesion.estado !== "PENDIENTE";
+  const completada = sesion?.estado === "COMPLETADA" || sesion?.estado === "REALIZADA";
   return (
-    <div className={`rounded-xl border p-4 ${programada ? "border-sky-200 bg-sky-50/40" : "border-emerald-200 bg-emerald-50/40"}`}>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xl">{icon}</span>
-        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white border border-neutral-200">
-          {programada ? "Programada" : "Completada"}
-        </span>
-      </div>
-      <Linea label="Fecha" value={sesion.fecha} />
-      <Linea label="Hora" value={sesion.hora} />
-      <Linea label="Plataforma" value={sesion.plataforma} />
-      {sesion.notas && <Linea label="Notas" value={sesion.notas} />}
-      {sesion.enlace_meet && (
+    <div className={`rounded-2xl border p-4 ${
+      completada ? "border-emerald-200 bg-emerald-50/50"
+      : agendada ? "border-sky-200 bg-sky-50/50"
+      : "border-dashed border-neutral-300 bg-neutral-50"
+    }`}>
+      <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">{etiqueta}</p>
+      <p className={`font-bold mt-1 ${agendada ? "text-[20px] text-[#023A4B]" : "text-[17px] text-neutral-400"}`}>
+        {agendada && sesion.fecha ? sesion.fecha : "Por agendar"}
+        {agendada && sesion.hora ? ` · ${sesion.hora}` : ""}
+      </p>
+      <p className="text-[12px] text-neutral-500 mt-1">
+        {agendada ? (sesion.plataforma || "Te confirmamos los detalles aquí") : vacio}
+      </p>
+      {pie && <p className="text-[12px] text-neutral-500 mt-1.5">{pie}</p>}
+      {sesion?.notas && <p className="text-[12px] text-neutral-600 mt-2">{sesion.notas}</p>}
+      {sesion?.enlace_meet && (
         <a href={sesion.enlace_meet} target="_blank" rel="noreferrer"
-          className="inline-block mt-3 text-[13px] font-semibold px-4 py-2 rounded-lg bg-[#2471A3] text-white hover:opacity-90 transition-all">
+          className="inline-block mt-3 text-[13px] font-semibold px-4 py-2 rounded-xl bg-[#2471A3] text-white hover:opacity-90 transition-all">
           🔗 Unirme a la sesión
         </a>
       )}
@@ -101,7 +111,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const [checklist, setChecklist] = useState([]);
   const [instructivos, setInstructivos] = useState([]);
   const [visaExp, setVisaExp] = useState(null);
-  const [sesiones, setSesiones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("docs");
@@ -141,9 +150,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
       const rExp = await apiGET(`/solicitudes/${idSolicitud}/visa-expediente`);
       if (rExp.ok) setVisaExp(rExp.expediente || null);
-
-      const rSes = await apiGET(`/solicitudes/${idSolicitud}/sesiones`);
-      if (rSes.ok) setSesiones(rSes.sesiones || []);
 
       const rInst = await apiGET(`/solicitudes/${idSolicitud}/instructivos`);
       if (rInst.ok) {
@@ -189,21 +195,14 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
   const docsBloqueados = (visaExp?.tipo_solvencia || "PENDIENTE") === "PENDIENTE";
 
-  const sesionPorTipo = (tipo) => sesiones.find((s) => s.tipo === tipo) || null;
-  const sesionEstado = (tipo) => (sesionPorTipo(tipo)?.estado === "COMPLETADA" ? "completado" : "pendiente");
-
   const estadoBloque = (key) => {
     switch (key) {
       case "datos": return datosCompletos ? "completado" : "pendiente";
       case "docs": return checklist.length ? docsEstado : "pendiente";
       case "solvencia": return visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE" ? "completado" : "pendiente";
       case "economicos": return djCompleta ? "completado" : "pendiente";
-      case "diagnostico": return sesionEstado("DIAGNOSTICO");
-      case "seguimiento": return sesionEstado("SEGUIMIENTO");
+      case "cita": return ["AGENDADA", "CONFIRMADA", "REALIZADA"].includes(visaExp?.cita_estado) ? "completado" : "pendiente";
       case "formulario": return visaExp?.formulario_estado === "FIRMADO" ? "completado" : "pendiente";
-      case "precita": return sesionEstado("PRECITA");
-      case "cita": return visaExp?.cita_estado === "REALIZADA" ? "completado" : "pendiente";
-      case "cierre": return visaExp?.cierre_estado === "CERRADO" ? "completado" : "pendiente";
       default: return "pendiente";
     }
   };
@@ -217,19 +216,27 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   })();
 
   const SOLV_SUB = { PROPIOS: "Medios propios", AVAL: "Con avalista", MIXTO: "Mixto" };
+  const CITA_SUB = {
+    AGENDADA: "Agendada", CONFIRMADA: "Confirmada",
+    REALIZADA: "Ya presentada", REAGENDAR: "Hay que reagendar",
+  };
+  const FORM_SUB = {
+    EN_PREPARACION: "En preparación", ENVIADO: "Listo para tu revisión", FIRMADO: "Firmado",
+  };
 
+  // Los 6 bloques del expediente, en el orden que pidio el usuario.
+  //
+  // La cita de BLS va segunda a proposito: su fecha marca el calendario de
+  // todo lo demas. Y medios y datos economicos van ANTES de documentos porque
+  // lo que se marca ahi es justo lo que decide QUE documentos se piden.
   const navSections = [
-    { id: "datos", num: 1, titulo: "Mis datos personales", subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
-    { id: "docs", num: 2, titulo: "Mis documentos", subtitulo: docsBloqueados ? "Se activa tras el diagnóstico" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
-    { id: "solvencia", num: 3, titulo: "Mis medios económicos", subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
-    { id: "economicos", num: 4, titulo: "Mis datos económicos", subtitulo: "Situación laboral e ingresos" },
-    { id: "diagnostico", num: 5, titulo: "Sesión de diagnóstico", subtitulo: "Evaluación inicial" },
-    { id: "seguimiento", num: 6, titulo: "Sesión de seguimiento", subtitulo: "Avance de documentos" },
-    { id: "formulario", num: 7, titulo: "Formulario de visado", subtitulo: "Preparado por Inspira" },
-    { id: "precita", num: 8, titulo: "Sesión pre-cita", subtitulo: "Verificación final" },
-    { id: "cita", num: 9, titulo: "Cita BLS / Consulado", subtitulo: "Presentación presencial" },
-    { id: "cierre", num: 10, titulo: "Resultado y cierre", subtitulo: "Cierre del expediente" },
-  ].map((s) => ({ ...s, estado: estadoBloque(s.id) }));
+    { id: "datos",      num: 1, titulo: "Tus datos",                subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
+    { id: "cita",       num: 2, titulo: "Cita BLS",                 subtitulo: CITA_SUB[visaExp?.cita_estado] || "Sin fecha aún" },
+    { id: "solvencia",  num: 3, titulo: "Mis medios económicos",    subtitulo: SOLV_SUB[visaExp?.tipo_solvencia] || "Elige tu vía y calcula" },
+    { id: "economicos", num: 4, titulo: "Datos económicos",         subtitulo: "Situación laboral e ingresos" },
+    { id: "docs",       num: 5, titulo: "Documentos",               subtitulo: docsBloqueados ? "Se activa al elegir tus medios" : total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
+    { id: "formulario", num: 6, titulo: "Formulario hecho por Inspira", subtitulo: FORM_SUB[visaExp?.formulario_estado] || "Lo preparamos nosotros" },
+  ].map((x) => ({ ...x, estado: estadoBloque(x.id) }));
 
   const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
   const pct = Math.round((bloquesDone / navSections.length) * 100);
@@ -238,33 +245,73 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
 
   function renderBody(key) {
     switch (key) {
-      case "diagnostico":
-        return <SesionView sesion={sesionPorTipo("DIAGNOSTICO")} icon="🔍"
-          vacio="En esta sesión evaluamos tu caso, definimos el tipo de solvencia y te explicamos todos los documentos que necesitas y sus plazos. Tu asesor te compartirá aquí la fecha y el enlace de la reunión." />;
-
-      case "seguimiento":
-        return <SesionView sesion={sesionPorTipo("SEGUIMIENTO")} icon="📊"
-          vacio="Mientras reúnes tus documentos, tu asesor se reunirá contigo para revisar el avance, resolver dudas y ajustar lo que sea necesario." />;
+      case "cita":
+        return (
+          <div className="space-y-3">
+            <p className="text-[13.5px] text-neutral-500 leading-relaxed">
+              Tu visa se tramita en el Consulado de España a través de BLS International.
+              La fecha de esta cita marca el calendario de todo lo demás.
+            </p>
+            <SesionView
+              sesion={visaExp?.cita_estado && visaExp.cita_estado !== "PENDIENTE" ? {
+                estado: visaExp.cita_estado,
+                fecha: visaExp.cita_fecha,
+                hora: visaExp.cita_hora,
+                plataforma: visaExp.cita_ref_bls ? `Referencia BLS: ${visaExp.cita_ref_bls}` : null,
+              } : null}
+              etiqueta="Cita BLS · Consulado"
+              vacio="La agendamos contigo y te confirmamos aquí"
+              pie="📍 BLS International · llega 15 min antes"
+            />
+            {visaExp?.cita_estado === "REAGENDAR" && (
+              <Aviso tono="warn" icono="🔁">
+                Hay que <b>reagendar</b> tu cita. Tu asesor te contactará con las
+                nuevas fechas disponibles.
+              </Aviso>
+            )}
+            {visaExp?.cita_resultado && (
+              <Tarjeta titulo="Resultado">
+                <p className="text-[13px] text-neutral-700">{visaExp.cita_resultado}</p>
+              </Tarjeta>
+            )}
+            <Aviso tono="ok" icono="🎒">
+              Lleva: expediente original + copia, pasaporte, foto y{" "}
+              <b>efectivo para la tasa consular</b>.
+            </Aviso>
+            <Aviso tono="warn" icono="✈️">
+              <b>No compres tu vuelo</b> todavía: sólo reserva con tarifa flexible.
+              Se compra cuando la visa esté aprobada.
+            </Aviso>
+          </div>
+        );
 
       case "formulario":
         return (
-          <>
-            {visaExp?.formulario_estado && visaExp.formulario_estado !== "EN_PREPARACION" ? (
-              <div className="rounded-xl border border-sky-200 bg-sky-50/40 p-4 mb-3">
-                <p className="text-[13px] text-neutral-700"><span className="font-semibold">Estado:</span> {FORM_LABEL[visaExp.formulario_estado]}</p>
-                {visaExp.formulario_estado === "ENVIADO" && (
-                  <p className="text-[12px] text-neutral-500 mt-1">Revisa que tus datos sean correctos y confírmalo con tu asesor.</p>
-                )}
-              </div>
-            ) : (
-              <BloqueInfo icon="📋">
-                Inspira prepara el formulario oficial de solicitud de visado con tus datos. Cuando esté listo lo recibirás
-                aquí para revisarlo, confirmar los datos del centro de estudios y firmarlo.
-              </BloqueInfo>
+          <div className="space-y-3">
+            <Aviso tono="info" icono="📝">
+              El <b>impreso oficial de solicitud</b> lo prepara Inspira con los datos
+              que cargaste en el bloque 1. Tú no tienes que rellenar nada: sólo
+              revisarlo y firmarlo a mano el día de tu cita.
+            </Aviso>
+
+            <SesionView
+              sesion={visaExp?.formulario_estado && visaExp.formulario_estado !== "EN_PREPARACION"
+                ? { estado: visaExp.formulario_estado === "FIRMADO" ? "COMPLETADA" : "PROGRAMADA",
+                    fecha: FORM_LABEL[visaExp.formulario_estado] }
+                : null}
+              etiqueta="Estado de tu formulario"
+              vacio="Lo estamos preparando con tus datos"
+            />
+
+            {visaExp?.formulario_estado === "ENVIADO" && (
+              <Aviso tono="warn" icono="👀">
+                Ya está listo. <b>Revisa que todos tus datos sean correctos</b> y
+                confírmalo con tu asesor antes de firmarlo.
+              </Aviso>
             )}
+
             {instructivos.length > 0 && (
-              <div className="mt-2 border-t border-neutral-100 pt-3">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Instructivos y plantillas</p>
+              <Tarjeta titulo="Instructivos y plantillas">
                 <ul className="space-y-2">
                   {instructivos.map((doc) => (
                     <li key={doc.url} className="flex items-center justify-between gap-3 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5">
@@ -276,47 +323,9 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </Tarjeta>
             )}
-          </>
-        );
-
-      case "precita":
-        return <SesionView sesion={sesionPorTipo("PRECITA")} icon="✅"
-          vacio="Justo antes de tu cita en BLS revisamos juntos que todo esté en orden: documentos, expediente impreso, efectivo para la tasa y la logística del día." />;
-
-      case "cita":
-        return visaExp?.cita_estado && visaExp.cita_estado !== "PENDIENTE" ? (
-          <div className="rounded-xl border border-sky-200 bg-sky-50/40 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">🏛️</span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white border border-neutral-200">{visaExp.cita_estado}</span>
-            </div>
-            <Linea label="Fecha" value={visaExp.cita_fecha} />
-            <Linea label="Hora" value={visaExp.cita_hora} />
-            <Linea label="N° referencia BLS" value={visaExp.cita_ref_bls} />
-            <Linea label="Tasa consular" value={visaExp.cita_tasa} />
-            <Linea label="Resultado" value={visaExp.cita_resultado} />
           </div>
-        ) : (
-          <BloqueInfo icon="🏛️">
-            Tu asesor coordinará y te comunicará aquí todos los detalles de la cita (fecha, hora y referencia) cuando el
-            expediente esté listo y aprobado.
-          </BloqueInfo>
-        );
-
-      case "cierre":
-        return visaExp?.cierre_estado === "CERRADO" ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
-            <p className="text-[14px] font-bold text-[#1D6A4A] mb-2">🎓 Expediente cerrado</p>
-            <Linea label="Resultado de la visa" value={visaExp.cita_resultado} />
-            <p className="text-[12px] text-neutral-500 mt-1">¡Felicidades! Si tienes dudas sobre tu llegada a España (NIE, TIE, empadronamiento), tu asesor te orientará.</p>
-          </div>
-        ) : (
-          <BloqueInfo icon="🎓">
-            Al finalizar el proceso encontrarás aquí el resultado de tu visa, las instrucciones para recogerla y la guía
-            de llegada a España (NIE, TIE y empadronamiento).
-          </BloqueInfo>
         );
 
       default:
@@ -529,10 +538,12 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
                   checklist={checklist}
                   cargarTodo={cargarTodo}
                   idSolicitud={idSolicitud}
-                  numero="2"
-                  titulo="Mis documentos"
-                  sectionId="2"
+                  numero={sec.num}
+                  titulo={sec.titulo}
+                  sectionId={String(sec.num)}
                   bloqueado={docsBloqueados}
+                  mensajeBloqueo="Primero elige tu vía en «Mis medios económicos» y marca tu perfil de ingresos. Con eso sabemos exactamente qué documentos pedirte, y esta lista se activa."
+                  expediente={visaExp}
                 />
               ) : (
                 <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>

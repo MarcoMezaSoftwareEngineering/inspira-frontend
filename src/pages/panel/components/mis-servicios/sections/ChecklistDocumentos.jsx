@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { apiDELETE, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
 import { requisitosDe, NOTA_APOSTILLA } from "./visaRequisitos";
+import { listaSolvencia, VIA_ETIQUETA } from "./visaSolvencia";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -301,6 +302,7 @@ export default function ChecklistDocumentos({
   onToggle,
   bloqueado = false,
   mensajeBloqueo = "",
+  expediente = null,
 }) {
   const [docVisor, setDocVisor] = useState(null);
 
@@ -311,6 +313,18 @@ export default function ChecklistDocumentos({
     grupos[etapa].push(it);
   });
   const multiGrupo = Object.keys(grupos).length > 1;
+
+  // Documentos de solvencia derivados de lo que el cliente marcó en el bloque
+  // de medios económicos. No son un adorno informativo: son exactamente los
+  // que se le piden, y cambian según su perfil de ingresos y sus situaciones
+  // especiales. Por eso se listan aquí, junto a los que tiene que subir.
+  const via = expediente?.tipo_solvencia && expediente.tipo_solvencia !== "PENDIENTE"
+    ? expediente.tipo_solvencia : null;
+  const solvenciaPedida = via
+    ? listaSolvencia(via, expediente?.medios_perfiles || {}, expediente?.medios_especiales || {})
+    : null;
+  const esGrupoSolvencia = (items) =>
+    items.some((it) => String(it.item?.grupo || "").startsWith("solvencia"));
   // Ordena las categorías por el orden de su etapa.
   const gruposOrdenados = Object.entries(grupos).sort(
     (a, b) => (a[1][0]?.item?.etapa?.orden ?? 99) - (b[1][0]?.item?.etapa?.orden ?? 99)
@@ -395,6 +409,30 @@ export default function ChecklistDocumentos({
               <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 pb-2 border-b border-neutral-100">
                 {nombre}
               </p>
+            )}
+
+            {solvenciaPedida && esGrupoSolvencia(items) && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3.5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-1">
+                  Según lo que marcaste
+                </p>
+                <p className="text-[12px] text-neutral-600 leading-relaxed mb-2.5">
+                  Elegiste <b>{VIA_ETIQUETA[via]}</b>. Con tu perfil de ingresos y tus
+                  situaciones especiales, el consulado te pedirá estos documentos:
+                </p>
+                <ul className="space-y-1.5">
+                  {solvenciaPedida.map((d) => (
+                    <li key={d} className="flex gap-2 text-[12.5px] text-neutral-700 leading-snug">
+                      <span className="shrink-0 text-[#1D6A4A] font-bold">✓</span>
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[11px] text-neutral-400 mt-2.5 leading-snug">
+                  ¿Falta algo o sobra? Ajusta lo que marcaste en <b>Mis medios económicos</b> y
+                  esta lista se recalcula sola.
+                </p>
+              </div>
             )}
 
             <div

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { boGET, boPOST, boPUT } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
 import { dialog } from "../../../services/dialogService";
-import ClientesTable from "./ClientesTable";
+import ClientesLista from "./ClientesLista";
 import ClienteForm from "./ClienteForm";
 import ServiciosClienteModal from "./ServiciosClienteModal";
 import PerfilClienteModal from "./PerfilClienteModal";
@@ -46,6 +46,7 @@ function Toast({ msg, tipo, onClose }) {
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [altaAbierta, setAltaAbierta] = useState(false);
+  const [orden, setOrden] = useState("recientes");
   // Ficha completa: sustituye a la lista mientras esta abierta.
   const [fichaDe, setFichaDe] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -79,12 +80,13 @@ export default function Clientes() {
     return () => document.removeEventListener("keydown", onKey);
   }, [showModal, clienteServicios, clientePerfil]);
 
-  async function cargar(qParam) {
+  async function cargar(qParam, ordenParam) {
     setLoading(true);
     const query = qParam !== undefined ? qParam : q;
-    const url = query.trim()
-      ? `/backoffice/clientes?q=${encodeURIComponent(query.trim())}`
-      : `/backoffice/clientes`;
+    const ord = ordenParam !== undefined ? ordenParam : orden;
+    const partes = [`orden=${ord}`];
+    if (query.trim()) partes.push(`q=${encodeURIComponent(query.trim())}`);
+    const url = `/backoffice/clientes?${partes.join("&")}`;
     const r = await boGET(url);
     if (r.ok) setClientes(r.clientes || []);
     setLoading(false);
@@ -305,14 +307,16 @@ export default function Clientes() {
         )}
       </div>
 
-      <ClientesTable
+      <ClientesLista
         clientes={clientes}
         loading={loading}
+        orden={orden}
+        onOrden={(v) => { setOrden(v); cargar(undefined, v); }}
+        onAbrir={onVerPerfilCliente}
         onEditar={onEditarCliente}
-        onVerServicios={onVerServiciosCliente}
-        onToggleActivo={onToggleActivoCliente}
+        onServicios={onVerServiciosCliente}
+        onActivo={onToggleActivoCliente}
         onPurgar={onPurgarCliente}
-        onVerPerfil={onVerPerfilCliente}
         isAdmin={isAdmin}
       />
 

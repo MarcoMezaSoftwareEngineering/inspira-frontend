@@ -4,8 +4,39 @@
 // datos en Clientes, sus procesos en Solicitudes, sus pagos en ningún lado y
 // sus notas dentro de cada expediente. Aquí está junto.
 import { useCallback, useEffect, useState } from "react";
-import { boGET, boPOST } from "../../../services/backofficeApi";
+import { boGET, boPOST, boFetch } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
+
+/* El voucher está detrás de autenticación, así que un enlace normal daría 401:
+   el token va en cabecera, no en la URL. Se pide, se convierte en blob y se
+   abre en otra pestaña. */
+function VerVoucher({ idPago }) {
+  const [abriendo, setAbriendo] = useState(false);
+
+  async function abrir() {
+    setAbriendo(true);
+    try {
+      const r = await boFetch(`/backoffice/procesos/pago/${idPago}/comprobante`);
+      if (r?.ok) {
+        const url = URL.createObjectURL(await r.blob());
+        window.open(url, "_blank", "noopener");
+        // Se suelta después de que el navegador lo haya cargado; revocarlo
+        // en el acto deja la pestaña en blanco.
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      }
+    } finally {
+      setAbriendo(false);
+    }
+  }
+
+  return (
+    <button type="button" onClick={abrir} disabled={abriendo}
+      title="Ver voucher"
+      className="shrink-0 text-[10.5px] font-semibold text-[#046C8C] hover:underline disabled:opacity-50">
+      {abriendo ? "…" : "voucher"}
+    </button>
+  );
+}
 
 const TONO_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -311,11 +342,21 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
             ) : (
               <ul className="space-y-1.5">
                 {finanzas.pagos.map((p) => (
-                  <li key={p.id_pago} className="flex items-center gap-2 text-[11.5px]">
-                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p.pagado ? "bg-[#1D6A4A]" : "bg-amber-400"}`} />
-                    <span className="font-semibold text-neutral-700">{Number(p.monto).toFixed(0)} {p.moneda}</span>
-                    <span className="text-neutral-400 truncate">{p.proceso}</span>
-                    <span className="ml-auto text-neutral-400 shrink-0">
+                  <li key={p.id_pago} className="flex items-start gap-2 text-[11.5px]">
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${p.pagado ? "bg-[#1D6A4A]" : "bg-amber-400"}`} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block">
+                        <span className="font-semibold text-neutral-700">{Number(p.monto).toFixed(0)} {p.moneda}</span>
+                        <span className="text-neutral-400"> · {p.proceso}</span>
+                      </span>
+                      {(p.metodo || p.referencia) && (
+                        <span className="block text-[10.5px] text-neutral-400 truncate">
+                          {[p.metodo, p.referencia && `op. ${p.referencia}`].filter(Boolean).join(" · ")}
+                        </span>
+                      )}
+                    </span>
+                    {p.tiene_comprobante && <VerVoucher idPago={p.id_pago} />}
+                    <span className="text-neutral-400 shrink-0 whitespace-nowrap">
                       {p.pagado ? fecha(p.fecha_pago) : `vence ${fecha(p.fecha_vencimiento)}`}
                     </span>
                   </li>

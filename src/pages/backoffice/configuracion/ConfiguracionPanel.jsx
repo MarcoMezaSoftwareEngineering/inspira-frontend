@@ -13,6 +13,7 @@ import EmailTemplates from "../correos/EmailTemplates";
 import MediaPanel from "../media/MediaPanel";
 import CumplimientoLegal from "../legal/CumplimientoLegal";
 import UsuariosSettings from "../settings/UsuariosSettings";
+import Auditoria from "../auditoria/Auditoria";
 
 const TABS = [
   { id: "planes",   label: "Planes",             perm: "planes.ver",  Component: PlanesAdmin },
@@ -21,6 +22,9 @@ const TABS = [
   { id: "media",    label: "Media",              adminOnly: true,     Component: MediaPanel },
   { id: "legal",    label: "Cumplimiento legal", adminOnly: true,     Component: CumplimientoLegal },
   { id: "settings", label: "Settings",           adminOnly: true,     Component: UsuariosSettings },
+  // Aquí y no en el menú principal: son ocho destinos y añadir un noveno por
+  // algo que se consulta de vez en cuando dispersaría la navegación otra vez.
+  { id: "auditoria", label: "Registro de cambios", adminOnly: true,    Component: Auditoria },
 ];
 
 export default function ConfiguracionPanel({ initialTabId = "planes" }) {

@@ -28,6 +28,7 @@ import ConfiguracionPanel from "./configuracion/ConfiguracionPanel";
 // abren el panel en la pestaña correspondiente.
 const CONFIG_TAB_BY_PATH = {
   "/backoffice/configuracion": "planes",
+  "/backoffice/auditoria": "auditoria",
   "/backoffice/planes": "planes",
   "/backoffice/precios": "precios",
   "/backoffice/correos": "correos",

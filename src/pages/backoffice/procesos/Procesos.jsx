@@ -108,8 +108,14 @@ function Proximo({ p }) {
   );
 }
 
-/* Alta de cobro. La tabla de pagos está vacía porque nunca hubo por dónde
-   meter nada; sin esto las finanzas parten de cero para siempre. */
+/* Alta de cobro.
+ *
+ * Casi todo entra por transferencia, así que el sistema no se entera solo:
+ * alguien tiene que registrarlo, y la prueba de que llegó es el voucher. Va
+ * en el mismo formulario a propósito —lo que se deja para adjuntar después no
+ * se adjunta— y la fecha se pide en vez de dar por hecho "hoy", porque el
+ * aviso de la transferencia casi siempre llega más tarde que el dinero.
+ */
 function NuevoPago({ proceso, metodos, onHecho, onCerrar }) {
   const [monto, setMonto] = useState("");
   const [moneda, setMoneda] = useState("EUR");
@@ -117,6 +123,8 @@ function NuevoPago({ proceso, metodos, onHecho, onCerrar }) {
   const [cobrado, setCobrado] = useState(true);
   const [vence, setVence] = useState("");
   const [ref, setRef] = useState("");
+  const [cuando, setCuando] = useState(() => new Date().toISOString().slice(0, 10));
+  const [voucher, setVoucher] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [err, setErr] = useState("");
 
@@ -125,12 +133,20 @@ function NuevoPago({ proceso, metodos, onHecho, onCerrar }) {
   async function guardar() {
     setGuardando(true);
     setErr("");
-    const r = await boPOST(`/backoffice/procesos/${proceso.id_solicitud}/pago`, {
-      monto, moneda, id_metodo_pago: metodo || undefined,
-      estado_pago: cobrado ? "aprobado" : "pendiente",
-      fecha_vencimiento: vence || undefined,
-      referencia: ref || undefined,
-    });
+
+    // FormData porque puede llevar el voucher adjunto; el cliente HTTP lo
+    // detecta y deja que el navegador ponga el Content-Type.
+    const datos = new FormData();
+    datos.append("monto", monto);
+    datos.append("moneda", moneda);
+    datos.append("estado_pago", cobrado ? "aprobado" : "pendiente");
+    if (metodo) datos.append("id_metodo_pago", metodo);
+    if (ref) datos.append("referencia", ref);
+    if (cobrado && cuando) datos.append("fecha_pago", cuando);
+    if (!cobrado && vence) datos.append("fecha_vencimiento", vence);
+    if (voucher) datos.append("comprobante", voucher);
+
+    const r = await boPOST(`/backoffice/procesos/${proceso.id_solicitud}/pago`, datos);
     setGuardando(false);
     if (r.ok) onHecho();
     else setErr(r.msg || "No se pudo registrar");
@@ -155,10 +171,33 @@ function NuevoPago({ proceso, metodos, onHecho, onCerrar }) {
           <input type="checkbox" checked={cobrado} onChange={(e) => setCobrado(e.target.checked)} />
           Ya cobrado
         </label>
-        {!cobrado && (
-          <input className={input} type="date" value={vence} onChange={(e) => setVence(e.target.value)} />
+        {cobrado ? (
+          <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
+            Pagó el
+            <input className={input} type="date" value={cuando}
+              onChange={(e) => setCuando(e.target.value)} aria-label="Fecha del pago" />
+          </label>
+        ) : (
+          <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
+            Vence el
+            <input className={input} type="date" value={vence}
+              onChange={(e) => setVence(e.target.value)} aria-label="Fecha de vencimiento" />
+          </label>
         )}
-        <input className={`${input} w-32`} placeholder="Referencia" value={ref} onChange={(e) => setRef(e.target.value)} />
+        <input className={`${input} w-32`} placeholder="Nº de operación" value={ref} onChange={(e) => setRef(e.target.value)} />
+
+        <label className={`${input} cursor-pointer flex items-center gap-1.5 ${
+          voucher ? "border-[#1D6A4A] text-[#1D6A4A] font-semibold" : "text-neutral-500"
+        }`}>
+          {voucher ? `✓ ${voucher.name.slice(0, 22)}` : "📎 Voucher"}
+          <input type="file" className="hidden" accept="image/*,application/pdf"
+            onChange={(e) => setVoucher(e.target.files?.[0] || null)} />
+        </label>
+        {voucher && (
+          <button type="button" onClick={() => setVoucher(null)}
+            className="text-[11px] text-neutral-400 hover:text-red-600">quitar</button>
+        )}
+
         <button type="button" onClick={guardar} disabled={guardando || !monto}
           className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[#1D6A4A] text-white disabled:opacity-40">
           {guardando ? "…" : "Guardar"}

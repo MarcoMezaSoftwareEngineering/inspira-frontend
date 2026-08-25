@@ -1,5 +1,5 @@
 // src/pages/backoffice/solicitudes/SolicitudDetalleBackoffice.jsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
 import FormularioDatosAcademicosAdmin from "./FormularioDatosAcademicosAdmin";
 import EleccionMastersAdmin from "./EleccionMastersAdmin";
@@ -59,17 +59,19 @@ function BlqHead({ numero, titulo, estado, open, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className={`flex items-center gap-3 w-full text-left px-4 py-3 mb-2 rounded-[12px] bg-white border shadow-sm transition-all active:scale-[0.995] ${cardBorder[e] || cardBorder.inactivo} ${open ? "rounded-b-none mb-0 border-b-0" : ""}`}
+      className={`flex items-center gap-2 sm:gap-3 w-full text-left px-3 sm:px-4 py-3 mb-2 rounded-[12px] bg-white border shadow-sm transition-all active:scale-[0.995] ${cardBorder[e] || cardBorder.inactivo} ${open ? "rounded-b-none mb-0 border-b-0" : ""}`}
     >
       <div className={`w-[28px] h-[28px] rounded-[7px] flex items-center justify-center text-[12px] font-extrabold font-mono shrink-0 ${badge[e] || badge.inactivo}`}>
         {numero}
       </div>
-      <span className="font-serif text-[15px] text-[#1A3557] flex-1 font-semibold">{titulo}</span>
-      <span className={`text-[10px] font-semibold px-[10px] py-1 rounded-full shrink-0 ${chip[e] || chip.inactivo}`}>
+      {/* min-w-0 para que el título pueda encogerse: sin él, en móvil empuja
+          la insignia fuera de la tarjeta y se corta a media palabra. */}
+      <span className="font-serif text-[14px] sm:text-[15px] text-[#1A3557] flex-1 min-w-0 font-semibold">{titulo}</span>
+      <span className={`text-[10px] font-semibold px-2 sm:px-[10px] py-1 rounded-full shrink-0 whitespace-nowrap ${chip[e] || chip.inactivo}`}>
         {chipLabel[e] || "—"}
       </span>
       <svg
-        className={`w-4 h-4 text-neutral-400 transition-transform duration-200 shrink-0 ${open ? "rotate-0" : "-rotate-90"}`}
+        className={`hidden sm:block w-4 h-4 text-neutral-400 transition-transform duration-200 shrink-0 ${open ? "rotate-0" : "-rotate-90"}`}
         fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -97,6 +99,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
   // Acordeón de apertura única: solo un bloque abierto a la vez.
   const [activeBloque, setActiveBloque] = useState("cliente");
+  const [navMovilAbierta, setNavMovilAbierta] = useState(false);
   const isOpen = (id) => activeBloque === id;
 
   // Datos de Visado (Fase 2)
@@ -109,6 +112,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
   function irABloque(id) {
     setActiveBloque(id);
+    setNavMovilAbierta(false);
     setTimeout(() => {
       const el = document.getElementById(`bloque-${id}`);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -118,10 +122,37 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const [progRefreshKey,   setProgRefreshKey]   = useState(0);
   const [eleccionResetKey, setEleccionResetKey] = useState(0);
 
-  // Los 8 bloques y su estado vienen calculados del servidor.
-  const bloques  = detalle?.estado_expediente?.bloques ?? [];
-  const isVisado = bloques.some((b) => b.id === "solvencia");
-  const estadoDe = (id) => bloques.find((b) => b.id === id)?.estado ?? "pendiente";
+  // Los bloques y su estado vienen calculados del servidor.
+  const bloquesServidor = detalle?.estado_expediente?.bloques ?? [];
+  const isVisado = bloquesServidor.some((b) => b.id === "solvencia");
+  const estadoDe = (id) => bloquesServidor.find((b) => b.id === id)?.estado ?? "pendiente";
+
+  // En visado la lista se arma aquí y no en el servidor: los bloques nuevos
+  // (declaración jurada, impreso oficial) dependen del expediente, que esta
+  // pantalla ya tiene cargado. Calcularlo allí obligaría a arrastrar el
+  // expediente a todas las consultas de solicitudes.
+  const bloques = useMemo(() => {
+    if (!isVisado) return bloquesServidor;
+    const hecho = (v) => (v ? "completado" : "pendiente");
+    const ses = (tipo) =>
+      visaSesiones.find((x) => x.tipo === tipo)?.estado === "COMPLETADA" ? "completado" : "pendiente";
+    const via = visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE";
+    return [
+      { id: "cliente",     numero: "1",  label: "Cliente y flujo interno", estado: estadoDe("cliente") },
+      { id: "checklist",   numero: "2",  label: "Documentos requeridos",   estado: estadoDe("checklist") },
+      { id: "solvencia",   numero: "3",  label: "Medios económicos",       estado: hecho(via) },
+      { id: "declaracion", numero: "3b", label: "Declaración jurada",      estado: hecho(visaExp?.dj_borrador || visaExp?.dj_datos) },
+      { id: "impreso",     numero: "3c", label: "Impreso oficial",         estado: hecho(visaExp?.formulario_estado === "FIRMADO") },
+      { id: "diagnostico", numero: "4",  label: "Sesión diagnóstico",      estado: ses("DIAGNOSTICO") },
+      { id: "seguimiento", numero: "5",  label: "Sesión seguimiento",      estado: ses("SEGUIMIENTO") },
+      { id: "formulario",  numero: "6",  label: "Formulario de visado",    estado: hecho(visaExp?.formulario_estado === "FIRMADO") },
+      { id: "precita",     numero: "7",  label: "Sesión pre-cita",         estado: ses("PRECITA") },
+      { id: "cita",        numero: "8",  label: "Estado del visado",       estado: hecho(visaExp?.visado_resultado === "FAVORABLE") },
+      { id: "cierre",      numero: "9",  label: "Cierre del expediente",   estado: hecho(visaExp?.cierre_estado === "CERRADO") },
+      { id: "portales",    numero: "P",  label: "Portales · Claves",       estado: "pendiente" },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVisado, bloquesServidor, visaExp, visaSesiones]);
 
   // Cargar expediente + sesiones de Visado
   useEffect(() => {
@@ -171,8 +202,13 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     } catch { /* silencioso */ }
   }
 
-  const pct      = detalle?.estado_expediente?.pct ?? 0;
-  const etiqueta = detalle?.estado_expediente?.etiqueta ?? "sin iniciar";
+  const completos = bloques.filter((b) => b.estado === "completado").length;
+  const pct = isVisado
+    ? (bloques.length ? Math.round((completos / bloques.length) * 100) : 0)
+    : (detalle?.estado_expediente?.pct ?? 0);
+  const etiqueta = isVisado
+    ? (pct === 0 ? "sin iniciar" : pct === 100 ? "completo" : `${completos} de ${bloques.length} bloques`)
+    : (detalle?.estado_expediente?.etiqueta ?? "sin iniciar");
 
   if (loading) {
     return (
@@ -194,6 +230,14 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
   if (!detalle) return null;
 
+  const indiceBloque = Math.max(0, bloques.findIndex((b) => b.id === activeBloque));
+  const bloqueActual = bloques[indiceBloque] || bloques[0];
+
+  function irBloqueRelativo(paso) {
+    const destino = bloques[indiceBloque + paso];
+    if (destino) irABloque(destino.id);
+  }
+
   function dotColor(estado) {
     if (estado === "completado") return "bg-[#1D6A4A]";
     if (estado === "observado")  return "bg-[#DC2626]";
@@ -203,10 +247,107 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   }
 
   return (
-    <div className="flex-1 min-h-0 flex overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
 
-      {/* ── SIDEBAR ── */}
-      <aside className="w-[220px] flex-none border-r border-[#E2E8F0] bg-white overflow-y-auto px-[9px] py-3">
+      {/* ── NAVEGACIÓN EN MÓVIL ──
+          La barra lateral mide 220 px fijos: en un teléfono se come la
+          pantalla y deja el contenido en una columna ilegible. Debajo de
+          1024 px se sustituye por una cabecera compacta con desplegable. */}
+      <div className="lg:hidden shrink-0 border-b border-[#E2E8F0] bg-white px-3 py-2.5 space-y-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onVolver}
+            aria-label="Volver a solicitudes"
+            className="shrink-0 w-9 h-9 rounded-lg border border-[#E2E8F0] grid place-items-center text-[#6B7280] active:scale-95 transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+          </button>
+          <div className="min-w-0 flex-1">
+            <p className="font-mono text-[9px] tracking-[.18em] text-[#6B7280] uppercase leading-none">
+              #{detalle.id_solicitud} · {detalle.cliente?.nombre || "Sin nombre"}
+            </p>
+            <p className="font-serif text-[13px] text-[#1A3557] leading-tight truncate mt-0.5">
+              {detalle.titulo || "(Sin título)"}
+            </p>
+          </div>
+          <span className="shrink-0 text-[11px] font-bold text-[#1D6A4A] bg-[#E8F5EE] border border-[#1D6A4A]/20 rounded-full px-2 py-1">
+            {pct}%
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => irBloqueRelativo(-1)}
+            disabled={indiceBloque <= 0}
+            aria-label="Bloque anterior"
+            className="shrink-0 w-9 h-9 rounded-lg border border-[#E2E8F0] grid place-items-center text-[#6B7280] disabled:opacity-30 active:scale-95 transition-all"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setNavMovilAbierta((v) => !v)}
+            aria-expanded={navMovilAbierta}
+            className="flex-1 min-w-0 flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F4F6F9] px-2.5 py-2 text-left"
+          >
+            <span className="shrink-0 w-6 h-6 rounded-md bg-[#1D6A4A] text-white grid place-items-center text-[10px] font-bold font-mono">
+              {bloqueActual?.numero || "—"}
+            </span>
+            <span className="flex-1 min-w-0 text-[12.5px] font-semibold text-[#1A3557] truncate">
+              {bloqueActual?.label || "Bloques"}
+            </span>
+            <svg className={`shrink-0 w-4 h-4 text-[#6B7280] transition-transform ${navMovilAbierta ? "rotate-180" : ""}`}
+              fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => irBloqueRelativo(1)}
+            disabled={indiceBloque >= bloques.length - 1}
+            aria-label="Bloque siguiente"
+            className="shrink-0 w-9 h-9 rounded-lg border border-[#E2E8F0] grid place-items-center text-[#6B7280] disabled:opacity-30 active:scale-95 transition-all"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
+
+        {navMovilAbierta && (
+          <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-lg p-1.5 max-h-[55vh] overflow-y-auto">
+            {bloques.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => irABloque(b.id)}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg text-left transition-colors ${
+                  activeBloque === b.id ? "bg-[#E8F5EE]" : "active:bg-[#F4F6F9]"
+                }`}
+              >
+                <span className={`shrink-0 w-6 h-6 rounded-md grid place-items-center text-[10px] font-bold font-mono ${
+                  activeBloque === b.id ? "bg-[#1D6A4A] text-white" : "bg-[#F4F6F9] text-[#6B7280]"
+                }`}>{b.numero}</span>
+                <span className={`flex-1 min-w-0 text-[12.5px] truncate ${
+                  activeBloque === b.id ? "font-bold text-[#1D6A4A]" : "font-medium text-[#6B7280]"
+                }`}>{b.label}</span>
+                <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${dotColor(b.estado)}`} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── SIDEBAR (sólo escritorio) ── */}
+      <aside className="hidden lg:block w-[220px] flex-none border-r border-[#E2E8F0] bg-white overflow-y-auto px-[9px] py-3">
 
         {/* Back button */}
         <button
@@ -289,7 +430,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
       {/* ── MAIN SCROLL ── */}
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
-        <div className="p-[22px] pb-20">
+        <div className="p-3 sm:p-[22px] pb-20">
 
           {/* B1 — Encabezado del cliente */}
           <div id="bloque-cliente" className="scroll-mt-4">

@@ -9,8 +9,39 @@ import { useEffect, useState } from "react";
 import { CALENDLY_URL } from "../../config/contacto";
 import { ASESORIA_PRINCIPAL } from "../../config/asesorias";
 import { TESTIMONIOS } from "../../config/testimonios";
+import { CAPACIDADES, COMPARATIVA } from "../../config/plataforma";
 import Icono from "../../components/common/Icono";
 import logo from "../../assets/images/logo.png";
+import fotoCarina from "../../assets/images/landing/carina-meza.jpg";
+
+const HERRAMIENTAS = [
+  {
+    icono: "laptop",
+    tono: "primary",
+    titulo: "Tu portal privado",
+    texto: CAPACIDADES.find((c) => c.id === "panel")?.texto,
+    cta: "Conocer el portal",
+    href: "/plataforma",
+  },
+  {
+    icono: "calendario",
+    tono: "accent",
+    titulo: "Calendario de citas en vivo",
+    texto:
+      "Eliges tú el día y la hora de tu asesoría, en tiempo real, sin ir y venir por WhatsApp para cuadrar un horario.",
+    cta: "Ver horarios disponibles",
+    href: CALENDLY_URL,
+    externo: true,
+  },
+  {
+    icono: "euro",
+    tono: "sun",
+    titulo: "Calculadora gratuita",
+    texto: "Calcula el costo real de tu máster en España: matrícula, visa, apostilla y gastos de vida. Al instante.",
+    cta: "Probar la calculadora",
+    href: "/calculadora-master.html",
+  },
+];
 
 const ETAPAS = [
   {
@@ -106,16 +137,21 @@ const FAQS = [
   },
 ];
 
-function CTAButton({ children, className = "" }) {
+function CTAButton({ children, className = "", pulse = false, fullWidth = false }) {
   return (
-    <a
-      href={CALENDLY_URL}
-      target="_blank"
-      rel="noopener"
-      className={`inline-flex items-center justify-center gap-2 font-bold px-7 py-4 rounded-xl transition-all hover:scale-[1.03] hover:shadow-xl active:scale-95 bg-accent hover:bg-accent-dark text-white ${className}`}
-    >
-      {children}
-    </a>
+    <span className={`relative inline-flex ${fullWidth ? "w-full" : ""}`}>
+      {pulse && (
+        <span className="absolute inset-0 rounded-xl bg-accent animate-ping opacity-40 pointer-events-none" />
+      )}
+      <a
+        href={CALENDLY_URL}
+        target="_blank"
+        rel="noopener"
+        className={`relative inline-flex items-center justify-center gap-2 font-bold px-7 py-4 rounded-xl transition-all hover:scale-[1.03] hover:shadow-xl active:scale-95 bg-accent hover:bg-accent-dark text-white ${fullWidth ? "w-full" : ""} ${className}`}
+      >
+        {children}
+      </a>
+    </span>
   );
 }
 
@@ -159,6 +195,48 @@ function FaqItem({ item, open, onToggle }) {
       </button>
       {open && (
         <div className="px-5 pb-5 text-sm text-neutral-600 leading-relaxed">{item.a}</div>
+      )}
+    </div>
+  );
+}
+
+function HerramientaCard({ h }) {
+  const [abierto, setAbierto] = useState(false);
+  const esCalculadora = h.href === "/calculadora-master.html";
+
+  return (
+    <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all flex flex-col">
+      <IconBadge nombre={h.icono} tone={h.tono} size="lg" />
+      <h3 className="font-bold text-primary mt-4">{h.titulo}</h3>
+      <p className="text-sm text-neutral-500 mt-2 leading-relaxed flex-1">{h.texto}</p>
+      {esCalculadora ? (
+        <button
+          type="button"
+          onClick={() => setAbierto((v) => !v)}
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-dark"
+        >
+          {abierto ? "Ocultar calculadora ▲" : `${h.cta} ▾`}
+        </button>
+      ) : (
+        <a
+          href={h.href}
+          target={h.externo ? "_blank" : undefined}
+          rel={h.externo ? "noopener" : undefined}
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-dark"
+        >
+          {h.cta} →
+        </a>
+      )}
+      {esCalculadora && abierto && (
+        <div className="mt-4 -mx-2 rounded-xl overflow-hidden border border-neutral-200">
+          <iframe
+            src="/calculadora-master.html"
+            title="Calculadora Máster Gratis — Inspira"
+            className="w-full border-0"
+            style={{ height: "560px" }}
+            loading="lazy"
+          />
+        </div>
       )}
     </div>
   );
@@ -250,7 +328,7 @@ export default function MasterAdsLanding() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <CTAButton>Quiero mi asesoría personalizada →</CTAButton>
+            <CTAButton pulse>Quiero mi asesoría personalizada →</CTAButton>
             <a
               href="/servicios/master"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary/70 hover:text-primary px-2 py-2"
@@ -327,6 +405,59 @@ export default function MasterAdsLanding() {
         </div>
       </section>
 
+      {/* Herramientas: portal, calendario, calculadora */}
+      <section className="py-16 px-6 bg-secondary-light">
+        <div className="max-w-3xl mx-auto text-center mb-10">
+          <Eyebrow>Todo en un solo lugar</Eyebrow>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
+            No trabajamos por WhatsApp: tenemos sistema propio
+          </h2>
+          <p className="text-neutral-500 mt-3">
+            Un portal privado, un calendario en vivo y una calculadora gratuita, para que
+            avances aunque todavía no hayas agendado tu asesoría.
+          </p>
+        </div>
+        <div className="max-w-4xl mx-auto grid sm:grid-cols-3 gap-5 items-stretch">
+          {HERRAMIENTAS.map((h) => (
+            <HerramientaCard key={h.titulo} h={h} />
+          ))}
+        </div>
+      </section>
+
+      {/* Comparativa: por qué no por WhatsApp */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-3xl mx-auto text-center mb-10">
+          <Eyebrow>La diferencia real</Eyebrow>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
+            Otras asesorías vs. Inspira Legal
+          </h2>
+        </div>
+        <div className="max-w-3xl mx-auto overflow-x-auto">
+          <div className="min-w-[560px] rounded-2xl border border-neutral-200 overflow-hidden">
+            <div className="grid grid-cols-[1fr,1.3fr,1.3fr] bg-primary text-white text-sm font-bold">
+              <div className="px-4 py-3"> </div>
+              <div className="px-4 py-3 border-l border-white/10">Otras asesorías</div>
+              <div className="px-4 py-3 border-l border-white/10 bg-accent">Inspira Legal</div>
+            </div>
+            {COMPARATIVA.map((row, i) => (
+              <div
+                key={row.tema}
+                className={`grid grid-cols-[1fr,1.3fr,1.3fr] text-sm ${i % 2 ? "bg-secondary-light/60" : "bg-white"}`}
+              >
+                <div className="px-4 py-3.5 font-semibold text-primary">{row.tema}</div>
+                <div className="px-4 py-3.5 border-l border-neutral-100 text-neutral-500">{row.otros}</div>
+                <div className="px-4 py-3.5 border-l border-neutral-100 text-neutral-700 font-medium bg-accent/5">
+                  {row.inspira}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="text-center mt-10">
+          <CTAButton>Quiero mi asesoría personalizada →</CTAButton>
+        </div>
+      </section>
+
       {/* Testimonios reales */}
       <section className="py-16 px-6 bg-sky-light">
         <div className="max-w-3xl mx-auto text-center mb-10">
@@ -352,16 +483,26 @@ export default function MasterAdsLanding() {
       </section>
 
       {/* Sobre Inspira Legal */}
-      <section className="py-16 px-6 bg-primary">
-        <div className="max-w-3xl mx-auto text-center">
-          <Eyebrow dark>Sobre Inspira Legal</Eyebrow>
-          <h2 className="font-fraunces text-3xl md:text-4xl font-bold text-white mt-2">
-            Un equipo de abogados asociados, no una plantilla genérica.
-          </h2>
-          <p className="text-white/70 mt-4 max-w-xl mx-auto leading-relaxed">
-            Combinamos derecho migratorio español con herramientas digitales para que cada
-            trámite sea claro, medible y acompañado.
-          </p>
+      <section className="py-16 px-6 bg-primary overflow-hidden">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-[280px,1fr] gap-10 items-center">
+          <div className="mx-auto md:mx-0 w-full max-w-[280px]">
+            <img
+              src={fotoCarina}
+              alt="Carina Meza, CEO y Consultora Legal de Inspira Legal"
+              className="w-full rounded-3xl shadow-2xl ring-4 ring-white/10"
+            />
+          </div>
+          <div className="text-center md:text-left">
+            <Eyebrow dark>Sobre Inspira Legal</Eyebrow>
+            <h2 className="font-fraunces text-3xl md:text-4xl font-bold text-white mt-2">
+              Un equipo de abogados asociados, no una plantilla genérica.
+            </h2>
+            <p className="text-white/70 mt-4 max-w-xl leading-relaxed">
+              Combinamos derecho migratorio español con herramientas digitales para que cada
+              trámite sea claro, medible y acompañado. Detrás de tu expediente hay abogados de
+              verdad, no un chatbot.
+            </p>
+          </div>
         </div>
 
         <div className="max-w-4xl mx-auto mt-12 grid sm:grid-cols-3 gap-5">
@@ -416,7 +557,7 @@ export default function MasterAdsLanding() {
           </ul>
 
           <div className="mt-9">
-            <CTAButton className="text-lg px-9 py-5">Agendar mi asesoría — {ASESORIA_PRINCIPAL.precio}</CTAButton>
+            <CTAButton pulse className="text-lg px-9 py-5">Agendar mi asesoría — {ASESORIA_PRINCIPAL.precio}</CTAButton>
           </div>
           <p className="text-xs text-neutral-400 mt-4">
             {ASESORIA_PRINCIPAL.duracion} · {ASESORIA_PRINCIPAL.precioAlt} · Reunión online desde
@@ -498,7 +639,7 @@ export default function MasterAdsLanding() {
               Resuélvelas en una asesoría personalizada de 30 minutos con un especialista. Sales
               con un plan de acción concreto para tu caso.
             </p>
-            <CTAButton className="w-full">Reservar mi asesoría — {ASESORIA_PRINCIPAL.precio}</CTAButton>
+            <CTAButton fullWidth>Reservar mi asesoría — {ASESORIA_PRINCIPAL.precio}</CTAButton>
           </div>
         </div>
       )}

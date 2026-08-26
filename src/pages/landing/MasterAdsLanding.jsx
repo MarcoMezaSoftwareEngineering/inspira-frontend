@@ -124,6 +124,17 @@ const COMO_TRABAJAMOS = [
   },
 ];
 
+// Comunidades reales donde operan los planes (masterPlans.data.js), para la
+// franja de cobertura. Ordenadas como aparecen en el catálogo real.
+const COMUNIDADES = [
+  "Andalucía", "Cantabria", "Asturias", "Castilla-La Mancha", "Galicia",
+  "Castilla y León", "La Rioja", "País Vasco", "Murcia", "Extremadura",
+  "Aragón", "Comunidad Valenciana", "Cataluña", "Madrid",
+];
+
+const QUIZ_PRIORIDADES = ["Costo más bajo", "Más universidades", "Mejor ranking o becas"];
+const QUIZ_TRAMITE = ["Sí, ya lo tengo resuelto", "No, todavía no", "No estoy seguro"];
+
 const FAQS = [
   {
     q: "¿Qué incluye la asesoría de 30 minutos?",
@@ -206,6 +217,110 @@ function FaqItem({ item, open, onToggle }) {
   );
 }
 
+function AnimatedNumber({ value, prefix = "", suffix = "", duration = 1200 }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(Math.round(value * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+  return <>{prefix}{n}{suffix}</>;
+}
+
+function PlanQuiz() {
+  const [paso, setPaso] = useState(0);
+  const [prioridad, setPrioridad] = useState(null);
+  const [tramite, setTramite] = useState(null);
+
+  function reiniciar() {
+    setPaso(0);
+    setPrioridad(null);
+    setTramite(null);
+  }
+
+  return (
+    <div className="bg-white rounded-3xl border border-neutral-200 shadow-xl p-7 sm:p-9 max-w-xl mx-auto">
+      {paso === 0 && (
+        <>
+          <p className="text-xs font-bold uppercase tracking-widest text-accent mb-2">Pregunta 1 de 2</p>
+          <h3 className="font-fraunces text-xl sm:text-2xl font-bold text-primary mb-6">
+            ¿Qué priorizas para tu máster?
+          </h3>
+          <div className="grid gap-3">
+            {QUIZ_PRIORIDADES.map((op) => (
+              <button
+                key={op}
+                type="button"
+                onClick={() => { setPrioridad(op); setPaso(1); }}
+                className="text-left px-5 py-4 rounded-xl border border-neutral-200 hover:border-accent hover:bg-accent/5 font-semibold text-primary transition-all"
+              >
+                {op}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      {paso === 1 && (
+        <>
+          <p className="text-xs font-bold uppercase tracking-widest text-accent mb-2">Pregunta 2 de 2</p>
+          <h3 className="font-fraunces text-xl sm:text-2xl font-bold text-primary mb-6">
+            ¿Ya tienes resuelto tu visado o estancia?
+          </h3>
+          <div className="grid gap-3">
+            {QUIZ_TRAMITE.map((op) => (
+              <button
+                key={op}
+                type="button"
+                onClick={() => { setTramite(op); setPaso(2); }}
+                className="text-left px-5 py-4 rounded-xl border border-neutral-200 hover:border-accent hover:bg-accent/5 font-semibold text-primary transition-all"
+              >
+                {op}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setPaso(0)}
+            className="mt-5 text-xs text-neutral-400 hover:text-neutral-600"
+          >
+            ← Volver
+          </button>
+        </>
+      )}
+      {paso === 2 && (
+        <div className="text-center">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center mb-4">
+            <Icono nombre="destello" size={26} />
+          </div>
+          <h3 className="font-fraunces text-xl sm:text-2xl font-bold text-primary mb-3">
+            Ya sabemos por dónde empezar
+          </h3>
+          <p className="text-sm text-neutral-600 leading-relaxed mb-7">
+            Priorizas <b>{prioridad?.toLowerCase()}</b>, y sobre el visado nos dices: “{tramite}”.
+            En tu asesoría de 30 minutos armamos el plan exacto para tu caso — comunidades,
+            universidades y presupuesto real, no una respuesta genérica.
+          </p>
+          <CTAButton pulse fullWidth>Reservar mi asesoría →</CTAButton>
+          <button
+            type="button"
+            onClick={reiniciar}
+            className="mt-4 text-xs text-neutral-400 hover:text-neutral-600 underline underline-offset-4"
+          >
+            Volver a empezar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function HerramientaCard({ h }) {
   const [abierto, setAbierto] = useState(false);
   const esCalculadora = h.href === "/calculadora-master.html";
@@ -250,6 +365,7 @@ function HerramientaCard({ h }) {
 
 export default function MasterAdsLanding() {
   const [faqOpen, setFaqOpen] = useState(0);
+  const [etapaActiva, setEtapaActiva] = useState(0);
   const [barVisible, setBarVisible] = useState(false);
   const [barDismissed, setBarDismissed] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -320,13 +436,13 @@ export default function MasterAdsLanding() {
 
           <div className="flex gap-4 mb-9 max-w-md mx-auto">
             {[
-              { n: "98%", l: "Admisión", tone: "sky" },
-              { n: "+45", l: "Universidades", tone: "sun" },
-              { n: "4", l: "Etapas", tone: "accent" },
+              { value: 98, suffix: "%", l: "Admisión", tone: "sky" },
+              { value: 45, prefix: "+", l: "Universidades", tone: "sun" },
+              { value: 4, l: "Etapas", tone: "accent" },
             ].map((s) => (
               <div key={s.l} className="bg-primary/5 border border-primary/10 rounded-xl px-4 py-3 text-center flex-1">
-                <div className={`text-2xl font-bold ${s.tone === "sky" ? "text-sky-dark" : s.tone === "sun" ? "text-[#C98F1B]" : "text-accent"}`}>
-                  {s.n}
+                <div className={`text-2xl font-bold tabular-nums ${s.tone === "sky" ? "text-sky-dark" : s.tone === "sun" ? "text-[#C98F1B]" : "text-accent"}`}>
+                  <AnimatedNumber value={s.value} prefix={s.prefix} suffix={s.suffix} />
                 </div>
                 <div className="text-neutral-500 text-xs mt-0.5">{s.l}</div>
               </div>
@@ -362,29 +478,44 @@ export default function MasterAdsLanding() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* Selector de etapas: clic para ver el detalle de cada una */}
+          <div className="flex items-center justify-center gap-2 mb-6 flex-wrap">
             {ETAPAS.map((e, i) => (
-              <article key={e.n} className="bg-white rounded-2xl border border-neutral-200 p-7 hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                <div className="flex items-start gap-4">
-                  <IconBadge nombre={e.icono} tone={["primary", "accent", "sky", "sun"][i % 4]} />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-black text-accent">{e.n}</span>
-                      <h3 className="font-bold text-lg text-primary">{e.title}</h3>
-                    </div>
-                    <ul className="space-y-1.5">
-                      {e.bullets.map((x) => (
-                        <li key={x} className="flex items-start gap-2 text-neutral-600 text-sm">
-                          <span className="flex-shrink-0 mt-0.5 font-bold text-accent">✓</span>
-                          {x}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </article>
+              <button
+                key={e.n}
+                type="button"
+                onClick={() => setEtapaActiva(i)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                  etapaActiva === i
+                    ? "bg-primary text-white shadow-lg scale-105"
+                    : "bg-white text-primary/60 border border-neutral-200 hover:border-primary/40"
+                }`}
+              >
+                <span>{e.n}</span>
+                <span className="hidden sm:inline">{e.title}</span>
+              </button>
             ))}
           </div>
+
+          <article className="bg-white rounded-2xl border border-neutral-200 p-7 sm:p-9 max-w-2xl mx-auto shadow-sm">
+            <div className="flex items-start gap-4">
+              <IconBadge nombre={ETAPAS[etapaActiva].icono} tone={["primary", "accent", "sky", "sun"][etapaActiva % 4]} size="lg" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-black text-accent">{ETAPAS[etapaActiva].n}</span>
+                  <h3 className="font-bold text-xl text-primary">{ETAPAS[etapaActiva].title}</h3>
+                </div>
+                <ul className="space-y-2">
+                  {ETAPAS[etapaActiva].bullets.map((x) => (
+                    <li key={x} className="flex items-start gap-2.5 text-neutral-600 text-sm">
+                      <span className="flex-shrink-0 mt-0.5 font-bold text-accent">✓</span>
+                      {x}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -464,6 +595,28 @@ export default function MasterAdsLanding() {
         </div>
       </section>
 
+      {/* Cobertura nacional: franja animada de comunidades reales */}
+      <style>{`
+        @keyframes marqueeComunidades { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+      `}</style>
+      <section className="py-14 bg-primary overflow-hidden">
+        <div className="text-center mb-7 px-6">
+          <p className="text-white/60 text-xs font-bold uppercase tracking-widest">
+            Cobertura nacional real · 17 comunidades · +80 universidades públicas y privadas
+          </p>
+        </div>
+        <div className="flex w-max animate-[marqueeComunidades_32s_linear_infinite]">
+          {[...COMUNIDADES, ...COMUNIDADES].map((c, i) => (
+            <span
+              key={`${c}-${i}`}
+              className="shrink-0 mx-2.5 px-5 py-2.5 rounded-full bg-white/10 border border-white/15 text-white text-sm font-semibold whitespace-nowrap"
+            >
+              {c}
+            </span>
+          ))}
+        </div>
+      </section>
+
       {/* Testimonios reales */}
       <section className="py-16 px-6 bg-sky-light">
         <div className="max-w-3xl mx-auto text-center mb-10">
@@ -508,7 +661,7 @@ export default function MasterAdsLanding() {
               key={p.alt}
               src={p.foto}
               alt={p.alt}
-              className="w-full rounded-3xl shadow-2xl ring-4 ring-white/10"
+              className="w-full rounded-3xl shadow-2xl ring-4 ring-white/10 transition-transform duration-300 hover:scale-105 hover:-rotate-1"
             />
           ))}
         </div>
@@ -522,6 +675,17 @@ export default function MasterAdsLanding() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Quiz interactivo: personaliza el mensaje y empuja a reservar */}
+      <section className="py-16 px-6 bg-secondary-light">
+        <div className="max-w-xl mx-auto text-center mb-8">
+          <Eyebrow>Antes de reservar</Eyebrow>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
+            Cuéntanos en 2 clics qué buscas
+          </h2>
+        </div>
+        <PlanQuiz />
       </section>
 
       {/* FAQ interactivo */}

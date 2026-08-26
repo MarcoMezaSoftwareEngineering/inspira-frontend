@@ -157,7 +157,7 @@ export default function VisaImpresoAdmin({ expediente, cliente, idSolicitud, onS
      del cliente, y no tendría sentido armarlo dos veces distintas. */
   async function construirPDF() {
     {
-      const [{ PDFDocument, rgb }, resp] = await Promise.all([
+      const [{ PDFDocument, StandardFonts, rgb }, resp] = await Promise.all([
         import("pdf-lib"),
         fetch(RUTA_PDF),
       ]);
@@ -165,11 +165,39 @@ export default function VisaImpresoAdmin({ expediente, cliente, idSolicitud, onS
       const pdf = await PDFDocument.load(await resp.arrayBuffer());
       const form = pdf.getForm();
 
+      // El impreso está compuesto en Times y sus campos piden TimesNewRoman,
+      // que no viene incrustada. Sin pasarle una fuente, pdf-lib cae en una de
+      // palo seco con el espaciado ancho: el dato escrito desentonaba del
+      // formulario y el nombre del cliente se veía amontonado.
+      const times = await pdf.embedFont(StandardFonts.TimesRoman);
+
+      /* 9pt se pierde en cajas de 33pt de alto; 11 se lee bien. Pero en los
+         huecos estrechos —fechas, número de pasaporte— 11 se saldría, así que
+         se mide el texto y se baja hasta que entre.
+         Los campos multilínea no se tocan: ahí el texto parte de línea solo, y
+         encogerlo sería empequeñecerlo sin motivo. */
+      const cuerpo = (campo, texto) => {
+        try {
+          if (campo.isMultiline()) return 10;
+          const ancho = campo.acroField.getWidgets()[0]?.getRectangle()?.width;
+          if (!ancho) return 10;
+          for (let t = 11; t > 7; t -= 0.5) {
+            if (times.widthOfTextAtSize(texto, t) <= ancho - 8) return t;
+          }
+        } catch { /* si no se puede medir, un tamaño prudente */ }
+        return 7.5;
+      };
+
       // El impreso trae campos con nombres largos y truncados; si alguno no
       // existe se ignora en silencio en vez de abortar todo el documento.
       const T = (nombre, valor) => {
         if (!valor) return;
-        try { form.getTextField(nombre).setText(String(valor)); } catch { /* campo ausente */ }
+        try {
+          const campo = form.getTextField(nombre);
+          const texto = String(valor);
+          campo.setText(texto);
+          campo.setFontSize(cuerpo(campo, texto));
+        } catch { /* campo ausente */ }
       };
       const X = (nombre) => {
         try { form.getCheckBox(nombre).check(); } catch { /* campo ausente */ }
@@ -230,7 +258,13 @@ export default function VisaImpresoAdmin({ expediente, cliente, idSolicitud, onS
         pagina.drawLine({ start: { x, y: y + l }, end: { x: x + l, y }, thickness: 1.1, color: rgb(0, 0, 0) });
       }
 
-      form.updateFieldAppearances();
+      // La fuente va explícita: es lo que hace que el relleno se vea igual que
+      // el impreso y no pegado encima. Se fuerza campo a campo porque algunos
+      // traen su propia fuente en cursiva y salían desparejos del resto.
+      for (const campo of form.getFields()) {
+        try { campo.updateAppearances?.(times); } catch { /* no todos aceptan fuente */ }
+      }
+      form.updateFieldAppearances(times);
       const bytes = await pdf.save();
       const nombre = (f.apellidos || f.nombres || "solicitud").split(" ")[0].toLowerCase();
       return {

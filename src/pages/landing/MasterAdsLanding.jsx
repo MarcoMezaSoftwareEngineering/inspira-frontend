@@ -217,6 +217,22 @@ function FaqItem({ item, open, onToggle }) {
   );
 }
 
+// Entrada en CSS puro, solo con transform (nunca opacity): no depende de
+// IntersectionObserver (el sitio ya tuvo un sistema de revelado por scroll
+// con ese mecanismo y no fue confiable — ver memoria del proyecto) y, al no
+// tocar la opacidad, el contenido NUNCA queda invisible pase lo que pase con
+// la animación — en el peor caso simplemente no se desliza.
+function Reveal({ children, className = "", delay = 0 }) {
+  return (
+    <div
+      className={`animate-[revealSlideUp_0.6s_ease-out_both] ${className}`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function AnimatedNumber({ value, prefix = "", suffix = "", duration = 1200 }) {
   const [n, setN] = useState(0);
   useEffect(() => {
@@ -326,7 +342,7 @@ function HerramientaCard({ h }) {
   const esCalculadora = h.href === "/calculadora-master.html";
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all flex flex-col">
+    <div className="h-full bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col">
       <IconBadge nombre={h.icono} tone={h.tono} size="lg" />
       <h3 className="font-bold text-primary mt-4">{h.titulo}</h3>
       <p className="text-sm text-neutral-500 mt-2 leading-relaxed flex-1">{h.texto}</p>
@@ -366,14 +382,21 @@ function HerramientaCard({ h }) {
 export default function MasterAdsLanding() {
   const [faqOpen, setFaqOpen] = useState(0);
   const [etapaActiva, setEtapaActiva] = useState(0);
-  const [barVisible, setBarVisible] = useState(false);
   const [barDismissed, setBarDismissed] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
-  // Barra fija: aparece al bajar más allá del hero.
+  // Entrada del hero al montar.
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Paralaje suave de las formas decorativas del hero.
   useEffect(() => {
     function onScroll() {
-      setBarVisible(window.scrollY > 620);
+      setScrollY(window.scrollY);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -393,6 +416,14 @@ export default function MasterAdsLanding() {
 
   return (
     <div className="w-full bg-white overflow-x-hidden font-sans">
+      <style>{`
+        @keyframes marqueeComunidades { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes floatSlowA { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-18px) translateX(8px); } }
+        @keyframes floatSlowB { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(16px) translateX(-10px); } }
+        @keyframes fadeInUpBar { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes revealSlideUp { from { transform: translateY(20px); } to { transform: translateY(0); } }
+      `}</style>
+
       {/* Marca mínima, con salida hacia el sitio completo */}
       <div className="px-6 pt-6">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
@@ -412,27 +443,36 @@ export default function MasterAdsLanding() {
       {/* Hero */}
       <section className="px-6 pt-10 pb-16 relative overflow-hidden">
         <div
-          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none bg-accent opacity-[0.08]"
-          style={{ transform: "translate(30%, -30%)" }}
+          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none bg-accent opacity-[0.08] animate-[floatSlowA_9s_ease-in-out_infinite]"
+          style={{ transform: `translate(calc(30% + ${scrollY * 0.06}px), -30%)` }}
         />
         <div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none bg-sky opacity-[0.12]"
-          style={{ transform: "translate(-30%, 30%)" }}
+          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none bg-sky opacity-[0.12] animate-[floatSlowB_11s_ease-in-out_infinite]"
+          style={{ transform: `translate(-30%, calc(30% - ${scrollY * 0.04}px))` }}
         />
-        <div className="max-w-3xl mx-auto relative z-10 text-center">
+        <div
+          className={`max-w-3xl mx-auto relative z-10 text-center transition-transform duration-700 ease-out ${mounted ? "translate-y-0" : "translate-y-6"}`}
+        >
           <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 text-primary/80 text-sm px-4 py-1.5 rounded-full mb-6">
             <Icono nombre="birrete" size={16} />
-            Programa Máster 360° · España 2026/2027
+            Programa Máster 360° · España 2027/2028
           </span>
           <h1 className="font-fraunces text-4xl md:text-5xl font-bold leading-tight mb-5 text-primary">
             Ayudamos a profesionales latinoamericanos a estudiar un{" "}
             <span className="text-accent">máster en universidades públicas de España</span>,
             con acompañamiento 360°.
           </h1>
-          <p className="text-neutral-500 text-lg mb-8 leading-relaxed max-w-xl mx-auto">
+          <p className="text-neutral-500 text-lg mb-5 leading-relaxed max-w-xl mx-auto">
             Te acompañamos desde la búsqueda del máster hasta la matrícula: asesoría educativa,
             admisión universitaria, postulación y seguimiento integral.
           </p>
+
+          <div className="inline-flex items-center gap-2 bg-sun/15 border border-sun/40 rounded-full px-4 py-2 mb-8">
+            <Icono nombre="euro" size={16} className="text-[#C98F1B]" />
+            <span className="text-sm font-bold text-[#8A6415]">
+              Desde programas económicos por 730 €/año hasta MBA de mejor ranking
+            </span>
+          </div>
 
           <div className="flex gap-4 mb-9 max-w-md mx-auto">
             {[
@@ -530,10 +570,12 @@ export default function MasterAdsLanding() {
 
         <div className="max-w-3xl mx-auto mt-10 grid sm:grid-cols-2 gap-5">
           {LOGROS.map((l, i) => (
-            <div key={l.texto} className="flex items-start gap-3.5 bg-secondary-light/60 rounded-2xl p-5">
-              <IconBadge nombre={l.icono} tone={["primary", "accent", "sky", "sun"][i % 4]} />
-              <span className="text-neutral-700 text-sm leading-relaxed pt-1.5">{l.texto}</span>
-            </div>
+            <Reveal key={l.texto} delay={i * 60}>
+              <div className="flex items-start gap-3.5 bg-secondary-light/60 rounded-2xl p-5 hover:bg-secondary-light transition-colors">
+                <IconBadge nombre={l.icono} tone={["primary", "accent", "sky", "sun"][i % 4]} />
+                <span className="text-neutral-700 text-sm leading-relaxed pt-1.5">{l.texto}</span>
+              </div>
+            </Reveal>
           ))}
         </div>
 
@@ -555,8 +597,10 @@ export default function MasterAdsLanding() {
           </p>
         </div>
         <div className="max-w-4xl mx-auto grid sm:grid-cols-3 gap-5 items-stretch">
-          {HERRAMIENTAS.map((h) => (
-            <HerramientaCard key={h.titulo} h={h} />
+          {HERRAMIENTAS.map((h, i) => (
+            <Reveal key={h.titulo} delay={i * 100} className="h-full">
+              <HerramientaCard h={h} />
+            </Reveal>
           ))}
         </div>
       </section>
@@ -569,26 +613,33 @@ export default function MasterAdsLanding() {
             Otras asesorías vs. Inspira Legal
           </h2>
         </div>
-        <div className="max-w-3xl mx-auto overflow-x-auto">
-          <div className="min-w-[560px] rounded-2xl border border-neutral-200 overflow-hidden">
-            <div className="grid grid-cols-[1fr,1.3fr,1.3fr] bg-primary text-white text-sm font-bold">
-              <div className="px-4 py-3"> </div>
-              <div className="px-4 py-3 border-l border-white/10">Otras asesorías</div>
-              <div className="px-4 py-3 border-l border-white/10 bg-accent">Inspira Legal</div>
-            </div>
-            {COMPARATIVA.map((row, i) => (
-              <div
-                key={row.tema}
-                className={`grid grid-cols-[1fr,1.3fr,1.3fr] text-sm ${i % 2 ? "bg-secondary-light/60" : "bg-white"}`}
-              >
-                <div className="px-4 py-3.5 font-semibold text-primary">{row.tema}</div>
-                <div className="px-4 py-3.5 border-l border-neutral-100 text-neutral-500">{row.otros}</div>
-                <div className="px-4 py-3.5 border-l border-neutral-100 text-neutral-700 font-medium bg-accent/5">
-                  {row.inspira}
+        <div className="max-w-3xl mx-auto grid sm:grid-cols-2 gap-2 mb-2 px-1">
+          <p className="text-xs font-black uppercase tracking-widest text-neutral-400 text-center">✕ Otras asesorías</p>
+          <p className="text-xs font-black uppercase tracking-widest text-accent text-center">✓ Inspira Legal</p>
+        </div>
+        <div className="max-w-3xl mx-auto space-y-4">
+          {COMPARATIVA.map((row, i) => (
+            <Reveal key={row.tema} delay={i * 80}>
+              <div className="group relative grid sm:grid-cols-2 rounded-2xl overflow-hidden border border-neutral-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div className="bg-neutral-50 p-5 sm:pr-9">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">{row.tema}</p>
+                  <div className="flex items-start gap-2.5">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center text-xs font-black">✕</span>
+                    <p className="text-sm text-neutral-500 leading-snug">{row.otros}</p>
+                  </div>
+                </div>
+                <div className="bg-accent/10 p-5 sm:pl-9 border-t sm:border-t-0 sm:border-l border-neutral-200">
+                  <div className="flex items-start gap-2.5">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-black">✓</span>
+                    <p className="text-sm text-primary font-semibold leading-snug">{row.inspira}</p>
+                  </div>
+                </div>
+                <div className="hidden sm:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-primary text-white items-center justify-center text-[10px] font-black shadow-lg z-10 group-hover:scale-110 transition-transform">
+                  VS
                 </div>
               </div>
-            ))}
-          </div>
+            </Reveal>
+          ))}
         </div>
         <div className="text-center mt-10">
           <CTAButton>Quiero mi asesoría personalizada →</CTAButton>
@@ -596,9 +647,6 @@ export default function MasterAdsLanding() {
       </section>
 
       {/* Cobertura nacional: franja animada de comunidades reales */}
-      <style>{`
-        @keyframes marqueeComunidades { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-      `}</style>
       <section className="py-14 bg-primary overflow-hidden">
         <div className="text-center mb-7 px-6">
           <p className="text-white/60 text-xs font-bold uppercase tracking-widest">
@@ -626,17 +674,19 @@ export default function MasterAdsLanding() {
           </h2>
         </div>
         <div className="max-w-3xl mx-auto grid sm:grid-cols-2 gap-6">
-          {TESTIMONIOS.map((t) => (
-            <div key={t.nombre} className="bg-white rounded-2xl p-6 shadow-sm">
-              <div className="flex gap-0.5 mb-3 text-sun">
-                {Array.from({ length: t.estrellas }).map((_, i) => (
-                  <Icono key={i} nombre="estrella" size={16} />
-                ))}
+          {TESTIMONIOS.map((t, i) => (
+            <Reveal key={t.nombre} delay={i * 100}>
+              <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
+                <div className="flex gap-0.5 mb-3 text-sun">
+                  {Array.from({ length: t.estrellas }).map((_, j) => (
+                    <Icono key={j} nombre="estrella" size={16} />
+                  ))}
+                </div>
+                <p className="text-neutral-700 text-sm leading-relaxed mb-4">“{t.texto}”</p>
+                <p className="text-xs font-bold text-primary">{t.nombre}</p>
+                <p className="text-xs text-neutral-400">{t.servicio} · {t.fuente}</p>
               </div>
-              <p className="text-neutral-700 text-sm leading-relaxed mb-4">“{t.texto}”</p>
-              <p className="text-xs font-bold text-primary">{t.nombre}</p>
-              <p className="text-xs text-neutral-400">{t.servicio} · {t.fuente}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -685,7 +735,7 @@ export default function MasterAdsLanding() {
             Cuéntanos en 2 clics qué buscas
           </h2>
         </div>
-        <PlanQuiz />
+        <Reveal><PlanQuiz /></Reveal>
       </section>
 
       {/* FAQ interactivo */}
@@ -745,8 +795,8 @@ export default function MasterAdsLanding() {
         </div>
       </section>
 
-      {/* Footer mínimo */}
-      <footer className="py-8 px-6 border-t border-neutral-100">
+      {/* Footer mínimo (padding extra abajo: la barra fija de reserva es siempre visible) */}
+      <footer className="py-8 pb-24 px-6 border-t border-neutral-100">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400">
           <div className="flex items-center gap-2">
             <img src={logo} alt="Inspira Legal" className="h-5 w-auto opacity-70" />
@@ -760,13 +810,19 @@ export default function MasterAdsLanding() {
         </div>
       </footer>
 
-      {/* Barra fija de reserva */}
-      {barVisible && !barDismissed && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-primary/95 backdrop-blur-sm border-t border-white/10 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
+      {/* Barra fija de reserva: siempre disponible desde que carga la página */}
+      {!barDismissed && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-primary/95 backdrop-blur-sm border-t border-white/10 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] animate-[fadeInUpBar_0.5s_ease-out]">
           <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
             <div className="min-w-0 hidden sm:block">
-              <p className="text-white text-sm font-semibold truncate">Asesoría personalizada 1:1 · 30 min</p>
-              <p className="text-white/60 text-xs">{ASESORIA_PRINCIPAL.precio} · {ASESORIA_PRINCIPAL.precioAlt}</p>
+              <p className="text-white text-sm font-semibold truncate flex items-center gap-2">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                </span>
+                Asesoría personalizada 1:1 · 30 min
+              </p>
+              <p className="text-white/60 text-xs">{ASESORIA_PRINCIPAL.precio} · {ASESORIA_PRINCIPAL.precioAlt} · Disponible ahora</p>
             </div>
             <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
               <CTAButton className="!px-5 !py-2.5 text-sm whitespace-nowrap">Reservar ahora</CTAButton>

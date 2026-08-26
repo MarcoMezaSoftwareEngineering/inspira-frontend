@@ -140,7 +140,6 @@ const QUIZ_TRAMITE = ["Sí, ya lo tengo resuelto", "No, todavía no", "No estoy 
 const MODALES = {
   recordatorio: {
     icono: "birrete",
-    tono: "accent",
     titulo: "¿Todavía tienes dudas sobre tu máster?",
     texto:
       "Resuélvelas en una asesoría personalizada de 30 minutos con un especialista. Sales con un plan de acción concreto para tu caso.",
@@ -148,7 +147,6 @@ const MODALES = {
   },
   precio: {
     icono: "euro",
-    tono: "sun",
     titulo: "Hay opciones para cada presupuesto",
     texto:
       "Desde programas económicos por 730 €/año hasta MBA de mejor ranking. En tu asesoría te mostramos exactamente qué opciones encajan con tu presupuesto.",
@@ -156,7 +154,6 @@ const MODALES = {
   },
   salida: {
     icono: "reloj",
-    tono: "primary",
     titulo: "Antes de irte…",
     texto: `Tu asesoría personalizada de 30 minutos sigue disponible por ${ASESORIA_PRINCIPAL.precio}. Agenda ahora y sal con un plan de acción concreto para tu máster.`,
     cta: "Sí, quiero mi asesoría",
@@ -192,7 +189,7 @@ function CTAButton({ children, className = "", pulse = false, fullWidth = false 
         href={CALENDLY_URL}
         target="_blank"
         rel="noopener"
-        className={`relative inline-flex items-center justify-center gap-2 font-bold px-7 py-4 rounded-xl transition-all hover:scale-[1.03] hover:shadow-xl active:scale-95 bg-accent hover:bg-accent-dark text-white ${fullWidth ? "w-full" : ""} ${className}`}
+        className={`relative inline-flex items-center justify-center gap-2 font-bold px-7 py-4 rounded-xl transition-all duration-300 ease-out hover:scale-[1.04] hover:shadow-[0_10px_30px_-6px_rgba(250,148,58,0.55)] active:scale-95 bg-accent hover:bg-accent-dark text-white ${fullWidth ? "w-full" : ""} ${className}`}
       >
         {children}
       </a>
@@ -200,9 +197,9 @@ function CTAButton({ children, className = "", pulse = false, fullWidth = false 
   );
 }
 
-function Eyebrow({ children, dark = false }) {
+function Eyebrow({ children }) {
   return (
-    <span className={`text-xs font-bold uppercase tracking-[0.18em] ${dark ? "text-sky" : "text-accent"}`}>
+    <span className="text-xs font-bold uppercase tracking-[0.18em] text-accent">
       {children}
     </span>
   );
@@ -700,27 +697,8 @@ export default function MasterAdsLanding() {
         </div>
       </section>
 
-      {/* Cobertura nacional: franja animada de comunidades reales */}
-      <section className="py-14 bg-primary overflow-hidden">
-        <div className="text-center mb-7 px-6">
-          <p className="text-white/60 text-xs font-bold uppercase tracking-widest">
-            Cobertura nacional real · 17 comunidades · +80 universidades públicas y privadas
-          </p>
-        </div>
-        <div className="flex w-max animate-[marqueeComunidades_32s_linear_infinite]">
-          {[...COMUNIDADES, ...COMUNIDADES].map((c, i) => (
-            <span
-              key={`${c}-${i}`}
-              className="shrink-0 mx-2.5 px-5 py-2.5 rounded-full bg-white/10 border border-white/15 text-white text-sm font-semibold whitespace-nowrap"
-            >
-              {c}
-            </span>
-          ))}
-        </div>
-      </section>
-
       {/* Testimonios reales */}
-      <section className="py-16 px-6 bg-sky-light">
+      <section className="py-16 px-6 bg-neutral-50">
         <div className="max-w-3xl mx-auto text-center mb-10">
           <Eyebrow>Casos reales</Eyebrow>
           <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
@@ -730,7 +708,7 @@ export default function MasterAdsLanding() {
         <div className="max-w-3xl mx-auto grid sm:grid-cols-2 gap-6">
           {TESTIMONIOS.map((t, i) => (
             <Reveal key={t.nombre} delay={i * 100}>
-              <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
+              <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all border border-neutral-100">
                 <div className="flex gap-0.5 mb-3 text-sun">
                   {Array.from({ length: t.estrellas }).map((_, j) => (
                     <Icono key={j} nombre="estrella" size={16} />
@@ -745,40 +723,73 @@ export default function MasterAdsLanding() {
         </div>
       </section>
 
-      {/* Sobre Inspira Legal */}
-      <section className="py-16 px-6 bg-primary overflow-hidden">
-        <div className="max-w-3xl mx-auto text-center">
-          <Eyebrow dark>Sobre Inspira Legal</Eyebrow>
-          <h2 className="font-fraunces text-3xl md:text-4xl font-bold text-white mt-2">
-            Un equipo real, no una plantilla genérica.
-          </h2>
-          <p className="text-white/70 mt-4 max-w-xl mx-auto leading-relaxed">
-            Combinamos derecho migratorio español con herramientas digitales para que cada
-            trámite sea claro, medible y acompañado. Detrás de tu expediente hay personas de
-            verdad, no un chatbot.
-          </p>
+      {/* Sobre Inspira Legal — único bloque oscuro de toda la página, con
+          la cobertura nacional integrada (antes eran 2 secciones navy
+          separadas por una clara: rompía el ritmo visual). */}
+      <section className="relative bg-primary overflow-hidden">
+        {/* Divisor curvo de entrada */}
+        <svg className="block w-full h-10 sm:h-14 text-neutral-50" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+          <path fill="currentColor" d="M0,60 C300,0 900,0 1200,60 L1200,0 L0,0 Z" />
+        </svg>
+
+        <div className="px-6 pb-14">
+          <div className="max-w-3xl mx-auto text-center">
+            <Eyebrow>Sobre Inspira Legal</Eyebrow>
+            <h2 className="font-fraunces text-3xl md:text-4xl font-bold text-white mt-2">
+              Un equipo real, no una plantilla genérica.
+            </h2>
+            <p className="text-white/70 mt-4 max-w-xl mx-auto leading-relaxed">
+              Combinamos derecho migratorio español con herramientas digitales para que cada
+              trámite sea claro, medible y acompañado. Detrás de tu expediente hay personas de
+              verdad, no un chatbot.
+            </p>
+          </div>
+
+          <div className="max-w-md mx-auto mt-10 grid grid-cols-2 gap-5">
+            {EQUIPO_FOTOS.map((p) => (
+              <img
+                key={p.alt}
+                src={p.foto}
+                alt={p.alt}
+                className="w-full rounded-3xl shadow-2xl ring-4 ring-white/10 transition-transform duration-300 hover:scale-105 hover:-rotate-1"
+              />
+            ))}
+          </div>
+
+          <div className="max-w-4xl mx-auto mt-12 grid sm:grid-cols-3 gap-5">
+            {COMO_TRABAJAMOS.map((item) => (
+              <div key={item.titulo} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors">
+                <div className="mb-3 text-sun"><Icono nombre={item.icono} size={26} /></div>
+                <h3 className="font-bold text-white">{item.titulo}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/60">{item.texto}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="max-w-md mx-auto mt-10 grid grid-cols-2 gap-5">
-          {EQUIPO_FOTOS.map((p) => (
-            <img
-              key={p.alt}
-              src={p.foto}
-              alt={p.alt}
-              className="w-full rounded-3xl shadow-2xl ring-4 ring-white/10 transition-transform duration-300 hover:scale-105 hover:-rotate-1"
-            />
-          ))}
+        {/* Cobertura nacional, misma sección, mismo fondo */}
+        <div className="border-t border-white/10 pt-8 pb-3">
+          <div className="text-center mb-6 px-6">
+            <p className="text-white/50 text-xs font-bold uppercase tracking-widest">
+              Cobertura nacional real · 17 comunidades · +80 universidades públicas y privadas
+            </p>
+          </div>
+          <div className="flex w-max animate-[marqueeComunidades_32s_linear_infinite]">
+            {[...COMUNIDADES, ...COMUNIDADES].map((c, i) => (
+              <span
+                key={`${c}-${i}`}
+                className="shrink-0 mx-2.5 px-5 py-2.5 rounded-full bg-white/10 border border-white/15 text-white text-sm font-semibold whitespace-nowrap"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="max-w-4xl mx-auto mt-12 grid sm:grid-cols-3 gap-5">
-          {COMO_TRABAJAMOS.map((item) => (
-            <div key={item.titulo} className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <div className="mb-3 text-sun"><Icono nombre={item.icono} size={26} /></div>
-              <h3 className="font-bold text-white">{item.titulo}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/60">{item.texto}</p>
-            </div>
-          ))}
-        </div>
+        {/* Divisor curvo de salida */}
+        <svg className="block w-full h-10 sm:h-14 text-secondary-light" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+          <path fill="currentColor" d="M0,0 C300,60 900,60 1200,0 L1200,60 L0,60 Z" />
+        </svg>
       </section>
 
       {/* Quiz interactivo: personaliza el mensaje y empuja a reservar */}
@@ -896,14 +907,13 @@ export default function MasterAdsLanding() {
       {/* Ventana emergente: recordatorio, precio (por scroll) o salida */}
       {modal && (() => {
         const m = MODALES[modal];
-        const badgeTone = { accent: "bg-accent", sun: "bg-sun", primary: "bg-primary" }[m.tono] || "bg-accent";
         return (
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-primary/70 backdrop-blur-sm p-4"
             onClick={() => setModal(null)}
           >
             <div
-              className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-7 text-center animate-[modalPopIn_0.3s_ease-out_both]"
+              className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center animate-[modalPopIn_0.3s_ease-out_both]"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -914,12 +924,19 @@ export default function MasterAdsLanding() {
               >
                 ✕
               </button>
-              <div className={`mx-auto w-14 h-14 rounded-2xl ${badgeTone} text-white flex items-center justify-center mb-4`}>
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center mb-4">
                 <Icono nombre={m.icono} size={28} />
               </div>
               <h3 className="font-fraunces text-xl font-bold text-primary mb-2">{m.titulo}</h3>
-              <p className="text-sm text-neutral-500 mb-5 leading-relaxed">{m.texto}</p>
+              <p className="text-sm text-neutral-500 mb-6 leading-relaxed">{m.texto}</p>
               <CTAButton pulse fullWidth>{m.cta}</CTAButton>
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                className="mt-3 text-xs text-neutral-400 hover:text-neutral-600"
+              >
+                Ahora no
+              </button>
             </div>
           </div>
         );

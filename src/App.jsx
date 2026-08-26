@@ -11,6 +11,7 @@ const BackofficeApp = lazy(() => import("./pages/backoffice/BackofficeApp"));
 const CalculadoraMaster = lazy(() => import("./pages/calculadora/CalculadoraMaster"));
 const PanelCliente = lazy(() => import("./pages/panel/PanelCliente"));
 const ReservarCita = lazy(() => import("./pages/reservar/ReservarCita"));
+const MasterAdsLanding = lazy(() => import("./pages/landing/MasterAdsLanding"));
 import ServiciosCatalogo from "./pages/servicios/ServiciosCatalogo";
 import ServicioDetalle from "./pages/servicios/ServicioDetalle";
 import { getServicio } from "./config/servicios";
@@ -238,9 +239,13 @@ const SCHEMA_ESTANCIA = {
 // ── Componente de SEO por ruta ──────────────────────────────────────────────
 const PRIVATE_PATHS = ["/panel", "/auth/success"];
 
+// Landings standalone para campañas de ads: sin Header/Footer del sitio, y
+// sin indexar (tráfico pagado, no orgánico).
+const LANDING_ADS_PATHS = ["/master-espana"];
+
 function RouteSEO({ path }) {
   const isPrivate =
-    PRIVATE_PATHS.includes(path) || path.startsWith("/backoffice");
+    PRIVATE_PATHS.includes(path) || path.startsWith("/backoffice") || LANDING_ADS_PATHS.includes(path);
   let config = SEO_PAGES[path];
   // Páginas de servicio: SEO dinámico a partir del catálogo
   if (!config && path.startsWith("/servicios/")) {
@@ -288,6 +293,7 @@ const PUBLIC_PATHS = [
   "/ruta/denegado",
   "/ruta/tramites",
   "/calculadora-master",
+  "/master-espana",
   "/panel",
   "/pago-exitoso",
   "/pago-fallido",
@@ -323,6 +329,7 @@ export default function App() {
   }
 
   const isPanel = path.startsWith("/panel");
+  const isLandingAds = LANDING_ADS_PATHS.includes(path);
   const isBlogPost = path.startsWith("/blog/") && !!getPost(path.slice("/blog/".length));
   const servicioId = path.startsWith("/servicios/")
     ? path.slice("/servicios/".length)
@@ -336,14 +343,14 @@ export default function App() {
   return (
     <div className="min-h-screen w-full bg-white">
       <RouteSEO path={path} />
-      {!isPanel && <BarraProgreso />}
+      {!isPanel && !isLandingAds && <BarraProgreso />}
 
       {/* Schema.org según ruta */}
       {path === "/" && <SEOSchema schema={SCHEMA_ORG} id="org" />}
       {path === "/servicios/master" && <SEOSchema schema={SCHEMA_MASTER} id="master" />}
       {path === "/servicios/estancia" && <SEOSchema schema={SCHEMA_ESTANCIA} id="estancia" />}
 
-      {!isPanel && !isNotFound && <Header />}
+      {!isPanel && !isLandingAds && !isNotFound && <Header />}
 
       {/* `key` fuerza el remontaje al navegar: cada página entra con animación */}
       <div key={path} className={isPanel ? undefined : "v4-page-enter"}>
@@ -366,6 +373,7 @@ export default function App() {
       {path === "/calculadora-master" && <CalculadoraMaster />}
       {path === "/panel" && <PanelCliente />}
       {path === "/reservar" && <ReservarCita />}
+      {path === "/master-espana" && <MasterAdsLanding />}
       {path === "/pago-exitoso" && <PagoExitoso />}
       {path === "/pago-fallido" && <PagoFallido />}
       {path === "/pago-pendiente" && <PagoPendiente />}
@@ -388,13 +396,13 @@ export default function App() {
       </div>
 
       {/* El footer identifica al proveedor en todas las páginas públicas */}
-      {!isPanel && <Footer />}
+      {!isPanel && !isLandingAds && <Footer />}
 
       {/* Invitación permanente a la primera asesoría (no en el panel privado) */}
-      {!isPanel && <AsesoriaCTA />}
+      {!isPanel && !isLandingAds && <AsesoriaCTA />}
 
       {/* Navegación inferior tipo app (móvil y tablet) */}
-      {!isPanel && (
+      {!isPanel && !isLandingAds && (
         <BarraInferior
           onReservar={() =>
             window.dispatchEvent(new CustomEvent("inspira:abrir-asesoria"))

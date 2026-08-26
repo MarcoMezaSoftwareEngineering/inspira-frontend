@@ -2,15 +2,20 @@
 //
 // Landing standalone para campañas de ads (Meta/IG). Sin Header ni Footer
 // del sitio: una sola página, un solo objetivo — agendar la asesoría
-// personalizada de 30 minutos. Todo el contenido (etapas, beneficios,
-// precios) sale de lo que ya existe en /servicios/master y /nosotros; nada
-// inventado.
+// personalizada de 30 minutos. Contenido, precios e iconos salen de lo que
+// ya existe en /servicios/master, /nosotros y config/testimonios.js; nada
+// inventado (testimonios reales, sin claims nuevos).
+import { useEffect, useState } from "react";
 import { CALENDLY_URL } from "../../config/contacto";
 import { ASESORIA_PRINCIPAL } from "../../config/asesorias";
+import { TESTIMONIOS } from "../../config/testimonios";
+import Icono from "../../components/common/Icono";
+import logo from "../../assets/images/logo.png";
 
 const ETAPAS = [
   {
     n: "01",
+    icono: "brujula",
     title: "Búsqueda y viabilidad",
     bullets: [
       "Entrevista inicial y análisis de perfil",
@@ -20,6 +25,7 @@ const ETAPAS = [
   },
   {
     n: "02",
+    icono: "libro",
     title: "Guía y asesoría educativa",
     bullets: [
       "CV europeo optimizado para universidades",
@@ -30,6 +36,7 @@ const ETAPAS = [
   },
   {
     n: "03",
+    icono: "documento",
     title: "Postulación a másteres",
     bullets: [
       "Postulación oficial por universidad y comunidad",
@@ -40,6 +47,7 @@ const ETAPAS = [
   },
   {
     n: "04",
+    icono: "birrete",
     title: "Matrícula y admisión final",
     bullets: [
       "Revisión de carta de admisión oficial",
@@ -50,29 +58,51 @@ const ETAPAS = [
 ];
 
 const LOGROS = [
-  "Acompañamiento por especialistas en extranjería y educación española en cada paso.",
-  "Reuniones 1 a 1 para avances, dudas y subsanaciones en tiempo real.",
-  "Trámites que cumplen la normativa española vigente, sin riesgos.",
-  "Gestión integral: de documentos y CV a admisión, postulación y matrícula final.",
-  "Acceso a becas como Generación Bicentenario y Fundación Carolina.",
-  "Búsqueda personalizada entre +80 universidades públicas españolas.",
+  { icono: "usuarios", texto: "Acompañamiento por especialistas en extranjería y educación española en cada paso." },
+  { icono: "chat", texto: "Reuniones 1 a 1 para avances, dudas y subsanaciones en tiempo real." },
+  { icono: "escudo", texto: "Trámites que cumplen la normativa española vigente, sin riesgos." },
+  { icono: "maletin", texto: "Gestión integral: de documentos y CV a admisión, postulación y matrícula final." },
+  { icono: "estrella", texto: "Acceso a becas como Generación Bicentenario y Fundación Carolina." },
+  { icono: "mapa", texto: "Búsqueda personalizada entre +80 universidades públicas españolas." },
 ];
 
 const COMO_TRABAJAMOS = [
   {
+    icono: "balanza",
     titulo: "Diagnóstico honesto",
     texto:
       "En la primera asesoría te decimos qué vía te conviene de verdad — incluso si eso significa esperar o elegir un proceso distinto al que tenías en mente.",
   },
   {
+    icono: "maletin",
     titulo: "Paquete a tu medida",
     texto:
       "No vendemos paquetes genéricos: después de conocer tu caso armamos exactamente los servicios que necesitas, ni uno más.",
   },
   {
+    icono: "laptop",
     titulo: "Seguimiento medible",
     texto:
       "Cada expediente vive en nuestro panel digital: sabes en qué paso está tu trámite, qué falta y qué sigue, sin perseguir a nadie.",
+  },
+];
+
+const FAQS = [
+  {
+    q: "¿Qué incluye la asesoría de 30 minutos?",
+    a: `${ASESORIA_PRINCIPAL.descripcion} Incluye: ${ASESORIA_PRINCIPAL.incluye.join("; ")}.`,
+  },
+  {
+    q: "¿Es totalmente online?",
+    a: "Sí. La reunión es online, desde cualquier parte del mundo, a la hora que agendes en el calendario.",
+  },
+  {
+    q: "¿Cuánto cuesta el Programa 360° completo?",
+    a: "Depende de tu perfil y del alcance que necesites (universidades y comunidades). En la asesoría revisamos tu caso y te damos el costo exacto para tu situación, sin compromiso.",
+  },
+  {
+    q: "¿Qué pasa después de la asesoría?",
+    a: "Si decides avanzar, entras al Programa 360°: 4 etapas guiadas, desde la búsqueda y viabilidad hasta tu matrícula final, con seguimiento en nuestro panel digital.",
   },
 ];
 
@@ -82,56 +112,121 @@ function CTAButton({ children, className = "" }) {
       href={CALENDLY_URL}
       target="_blank"
       rel="noopener"
-      className={`inline-flex items-center justify-center gap-2 font-semibold px-7 py-4 rounded-xl transition-all hover:scale-[1.03] hover:shadow-xl active:scale-95 ${className}`}
-      style={{ background: "#FA943A", color: "#fff" }}
+      className={`inline-flex items-center justify-center gap-2 font-bold px-7 py-4 rounded-xl transition-all hover:scale-[1.03] hover:shadow-xl active:scale-95 bg-accent hover:bg-accent-dark text-white ${className}`}
     >
       {children}
     </a>
   );
 }
 
-function Eyebrow({ children }) {
+function Eyebrow({ children, dark = false }) {
   return (
-    <span className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: "#FA943A" }}>
+    <span className={`text-xs font-bold uppercase tracking-[0.18em] ${dark ? "text-sky" : "text-accent"}`}>
       {children}
     </span>
   );
 }
 
-export default function MasterAdsLanding() {
+function IconBadge({ nombre, size = "md", tone = "primary" }) {
+  const dims = size === "lg" ? "w-14 h-14" : "w-11 h-11";
+  const tones = {
+    primary: "bg-primary text-white",
+    accent: "bg-accent text-white",
+    sky: "bg-sky text-primary",
+    sun: "bg-sun text-primary",
+  };
   return (
-    <div className="w-full bg-white overflow-x-hidden">
-      {/* Marca mínima, sin menú */}
+    <div className={`shrink-0 rounded-xl flex items-center justify-center ${dims} ${tones[tone]}`}>
+      <Icono nombre={nombre} size={size === "lg" ? 26 : 22} />
+    </div>
+  );
+}
+
+function FaqItem({ item, open, onToggle }) {
+  return (
+    <div className="border border-neutral-200 rounded-2xl overflow-hidden bg-white">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+      >
+        <span className="font-semibold text-primary">{item.q}</span>
+        <span
+          className={`shrink-0 w-7 h-7 rounded-full bg-secondary-light flex items-center justify-center text-primary transition-transform ${open ? "rotate-45" : ""}`}
+        >
+          +
+        </span>
+      </button>
+      {open && (
+        <div className="px-5 pb-5 text-sm text-neutral-600 leading-relaxed">{item.a}</div>
+      )}
+    </div>
+  );
+}
+
+export default function MasterAdsLanding() {
+  const [faqOpen, setFaqOpen] = useState(0);
+  const [barVisible, setBarVisible] = useState(false);
+  const [barDismissed, setBarDismissed] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Barra fija: aparece al bajar más allá del hero.
+  useEffect(() => {
+    function onScroll() {
+      setBarVisible(window.scrollY > 620);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Ventana emergente: una sola vez por sesión, a los 18s.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("master_ads_popup_visto")) return;
+    } catch { /* noop */ }
+    const t = setTimeout(() => {
+      setModalOpen(true);
+      try { sessionStorage.setItem("master_ads_popup_visto", "1"); } catch { /* noop */ }
+    }, 18000);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="w-full bg-white overflow-x-hidden font-sans">
+      {/* Marca mínima, con salida hacia el sitio completo */}
       <div className="px-6 pt-6">
-        <div className="max-w-3xl mx-auto flex items-center gap-2">
-          <span className="font-fraunces font-bold text-lg" style={{ color: "#013446" }}>
-            Inspira Legal
-          </span>
-          <span className="text-xs text-neutral-400">· Asesoría educativa y extranjería</span>
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <img src={logo} alt="Inspira Legal" className="h-8 w-auto" />
+            <span className="text-xs text-neutral-400 hidden sm:inline">· Asesoría educativa y extranjería</span>
+          </div>
+          <a
+            href="/servicios/master"
+            className="text-xs font-semibold text-primary/70 hover:text-primary underline underline-offset-4 shrink-0"
+          >
+            Ver sitio completo →
+          </a>
         </div>
       </div>
 
       {/* Hero */}
       <section className="px-6 pt-10 pb-16 relative overflow-hidden">
         <div
-          className="absolute top-0 right-0 rounded-full pointer-events-none"
-          style={{
-            width: "600px",
-            height: "600px",
-            background: "radial-gradient(circle, #FA943A 0%, transparent 70%)",
-            opacity: 0.08,
-            transform: "translate(30%, -30%)",
-          }}
+          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none bg-accent opacity-[0.08]"
+          style={{ transform: "translate(30%, -30%)" }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none bg-sky opacity-[0.12]"
+          style={{ transform: "translate(-30%, 30%)" }}
         />
         <div className="max-w-3xl mx-auto relative z-10 text-center">
-          <span
-            className="inline-block bg-[#013446]/5 border border-[#013446]/10 text-[#013446]/80 text-sm px-4 py-1.5 rounded-full mb-6"
-          >
+          <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 text-primary/80 text-sm px-4 py-1.5 rounded-full mb-6">
+            <Icono nombre="birrete" size={16} />
             Programa Máster 360° · España 2026/2027
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-5" style={{ color: "#013446" }}>
+          <h1 className="font-fraunces text-4xl md:text-5xl font-bold leading-tight mb-5 text-primary">
             Ayudamos a profesionales latinoamericanos a estudiar un{" "}
-            <span style={{ color: "#FA943A" }}>máster en universidades públicas de España</span>,
+            <span className="text-accent">máster en universidades públicas de España</span>,
             con acompañamiento 360°.
           </h1>
           <p className="text-neutral-500 text-lg mb-8 leading-relaxed max-w-xl mx-auto">
@@ -141,18 +236,28 @@ export default function MasterAdsLanding() {
 
           <div className="flex gap-4 mb-9 max-w-md mx-auto">
             {[
-              { n: "98%", l: "Admisión" },
-              { n: "+45", l: "Universidades" },
-              { n: "4", l: "Etapas" },
+              { n: "98%", l: "Admisión", tone: "sky" },
+              { n: "+45", l: "Universidades", tone: "sun" },
+              { n: "4", l: "Etapas", tone: "accent" },
             ].map((s) => (
-              <div key={s.l} className="bg-[#013446]/5 border border-[#013446]/10 rounded-xl px-4 py-3 text-center flex-1">
-                <div className="text-2xl font-bold" style={{ color: "#FA943A" }}>{s.n}</div>
+              <div key={s.l} className="bg-primary/5 border border-primary/10 rounded-xl px-4 py-3 text-center flex-1">
+                <div className={`text-2xl font-bold ${s.tone === "sky" ? "text-sky-dark" : s.tone === "sun" ? "text-[#C98F1B]" : "text-accent"}`}>
+                  {s.n}
+                </div>
                 <div className="text-neutral-500 text-xs mt-0.5">{s.l}</div>
               </div>
             ))}
           </div>
 
-          <CTAButton>Quiero mi asesoría personalizada →</CTAButton>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <CTAButton>Quiero mi asesoría personalizada →</CTAButton>
+            <a
+              href="/servicios/master"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary/70 hover:text-primary px-2 py-2"
+            >
+              Conocer el Programa 360° completo
+            </a>
+          </div>
           <p className="text-xs text-neutral-400 mt-3">
             30 minutos · {ASESORIA_PRINCIPAL.precio} ({ASESORIA_PRINCIPAL.precioAlt})
           </p>
@@ -160,11 +265,11 @@ export default function MasterAdsLanding() {
       </section>
 
       {/* El método */}
-      <section className="py-16 px-6" style={{ background: "#F4F8FC" }}>
+      <section className="py-16 px-6 bg-secondary-light">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <Eyebrow>El Programa 360°</Eyebrow>
-            <h2 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: "#013446" }}>
+            <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
               Trabajamos 4 etapas hasta tu máster
             </h2>
             <p className="text-neutral-500 mt-3">
@@ -174,21 +279,19 @@ export default function MasterAdsLanding() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {ETAPAS.map((e) => (
-              <article key={e.n} className="bg-white rounded-2xl border border-neutral-200 p-7 hover:shadow-lg transition-all">
+            {ETAPAS.map((e, i) => (
+              <article key={e.n} className="bg-white rounded-2xl border border-neutral-200 p-7 hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start gap-4">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-white text-sm"
-                    style={{ background: "linear-gradient(135deg, #013446, #02506B)" }}
-                  >
-                    {e.n}
-                  </div>
+                  <IconBadge nombre={e.icono} tone={["primary", "accent", "sky", "sun"][i % 4]} />
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-3" style={{ color: "#013446" }}>{e.title}</h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-black text-accent">{e.n}</span>
+                      <h3 className="font-bold text-lg text-primary">{e.title}</h3>
+                    </div>
                     <ul className="space-y-1.5">
                       {e.bullets.map((x) => (
                         <li key={x} className="flex items-start gap-2 text-neutral-600 text-sm">
-                          <span className="flex-shrink-0 mt-0.5 font-bold" style={{ color: "#FA943A" }}>✓</span>
+                          <span className="flex-shrink-0 mt-0.5 font-bold text-accent">✓</span>
                           {x}
                         </li>
                       ))}
@@ -205,35 +308,54 @@ export default function MasterAdsLanding() {
       <section className="py-16 px-6 bg-white">
         <div className="max-w-3xl mx-auto text-center">
           <Eyebrow>¿Por qué elegirnos?</Eyebrow>
-          <h2 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: "#013446" }}>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
             Esto es lo que obtienes con el Programa 360°
           </h2>
         </div>
 
-        <ul className="max-w-2xl mx-auto mt-10 space-y-4">
-          {LOGROS.map((l) => (
-            <li key={l} className="flex items-start gap-3 text-neutral-700">
-              <span
-                className="shrink-0 mt-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                style={{ background: "#013446" }}
-              >
-                ✓
-              </span>
-              <span>{l}</span>
-            </li>
+        <div className="max-w-3xl mx-auto mt-10 grid sm:grid-cols-2 gap-5">
+          {LOGROS.map((l, i) => (
+            <div key={l.texto} className="flex items-start gap-3.5 bg-secondary-light/60 rounded-2xl p-5">
+              <IconBadge nombre={l.icono} tone={["primary", "accent", "sky", "sun"][i % 4]} />
+              <span className="text-neutral-700 text-sm leading-relaxed pt-1.5">{l.texto}</span>
+            </div>
           ))}
-        </ul>
+        </div>
 
         <div className="text-center mt-10">
           <CTAButton>Quiero mi asesoría personalizada →</CTAButton>
         </div>
       </section>
 
+      {/* Testimonios reales */}
+      <section className="py-16 px-6 bg-sky-light">
+        <div className="max-w-3xl mx-auto text-center mb-10">
+          <Eyebrow>Casos reales</Eyebrow>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
+            Lo que dicen quienes ya pasaron por esto
+          </h2>
+        </div>
+        <div className="max-w-3xl mx-auto grid sm:grid-cols-2 gap-6">
+          {TESTIMONIOS.map((t) => (
+            <div key={t.nombre} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div className="flex gap-0.5 mb-3 text-sun">
+                {Array.from({ length: t.estrellas }).map((_, i) => (
+                  <Icono key={i} nombre="estrella" size={16} />
+                ))}
+              </div>
+              <p className="text-neutral-700 text-sm leading-relaxed mb-4">“{t.texto}”</p>
+              <p className="text-xs font-bold text-primary">{t.nombre}</p>
+              <p className="text-xs text-neutral-400">{t.servicio} · {t.fuente}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Sobre Inspira Legal */}
-      <section className="py-16 px-6" style={{ background: "#013446" }}>
+      <section className="py-16 px-6 bg-primary">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Sobre Inspira Legal</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">
+          <Eyebrow dark>Sobre Inspira Legal</Eyebrow>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold text-white mt-2">
             Un equipo de abogados asociados, no una plantilla genérica.
           </h2>
           <p className="text-white/70 mt-4 max-w-xl mx-auto leading-relaxed">
@@ -245,6 +367,7 @@ export default function MasterAdsLanding() {
         <div className="max-w-4xl mx-auto mt-12 grid sm:grid-cols-3 gap-5">
           {COMO_TRABAJAMOS.map((item) => (
             <div key={item.titulo} className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div className="mb-3 text-sun"><Icono nombre={item.icono} size={26} /></div>
               <h3 className="font-bold text-white">{item.titulo}</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/60">{item.texto}</p>
             </div>
@@ -252,11 +375,33 @@ export default function MasterAdsLanding() {
         </div>
       </section>
 
-      {/* CTA final */}
+      {/* FAQ interactivo */}
       <section className="py-16 px-6 bg-white">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10">
+            <Eyebrow>Preguntas frecuentes</Eyebrow>
+            <h2 className="font-fraunces text-3xl font-bold mt-2 text-primary">
+              Antes de agendar
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {FAQS.map((f, i) => (
+              <FaqItem
+                key={f.q}
+                item={f}
+                open={faqOpen === i}
+                onToggle={() => setFaqOpen(faqOpen === i ? -1 : i)}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="py-16 px-6 bg-secondary-light">
         <div className="max-w-2xl mx-auto text-center">
           <Eyebrow>Da el primer paso</Eyebrow>
-          <h2 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: "#013446" }}>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
             Reserva tu {ASESORIA_PRINCIPAL.nombre.toLowerCase()}
           </h2>
           <p className="text-neutral-500 mt-3">{ASESORIA_PRINCIPAL.descripcion}</p>
@@ -264,7 +409,7 @@ export default function MasterAdsLanding() {
           <ul className="mt-8 space-y-2.5 text-left max-w-md mx-auto">
             {ASESORIA_PRINCIPAL.incluye.map((x) => (
               <li key={x} className="flex items-start gap-2.5 text-neutral-700 text-sm">
-                <span className="flex-shrink-0 mt-0.5 font-bold" style={{ color: "#FA943A" }}>✓</span>
+                <span className="flex-shrink-0 mt-0.5 font-bold text-accent">✓</span>
                 {x}
               </li>
             ))}
@@ -277,19 +422,86 @@ export default function MasterAdsLanding() {
             {ASESORIA_PRINCIPAL.duracion} · {ASESORIA_PRINCIPAL.precioAlt} · Reunión online desde
             cualquier parte del mundo.
           </p>
+
+          <a
+            href="/"
+            className="inline-block mt-6 text-xs font-semibold text-primary/60 hover:text-primary underline underline-offset-4"
+          >
+            Prefiero conocer todos los servicios de Inspira Legal primero
+          </a>
         </div>
       </section>
 
       {/* Footer mínimo */}
       <footer className="py-8 px-6 border-t border-neutral-100">
-        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400">
-          <span>Inspira Legal · Asesoría educativa y extranjería · © 2026</span>
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Inspira Legal" className="h-5 w-auto opacity-70" />
+            <span>· Asesoría educativa y extranjería · © 2026</span>
+          </div>
           <div className="flex gap-4">
+            <a href="/" className="hover:text-neutral-600">Sitio completo</a>
             <a href="/legal/terminos" className="hover:text-neutral-600">Términos</a>
             <a href="/legal/privacidad" className="hover:text-neutral-600">Privacidad</a>
           </div>
         </div>
       </footer>
+
+      {/* Barra fija de reserva */}
+      {barVisible && !barDismissed && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-primary/95 backdrop-blur-sm border-t border-white/10 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
+          <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
+            <div className="min-w-0 hidden sm:block">
+              <p className="text-white text-sm font-semibold truncate">Asesoría personalizada 1:1 · 30 min</p>
+              <p className="text-white/60 text-xs">{ASESORIA_PRINCIPAL.precio} · {ASESORIA_PRINCIPAL.precioAlt}</p>
+            </div>
+            <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+              <CTAButton className="!px-5 !py-2.5 text-sm whitespace-nowrap">Reservar ahora</CTAButton>
+              <button
+                type="button"
+                onClick={() => setBarDismissed(true)}
+                aria-label="Cerrar"
+                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ventana emergente */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setModalOpen(false)}
+        >
+          <div
+            className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-7 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setModalOpen(false)}
+              aria-label="Cerrar"
+              className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+            >
+              ✕
+            </button>
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-accent text-white flex items-center justify-center mb-4">
+              <Icono nombre="birrete" size={28} />
+            </div>
+            <h3 className="font-fraunces text-xl font-bold text-primary mb-2">
+              ¿Todavía tienes dudas sobre tu máster?
+            </h3>
+            <p className="text-sm text-neutral-500 mb-5 leading-relaxed">
+              Resuélvelas en una asesoría personalizada de 30 minutos con un especialista. Sales
+              con un plan de acción concreto para tu caso.
+            </p>
+            <CTAButton className="w-full">Reservar mi asesoría — {ASESORIA_PRINCIPAL.precio}</CTAButton>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

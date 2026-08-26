@@ -494,11 +494,11 @@ export default function MasterAdsLanding() {
       {/* Hero */}
       <section className="px-6 pt-10 pb-16 relative overflow-hidden">
         <div
-          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none bg-accent opacity-[0.08] animate-[floatSlowA_9s_ease-in-out_infinite]"
+          className="absolute top-0 right-0 w-[280px] h-[280px] sm:w-[600px] sm:h-[600px] rounded-full pointer-events-none bg-accent opacity-[0.08] animate-[floatSlowA_9s_ease-in-out_infinite]"
           style={{ transform: `translate(calc(30% + ${scrollY * 0.06}px), -30%)` }}
         />
         <div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none bg-sky opacity-[0.12] animate-[floatSlowB_11s_ease-in-out_infinite]"
+          className="absolute bottom-0 left-0 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] rounded-full pointer-events-none bg-sky opacity-[0.12] animate-[floatSlowB_11s_ease-in-out_infinite]"
           style={{ transform: `translate(-30%, calc(30% - ${scrollY * 0.04}px))` }}
         />
         <div
@@ -518,9 +518,9 @@ export default function MasterAdsLanding() {
             admisión universitaria, postulación y seguimiento integral.
           </p>
 
-          <div className="inline-flex items-center gap-2 bg-sun/15 border border-sun/40 rounded-full px-4 py-2 mb-8">
-            <Icono nombre="euro" size={16} className="text-[#C98F1B]" />
-            <span className="text-sm font-bold text-[#8A6415]">
+          <div className="inline-flex items-start gap-2.5 bg-sun/15 border border-sun/40 rounded-2xl px-4 py-3 mb-8 max-w-sm mx-auto text-left">
+            <Icono nombre="euro" size={18} className="text-[#C98F1B] shrink-0 mt-0.5" />
+            <span className="text-sm font-bold text-[#8A6415] leading-snug">
               Desde programas económicos por 730 €/año hasta MBA de mejor ranking
             </span>
           </div>

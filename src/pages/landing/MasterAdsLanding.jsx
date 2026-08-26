@@ -5,7 +5,7 @@
 // personalizada de 30 minutos. Contenido, precios e iconos salen de lo que
 // ya existe en /servicios/master, /nosotros y config/testimonios.js; nada
 // inventado (testimonios reales, sin claims nuevos).
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CALENDLY_URL } from "../../config/contacto";
 import { ASESORIA_PRINCIPAL } from "../../config/asesorias";
 import { TESTIMONIOS } from "../../config/testimonios";
@@ -14,6 +14,49 @@ import Icono from "../../components/common/Icono";
 import logo from "../../assets/images/logo.png";
 import fotoCarina from "../../assets/images/landing/carina-meza.jpg";
 import fotoSebastian from "../../assets/images/landing/sebastian-alpiste.jpg";
+
+// Slides del hero: mismo mensaje real de siempre, repartido en 3 titulares
+// distintos (propuesta central, precio, resultados) para que el hero se
+// sienta vivo desde el primer segundo.
+const HERO_SLIDES = [
+  {
+    badge: "Método 360° · España 2027/2028",
+    badgeIcono: "birrete",
+    titulo: (
+      <>
+        Ayudamos a profesionales latinoamericanos a estudiar un{" "}
+        <span className="text-accent">máster en universidades públicas de España</span>, con
+        acompañamiento 360°.
+      </>
+    ),
+    subtitulo:
+      "Te acompañamos desde la búsqueda del máster hasta la matrícula: asesoría educativa, admisión universitaria, postulación y seguimiento integral.",
+  },
+  {
+    badge: "Para cada presupuesto",
+    badgeIcono: "euro",
+    titulo: (
+      <>
+        Desde programas económicos por <span className="text-accent">730 €/año</span> hasta MBA
+        de mejor ranking.
+      </>
+    ),
+    subtitulo:
+      "En tu asesoría personalizada te mostramos exactamente qué opciones encajan con tu perfil y tu presupuesto.",
+  },
+  {
+    badge: "Resultados reales",
+    badgeIcono: "destello",
+    titulo: (
+      <>
+        <span className="text-accent">98% de admisión</span>, +45 universidades públicas y un
+        método de 4 etapas.
+      </>
+    ),
+    subtitulo:
+      "No trabajamos por WhatsApp: tenemos un sistema propio para acompañar cada paso de tu postulación.",
+  },
+];
 
 const EQUIPO_FOTOS = [
   { foto: fotoCarina, alt: "Carina Meza, CEO y Consultora Legal de Inspira Legal — Perú" },
@@ -258,6 +301,31 @@ function Reveal({ children, className = "", delay = 0 }) {
   );
 }
 
+// Rastrea qué slide está activo en un carrusel con scroll-snap nativo (swipe
+// real en mobile, sin librerías). El contenido nunca depende de esto para
+// ser visible — todos los slides existen siempre en el DOM, uno al lado del
+// otro; esto solo decide qué punto/pestaña se marca como activo.
+function useActiveSlide(ref, count) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    function onScroll() {
+      const idx = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+      setActive(Math.max(0, Math.min(count - 1, idx)));
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [ref, count]);
+  return active;
+}
+
+function irASlide(ref, i) {
+  const el = ref.current;
+  if (!el) return;
+  el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+}
+
 function AnimatedNumber({ value, prefix = "", suffix = "", duration = 1200 }) {
   const [n, setN] = useState(0);
   useEffect(() => {
@@ -406,12 +474,29 @@ function HerramientaCard({ h }) {
 
 export default function MasterAdsLanding() {
   const [faqOpen, setFaqOpen] = useState(0);
-  const [etapaActiva, setEtapaActiva] = useState(0);
   const [barDismissed, setBarDismissed] = useState(false);
   const [modal, setModal] = useState(null); // null | "recordatorio" | "precio" | "salida"
   const [mounted, setMounted] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [scrollPct, setScrollPct] = useState(0);
+
+  const heroRef = useRef(null);
+  const heroActivo = useActiveSlide(heroRef, HERO_SLIDES.length);
+  const etapasRef = useRef(null);
+  const etapaActiva = useActiveSlide(etapasRef, ETAPAS.length);
+
+  // Hero: avanza solo cada 6s (se detiene si el usuario ya interactuó).
+  const [heroAuto, setHeroAuto] = useState(true);
+  useEffect(() => {
+    if (!heroAuto) return;
+    const t = setInterval(() => {
+      const el = heroRef.current;
+      if (!el) return;
+      const actual = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+      irASlide(heroRef, (actual + 1) % HERO_SLIDES.length);
+    }, 6000);
+    return () => clearInterval(t);
+  }, [heroAuto]);
 
   function abrirModal(clave) {
     try {
@@ -465,6 +550,8 @@ export default function MasterAdsLanding() {
         @keyframes fadeInUpBar { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes revealSlideUp { from { transform: translateY(20px); } to { transform: translateY(0); } }
         @keyframes modalPopIn { from { transform: scale(0.92) translateY(14px); } to { transform: scale(1) translateY(0); } }
+        .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* Barra de progreso de lectura */}
@@ -504,19 +591,38 @@ export default function MasterAdsLanding() {
         <div
           className={`max-w-3xl mx-auto relative z-10 text-center transition-transform duration-700 ease-out ${mounted ? "translate-y-0" : "translate-y-6"}`}
         >
-          <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 text-primary/80 text-sm px-4 py-1.5 rounded-full mb-6">
-            <Icono nombre="birrete" size={16} />
-            Método 360° · España 2027/2028
-          </span>
-          <h1 className="font-fraunces text-4xl md:text-5xl font-bold leading-tight mb-5 text-primary">
-            Ayudamos a profesionales latinoamericanos a estudiar un{" "}
-            <span className="text-accent">máster en universidades públicas de España</span>,
-            con acompañamiento 360°.
-          </h1>
-          <p className="text-neutral-500 text-lg mb-5 leading-relaxed max-w-xl mx-auto">
-            Te acompañamos desde la búsqueda del máster hasta la matrícula: asesoría educativa,
-            admisión universitaria, postulación y seguimiento integral.
-          </p>
+          {/* Carrusel del hero: 3 titulares reales, deslizables (swipe) y con avance automático */}
+          <div
+            ref={heroRef}
+            onPointerDown={() => setHeroAuto(false)}
+            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar -mx-6"
+          >
+            {HERO_SLIDES.map((s) => (
+              <div key={s.badge} className="snap-center shrink-0 w-full px-6">
+                <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 text-primary/80 text-sm px-4 py-1.5 rounded-full mb-6">
+                  <Icono nombre={s.badgeIcono} size={16} />
+                  {s.badge}
+                </span>
+                <h1 className="font-fraunces text-4xl md:text-5xl font-bold leading-tight mb-5 text-primary min-h-[8rem] md:min-h-[10rem]">
+                  {s.titulo}
+                </h1>
+                <p className="text-neutral-500 text-lg mb-2 leading-relaxed max-w-xl mx-auto">
+                  {s.subtitulo}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-center gap-2 mb-7">
+            {HERO_SLIDES.map((s, i) => (
+              <button
+                key={s.badge}
+                type="button"
+                aria-label={`Ir al titular ${i + 1}`}
+                onClick={() => { setHeroAuto(false); irASlide(heroRef, i); }}
+                className={`h-2 rounded-full transition-all ${heroActivo === i ? "w-6 bg-accent" : "w-2 bg-primary/20"}`}
+              />
+            ))}
+          </div>
 
           <div className="inline-flex items-start gap-2.5 bg-sun/15 border border-sun/40 rounded-2xl px-4 py-3 mb-8 max-w-sm mx-auto text-left">
             <Icono nombre="euro" size={18} className="text-[#C98F1B] shrink-0 mt-0.5" />
@@ -569,13 +675,13 @@ export default function MasterAdsLanding() {
             </p>
           </div>
 
-          {/* Selector de etapas: clic para ver el detalle de cada una */}
+          {/* Selector de etapas: clic salta al slide, pero también se desliza (swipe) */}
           <div className="flex items-center justify-center gap-2 mb-6 flex-wrap">
             {ETAPAS.map((e, i) => (
               <button
                 key={e.n}
                 type="button"
-                onClick={() => setEtapaActiva(i)}
+                onClick={() => irASlide(etapasRef, i)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
                   etapaActiva === i
                     ? "bg-primary text-white shadow-lg scale-105"
@@ -588,25 +694,32 @@ export default function MasterAdsLanding() {
             ))}
           </div>
 
-          <article className="bg-white rounded-2xl border border-neutral-200 p-7 sm:p-9 max-w-2xl mx-auto shadow-sm">
-            <div className="flex items-start gap-4">
-              <IconBadge nombre={ETAPAS[etapaActiva].icono} tone={["primary", "accent", "sky", "sun"][etapaActiva % 4]} size="lg" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-black text-accent">{ETAPAS[etapaActiva].n}</span>
-                  <h3 className="font-bold text-xl text-primary">{ETAPAS[etapaActiva].title}</h3>
-                </div>
-                <ul className="space-y-2">
-                  {ETAPAS[etapaActiva].bullets.map((x) => (
-                    <li key={x} className="flex items-start gap-2.5 text-neutral-600 text-sm">
-                      <span className="flex-shrink-0 mt-0.5 font-bold text-accent">✓</span>
-                      {x}
-                    </li>
-                  ))}
-                </ul>
+          <div ref={etapasRef} className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar -mx-6 px-6 sm:px-0 sm:-mx-0">
+            {ETAPAS.map((e, i) => (
+              <div key={e.n} className="snap-center shrink-0 w-full px-1">
+                <article className="bg-white rounded-2xl border border-neutral-200 p-7 sm:p-9 max-w-2xl mx-auto shadow-sm h-full">
+                  <div className="flex items-start gap-4">
+                    <IconBadge nombre={e.icono} tone={["primary", "accent", "sky", "sun"][i % 4]} size="lg" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-black text-accent">{e.n}</span>
+                        <h3 className="font-bold text-xl text-primary">{e.title}</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {e.bullets.map((x) => (
+                          <li key={x} className="flex items-start gap-2.5 text-neutral-600 text-sm">
+                            <span className="flex-shrink-0 mt-0.5 font-bold text-accent">✓</span>
+                            {x}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </article>
               </div>
-            </div>
-          </article>
+            ))}
+          </div>
+          <p className="text-center text-xs text-neutral-400 mt-4 sm:hidden">← Desliza para ver las 4 etapas →</p>
         </div>
       </section>
 

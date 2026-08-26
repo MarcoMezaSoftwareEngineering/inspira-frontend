@@ -82,7 +82,7 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function DetalleSolicitud({ solicitudBase, onVolver }) {
+export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia }) {
   const [detalle,           setDetalle]           = useState(null);
   const [checklist,         setChecklist]         = useState([]);
   const [formData,          setFormData]          = useState({});
@@ -443,7 +443,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver }) {
               )}
 
               {activeSection === "inst" && (
-                <InstructivosPlantillas instructivos={instructivos} />
+                <InstructivosPlantillas instructivos={instructivos} onIrAGuia={onIrAGuia} />
               )}
 
               {activeSection === "form" && (

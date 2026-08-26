@@ -14,7 +14,7 @@ function esVisado(s) {
   return cod.includes("VISADO");
 }
 
-export default function MisServicios() {
+export default function MisServicios({ onIrAGuia }) {
   const [servicios, setServicios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -71,7 +71,7 @@ export default function MisServicios() {
         {esVisado(seleccionada) ? (
           <DetalleSolicitudVisado solicitudBase={seleccionada} onVolver={manejarVolverLista} />
         ) : (
-          <DetalleSolicitud solicitudBase={seleccionada} onVolver={manejarVolverLista} />
+          <DetalleSolicitud solicitudBase={seleccionada} onVolver={manejarVolverLista} onIrAGuia={onIrAGuia} />
         )}
       </div>
     );

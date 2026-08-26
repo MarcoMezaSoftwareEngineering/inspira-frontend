@@ -7,6 +7,7 @@ export default function InstructivosPlantillas({
   titulo = "Instructivos y plantillas",
   subtitulo = "Descarga la guía paso a paso de tu servicio.",
   sectionId = "2",
+  onIrAGuia,
 }) {
   const lista = Array.isArray(instructivos) ? instructivos : [];
 
@@ -17,6 +18,33 @@ export default function InstructivosPlantillas({
       subtitulo={subtitulo}
       sectionId={sectionId}
     >
+      {onIrAGuia && (
+        <div className="grid sm:grid-cols-2 gap-3 mb-4">
+          <button
+            type="button"
+            onClick={() => onIrAGuia("guia")}
+            className="flex items-center gap-3 bg-[#1D6A4A]/5 border border-[#1D6A4A]/20 rounded-xl px-4 py-3.5 text-left hover:bg-[#1D6A4A]/10 transition-all"
+          >
+            <span className="text-xl shrink-0">🎓</span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[#1D6A4A]">Guía completa del Máster</p>
+              <p className="text-xs text-neutral-500">Paso a paso de todo el proceso de postulación.</p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => onIrAGuia("apostilla")}
+            className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100/60 transition-all"
+          >
+            <span className="text-xl shrink-0">📜</span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-amber-800">Guía de Apostilla</p>
+              <p className="text-xs text-neutral-500">Cómo apostillar tus documentos.</p>
+            </div>
+          </button>
+        </div>
+      )}
+
       {lista.length === 0 ? (
         <div className="py-6 text-center">
           <p className="text-sm text-neutral-400">Aún no hay instructivos configurados.</p>

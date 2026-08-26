@@ -13,6 +13,12 @@ import { CAPACIDADES, COMPARATIVA } from "../../config/plataforma";
 import Icono from "../../components/common/Icono";
 import logo from "../../assets/images/logo.png";
 import fotoCarina from "../../assets/images/landing/carina-meza.jpg";
+import fotoSebastian from "../../assets/images/landing/sebastian-alpiste.jpg";
+
+const EQUIPO_FOTOS = [
+  { foto: fotoCarina, alt: "Carina Meza, CEO y Consultora Legal de Inspira Legal — Perú" },
+  { foto: fotoSebastian, alt: "Sebastián Alpiste, equipo de Inspira Legal — Madrid" },
+];
 
 const HERRAMIENTAS = [
   {
@@ -276,7 +282,7 @@ export default function MasterAdsLanding() {
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <img src={logo} alt="Inspira Legal" className="h-8 w-auto" />
-            <span className="text-xs text-neutral-400 hidden sm:inline">· Asesoría educativa y extranjería</span>
+            <span className="text-xs text-neutral-400 hidden sm:inline">· Sueña · Aprende · Viaja</span>
           </div>
           <a
             href="/servicios/master"
@@ -484,25 +490,27 @@ export default function MasterAdsLanding() {
 
       {/* Sobre Inspira Legal */}
       <section className="py-16 px-6 bg-primary overflow-hidden">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-[280px,1fr] gap-10 items-center">
-          <div className="mx-auto md:mx-0 w-full max-w-[280px]">
+        <div className="max-w-3xl mx-auto text-center">
+          <Eyebrow dark>Sobre Inspira Legal</Eyebrow>
+          <h2 className="font-fraunces text-3xl md:text-4xl font-bold text-white mt-2">
+            Un equipo real, no una plantilla genérica.
+          </h2>
+          <p className="text-white/70 mt-4 max-w-xl mx-auto leading-relaxed">
+            Combinamos derecho migratorio español con herramientas digitales para que cada
+            trámite sea claro, medible y acompañado. Detrás de tu expediente hay personas de
+            verdad, no un chatbot.
+          </p>
+        </div>
+
+        <div className="max-w-md mx-auto mt-10 grid grid-cols-2 gap-5">
+          {EQUIPO_FOTOS.map((p) => (
             <img
-              src={fotoCarina}
-              alt="Carina Meza, CEO y Consultora Legal de Inspira Legal"
+              key={p.alt}
+              src={p.foto}
+              alt={p.alt}
               className="w-full rounded-3xl shadow-2xl ring-4 ring-white/10"
             />
-          </div>
-          <div className="text-center md:text-left">
-            <Eyebrow dark>Sobre Inspira Legal</Eyebrow>
-            <h2 className="font-fraunces text-3xl md:text-4xl font-bold text-white mt-2">
-              Un equipo de abogados asociados, no una plantilla genérica.
-            </h2>
-            <p className="text-white/70 mt-4 max-w-xl leading-relaxed">
-              Combinamos derecho migratorio español con herramientas digitales para que cada
-              trámite sea claro, medible y acompañado. Detrás de tu expediente hay abogados de
-              verdad, no un chatbot.
-            </p>
-          </div>
+          ))}
         </div>
 
         <div className="max-w-4xl mx-auto mt-12 grid sm:grid-cols-3 gap-5">

@@ -200,9 +200,16 @@ export default function PerfilCliente({ user, onUserUpdated }) {
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold text-white leading-snug">{user.nombre || "Sin nombre"}</p>
-                <p className="text-xs text-white/60 truncate">{user.email_contacto}</p>
-                <p className="text-[11px] text-white/40 mt-0.5">
+                {/* Los nombres completos peruanos llevan dos apellidos y pasan
+                    de 35 caracteres: sin sitio para respirar, el nombre, el
+                    correo y la fecha se apelotonaban en tres lineas pegadas. */}
+                <p className="text-sm font-bold text-white leading-snug break-words" title={user.nombre}>
+                  {user.nombre || "Sin nombre"}
+                </p>
+                <p className="text-xs text-white/60 truncate mt-1" title={user.email_contacto}>
+                  {user.email_contacto}
+                </p>
+                <p className="text-[11px] text-white/40 mt-1">
                   Cliente desde {new Date(user.fecha_registro).toLocaleDateString("es-ES", { year: "numeric", month: "long" })}
                 </p>
               </div>

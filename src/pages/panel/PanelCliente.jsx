@@ -115,10 +115,19 @@ export default function PanelCliente() {
               {titles[tab] || "Mi panel"}
             </h1>
           </div>
+          {/* min-w-0 en vez de shrink-0: con shrink-0 el bloque del nombre no
+              cedia nunca, y un nombre largo -los hay de 38 caracteres- aplastaba
+              contra el el titulo de la pagina. Ahora el que se recorta es el
+              nombre, que ademas se lee entero al pasar el raton. */}
           {user?.nombre && (
-            <div className="ml-auto flex items-center gap-2 shrink-0">
-              <span className="hidden sm:block text-[12px] text-neutral-500">{user.nombre}</span>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[13px] font-bold text-[#1A3557] font-serif"
+            <div className="ml-auto flex items-center gap-2 min-w-0">
+              <span
+                className="hidden sm:block text-[12px] text-neutral-500 truncate max-w-[150px] lg:max-w-[220px]"
+                title={user.nombre}
+              >
+                {user.nombre}
+              </span>
+              <div className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[13px] font-bold text-[#1A3557] font-serif"
                 style={{ background: "linear-gradient(135deg, #E8F5EE, #EEF2F8)" }}>
                 {user.nombre?.[0]?.toUpperCase() || "?"}
               </div>

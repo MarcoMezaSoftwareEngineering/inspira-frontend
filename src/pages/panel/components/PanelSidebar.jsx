@@ -46,8 +46,8 @@ export default function PanelSidebar({ user, activeTab, onChangeTab, isOpen, onC
             {inicial}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[13px] font-semibold truncate leading-tight text-white">{nombre}</span>
-            <span className="text-[11px] text-white/55 truncate leading-tight mt-0.5">{correo}</span>
+            <span className="text-[13px] font-semibold truncate leading-snug text-white" title={nombre}>{nombre}</span>
+            <span className="text-[11px] text-white/55 truncate leading-snug mt-1" title={correo}>{correo}</span>
           </div>
         </div>
       </div>

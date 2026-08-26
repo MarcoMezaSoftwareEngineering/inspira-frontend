@@ -135,6 +135,34 @@ const COMUNIDADES = [
 const QUIZ_PRIORIDADES = ["Costo más bajo", "Más universidades", "Mejor ranking o becas"];
 const QUIZ_TRAMITE = ["Sí, ya lo tengo resuelto", "No, todavía no", "No estoy seguro"];
 
+// Ventanas emergentes: cada una con su propio disparador y ángulo. Nunca dos
+// a la vez — se controla con un solo estado `modal`.
+const MODALES = {
+  recordatorio: {
+    icono: "birrete",
+    tono: "accent",
+    titulo: "¿Todavía tienes dudas sobre tu máster?",
+    texto:
+      "Resuélvelas en una asesoría personalizada de 30 minutos con un especialista. Sales con un plan de acción concreto para tu caso.",
+    cta: `Reservar mi asesoría — ${ASESORIA_PRINCIPAL.precio}`,
+  },
+  precio: {
+    icono: "euro",
+    tono: "sun",
+    titulo: "Hay opciones para cada presupuesto",
+    texto:
+      "Desde programas económicos por 730 €/año hasta MBA de mejor ranking. En tu asesoría te mostramos exactamente qué opciones encajan con tu presupuesto.",
+    cta: "Quiero ver mis opciones",
+  },
+  salida: {
+    icono: "reloj",
+    tono: "primary",
+    titulo: "Antes de irte…",
+    texto: `Tu asesoría personalizada de 30 minutos sigue disponible por ${ASESORIA_PRINCIPAL.precio}. Agenda ahora y sal con un plan de acción concreto para tu máster.`,
+    cta: "Sí, quiero mi asesoría",
+  },
+};
+
 const FAQS = [
   {
     q: "¿Qué incluye la asesoría de 30 minutos?",
@@ -145,12 +173,12 @@ const FAQS = [
     a: "Sí. La reunión es online, desde cualquier parte del mundo, a la hora que agendes en el calendario.",
   },
   {
-    q: "¿Cuánto cuesta el Programa 360° completo?",
+    q: "¿Cuánto cuesta el Método 360° completo?",
     a: "Depende de tu perfil y del alcance que necesites (universidades y comunidades). En la asesoría revisamos tu caso y te damos el costo exacto para tu situación, sin compromiso.",
   },
   {
     q: "¿Qué pasa después de la asesoría?",
-    a: "Si decides avanzar, entras al Programa 360°: 4 etapas guiadas, desde la búsqueda y viabilidad hasta tu matrícula final, con seguimiento en nuestro panel digital.",
+    a: "Si decides avanzar, entras al Método 360°: 4 etapas guiadas, desde la búsqueda y viabilidad hasta tu matrícula final, con seguimiento en nuestro panel digital.",
   },
 ];
 
@@ -383,9 +411,18 @@ export default function MasterAdsLanding() {
   const [faqOpen, setFaqOpen] = useState(0);
   const [etapaActiva, setEtapaActiva] = useState(0);
   const [barDismissed, setBarDismissed] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modal, setModal] = useState(null); // null | "recordatorio" | "precio" | "salida"
   const [mounted, setMounted] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [scrollPct, setScrollPct] = useState(0);
+
+  function abrirModal(clave) {
+    try {
+      if (sessionStorage.getItem(`master_ads_popup_${clave}`)) return;
+      sessionStorage.setItem(`master_ads_popup_${clave}`, "1");
+    } catch { /* noop */ }
+    setModal((actual) => actual ?? clave);
+  }
 
   // Entrada del hero al montar.
   useEffect(() => {
@@ -393,25 +430,33 @@ export default function MasterAdsLanding() {
     return () => clearTimeout(t);
   }, []);
 
-  // Paralaje suave de las formas decorativas del hero.
+  // Paralaje del hero + barra de progreso de lectura + ventana por scroll.
   useEffect(() => {
     function onScroll() {
-      setScrollY(window.scrollY);
+      const y = window.scrollY;
+      setScrollY(y);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollPct(max > 0 ? Math.min(100, Math.round((y / max) * 100)) : 0);
+      if (max > 0 && y / max > 0.55) abrirModal("precio");
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Ventana emergente: una sola vez por sesión, a los 18s.
+  // Ventana por tiempo (15s) — la primera si nadie hizo scroll todavía.
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem("master_ads_popup_visto")) return;
-    } catch { /* noop */ }
-    const t = setTimeout(() => {
-      setModalOpen(true);
-      try { sessionStorage.setItem("master_ads_popup_visto", "1"); } catch { /* noop */ }
-    }, 18000);
+    const t = setTimeout(() => abrirModal("recordatorio"), 15000);
     return () => clearTimeout(t);
+  }, []);
+
+  // Ventana de intención de salida (desktop: mouse sale por arriba de la ventana).
+  useEffect(() => {
+    if (window.innerWidth < 768) return;
+    function onLeave(e) {
+      if (e.clientY <= 0) abrirModal("salida");
+    }
+    document.addEventListener("mouseleave", onLeave);
+    return () => document.removeEventListener("mouseleave", onLeave);
   }, []);
 
   return (
@@ -422,7 +467,16 @@ export default function MasterAdsLanding() {
         @keyframes floatSlowB { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(16px) translateX(-10px); } }
         @keyframes fadeInUpBar { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes revealSlideUp { from { transform: translateY(20px); } to { transform: translateY(0); } }
+        @keyframes modalPopIn { from { transform: scale(0.92) translateY(14px); } to { transform: scale(1) translateY(0); } }
       `}</style>
+
+      {/* Barra de progreso de lectura */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-neutral-100/50">
+        <div
+          className="h-full bg-accent transition-[width] duration-150 ease-out"
+          style={{ width: `${scrollPct}%` }}
+        />
+      </div>
 
       {/* Marca mínima, con salida hacia el sitio completo */}
       <div className="px-6 pt-6">
@@ -455,7 +509,7 @@ export default function MasterAdsLanding() {
         >
           <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 text-primary/80 text-sm px-4 py-1.5 rounded-full mb-6">
             <Icono nombre="birrete" size={16} />
-            Programa Máster 360° · España 2027/2028
+            Método 360° · España 2027/2028
           </span>
           <h1 className="font-fraunces text-4xl md:text-5xl font-bold leading-tight mb-5 text-primary">
             Ayudamos a profesionales latinoamericanos a estudiar un{" "}
@@ -495,7 +549,7 @@ export default function MasterAdsLanding() {
               href="/servicios/master"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary/70 hover:text-primary px-2 py-2"
             >
-              Conocer el Programa 360° completo
+              Conocer el Método 360° completo
             </a>
           </div>
           <p className="text-xs text-neutral-400 mt-3">
@@ -508,7 +562,7 @@ export default function MasterAdsLanding() {
       <section className="py-16 px-6 bg-secondary-light">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <Eyebrow>El Programa 360°</Eyebrow>
+            <Eyebrow>El Método 360°</Eyebrow>
             <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
               Trabajamos 4 etapas hasta tu máster
             </h2>
@@ -564,7 +618,7 @@ export default function MasterAdsLanding() {
         <div className="max-w-3xl mx-auto text-center">
           <Eyebrow>¿Por qué elegirnos?</Eyebrow>
           <h2 className="font-fraunces text-3xl md:text-4xl font-bold mt-2 text-primary">
-            Esto es lo que obtienes con el Programa 360°
+            Esto es lo que obtienes con el Método 360°
           </h2>
         </div>
 
@@ -839,38 +893,37 @@ export default function MasterAdsLanding() {
         </div>
       )}
 
-      {/* Ventana emergente */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={() => setModalOpen(false)}
-        >
+      {/* Ventana emergente: recordatorio, precio (por scroll) o salida */}
+      {modal && (() => {
+        const m = MODALES[modal];
+        const badgeTone = { accent: "bg-accent", sun: "bg-sun", primary: "bg-primary" }[m.tono] || "bg-accent";
+        return (
           <div
-            className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-7 text-center"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+            onClick={() => setModal(null)}
           >
-            <button
-              type="button"
-              onClick={() => setModalOpen(false)}
-              aria-label="Cerrar"
-              className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+            <div
+              className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-7 text-center animate-[modalPopIn_0.3s_ease-out_both]"
+              onClick={(e) => e.stopPropagation()}
             >
-              ✕
-            </button>
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-accent text-white flex items-center justify-center mb-4">
-              <Icono nombre="birrete" size={28} />
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                aria-label="Cerrar"
+                className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+              >
+                ✕
+              </button>
+              <div className={`mx-auto w-14 h-14 rounded-2xl ${badgeTone} text-white flex items-center justify-center mb-4`}>
+                <Icono nombre={m.icono} size={28} />
+              </div>
+              <h3 className="font-fraunces text-xl font-bold text-primary mb-2">{m.titulo}</h3>
+              <p className="text-sm text-neutral-500 mb-5 leading-relaxed">{m.texto}</p>
+              <CTAButton pulse fullWidth>{m.cta}</CTAButton>
             </div>
-            <h3 className="font-fraunces text-xl font-bold text-primary mb-2">
-              ¿Todavía tienes dudas sobre tu máster?
-            </h3>
-            <p className="text-sm text-neutral-500 mb-5 leading-relaxed">
-              Resuélvelas en una asesoría personalizada de 30 minutos con un especialista. Sales
-              con un plan de acción concreto para tu caso.
-            </p>
-            <CTAButton fullWidth>Reservar mi asesoría — {ASESORIA_PRINCIPAL.precio}</CTAButton>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

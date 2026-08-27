@@ -161,7 +161,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
         { id: "flujo",       numero: "0", label: "Estado del expediente", estado: "pendiente" },
         { id: "datos",       numero: "1", label: "Datos y plazos",        estado: "pendiente" },
         { id: "documentos",  numero: "2", label: "Documentos",            estado: doc },
-        { id: "extranjeria", numero: "3", label: "Extranjeria",           estado: "pendiente" },
+        { id: "generadores", numero: "3", label: "EX-00 y carta",        estado: "pendiente" },
+        { id: "extranjeria", numero: "4", label: "Extranjeria",           estado: "pendiente" },
       ];
     }
     if (!isVisado) {

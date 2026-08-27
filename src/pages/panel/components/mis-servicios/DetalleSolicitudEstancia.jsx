@@ -1,9 +1,14 @@
 // Portal del cliente para la estancia por estudios.
 //
-// Servicio aparte del visado y del máster: ni comparte formulario ni
-// documentos con ellos. El orden de los bloques es el orden en que se hacen
-// las cosas —datos, guía, documentos, extranjería—, y arriba del todo va
-// siempre en qué punto está su expediente, que es lo que viene a mirar.
+// Cada dato se pide UNA vez. El formulario oficial repite algunos —el correo
+// aparece en dos apartados, las fechas del programa en tres— pero eso lo
+// resuelve el generador del EX-00, no el asesorado: a él se le pregunta lo
+// mínimo y se rellena el resto solo.
+//
+// Los datos no bloquean la subida de documentos. Se avisa, y con claridad,
+// pero alguien puede tener el pasaporte a mano y la carta de admisión no; que
+// no pueda avanzar por eso sólo hace que abandone el portal y lo mande todo
+// por WhatsApp.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiGET, apiPUT, apiUpload, apiDELETE } from "../../../../services/api";
 
@@ -33,66 +38,110 @@ const OPCIONES = {
   prog_modalidad: [["PRESENCIAL", "Presencial"], ["SEMIPRESENCIAL", "Semipresencial"]],
 };
 
-function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatorio }) {
+/* ── Campos con ayuda ────────────────────────────────────────────────────── */
+
+/**
+ * La ayuda va detrás de una ⓘ y no siempre visible: con treinta campos, un
+ * párrafo bajo cada uno convierte el formulario en un muro. Quien sabe qué
+ * poner no la abre; quien duda, la tiene a un clic.
+ */
+function Ayuda({ texto }) {
+  const [ver, setVer] = useState(false);
+  if (!texto) return null;
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400">
-        {label}{obligatorio && <span className="text-orange-500"> *</span>}
+    <>
+      <button type="button" onClick={() => setVer((v) => !v)}
+        aria-label="Qué va en este campo"
+        className={`shrink-0 w-4 h-4 rounded-full text-[10px] font-bold leading-none
+          border transition-colors ${
+          ver ? "bg-[#1A3557] border-[#1A3557] text-white"
+              : "border-neutral-300 text-neutral-400 hover:border-[#1A3557] hover:text-[#1A3557]"
+        }`}>i</button>
+      {ver && (
+        <span className="block w-full text-[11.5px] text-[#1A3557] bg-[#EEF2F8]
+          border border-[#1A3557]/15 rounded-lg px-2.5 py-1.5 mt-1 leading-relaxed order-last">
+          {texto}
+        </span>
+      )}
+    </>
+  );
+}
+
+function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatorio, falta }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="flex items-center gap-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400">
+          {label}{obligatorio && <span className="text-orange-500"> *</span>}
+        </span>
+        <Ayuda texto={ayuda} />
       </span>
       <input
         type={tipo} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className="text-[13px] border border-neutral-300 rounded-lg px-3 py-2 bg-white
-          focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]"
+        className={`text-[13px] border rounded-lg px-3 py-2 bg-white transition-colors
+          focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A] ${
+          falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
+        }`}
       />
-      {ayuda && <span className="text-[11px] text-neutral-400">{ayuda}</span>}
-    </label>
-  );
-}
-
-function Selector({ label, valor, onChange, opciones, obligatorio }) {
-  const pares = opciones.map((o) => (Array.isArray(o) ? o : [o, o]));
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400">
-        {label}{obligatorio && <span className="text-orange-500"> *</span>}
-      </span>
-      <select
-        value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className="text-[13px] border border-neutral-300 rounded-lg px-3 py-2 bg-white
-          focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]"
-      >
-        <option value="">—</option>
-        {pares.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
-      </select>
-    </label>
-  );
-}
-
-function Bloque({ numero, titulo, subtitulo, children, abierto, onToggle }) {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
-      <button type="button" onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-neutral-50/60">
-        <span className="shrink-0 w-8 h-8 rounded-xl grid place-items-center text-[13px] font-bold text-white font-serif"
-          style={{ background: "#1A3557" }}>{numero}</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-bold text-[#1A3557] leading-tight">{titulo}</span>
-          {subtitulo && <span className="block text-[11.5px] text-neutral-500 mt-0.5">{subtitulo}</span>}
-        </span>
-        <span className="shrink-0 text-neutral-300 text-[13px]">{abierto ? "▲" : "▼"}</span>
-      </button>
-      {abierto && <div className="px-4 pb-5 pt-1 border-t border-neutral-100">{children}</div>}
     </div>
   );
 }
 
-/* ── Estado del expediente ───────────────────────────────────────────────── */
+function Selector({ label, valor, onChange, opciones, ayuda, obligatorio, falta }) {
+  const pares = opciones.map((o) => (Array.isArray(o) ? o : [o, o]));
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="flex items-center gap-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400">
+          {label}{obligatorio && <span className="text-orange-500"> *</span>}
+        </span>
+        <Ayuda texto={ayuda} />
+      </span>
+      <select
+        value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
+        className={`text-[13px] border rounded-lg px-3 py-2 bg-white
+          focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A] ${
+          falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
+        }`}
+      >
+        <option value="">—</option>
+        {pares.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, children }) {
+  const completo = faltan === 0;
+  return (
+    <div className={`rounded-xl border overflow-hidden ${
+      completo ? "border-[#1D6A4A]/25" : "border-neutral-200"
+    }`}>
+      <button type="button" onClick={onToggle}
+        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-neutral-50/60">
+        <span className={`shrink-0 w-6 h-6 rounded-lg grid place-items-center text-[11px] font-bold ${
+          completo ? "bg-[#1D6A4A] text-white" : "bg-neutral-200 text-neutral-500"
+        }`}>{completo ? "✓" : numero}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13px] font-semibold text-neutral-800">{titulo}</span>
+          {subtitulo && <span className="block text-[11px] text-neutral-400">{subtitulo}</span>}
+        </span>
+        {!completo && (
+          <span className="shrink-0 text-[10.5px] font-bold text-amber-600">faltan {faltan}</span>
+        )}
+        <span className="shrink-0 text-neutral-300 text-[11px]">{abierto ? "▲" : "▼"}</span>
+      </button>
+      {abierto && <div className="px-3.5 pb-4 pt-1 border-t border-neutral-100">{children}</div>}
+    </div>
+  );
+}
+
+/* ── Estado y plazos ─────────────────────────────────────────────────────── */
 
 function EstadoProceso({ revision }) {
   const etapa = revision?.etapa;
   const recorrido = revision?.recorrido || [];
   if (!etapa) return null;
-
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl px-4 py-4">
       <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
@@ -102,7 +151,6 @@ function EstadoProceso({ revision }) {
         <span className="text-[14px] font-bold">{etapa.cliente}</span>
       </div>
       <p className="text-[13px] text-neutral-600 leading-relaxed mb-4">{etapa.explica_cliente}</p>
-
       <div className="flex items-center gap-1">
         {recorrido.map((e) => (
           <div key={e.clave} className="flex-1 min-w-0" title={e.cliente}>
@@ -119,10 +167,6 @@ function EstadoProceso({ revision }) {
   );
 }
 
-/* ── Plazos ──────────────────────────────────────────────────────────────── */
-
-/* Fuera del render: declarada dentro, se recrearía en cada pasada y perdería
-   su estado. */
 function CajaPlazo({ titulo, dato }) {
   if (!dato) return null;
   return (
@@ -134,8 +178,7 @@ function CajaPlazo({ titulo, dato }) {
         dato.a_tiempo ? "text-[#14532d]" : "text-red-700"
       }`}>{dato.limite}</p>
       <p className="text-[11.5px] text-neutral-600 mt-0.5">
-        {dato.a_tiempo
-          ? `Quedan ${dato.dias_restantes} día(s)`
+        {dato.a_tiempo ? `Quedan ${dato.dias_restantes} día(s)`
           : `Pasado hace ${Math.abs(dato.dias_restantes)} día(s)`}
       </p>
     </div>
@@ -145,21 +188,21 @@ function CajaPlazo({ titulo, dato }) {
 function Plazos({ plazos }) {
   if (!plazos) return null;
   const { antelacion, tope, avisos = [] } = plazos;
-
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="space-y-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         <CajaPlazo titulo="Presentar antes de" dato={antelacion} />
         <CajaPlazo titulo="Tope desde tu llegada" dato={tope} />
       </div>
-      {antelacion && <p className="text-[11.5px] text-neutral-500">{antelacion.explicacion}</p>}
-      {tope && <p className="text-[11.5px] text-neutral-500">{tope.explicacion}</p>}
       {avisos.map((a, i) => (
-        <div key={i} className={`rounded-xl border px-3.5 py-2.5 text-[12.5px] leading-relaxed ${
+        <div key={i} className={`rounded-xl border px-3.5 py-2.5 text-[12.5px] leading-relaxed flex gap-2 ${
           a.nivel === "alto" ? "bg-red-50 border-red-300 text-red-800"
-            : a.nivel === "medio" ? "bg-amber-50 border-amber-300 text-amber-800"
+            : a.nivel === "medio" ? "bg-amber-50 border-amber-300 text-amber-900"
             : "bg-neutral-50 border-neutral-200 text-neutral-600"
-        }`}>{a.texto}</div>
+        }`}>
+          <span className="shrink-0">{a.nivel === "alto" ? "⚠️" : "💡"}</span>
+          <span>{a.texto}</span>
+        </div>
       ))}
     </div>
   );
@@ -167,9 +210,20 @@ function Plazos({ plazos }) {
 
 /* ── Documentos ──────────────────────────────────────────────────────────── */
 
-function Ranura({ id, clave, def, onCambio }) {
+const ESTADO_DOC = {
+  SIN_SUBIR: { label: "Pendiente",   bg: "bg-neutral-100", text: "text-neutral-500", borde: "border-neutral-200 bg-white" },
+  PENDIENTE: { label: "En revisión", bg: "bg-sky-50",      text: "text-sky-700",     borde: "border-sky-200 bg-sky-50/30" },
+  APROBADO:  { label: "Aprobado",    bg: "bg-emerald-50",  text: "text-emerald-700", borde: "border-emerald-200 bg-emerald-50/20" },
+  OBSERVADO: { label: "Corrígelo",   bg: "bg-red-50",      text: "text-red-700",     borde: "border-red-300 bg-red-50/30" },
+};
+
+function TarjetaDocumento({ id, clave, def, onCambio }) {
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState("");
+
+  const cfg = ESTADO_DOC[def.estado] || ESTADO_DOC.SIN_SUBIR;
+  const ultimo = def.archivos[0];
+  const esDelAsesor = def.de === "asesor";
 
   async function subir(archivo) {
     if (!archivo) return;
@@ -177,14 +231,11 @@ function Ranura({ id, clave, def, onCambio }) {
     try {
       const datos = new FormData();
       datos.append("archivo", archivo);
-      // apiUpload lanza si algo va mal; no devuelve {ok:false}.
       await apiUpload(`/solicitudes/${id}/estancia/documentos/${clave}`, datos);
       onCambio();
     } catch (e) {
       setError(e.message || "No se pudo subir");
-    } finally {
-      setSubiendo(false);
-    }
+    } finally { setSubiendo(false); }
   }
 
   async function quitar(idDoc) {
@@ -192,82 +243,126 @@ function Ranura({ id, clave, def, onCambio }) {
     if (r?.ok) onCambio();
   }
 
-  const tiene = def.archivos.length > 0;
-  const esDelAsesor = def.de === "asesor";
-
   return (
-    <div className={`rounded-xl border px-3.5 py-3 ${
-      tiene ? "border-[#1D6A4A]/30 bg-[#E8F5EE]/40"
-        : def.obligatorio ? "border-amber-300 bg-amber-50/40" : "border-neutral-200"
-    }`}>
-      <div className="flex items-start gap-2">
-        <span className="shrink-0 mt-0.5 text-[13px]">{tiene ? "✅" : def.obligatorio ? "⚠️" : "○"}</span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold text-neutral-800">
-            {def.etiqueta}
-            {def.obligatorio && !tiene && (
-              <span className="ml-1.5 text-[10px] font-bold uppercase text-amber-600">falta</span>
-            )}
-          </p>
-          {def.requisito && (
-            <p className="text-[11.5px] text-neutral-500 leading-relaxed mt-0.5">{def.requisito}</p>
-          )}
+    <div className={`border rounded-xl p-3 relative flex flex-col gap-2 ${cfg.borde}`}>
+      <span className={`absolute top-2.5 right-2.5 text-[10px] font-semibold px-2 py-0.5
+        rounded-full ${cfg.bg} ${cfg.text}`}>
+        {esDelAsesor && def.estado === "SIN_SUBIR" ? "Lo hacemos nosotros" : cfg.label}
+      </span>
 
+      <p className="text-[13px] font-semibold text-neutral-900 pr-24 leading-snug">
+        {def.etiqueta}{def.obligatorio && <span className="text-orange-500"> *</span>}
+      </p>
+
+      {def.requisito && (
+        <details className="group -mt-1">
+          <summary className="cursor-pointer select-none text-[11.5px] font-semibold
+            text-[#046C8C] hover:underline list-none">
+            <span className="group-open:hidden">Ver requisitos ▾</span>
+            <span className="hidden group-open:inline">Ocultar requisitos ▴</span>
+          </summary>
+          <p className="mt-1.5 text-[11.5px] text-neutral-600 leading-relaxed border-l-2
+            border-neutral-200 pl-3">{def.requisito}</p>
+        </details>
+      )}
+
+      {ultimo?.observacion && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-2.5 py-2">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-red-700 mb-0.5">
+            Hay que corregirlo
+          </p>
+          <p className="text-[12px] text-red-800 leading-relaxed">{ultimo.observacion}</p>
+        </div>
+      )}
+
+      {def.estado === "PENDIENTE" && (
+        <p className="text-[11.5px] text-sky-700 leading-relaxed">
+          Lo tenemos. Tu asesor lo está revisando y te dirá si está correcto.
+        </p>
+      )}
+
+      {def.archivos.length > 0 && (
+        <div className="space-y-1">
           {def.archivos.map((a) => (
-            <div key={a.id_documento} className="flex items-center gap-2 mt-1.5">
+            <div key={a.id_documento} className="flex items-center gap-2">
               <a href={`/api/solicitudes/${id}/estancia/documentos/archivo/${a.id_documento}`}
                 target="_blank" rel="noreferrer"
-                className="text-[11.5px] text-[#046C8C] hover:underline truncate">
-                {a.nombre}
+                className="text-[11.5px] text-[#046C8C] hover:underline truncate flex-1">
+                📄 {a.nombre}
               </a>
               {a.subido_por === "CLIENTE" && (
                 <button type="button" onClick={() => quitar(a.id_documento)}
-                  className="text-[11px] text-neutral-400 hover:text-red-600">quitar</button>
+                  className="shrink-0 text-[11px] text-neutral-400 hover:text-red-600">quitar</button>
               )}
             </div>
           ))}
-
-          {!esDelAsesor && (!tiene || def.varios) && (
-            <label className="inline-flex items-center gap-1.5 mt-2 text-[11.5px] font-semibold
-              text-[#023A4B] cursor-pointer hover:underline">
-              {subiendo ? "Subiendo…" : tiene ? "+ añadir otro" : "📎 Subir"}
-              <input type="file" className="hidden" accept="application/pdf,image/*"
-                disabled={subiendo}
-                onChange={(e) => subir(e.target.files?.[0])} />
-            </label>
-          )}
-          {esDelAsesor && !tiene && (
-            <p className="text-[11px] text-neutral-400 mt-1">Lo prepara Inspira.</p>
-          )}
-          {error && <p className="text-[11.5px] text-red-600 mt-1">{error}</p>}
         </div>
-      </div>
+      )}
+
+      {!esDelAsesor && (
+        <label className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold
+          text-[#023A4B] cursor-pointer hover:underline w-fit">
+          {subiendo ? "Subiendo…"
+            : def.estado === "OBSERVADO" ? "📎 Subir la corrección"
+            : def.archivos.length ? (def.varios ? "+ añadir otro" : "Reemplazar")
+            : "📎 Subir"}
+          <input type="file" className="hidden" accept="application/pdf,image/*"
+            disabled={subiendo} onChange={(e) => subir(e.target.files?.[0])} />
+        </label>
+      )}
+
+      {esDelAsesor && def.archivos.length === 0 && (
+        <p className="text-[11px] text-neutral-400">
+          Lo preparamos nosotros y aparecerá aquí cuando esté listo.
+        </p>
+      )}
+
+      {error && <p className="text-[11.5px] text-red-600">{error}</p>}
     </div>
   );
 }
 
-/* ── Componente principal ────────────────────────────────────────────────── */
+/* ── Bloque plegable ─────────────────────────────────────────────────────── */
+
+function Bloque({ numero, titulo, subtitulo, abierto, onToggle, children }) {
+  return (
+    <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
+      <button type="button" onClick={onToggle}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-neutral-50/60">
+        <span className="shrink-0 w-8 h-8 rounded-xl grid place-items-center text-[13px]
+          font-bold text-white font-serif" style={{ background: "#1A3557" }}>{numero}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[14px] font-bold text-[#1A3557]">{titulo}</span>
+          {subtitulo && <span className="block text-[11.5px] text-neutral-500 mt-0.5">{subtitulo}</span>}
+        </span>
+        <span className="shrink-0 text-neutral-300 text-[13px]">{abierto ? "▲" : "▼"}</span>
+      </button>
+      {abierto && <div className="px-4 pb-5 pt-1 border-t border-neutral-100">{children}</div>}
+    </div>
+  );
+}
+
+/* ── Principal ───────────────────────────────────────────────────────────── */
 
 export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIrAGuia }) {
   const id = solicitudBase?.id_solicitud;
   const [exp, setExp] = useState(null);
   const [docs, setDocs] = useState(null);
   const [ext, setExt] = useState([]);
-  const [abierto, setAbierto] = useState(1);
+  const [bloque, setBloque] = useState(1);
+  const [paso, setPaso] = useState(1);
   const [guardando, setGuardando] = useState(false);
   const [tocado, setTocado] = useState(false);
 
-  const cargar = useCallback(() => {
-    return Promise.all([
-      apiGET(`/solicitudes/${id}/estancia`),
-      apiGET(`/solicitudes/${id}/estancia/documentos`),
-      apiGET(`/solicitudes/${id}/estancia/extranjeria`),
-    ]).then(([a, b, c]) => {
-      if (a?.ok) setExp(a.expediente);
-      if (b?.ok) setDocs(b);
-      if (c?.ok) setExt(c.registros || []);
-    });
-  }, [id]);
+  const cargar = useCallback(() => Promise.all([
+    apiGET(`/solicitudes/${id}/estancia`),
+    apiGET(`/solicitudes/${id}/estancia/documentos`),
+    apiGET(`/solicitudes/${id}/estancia/extranjeria`),
+  ]).then(([a, b, c]) => {
+    if (a?.ok) setExp(a.expediente);
+    if (b?.ok) setDocs(b);
+    if (c?.ok) setExt(c.registros || []);
+  }), [id]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
@@ -276,30 +371,60 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
   const guardar = useCallback(async () => {
     if (!tocado) return;
     setGuardando(true);
-    const r = await apiPUT(`/solicitudes/${id}/estancia/datos`, exp || {});
+    // Al asesorado se le pregunta una vez; los campos que el impreso repite se
+    // rellenan aquí. El inicio de clases es el mismo dato que el inicio del
+    // programa y el de la formación: preguntarlo tres veces sólo confunde.
+    const payload = {
+      ...exp,
+      prog_inicio: exp.fecha_inicio_clases || exp.prog_inicio,
+      formacion_inicio: exp.fecha_inicio_clases || exp.formacion_inicio,
+      formacion_fin: exp.prog_fin || exp.formacion_fin,
+      dom_correo: exp.correo,
+      dom_telefono: exp.telefono,
+      nombre_completo: [exp.nombres, exp.apellido1, exp.apellido2].filter(Boolean).join(" "),
+    };
+    const r = await apiPUT(`/solicitudes/${id}/estancia/datos`, payload);
     setGuardando(false);
     if (r?.ok) { setExp(r.expediente); setTocado(false); }
   }, [id, exp, tocado]);
 
-  const revision = exp?.revision;
+  const rev = exp?.revision;
+  const faltaLista = useMemo(() => new Set(rev?.faltan || []), [rev]);
+  const falta = (l) => faltaLista.has(l);
+  const cuenta = useCallback((ls) => ls.filter((l) => faltaLista.has(l)).length, [faltaLista]);
+
+  const datosCompletos = rev?.completo;
+  const usaUni = Boolean(exp?.dom_usa_universidad);
   const esMaster = exp?.tipo_estudios === "MASTER";
   const conCreditos = ["MASTER", "GRADO"].includes(exp?.tipo_estudios);
 
-  const faltanDocs = docs?.faltan?.length || 0;
   const ranurasCliente = useMemo(
-    () => Object.entries(docs?.ranuras || {}).filter(([, d]) => d.de === "cliente"),
-    [docs]
-  );
+    () => Object.entries(docs?.ranuras || {}).filter(([, d]) => d.de === "cliente"), [docs]);
   const ranurasAsesor = useMemo(
-    () => Object.entries(docs?.ranuras || {}).filter(([, d]) => d.de === "asesor"),
-    [docs]
-  );
+    () => Object.entries(docs?.ranuras || {}).filter(([, d]) => d.de === "asesor"), [docs]);
 
   if (!exp) {
     return <p className="text-[13px] text-neutral-400 py-10 text-center">Cargando tu expediente…</p>;
   }
 
-  const g = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3";
+  const g = "grid grid-cols-1 sm:grid-cols-2 gap-3";
+  const abrir = (n) => setPaso(paso === n ? 0 : n);
+
+  const PASOS = {
+    1: ["Primer apellido", "Nombres", "Fecha de nacimiento", "Lugar de nacimiento",
+        "País de nacimiento", "Nacionalidad", "Sexo", "Estado civil",
+        "Nombre del padre", "Nombre de la madre"],
+    2: ["Nº de pasaporte", "DNI", "Fecha de emisión del pasaporte",
+        "Fecha de caducidad del pasaporte", "Correo electrónico", "Teléfono"],
+    3: ["Fecha de admisión", "Fecha de llegada a España",
+        "Inicio de clases según la carta de admisión", "Fin del programa"],
+    4: ["Nombre de la universidad", "Provincia de la universidad", "Tipo de estudios",
+        "Tipo de título", "Nombre del programa", "Modalidad"],
+    5: ["Domicilio en España", "Localidad en España", "Código postal en España",
+        "Provincia en España", "Teléfono móvil"],
+  };
+  const totalCampos = Object.values(PASOS).flat().length;
+  const hechos = totalCampos - (rev?.faltan?.length || 0);
 
   return (
     <div className="flex-1 min-h-0 overflow-auto">
@@ -316,175 +441,249 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
           <h1 className="font-serif text-xl font-bold text-[#1A3557]">Tu expediente</h1>
         </div>
 
-        <EstadoProceso revision={revision} />
+        <EstadoProceso revision={rev} />
 
-        {/* 1 · Datos */}
+        {/* ── 1 · Datos ── */}
         <Bloque numero="1" titulo="Tus datos"
-          subtitulo={revision?.faltan?.length
-            ? `Faltan ${revision.faltan.length} datos obligatorios`
-            : "Completos"}
-          abierto={abierto === 1} onToggle={() => setAbierto(abierto === 1 ? 0 : 1)}>
+          subtitulo={datosCompletos ? "Completos" : `${hechos} de ${totalCampos} completados`}
+          abierto={bloque === 1} onToggle={() => setBloque(bloque === 1 ? 0 : 1)}>
 
-          {/* Un bloque rojo con quince nombres de campo asusta y no ayuda. Se
-              dice cuántos quedan, en tono de guía, y el detalle se despliega
-              solo si lo pide. */}
-          {revision?.faltan?.length > 0 && (
-            <details className="rounded-xl bg-[#EEF2F8] border border-[#1A3557]/15 px-3.5 py-2.5 mb-4">
-              <summary className="text-[12.5px] text-[#1A3557] cursor-pointer list-none
-                flex items-center gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-[#1A3557] text-white
-                  grid place-items-center text-[10px] font-bold">{revision.faltan.length}</span>
-                <span>datos por completar</span>
-                <span className="ml-auto text-[11px] text-neutral-400">ver cuáles</span>
-              </summary>
-              <p className="text-[12px] text-neutral-600 leading-relaxed mt-2 pl-7">
-                {revision.faltan.join(" · ")}
-              </p>
-            </details>
-          )}
-          {revision?.avisos?.map((a, i) => (
-            <div key={i} className="rounded-xl bg-amber-50 border border-amber-300 px-3.5 py-2.5 mb-3
-              flex gap-2">
-              <span className="shrink-0 text-[13px]">💡</span>
-              <p className="text-[12px] text-amber-900 leading-relaxed">{a}</p>
+          <div className="rounded-xl border-l-[3px] border-orange-400 bg-orange-50 px-3.5 py-3 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-orange-800 mb-1">
+              Antes de empezar
+            </p>
+            <p className="text-[12.5px] text-orange-900 leading-relaxed">
+              Estos datos se copian <b>tal cual</b> al formulario oficial que presentamos ante
+              Extranjería. Escríbelos exactamente como figuran en tu pasaporte y en tu carta de
+              admisión: <b>es tu responsabilidad que sean correctos</b>. Un apellido mal escrito
+              puede costar el expediente.
+            </p>
+            <p className="text-[12px] text-orange-800 leading-relaxed mt-1.5">
+              Si dudas de algún campo, pulsa la <b>ⓘ</b> que hay junto a su nombre.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex-1 h-2 rounded-full bg-neutral-100 overflow-hidden">
+              <div className="h-full bg-[#1D6A4A] transition-all"
+                style={{ width: `${totalCampos ? (hechos / totalCampos) * 100 : 0}%` }} />
             </div>
-          ))}
-
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
-            Fechas que fijan tus plazos
-          </p>
-          <div className={`${g} mb-3`}>
-            <Campo label="Fecha de admisión" tipo="date" obligatorio
-              valor={exp.fecha_admision} onChange={set("fecha_admision")} />
-            <Campo label="Llegada a España" tipo="date" obligatorio
-              valor={exp.fecha_llegada_espana} onChange={set("fecha_llegada_espana")} />
-            <Campo label="Inicio de clases" tipo="date" obligatorio
-              ayuda="Según tu carta de admisión"
-              valor={exp.fecha_inicio_clases} onChange={set("fecha_inicio_clases")} />
-          </div>
-
-          <label className="flex items-start gap-2 mb-4 text-[12.5px] text-neutral-700">
-            <input type="checkbox" className="mt-0.5 accent-[#1D6A4A]"
-              checked={exp.viaje_schengen_180 === true}
-              onChange={(e) => set("viaje_schengen_180")(e.target.checked)} />
-            <span>
-              He viajado al espacio Schengen en los últimos 180 días
-              <span className="block text-[11px] text-neutral-400">
-                Si es así, tus 90 días no empiezan de cero. Coméntalo con tu asesor.
-              </span>
+            <span className="text-[11.5px] font-bold text-neutral-500 shrink-0">
+              {datosCompletos ? "listo" : `${hechos}/${totalCampos}`}
             </span>
-          </label>
-
-          <Plazos plazos={revision?.plazos} />
-
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mt-5 mb-2">
-            Identidad
-          </p>
-          <div className={g}>
-            <Campo label="Nombre completo" obligatorio valor={exp.nombre_completo} onChange={set("nombre_completo")} />
-            <Campo label="Nº de pasaporte" obligatorio valor={exp.pasaporte_numero} onChange={set("pasaporte_numero")} />
-            <Campo label="DNI" obligatorio valor={exp.dni} onChange={set("dni")} />
-            <Campo label="Emisión del pasaporte" tipo="date" obligatorio valor={exp.pasaporte_emision} onChange={set("pasaporte_emision")} />
-            <Campo label="Caducidad del pasaporte" tipo="date" obligatorio valor={exp.pasaporte_caducidad} onChange={set("pasaporte_caducidad")} />
-            <Selector label="Sexo" obligatorio opciones={OPCIONES.sexo} valor={exp.sexo} onChange={set("sexo")} />
-            <Campo label="Fecha de nacimiento" tipo="date" obligatorio valor={exp.fecha_nacimiento} onChange={set("fecha_nacimiento")} />
-            <Campo label="Lugar de nacimiento" obligatorio valor={exp.lugar_nacimiento} onChange={set("lugar_nacimiento")} />
-            <Campo label="País de nacimiento" obligatorio valor={exp.pais_nacimiento} onChange={set("pais_nacimiento")} />
-            <Campo label="Nacionalidad" obligatorio valor={exp.nacionalidad} onChange={set("nacionalidad")} />
-            <Selector label="Estado civil" obligatorio opciones={OPCIONES.estado_civil} valor={exp.estado_civil} onChange={set("estado_civil")} />
-            <Campo label="Nombre del padre" obligatorio valor={exp.nombre_padre} onChange={set("nombre_padre")} />
-            <Campo label="Nombre de la madre" obligatorio valor={exp.nombre_madre} onChange={set("nombre_madre")} />
-            <Campo label="Correo" tipo="email" obligatorio valor={exp.correo} onChange={set("correo")} />
-            <Campo label="Teléfono" obligatorio valor={exp.telefono} onChange={set("telefono")} />
           </div>
 
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mt-5 mb-1">
-            Domicilio en España
-          </p>
-          <p className="text-[11.5px] text-neutral-500 mb-2 leading-relaxed">
-            Tiene que estar en la misma provincia donde estudias: la solicitud se presenta
-            ante la oficina de extranjería de esa jurisdicción.
-          </p>
-          <div className={g}>
-            <Campo label="Dirección" obligatorio valor={exp.dom_direccion} onChange={set("dom_direccion")} />
-            <Campo label="Localidad" obligatorio valor={exp.dom_localidad} onChange={set("dom_localidad")} />
-            <Campo label="Código postal" obligatorio valor={exp.dom_cp} onChange={set("dom_cp")} />
-            <Campo label="Provincia" obligatorio valor={exp.dom_provincia} onChange={set("dom_provincia")} />
-            <Campo label="Móvil (español)" obligatorio valor={exp.dom_telefono} onChange={set("dom_telefono")} />
-            <Campo label="Correo de contacto" valor={exp.dom_correo} onChange={set("dom_correo")} />
-          </div>
+          <div className="space-y-2">
+            <Paso numero="1" titulo="Quién eres" subtitulo="Como figura en tu pasaporte"
+              faltan={cuenta(PASOS[1])} abierto={paso === 1} onToggle={() => abrir(1)}>
+              <div className={g}>
+                <Campo label="Primer apellido" obligatorio falta={falta("Primer apellido")}
+                  ayuda="Tu primer apellido, exactamente como aparece en tu pasaporte."
+                  valor={exp.apellido1} onChange={set("apellido1")} />
+                <Campo label="Segundo apellido"
+                  ayuda="Si en tu país no se usan dos apellidos, déjalo vacío."
+                  valor={exp.apellido2} onChange={set("apellido2")} />
+                <Campo label="Nombres" obligatorio falta={falta("Nombres")}
+                  ayuda="Todos tus nombres de pila, tal como figuran en el pasaporte."
+                  valor={exp.nombres} onChange={set("nombres")} />
+                <Campo label="Fecha de nacimiento" tipo="date" obligatorio
+                  falta={falta("Fecha de nacimiento")}
+                  valor={exp.fecha_nacimiento} onChange={set("fecha_nacimiento")} />
+                <Campo label="Lugar de nacimiento" obligatorio falta={falta("Lugar de nacimiento")}
+                  ayuda="La ciudad donde naciste, no el país."
+                  valor={exp.lugar_nacimiento} onChange={set("lugar_nacimiento")} />
+                <Campo label="País de nacimiento" obligatorio falta={falta("País de nacimiento")}
+                  valor={exp.pais_nacimiento} onChange={set("pais_nacimiento")} />
+                <Campo label="Nacionalidad" obligatorio falta={falta("Nacionalidad")}
+                  ayuda="Tu nacionalidad actual, que puede no coincidir con el país donde naciste."
+                  valor={exp.nacionalidad} onChange={set("nacionalidad")} />
+                <Selector label="Sexo" obligatorio falta={falta("Sexo")} opciones={OPCIONES.sexo}
+                  ayuda="El que consta en tu pasaporte."
+                  valor={exp.sexo} onChange={set("sexo")} />
+                <Selector label="Estado civil" obligatorio falta={falta("Estado civil")}
+                  opciones={OPCIONES.estado_civil} valor={exp.estado_civil} onChange={set("estado_civil")} />
+                <Campo label="Nombre del padre" obligatorio falta={falta("Nombre del padre")}
+                  ayuda="Nombre y apellidos completos. Extranjería lo pide siempre, aunque no viaje contigo."
+                  valor={exp.nombre_padre} onChange={set("nombre_padre")} />
+                <Campo label="Nombre de la madre" obligatorio falta={falta("Nombre de la madre")}
+                  ayuda="Nombre y apellidos completos, con su apellido de soltera si es el que consta."
+                  valor={exp.nombre_madre} onChange={set("nombre_madre")} />
+              </div>
+            </Paso>
 
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mt-5 mb-2">
-            Tus estudios
-          </p>
-          <div className={g}>
-            <Selector label="Tipo de estudios" obligatorio opciones={OPCIONES.tipo_estudios}
-              valor={exp.tipo_estudios} onChange={set("tipo_estudios")} />
-            <Campo label="Duración" ayuda="Ej.: 1 año, 2 semestres" valor={exp.duracion} onChange={set("duracion")} />
-            <Selector label="Tipo de título" obligatorio opciones={OPCIONES.tipo_titulo}
-              valor={exp.tipo_titulo} onChange={set("tipo_titulo")} />
-            <Campo label="Inicio de la formación" tipo="date" obligatorio valor={exp.formacion_inicio} onChange={set("formacion_inicio")} />
-            <Campo label="Fin de la formación" tipo="date" obligatorio valor={exp.formacion_fin} onChange={set("formacion_fin")} />
-            {conCreditos && (
-              <Campo label="Créditos" obligatorio valor={exp.creditos} onChange={set("creditos")} />
-            )}
-            {esMaster && (
-              <Selector label="Tipo de máster" obligatorio opciones={OPCIONES.master_tipo}
-                valor={exp.master_tipo} onChange={set("master_tipo")} />
-            )}
-          </div>
+            <Paso numero="2" titulo="Documentación y contacto"
+              faltan={cuenta(PASOS[2])} abierto={paso === 2} onToggle={() => abrir(2)}>
+              <div className={g}>
+                <Campo label="Nº de pasaporte" obligatorio falta={falta("Nº de pasaporte")}
+                  ayuda="El número de la página de datos de tu pasaporte, sin espacios."
+                  valor={exp.pasaporte_numero} onChange={set("pasaporte_numero")} />
+                <Campo label="DNI de tu país" obligatorio falta={falta("DNI")}
+                  ayuda="Tu documento de identidad nacional: DNI, cédula o equivalente."
+                  valor={exp.dni} onChange={set("dni")} />
+                <Campo label="Emisión del pasaporte" tipo="date" obligatorio
+                  ayuda="Está en la misma página que el número, como «fecha de expedición»."
+                  falta={falta("Fecha de emisión del pasaporte")}
+                  valor={exp.pasaporte_emision} onChange={set("pasaporte_emision")} />
+                <Campo label="Caducidad del pasaporte" tipo="date" obligatorio
+                  ayuda="Debe seguir vigente cuando terminen tus estudios."
+                  falta={falta("Fecha de caducidad del pasaporte")}
+                  valor={exp.pasaporte_caducidad} onChange={set("pasaporte_caducidad")} />
+                <Campo label="Correo electrónico" tipo="email" obligatorio
+                  ayuda="Donde recibirás los avisos del expediente. Míralo a menudo: los plazos son cortos."
+                  falta={falta("Correo electrónico")}
+                  valor={exp.correo} onChange={set("correo")} />
+                <Campo label="Teléfono" obligatorio falta={falta("Teléfono")}
+                  ayuda="Con el prefijo del país. Si ya tienes móvil español, pon ese."
+                  valor={exp.telefono} onChange={set("telefono")} />
+              </div>
+            </Paso>
 
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mt-5 mb-2">
-            Universidad o centro
-          </p>
-          <div className={g}>
-            <Campo label="Denominación" obligatorio valor={exp.uni_denominacion} onChange={set("uni_denominacion")} />
-            <Selector label="Registro oficial" opciones={OPCIONES.uni_registro_tipo}
-              valor={exp.uni_registro_tipo} onChange={set("uni_registro_tipo")} />
-            <Campo label="Nº de registro" valor={exp.uni_registro_num} onChange={set("uni_registro_num")} />
-            <Campo label="Dirección" valor={exp.uni_direccion} onChange={set("uni_direccion")} />
-            <Campo label="Localidad" valor={exp.uni_localidad} onChange={set("uni_localidad")} />
-            <Campo label="Código postal" valor={exp.uni_cp} onChange={set("uni_cp")} />
-            <Campo label="Provincia" obligatorio valor={exp.uni_provincia} onChange={set("uni_provincia")} />
-          </div>
+            <Paso numero="3" titulo="Tus fechas" subtitulo="De aquí salen tus plazos legales"
+              faltan={cuenta(PASOS[3])} abierto={paso === 3} onToggle={() => abrir(3)}>
+              <div className={`${g} mb-3`}>
+                <Campo label="Fecha de admisión" tipo="date" obligatorio
+                  ayuda="La fecha que lleva tu carta de admisión."
+                  falta={falta("Fecha de admisión")}
+                  valor={exp.fecha_admision} onChange={set("fecha_admision")} />
+                <Campo label="Llegada a España" tipo="date" obligatorio
+                  ayuda="El día que aterrizas. De aquí sale tu fecha tope para presentar."
+                  falta={falta("Fecha de llegada a España")}
+                  valor={exp.fecha_llegada_espana} onChange={set("fecha_llegada_espana")} />
+                <Campo label="Inicio de clases" tipo="date" obligatorio
+                  ayuda="Según tu carta de admisión. Marca el plazo de antelación de dos meses."
+                  falta={falta("Inicio de clases según la carta de admisión")}
+                  valor={exp.fecha_inicio_clases} onChange={set("fecha_inicio_clases")} />
+                <Campo label="Fin de los estudios" tipo="date" obligatorio
+                  ayuda="Cuándo terminan, según tu carta de admisión."
+                  falta={falta("Fin del programa")}
+                  valor={exp.prog_fin} onChange={set("prog_fin")} />
+              </div>
+              <label className="flex items-start gap-2 mb-3 text-[12.5px] text-neutral-700">
+                <input type="checkbox" className="mt-0.5 accent-[#1D6A4A]"
+                  checked={exp.viaje_schengen_180 === true}
+                  onChange={(e) => set("viaje_schengen_180")(e.target.checked)} />
+                <span>
+                  He viajado al espacio Schengen en los últimos 180 días
+                  <span className="block text-[11px] text-neutral-400">
+                    Si es así, tus 90 días no empiezan de cero.
+                  </span>
+                </span>
+              </label>
+              <Plazos plazos={rev?.plazos} />
+            </Paso>
 
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mt-5 mb-2">
-            Programa
-          </p>
-          <div className={g}>
-            <Campo label="Denominación" obligatorio valor={exp.prog_denominacion} onChange={set("prog_denominacion")} />
-            <Campo label="Código" valor={exp.prog_codigo} onChange={set("prog_codigo")} />
-            <Selector label="Modalidad" obligatorio opciones={OPCIONES.prog_modalidad}
-              valor={exp.prog_modalidad} onChange={set("prog_modalidad")} />
-            <Campo label="Inicio" tipo="date" obligatorio valor={exp.prog_inicio} onChange={set("prog_inicio")} />
-            <Campo label="Fin" tipo="date" obligatorio valor={exp.prog_fin} onChange={set("prog_fin")} />
-          </div>
+            <Paso numero="4" titulo="Tus estudios"
+              faltan={cuenta(PASOS[4])} abierto={paso === 4} onToggle={() => abrir(4)}>
+              <div className={g}>
+                <Campo label="Universidad o centro" obligatorio falta={falta("Nombre de la universidad")}
+                  ayuda="El nombre oficial completo, como aparece en la carta de admisión."
+                  valor={exp.uni_denominacion} onChange={set("uni_denominacion")} />
+                <Campo label="Nombre del programa" obligatorio falta={falta("Nombre del programa")}
+                  ayuda="El máster, grado o curso, tal cual figura en tu admisión."
+                  valor={exp.prog_denominacion} onChange={set("prog_denominacion")} />
+                <Selector label="Tipo de estudios" obligatorio falta={falta("Tipo de estudios")}
+                  opciones={OPCIONES.tipo_estudios} valor={exp.tipo_estudios} onChange={set("tipo_estudios")} />
+                <Selector label="Tipo de título" obligatorio falta={falta("Tipo de título")}
+                  ayuda="Oficial es el reconocido por el Ministerio; propio lo expide la universidad."
+                  opciones={OPCIONES.tipo_titulo} valor={exp.tipo_titulo} onChange={set("tipo_titulo")} />
+                {esMaster && (
+                  <Selector label="Tipo de máster" obligatorio opciones={OPCIONES.master_tipo}
+                    ayuda="Lo dice tu carta de admisión."
+                    valor={exp.master_tipo} onChange={set("master_tipo")} />
+                )}
+                {conCreditos && (
+                  <Campo label="Créditos" obligatorio ayuda="Los créditos ECTS del programa."
+                    valor={exp.creditos} onChange={set("creditos")} />
+                )}
+                <Selector label="Modalidad" obligatorio falta={falta("Modalidad")}
+                  opciones={OPCIONES.prog_modalidad} valor={exp.prog_modalidad} onChange={set("prog_modalidad")} />
+                <Campo label="Código del programa"
+                  ayuda="Si tu admisión trae un código, ponlo. Si no, déjalo vacío."
+                  valor={exp.prog_codigo} onChange={set("prog_codigo")} />
+              </div>
 
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mt-5 mb-2">
-            Notas
-          </p>
-          <textarea rows={3} value={exp.notas ?? ""} onChange={(e) => set("notas")(e.target.value)}
-            placeholder="Un NIE anterior, una estancia previa, cualquier cosa que debamos saber…"
-            className="w-full text-[13px] border border-neutral-300 rounded-lg px-3 py-2
-              focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]" />
+              <p className="text-[10px] font-bold uppercase tracking-widest font-mono
+                text-neutral-400 mt-4 mb-2">Dónde está tu universidad</p>
+              <div className={g}>
+                <Campo label="Dirección" valor={exp.uni_direccion} onChange={set("uni_direccion")} />
+                <Campo label="Localidad" valor={exp.uni_localidad} onChange={set("uni_localidad")} />
+                <Campo label="Código postal" valor={exp.uni_cp} onChange={set("uni_cp")} />
+                <Campo label="Provincia" obligatorio falta={falta("Provincia de la universidad")}
+                  ayuda="Determina qué oficina de Extranjería lleva tu expediente."
+                  valor={exp.uni_provincia} onChange={set("uni_provincia")} />
+                <Selector label="Registro oficial" opciones={OPCIONES.uni_registro_tipo}
+                  ayuda="RUCT para estudios universitarios, RCD para formación profesional."
+                  valor={exp.uni_registro_tipo} onChange={set("uni_registro_tipo")} />
+                <Campo label="Nº de registro" valor={exp.uni_registro_num} onChange={set("uni_registro_num")} />
+              </div>
+            </Paso>
+
+            <Paso numero="5" titulo="Dónde vivirás en España"
+              subtitulo="Tiene que ser la misma provincia donde estudias"
+              faltan={usaUni ? 0 : cuenta(PASOS[5])} abierto={paso === 5} onToggle={() => abrir(5)}>
+
+              <label className="flex items-start gap-2 mb-3 text-[12.5px] text-neutral-700
+                rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8] px-3 py-2.5 cursor-pointer">
+                <input type="checkbox" className="mt-0.5 accent-[#1D6A4A]"
+                  checked={usaUni} onChange={(e) => set("dom_usa_universidad")(e.target.checked)} />
+                <span>
+                  <b>Todavía no tengo dirección en España</b>
+                  <span className="block text-[11.5px] text-neutral-500 mt-0.5">
+                    Usaremos la de tu universidad. Lo que Extranjería mira es que la provincia
+                    coincida, y así coincide.
+                  </span>
+                </span>
+              </label>
+
+              {!usaUni && (
+                <div className={g}>
+                  <Campo label="Calle" obligatorio falta={falta("Domicilio en España")}
+                    ayuda="El nombre de la calle, sin número."
+                    valor={exp.dom_direccion} onChange={set("dom_direccion")} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Campo label="Número" valor={exp.dom_numero} onChange={set("dom_numero")} />
+                    <Campo label="Piso / puerta" valor={exp.dom_piso} onChange={set("dom_piso")} />
+                  </div>
+                  <Campo label="Localidad" obligatorio falta={falta("Localidad en España")}
+                    valor={exp.dom_localidad} onChange={set("dom_localidad")} />
+                  <Campo label="Código postal" obligatorio falta={falta("Código postal en España")}
+                    valor={exp.dom_cp} onChange={set("dom_cp")} />
+                  <Campo label="Provincia" obligatorio falta={falta("Provincia en España")}
+                    ayuda="Tiene que ser la misma que la de tu universidad."
+                    valor={exp.dom_provincia} onChange={set("dom_provincia")} />
+                </div>
+              )}
+
+              <p className="text-[10px] font-bold uppercase tracking-widest font-mono
+                text-neutral-400 mt-4 mb-2">Algo más que debamos saber</p>
+              <textarea rows={3} value={exp.notas ?? ""} onChange={(e) => set("notas")(e.target.value)}
+                placeholder="Un NIE anterior, una estancia previa, cualquier cosa…"
+                className="w-full text-[13px] border border-neutral-300 rounded-lg px-3 py-2
+                  focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]" />
+            </Paso>
+          </div>
 
           <div className="flex items-center gap-3 mt-4">
             <button type="button" onClick={guardar} disabled={!tocado || guardando}
-              className="text-[13px] font-semibold px-5 py-2 rounded-lg bg-[#1D6A4A] text-white
-                disabled:opacity-40 hover:opacity-90">
+              className="text-[13px] font-semibold px-5 py-2.5 rounded-lg bg-[#1D6A4A]
+                text-white disabled:opacity-40 hover:opacity-90">
               {guardando ? "Guardando…" : "Guardar mis datos"}
             </button>
-            {!tocado && <span className="text-[11.5px] text-neutral-400">Todo guardado</span>}
+            {!tocado && (
+              <span className="text-[11.5px] text-neutral-400">
+                {datosCompletos ? "✓ Todo guardado y completo" : "Guardado"}
+              </span>
+            )}
           </div>
         </Bloque>
 
-        {/* 2 · Instructivo */}
+        {/* ── 2 · Guía ── */}
         <Bloque numero="2" titulo="Guía del proceso"
           subtitulo="Qué se pide, en qué orden y con qué plazos"
-          abierto={abierto === 2} onToggle={() => setAbierto(abierto === 2 ? 0 : 2)}>
+          abierto={bloque === 2} onToggle={() => setBloque(bloque === 2 ? 0 : 2)}>
           <p className="text-[13px] text-neutral-700 leading-relaxed mb-3">
-            Antes de subir nada, léela: cada documento tiene requisitos concretos y
-            extranjería devuelve los que no los cumplen.
+            Recuerda que viajas <b>como turista</b> y tramitas desde España. La guía lleva lo
+            que necesitas en frontera y lo que hay que reunir después.
           </p>
           <button type="button" onClick={() => onIrAGuia?.("estancia")}
             className="inline-flex items-center gap-2 text-[13px] font-semibold px-4 py-2.5
@@ -494,30 +693,59 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
           </button>
         </Bloque>
 
-        {/* 3 · Documentos */}
+        {/* ── 3 · Documentos ── */}
         <Bloque numero="3" titulo="Tus documentos"
-          subtitulo={docs ? (faltanDocs ? `Faltan ${faltanDocs}` : "Todos entregados") : "Cargando…"}
-          abierto={abierto === 3} onToggle={() => setAbierto(abierto === 3 ? 0 : 3)}>
-          <div className="space-y-2.5">
+          subtitulo={docs?.faltan?.length ? `Te faltan ${docs.faltan.length}`
+            : docs?.observados?.length ? `${docs.observados.length} por corregir`
+            : "Todo entregado"}
+          abierto={bloque === 3} onToggle={() => setBloque(bloque === 3 ? 0 : 3)}>
+
+          {/* Aviso, no candado: puede tener el pasaporte a mano y la carta de
+              admisión no, y bloquearle sólo haría que lo mande por WhatsApp. */}
+          {!datosCompletos && (
+            <div className="rounded-xl bg-amber-50 border border-amber-300 px-3.5 py-3 mb-3 flex gap-2.5">
+              <span className="shrink-0 text-[14px]">📋</span>
+              <div>
+                <p className="text-[12.5px] text-amber-900 leading-relaxed">
+                  Puedes ir subiendo documentos, pero <b>no podremos presentar tu expediente
+                  hasta que completes tus datos</b>: se copian al formulario oficial.
+                </p>
+                <button type="button" onClick={() => { setBloque(1); setPaso(1); }}
+                  className="text-[12px] font-semibold text-[#023A4B] hover:underline mt-1">
+                  Ir a completar mis datos →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {docs?.observados?.length > 0 && (
+            <div className="rounded-xl bg-red-50 border border-red-300 px-3.5 py-2.5 mb-3">
+              <p className="text-[12.5px] text-red-800 leading-relaxed">
+                Hay {docs.observados.length} documento(s) que hay que corregir. Te decimos
+                exactamente qué falla en cada uno.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
             {ranurasCliente.map(([clave, def]) => (
-              <Ranura key={clave} id={id} clave={clave} def={def} onCambio={cargar} />
+              <TarjetaDocumento key={clave} id={id} clave={clave} def={def} onCambio={cargar} />
             ))}
           </div>
 
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mt-5 mb-2">
-            Los prepara Inspira
-          </p>
-          <div className="space-y-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest font-mono
+            text-neutral-400 mb-2">Los preparamos nosotros</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {ranurasAsesor.map(([clave, def]) => (
-              <Ranura key={clave} id={id} clave={clave} def={def} onCambio={cargar} />
+              <TarjetaDocumento key={clave} id={id} clave={clave} def={def} onCambio={cargar} />
             ))}
           </div>
         </Bloque>
 
-        {/* 4 · Extranjería */}
+        {/* ── 4 · Extranjería ── */}
         <Bloque numero="4" titulo="Extranjería"
           subtitulo={ext.length ? `${ext.length} comunicación(es)` : "Sin novedades"}
-          abierto={abierto === 4} onToggle={() => setAbierto(abierto === 4 ? 0 : 4)}>
+          abierto={bloque === 4} onToggle={() => setBloque(bloque === 4 ? 0 : 4)}>
           {exp.expediente_numero && (
             <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8] px-3.5 py-3 mb-3">
               <p className="text-[11px] text-neutral-500">Nº de expediente</p>
@@ -535,14 +763,15 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
           {ext.length === 0 ? (
             <p className="text-[13px] text-neutral-400">
-              Cuando extranjería nos comunique algo, aparecerá aquí y te avisaremos por correo.
+              Cuando Extranjería nos comunique algo, aparecerá aquí y te avisaremos por correo.
             </p>
           ) : (
             <div className="space-y-2.5">
               {ext.map((r) => (
                 <div key={r.id_registro} className="rounded-xl border border-neutral-200 px-3.5 py-3">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${
+                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5
+                      rounded border ${
                       r.tipo === "RESOLUCION" ? TONOS.verde
                         : r.tipo === "REQUERIMIENTO" ? TONOS.rojo : TONOS.ambar
                     }`}>{r.tipo_label}</span>
@@ -560,7 +789,8 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                   {r.tiene_archivo && (
                     <a href={`/api/solicitudes/${id}/estancia/extranjeria/${r.id_registro}/archivo`}
                       target="_blank" rel="noreferrer"
-                      className="inline-block text-[11.5px] font-semibold text-[#046C8C] hover:underline mt-1.5">
+                      className="inline-block text-[11.5px] font-semibold text-[#046C8C]
+                        hover:underline mt-1.5">
                       📄 Ver el documento
                     </a>
                   )}

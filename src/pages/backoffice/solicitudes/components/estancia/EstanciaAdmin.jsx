@@ -9,6 +9,7 @@
 // el asesorado tiene que saber si el suyo pasó.
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boPATCH, boFetch } from "../../../../../services/backofficeApi";
+import GeneradoresEstancia from "./GeneradoresEstancia";
 
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-700 border-neutral-300",
@@ -366,7 +367,7 @@ function Extranjeria({ id, registros, onCambio }) {
 
   return (
     <div id="bloque-extranjeria" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
-      <Cabecera numero="3" titulo="Extranjería"
+      <Cabecera numero="4" titulo="Extranjería"
         extra={
           <button type="button" onClick={() => setAbierto((v) => !v)}
             className="ml-auto text-[11.5px] font-semibold text-[#023A4B] hover:underline">
@@ -488,6 +489,7 @@ export default function EstanciaAdmin({ idSolicitud }) {
         onCambiar={(estado_proceso) => guardar({ estado_proceso })} />
       <Datos exp={exp} onGuardar={guardar} />
       <Documentos id={idSolicitud} docs={docs} onCambio={cargar} />
+      <GeneradoresEstancia id={idSolicitud} exp={exp} onArchivado={cargar} />
       <Extranjeria id={idSolicitud} registros={ext} onCambio={cargar} />
     </div>
   );

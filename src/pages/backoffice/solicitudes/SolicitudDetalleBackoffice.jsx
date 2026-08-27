@@ -153,6 +153,17 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   // proceso. Y de la declaracion jurada y el formulario, el cliente ve el
   // documento terminado que se le sube, nunca el generador.
   const bloques = useMemo(() => {
+    // La estancia lleva su propia navegacion dentro del panel; la lista
+    // lateral del master aqui no significa nada.
+    if (isEstancia) {
+      const doc = detalle?.estancia_docs;
+      return [
+        { id: "flujo",       numero: "0", label: "Estado del expediente", estado: "pendiente" },
+        { id: "datos",       numero: "1", label: "Datos y plazos",        estado: "pendiente" },
+        { id: "documentos",  numero: "2", label: "Documentos",            estado: doc },
+        { id: "extranjeria", numero: "3", label: "Extranjeria",           estado: "pendiente" },
+      ];
+    }
     if (!isVisado) {
       // El bloque de documentos del proceso vive solo en el frontend: el
       // servidor calcula la lista sin saber de el.
@@ -176,7 +187,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       { id: "cierre",      numero: "7", label: "Cierre del expediente", estado: hecho(visaExp?.cierre_estado === "CERRADO") },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVisado, bloquesServidor, visaExp, visaSesiones]);
+  }, [isEstancia, isVisado, bloquesServidor, visaExp, visaSesiones]);
 
   // Cargar expediente, sesiones y documentos entregables del visado
   useEffect(() => {
@@ -453,14 +464,13 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-3 sm:p-[22px] pb-20">
 
-          {/* Estancia por estudios: panel propio, empezando por el punto 0 con
-              el flujo del expediente. */}
-          {isEstancia && (
-            <div className="mb-4">
-              <EstanciaAdmin idSolicitud={detalle?.id_solicitud} />
-            </div>
-          )}
-
+          {/* La estancia por estudios NO comparte bloques con el master ni con
+              el visado: ni informe de IA, ni eleccion de universidades, ni
+              postulaciones. Su panel es todo lo que hay. */}
+          {isEstancia ? (
+            <EstanciaAdmin idSolicitud={detalle?.id_solicitud} />
+          ) : (
+          <>
           {/* B0 — Checklist y estado del proceso (sólo visado, sólo interno) */}
           {isVisado && (
             <div id="bloque-proceso" className="scroll-mt-4">
@@ -776,6 +786,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
             </>
           )}
 
+          </>
+          )}
         </div>
       </main>
 

@@ -325,16 +325,28 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             : "Completos"}
           abierto={abierto === 1} onToggle={() => setAbierto(abierto === 1 ? 0 : 1)}>
 
+          {/* Un bloque rojo con quince nombres de campo asusta y no ayuda. Se
+              dice cuántos quedan, en tono de guía, y el detalle se despliega
+              solo si lo pide. */}
           {revision?.faltan?.length > 0 && (
-            <div className="rounded-xl bg-amber-50 border border-amber-300 px-3.5 py-2.5 mb-4">
-              <p className="text-[12px] text-amber-900 leading-relaxed">
-                <b>Te falta por completar:</b> {revision.faltan.join(", ")}.
+            <details className="rounded-xl bg-[#EEF2F8] border border-[#1A3557]/15 px-3.5 py-2.5 mb-4">
+              <summary className="text-[12.5px] text-[#1A3557] cursor-pointer list-none
+                flex items-center gap-2">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-[#1A3557] text-white
+                  grid place-items-center text-[10px] font-bold">{revision.faltan.length}</span>
+                <span>datos por completar</span>
+                <span className="ml-auto text-[11px] text-neutral-400">ver cuáles</span>
+              </summary>
+              <p className="text-[12px] text-neutral-600 leading-relaxed mt-2 pl-7">
+                {revision.faltan.join(" · ")}
               </p>
-            </div>
+            </details>
           )}
           {revision?.avisos?.map((a, i) => (
-            <div key={i} className="rounded-xl bg-red-50 border border-red-300 px-3.5 py-2.5 mb-3">
-              <p className="text-[12px] text-red-800 leading-relaxed">{a}</p>
+            <div key={i} className="rounded-xl bg-amber-50 border border-amber-300 px-3.5 py-2.5 mb-3
+              flex gap-2">
+              <span className="shrink-0 text-[13px]">💡</span>
+              <p className="text-[12px] text-amber-900 leading-relaxed">{a}</p>
             </div>
           ))}
 

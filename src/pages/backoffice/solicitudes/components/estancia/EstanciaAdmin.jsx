@@ -8,7 +8,7 @@
 // los que no cumplen, así que alguien tiene que mirarlos antes de presentar y
 // el asesorado tiene que saber si el suyo pasó.
 import { useCallback, useEffect, useState } from "react";
-import { boGET, boPATCH, boFetch } from "../../../../../services/backofficeApi";
+import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backofficeApi";
 import GeneradoresEstancia from "./GeneradoresEstancia";
 
 const TONOS = {
@@ -111,24 +111,71 @@ function Plazos({ plazos }) {
   );
 }
 
+/**
+ * Vista general del asesorado.
+ *
+ * Lo primero son los plazos, en grande: es lo que decide si este expediente
+ * corre o puede esperar, y lo que hay que mirar antes que nada al abrirlo.
+ * Debajo, sus datos de un vistazo, para no preguntarle lo que ya puso.
+ *
+ * Lo que le falta ya no es una lista de treinta nombres separados por puntos
+ * -ilegible y desalentadora-: se cuenta por apartados y se despliega solo si
+ * hay que perseguirlo.
+ */
+function Dato({ k, v, falta }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">{k}</p>
+      <p className={`text-[12.5px] truncate ${
+        v ? "text-neutral-800 font-medium" : falta ? "text-amber-600" : "text-neutral-300"
+      }`} title={v || ""}>{v || (falta ? "falta" : "—")}</p>
+    </div>
+  );
+}
+
+const APARTADOS = {
+  "Identidad": ["Primer apellido", "Nombres", "Fecha de nacimiento", "Lugar de nacimiento",
+    "País de nacimiento", "Nacionalidad", "Sexo", "Estado civil",
+    "Nombre del padre", "Nombre de la madre"],
+  "Documentación": ["Nº de pasaporte", "DNI", "Fecha de emisión del pasaporte",
+    "Fecha de caducidad del pasaporte", "Correo electrónico", "Teléfono"],
+  "Fechas": ["Fecha de admisión", "Fecha de llegada a España",
+    "Inicio de clases según la carta de admisión", "Fin del programa"],
+  "Estudios": ["Nombre de la universidad", "Provincia de la universidad", "Tipo de estudios",
+    "Tipo de título", "Nombre del programa", "Modalidad"],
+  "Domicilio": ["Domicilio en España", "Localidad en España", "Código postal en España",
+    "Provincia en España", "Teléfono móvil"],
+};
+
 function Datos({ exp, onGuardar }) {
+  const [verFaltan, setVerFaltan] = useState(false);
   const rev = exp.revision;
+  const faltan = rev?.faltan || [];
+  const setFaltan = new Set(faltan);
+  const anio = (exp.fecha_nacimiento || "").slice(0, 4);
+
+  const porApartado = Object.entries(APARTADOS)
+    .map(([nombre, campos]) => [nombre, campos.filter((c) => setFaltan.has(c)).length])
+    .filter(([, n]) => n > 0);
+
   return (
     <div id="bloque-datos" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
-      <Cabecera numero="1" titulo="Datos y plazos"
+      <Cabecera numero="1" titulo="El asesorado"
         extra={
           <span className={`ml-auto text-[11.5px] font-semibold ${
-            rev?.faltan?.length ? "text-amber-600" : "text-[#1D6A4A]"
+            faltan.length ? "text-amber-600" : "text-[#1D6A4A]"
           }`}>
-            {rev?.faltan?.length ? `faltan ${rev.faltan.length}` : "completos"}
+            {faltan.length ? `${faltan.length} datos sin completar` : "datos completos"}
           </span>
         } />
 
+      {/* Los plazos, primero y en grande */}
       <Plazos plazos={rev?.plazos} />
 
       {rev?.plazos?.escrito_excepcionalidad && (
-        <p className="text-[12px] text-red-700 font-semibold mt-2.5">
-          Hace falta la declaración jurada de excepcionalidad.
+        <p className="text-[12px] text-red-700 bg-red-50 border border-red-200 rounded-lg
+          px-3 py-2 mt-2.5 font-semibold">
+          Fuera del plazo de antelación: hace falta la declaración jurada de excepcionalidad.
         </p>
       )}
 
@@ -137,24 +184,86 @@ function Datos({ exp, onGuardar }) {
           rounded-lg px-3 py-2 mt-2.5 leading-relaxed">{a}</p>
       ))}
 
-      {rev?.faltan?.length > 0 && (
-        <p className="text-[11.5px] text-neutral-500 mt-2.5 leading-relaxed">
-          <b className="text-amber-700">Al asesorado le falta:</b> {rev.faltan.join(" · ")}
+      {faltan.length > 0 && (
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/50 px-3 py-2.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11.5px] text-amber-900">Le falta completar:</span>
+            {porApartado.map(([nombre, n]) => (
+              <span key={nombre} className="text-[11px] font-semibold px-2 py-0.5 rounded-full
+                bg-white border border-amber-300 text-amber-800">
+                {nombre} · {n}
+              </span>
+            ))}
+            <button type="button" onClick={() => setVerFaltan((v) => !v)}
+              className="ml-auto text-[11px] font-semibold text-amber-700 hover:underline">
+              {verFaltan ? "ocultar" : "ver cuáles"}
+            </button>
+          </div>
+          {verFaltan && (
+            <p className="text-[11.5px] text-amber-800 leading-relaxed mt-2">
+              {faltan.join(" · ")}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2.5 mt-4 pt-3
+        border-t border-neutral-100">
+        <Dato k="Apellidos" v={[exp.apellido1, exp.apellido2].filter(Boolean).join(" ")}
+          falta={setFaltan.has("Primer apellido")} />
+        <Dato k="Nombres" v={exp.nombres} falta={setFaltan.has("Nombres")} />
+        <Dato k="Pasaporte" v={exp.pasaporte_numero} falta={setFaltan.has("Nº de pasaporte")} />
+        <Dato k="Nacimiento" v={exp.fecha_nacimiento} falta={setFaltan.has("Fecha de nacimiento")} />
+        <Dato k="Nacionalidad" v={exp.nacionalidad} falta={setFaltan.has("Nacionalidad")} />
+        <Dato k="Teléfono" v={exp.telefono || exp.dom_telefono} falta={setFaltan.has("Teléfono")} />
+        <Dato k="Correo" v={exp.correo} falta={setFaltan.has("Correo electrónico")} />
+        <Dato k="Llegada" v={exp.fecha_llegada_espana} falta={setFaltan.has("Fecha de llegada a España")} />
+        <Dato k="Universidad" v={exp.uni_denominacion} falta={setFaltan.has("Nombre de la universidad")} />
+        <Dato k="Programa" v={exp.prog_denominacion} falta={setFaltan.has("Nombre del programa")} />
+        <Dato k="Provincia uni." v={exp.uni_provincia} falta={setFaltan.has("Provincia de la universidad")} />
+        <Dato k="Provincia domicilio"
+          v={exp.dom_usa_universidad ? `${exp.uni_provincia || "—"} (usa la de la uni)` : exp.dom_provincia}
+          falta={!exp.dom_usa_universidad && setFaltan.has("Provincia en España")} />
+      </div>
+
+      {exp.notas && (
+        <p className="text-[12px] text-neutral-600 bg-neutral-50 border border-neutral-200
+          rounded-lg px-3 py-2 mt-3 leading-relaxed">
+          <b className="text-neutral-700">Nota suya:</b> {exp.notas}
         </p>
       )}
 
-      <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-neutral-100">
+      <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400
+        mt-4 mb-2">Seguimiento en extranjería</p>
+      <div className="flex flex-wrap gap-2">
         <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
-          Nº de expediente
-          <input className={`${input} w-40`} defaultValue={exp.expediente_numero || ""}
+          Nº expediente
+          <input className={`${input} w-36`} defaultValue={exp.expediente_numero || ""}
             onBlur={(e) => onGuardar({ expediente_numero: e.target.value })} />
         </label>
         <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
-          Ingresado el
+          Nº justificante
+          <input className={`${input} w-36`} defaultValue={exp.expediente_justificante || ""}
+            onBlur={(e) => onGuardar({ expediente_justificante: e.target.value })} />
+        </label>
+        <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
+          NIE
+          <input className={`${input} w-28`} defaultValue={exp.expediente_nie || ""}
+            onBlur={(e) => onGuardar({ expediente_nie: e.target.value })} />
+        </label>
+        <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
+          Fecha de ingreso
           <input type="date" className={input} defaultValue={exp.expediente_fecha || ""}
             onBlur={(e) => onGuardar({ expediente_fecha: e.target.value })} />
         </label>
+        <span className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
+          Año de nacimiento
+          <span className="text-[12.5px] font-bold text-neutral-800">{anio || "—"}</span>
+        </span>
       </div>
+      <p className="text-[10.5px] text-neutral-400 mt-1.5">
+        Son los datos con los que se consulta en la sede. El asesorado los ve en su portal.
+      </p>
     </div>
   );
 }
@@ -367,7 +476,7 @@ function Extranjeria({ id, registros, onCambio }) {
 
   return (
     <div id="bloque-extranjeria" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
-      <Cabecera numero="4" titulo="Extranjería"
+      <Cabecera numero="5" titulo="Extranjería"
         extra={
           <button type="button" onClick={() => setAbierto((v) => !v)}
             className="ml-auto text-[11.5px] font-semibold text-[#023A4B] hover:underline">
@@ -454,6 +563,137 @@ function Extranjeria({ id, registros, onCambio }) {
   );
 }
 
+/**
+ * El asesorado ha pedido revision.
+ *
+ * Va arriba del todo y en color: es una peticion con alguien esperando al otro
+ * lado, no una notificacion mas.
+ */
+function RevisionPedida({ exp }) {
+  if (!exp.revision_solicitada_at) return null;
+  const cuando = new Date(exp.revision_solicitada_at)
+    .toLocaleDateString("es-ES", { day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" });
+  return (
+    <div className="rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-3 flex gap-3">
+      <span className="shrink-0 text-[16px]">🔔</span>
+      <div className="min-w-0">
+        <p className="text-[13px] font-bold text-amber-900">
+          Ha pedido revision de sus documentos
+        </p>
+        <p className="text-[11.5px] text-amber-700 mt-0.5">{cuando}</p>
+        {exp.revision_nota && (
+          <p className="text-[12.5px] text-amber-900 leading-relaxed mt-1.5">
+            <b>Dice:</b> {exp.revision_nota}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Cerrar la carpeta.
+ *
+ * Es el momento en que el expediente pasa al staff de abogados y deja de estar
+ * en manos del asesorado. Se le avisa con la fecha prevista de presentacion,
+ * que es lo unico que va a querer saber a partir de aqui.
+ */
+function CerrarCarpeta({ id, exp, docs, onHecho }) {
+  const [abierto, setAbierto] = useState(false);
+  const [fecha, setFecha] = useState(exp.presentacion_prevista || "");
+  const [avisar, setAvisar] = useState(true);
+  const [enviando, setEnviando] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const oblig = docs ? Object.values(docs.ranuras).filter((d) => d.obligatorio) : [];
+  const aprobados = oblig.filter((d) => d.estado === "APROBADO").length;
+  const todoAprobado = oblig.length > 0 && aprobados === oblig.length;
+  const yaCerrada = Boolean(exp.carpeta_lista_at);
+
+  async function cerrar() {
+    setEnviando(true); setMsg("");
+    const r = await boPOST(`/backoffice/solicitudes/${id}/estancia/carpeta-lista`, {
+      presentacion_prevista: fecha || null,
+      avisar,
+    });
+    setEnviando(false);
+    setMsg(r?.msg || (r?.ok ? "Cerrada" : "No se pudo cerrar"));
+    if (r?.ok) { setAbierto(false); onHecho(); }
+  }
+
+  return (
+    <div className="bg-white border border-neutral-200 rounded-xl p-4">
+      <Cabecera numero="3" titulo="Cerrar la carpeta"
+        extra={
+          yaCerrada ? (
+            <span className="ml-auto text-[11px] font-bold uppercase tracking-wide px-2 py-1
+              rounded border bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35">
+              cerrada
+            </span>
+          ) : (
+            <span className={`ml-auto text-[11.5px] font-semibold ${
+              todoAprobado ? "text-[#1D6A4A]" : "text-neutral-400"
+            }`}>
+              {aprobados} de {oblig.length} aprobados
+            </span>
+          )
+        } />
+
+      {yaCerrada ? (
+        <p className="text-[12.5px] text-neutral-600 leading-relaxed">
+          Cerrada el {new Date(exp.carpeta_lista_at).toLocaleDateString("es-ES",
+            { day: "2-digit", month: "long", year: "numeric" })}
+          {exp.presentacion_prevista && <> · presentacion prevista el <b>{exp.presentacion_prevista}</b></>}.
+          El asesorado ya fue avisado.
+        </p>
+      ) : !abierto ? (
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-[12.5px] text-neutral-600 leading-relaxed min-w-0 flex-1">
+            Marca la carpeta como revisada y terminada. Se le avisa de que pasa al staff de
+            abogados y de cuando esta prevista la presentacion.
+          </p>
+          <button type="button" onClick={() => setAbierto(true)}
+            className={`shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg ${
+              todoAprobado ? "bg-[#1D6A4A] text-white hover:opacity-90"
+                : "border border-neutral-300 text-neutral-600 hover:border-neutral-400"
+            }`}>
+            Cerrar carpeta
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {!todoAprobado && (
+            <p className="text-[12px] text-amber-800 bg-amber-50 border border-amber-300
+              rounded-lg px-3 py-2 leading-relaxed">
+              Todavia hay {oblig.length - aprobados} documento(s) obligatorio(s) sin aprobar.
+              Puedes cerrarla igual, pero revisa que no falte nada.
+            </p>
+          )}
+          <label className="flex items-center gap-2 text-[12px] text-neutral-600">
+            Presentacion prevista
+            <input type="date" className={input} value={fecha}
+              onChange={(e) => setFecha(e.target.value)} />
+          </label>
+          <label className="flex items-center gap-1.5 text-[12px] text-neutral-600">
+            <input type="checkbox" checked={avisar} onChange={(e) => setAvisar(e.target.checked)} />
+            Avisar al asesorado por correo
+          </label>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={cerrar} disabled={enviando}
+              className="text-[12px] font-semibold px-4 py-2 rounded-lg bg-[#1D6A4A]
+                text-white disabled:opacity-40">
+              {enviando ? "Cerrando…" : "Cerrar y avisar"}
+            </button>
+            <button type="button" onClick={() => setAbierto(false)}
+              className="text-[12px] text-neutral-500 hover:text-neutral-800">Cancelar</button>
+          </div>
+        </div>
+      )}
+      {msg && <p className="text-[11.5px] text-neutral-600 mt-2">{msg}</p>}
+    </div>
+  );
+}
+
 /* ── Principal ───────────────────────────────────────────────────────────── */
 
 export default function EstanciaAdmin({ idSolicitud }) {
@@ -485,10 +725,12 @@ export default function EstanciaAdmin({ idSolicitud }) {
 
   return (
     <div className="space-y-3">
+      <RevisionPedida exp={exp} />
       <Flujo revision={exp.revision} guardando={guardando}
         onCambiar={(estado_proceso) => guardar({ estado_proceso })} />
       <Datos exp={exp} onGuardar={guardar} />
       <Documentos id={idSolicitud} docs={docs} onCambio={cargar} />
+      <CerrarCarpeta id={idSolicitud} exp={exp} docs={docs} onHecho={cargar} />
       <GeneradoresEstancia id={idSolicitud} exp={exp} onArchivado={cargar} />
       <Extranjeria id={idSolicitud} registros={ext} onCambio={cargar} />
     </div>

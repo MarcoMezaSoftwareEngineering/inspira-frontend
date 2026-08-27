@@ -10,7 +10,7 @@
 // no pueda avanzar por eso sólo hace que abandone el portal y lo mande todo
 // por WhatsApp.
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { apiGET, apiPUT, apiUpload, apiDELETE } from "../../../../services/api";
+import { apiGET, apiPUT, apiPOST, apiUpload, apiDELETE } from "../../../../services/api";
 
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
@@ -208,6 +208,55 @@ function Plazos({ plazos }) {
   );
 }
 
+/**
+ * Los datos con los que se consulta el expediente en la sede de extranjería.
+ *
+ * Van juntos y en el mismo orden en que los pide el formulario oficial, porque
+ * quien consulta los va copiando uno detrás de otro. El año de nacimiento no
+ * se guarda: se saca de la fecha, que ya está en el expediente.
+ */
+function SeguimientoExpediente({ exp }) {
+  const anio = (exp.fecha_nacimiento || "").slice(0, 4);
+  const filas = [
+    ["Nº de expediente", exp.expediente_numero],
+    ["Nº de justificante", exp.expediente_justificante],
+    ["NIE", exp.expediente_nie],
+    ["Fecha de ingreso", exp.expediente_fecha],
+    ["Año de nacimiento", anio],
+  ].filter(([, v]) => v);
+
+  if (!filas.length) {
+    return (
+      <p className="text-[12.5px] text-neutral-500 leading-relaxed mb-3">
+        Cuando presentemos tu solicitud te daremos aquí el número de expediente para que
+        puedas seguirlo por tu cuenta.
+      </p>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8] px-3.5 py-3 mb-3">
+      <p className="text-[10px] font-bold uppercase tracking-widest font-mono
+        text-[#1A3557] mb-2">Para consultar tu expediente</p>
+      <table className="w-full">
+        <tbody>
+          {filas.map(([k, v]) => (
+            <tr key={k}>
+              <td className="text-[11.5px] text-neutral-500 py-0.5 pr-3 align-top w-[45%]">{k}</td>
+              <td className="text-[12.5px] font-bold text-[#1A3557] py-0.5 select-all">{v}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <a href="https://infoext2.delegaciondelgobierno.gob.es/infoext2/consulta.html"
+        target="_blank" rel="noreferrer"
+        className="inline-block text-[11.5px] font-semibold text-[#046C8C] hover:underline mt-2">
+        Consultar en la sede de la Delegación del Gobierno →
+      </a>
+    </div>
+  );
+}
+
 /* ── Documentos ──────────────────────────────────────────────────────────── */
 
 const ESTADO_DOC = {
@@ -318,6 +367,90 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
       )}
 
       {error && <p className="text-[11.5px] text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+/**
+ * Pedir revisión.
+ *
+ * Sube tres documentos y no sabe si alguien los ha mirado; el asesor no sabe
+ * que hay cosas nuevas. Un botón resuelve las dos mitades del problema.
+ */
+function PedirRevision({ id, docs, exp, onHecho }) {
+  const [abierto, setAbierto] = useState(false);
+  const [nota, setNota] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const subidos = Object.values(docs?.ranuras || {})
+    .filter((r) => r.de === "cliente" && r.archivos.length).length;
+  const porRevisar = Object.values(docs?.ranuras || {})
+    .filter((r) => r.de === "cliente" && r.estado === "PENDIENTE").length;
+
+  const yaPedida = Boolean(exp?.revision_solicitada_at);
+
+  async function pedir() {
+    setEnviando(true); setMsg("");
+    const r = await apiPOST(`/solicitudes/${id}/estancia/solicitar-revision`, { nota });
+    setEnviando(false);
+    setMsg(r?.msg || (r?.ok ? "Avisado" : "No se pudo avisar"));
+    if (r?.ok) { setAbierto(false); setNota(""); onHecho(); }
+  }
+
+  if (!subidos) return null;
+
+  if (yaPedida) {
+    return (
+      <div className="rounded-xl border border-sky-200 bg-sky-50/50 px-3.5 py-3 mb-3 flex gap-2.5">
+        <span className="shrink-0 text-[14px]">👀</span>
+        <p className="text-[12.5px] text-sky-900 leading-relaxed">
+          <b>Tu asesor ya sabe que has subido documentos.</b> Los está revisando y te dirá
+          si están correctos o qué hay que corregir. Si subes algo más, vuelve a avisarle.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-[#1D6A4A]/30 bg-[#E8F5EE]/50 px-3.5 py-3 mb-3">
+      {!abierto ? (
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <p className="text-[12.5px] font-semibold text-[#14532d]">
+              ¿Has terminado de subir?
+            </p>
+            <p className="text-[11.5px] text-neutral-600 leading-relaxed">
+              Avísanos y revisamos tus {porRevisar || subidos} documento(s).
+            </p>
+          </div>
+          <button type="button" onClick={() => setAbierto(true)}
+            className="shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg
+              bg-[#1D6A4A] text-white hover:opacity-90">
+            Pedir revisión
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-[12.5px] font-semibold text-[#14532d]">
+            Avisar a tu asesor
+          </p>
+          <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)}
+            placeholder="¿Algo que debamos saber? (opcional)"
+            className="w-full text-[12.5px] border border-neutral-300 rounded-lg px-3 py-2
+              focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]" />
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={pedir} disabled={enviando}
+              className="text-[12.5px] font-semibold px-4 py-2 rounded-lg bg-[#1D6A4A]
+                text-white disabled:opacity-40 hover:opacity-90">
+              {enviando ? "Avisando…" : "Enviar"}
+            </button>
+            <button type="button" onClick={() => setAbierto(false)}
+              className="text-[12px] text-neutral-500 hover:text-neutral-800">Cancelar</button>
+          </div>
+        </div>
+      )}
+      {msg && <p className="text-[11.5px] text-neutral-600 mt-2">{msg}</p>}
     </div>
   );
 }
@@ -727,6 +860,8 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </div>
           )}
 
+          <PedirRevision id={id} docs={docs} exp={exp} onHecho={cargar} />
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
             {ranurasCliente.map(([clave, def]) => (
               <TarjetaDocumento key={clave} id={id} clave={clave} def={def} onCambio={cargar} />
@@ -746,20 +881,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
         <Bloque numero="4" titulo="Extranjería"
           subtitulo={ext.length ? `${ext.length} comunicación(es)` : "Sin novedades"}
           abierto={bloque === 4} onToggle={() => setBloque(bloque === 4 ? 0 : 4)}>
-          {exp.expediente_numero && (
-            <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8] px-3.5 py-3 mb-3">
-              <p className="text-[11px] text-neutral-500">Nº de expediente</p>
-              <p className="text-[15px] font-bold text-[#1A3557]">{exp.expediente_numero}</p>
-              {exp.expediente_fecha && (
-                <p className="text-[11.5px] text-neutral-500">Ingresado el {exp.expediente_fecha}</p>
-              )}
-              <a href="https://infoext2.delegaciondelgobierno.gob.es/infoext2/consulta.html"
-                target="_blank" rel="noreferrer"
-                className="text-[11.5px] font-semibold text-[#046C8C] hover:underline">
-                Consultar en la sede de la Delegación del Gobierno →
-              </a>
-            </div>
-          )}
+          <SeguimientoExpediente exp={exp} />
 
           {ext.length === 0 ? (
             <p className="text-[13px] text-neutral-400">

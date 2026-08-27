@@ -214,7 +214,7 @@ export default function GeneradoresEstancia({ id, exp, onArchivado }) {
     <div id="bloque-generadores" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <span className="shrink-0 w-7 h-7 rounded-lg grid place-items-center text-[12px]
-          font-bold text-white font-serif" style={{ background: "#023A4B" }}>3</span>
+          font-bold text-white font-serif" style={{ background: "#023A4B" }}>4</span>
         <span className="text-[13.5px] font-bold text-[#1A3557]">Documentos que generamos</span>
         <span className="ml-auto text-[11.5px] text-neutral-400">
           con los datos del expediente

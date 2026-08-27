@@ -3,7 +3,10 @@ import SidebarItem from "./SidebarItem";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 
-export default function PanelSidebar({ user, activeTab, onChangeTab, isOpen, onClose, tieneSolicitudes, tieneEstancia }) {
+export default function PanelSidebar({
+  user, activeTab, onChangeTab, isOpen, onClose,
+  tieneSolicitudes, tieneEstancia, tieneModificatoria,
+}) {
   const { logout } = useAuth();
 
   const inicial = user?.nombre?.[0] || user?.email_contacto?.[0] || "U";
@@ -103,6 +106,14 @@ export default function PanelSidebar({ user, activeTab, onChangeTab, isOpen, onC
                 label="Guía Estancia"
                 active={activeTab === "estancia"}
                 onClick={() => onChangeTab("estancia")}
+              />
+            )}
+            {tieneModificatoria && (
+              <SidebarItem
+                icon="💼"
+                label="Guía Residencia y Trabajo"
+                active={activeTab === "modificatoria"}
+                onClick={() => onChangeTab("modificatoria")}
               />
             )}
           </>

@@ -80,7 +80,7 @@ export default function MisServicios({ onIrAGuia }) {
             es el que sale por defecto para todo lo que no es visado. */}
         {esModificatoria(seleccionada) ? (
           <DetalleSolicitudModificatoria
-            solicitudBase={seleccionada} onVolver={manejarVolverLista} />
+            solicitudBase={seleccionada} onVolver={manejarVolverLista} onIrAGuia={onIrAGuia} />
         ) : esEstancia(seleccionada) ? (
           <DetalleSolicitudEstancia
             solicitudBase={seleccionada} onVolver={manejarVolverLista} onIrAGuia={onIrAGuia} />

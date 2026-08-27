@@ -402,7 +402,7 @@ function PedirRevision({ id, docs, exp, onHecho }) {
 
 /* ── Principal ───────────────────────────────────────────────────────────── */
 
-export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver }) {
+export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver, onIrAGuia }) {
   const id = solicitudBase?.id_solicitud;
   const [exp, setExp] = useState(null);
   const [docs, setDocs] = useState(null);
@@ -708,11 +708,30 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver 
         </Bloque>
 
         {/* ── 2 · Documentos ── */}
-        <Bloque numero="2" titulo="Tus documentos"
+        {/* ── 2 · Guía ── */}
+        <Bloque numero="2" titulo="Guía del proceso"
+          subtitulo="Los plazos, los requisitos y qué pide tu empresa"
+          abierto={bloque === 2} onToggle={() => setBloque(bloque === 2 ? 0 : 2)}>
+          <p className="text-[13px] text-neutral-700 leading-relaxed mb-3">
+            Léela antes de subir nada. Lleva la <b>calculadora de tu ventana de
+            presentación</b> —que se abre dos meses antes y se cierra tres después—, la lista
+            de lo que tiene que aportar tu empresa y la <b>cláusula que tu contrato debe
+            incluir palabra por palabra</b>.
+          </p>
+          <button type="button" onClick={() => onIrAGuia?.("modificatoria")}
+            className="inline-flex items-center gap-2 text-[13px] font-semibold px-4 py-2.5
+              rounded-lg text-white hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #1A3557 0%, #023A4B 100%)" }}>
+            📖 Abrir la guía de residencia y trabajo
+          </button>
+        </Bloque>
+
+        {/* ── 3 · Documentos ── */}
+        <Bloque numero="3" titulo="Tus documentos"
           subtitulo={docs?.faltan?.length ? `Te faltan ${docs.faltan.length}`
             : docs?.observados?.length ? `${docs.observados.length} por corregir`
             : "Todo entregado"}
-          abierto={bloque === 2} onToggle={() => setBloque(bloque === 2 ? 0 : 2)}>
+          abierto={bloque === 3} onToggle={() => setBloque(bloque === 3 ? 0 : 3)}>
 
           <PedirRevision id={id} docs={docs} exp={exp} onHecho={cargar} />
 
@@ -746,9 +765,9 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver 
         </Bloque>
 
         {/* ── 3 · Extranjería ── */}
-        <Bloque numero="3" titulo="Extranjería"
+        <Bloque numero="4" titulo="Extranjería"
           subtitulo={ext.length ? `${ext.length} comunicación(es)` : "Sin novedades"}
-          abierto={bloque === 3} onToggle={() => setBloque(bloque === 3 ? 0 : 3)}>
+          abierto={bloque === 4} onToggle={() => setBloque(bloque === 4 ? 0 : 4)}>
 
           {(exp.expediente_numero || exp.expediente_justificante || exp.nie) && (
             <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8] px-3.5 py-3 mb-3">

@@ -11,8 +11,9 @@ const BecasEspana   = lazy(() => import("./BecasEspana"));
 const GuiaMaster    = lazy(() => import("./GuiaMaster"));
 const GuiaApostilla = lazy(() => import("./GuiaApostilla"));
 const GuiaEstancia  = lazy(() => import("./GuiaEstancia"));
+const GuiaModificatoria = lazy(() => import("./GuiaModificatoria"));
 
-const VALID_TABS = ["servicios", "perfil", "becas", "guia", "apostilla", "estancia"];
+const VALID_TABS = ["servicios", "perfil", "becas", "guia", "apostilla", "estancia", "modificatoria"];
 
 function LoadingPage() {
   return (
@@ -38,6 +39,7 @@ export default function PanelCliente() {
   // La guía de estancia sólo se le enseña a quien tiene ese servicio: al
   // resto no le dice nada y le ensucia el menú.
   const [tieneEstancia, setTieneEstancia] = useState(false);
+  const [tieneModificatoria, setTieneModificatoria] = useState(false);
 
   const perfilIncompleto = usePerfilIncompletoBool(user);
   const mostrarWizard = user !== null && tieneSolicitudes !== null && tieneSolicitudes && perfilIncompleto;
@@ -71,12 +73,21 @@ export default function PanelCliente() {
       });
       setTieneSolicitudes(tieneNoVisado);
 
+      // Cada guia se le enseña solo a quien tiene ese servicio: al resto no le
+      // dice nada y le ensucia el menu.
+      const textoDe = (s) => String(
+        s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.titulo || s?.nombre_servicio || ""
+      ).toLowerCase();
+
+      setTieneModificatoria(lista.some((s) => (
+        Number(s?.id_tipo_solicitud) === 20 || /modificatoria|modificaci/.test(textoDe(s))
+      )));
+
       setTieneEstancia(lista.some((s) => {
+        if (Number(s?.id_tipo_solicitud) === 20) return false; // esa es la otra
         if (Number(s?.id_tipo_solicitud) === 18) return true;
-        const txt = String(
-          s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.titulo || s?.nombre_servicio || ""
-        ).toLowerCase();
-        return txt.includes("estancia");
+        const txt = textoDe(s);
+        return txt.includes("estancia") && !/modificatoria|modificaci/.test(txt);
       }));
     } catch { setTieneSolicitudes(false); }
   }
@@ -90,7 +101,12 @@ export default function PanelCliente() {
   const esScrollInterno = esServicios;
 
   // Tab titles
-  const titles = { servicios: "Mis Servicios", perfil: "Mi Perfil", becas: "Becas España", guia: "Guía Máster", apostilla: "Guía Apostilla Digital", estancia: "Guía Estancia por Estudios" };
+  const titles = {
+    servicios: "Mis Servicios", perfil: "Mi Perfil", becas: "Becas España",
+    guia: "Guía Máster", apostilla: "Guía Apostilla Digital",
+    estancia: "Guía Estancia por Estudios",
+    modificatoria: "Guía Residencia y Trabajo",
+  };
 
   return (
     <div className="h-screen overflow-hidden flex bg-[#F4F6F9] relative">
@@ -106,6 +122,7 @@ export default function PanelCliente() {
         onClose={() => setSidebarOpen(false)}
         tieneSolicitudes={tieneSolicitudes}
         tieneEstancia={tieneEstancia}
+        tieneModificatoria={tieneModificatoria}
       />
 
       <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>
@@ -183,6 +200,12 @@ export default function PanelCliente() {
           {tab === "estancia" && (
             <Suspense fallback={<LoadingPage />}>
               <GuiaEstancia />
+            </Suspense>
+          )}
+
+          {tab === "modificatoria" && (
+            <Suspense fallback={<LoadingPage />}>
+              <GuiaModificatoria />
             </Suspense>
           )}
 

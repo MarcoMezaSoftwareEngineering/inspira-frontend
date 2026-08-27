@@ -115,21 +115,39 @@ export function valoresEX00(exp = {}) {
 }
 
 /**
- * Casillas que van marcadas.
+ * Qué casillas se marcan.
  *
- * Son las mismas que traía el ejemplar de referencia. Van fijas porque
- * describen siempre el mismo supuesto: estancia por estudios solicitada desde
- * España y con representante.
+ * Al sacar el mapa del ejemplar de referencia, las casillas de sexo y estado
+ * civil parecían fijas: estaban marcadas «H» y «C» porque el titular de aquel
+ * ejemplar era un varón casado. Copiarlas tal cual habría mandado a
+ * extranjería el sexo y el estado civil de otra persona en todos los impresos.
+ * Se identificaron por su posición en la página y ahora salen de los datos.
+ *
+ * Las de la última página sí van fijas: describen el supuesto, que es siempre
+ * el mismo —estancia por estudios solicitada desde España y con representante.
  */
-export const CASILLAS_EX00 = [
-  "Casilla de verificación3",
-  "Casilla de verificación6",
-  "Casilla de verificación13",
-  "Casilla de verificación15",
-  "Casilla de verificación18",
-  "Casilla de verificación19",
-  "Casilla de verificación20",
-];
+const SEXO = { Hombre: 3, Mujer: 4 };
+const CIVIL = { "Soltero/a": 5, "Casado/a": 6, "Viudo/a": 7, "Divorciado/a": 8, "Separado/a": 9 };
+const REGISTRO = { RUCT: 10, RCD: 11, OTRO: 12 };
+const MODALIDAD = { PRESENCIAL: 15, SEMIPRESENCIAL: 16 };
+
+// Adscripción a Universidad: lo que se marca cuando no se ha indicado un
+// registro concreto, que es el caso más común en los másteres.
+const ADSCRIPCION = 13;
+
+const FIJAS = [18, 19, 20];
+
+export function casillasEX00(exp = {}) {
+  const n = new Set(FIJAS);
+
+  if (SEXO[exp.sexo]) n.add(SEXO[exp.sexo]);
+  if (CIVIL[exp.estado_civil]) n.add(CIVIL[exp.estado_civil]);
+  if (REGISTRO[exp.uni_registro_tipo]) n.add(REGISTRO[exp.uni_registro_tipo]);
+  else n.add(ADSCRIPCION);
+  if (MODALIDAD[exp.prog_modalidad]) n.add(MODALIDAD[exp.prog_modalidad]);
+
+  return [...n].map((x) => `Casilla de verificación${x}`);
+}
 
 /** Qué le falta al expediente para que el impreso salga completo. */
 export function faltaParaEX00(exp = {}) {

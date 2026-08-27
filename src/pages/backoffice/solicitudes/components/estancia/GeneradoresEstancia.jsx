@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { boFetch } from "../../../../../services/backofficeApi";
 import {
-  REPRESENTANTE, valoresEX00, CASILLAS_EX00, faltaParaEX00, nombreCompleto,
+  REPRESENTANTE, valoresEX00, casillasEX00, faltaParaEX00, nombreCompleto,
 } from "./ex00";
 
 const RUTA_EX00 = "/formularios/ex00-estancia.pdf";
@@ -46,7 +46,7 @@ async function construirEX00(exp) {
       c.setFontSize(9);
     } catch { /* casilla ausente en esta versión de la plantilla */ }
   }
-  for (const casilla of CASILLAS_EX00) {
+  for (const casilla of casillasEX00(exp)) {
     try { form.getCheckBox(casilla).check(); } catch { /* idem */ }
   }
 

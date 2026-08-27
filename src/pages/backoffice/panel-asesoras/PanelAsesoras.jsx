@@ -7,7 +7,8 @@ import { Search, Copy, MoreVertical, ChevronDown, ChevronLeft, ChevronRight, Pen
 
 /* ─── Constantes ─────────────────────────────────────────────────────────── */
 const SVC_KEYS = ["master", "visa", "ee", "fp", "legal"];
-const SVC_LABELS = { master: "Máster", visa: "Visa estudios", ee: "Estancia est.", fp: "FP / Grado", legal: "Legal / RR" };
+const SVC_LABELS = { master: "Máster", visa: "Visa estudios", ee: "Estancia est.",
+  mod: "Modificatoria", fp: "FP / Grado", legal: "Legal / RR" };
 const TABS = [{ id: "all", label: "Todos" }, ...SVC_KEYS.map(s => ({ id: s, label: SVC_LABELS[s] }))];
 const FASES_VE = ["Estrategia realizada", "Preparación documentaria", "Cita programada", "Documentos listos"];
 const UNI_EST = ["ADMITIDO","LISTA DE ESPERA ALTA","LISTA DE ESPERA MEDIA","LISTA DE ESPERA BAJA","POSTULADO","POSTULAR","NO POSTULAR AUN","PROCESO PREVIO","PENDIENTE","EXCLUIDO","FINALIZADO"];

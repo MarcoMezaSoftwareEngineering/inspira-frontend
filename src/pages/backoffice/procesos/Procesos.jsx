@@ -18,7 +18,8 @@ const COLOR_SERVICIO = {
   fp:     "bg-[#E8F5EE] text-[#1D6A4A]",
   legal:  "bg-[#FDEDEC] text-[#C0392B]",
 };
-const CORTO = { master: "Máster", visa: "Visado", ee: "Estancia", fp: "FP", legal: "Extranjería" };
+const CORTO = { master: "Máster", visa: "Visado", ee: "Estancia",
+  mod: "Modificatoria", fp: "FP", legal: "Extranjería" };
 
 // Los colores salen de las hojas de seguimiento del equipo: verde admitido,
 // morado lista de espera, marrón cita completada, rojo excluido. En una tabla

@@ -9,6 +9,7 @@ const SERVICIO = {
   master: { corto: "Máster",      tono: "bg-[#EEF2F8] text-[#1A3557]" },
   visa:   { corto: "Visado",      tono: "bg-[#FEF3E7] text-[#B9770E]" },
   ee:     { corto: "Estancia",    tono: "bg-[#F5EEF8] text-[#7D3C98]" },
+  mod:    { corto: "Modificatoria", tono: "bg-[#FEF3E7] text-[#B9770E]" },
   fp:     { corto: "FP",          tono: "bg-[#E8F5EE] text-[#1D6A4A]" },
   legal:  { corto: "Extranjería", tono: "bg-[#FDEDEC] text-[#C0392B]" },
 };

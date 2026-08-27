@@ -49,8 +49,9 @@ export default function SolicitudesList({ onVerSolicitud }) {
             <p className="text-sm text-neutral-500 mt-0.5">Control de expedientes, pagos y seguimiento de clientes.</p>
           </div>
 
-          {/* Tabs — solo admins ven la papelera */}
-          {isAdmin && (
+          {/* La papelera la ve todo el equipo: si se le deja tirar algo, tiene
+              que poder deshacerlo. Purgar sigue siendo cosa de admin. */}
+          {(
             <div className="flex bg-[#eef2ef] p-1 rounded-xl gap-0.5 text-sm font-bold">
               <button
                 onClick={() => setTab("activas")}
@@ -179,7 +180,7 @@ export default function SolicitudesList({ onVerSolicitud }) {
       )}
 
       {/* ══ TAB PAPELERA ══ */}
-      {tab === "papelera" && isAdmin && (
+      {tab === "papelera" && (
         <div className="bg-white border border-red-200 rounded-2xl shadow-[0_12px_40px_rgba(16,40,26,0.08)] overflow-hidden">
           <div className="px-4 py-3.5 border-b border-red-100 flex justify-between items-center bg-red-50">
             <span className="text-sm font-extrabold text-red-700">Solicitudes eliminadas</span>
@@ -225,13 +226,15 @@ export default function SolicitudesList({ onVerSolicitud }) {
                             >
                               Restaurar
                             </button>
-                            <button
-                              onClick={() => handlePurgar(s.id_solicitud)}
-                              className="px-3 py-1.5 text-xs font-medium bg-white text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition"
-                              title="Eliminar permanentemente"
-                            >
-                              Purgar
-                            </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => handlePurgar(s.id_solicitud)}
+                                className="px-3 py-1.5 text-xs font-medium bg-white text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition"
+                                title="Eliminar permanentemente. Esto no se deshace."
+                              >
+                                Purgar
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

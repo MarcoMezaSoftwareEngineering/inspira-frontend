@@ -183,7 +183,37 @@ function CampoEdit({ label, valor, onChange, falta, tipo = "text", opciones }) {
   );
 }
 
-function SeccionEdit({ titulo, campos, faltaSet, borrador, set }) {
+/** El mismo dato, para leer. Es como se ve la ficha mientras nadie la edita. */
+function CampoVista({ label, valor, falta }) {
+  const vacio = !String(valor ?? "").trim();
+  return (
+    <div className="min-w-0 flex flex-col gap-0.5">
+      <span className="text-[11px] text-neutral-500 leading-tight truncate" title={label}>
+        {label}
+      </span>
+      <span className={`text-[12.5px] leading-snug break-words ${
+        !vacio ? "text-neutral-900 font-medium"
+          : falta ? "text-amber-600" : "text-neutral-300"
+      }`}>{!vacio ? valor : falta ? "falta" : "—"}</span>
+    </div>
+  );
+}
+
+/** El lápiz. Fuera de él la ficha no se toca. */
+function Lapiz({ editando, onToggle }) {
+  return (
+    <button type="button" onClick={onToggle}
+      className={`text-[11.5px] font-semibold px-2.5 py-1 rounded-lg border transition-colors ${
+        editando
+          ? "bg-[#023A4B] text-white border-[#023A4B]"
+          : "border-neutral-300 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B]"
+      }`}>
+      {editando ? "✓ Listo" : "✎ Editar"}
+    </button>
+  );
+}
+
+function SeccionEdit({ titulo, campos, faltaSet, borrador, set, editando }) {
   const sinCompletar = campos.filter(
     ([, k, ob]) => ob && faltaSet.has(ob) && !String(borrador[k] || "").trim()
   ).length;
@@ -200,13 +230,17 @@ function SeccionEdit({ titulo, campos, faltaSet, borrador, set }) {
         )}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-2.5">
-        {campos.map(([label, k, ob, extra]) => (
-          <CampoEdit
-            key={k} label={label} valor={borrador[k]} onChange={set(k)}
-            falta={Boolean(ob) && faltaSet.has(ob) && !String(borrador[k] || "").trim()}
-            tipo={extra?.tipo} opciones={extra?.opciones}
-          />
-        ))}
+        {campos.map(([label, k, ob, extra]) => {
+          const falta = Boolean(ob) && faltaSet.has(ob) && !String(borrador[k] || "").trim();
+          return editando ? (
+            <CampoEdit
+              key={k} label={label} valor={borrador[k]} onChange={set(k)} falta={falta}
+              tipo={extra?.tipo} opciones={extra?.opciones}
+            />
+          ) : (
+            <CampoVista key={k} label={label} valor={borrador[k]} falta={falta} />
+          );
+        })}
       </div>
     </div>
   );
@@ -221,6 +255,7 @@ function SeccionEdit({ titulo, campos, faltaSet, borrador, set }) {
  */
 function Datos({ exp, onGuardar }) {
   const [borrador, setBorrador] = useState(exp);
+  const [editando, setEditando] = useState(false);
   const [tocado, setTocado] = useState(false);
   const [guardandoDatos, setGuardandoDatos] = useState(false);
   const version = useRef(0);
@@ -321,9 +356,12 @@ function Datos({ exp, onGuardar }) {
       <Cabecera numero="1" titulo="El expediente"
         extra={
           <span className="ml-auto flex items-center gap-3">
-            <span className="text-[11px] text-neutral-400">
-              {guardandoDatos ? "guardando…" : tocado ? "sin guardar…" : "se guarda solo"}
-            </span>
+            {editando && (
+              <span className="text-[11px] text-neutral-400">
+                {guardandoDatos ? "guardando…" : tocado ? "sin guardar…" : "se guarda solo"}
+              </span>
+            )}
+            <Lapiz editando={editando} onToggle={() => setEditando((v) => !v)} />
             <span className={`text-[11.5px] font-semibold ${
               faltan.length ? "text-amber-600" : "text-[#1D6A4A]"
             }`}>
@@ -342,30 +380,48 @@ function Datos({ exp, onGuardar }) {
 
       {SECCIONES.map(([titulo, campos]) => (
         <SeccionEdit key={titulo} titulo={titulo} campos={campos} faltaSet={faltaSet}
-          borrador={borrador} set={set} />
+          borrador={borrador} set={set} editando={editando} />
       ))}
 
-      <label className="flex items-center gap-2 text-[12px] text-neutral-600 mt-3">
-        <span>Hijos escolarizados</span>
-        <select className={input}
-          value={borrador.hijos_escolarizacion === true ? "si"
-            : borrador.hijos_escolarizacion === false ? "no" : ""}
-          onChange={(e) => set("hijos_escolarizacion")(
-            e.target.value === "si" ? true : e.target.value === "no" ? false : null
-          )}>
-          <option value="">Sin preguntar</option>
-          <option value="si">Sí</option>
-          <option value="no">No</option>
-        </select>
-      </label>
-
-      <div className="flex items-center gap-2 mt-3.5 mb-1.5">
-        <p className="text-[11.5px] font-semibold text-neutral-600">Lo que nos ha contado</p>
-        <span className="flex-1 h-px bg-neutral-100" />
+      <div className="mt-3">
+        {editando ? (
+          <label className="flex items-center gap-2 text-[12px] text-neutral-600">
+            <span>Hijos escolarizados</span>
+            <select className={input}
+              value={borrador.hijos_escolarizacion === true ? "si"
+                : borrador.hijos_escolarizacion === false ? "no" : ""}
+              onChange={(e) => set("hijos_escolarizacion")(
+                e.target.value === "si" ? true : e.target.value === "no" ? false : null
+              )}>
+              <option value="">Sin preguntar</option>
+              <option value="si">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </label>
+        ) : (
+          <CampoVista label="Hijos escolarizados"
+            valor={borrador.hijos_escolarizacion === true ? "Sí"
+              : borrador.hijos_escolarizacion === false ? "No" : ""} />
+        )}
       </div>
-      <textarea rows={2} value={borrador.notas ?? ""} onChange={(e) => set("notas")(e.target.value)}
-        placeholder="Cualquier cosa que convenga tener anotada…"
-        className={`${input} w-full`} />
+
+      {(editando || borrador.notas) && (
+        <>
+          <div className="flex items-center gap-2 mt-3.5 mb-1.5">
+            <p className="text-[11.5px] font-semibold text-neutral-600">Lo que nos ha contado</p>
+            <span className="flex-1 h-px bg-neutral-100" />
+          </div>
+          {editando ? (
+            <textarea rows={2} value={borrador.notas ?? ""}
+              onChange={(e) => set("notas")(e.target.value)}
+              placeholder="Cualquier cosa que convenga tener anotada…"
+              className={`${input} w-full`} />
+          ) : (
+            <p className="text-[12.5px] text-neutral-700 bg-neutral-50 border border-neutral-200
+              rounded-lg px-3 py-2 leading-relaxed">{borrador.notas}</p>
+          )}
+        </>
+      )}
 
       {/* Seguimiento en la sede */}
       <div className="flex items-center gap-2 mt-4 mb-2">

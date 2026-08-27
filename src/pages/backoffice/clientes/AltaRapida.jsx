@@ -87,7 +87,15 @@ export default function AltaRapida({ onCreado, onCancelar, cliente }) {
     try {
       const r = await boPOST("/backoffice/alta-rapida", { ...f, comunidades });
       if (!r.ok) throw new Error(r.msg || "No se pudo crear");
-      setMsg({ tono: "ok", texto: r.msg });
+      // A dónde ha ido el acceso, dicho en voz alta. El correo mal escrito no
+      // da error: se crea el servicio, el instructivo rebota a administración y
+      // el asesorado no se entera de nada. Enseñarlo aquí es la única
+      // oportunidad de que alguien vea la letra de más antes de que sea tarde.
+      setMsg({
+        tono: r.aviso_correo ? "aviso" : "ok",
+        texto: `${r.msg} El acceso se ha enviado a ${r.correo_instructivo}.` +
+          (r.aviso_correo ? ` ${r.aviso_correo}` : ""),
+      });
       onCreado?.(r);
     } catch (e) {
       setMsg({ tono: "error", texto: e.message || "Error al crear" });
@@ -201,7 +209,8 @@ export default function AltaRapida({ onCreado, onCancelar, cliente }) {
 
       {msg && (
         <p className={`text-[12.5px] rounded-lg border px-3 py-2 ${
-          msg.tono === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+          msg.tono === "aviso" ? "border-amber-300 bg-amber-50 text-amber-800"
+            : msg.tono === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                             : "border-red-200 bg-red-50 text-red-700"
         }`}>
           {msg.texto}

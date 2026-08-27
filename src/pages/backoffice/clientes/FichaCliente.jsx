@@ -4,7 +4,7 @@
 // datos en Clientes, sus procesos en Solicitudes, sus pagos en ningún lado y
 // sus notas dentro de cada expediente. Aquí está junto.
 import { useCallback, useEffect, useState } from "react";
-import { boGET, boPOST, boFetch } from "../../../services/backofficeApi";
+import { boGET, boPOST, boPATCH, boDELETE, boFetch } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
 
 /* El voucher está detrás de autenticación, así que un enlace normal daría 401:
@@ -74,6 +74,112 @@ function Bloque({ titulo, extra, children }) {
   );
 }
 
+/**
+ * Un servicio del cliente, con lo que se puede hacer con el.
+ *
+ * Antes era solo un enlace: para asignar a alguien, reenviar el acceso o
+ * retirar un duplicado habia que ir a otra pantalla o pedirselo a alguien. Lo
+ * que se ve mal desde aqui se arregla desde aqui.
+ */
+function TarjetaServicio({ p: proc, equipo, onAbrir, onCambio }) {
+  const [ocupado, setOcupado] = useState("");
+  const [msg, setMsg] = useState(null);
+
+  async function asignar(id) {
+    setOcupado("asesor");
+    const r = await boPATCH(`/backoffice/solicitudes/${proc.id_solicitud}/asesor`, {
+      id_asesor_asignado: id || null,
+    });
+    setOcupado("");
+    if (r?.ok) onCambio(); else setMsg({ mal: true, texto: r?.msg || "No se pudo asignar" });
+  }
+
+  async function reenviar() {
+    setOcupado("correo"); setMsg(null);
+    const r = await boPOST(`/backoffice/solicitudes/${proc.id_solicitud}/reenviar-acceso`, {});
+    setOcupado("");
+    setMsg(r?.ok
+      ? { texto: `Acceso reenviado a ${r.para}` }
+      : { mal: true, texto: r?.msg || "No se pudo reenviar" });
+  }
+
+  async function retirar() {
+    const seguro = window.confirm(
+      `¿Retirar «${proc.servicio_label}» de este cliente?\n\n` +
+      "Va a la papelera, no se borra: un administrador puede recuperarlo."
+    );
+    if (!seguro) return;
+    setOcupado("papelera"); setMsg(null);
+    const r = await boDELETE(`/backoffice/solicitudes/${proc.id_solicitud}`);
+    setOcupado("");
+    if (r?.ok) onCambio(); else setMsg({ mal: true, texto: r?.msg || "No se pudo retirar" });
+  }
+
+  return (
+    <div className={`border rounded-lg px-3 py-2.5 ${
+      proc.cerrado ? "border-neutral-200 bg-neutral-50 opacity-70" : "border-neutral-200 bg-white"
+    }`}>
+      <button type="button" onClick={() => onAbrir?.(proc.id_solicitud)}
+        className="w-full text-left">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${TONO_SERVICIO[proc.servicio]}`}>
+            {proc.servicio_label}
+          </span>
+          <span className="text-[12.5px] font-semibold text-neutral-800">{proc.etapa}</span>
+          {proc.etapa_deducida && (
+            <span className="text-[10px] text-neutral-400"
+              title="Sale del estado del expediente; nadie la ha confirmado a mano">
+              (deducida)
+            </span>
+          )}
+          <span className="ml-auto text-[11px] text-neutral-400">{proc.progreso}%</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1 flex-wrap text-[11px] text-neutral-500">
+          {proc.paquete && <span>{proc.paquete}</span>}
+          {proc.comunidades.length > 0 && <span>· {proc.comunidades.join(", ")}</span>}
+          {proc.docs_observados > 0 && (
+            <span className="text-red-600 font-semibold">· {proc.docs_observados} obs</span>
+          )}
+        </div>
+      </button>
+
+      <div className="flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-neutral-100">
+        <select
+          value={proc.id_responsable || ""} disabled={ocupado === "asesor"}
+          onChange={(e) => asignar(e.target.value)}
+          className={`text-[11px] rounded-lg border px-2 py-1 bg-white max-w-[170px] ${
+            proc.id_responsable ? "border-neutral-300 text-neutral-700"
+              : "border-amber-300 bg-amber-50 text-amber-700 font-semibold"
+          }`}
+        >
+          <option value="">Sin asignar</option>
+          {equipo.map((u) => (
+            <option key={u.id_usuario} value={u.id_usuario}>{u.nombre}</option>
+          ))}
+        </select>
+
+        <button type="button" onClick={reenviar} disabled={Boolean(ocupado)}
+          title="Vuelve a mandarle el correo con sus datos de acceso al portal"
+          className="text-[11px] font-semibold text-[#046C8C] hover:underline disabled:opacity-40">
+          {ocupado === "correo" ? "enviando…" : "✉ Reenviar acceso"}
+        </button>
+
+        <button type="button" onClick={retirar} disabled={Boolean(ocupado)}
+          title="A la papelera. No se borra."
+          className="ml-auto text-[11px] text-neutral-400 hover:text-red-600 disabled:opacity-40">
+          {ocupado === "papelera" ? "…" : "Retirar"}
+        </button>
+      </div>
+
+      {msg && (
+        <p className={`text-[11px] mt-1.5 leading-relaxed ${
+          msg.mal ? "text-red-600" : "text-[#1D6A4A]"
+        }`}>{msg.texto}</p>
+      )}
+    </div>
+  );
+}
+
 export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -91,6 +197,14 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
       setCargando(false);
     });
   }, [idCliente]);
+
+  // Quién puede llevar un servicio. Se pide una vez: no cambia cada rato.
+  const [equipo, setEquipo] = useState([]);
+  useEffect(() => {
+    boGET("/backoffice/solicitudes/equipo").then((r) => {
+      if (r?.ok) setEquipo(r.equipo || []);
+    });
+  }, []);
 
   useEffect(() => {
     boGET(`/backoffice/ficha-cliente/${idCliente}`).then((r) => {
@@ -187,30 +301,10 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
             ) : (
               <div className="space-y-2">
                 {procesos.map((p) => (
-                  <button
-                    key={p.id_solicitud} type="button" onClick={() => onAbrirProceso?.(p.id_solicitud)}
-                    className={`w-full text-left border rounded-lg px-3 py-2.5 transition-colors hover:border-neutral-300 ${
-                      p.cerrado ? "border-neutral-200 bg-neutral-50 opacity-70" : "border-neutral-200 bg-white"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${TONO_SERVICIO[p.servicio]}`}>
-                        {p.servicio_label}
-                      </span>
-                      <span className="text-[12.5px] font-semibold text-neutral-800">{p.etapa}</span>
-                      {p.etapa_deducida && <span className="text-[10px] text-neutral-400">(deducida)</span>}
-                      <span className="ml-auto text-[11px] text-neutral-400">{p.progreso}%</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap text-[11px] text-neutral-500">
-                      {p.paquete && <span>{p.paquete}</span>}
-                      {p.comunidades.length > 0 && <span>· {p.comunidades.join(", ")}</span>}
-                      {p.responsable ? <span>· {p.responsable}</span>
-                        : <span className="text-amber-600 font-semibold">· sin asignar</span>}
-                      {p.docs_observados > 0 && (
-                        <span className="text-red-600 font-semibold">· {p.docs_observados} obs</span>
-                      )}
-                    </div>
-                  </button>
+                  <TarjetaServicio
+                    key={p.id_solicitud} p={p} equipo={equipo}
+                    onAbrir={onAbrirProceso} onCambio={cargar}
+                  />
                 ))}
               </div>
             )}

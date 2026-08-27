@@ -19,8 +19,9 @@ function fecha(v) {
   });
 }
 
-function Ficha({ i, onQuitar }) {
+function Ficha({ i, onQuitar, onAvisar }) {
   const [quitando, setQuitando] = useState(false);
+  const [avisando, setAvisando] = useState(false);
 
   async function quitar() {
     const seguro = window.confirm(
@@ -48,10 +49,26 @@ function Ficha({ i, onQuitar }) {
               : " Sólo puede mirar."}
           </p>
         </div>
-        <button type="button" onClick={quitar} disabled={quitando}
-          className="shrink-0 text-[11.5px] text-neutral-400 hover:text-red-600 disabled:opacity-40">
-          {quitando ? "…" : "Quitar acceso"}
-        </button>
+        <div className="shrink-0 flex flex-col items-end gap-1">
+          {/* El aviso sale una vez, al invitar. Se pierde por tres caminos: el
+              correo rebota, se va al spam, o la invitación se creó antes de que
+              este correo existiera. Por eso se puede repetir. */}
+          <button type="button" disabled={avisando || quitando}
+            onClick={async () => {
+              setAvisando(true);
+              await onAvisar(i.id_invitado);
+              setAvisando(false);
+            }}
+            title="Le vuelve a mandar el aviso a esta persona y al asesorado"
+            className="text-[11.5px] font-semibold text-[#046C8C] hover:underline
+              disabled:opacity-40">
+            {avisando ? "enviando…" : "✉ Reenviar aviso"}
+          </button>
+          <button type="button" onClick={quitar} disabled={quitando || avisando}
+            className="text-[11.5px] text-neutral-400 hover:text-red-600 disabled:opacity-40">
+            {quitando ? "…" : "Quitar acceso"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -91,6 +108,14 @@ export default function Invitados({ idSolicitud, numero = "6" }) {
     }
   }
 
+  async function avisar(id) {
+    setMsg(null);
+    const r = await boPOST(`/backoffice/solicitudes/${idSolicitud}/invitados/${id}/avisar`, {});
+    setMsg(r?.ok
+      ? { texto: `Avisos enviados a ${r.invitado} y al asesorado.` }
+      : { mal: true, texto: r?.msg || "No se pudieron mandar" });
+  }
+
   async function quitar(id) {
     const r = await boDELETE(`/backoffice/solicitudes/${idSolicitud}/invitados/${id}`);
     if (r?.ok) { setMsg({ texto: "Acceso retirado." }); cargar(); }
@@ -120,7 +145,9 @@ export default function Invitados({ idSolicitud, numero = "6" }) {
 
       {lista.length > 0 && (
         <div className="space-y-2 mb-3">
-          {lista.map((i) => <Ficha key={i.id_invitado} i={i} onQuitar={quitar} />)}
+          {lista.map((i) => (
+            <Ficha key={i.id_invitado} i={i} onQuitar={quitar} onAvisar={avisar} />
+          ))}
         </div>
       )}
 

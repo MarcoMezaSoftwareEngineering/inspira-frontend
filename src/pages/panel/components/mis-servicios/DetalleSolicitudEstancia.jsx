@@ -9,8 +9,11 @@
 // pero alguien puede tener el pasaporte a mano y la carta de admisión no; que
 // no pueda avanzar por eso sólo hace que abandone el portal y lo mande todo
 // por WhatsApp.
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { apiGET, apiPUT, apiPOST, apiUpload, apiDELETE } from "../../../../services/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { apiGET, apiPUT, apiPOST } from "../../../../services/api";
+import { Campo, Selector, Guardado } from "./campos";
+import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
+import AcompanantesCliente from "./AcompanantesCliente";
 
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
@@ -45,95 +48,6 @@ const OPCIONES = {
  * párrafo bajo cada uno convierte el formulario en un muro. Quien sabe qué
  * poner no la abre; quien duda, la tiene a un clic.
  */
-function Ayuda({ texto }) {
-  const [ver, setVer] = useState(false);
-  if (!texto) return null;
-  return (
-    <>
-      <button type="button" onClick={() => setVer((v) => !v)}
-        aria-label="Qué va en este campo"
-        className={`shrink-0 w-4 h-4 rounded-full text-[10px] font-bold leading-none
-          border transition-colors ${
-          ver ? "bg-[#1A3557] border-[#1A3557] text-white"
-              : "border-neutral-300 text-neutral-400 hover:border-[#1A3557] hover:text-[#1A3557]"
-        }`}>i</button>
-      {ver && (
-        <span className="block w-full text-[11.5px] text-[#1A3557] bg-[#EEF2F8]
-          border border-[#1A3557]/15 rounded-lg px-2.5 py-1.5 mt-1 leading-relaxed order-last">
-          {texto}
-        </span>
-      )}
-    </>
-  );
-}
-
-function Etiqueta({ id, label, ayuda, obligatorio }) {
-  return (
-    <span className="flex items-center gap-1.5 flex-wrap">
-      <label htmlFor={id} className="text-[12.5px] font-medium text-neutral-700">
-        {label}
-      </label>
-      {!obligatorio && (
-        <span className="text-[10.5px] text-neutral-400">opcional</span>
-      )}
-      <Ayuda texto={ayuda} />
-    </span>
-  );
-}
-
-function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatorio, falta }) {
-  const id = useId();
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Etiqueta id={id} label={label} ayuda={ayuda} obligatorio={obligatorio} />
-      <input
-        id={id} type={tipo} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className={`text-[14px] border rounded-lg px-3 py-2.5 bg-white transition-colors
-          focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/25 focus:border-[#1D6A4A] ${
-          falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
-        }`}
-      />
-    </div>
-  );
-}
-
-function Selector({ label, valor, onChange, opciones, ayuda, obligatorio, falta }) {
-  const pares = opciones.map((o) => (Array.isArray(o) ? o : [o, o]));
-  const id = useId();
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Etiqueta id={id} label={label} ayuda={ayuda} obligatorio={obligatorio} />
-      <select
-        id={id} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className={`text-[14px] border rounded-lg px-3 py-2.5 bg-white
-          focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/25 focus:border-[#1D6A4A] ${
-          falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
-        }`}
-      >
-        <option value="">—</option>
-        {pares.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
-      </select>
-    </div>
-  );
-}
-
-function Guardado({ guardando, tocado, completo, arriba }) {
-  const texto = guardando ? "Guardando…"
-    : tocado ? "Sin guardar…"
-    : completo ? "Guardado. Ya está todo."
-    : "Guardado";
-  const tono = guardando || tocado ? "text-neutral-400" : "text-[#1D6A4A]";
-  return (
-    <p className={`flex items-center gap-1.5 text-[11.5px] ${tono} ${arriba ? "mb-3" : "mt-4"}`}>
-      <span aria-hidden="true">{guardando || tocado ? "•" : "✓"}</span>
-      {texto}
-      {!guardando && !tocado && (
-        <span className="text-neutral-400">· se guarda solo</span>
-      )}
-    </p>
-  );
-}
-
 function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, onSiguiente, children }) {
   const completo = faltan === 0;
   return (
@@ -298,124 +212,6 @@ function SeguimientoExpediente({ exp }) {
 
 /* ── Documentos ──────────────────────────────────────────────────────────── */
 
-const ESTADO_DOC = {
-  SIN_SUBIR: { label: "Pendiente",   bg: "bg-neutral-100", text: "text-neutral-500", borde: "border-neutral-200 bg-white" },
-  PENDIENTE: { label: "En revisión", bg: "bg-sky-50",      text: "text-sky-700",     borde: "border-sky-200 bg-sky-50/30" },
-  APROBADO:  { label: "Aprobado",    bg: "bg-emerald-50",  text: "text-emerald-700", borde: "border-emerald-200 bg-emerald-50/20" },
-  OBSERVADO: { label: "Corrígelo",   bg: "bg-red-50",      text: "text-red-700",     borde: "border-red-300 bg-red-50/30" },
-};
-
-function TarjetaDocumento({ id, clave, def, onCambio }) {
-  const [subiendo, setSubiendo] = useState(false);
-  const [error, setError] = useState("");
-
-  const cfg = ESTADO_DOC[def.estado] || ESTADO_DOC.SIN_SUBIR;
-  const ultimo = def.archivos[0];
-  const esDelAsesor = def.de === "asesor";
-
-  async function subir(archivo) {
-    if (!archivo) return;
-    setSubiendo(true); setError("");
-    try {
-      const datos = new FormData();
-      datos.append("archivo", archivo);
-      await apiUpload(`/solicitudes/${id}/estancia/documentos/${clave}`, datos);
-      onCambio();
-    } catch (e) {
-      setError(e.message || "No se pudo subir");
-    } finally { setSubiendo(false); }
-  }
-
-  async function quitar(idDoc) {
-    const r = await apiDELETE(`/solicitudes/${id}/estancia/documentos/archivo/${idDoc}`);
-    if (r?.ok) onCambio();
-  }
-
-  return (
-    <div className={`border rounded-xl p-3 relative flex flex-col gap-2 ${cfg.borde}`}>
-      <span className={`absolute top-2.5 right-2.5 text-[10px] font-semibold px-2 py-0.5
-        rounded-full ${cfg.bg} ${cfg.text}`}>
-        {esDelAsesor && def.estado === "SIN_SUBIR" ? "Lo hacemos nosotros" : cfg.label}
-      </span>
-
-      <p className="text-[13px] font-semibold text-neutral-900 pr-24 leading-snug">
-        {def.etiqueta}{def.obligatorio && <span className="text-orange-500"> *</span>}
-      </p>
-
-      {def.requisito && (
-        <details className="group -mt-1">
-          <summary className="cursor-pointer select-none text-[11.5px] font-semibold
-            text-[#046C8C] hover:underline list-none">
-            <span className="group-open:hidden">Ver requisitos ▾</span>
-            <span className="hidden group-open:inline">Ocultar requisitos ▴</span>
-          </summary>
-          <p className="mt-1.5 text-[11.5px] text-neutral-600 leading-relaxed border-l-2
-            border-neutral-200 pl-3">{def.requisito}</p>
-        </details>
-      )}
-
-      {ultimo?.observacion && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-2.5 py-2">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-red-700 mb-0.5">
-            Hay que corregirlo
-          </p>
-          <p className="text-[12px] text-red-800 leading-relaxed">{ultimo.observacion}</p>
-        </div>
-      )}
-
-      {def.estado === "PENDIENTE" && (
-        <p className="text-[11.5px] text-sky-700 leading-relaxed">
-          Lo tenemos. Tu asesor lo está revisando y te dirá si está correcto.
-        </p>
-      )}
-
-      {def.archivos.length > 0 && (
-        <div className="space-y-1">
-          {def.archivos.map((a) => (
-            <div key={a.id_documento} className="flex items-center gap-2">
-              <a href={`/api/solicitudes/${id}/estancia/documentos/archivo/${a.id_documento}`}
-                target="_blank" rel="noreferrer"
-                className="text-[11.5px] text-[#046C8C] hover:underline truncate flex-1">
-                📄 {a.nombre}
-              </a>
-              {a.subido_por === "CLIENTE" && (
-                <button type="button" onClick={() => quitar(a.id_documento)}
-                  className="shrink-0 text-[11px] text-neutral-400 hover:text-red-600">quitar</button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {!esDelAsesor && (
-        <label className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold
-          text-[#023A4B] cursor-pointer hover:underline w-fit">
-          {subiendo ? "Subiendo…"
-            : def.estado === "OBSERVADO" ? "📎 Subir la corrección"
-            : def.archivos.length ? (def.varios ? "+ añadir otro" : "Reemplazar")
-            : "📎 Subir"}
-          <input type="file" className="hidden" accept="application/pdf,image/*"
-            disabled={subiendo} onChange={(e) => subir(e.target.files?.[0])} />
-        </label>
-      )}
-
-      {esDelAsesor && def.archivos.length === 0 && (
-        <p className="text-[11px] text-neutral-400">
-          Lo preparamos nosotros y aparecerá aquí cuando esté listo.
-        </p>
-      )}
-
-      {error && <p className="text-[11.5px] text-red-600">{error}</p>}
-    </div>
-  );
-}
-
-/**
- * Pedir revisión.
- *
- * Sube tres documentos y no sabe si alguien los ha mirado; el asesor no sabe
- * que hay cosas nuevas. Un botón resuelve las dos mitades del problema.
- */
 function PedirRevision({ id, docs, exp, onHecho }) {
   const [abierto, setAbierto] = useState(false);
   const [nota, setNota] = useState("");
@@ -934,11 +730,14 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </div>
           )}
 
+          <ResumenDocumentos ranuras={docs?.ranuras} />
+
           <PedirRevision id={id} docs={docs} exp={exp} onHecho={cargar} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
             {ranurasCliente.map(([clave, def]) => (
-              <TarjetaDocumento key={clave} id={id} clave={clave} def={def} onCambio={cargar} />
+              <TarjetaDocumento key={clave} base={`/solicitudes/${id}/estancia`}
+                clave={clave} def={def} onCambio={cargar} />
             ))}
           </div>
 
@@ -946,15 +745,29 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             text-neutral-400 mb-2">Los preparamos nosotros</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {ranurasAsesor.map(([clave, def]) => (
-              <TarjetaDocumento key={clave} id={id} clave={clave} def={def} onCambio={cargar} />
+              <TarjetaDocumento key={clave} base={`/solicitudes/${id}/estancia`}
+                clave={clave} def={def} onCambio={cargar} />
             ))}
           </div>
         </Bloque>
 
-        {/* ── 4 · Extranjería ── */}
-        <Bloque numero="4" titulo="Extranjería"
-          subtitulo={ext.length ? `${ext.length} comunicación(es)` : "Sin novedades"}
+        {/* ── 4 · Acompañantes ── */}
+        <Bloque numero="4" titulo="¿Viajas acompañado?"
+          subtitulo={exp.con_acompanantes
+            ? "Cónyuge o hijos vinculados a tu autorización"
+            : "Cónyuge, hijos o familiares a tu cargo"}
           abierto={bloque === 4} onToggle={() => setBloque(bloque === 4 ? 0 : 4)}>
+          <AcompanantesCliente
+            idSolicitud={id}
+            conAcompanantes={exp.con_acompanantes}
+            onMarcar={(v) => { set("con_acompanantes")(v); }}
+          />
+        </Bloque>
+
+        {/* ── 5 · Extranjería ── */}
+        <Bloque numero="5" titulo="Extranjería"
+          subtitulo={ext.length ? `${ext.length} comunicación(es)` : "Sin novedades"}
+          abierto={bloque === 5} onToggle={() => setBloque(bloque === 5 ? 0 : 5)}>
           <SeguimientoExpediente exp={exp} />
 
           {ext.length === 0 ? (

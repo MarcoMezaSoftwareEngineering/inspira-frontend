@@ -175,3 +175,118 @@ export function faltaParaEX00(exp = {}) {
   ];
   return req.filter(([v]) => !String(v || "").trim()).map(([, l]) => l);
 }
+
+/* ── El acompañante ──────────────────────────────────────────────────────── */
+
+/**
+ * El domicilio que se pone en su impreso.
+ *
+ * Si vive con el titular, el del titular —que a su vez puede ser el de la
+ * universidad, cuando todavía no tiene piso.
+ */
+export function domicilioAcompanante(a = {}, exp = {}) {
+  if (a.dom_mismo === false) {
+    return {
+      calle: a.dom_direccion, numero: a.dom_numero, piso: a.dom_piso,
+      localidad: a.dom_localidad, cp: a.dom_cp, provincia: a.dom_provincia,
+    };
+  }
+  const usaUni = exp.dom_usa_universidad;
+  return {
+    calle: usaUni ? exp.uni_direccion : exp.dom_direccion,
+    numero: usaUni ? "" : exp.dom_numero,
+    piso: usaUni ? "" : exp.dom_piso,
+    localidad: usaUni ? exp.uni_localidad : exp.dom_localidad,
+    cp: usaUni ? exp.uni_cp : exp.dom_cp,
+    provincia: usaUni ? exp.uni_provincia : exp.dom_provincia,
+  };
+}
+
+/**
+ * El NIE va partido en tres casillas —letra, número, letra—, tal como está
+ * impreso. Se acepta escrito de cualquier forma: «Y1234567Z», «Y-1234567-Z».
+ */
+export function partesNIE(v) {
+  const txt = String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!txt) return { inicial: "", numero: "", final: "" };
+  const m = txt.match(/^([A-Z]?)(\d*)([A-Z]?)$/);
+  if (!m) return { inicial: "", numero: txt, final: "" };
+  return { inicial: m[1], numero: m[2], final: m[3] };
+}
+
+/**
+ * Qué va en el impreso del acompañante.
+ *
+ * Sólo el bloque 1: el resto del EX-00 describe los estudios del titular, que
+ * no son los suyos. El acompañante se vincula a la autorización del
+ * estudiante, no pide una estancia por estudios propia.
+ */
+export function valoresEX00Acompanante(a = {}, exp = {}) {
+  const nac = partesFecha(a.fecha_nacimiento);
+  const dom = domicilioAcompanante(a, exp);
+  const nie = partesNIE(a.nie);
+
+  return {
+    Texto1: a.pasaporte,
+    Texto2: nie.inicial,
+    Texto3: nie.numero,
+    Texto4: nie.final,
+    Texto5: (a.apellido1 || "").toUpperCase(),
+    Texto6: (a.apellido2 || "").toUpperCase(),
+    Texto7: (a.nombres || "").toUpperCase(),
+    Texto8: nac.dia,
+    Texto9: nac.mes,
+    Texto10: nac.anio,
+    Texto11: (a.lugar_nacimiento || "").toUpperCase(),
+    Texto12: (a.pais_nacimiento || "").toUpperCase(),
+    Texto13: (a.nacionalidad || "").toUpperCase(),
+    Texto14: (a.nombre_padre || "").toUpperCase(),
+    Texto15: (a.nombre_madre || "").toUpperCase(),
+    Texto16: (dom.calle || "").toUpperCase(),
+    Texto17: dom.numero,
+    Texto18: dom.piso,
+    Texto19: (dom.localidad || "").toUpperCase(),
+    Texto20: dom.cp,
+    Texto21: (dom.provincia || "").toUpperCase(),
+    Texto22: a.telefono || exp.dom_telefono || exp.telefono,
+    Texto23: a.correo || exp.dom_correo || exp.correo,
+
+    // Representante legal, sólo cuando es menor de edad.
+    Texto24: (a.repr_nombre || "").toUpperCase(),
+    Texto25: a.repr_doc,
+    Texto26: (a.repr_titulo || "").toUpperCase(),
+  };
+}
+
+/** Sólo las del bloque 1: sexo y estado civil. Las demás describen al titular. */
+export function casillasEX00Acompanante(a = {}) {
+  const n = [];
+  if (SEXO[a.sexo]) n.push(SEXO[a.sexo]);
+  if (CIVIL[a.estado_civil]) n.push(CIVIL[a.estado_civil]);
+  return n.map((x) => `Casilla de verificación${x}`);
+}
+
+export function faltaParaEX00Acompanante(a = {}, exp = {}) {
+  const dom = domicilioAcompanante(a, exp);
+  const req = [
+    [a.apellido1, "Primer apellido"],
+    [a.nombres, "Nombres"],
+    [a.pasaporte, "Nº de pasaporte"],
+    [a.fecha_nacimiento, "Fecha de nacimiento"],
+    [a.lugar_nacimiento, "Lugar de nacimiento"],
+    [a.pais_nacimiento, "País de nacimiento"],
+    [a.nacionalidad, "Nacionalidad"],
+    [a.nombre_padre, "Nombre del padre"],
+    [a.nombre_madre, "Nombre de la madre"],
+    [dom.calle, "Domicilio en España"],
+    [dom.localidad, "Localidad"],
+    [dom.cp, "Código postal"],
+    [dom.provincia, "Provincia"],
+  ];
+  return req.filter(([v]) => !String(v || "").trim()).map(([, etiqueta]) => etiqueta);
+}
+
+/** «NOMBRES APELLIDOS» del acompañante, en mayúsculas. */
+export function nombreAcompanante(a = {}) {
+  return [a.nombres, a.apellido1, a.apellido2].filter(Boolean).join(" ").toUpperCase();
+}

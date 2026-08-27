@@ -9,6 +9,7 @@
 // el asesorado tiene que saber si el suyo pasó.
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backofficeApi";
+import AcompanantesAdmin from "./AcompanantesAdmin";
 import GeneradoresEstancia from "./GeneradoresEstancia";
 
 const TONOS = {
@@ -523,6 +524,109 @@ function Documentos({ id, docs, onCambio }) {
   );
 }
 
+/* ── Pasarle la carpeta a la abogada ─────────────────────────────────────── */
+
+/**
+ * Un paso distinto de cerrar la carpeta.
+ *
+ * Cerrarla le dice al asesorado que su parte terminó. Esto se la entrega a
+ * quien la va a presentar, con el enlace directo a Drive para que no tenga que
+ * buscarla entre carpetas. Son dos avisos a dos personas distintas, y hacerlos
+ * a la vez obligaría a esperar a que el cliente estuviera listo para poder
+ * mandarle nada a la letrada.
+ */
+function PasarAAbogada({ id, exp, onHecho }) {
+  const [abierto, setAbierto] = useState(false);
+  const [para, setPara] = useState(exp.abogada_email || "");
+  const [nota, setNota] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const ya = exp.abogada_avisada_at;
+
+  async function enviar() {
+    setEnviando(true); setMsg("");
+    const r = await boPOST(`/backoffice/solicitudes/${id}/estancia/avisar-abogada`, {
+      para: para.trim(),
+      nota: nota.trim() || null,
+    });
+    setEnviando(false);
+    if (r?.ok) {
+      setMsg(`Enviado a ${r.para}${r.carpeta ? " con el enlace a la carpeta" : " (sin enlace: Drive no respondió)"}`);
+      setAbierto(false);
+      onHecho();
+    } else {
+      setMsg(r?.msg || "No se pudo enviar");
+    }
+  }
+
+  return (
+    <div className="bg-white border border-neutral-200 rounded-xl p-4">
+      <Cabecera numero="4b" titulo="Pasársela a la abogada"
+        extra={ya ? (
+          <span className="ml-auto text-[11px] font-bold uppercase tracking-wide px-2 py-1
+            rounded border bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35">
+            avisada
+          </span>
+        ) : null} />
+
+      {ya && !abierto ? (
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-[12.5px] text-neutral-600 leading-relaxed min-w-0 flex-1">
+            Avisada el {new Date(ya).toLocaleDateString("es-ES",
+              { day: "2-digit", month: "long", year: "numeric" })}
+            {exp.abogada_email && <> a <b>{exp.abogada_email}</b></>}.
+          </p>
+          <button type="button" onClick={() => setAbierto(true)}
+            className="shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg border
+              border-neutral-300 text-neutral-600 hover:border-neutral-400">
+            Volver a enviar
+          </button>
+        </div>
+      ) : !abierto ? (
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-[12.5px] text-neutral-600 leading-relaxed min-w-0 flex-1">
+            Le manda un correo con el enlace directo a la carpeta de Drive y el estado de los
+            documentos, para que la presente.
+          </p>
+          <button type="button" onClick={() => setAbierto(true)}
+            className="shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg
+              bg-[#1A3557] text-white hover:opacity-90">
+            Enviar a la abogada
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          <div>
+            <p className="text-[11.5px] font-semibold text-neutral-600 mb-1">Correo de la abogada</p>
+            <input type="email" value={para} onChange={(e) => setPara(e.target.value)}
+              placeholder="nombre@despacho.com" className={input + " w-full"} />
+          </div>
+          <div>
+            <p className="text-[11.5px] font-semibold text-neutral-600 mb-1">
+              Nota para ella <span className="text-neutral-400 font-normal">(opcional)</span>
+            </p>
+            <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)}
+              placeholder="Cualquier cosa que deba saber antes de abrirla…"
+              className={input + " w-full"} />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button type="button" onClick={enviar} disabled={enviando || !para.trim()}
+              className="text-[12px] font-semibold px-4 py-2 rounded-lg bg-[#1A3557]
+                text-white hover:opacity-90 disabled:opacity-40">
+              {enviando ? "Enviando…" : "Enviar"}
+            </button>
+            <button type="button" onClick={() => setAbierto(false)}
+              className="text-[12px] text-neutral-500 hover:text-neutral-700">cancelar</button>
+            {msg && <span className="text-[11.5px] text-neutral-600">{msg}</span>}
+          </div>
+        </div>
+      )}
+      {!abierto && msg && <p className="text-[11.5px] text-[#1D6A4A] mt-2">{msg}</p>}
+    </div>
+  );
+}
+
 /* ── 3 · Extranjería ─────────────────────────────────────────────────────── */
 
 function Extranjeria({ id, registros, onCambio }) {
@@ -553,7 +657,7 @@ function Extranjeria({ id, registros, onCambio }) {
 
   return (
     <div id="bloque-extranjeria" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
-      <Cabecera numero="5" titulo="Extranjería"
+      <Cabecera numero="6" titulo="Extranjería"
         extra={
           <button type="button" onClick={() => setAbierto((v) => !v)}
             className="ml-auto text-[11.5px] font-semibold text-[#023A4B] hover:underline">
@@ -700,7 +804,7 @@ function CerrarCarpeta({ id, exp, docs, onHecho }) {
 
   return (
     <div className="bg-white border border-neutral-200 rounded-xl p-4">
-      <Cabecera numero="3" titulo="Cerrar la carpeta"
+      <Cabecera numero="4" titulo="Cerrar la carpeta"
         extra={
           yaCerrada ? (
             <span className="ml-auto text-[11px] font-bold uppercase tracking-wide px-2 py-1
@@ -807,7 +911,9 @@ export default function EstanciaAdmin({ idSolicitud }) {
         onCambiar={(estado_proceso) => guardar({ estado_proceso })} />
       <Datos exp={exp} onGuardar={guardar} />
       <Documentos id={idSolicitud} docs={docs} onCambio={cargar} />
+      <AcompanantesAdmin idSolicitud={idSolicitud} exp={exp} numero="3" />
       <CerrarCarpeta id={idSolicitud} exp={exp} docs={docs} onHecho={cargar} />
+      <PasarAAbogada id={idSolicitud} exp={exp} onHecho={cargar} />
       <GeneradoresEstancia id={idSolicitud} exp={exp} onArchivado={cargar} />
       <Extranjeria id={idSolicitud} registros={ext} onCambio={cargar} />
     </div>

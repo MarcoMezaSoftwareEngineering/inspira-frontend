@@ -1,7 +1,33 @@
 // src/pages/panel/components/mis-servicios/sections/PortalesYJustificantesCliente.jsx
 import { useEffect, useState } from "react";
 import { apiGET } from "../../../../../services/api";
+import { descargarArchivoProtegido } from "../../../../../services/descargas";
+import { dialog } from "../../../../../services/dialogService";
 import SeccionPanel from "./SeccionPanel";
+
+/* La descarga necesita el token, así que no puede ser un <a href>: hay que
+   pedir el archivo con fetch y abrir el blob. Ver services/descargas.js. */
+function BotonVerJustificante({ id, etiqueta }) {
+  const [cargando, setCargando] = useState(false);
+
+  const abrir = async () => {
+    setCargando(true);
+    const r = await descargarArchivoProtegido(`/portales/justificantes/${id}/descargar`);
+    setCargando(false);
+    if (!r.ok) dialog.toast(r.error, "error");
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={abrir}
+      disabled={cargando}
+      className="text-sm font-semibold text-[#023A4B] hover:underline disabled:opacity-50"
+    >
+      {cargando ? "Abriendo…" : etiqueta}
+    </button>
+  );
+}
 
 function AccesoCard({ item }) {
   return (
@@ -42,9 +68,7 @@ function AccesoCard({ item }) {
             {item.justificantes.map((j) => (
               <li key={j.id_justificante} className="flex items-center justify-between gap-2">
                 <span className="text-sm text-neutral-700">{j.tipo_justificante}</span>
-                <a href={`/portales/justificantes/${j.id_justificante}/descargar`} className="text-sm font-semibold text-[#023A4B] hover:underline">
-                  Ver PDF
-                </a>
+                <BotonVerJustificante id={j.id_justificante} etiqueta="Ver PDF" />
               </li>
             ))}
           </ul>

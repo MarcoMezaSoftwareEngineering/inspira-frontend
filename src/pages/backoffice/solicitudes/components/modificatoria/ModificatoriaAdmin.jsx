@@ -97,8 +97,13 @@ function Flujo({ revision, onCambiar, guardando }) {
  */
 function Condiciones({ exp, revision }) {
   const smi = revision?.smi_referencia || 16576;
+  // Sin sueldo escrito no hay nada que juzgar. `Number("")` es 0, y por ese
+  // camino un expediente recien abierto salia en rojo diciendo que no llega al
+  // minimo: no es que no llegue, es que aun no se ha preguntado.
   const num = (v) => {
-    const n = Number(String(v || "").replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", "."));
+    const txt = String(v ?? "").trim();
+    if (!txt) return null;
+    const n = Number(txt.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", "."));
     return Number.isFinite(n) ? n : null;
   };
   const salario = num(exp.con_retribucion);
@@ -122,33 +127,40 @@ function Condiciones({ exp, revision }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
       {filas.map(([label, valor, bien, regla]) => (
-        <div key={label} className={`rounded-xl border px-3 py-2.5 ${
-          bien === null ? "border-neutral-200 bg-neutral-50"
+        <div key={label} className={`rounded-xl border px-3 py-2 ${
+          bien === null ? "border-neutral-200 bg-white"
             : bien ? "border-[#1D6A4A]/25 bg-[#E8F5EE]/50" : "border-red-300 bg-red-50/60"
         }`}>
-          <p className="text-[10px] font-bold uppercase tracking-wide font-mono
-            text-neutral-500 leading-tight">{label}</p>
-          <p className={`text-[16px] font-bold leading-tight mt-0.5 ${
+          <p className="text-[11px] text-neutral-500 leading-tight">{label}</p>
+          <p className={`text-[15px] font-semibold leading-tight mt-0.5 ${
             bien === null ? "text-neutral-300" : bien ? "text-[#14532d]" : "text-red-700"
-          }`}>{valor || "—"}</p>
-          <p className="text-[10.5px] text-neutral-500">{bien === false ? `✕ ${regla}` : regla}</p>
+          }`}>{valor || "sin dato"}</p>
+          <p className={`text-[10.5px] mt-0.5 ${
+            bien === false ? "text-red-600 font-medium" : "text-neutral-400"
+          }`}>{bien === false ? `✕ ${regla}` : regla}</p>
         </div>
       ))}
     </div>
   );
 }
 
+/**
+ * Un dato de la ficha.
+ *
+ * Rotulo a la izquierda, valor a la derecha, un hilo debajo. Se probo con una
+ * caja de color por cada dato que falta y en un expediente recien abierto
+ * salian trece seguidas: gritaba tanto que ya no decia nada. Lo que falta se
+ * cuenta arriba, en el rotulo del apartado, y aqui basta con no estar en negro.
+ */
 function Campo({ k, v, obligatorio, faltaSet }) {
   const vacio = !String(v || "").trim();
   const falta = vacio && obligatorio && faltaSet.has(obligatorio);
   return (
-    <div className={`min-w-0 rounded-lg px-2.5 py-1.5 ${
-      falta ? "bg-amber-50 border border-amber-200" : "bg-neutral-50/70"
-    }`}>
-      <p className="text-[10.5px] text-neutral-500 truncate" title={k}>{k}</p>
-      <p className={`text-[13px] leading-snug break-words ${
+    <div className="min-w-0 flex items-baseline gap-3 py-[7px] border-b border-neutral-100">
+      <p className="text-[11.5px] text-neutral-500 leading-snug w-[44%] shrink-0" title={k}>{k}</p>
+      <p className={`text-[12.5px] leading-snug break-words min-w-0 flex-1 ${
         !vacio ? "text-neutral-900 font-medium"
-          : falta ? "text-amber-700 font-semibold" : "text-neutral-300"
+          : falta ? "text-amber-600" : "text-neutral-300"
       }`}>{!vacio ? v : falta ? "falta" : "—"}</p>
     </div>
   );
@@ -161,17 +173,17 @@ function Seccion({ titulo, campos, faltaSet }) {
 
   return (
     <div className="mt-3.5">
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-1.5">
         <p className="text-[12px] font-semibold text-neutral-700">{titulo}</p>
         <span className="flex-1 h-px bg-neutral-100" />
         {sinCompletar > 0 && (
-          <span className="text-[10.5px] font-bold text-amber-700 bg-amber-50
-            border border-amber-200 rounded-full px-2 py-0.5">
+          <span className="text-[10.5px] font-semibold text-amber-700">
             {sinCompletar} sin completar
           </span>
         )}
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2">
+      <div className="rounded-xl border border-neutral-200 bg-white px-3 py-0.5
+        grid grid-cols-1 sm:grid-cols-2 gap-x-7">
         {campos.map(([k, v, ob]) => (
           <Campo key={k} k={k} v={v} obligatorio={ob} faltaSet={faltaSet} />
         ))}
@@ -767,7 +779,7 @@ export default function ModificatoriaAdmin({ idSolicitud }) {
   const [guardando, setGuardando] = useState(false);
 
   const cargar = useCallback(() => Promise.all([
-    boGET(`/backoffice/solicitudes/${idSolicitud}/estancia`),
+    boGET(`/backoffice/solicitudes/${idSolicitud}/modificatoria`),
     boGET(`/backoffice/solicitudes/${idSolicitud}/modificatoria/documentos`),
     boGET(`/backoffice/solicitudes/${idSolicitud}/modificatoria/extranjeria`),
   ]).then(([a, b, c]) => {
@@ -780,7 +792,7 @@ export default function ModificatoriaAdmin({ idSolicitud }) {
 
   const guardar = useCallback(async (cambios) => {
     setGuardando(true);
-    const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/estancia`, cambios);
+    const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/modificatoria`, cambios);
     setGuardando(false);
     if (r?.ok) setExp(r.expediente);
   }, [idSolicitud]);

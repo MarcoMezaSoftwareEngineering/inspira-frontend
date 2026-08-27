@@ -104,9 +104,17 @@ export default function TerminosCondiciones() {
       <Seccion n="4" titulo="Precios, impuestos y medios de pago">
         <ul className="space-y-1">
           <Li>
-            Los precios mostrados están expresados en la moneda que se indica en
-            cada caso e incluyen los impuestos aplicables, salvo indicación
-            expresa en contrario junto al precio.
+            Todos los precios que mostramos son el{" "}
+            <strong>precio total a pagar</strong>: están expresados en la moneda
+            que se indica en cada caso e incluyen el IGV y cualquier otro
+            tributo, comisión o cargo aplicable. No añadimos importes al final
+            del proceso de compra.
+          </Li>
+          <Li>
+            Cuando junto a un precio aparezca un importe orientativo en otra
+            moneda (por ejemplo, en dólares), es solo una referencia de cambio:
+            el cobro se realiza siempre por el importe y la moneda indicados en
+            el momento de pagar.
           </Li>
           <Li>
             Los pagos se procesan mediante <strong>Mercado Pago</strong>. Los
@@ -233,8 +241,14 @@ export default function TerminosCondiciones() {
           pagado por el servicio afectado. No respondemos por las decisiones de
           universidades, consulados u otras autoridades, por cambios normativos
           o de convocatorias, ni por la información inexacta facilitada por el
-          cliente. Nada de lo aquí dispuesto limita los derechos que la
-          normativa de protección al consumidor reconoce de forma imperativa.
+          cliente.
+        </p>
+        <p>
+          <strong>Este límite no se aplica</strong> a los daños causados por
+          dolo o culpa inexcusable, ni a los supuestos en que la normativa
+          impide limitar la responsabilidad del proveedor. Nada de lo aquí
+          dispuesto limita los derechos que la normativa de protección al
+          consumidor reconoce de forma imperativa.
         </p>
       </Seccion>
 
@@ -267,8 +281,12 @@ export default function TerminosCondiciones() {
           contratación es la vigente en el momento en que la aceptaste, y la
           conservamos como parte del registro del contrato. Estas condiciones se
           rigen por la ley peruana. Para cualquier controversia, las partes se
-          someten a los jueces y tribunales del distrito judicial de Lima, sin
-          perjuicio del derecho del consumidor de acudir a las instancias
+          someten a los jueces y tribunales del distrito judicial de Lima,{" "}
+          <strong>
+            sin perjuicio del derecho del consumidor a acudir a los jueces de su
+            propio domicilio
+          </strong>{" "}
+          y sin perjuicio del derecho a recurrir a las instancias
           administrativas de protección al consumidor.
         </p>
         <p className="text-xs text-neutral-500">

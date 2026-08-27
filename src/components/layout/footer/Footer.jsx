@@ -127,6 +127,14 @@ export default function Footer() {
             >
               📕 Libro de Reclamaciones
             </a>
+            {/* Aviso del Libro de Reclamaciones. El reglamento exige que el
+                aviso, y no solo el enlace, esté visible en el establecimiento
+                —aquí, en todas las páginas del sitio. */}
+            <p className="mt-2 max-w-xs text-xs leading-relaxed text-neutral-600">
+              Conforme a lo establecido en el Código de Protección y Defensa del
+              Consumidor, este establecimiento cuenta con un Libro de
+              Reclamaciones a tu disposición.
+            </p>
           </div>
 
           {/* Legal */}

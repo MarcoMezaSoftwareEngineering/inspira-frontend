@@ -39,6 +39,71 @@ function Campo({ id, label, children }) {
   );
 }
 
+const Dato = ({ etiqueta, valor }) =>
+  valor ? (
+    <p>
+      <span className="text-neutral-500">{etiqueta}:</span> {valor}
+    </p>
+  ) : null;
+
+/**
+ * Copia de la hoja para el consumidor, con el contenido mínimo que exige el
+ * reglamento del Libro de Reclamaciones: identificación del proveedor y del
+ * consumidor, del bien contratado, el detalle, el pedido y el número
+ * correlativo. Se imprime tal cual desde el botón de arriba.
+ */
+function CopiaHoja({ hoja }) {
+  const d = hoja.datos || {};
+  return (
+    <div className="mt-4 space-y-4 border-t border-neutral-200 pt-4 text-sm leading-relaxed">
+      <section className="space-y-0.5">
+        <p className="font-semibold text-primary">1. Proveedor</p>
+        <Dato etiqueta="Razón social" valor={`${TITULAR.razonSocial} — RUC ${TITULAR.ruc}`} />
+        <Dato etiqueta="Nombre comercial" valor={TITULAR.nombreComercial} />
+        {!pendiente(TITULAR.domicilioFiscal) && (
+          <Dato etiqueta="Domicilio" valor={TITULAR.domicilioFiscal} />
+        )}
+        <Dato etiqueta="Correo" valor={TITULAR.emailContacto} />
+      </section>
+
+      <section className="space-y-0.5">
+        <p className="font-semibold text-primary">2. Consumidor reclamante</p>
+        <Dato etiqueta="Nombre" valor={d.nombre} />
+        <Dato
+          etiqueta="Documento"
+          valor={d.numero_documento && `${d.tipo_documento} ${d.numero_documento}`}
+        />
+        <Dato etiqueta="Correo" valor={d.email} />
+        <Dato etiqueta="Teléfono" valor={d.telefono} />
+        <Dato etiqueta="Domicilio" valor={d.domicilio} />
+        {d.es_menor && <Dato etiqueta="Padre, madre o apoderado" valor={d.apoderado} />}
+      </section>
+
+      <section className="space-y-0.5">
+        <p className="font-semibold text-primary">3. Bien contratado</p>
+        <Dato
+          etiqueta="Tipo"
+          valor={d.tipo_bien === "PRODUCTO" ? "Producto" : "Servicio"}
+        />
+        <Dato etiqueta="Descripción" valor={d.descripcion_bien} />
+        <Dato
+          etiqueta="Monto reclamado"
+          valor={d.monto_reclamado ? `S/ ${d.monto_reclamado}` : null}
+        />
+      </section>
+
+      <section className="space-y-1">
+        <p className="font-semibold text-primary">
+          4. Detalle de la {d.tipo === "QUEJA" ? "queja" : "reclamación"}
+        </p>
+        <p className="whitespace-pre-wrap">{d.detalle}</p>
+        <p className="mt-2 font-semibold text-primary">5. Pedido del consumidor</p>
+        <p className="whitespace-pre-wrap">{d.pedido}</p>
+      </section>
+    </div>
+  );
+}
+
 /**
  * Libro de Reclamaciones virtual.
  *
@@ -86,7 +151,11 @@ export default function LibroReclamaciones() {
           : null,
       });
       if (res?.ok) {
-        setHoja(res);
+        // Se guarda una copia de lo enviado ANTES de limpiar el formulario:
+        // el reglamento obliga a entregar copia de la hoja al consumidor, y
+        // hasta ahora eso dependía por completo de un correo que se manda sin
+        // comprobar si sale. Con esto la copia existe siempre en pantalla.
+        setHoja({ ...res, datos: { ...form } });
         setForm(INICIAL);
       } else {
         setError(res?.msg || "No pudimos registrar tu hoja. Intenta nuevamente.");
@@ -139,31 +208,68 @@ export default function LibroReclamaciones() {
           </section>
 
           {hoja ? (
-            <div className="mt-6 rounded-2xl border-2 border-primary bg-secondary-light p-6">
-              <h2 className="font-fraunces text-xl font-semibold text-primary">
-                Hoja de reclamación registrada
-              </h2>
-              <p className="mt-2 text-sm">
-                Número de hoja:{" "}
-                <strong className="text-primary">{hoja.numero}</strong> · Fecha:{" "}
-                {new Date(hoja.fecha || Date.now()).toLocaleString("es-PE", {
-                  timeZone: "America/Lima",
-                })}
-              </p>
-              <p className="mt-2 text-sm">
-                Hemos enviado una copia a tu correo. Te responderemos en un plazo
-                máximo de <strong>{PLAZOS.reclamoConsumidor}</strong>,
-                prorrogable por única vez cuando la naturaleza del reclamo lo
-                justifique, lo que te comunicaríamos.
-              </p>
-              <button
-                type="button"
-                onClick={() => setHoja(null)}
-                className="mt-4 h-11 rounded-xl border border-primary px-5 text-sm font-semibold text-primary hover:bg-white"
+            <>
+              {/* Al imprimir solo debe salir la hoja, no la web entera. */}
+              <style>{`
+                @media print {
+                  body * { visibility: hidden !important; }
+                  #hoja-imprimible, #hoja-imprimible * { visibility: visible !important; }
+                  #hoja-imprimible {
+                    position: absolute; left: 0; top: 0; width: 100%;
+                    padding: 16px; background: #fff; border: 0;
+                  }
+                  .no-imprimir { display: none !important; }
+                }
+              `}</style>
+
+              <div
+                id="hoja-imprimible"
+                className="mt-6 rounded-2xl border-2 border-primary bg-white p-6"
               >
-                Registrar otra hoja
-              </button>
-            </div>
+                <h2 className="font-fraunces text-xl font-semibold text-primary">
+                  Hoja de reclamación registrada
+                </h2>
+                <p className="mt-2 text-sm">
+                  Número de hoja:{" "}
+                  <strong className="text-primary">{hoja.numero}</strong> · Fecha:{" "}
+                  {new Date(hoja.fecha || Date.now()).toLocaleString("es-PE", {
+                    timeZone: "America/Lima",
+                  })}
+                </p>
+
+                <CopiaHoja hoja={hoja} />
+
+                <p className="mt-4 text-sm">
+                  Te responderemos en un plazo máximo de{" "}
+                  <strong>{PLAZOS.reclamoConsumidor}</strong>, prorrogable por
+                  única vez cuando la naturaleza del reclamo lo justifique, lo
+                  que te comunicaríamos.
+                </p>
+                <p className="mt-2 text-xs text-neutral-600">
+                  Guarda esta hoja: es tu constancia. También te enviamos una
+                  copia al correo que indicaste; si no te llega en unos minutos,
+                  revisa la carpeta de no deseados o escríbenos a{" "}
+                  {TITULAR.emailContacto} citando el número de hoja.
+                </p>
+
+                <div className="no-imprimir mt-5 flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-dark"
+                  >
+                    Descargar / imprimir mi hoja
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHoja(null)}
+                    className="h-11 rounded-xl border border-primary px-5 text-sm font-semibold text-primary hover:bg-secondary"
+                  >
+                    Registrar otra hoja
+                  </button>
+                </div>
+              </div>
+            </>
           ) : (
             <form onSubmit={onSubmit} className="mt-8 space-y-8">
               {/* 1. Consumidor */}

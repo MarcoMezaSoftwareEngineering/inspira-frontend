@@ -15,6 +15,16 @@ import { vigilarVersionNueva, marcarArranqueCorrecto } from "./lib/versionNueva"
 marcarArranqueCorrecto();
 vigilarVersionNueva();
 
+// Recargar al volver con el botón "atrás" desde la caché de retroceso (bfcache),
+// para que el panel no muestre datos de una sesión que ya cerró.
+//
+// Vivía como <script> suelto dentro de index.html, y era el único motivo por el
+// que la CSP del sitio necesitaba 'unsafe-inline' en script-src por nuestra
+// parte. Aquí entra en el bundle y deja de serlo.
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) window.location.reload();
+});
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

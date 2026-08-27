@@ -1,8 +1,34 @@
 // src/pages/panel/components/mis-servicios/sections/CierreServicioMasterCliente.jsx
 import { useEffect, useState } from "react";
 import { apiGET, apiPOST } from "../../../../../services/api";
+import { descargarArchivoProtegido } from "../../../../../services/descargas";
 import { dialog } from "../../../../../services/dialogService";
 import SeccionPanel from "./SeccionPanel";
+
+/* Estos documentos van detrás de un endpoint con token: un <a href> relativo
+   apuntaba al dominio del frontend y no descargaba nada. Ver
+   services/descargas.js. */
+function BotonVerDocumento({ id, etiqueta }) {
+  const [cargando, setCargando] = useState(false);
+
+  const abrir = async () => {
+    setCargando(true);
+    const r = await descargarArchivoProtegido(`/portales/justificantes/${id}/descargar`);
+    setCargando(false);
+    if (!r.ok) dialog.toast(r.error, "error");
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={abrir}
+      disabled={cargando}
+      className="text-xs font-semibold text-[#023A4B] hover:underline disabled:opacity-50"
+    >
+      {cargando ? "Abriendo…" : etiqueta}
+    </button>
+  );
+}
 
 function DerivacionStep({ paso, idx }) {
   return (
@@ -74,20 +100,16 @@ function ResultadosAdmision({ masters }) {
           {(m.carta_admision || m.comprobante_pago) && (
             <div className="flex gap-3 mt-2 pt-2 border-t border-neutral-100">
               {m.carta_admision && (
-                <a
-                  href={`/portales/justificantes/${m.carta_admision.id_justificante}/descargar`}
-                  className="text-xs font-semibold text-[#023A4B] hover:underline"
-                >
-                  Ver carta de admisión
-                </a>
+                <BotonVerDocumento
+                  id={m.carta_admision.id_justificante}
+                  etiqueta="Ver carta de admisión"
+                />
               )}
               {m.comprobante_pago && (
-                <a
-                  href={`/portales/justificantes/${m.comprobante_pago.id_justificante}/descargar`}
-                  className="text-xs font-semibold text-[#023A4B] hover:underline"
-                >
-                  Ver comprobante
-                </a>
+                <BotonVerDocumento
+                  id={m.comprobante_pago.id_justificante}
+                  etiqueta="Ver comprobante"
+                />
               )}
             </div>
           )}

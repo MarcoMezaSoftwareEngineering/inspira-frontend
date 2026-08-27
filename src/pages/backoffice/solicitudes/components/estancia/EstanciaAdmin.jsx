@@ -132,17 +132,23 @@ function Plazos({ plazos }) {
  * Aquí cada campo está en su sitio con su valor o con «falta», así que se lee
  * igual de rápido lo que hay y lo que no, sin desplegar nada.
  */
+/**
+ * Un dato de la ficha.
+ *
+ * Rotulo a la izquierda, valor a la derecha, un hilo debajo. Se probo con una
+ * caja de color por cada dato que falta y en un expediente recien abierto
+ * salian trece seguidas: gritaba tanto que ya no decia nada. Lo que falta se
+ * cuenta arriba, en el rotulo del apartado, y aqui basta con no estar en negro.
+ */
 function Campo({ k, v, obligatorio, faltaSet }) {
   const vacio = !String(v || "").trim();
   const falta = vacio && obligatorio && faltaSet.has(obligatorio);
   return (
-    <div className={`min-w-0 rounded-lg px-2.5 py-1.5 ${
-      falta ? "bg-amber-50 border border-amber-200" : "bg-neutral-50/70"
-    }`}>
-      <p className="text-[10.5px] text-neutral-500 truncate" title={k}>{k}</p>
-      <p className={`text-[13px] leading-snug break-words ${
+    <div className="min-w-0 flex items-baseline gap-3 py-[7px] border-b border-neutral-100">
+      <p className="text-[11.5px] text-neutral-500 leading-snug w-[44%] shrink-0" title={k}>{k}</p>
+      <p className={`text-[12.5px] leading-snug break-words min-w-0 flex-1 ${
         !vacio ? "text-neutral-900 font-medium"
-          : falta ? "text-amber-700 font-semibold" : "text-neutral-300"
+          : falta ? "text-amber-600" : "text-neutral-300"
       }`}>{!vacio ? v : falta ? "falta" : "—"}</p>
     </div>
   );
@@ -155,17 +161,17 @@ function Seccion({ titulo, campos, faltaSet }) {
 
   return (
     <div className="mt-3.5">
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-1.5">
         <p className="text-[12px] font-semibold text-neutral-700">{titulo}</p>
         <span className="flex-1 h-px bg-neutral-100" />
         {sinCompletar > 0 && (
-          <span className="text-[10.5px] font-bold text-amber-700 bg-amber-50
-            border border-amber-200 rounded-full px-2 py-0.5">
+          <span className="text-[10.5px] font-semibold text-amber-700">
             {sinCompletar} sin completar
           </span>
         )}
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2">
+      <div className="rounded-xl border border-neutral-200 bg-white px-3 py-0.5
+        grid grid-cols-1 sm:grid-cols-2 gap-x-7">
         {campos.map(([k, v, ob]) => (
           <Campo key={k} k={k} v={v} obligatorio={ob} faltaSet={faltaSet} />
         ))}

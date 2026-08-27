@@ -300,7 +300,11 @@ export default function PoliticaPrivacidad() {
           Nuestros servicios están dirigidos a personas mayores de edad. No
           recogemos deliberadamente datos de menores de 14 años. Si detectamos
           que hemos recibido datos de un menor sin la autorización de su padre,
-          madre o tutor, los eliminaremos. Si crees que esto ha ocurrido,
+          madre o tutor, los eliminaremos. La única excepción es el{" "}
+          <A href={RUTAS_LEGALES.reclamaciones}>Libro de Reclamaciones</A>,
+          donde la normativa de protección al consumidor nos obliga a recoger
+          los datos del padre, madre o apoderado cuando quien reclama es menor
+          de edad. Si crees que hemos recibido datos de un menor por otra vía,
           escríbenos a{" "}
           <A href={"mailto:" + TITULAR.emailDatosPersonales}>
             {TITULAR.emailDatosPersonales}

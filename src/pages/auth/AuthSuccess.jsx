@@ -2,6 +2,22 @@ import { useEffect } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
+/**
+ * Solo se admiten rutas internas de este sitio.
+ *
+ * El destino sale de localStorage y va derecho a `location.replace`. Hoy solo
+ * lo escribe la propia aplicación, pero si alguna vez ese valor pudiera venir
+ * de fuera sería un redirect abierto: el usuario acaba de autenticarse con
+ * Google y se le podría enviar a un dominio ajeno con aspecto de "sesión
+ * iniciada". Se exige "/" inicial y se descarta "//" y "/\", que el navegador
+ * interpreta como URL absoluta a otro host.
+ */
+function destinoSeguro(valor) {
+  if (typeof valor !== "string" || !valor.startsWith("/")) return "/";
+  if (valor.startsWith("//") || valor.startsWith("/\\")) return "/";
+  return valor;
+}
+
 export default function AuthSuccess() {
   useEffect(() => {
     async function canjearToken() {
@@ -12,7 +28,7 @@ export default function AuthSuccess() {
 
         if (!resp.ok) {
           // No hay token disponible → ir a home
-          const fallback = localStorage.getItem("post_login_redirect") || "/";
+          const fallback = destinoSeguro(localStorage.getItem("post_login_redirect"));
           localStorage.removeItem("post_login_redirect");
           window.location.replace(fallback);
           return;
@@ -27,7 +43,7 @@ export default function AuthSuccess() {
 
         localStorage.setItem("token", data.token);
 
-        const redirect = localStorage.getItem("post_login_redirect") || "/";
+        const redirect = destinoSeguro(localStorage.getItem("post_login_redirect"));
         localStorage.removeItem("post_login_redirect");
         window.location.replace(redirect);
       } catch {

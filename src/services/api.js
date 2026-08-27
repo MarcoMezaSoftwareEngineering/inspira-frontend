@@ -6,10 +6,16 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-/* === Logout automático si el token del panel expira === */
+/* === Logout automático si el token del panel expira ===
+   Solo tiene sentido cuando el usuario venía con sesión: un 401 en una página
+   pública (Libro de Reclamaciones, formulario de derechos ARCO) no es una
+   sesión caducada, y expulsar a la home hacía que el consumidor perdiera el
+   formulario que estaba rellenando sin explicación alguna. */
 function handleUnauthorized() {
+  if (!localStorage.getItem("token")) return false; // no había sesión que cerrar
   localStorage.removeItem("token");
   window.location.href = "/";
+  return true;
 }
 
 async function parseJsonSafe(response) {
@@ -34,10 +40,10 @@ async function makeRequest(method, url, body, extraHeaders = {}) {
     cache: "no-store",
   });
 
-  if (r.status === 401) {
-    handleUnauthorized();
-    return {};
-  }
+  // Si había sesión, `handleUnauthorized` ya redirige y no hay nada más que
+  // hacer. Si no la había (página pública), se sigue el flujo normal para que
+  // la vista pueda mostrar el mensaje real que devolvió el servidor.
+  if (r.status === 401 && handleUnauthorized()) return {};
 
   const data = await parseJsonSafe(r);
 
@@ -73,10 +79,10 @@ export async function apiUpload(path, formData) {
     cache: "no-store",
   });
 
-  if (r.status === 401) {
-    handleUnauthorized();
-    return {};
-  }
+  // Si había sesión, `handleUnauthorized` ya redirige y no hay nada más que
+  // hacer. Si no la había (página pública), se sigue el flujo normal para que
+  // la vista pueda mostrar el mensaje real que devolvió el servidor.
+  if (r.status === 401 && handleUnauthorized()) return {};
 
   let data = {};
   try {
@@ -99,10 +105,10 @@ export async function apiDELETE(url) {
     cache: "no-store",
   });
 
-  if (r.status === 401) {
-    handleUnauthorized();
-    return {};
-  }
+  // Si había sesión, `handleUnauthorized` ya redirige y no hay nada más que
+  // hacer. Si no la había (página pública), se sigue el flujo normal para que
+  // la vista pueda mostrar el mensaje real que devolvió el servidor.
+  if (r.status === 401 && handleUnauthorized()) return {};
 
   const data = await parseJsonSafe(r);
   if (!r.ok || data.ok === false) {

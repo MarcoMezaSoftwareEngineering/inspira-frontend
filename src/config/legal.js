@@ -44,10 +44,19 @@ export const RESPONSABLE_DATOS = {
 
 // Versionado de documentos legales: cualquier cambio sustancial sube la versión
 // y la fecha. La versión se guarda junto a cada consentimiento como prueba.
+// ⚠️ Subir `cookies.version` invalida el consentimiento de cookies de TODOS los
+// visitantes y les vuelve a mostrar el banner (lo comprueba `lib/consent.js`).
+// Hacerlo solo cuando cambien de verdad las tecnologías del inventario, no por
+// una corrección de redacción.
 export const VERSIONES = {
-  privacidad: { version: "1.0", fecha: "2026-08-21" },
+  // 1.1 (27/08/2026): se aclara el tratamiento de datos de menores en el Libro
+  // de Reclamaciones, que la normativa de consumo obliga a recoger.
+  privacidad: { version: "1.1", fecha: "2026-08-27" },
   cookies: { version: "1.0", fecha: "2026-08-21" },
-  terminos: { version: "1.0", fecha: "2026-08-21" },
+  // 1.1 (27/08/2026): precio total sin excepciones (art. 5.2 Ley 29571), la
+  // limitación de responsabilidad deja fuera el dolo y la culpa inexcusable, y
+  // el consumidor conserva el fuero de su propio domicilio.
+  terminos: { version: "1.1", fecha: "2026-08-27" },
 };
 
 // Plazos legales aplicables (Ley N.° 29733 y su Reglamento)

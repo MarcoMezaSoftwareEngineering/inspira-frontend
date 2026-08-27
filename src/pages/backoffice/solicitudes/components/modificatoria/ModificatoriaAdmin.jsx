@@ -142,12 +142,13 @@ function Campo({ k, v, obligatorio, faltaSet }) {
   const vacio = !String(v || "").trim();
   const falta = vacio && obligatorio && faltaSet.has(obligatorio);
   return (
-    <div className="min-w-0">
-      <p className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400 truncate"
-        title={k}>{k}</p>
-      <p className={`text-[12.5px] leading-snug break-words ${
-        !vacio ? "text-neutral-800 font-medium"
-          : falta ? "text-amber-600 font-semibold" : "text-neutral-300"
+    <div className={`min-w-0 rounded-lg px-2.5 py-1.5 ${
+      falta ? "bg-amber-50 border border-amber-200" : "bg-neutral-50/70"
+    }`}>
+      <p className="text-[10.5px] text-neutral-500 truncate" title={k}>{k}</p>
+      <p className={`text-[13px] leading-snug break-words ${
+        !vacio ? "text-neutral-900 font-medium"
+          : falta ? "text-amber-700 font-semibold" : "text-neutral-300"
       }`}>{!vacio ? v : falta ? "falta" : "—"}</p>
     </div>
   );
@@ -160,16 +161,17 @@ function Seccion({ titulo, campos, faltaSet }) {
 
   return (
     <div className="mt-3.5">
-      <div className="flex items-center gap-2 mb-1.5">
-        <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400">
-          {titulo}
-        </p>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-[12px] font-semibold text-neutral-700">{titulo}</p>
         <span className="flex-1 h-px bg-neutral-100" />
         {sinCompletar > 0 && (
-          <span className="text-[10px] font-bold text-amber-600">{sinCompletar} sin completar</span>
+          <span className="text-[10.5px] font-bold text-amber-700 bg-amber-50
+            border border-amber-200 rounded-full px-2 py-0.5">
+            {sinCompletar} sin completar
+          </span>
         )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2.5">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2">
         {campos.map(([k, v, ob]) => (
           <Campo key={k} k={k} v={v} obligatorio={ob} faltaSet={faltaSet} />
         ))}
@@ -274,7 +276,7 @@ function Datos({ exp, onGuardar }) {
       {exp.notas && (
         <>
           <div className="flex items-center gap-2 mt-3.5 mb-1.5">
-            <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400">
+            <p className="text-[11.5px] font-semibold text-neutral-600">
               Lo que nos ha contado
             </p>
             <span className="flex-1 h-px bg-neutral-100" />
@@ -286,39 +288,39 @@ function Datos({ exp, onGuardar }) {
 
       {/* Seguimiento en la sede */}
       <div className="flex items-center gap-2 mt-4 mb-2">
-        <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400">
+        <p className="text-[11.5px] font-semibold text-neutral-600">
           Seguimiento en extranjería
         </p>
         <span className="flex-1 h-px bg-neutral-100" />
       </div>
       <div className="flex flex-wrap gap-2 items-end">
         <label className="flex flex-col gap-1">
-          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+          <span className="text-[11px] text-neutral-500">
             Nº expediente</span>
           <input className={`${input} w-40`} defaultValue={exp.expediente_numero || ""}
             onBlur={(e) => onGuardar({ expediente_numero: e.target.value })} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+          <span className="text-[11px] text-neutral-500">
             Nº justificante</span>
           <input className={`${input} w-36`} defaultValue={exp.expediente_justificante || ""}
             onBlur={(e) => onGuardar({ expediente_justificante: e.target.value })} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+          <span className="text-[11px] text-neutral-500">
             NIE</span>
           <input className={`${input} w-32`} defaultValue={exp.expediente_nie || ""}
             onBlur={(e) => onGuardar({ expediente_nie: e.target.value })} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+          <span className="text-[11px] text-neutral-500">
             Fecha de ingreso</span>
           <input type="date" className={input} defaultValue={exp.expediente_fecha || ""}
             onBlur={(e) => onGuardar({ expediente_fecha: e.target.value })} />
         </label>
         {/* El año no se pide: sale de la fecha de nacimiento, que ya está */}
         <div className="flex flex-col gap-1">
-          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+          <span className="text-[11px] text-neutral-500">
             Año de nacimiento</span>
           <span className={`text-[12.5px] px-2.5 py-1.5 rounded-lg border ${
             anio ? "bg-[#EEF2F8] border-[#1A3557]/20 text-[#1A3557] font-bold"

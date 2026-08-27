@@ -9,7 +9,7 @@
 // pero alguien puede tener el pasaporte a mano y la carta de admisión no; que
 // no pueda avanzar por eso sólo hace que abandone el portal y lo mande todo
 // por WhatsApp.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { apiGET, apiPUT, apiPOST, apiUpload, apiDELETE } from "../../../../services/api";
 
 const TONOS = {
@@ -67,19 +67,29 @@ function Ayuda({ texto }) {
   );
 }
 
-function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatorio, falta }) {
+function Etiqueta({ id, label, ayuda, obligatorio }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="flex items-center gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400">
-          {label}{obligatorio && <span className="text-orange-500"> *</span>}
-        </span>
-        <Ayuda texto={ayuda} />
-      </span>
+    <span className="flex items-center gap-1.5 flex-wrap">
+      <label htmlFor={id} className="text-[12.5px] font-medium text-neutral-700">
+        {label}
+      </label>
+      {!obligatorio && (
+        <span className="text-[10.5px] text-neutral-400">opcional</span>
+      )}
+      <Ayuda texto={ayuda} />
+    </span>
+  );
+}
+
+function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatorio, falta }) {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Etiqueta id={id} label={label} ayuda={ayuda} obligatorio={obligatorio} />
       <input
-        type={tipo} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className={`text-[13px] border rounded-lg px-3 py-2 bg-white transition-colors
-          focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A] ${
+        id={id} type={tipo} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
+        className={`text-[14px] border rounded-lg px-3 py-2.5 bg-white transition-colors
+          focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/25 focus:border-[#1D6A4A] ${
           falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
         }`}
       />
@@ -89,18 +99,14 @@ function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatorio, falt
 
 function Selector({ label, valor, onChange, opciones, ayuda, obligatorio, falta }) {
   const pares = opciones.map((o) => (Array.isArray(o) ? o : [o, o]));
+  const id = useId();
   return (
-    <div className="flex flex-col gap-1">
-      <span className="flex items-center gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400">
-          {label}{obligatorio && <span className="text-orange-500"> *</span>}
-        </span>
-        <Ayuda texto={ayuda} />
-      </span>
+    <div className="flex flex-col gap-1.5">
+      <Etiqueta id={id} label={label} ayuda={ayuda} obligatorio={obligatorio} />
       <select
-        value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className={`text-[13px] border rounded-lg px-3 py-2 bg-white
-          focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A] ${
+        id={id} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
+        className={`text-[14px] border rounded-lg px-3 py-2.5 bg-white
+          focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/25 focus:border-[#1D6A4A] ${
           falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
         }`}
       >
@@ -111,7 +117,24 @@ function Selector({ label, valor, onChange, opciones, ayuda, obligatorio, falta 
   );
 }
 
-function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, children }) {
+function Guardado({ guardando, tocado, completo, arriba }) {
+  const texto = guardando ? "Guardando…"
+    : tocado ? "Sin guardar…"
+    : completo ? "Guardado. Ya está todo."
+    : "Guardado";
+  const tono = guardando || tocado ? "text-neutral-400" : "text-[#1D6A4A]";
+  return (
+    <p className={`flex items-center gap-1.5 text-[11.5px] ${tono} ${arriba ? "mb-3" : "mt-4"}`}>
+      <span aria-hidden="true">{guardando || tocado ? "•" : "✓"}</span>
+      {texto}
+      {!guardando && !tocado && (
+        <span className="text-neutral-400">· se guarda solo</span>
+      )}
+    </p>
+  );
+}
+
+function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, onSiguiente, children }) {
   const completo = faltan === 0;
   return (
     <div className={`rounded-xl border overflow-hidden ${
@@ -131,7 +154,23 @@ function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, children }
         )}
         <span className="shrink-0 text-neutral-300 text-[11px]">{abierto ? "▲" : "▼"}</span>
       </button>
-      {abierto && <div className="px-3.5 pb-4 pt-1 border-t border-neutral-100">{children}</div>}
+      {abierto && (
+        <div className="px-3.5 pb-4 pt-1 border-t border-neutral-100">
+          {children}
+          {onSiguiente && (
+            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-neutral-100">
+              <button type="button" onClick={onSiguiente}
+                className="text-[12.5px] font-semibold px-4 py-2 rounded-lg
+                  bg-neutral-900 text-white hover:opacity-90">
+                Continuar
+              </button>
+              <span className="text-[11.5px] text-neutral-400">
+                {completo ? "Este paso está completo" : "Puedes volver luego a lo que falta"}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -398,7 +437,29 @@ function PedirRevision({ id, docs, exp, onHecho }) {
     if (r?.ok) { setAbierto(false); setNota(""); onHecho(); }
   }
 
-  if (!subidos) return null;
+  // Se ve siempre, tambien sin documentos. Escondiendolo hasta que subiera
+  // algo, quien buscaba como avisar a su asesor no encontraba nada y concluia
+  // que no existe.
+  if (!subidos) {
+    return (
+      <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 py-3 mb-3
+        flex items-center gap-3 flex-wrap">
+        <div className="min-w-0 flex-1">
+          <p className="text-[12.5px] font-semibold text-neutral-600">
+            ¿Terminaste de subir?
+          </p>
+          <p className="text-[11.5px] text-neutral-500 leading-relaxed">
+            Cuando subas tus documentos, avísanos desde aquí y los revisamos.
+          </p>
+        </div>
+        <button type="button" disabled
+          className="shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg
+            border border-neutral-300 text-neutral-400 cursor-not-allowed">
+          Pedir revisión
+        </button>
+      </div>
+    );
+  }
 
   if (yaPedida) {
     return (
@@ -499,10 +560,19 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  const set = (k) => (v) => { setTocado(true); setExp((p) => ({ ...p, [k]: v })); };
+  // Cada retoque sube un numero. Si al volver la respuesta el numero cambio,
+  // es que siguio escribiendo mientras se guardaba: ni se le pisa lo escrito ni
+  // se da por guardado lo que aun no lo esta.
+  const version = useRef(0);
+  const set = (k) => (v) => {
+    version.current += 1;
+    setTocado(true);
+    setExp((p) => ({ ...p, [k]: v }));
+  };
 
   const guardar = useCallback(async () => {
     if (!tocado) return;
+    const v = version.current;
     setGuardando(true);
     // Al asesorado se le pregunta una vez; los campos que el impreso repite se
     // rellenan aquí. El inicio de clases es el mismo dato que el inicio del
@@ -518,8 +588,21 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
     };
     const r = await apiPUT(`/solicitudes/${id}/estancia/datos`, payload);
     setGuardando(false);
-    if (r?.ok) { setExp(r.expediente); setTocado(false); }
+    if (r?.ok) {
+      // Solo se refresca lo que calcula el servidor —qué falta, qué plazos—;
+      // los campos se quedan como los tiene escritos delante.
+      setExp((p) => ({ ...p, revision: r.expediente?.revision }));
+      if (version.current === v) setTocado(false);
+    }
   }, [id, exp, tocado]);
+
+  // Se guarda solo al dejar de escribir. Antes habia que bajar hasta el final
+  // del formulario a buscar el boton, y quien no lo encontraba perdia el rato.
+  useEffect(() => {
+    if (!tocado) return undefined;
+    const t = setTimeout(guardar, 900);
+    return () => clearTimeout(t);
+  }, [exp, tocado, guardar]);
 
   const rev = exp?.revision;
   const faltaLista = useMemo(() => new Set(rev?.faltan || []), [rev]);
@@ -606,9 +689,11 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </span>
           </div>
 
+          <Guardado guardando={guardando} tocado={tocado} completo={datosCompletos} arriba />
+
           <div className="space-y-2">
             <Paso numero="1" titulo="Quién eres" subtitulo="Como figura en tu pasaporte"
-              faltan={cuenta(PASOS[1])} abierto={paso === 1} onToggle={() => abrir(1)}>
+              faltan={cuenta(PASOS[1])} abierto={paso === 1} onToggle={() => abrir(1)} onSiguiente={() => setPaso(2)}>
               <div className={g}>
                 <Campo label="Primer apellido" obligatorio falta={falta("Primer apellido")}
                   ayuda="Tu primer apellido, exactamente como aparece en tu pasaporte."
@@ -645,7 +730,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </Paso>
 
             <Paso numero="2" titulo="Documentación y contacto"
-              faltan={cuenta(PASOS[2])} abierto={paso === 2} onToggle={() => abrir(2)}>
+              faltan={cuenta(PASOS[2])} abierto={paso === 2} onToggle={() => abrir(2)} onSiguiente={() => setPaso(3)}>
               <div className={g}>
                 <Campo label="Nº de pasaporte" obligatorio falta={falta("Nº de pasaporte")}
                   ayuda="El número de la página de datos de tu pasaporte, sin espacios."
@@ -672,7 +757,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </Paso>
 
             <Paso numero="3" titulo="Tus fechas" subtitulo="De aquí salen tus plazos legales"
-              faltan={cuenta(PASOS[3])} abierto={paso === 3} onToggle={() => abrir(3)}>
+              faltan={cuenta(PASOS[3])} abierto={paso === 3} onToggle={() => abrir(3)} onSiguiente={() => setPaso(4)}>
               <div className={`${g} mb-3`}>
                 <Campo label="Fecha de admisión" tipo="date" obligatorio
                   ayuda="La fecha que lleva tu carta de admisión."
@@ -706,7 +791,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </Paso>
 
             <Paso numero="4" titulo="Tus estudios"
-              faltan={cuenta(PASOS[4])} abierto={paso === 4} onToggle={() => abrir(4)}>
+              faltan={cuenta(PASOS[4])} abierto={paso === 4} onToggle={() => abrir(4)} onSiguiente={() => setPaso(5)}>
               <div className={g}>
                 <Campo label="Universidad o centro" obligatorio falta={falta("Nombre de la universidad")}
                   ayuda="El nombre oficial completo, como aparece en la carta de admisión."
@@ -796,18 +881,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </Paso>
           </div>
 
-          <div className="flex items-center gap-3 mt-4">
-            <button type="button" onClick={guardar} disabled={!tocado || guardando}
-              className="text-[13px] font-semibold px-5 py-2.5 rounded-lg bg-[#1D6A4A]
-                text-white disabled:opacity-40 hover:opacity-90">
-              {guardando ? "Guardando…" : "Guardar mis datos"}
-            </button>
-            {!tocado && (
-              <span className="text-[11.5px] text-neutral-400">
-                {datosCompletos ? "✓ Todo guardado y completo" : "Guardado"}
-              </span>
-            )}
-          </div>
+          <Guardado guardando={guardando} tocado={tocado} completo={datosCompletos} />
         </Bloque>
 
         {/* ── 2 · Guía ── */}

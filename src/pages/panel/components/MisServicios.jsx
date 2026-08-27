@@ -37,15 +37,16 @@ export default function MisServicios({ onIrAGuia }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [seleccionadaId, setSeleccionadaId] = useState(() => {
-    if (typeof window === "undefined") return null;
-    try { const raw = window.localStorage.getItem("panel_servicio_id"); return raw ? Number(raw) : null; }
-    catch { return null; }
-  });
-
+  // Al entrar en «Mis servicios» se ve la lista, siempre.
+  //
+  // Antes se recordaba el ultimo servicio abierto y se entraba directo en el.
+  // Ayudaba al recargar a mitad de faena, pero rompia lo esencial: quien pulsa
+  // «Mi panel» quiere ver sus servicios, no caer dentro de uno. Con varios
+  // servicios contratados era ademas desconcertante, porque abria uno sin que
+  // nadie lo hubiera pedido.
   const [seleccionada, setSeleccionada] = useState(null);
 
-  useEffect(() => { cargarServicios(); }, []); // eslint-disable-line
+  useEffect(() => { cargarServicios(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function cargarServicios() {
     setLoading(true);
@@ -55,10 +56,6 @@ export default function MisServicios({ onIrAGuia }) {
       if (!resp.ok) throw new Error(resp.msg || resp.message || "No se pudieron cargar los servicios");
       const lista = resp.solicitudes || [];
       setServicios(lista);
-      if (!seleccionada && seleccionadaId && lista.length) {
-        const encontrada = lista.find((s) => Number(s.id_solicitud) === Number(seleccionadaId));
-        if (encontrada) setSeleccionada(encontrada);
-      }
     } catch (e) {
       setError(e.message || "Error al cargar servicios");
     } finally {
@@ -68,18 +65,10 @@ export default function MisServicios({ onIrAGuia }) {
 
   function manejarVerDetalle(servicio) {
     setSeleccionada(servicio);
-    setSeleccionadaId(servicio.id_solicitud);
-    if (typeof window !== "undefined") {
-      try { window.localStorage.setItem("panel_servicio_id", String(servicio.id_solicitud)); } catch { /* noop */ }
-    }
   }
 
   function manejarVolverLista() {
     setSeleccionada(null);
-    setSeleccionadaId(null);
-    if (typeof window !== "undefined") {
-      try { window.localStorage.removeItem("panel_servicio_id"); } catch { /* noop */ }
-    }
   }
 
   if (seleccionada) {

@@ -39,12 +39,19 @@ function ServicioCard({ s, onVerDetalle }) {
   const estadoBadge = badgeEstadoSolicitud(s.estado?.nombre, s.estado?.es_final);
   const r = s.resumen || {};
 
+  // El informe de compatibilidad y la elección de universidades son del máster.
+  // Una estancia por estudios no los tiene, y sacarlos ahí le decía al
+  // asesorado que le faltaba algo que en su proceso no existe.
+  const esEstancia =
+    Number(s.id_tipo_solicitud) === 18 ||
+    String(s.tipo?.nombre || s.titulo || "").toLowerCase().includes("estancia");
+
   const alertas = [];
   if (r.docs_pendientes > 0)   alertas.push({ tipo: "docs_pendientes", count: r.docs_pendientes });
   if (r.docs_observados > 0)   alertas.push({ tipo: "docs_observados", count: r.docs_observados });
   if (!r.formulario_completo)  alertas.push({ tipo: "formulario" });
-  if (!r.informe_disponible)   alertas.push({ tipo: "informe" });
-  if (!r.eleccion_completa)    alertas.push({ tipo: "eleccion" });
+  if (!esEstancia && !r.informe_disponible) alertas.push({ tipo: "informe" });
+  if (!esEstancia && !r.eleccion_completa)  alertas.push({ tipo: "eleccion" });
 
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-200 flex flex-col">

@@ -111,7 +111,15 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
                 className="text-[12px] text-[#046C8C] hover:underline truncate flex-1">
                 📄 {a.nombre}
               </a>
-              {a.subido_por === "CLIENTE" && (
+              {/* Quién lo subió. Con dos personas entrando al expediente,
+                  «lo subió el cliente» ya no dice de quién fue. */}
+              {a.subido_por_quien && a.subido_por !== "ASESOR" && (
+                <span className="shrink-0 text-[11px] text-neutral-400 truncate max-w-[45%]"
+                  title={`Lo subió ${a.subido_por_quien}`}>
+                  {a.subido_por_quien}
+                </span>
+              )}
+              {a.subido_por !== "ASESOR" && (
                 <button type="button" onClick={() => quitar(a.id_documento)}
                   className="shrink-0 text-[11.5px] text-neutral-400 hover:text-red-600">
                   quitar

@@ -523,7 +523,13 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo }) {
               <span className="text-[9.5px] font-bold uppercase tracking-wide px-1.5 py-0.5
                 rounded bg-neutral-100 text-neutral-500">obligatorio</span>
             )}
-            <span className={`text-[10px] font-bold uppercase tracking-wide ${est.clase}`}>
+            {ultimo?.subido_por_quien && (
+          <span className="text-[10.5px] text-neutral-400 truncate max-w-[30%]"
+            title={`Lo subió ${ultimo.subido_por_quien}`}>
+            {ultimo.subido_por_quien}
+          </span>
+        )}
+        <span className={`text-[10px] font-bold uppercase tracking-wide ${est.clase}`}>
               {est.label}
             </span>
           </div>

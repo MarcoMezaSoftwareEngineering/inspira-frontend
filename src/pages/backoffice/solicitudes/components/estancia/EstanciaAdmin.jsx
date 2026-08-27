@@ -122,41 +122,126 @@ function Plazos({ plazos }) {
  * -ilegible y desalentadora-: se cuenta por apartados y se despliega solo si
  * hay que perseguirlo.
  */
-function Dato({ k, v, falta }) {
+/**
+ * Ficha completa del asesorado.
+ *
+ * Todos los campos, agrupados como se los pedimos a él. Antes había un resumen
+ * de doce datos y, aparte, la lista de los que faltaban: no se veía lo que sí
+ * había rellenado, y la lista era un muro de treinta nombres seguidos.
+ *
+ * Aquí cada campo está en su sitio con su valor o con «falta», así que se lee
+ * igual de rápido lo que hay y lo que no, sin desplegar nada.
+ */
+function Campo({ k, v, obligatorio, faltaSet }) {
+  const vacio = !String(v || "").trim();
+  const falta = vacio && obligatorio && faltaSet.has(obligatorio);
   return (
     <div className="min-w-0">
-      <p className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">{k}</p>
-      <p className={`text-[12.5px] truncate ${
-        v ? "text-neutral-800 font-medium" : falta ? "text-amber-600" : "text-neutral-300"
-      }`} title={v || ""}>{v || (falta ? "falta" : "—")}</p>
+      <p className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400 truncate"
+        title={k}>{k}</p>
+      <p className={`text-[12.5px] leading-snug break-words ${
+        !vacio ? "text-neutral-800 font-medium"
+          : falta ? "text-amber-600 font-semibold" : "text-neutral-300"
+      }`}>{!vacio ? v : falta ? "falta" : "—"}</p>
     </div>
   );
 }
 
-const APARTADOS = {
-  "Identidad": ["Primer apellido", "Nombres", "Fecha de nacimiento", "Lugar de nacimiento",
-    "País de nacimiento", "Nacionalidad", "Sexo", "Estado civil",
-    "Nombre del padre", "Nombre de la madre"],
-  "Documentación": ["Nº de pasaporte", "DNI", "Fecha de emisión del pasaporte",
-    "Fecha de caducidad del pasaporte", "Correo electrónico", "Teléfono"],
-  "Fechas": ["Fecha de admisión", "Fecha de llegada a España",
-    "Inicio de clases según la carta de admisión", "Fin del programa"],
-  "Estudios": ["Nombre de la universidad", "Provincia de la universidad", "Tipo de estudios",
-    "Tipo de título", "Nombre del programa", "Modalidad"],
-  "Domicilio": ["Domicilio en España", "Localidad en España", "Código postal en España",
-    "Provincia en España", "Teléfono móvil"],
-};
+function Seccion({ titulo, campos, faltaSet }) {
+  const sinCompletar = campos.filter(
+    ([, v, ob]) => ob && faltaSet.has(ob) && !String(v || "").trim()
+  ).length;
+
+  return (
+    <div className="mt-3.5">
+      <div className="flex items-center gap-2 mb-1.5">
+        <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400">
+          {titulo}
+        </p>
+        <span className="flex-1 h-px bg-neutral-100" />
+        {sinCompletar > 0 && (
+          <span className="text-[10px] font-bold text-amber-600">{sinCompletar} sin completar</span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2.5">
+        {campos.map(([k, v, ob]) => (
+          <Campo key={k} k={k} v={v} obligatorio={ob} faltaSet={faltaSet} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Datos({ exp, onGuardar }) {
-  const [verFaltan, setVerFaltan] = useState(false);
   const rev = exp.revision;
   const faltan = rev?.faltan || [];
-  const setFaltan = new Set(faltan);
+  const faltaSet = new Set(faltan);
   const anio = (exp.fecha_nacimiento || "").slice(0, 4);
+  const usaUni = exp.dom_usa_universidad;
 
-  const porApartado = Object.entries(APARTADOS)
-    .map(([nombre, campos]) => [nombre, campos.filter((c) => setFaltan.has(c)).length])
-    .filter(([, n]) => n > 0);
+  // [etiqueta, valor, nombre con el que el servidor lo llama al faltar]
+  const SECCIONES = [
+    ["Identidad", [
+      ["1er apellido", exp.apellido1, "Primer apellido"],
+      ["2º apellido", exp.apellido2, null],
+      ["Nombres", exp.nombres, "Nombres"],
+      ["Sexo", exp.sexo, "Sexo"],
+      ["Fecha de nacimiento", exp.fecha_nacimiento, "Fecha de nacimiento"],
+      ["Lugar de nacimiento", exp.lugar_nacimiento, "Lugar de nacimiento"],
+      ["País de nacimiento", exp.pais_nacimiento, "País de nacimiento"],
+      ["Nacionalidad", exp.nacionalidad, "Nacionalidad"],
+      ["Estado civil", exp.estado_civil, "Estado civil"],
+      ["Padre", exp.nombre_padre, "Nombre del padre"],
+      ["Madre", exp.nombre_madre, "Nombre de la madre"],
+    ]],
+    ["Documentación y contacto", [
+      ["Nº pasaporte", exp.pasaporte_numero, "Nº de pasaporte"],
+      ["DNI", exp.dni, "DNI"],
+      ["Emisión pasaporte", exp.pasaporte_emision, "Fecha de emisión del pasaporte"],
+      ["Caducidad pasaporte", exp.pasaporte_caducidad, "Fecha de caducidad del pasaporte"],
+      ["Correo", exp.correo, "Correo electrónico"],
+      ["Teléfono", exp.telefono, "Teléfono"],
+    ]],
+    ["Fechas", [
+      ["Admisión", exp.fecha_admision, "Fecha de admisión"],
+      ["Llegada a España", exp.fecha_llegada_espana, "Fecha de llegada a España"],
+      ["Inicio de clases", exp.fecha_inicio_clases, "Inicio de clases según la carta de admisión"],
+      ["Fin de estudios", exp.prog_fin, "Fin del programa"],
+      ["Schengen 180 días", exp.viaje_schengen_180 === true ? "Sí, ha viajado"
+        : exp.viaje_schengen_180 === false ? "No" : "", null],
+    ]],
+    ["Estudios", [
+      ["Universidad", exp.uni_denominacion, "Nombre de la universidad"],
+      ["Programa", exp.prog_denominacion, "Nombre del programa"],
+      ["Tipo de estudios", exp.tipo_estudios, "Tipo de estudios"],
+      ["Tipo de título", exp.tipo_titulo, "Tipo de título"],
+      ["Tipo de máster", exp.master_tipo, null],
+      ["Créditos", exp.creditos, null],
+      ["Modalidad", exp.prog_modalidad, "Modalidad"],
+      ["Código", exp.prog_codigo, null],
+    ]],
+    ["Universidad · dirección", [
+      ["Dirección", exp.uni_direccion, null],
+      ["Localidad", exp.uni_localidad, null],
+      ["C.P.", exp.uni_cp, null],
+      ["Provincia", exp.uni_provincia, "Provincia de la universidad"],
+      ["Registro", exp.uni_registro_tipo, null],
+      ["Nº registro", exp.uni_registro_num, null],
+    ]],
+    ["Domicilio en España", usaUni ? [
+      ["Domicilio", "Usa el de la universidad", null],
+      ["Localidad", exp.uni_localidad, null],
+      ["C.P.", exp.uni_cp, null],
+      ["Provincia", exp.uni_provincia, null],
+    ] : [
+      ["Calle", exp.dom_direccion, "Domicilio en España"],
+      ["Número", exp.dom_numero, null],
+      ["Piso", exp.dom_piso, null],
+      ["Localidad", exp.dom_localidad, "Localidad en España"],
+      ["C.P.", exp.dom_cp, "Código postal en España"],
+      ["Provincia", exp.dom_provincia, "Provincia en España"],
+    ]],
+  ];
 
   return (
     <div id="bloque-datos" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
@@ -165,11 +250,11 @@ function Datos({ exp, onGuardar }) {
           <span className={`ml-auto text-[11.5px] font-semibold ${
             faltan.length ? "text-amber-600" : "text-[#1D6A4A]"
           }`}>
-            {faltan.length ? `${faltan.length} datos sin completar` : "datos completos"}
+            {faltan.length ? `${faltan.length} datos sin completar` : "✓ datos completos"}
           </span>
         } />
 
-      {/* Los plazos, primero y en grande */}
+      {/* Los plazos, primero: son lo que decide si esto corre o puede esperar */}
       <Plazos plazos={rev?.plazos} />
 
       {rev?.plazos?.escrito_excepcionalidad && (
@@ -184,85 +269,69 @@ function Datos({ exp, onGuardar }) {
           rounded-lg px-3 py-2 mt-2.5 leading-relaxed">{a}</p>
       ))}
 
-      {faltan.length > 0 && (
-        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/50 px-3 py-2.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11.5px] text-amber-900">Le falta completar:</span>
-            {porApartado.map(([nombre, n]) => (
-              <span key={nombre} className="text-[11px] font-semibold px-2 py-0.5 rounded-full
-                bg-white border border-amber-300 text-amber-800">
-                {nombre} · {n}
-              </span>
-            ))}
-            <button type="button" onClick={() => setVerFaltan((v) => !v)}
-              className="ml-auto text-[11px] font-semibold text-amber-700 hover:underline">
-              {verFaltan ? "ocultar" : "ver cuáles"}
-            </button>
-          </div>
-          {verFaltan && (
-            <p className="text-[11.5px] text-amber-800 leading-relaxed mt-2">
-              {faltan.join(" · ")}
-            </p>
-          )}
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2.5 mt-4 pt-3
-        border-t border-neutral-100">
-        <Dato k="Apellidos" v={[exp.apellido1, exp.apellido2].filter(Boolean).join(" ")}
-          falta={setFaltan.has("Primer apellido")} />
-        <Dato k="Nombres" v={exp.nombres} falta={setFaltan.has("Nombres")} />
-        <Dato k="Pasaporte" v={exp.pasaporte_numero} falta={setFaltan.has("Nº de pasaporte")} />
-        <Dato k="Nacimiento" v={exp.fecha_nacimiento} falta={setFaltan.has("Fecha de nacimiento")} />
-        <Dato k="Nacionalidad" v={exp.nacionalidad} falta={setFaltan.has("Nacionalidad")} />
-        <Dato k="Teléfono" v={exp.telefono || exp.dom_telefono} falta={setFaltan.has("Teléfono")} />
-        <Dato k="Correo" v={exp.correo} falta={setFaltan.has("Correo electrónico")} />
-        <Dato k="Llegada" v={exp.fecha_llegada_espana} falta={setFaltan.has("Fecha de llegada a España")} />
-        <Dato k="Universidad" v={exp.uni_denominacion} falta={setFaltan.has("Nombre de la universidad")} />
-        <Dato k="Programa" v={exp.prog_denominacion} falta={setFaltan.has("Nombre del programa")} />
-        <Dato k="Provincia uni." v={exp.uni_provincia} falta={setFaltan.has("Provincia de la universidad")} />
-        <Dato k="Provincia domicilio"
-          v={exp.dom_usa_universidad ? `${exp.uni_provincia || "—"} (usa la de la uni)` : exp.dom_provincia}
-          falta={!exp.dom_usa_universidad && setFaltan.has("Provincia en España")} />
-      </div>
+      {SECCIONES.map(([titulo, campos]) => (
+        <Seccion key={titulo} titulo={titulo} campos={campos} faltaSet={faltaSet} />
+      ))}
 
       {exp.notas && (
-        <p className="text-[12px] text-neutral-600 bg-neutral-50 border border-neutral-200
-          rounded-lg px-3 py-2 mt-3 leading-relaxed">
-          <b className="text-neutral-700">Nota suya:</b> {exp.notas}
-        </p>
+        <>
+          <div className="flex items-center gap-2 mt-3.5 mb-1.5">
+            <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400">
+              Lo que nos ha contado
+            </p>
+            <span className="flex-1 h-px bg-neutral-100" />
+          </div>
+          <p className="text-[12.5px] text-neutral-700 bg-neutral-50 border border-neutral-200
+            rounded-lg px-3 py-2 leading-relaxed">{exp.notas}</p>
+        </>
       )}
 
-      <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400
-        mt-4 mb-2">Seguimiento en extranjería</p>
-      <div className="flex flex-wrap gap-2">
-        <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
-          Nº expediente
-          <input className={`${input} w-36`} defaultValue={exp.expediente_numero || ""}
+      {/* Seguimiento en la sede */}
+      <div className="flex items-center gap-2 mt-4 mb-2">
+        <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400">
+          Seguimiento en extranjería
+        </p>
+        <span className="flex-1 h-px bg-neutral-100" />
+      </div>
+      <div className="flex flex-wrap gap-2 items-end">
+        <label className="flex flex-col gap-1">
+          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+            Nº expediente</span>
+          <input className={`${input} w-40`} defaultValue={exp.expediente_numero || ""}
             onBlur={(e) => onGuardar({ expediente_numero: e.target.value })} />
         </label>
-        <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
-          Nº justificante
+        <label className="flex flex-col gap-1">
+          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+            Nº justificante</span>
           <input className={`${input} w-36`} defaultValue={exp.expediente_justificante || ""}
             onBlur={(e) => onGuardar({ expediente_justificante: e.target.value })} />
         </label>
-        <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
-          NIE
-          <input className={`${input} w-28`} defaultValue={exp.expediente_nie || ""}
+        <label className="flex flex-col gap-1">
+          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+            NIE</span>
+          <input className={`${input} w-32`} defaultValue={exp.expediente_nie || ""}
             onBlur={(e) => onGuardar({ expediente_nie: e.target.value })} />
         </label>
-        <label className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
-          Fecha de ingreso
+        <label className="flex flex-col gap-1">
+          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+            Fecha de ingreso</span>
           <input type="date" className={input} defaultValue={exp.expediente_fecha || ""}
             onBlur={(e) => onGuardar({ expediente_fecha: e.target.value })} />
         </label>
-        <span className="flex items-center gap-1.5 text-[11.5px] text-neutral-500">
-          Año de nacimiento
-          <span className="text-[12.5px] font-bold text-neutral-800">{anio || "—"}</span>
-        </span>
+        {/* El año no se pide: sale de la fecha de nacimiento, que ya está */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[9.5px] font-bold uppercase tracking-wide font-mono text-neutral-400">
+            Año de nacimiento</span>
+          <span className={`text-[12.5px] px-2.5 py-1.5 rounded-lg border ${
+            anio ? "bg-[#EEF2F8] border-[#1A3557]/20 text-[#1A3557] font-bold"
+              : "bg-neutral-50 border-neutral-200 text-neutral-400"
+          }`}>
+            {anio || "al poner su fecha de nacimiento"}
+          </span>
+        </div>
       </div>
       <p className="text-[10.5px] text-neutral-400 mt-1.5">
-        Son los datos con los que se consulta en la sede. El asesorado los ve en su portal.
+        Son los cuatro datos con los que se consulta en la sede. El asesorado los ve en su portal.
       </p>
     </div>
   );

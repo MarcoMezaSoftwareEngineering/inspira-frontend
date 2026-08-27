@@ -40,6 +40,9 @@ export default function PanelCliente() {
   // resto no le dice nada y le ensucia el menú.
   const [tieneEstancia, setTieneEstancia] = useState(false);
   const [tieneModificatoria, setTieneModificatoria] = useState(false);
+  // Quien entra solo porque le invitaron a un expediente ajeno no tiene
+  // servicios propios: las becas, las guías y el resto del portal no son suyos.
+  const [soloInvitado, setSoloInvitado] = useState(false);
 
   const perfilIncompleto = usePerfilIncompletoBool(user);
   const mostrarWizard = user !== null && tieneSolicitudes !== null && tieneSolicitudes && perfilIncompleto;
@@ -72,6 +75,9 @@ export default function PanelCliente() {
         return !cod.includes("VISADO") && String(s?.codigo_servicio || s?.servicio?.codigo || "") !== "017";
       });
       setTieneSolicitudes(tieneNoVisado);
+
+      // Todo lo que ve es de otra persona: no tiene nada suyo.
+      setSoloInvitado(lista.length > 0 && lista.every((s) => s?.invitado));
 
       // Cada guia se le enseña solo a quien tiene ese servicio: al resto no le
       // dice nada y le ensucia el menu.
@@ -123,6 +129,7 @@ export default function PanelCliente() {
         tieneSolicitudes={tieneSolicitudes}
         tieneEstancia={tieneEstancia}
         tieneModificatoria={tieneModificatoria}
+        soloInvitado={soloInvitado}
       />
 
       <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>

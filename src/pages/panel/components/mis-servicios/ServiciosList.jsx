@@ -83,6 +83,13 @@ function ServicioCard({ s, onVerDetalle }) {
 
         {/* Título */}
         <div>
+          {/* De quién es. Sin esto, quien entra invitado ve en «Mis servicios»
+              un expediente con apellidos ajenos y no entiende qué mira. */}
+          {s.invitado && (
+            <p className="text-[11.5px] font-semibold text-amber-700 mb-0.5">
+              Expediente de {s.titular}
+            </p>
+          )}
           <h3 className="text-base font-bold text-neutral-900 leading-snug">
             {s.titulo || "Servicio sin título"}
           </h3>

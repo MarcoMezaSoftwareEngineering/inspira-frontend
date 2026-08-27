@@ -5,7 +5,7 @@ import { navigate } from "../../../services/navigate";
 
 export default function PanelSidebar({
   user, activeTab, onChangeTab, isOpen, onClose,
-  tieneSolicitudes, tieneEstancia, tieneModificatoria,
+  tieneSolicitudes, tieneEstancia, tieneModificatoria, soloInvitado,
 }) {
   const { logout } = useAuth();
 
@@ -75,8 +75,10 @@ export default function PanelSidebar({
           onClick={() => onChangeTab("servicios")}
         />
 
-        {/* Sección recursos — solo si tiene al menos una solicitud */}
-        {tieneSolicitudes && (
+        {/* Recursos: sólo si tiene algo suyo. A quien entra únicamente porque
+            le invitaron a un expediente ajeno, las becas y las guías no le
+            pertenecen: viene a ayudar con un trámite concreto. */}
+        {tieneSolicitudes && !soloInvitado && (
           <>
             <p className="text-[9px] font-bold uppercase tracking-[.18em] text-white/35 px-3 mt-4 mb-1.5 font-mono">
               Recursos Inspira

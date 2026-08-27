@@ -162,6 +162,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     if (isModificatoria) {
       return [
         { id: "flujo",       numero: "0", label: "Estado del expediente", estado: "pendiente" },
+        { id: "invitados",   numero: "0b", label: "Quién más entra",      estado: "pendiente" },
         { id: "datos",       numero: "1", label: "Datos del expediente",  estado: "pendiente" },
         { id: "documentos",  numero: "2", label: "Documentos",            estado: "pendiente" },
         { id: "carpeta",     numero: "3", label: "Cerrar carpeta",        estado: "pendiente" },
@@ -173,6 +174,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       const doc = detalle?.estancia_docs;
       return [
         { id: "flujo",       numero: "0", label: "Estado del expediente", estado: "pendiente" },
+        { id: "invitados",   numero: "0b", label: "Quién más entra",      estado: "pendiente" },
         { id: "datos",       numero: "1", label: "Datos y plazos",        estado: "pendiente" },
         { id: "documentos",  numero: "2", label: "Documentos",            estado: doc },
         { id: "acompanantes", numero: "3", label: "Acompañantes",       estado: "pendiente" },

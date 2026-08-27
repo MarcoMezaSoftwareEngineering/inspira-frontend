@@ -930,13 +930,13 @@ export default function ModificatoriaAdmin({ idSolicitud }) {
       <RevisionPedida exp={exp} />
       <Flujo revision={exp.revision} guardando={guardando}
         onCambiar={(estado_proceso) => guardar({ estado_proceso })} />
+      <Invitados idSolicitud={idSolicitud} numero="0b" />
       <Datos exp={exp} onGuardar={guardar} />
       <Documentos id={idSolicitud} docs={docs} onCambio={cargar} />
       <CerrarCarpeta id={idSolicitud} exp={exp} docs={docs} onHecho={cargar} />
       
       <GeneradoresModificatoria id={idSolicitud} exp={exp} onArchivado={cargar} />
       <Extranjeria id={idSolicitud} registros={ext} onCambio={cargar} />
-      <Invitados idSolicitud={idSolicitud} numero="7" />
     </div>
   );
 }

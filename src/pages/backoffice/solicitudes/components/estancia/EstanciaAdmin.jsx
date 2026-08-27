@@ -1142,6 +1142,7 @@ export default function EstanciaAdmin({ idSolicitud }) {
       <RevisionPedida exp={exp} />
       <Flujo revision={exp.revision} guardando={guardando}
         onCambiar={(estado_proceso) => guardar({ estado_proceso })} />
+      <Invitados idSolicitud={idSolicitud} numero="0b" />
       <Datos exp={exp} onGuardar={guardar} />
       <Documentos id={idSolicitud} docs={docs} onCambio={cargar} />
       <AcompanantesAdmin idSolicitud={idSolicitud} exp={exp} numero="3" />
@@ -1149,7 +1150,6 @@ export default function EstanciaAdmin({ idSolicitud }) {
       <PasarAAbogada id={idSolicitud} exp={exp} onHecho={cargar} />
       <GeneradoresEstancia id={idSolicitud} exp={exp} onArchivado={cargar} />
       <Extranjeria id={idSolicitud} registros={ext} onCambio={cargar} />
-      <Invitados idSolicitud={idSolicitud} numero="7" />
     </div>
   );
 }

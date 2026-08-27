@@ -142,6 +142,112 @@ function Plazos({ plazos }) {
  * cuenta arriba, en el rotulo del apartado, y aqui basta con no estar en negro.
  */
 /**
+ * La segunda persona que recibe los avisos.
+ *
+ * Va en su propio recuadro y no como un campo mas de la ficha porque no es un
+ * dato del expediente: es dar acceso a los datos de extranjeria de alguien.
+ * Pide decir quien es, y el asesorado lo ve en su portal y en cada correo.
+ */
+function SegundoCorreo({ exp, onGuardar }) {
+  const [abierto, setAbierto] = useState(false);
+  const [correo, setCorreo] = useState(exp.correo_copia || "");
+  const [quien, setQuien] = useState(exp.correo_copia_quien || "");
+  const [guardando, setGuardando] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const hay = Boolean(exp.correo_copia);
+
+  async function guardar() {
+    const limpio = correo.trim().toLowerCase();
+    if (limpio && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(limpio)) {
+      setMsg("Ese correo no tiene forma de correo");
+      return;
+    }
+    if (limpio && !quien.trim()) {
+      setMsg("Di quién es: el asesorado lo va a ver en sus correos");
+      return;
+    }
+    setGuardando(true); setMsg("");
+    await onGuardar({
+      correo_copia: limpio || null,
+      correo_copia_quien: limpio ? quien.trim() : null,
+    });
+    setGuardando(false);
+    setAbierto(false);
+  }
+
+  async function quitar() {
+    if (!window.confirm("¿Dejar de mandarle los avisos a esa persona?")) return;
+    setGuardando(true);
+    await onGuardar({ correo_copia: null, correo_copia_quien: null });
+    setCorreo(""); setQuien("");
+    setGuardando(false);
+  }
+
+  return (
+    <div className={`rounded-xl border px-3.5 py-3 mt-3 ${
+      hay ? "border-[#1A3557]/30 bg-[#EEF2F8]/60" : "border-neutral-200"
+    }`}>
+      <div className="flex items-start gap-2.5 flex-wrap">
+        <div className="min-w-0 flex-1">
+          <p className="text-[12.5px] font-semibold text-neutral-800">
+            {hay ? "Dos personas reciben los avisos" : "¿Alguien más debe recibir los avisos?"}
+          </p>
+          {hay ? (
+            <p className="text-[12px] text-neutral-600 leading-relaxed mt-0.5">
+              Además del asesorado, van a <b>{exp.correo_copia}</b>
+              {exp.correo_copia_quien ? ` (${exp.correo_copia_quien})` : ""}. Él lo ve en su
+              portal y al pie de cada correo.
+            </p>
+          ) : (
+            <p className="text-[12px] text-neutral-500 leading-relaxed mt-0.5">
+              Lo normal es que no. Se usa cuando hace falta de verdad: el padre de un menor,
+              quien lleva el tema en la empresa. Recibe <b>todo</b> lo del expediente.
+            </p>
+          )}
+        </div>
+        <div className="shrink-0 flex gap-2">
+          {hay && (
+            <button type="button" onClick={quitar} disabled={guardando}
+              className="text-[11.5px] text-neutral-400 hover:text-red-600 disabled:opacity-40">
+              Quitar
+            </button>
+          )}
+          <button type="button" onClick={() => setAbierto((v) => !v)}
+            className="text-[11.5px] font-semibold text-[#023A4B] hover:underline">
+            {abierto ? "Cancelar" : hay ? "Cambiar" : "Añadir"}
+          </button>
+        </div>
+      </div>
+
+      {abierto && (
+        <div className="mt-2.5 space-y-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)}
+              placeholder="correo@ejemplo.com" className={`${input} flex-1 min-w-0`} />
+            <input type="text" value={quien} onChange={(e) => setQuien(e.target.value)}
+              placeholder="Quién es (su madre, RR. HH. de la empresa…)"
+              className={`${input} flex-1 min-w-0`} />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button type="button" onClick={guardar} disabled={guardando}
+              className="text-[12px] font-semibold px-4 py-1.5 rounded-lg bg-[#1A3557]
+                text-white hover:opacity-90 disabled:opacity-40">
+              {guardando ? "…" : "Guardar"}
+            </button>
+            {msg && <span className="text-[11.5px] text-red-600">{msg}</span>}
+          </div>
+          <p className="text-[11px] text-neutral-500 leading-relaxed">
+            Esa persona va a recibir <b>los mismos correos que el asesorado</b>: requerimientos,
+            resoluciones, todo. Asegúrate de que él está de acuerdo.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * Un dato de la ficha, editable.
  *
  * En mayusculas porque asi va al impreso: lo que el asesor ve aqui es lo que
@@ -220,7 +326,7 @@ function SeccionEdit({ titulo, campos, faltaSet, borrador, set, editando }) {
           </span>
         )}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-2.5">
         {campos.map(([label, k, ob, extra]) => {
           const falta = Boolean(ob) && faltaSet.has(ob) && !String(borrador[k] || "").trim();
           return editando ? (
@@ -414,7 +520,9 @@ function Datos({ exp, onGuardar }) {
         )}
       </div>
 
-      {(editando || borrador.notas) && (
+<SegundoCorreo exp={exp} onGuardar={onGuardar} />
+
+            {(editando || borrador.notas) && (
         <>
           <div className="flex items-center gap-2 mt-3.5 mb-1.5">
             <p className="text-[11.5px] font-semibold text-neutral-600">Lo que nos ha contado</p>
@@ -558,7 +666,7 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo }) {
 
           {observando && (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <input autoFocus className={`${input} flex-1 min-w-[200px]`}
+              <input autoFocus className={`${input} flex-1 min-w-[160px]`}
                 placeholder="Qué tiene que corregir…"
                 value={texto} onChange={(e) => setTexto(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && texto.trim() && revisar("OBSERVADO", texto)} />
@@ -819,7 +927,7 @@ function SinClasificar({ id, r, onCambio }) {
           <option value="NOTIFICACION">Notificación</option>
           <option value="RESOLUCION">Resolución</option>
         </select>
-        <input className={`${input} flex-1 min-w-[180px]`} placeholder="Título"
+        <input className={`${input} flex-1 min-w-[150px]`} placeholder="Título"
           value={f.titulo} onChange={(e) => setF({ ...f, titulo: e.target.value })} />
       </div>
       <div className="flex flex-wrap gap-2 mb-2">
@@ -904,7 +1012,7 @@ function Extranjeria({ id, registros, onCambio }) {
               <option value="NOTIFICACION">Notificación</option>
               <option value="RESOLUCION">Resolución</option>
             </select>
-            <input className={`${input} flex-1 min-w-[200px]`} placeholder="Título"
+            <input className={`${input} flex-1 min-w-[160px]`} placeholder="Título"
               value={f.titulo} onChange={(e) => setF({ ...f, titulo: e.target.value })} />
           </div>
           <div className="flex flex-wrap gap-2">

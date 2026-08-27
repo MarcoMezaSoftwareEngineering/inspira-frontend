@@ -321,10 +321,14 @@ export default function GuiaEstancia() {
 
           <Seccion numero="2" icono="⏱️" titulo="Tus 90 días empiezan al entrar"
             subtitulo="Y de ahí sale tu fecha tope">
-            <Aviso tono="naranja">
-              La entrada como turista te da <b>90 días</b>. La solicitud de estancia se
-              presenta dentro de ese margen, así que tu fecha de llegada no es un dato
-              cualquiera: es la que fija tu plazo.
+            <Aviso tono="rojo" titulo="No es el último día de los 90">
+              La entrada como turista te da <b>90 días</b>, pero tu solicitud tiene que estar
+              presentada <b>como máximo dos meses antes de que se cumplan</b>. No dentro de
+              los 90: dos meses antes de que terminen.
+              <br /><br />
+              Si entras el <b>1 de marzo</b>, tus 90 días acaban el <b>30 de mayo</b>, así que
+              tu fecha tope para presentar es el <b>30 de marzo</b>. Por eso tu fecha de
+              llegada no es un dato cualquiera: es la que fija tu plazo.
             </Aviso>
             <Aviso tono="rojo" titulo="Si ya estuviste en Europa">
               Schengen cuenta 90 días dentro de cualquier ventana de 180. Si viajaste hace

@@ -152,6 +152,56 @@ function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, onSiguient
   );
 }
 
+/**
+ * Quién más recibe los avisos de este expediente.
+ *
+ * Se le enseña sin que tenga que buscarlo. Sus datos de extranjería son suyos:
+ * si hay otra persona leyéndolos tiene que saberlo, y poder decir que no.
+ */
+function OtraPersona({ exp }) {
+  if (!exp?.correo_copia) return null;
+  return (
+    <div className="rounded-xl border border-[#1A3557]/25 bg-[#EEF2F8]/60 px-3.5 py-3 mb-3
+      flex items-start gap-2.5">
+      <span className="shrink-0 text-[15px]" aria-hidden="true">👥</span>
+      <div className="min-w-0">
+        <p className="text-[12.5px] font-semibold text-[#1A3557]">
+          Otra persona recibe los avisos de tu expediente
+        </p>
+        <p className="text-[12px] text-neutral-600 leading-relaxed mt-0.5">
+          Los correos de este trámite también llegan a <b>{exp.correo_copia}</b>
+          {exp.correo_copia_quien ? ` (${exp.correo_copia_quien})` : ""}. Si prefieres que
+          deje de recibirlos, dínoslo y lo quitamos.
+        </p>
+      </div>
+    </div>
+  );
+}
+/** Cómo tienen que verse los documentos. Se dice antes de que suba el primero. */
+function ComoEscanear() {
+  const [abierto, setAbierto] = useState(false);
+  return (
+    <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8]/50 px-3.5 py-2.5 mb-3">
+      <button type="button" onClick={() => setAbierto((v) => !v)}
+        className="w-full flex items-center gap-2 text-left">
+        <span className="shrink-0 text-[14px]" aria-hidden="true">📷</span>
+        <span className="text-[12.5px] font-semibold text-[#1A3557] min-w-0 flex-1">
+          Cómo escanear tus documentos
+        </span>
+        <span className="shrink-0 text-neutral-400 text-[11px]">{abierto ? "▲" : "▼"}</span>
+      </button>
+      {abierto && (
+        <p className="text-[12.5px] text-neutral-700 leading-relaxed mt-2">
+          Tienen que verse <b>nítidos y completos</b>: un documento borroso o con una esquina
+          cortada te lo devuelven y hay que rehacerlo. Desde el celular puedes usar
+          <b> CamScanner</b> o la app de escaneo que ya traiga tu teléfono —recorta, endereza y
+          lo guarda en PDF—; y si tienes escáner a mano, mejor todavía. Foto suelta con el
+          fondo de la mesa, no.
+        </p>
+      )}
+    </div>
+  );
+}
 function Bloque({ numero, titulo, subtitulo, abierto, onToggle, children }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
@@ -427,31 +477,36 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
   // Cada retoque sube un numero, para no pisar lo que escriba mientras se
   // guarda ni dar por guardado lo que aun no lo esta.
   const version = useRef(0);
+  // Qué ha tocado él. Es lo único que se manda: ver el comentario del guardado.
+  const pendientes = useRef({});
   const set = (k) => (v) => {
     version.current += 1;
+    pendientes.current[k] = v;
     setTocado(true);
     setExp((p) => ({ ...p, [k]: v }));
   };
 
-  const guardar = useCallback(async () => {
-    if (!tocado) return;
-    const v = version.current;
-    setGuardando(true);
-    const r = await apiPUT(`/solicitudes/${id}/modificatoria/datos`, exp || {});
-    setGuardando(false);
-    if (r?.ok) {
-      // Solo lo que calcula el servidor; lo escrito se queda donde esta.
-      setExp((p) => ({ ...p, revision: r.expediente?.revision }));
-      if (version.current === v) setTocado(false);
-    }
-  }, [id, exp, tocado]);
-
-  // Se guarda solo al dejar de escribir, sin boton que ir a buscar.
+  // Se guarda solo al dejar de escribir, sin botón que ir a buscar.
   useEffect(() => {
     if (!tocado) return undefined;
-    const t = setTimeout(guardar, 900);
+
+    const t = setTimeout(async () => {
+      const v = version.current;
+      // Solo lo tocado: mandar el expediente entero haría que dos personas
+      // trabajando a la vez se pisaran campos que ninguna ha llegado a tocar.
+      setGuardando(true);
+      const r = await apiPUT(
+        `/solicitudes/${id}/modificatoria/datos`, { ...pendientes.current },
+      );
+      setGuardando(false);
+      if (r?.ok) {
+        setExp((p) => ({ ...p, revision: r.expediente?.revision }));
+        if (version.current === v) { pendientes.current = {}; setTocado(false); }
+      }
+    }, 900);
+
     return () => clearTimeout(t);
-  }, [exp, tocado, guardar]);
+  }, [exp, tocado, id]);
 
   const rev = exp?.revision;
   const faltaSet = useMemo(() => new Set(rev?.faltan || []), [rev]);
@@ -501,6 +556,8 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
         <EstadoProceso revision={rev} />
 
         {/* ── 1 · Datos ── */}
+<OtraPersona exp={exp} />
+
         <Bloque numero="1" titulo="Tus datos"
           subtitulo={rev?.completo ? "Completos" : `${hechos} de ${totalCampos} completados`}
           abierto={bloque === 1} onToggle={() => setBloque(bloque === 1 ? 0 : 1)}>
@@ -732,6 +789,8 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
             : docs?.observados?.length ? `${docs.observados.length} por corregir`
             : "Todo entregado"}
           abierto={bloque === 3} onToggle={() => setBloque(bloque === 3 ? 0 : 3)}>
+
+          <ComoEscanear />
 
           <PedirRevision id={id} docs={docs} exp={exp} onHecho={cargar} />
 

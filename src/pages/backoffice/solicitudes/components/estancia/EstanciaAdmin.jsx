@@ -552,7 +552,11 @@ function PasarAAbogada({ id, exp, onHecho }) {
     });
     setEnviando(false);
     if (r?.ok) {
-      setMsg(`Enviado a ${r.para}${r.carpeta ? " con el enlace a la carpeta" : " (sin enlace: Drive no respondió)"}`);
+      const acceso = !r.carpeta ? "sin enlace: Drive no respondió"
+        : r.acceso?.nuevo ? "con el enlace y acceso a la carpeta del asesorado"
+        : r.acceso?.compartida ? "con el enlace; ya tenía acceso"
+        : "con el enlace, pero NO se le pudo dar acceso: compártesela a mano";
+      setMsg(`Enviado a ${r.para} ${acceso}`);
       setAbierto(false);
       onHecho();
     } else {
@@ -586,8 +590,9 @@ function PasarAAbogada({ id, exp, onHecho }) {
       ) : !abierto ? (
         <div className="flex items-center gap-3 flex-wrap">
           <p className="text-[12.5px] text-neutral-600 leading-relaxed min-w-0 flex-1">
-            Le manda un correo con el enlace directo a la carpeta de Drive y el estado de los
-            documentos, para que la presente.
+            Le manda un correo con el estado de los documentos y el enlace a la carpeta
+            <b> de este asesorado</b>, y le da acceso a esa carpeta —sólo a esa— para que
+            pueda abrirla y dejar ahí lo que llegue de extranjería.
           </p>
           <button type="button" onClick={() => setAbierto(true)}
             className="shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg

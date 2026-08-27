@@ -476,6 +476,8 @@ function Datos({ exp, onGuardar }) {
           </span>
         } />
 
+<SegundoCorreo exp={exp} onGuardar={onGuardar} />
+
       {/* Las condiciones del contrato, primero: si alguna falla, lo deniegan */}
       <Condiciones exp={borrador} revision={rev} />
 
@@ -511,9 +513,7 @@ function Datos({ exp, onGuardar }) {
         )}
       </div>
 
-<SegundoCorreo exp={exp} onGuardar={onGuardar} />
-
-            {(editando || borrador.notas) && (
+      {(editando || borrador.notas) && (
         <>
           <div className="flex items-center gap-2 mt-3.5 mb-1.5">
             <p className="text-[11.5px] font-semibold text-neutral-600">Lo que nos ha contado</p>

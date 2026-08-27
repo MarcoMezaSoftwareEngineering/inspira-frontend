@@ -315,30 +315,56 @@ function PedirRevision({ id, docs, exp, onHecho }) {
 /* ── Bloque plegable ─────────────────────────────────────────────────────── */
 
 /**
- * Quién más recibe los avisos de este expediente.
+ * Quién más entra a este expediente.
  *
- * Se le enseña sin que tenga que buscarlo. Sus datos de extranjería son suyos:
- * si hay otra persona leyéndolos tiene que saberlo, y poder decir que no.
+ * Se le enseña sin que tenga que buscarlo. Sus datos son suyos: si hay otra
+ * persona entrando tiene que saberlo, y poder decir que no.
  */
-function OtraPersona({ exp }) {
-  if (!exp?.correo_copia) return null;
+function OtraPersona({ invitados }) {
+  if (!invitados?.length) return null;
+  const plural = invitados.length > 1;
   return (
     <div className="rounded-xl border border-[#1A3557]/25 bg-[#EEF2F8]/60 px-3.5 py-3 mb-3
       flex items-start gap-2.5">
       <span className="shrink-0 text-[15px]" aria-hidden="true">👥</span>
       <div className="min-w-0">
         <p className="text-[12.5px] font-semibold text-[#1A3557]">
-          Otra persona recibe los avisos de tu expediente
+          {plural ? "Otras personas entran" : "Otra persona entra"} a tu expediente
         </p>
         <p className="text-[12px] text-neutral-600 leading-relaxed mt-0.5">
-          Los correos de este trámite también llegan a <b>{exp.correo_copia}</b>
-          {exp.correo_copia_quien ? ` (${exp.correo_copia_quien})` : ""}. Si prefieres que
-          deje de recibirlos, dínoslo y lo quitamos.
+          {invitados.map((i) => (
+            <span key={i.correo} className="block">
+              <b>{i.correo}</b>{i.quien ? ` · ${i.quien}` : ""}
+            </span>
+          ))}
+          <span className="block mt-1">
+            {plural ? "Ven" : "Ve"} tu expediente y {plural ? "reciben" : "recibe"} los mismos
+            avisos que tú. Si prefieres que no, dínoslo y lo quitamos.
+          </span>
         </p>
       </div>
     </div>
   );
 }
+
+/**
+ * Cuando quien mira NO es el titular.
+ *
+ * Sin esto, alguien invitado abre «Mis servicios», ve el expediente de otra
+ * persona con sus apellidos y su pasaporte, y no entiende qué está pasando.
+ */
+function ComoInvitado({ solicitud }) {
+  if (!solicitud?.invitado) return null;
+  return (
+    <div className="rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-3 mb-3">
+      <p className="text-[12.5px] text-amber-900 leading-relaxed">
+        Estás viendo el expediente de <b>{solicitud.titular}</b>, que te dio acceso. Lo que
+        subas o completes aquí queda en su expediente.
+      </p>
+    </div>
+  );
+}
+
 /** Cómo tienen que verse los documentos. Se dice antes de que suba el primero. */
 function ComoEscanear() {
   const [abierto, setAbierto] = useState(false);
@@ -518,7 +544,8 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
         <EstadoProceso revision={rev} />
 
-<OtraPersona exp={exp} />
+<ComoInvitado solicitud={solicitudBase} />
+        <OtraPersona invitados={exp.invitados} />
 
         {/* ── 1 · Datos ── */}
         <Bloque numero="1" titulo="Tus datos"

@@ -212,7 +212,7 @@ function ComoEscanear() {
         className="w-full flex items-center gap-2 text-left">
         <span className="shrink-0 text-[14px]" aria-hidden="true">📷</span>
         <span className="text-[12.5px] font-semibold text-[#1A3557] min-w-0 flex-1">
-          Cómo escanear tus documentos
+          Cómo escanear: un archivo, nítido, menos de 4 MB
         </span>
         <span className="shrink-0 text-neutral-400 text-[11px]">{abierto ? "▲" : "▼"}</span>
       </button>
@@ -223,6 +223,11 @@ function ComoEscanear() {
           <b> CamScanner</b> o la app de escaneo que ya traiga tu teléfono —recorta, endereza y
           lo guarda en PDF—; y si tienes escáner a mano, mejor todavía. Foto suelta con el
           fondo de la mesa, no.
+          <br /><br />
+          <b>Cada documento va en un solo archivo</b>: si el pasaporte tiene diez páginas, van
+          las diez en un PDF, no diez fotos sueltas. Y que <b>pese menos de 4 MB</b>. Si se te
+          pasa, lo achicamos nosotros al subirlo, pero un escaneo que ya venía borroso no se
+          arregla achicándolo.
         </p>
       )}
     </div>

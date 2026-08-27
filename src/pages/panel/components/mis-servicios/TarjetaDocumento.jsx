@@ -149,6 +149,9 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
           >
             {textoSubida}
           </button>
+          <p className="text-[11px] text-neutral-400 leading-relaxed -mt-0.5">
+            Un solo archivo, nítido, menos de 4 MB.
+          </p>
           <input ref={entradaRef} type="file" className="hidden"
             accept="application/pdf,image/*" disabled={subiendo}
             onChange={(e) => { subir(e.target.files?.[0]); e.target.value = ""; }} />

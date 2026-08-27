@@ -13,6 +13,7 @@ import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
 import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
 import VisaDeclaracionAdmin from "./components/visa/VisaDeclaracionAdmin";
 import VisaImpresoAdmin from "./components/visa/VisaImpresoAdmin";
+import EstanciaAdmin from "./components/estancia/EstanciaAdmin";
 import VisaRecordatoriosAdmin from "./components/visa/VisaRecordatoriosAdmin";
 import VisaFlujoInternoAdmin from "./components/visa/VisaFlujoInternoAdmin";
 import VisaEstadoVisadoAdmin from "./components/visa/VisaEstadoVisadoAdmin";
@@ -136,6 +137,11 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   // Los bloques y su estado vienen calculados del servidor.
   const bloquesServidor = detalle?.estado_expediente?.bloques ?? [];
   const isVisado = bloquesServidor.some((b) => b.id === "solvencia");
+  // La estancia por estudios no es una variante del visado ni del master: su
+  // panel entero es otro, asi que se detecta aqui y se muestra el suyo.
+  const isEstancia =
+    Number(detalle?.id_tipo_solicitud) === 18 ||
+    String(detalle?.tipo?.nombre || detalle?.titulo || "").toLowerCase().includes("estancia");
   const estadoDe = (id) => bloquesServidor.find((b) => b.id === id)?.estado ?? "pendiente";
 
   // En visado la lista se arma aquí y no en el servidor: los bloques nuevos
@@ -446,6 +452,14 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       {/* ── MAIN SCROLL ── */}
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-3 sm:p-[22px] pb-20">
+
+          {/* Estancia por estudios: panel propio, empezando por el punto 0 con
+              el flujo del expediente. */}
+          {isEstancia && (
+            <div className="mb-4">
+              <EstanciaAdmin idSolicitud={detalle?.id_solicitud} />
+            </div>
+          )}
 
           {/* B0 — Checklist y estado del proceso (sólo visado, sólo interno) */}
           {isVisado && (

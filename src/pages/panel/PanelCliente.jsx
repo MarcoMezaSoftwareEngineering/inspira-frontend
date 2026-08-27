@@ -10,8 +10,9 @@ import { usePerfilIncompletoBool } from "./hooks/usePerfilIncompletoBool";
 const BecasEspana   = lazy(() => import("./BecasEspana"));
 const GuiaMaster    = lazy(() => import("./GuiaMaster"));
 const GuiaApostilla = lazy(() => import("./GuiaApostilla"));
+const GuiaEstancia  = lazy(() => import("./GuiaEstancia"));
 
-const VALID_TABS = ["servicios", "perfil", "becas", "guia", "apostilla"];
+const VALID_TABS = ["servicios", "perfil", "becas", "guia", "apostilla", "estancia"];
 
 function LoadingPage() {
   return (
@@ -34,6 +35,9 @@ export default function PanelCliente() {
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tieneSolicitudes, setTieneSolicitudes] = useState(null);
+  // La guía de estancia sólo se le enseña a quien tiene ese servicio: al
+  // resto no le dice nada y le ensucia el menú.
+  const [tieneEstancia, setTieneEstancia] = useState(false);
 
   const perfilIncompleto = usePerfilIncompletoBool(user);
   const mostrarWizard = user !== null && tieneSolicitudes !== null && tieneSolicitudes && perfilIncompleto;
@@ -66,6 +70,14 @@ export default function PanelCliente() {
         return !cod.includes("VISADO") && String(s?.codigo_servicio || s?.servicio?.codigo || "") !== "017";
       });
       setTieneSolicitudes(tieneNoVisado);
+
+      setTieneEstancia(lista.some((s) => {
+        if (Number(s?.id_tipo_solicitud) === 18) return true;
+        const txt = String(
+          s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.titulo || s?.nombre_servicio || ""
+        ).toLowerCase();
+        return txt.includes("estancia");
+      }));
     } catch { setTieneSolicitudes(false); }
   }
 
@@ -78,7 +90,7 @@ export default function PanelCliente() {
   const esScrollInterno = esServicios;
 
   // Tab titles
-  const titles = { servicios: "Mis Servicios", perfil: "Mi Perfil", becas: "Becas España", guia: "Guía Máster", apostilla: "Guía Apostilla Digital" };
+  const titles = { servicios: "Mis Servicios", perfil: "Mi Perfil", becas: "Becas España", guia: "Guía Máster", apostilla: "Guía Apostilla Digital", estancia: "Guía Estancia por Estudios" };
 
   return (
     <div className="h-screen overflow-hidden flex bg-[#F4F6F9] relative">
@@ -93,6 +105,7 @@ export default function PanelCliente() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         tieneSolicitudes={tieneSolicitudes}
+        tieneEstancia={tieneEstancia}
       />
 
       <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>
@@ -167,6 +180,12 @@ export default function PanelCliente() {
           )}
 
           {/* Guía Apostilla Digital */}
+          {tab === "estancia" && (
+            <Suspense fallback={<LoadingPage />}>
+              <GuiaEstancia />
+            </Suspense>
+          )}
+
           {tab === "apostilla" && (
             <Suspense fallback={<LoadingPage />}>
               <GuiaApostilla />

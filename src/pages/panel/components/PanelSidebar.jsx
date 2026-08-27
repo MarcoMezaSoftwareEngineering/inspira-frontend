@@ -3,7 +3,7 @@ import SidebarItem from "./SidebarItem";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 
-export default function PanelSidebar({ user, activeTab, onChangeTab, isOpen, onClose, tieneSolicitudes }) {
+export default function PanelSidebar({ user, activeTab, onChangeTab, isOpen, onClose, tieneSolicitudes, tieneEstancia }) {
   const { logout } = useAuth();
 
   const inicial = user?.nombre?.[0] || user?.email_contacto?.[0] || "U";
@@ -96,6 +96,15 @@ export default function PanelSidebar({ user, activeTab, onChangeTab, isOpen, onC
               active={activeTab === "apostilla"}
               onClick={() => onChangeTab("apostilla")}
             />
+            {/* Sólo para quien tiene el servicio: al resto no le dice nada. */}
+            {tieneEstancia && (
+              <SidebarItem
+                icon="🇪🇸"
+                label="Guía Estancia"
+                active={activeTab === "estancia"}
+                onClick={() => onChangeTab("estancia")}
+              />
+            )}
           </>
         )}
       </div>

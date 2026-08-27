@@ -1,9 +1,14 @@
 // Guía de la modificación de estancia por estudios a residencia y trabajo.
 //
-// El contenido sale de la guía oficial MOD03a de la Generalitat (versión de
-// 26.05.2026, adaptada al Real Decreto 1155/2024) y del impreso EX-03. No es
-// un resumen de andar por casa: cada plazo y cada requisito está donde está
-// porque lo dice esa hoja, y si Extranjería la cambia hay que cambiarla aquí.
+// El contenido sale de la guía oficial de tramitación del procedimiento
+// (versión de 26.05.2026, adaptada al Real Decreto 1155/2024) y del impreso
+// EX-03. No es un resumen de andar por casa: cada plazo y cada requisito está
+// donde está porque lo dice esa hoja, y si Extranjería la cambia hay que
+// cambiarla aquí.
+//
+// La guía NO se ata a ninguna comunidad: el trámite se presenta ante
+// Extranjería, y la oficina concreta depende de dónde viva el asesorado. Decir
+// «Cataluña» aquí confundiría a quien no está allí.
 //
 // Dos avisos que no se pueden suavizar y por eso van en rojo:
 //
@@ -448,7 +453,7 @@ export default function GuiaModificatoria() {
         {lista(DOCS_TUYOS)}
         <Aviso tono="naranja" titulo="Traducción y legalización">
           Todo documento público extranjero va <b>legalizado o apostillado y traducido</b> al
-          castellano o al catalán. Un documento sin apostillar no lo miran.
+          castellano. Un documento sin apostillar no lo miran.
         </Aviso>
       </Seccion>
 
@@ -486,8 +491,9 @@ export default function GuiaModificatoria() {
         subtitulo="De esto nos encargamos nosotros">
         <div className="text-[13px] text-neutral-700 leading-relaxed space-y-2.5">
           <p>
-            La solicitud es <b>solo electrónica</b> y va firmada digitalmente. Se presenta en la
-            Oficina Virtual de Trámites de la Generalitat, con el trámite <b>MOD03a</b>.
+            La solicitud se presenta ante <b>Extranjería</b>, es <b>solo electrónica</b> y va
+            firmada digitalmente. La oficina que te corresponde depende de dónde vivas; de eso
+            nos ocupamos nosotros.
           </p>
           <p>
             La puede presentar la empresa o puedes presentarla tú. En cualquier caso,
@@ -512,8 +518,8 @@ export default function GuiaModificatoria() {
         </Aviso>
         <div className="text-[13px] text-neutral-700 leading-relaxed space-y-2">
           <p>
-            A partir de ahí puedes <b>residir y trabajar un año</b>, por cuenta ajena o por cuenta
-            propia, en Cataluña.
+            A partir de ahí puedes <b>residir y trabajar un año</b> en España, por cuenta ajena
+            o por cuenta propia.
           </p>
           <p className="text-[12.5px] text-neutral-600">
             Y una obligación que casi nadie conoce: si mientras lo resuelven <b>cambia el contrato
@@ -530,7 +536,7 @@ export default function GuiaModificatoria() {
           consulta a tiempo que un documento rehecho tres veces.
         </p>
         <p className="text-[11px] text-neutral-400 leading-relaxed mt-3">
-          Contenido basado en la guía oficial MOD03a de la Generalitat de Catalunya (versión de
+          Contenido basado en la guía oficial de tramitación del procedimiento (versión de
           26.05.2026, Real Decreto 1155/2024) y en el impreso EX-03. Si la normativa cambia,
           manda lo que diga Extranjería.
         </p>

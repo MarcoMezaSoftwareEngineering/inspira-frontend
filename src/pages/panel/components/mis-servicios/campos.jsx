@@ -50,6 +50,11 @@ export function Etiqueta({ id, label, ayuda, obligatorio }) {
 
 export function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatorio, falta }) {
   const id = useId();
+  // Lo que va al impreso se guarda en mayúsculas, así que se escribe en
+  // mayúsculas: si no, se teclea «pérez» y al recargar aparece «PÉREZ», y
+  // parece que el sistema ha cambiado algo por su cuenta. El correo no, que en
+  // mayúsculas parece roto, ni las fechas.
+  const mayus = tipo === "text";
   return (
     <div className="flex flex-col gap-1.5">
       <Etiqueta id={id} label={label} ayuda={ayuda} obligatorio={obligatorio} />
@@ -57,8 +62,8 @@ export function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatori
         id={id} type={tipo} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
         className={`text-[14px] border rounded-lg px-3 py-2.5 bg-white transition-colors
           focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/25 focus:border-[#1D6A4A] ${
-          falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
-        }`}
+          mayus ? "uppercase placeholder:normal-case" : ""
+        } ${falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"}`}
       />
     </div>
   );

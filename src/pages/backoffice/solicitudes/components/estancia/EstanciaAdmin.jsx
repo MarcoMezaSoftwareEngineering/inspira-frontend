@@ -7,7 +7,7 @@
 // que un documento esté subido no significa que sirva. Extranjería devuelve
 // los que no cumplen, así que alguien tiene que mirarlos antes de presentar y
 // el asesorado tiene que saber si el suyo pasó.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backofficeApi";
 import AcompanantesAdmin from "./AcompanantesAdmin";
 import GeneradoresEstancia from "./GeneradoresEstancia";
@@ -141,23 +141,42 @@ function Plazos({ plazos }) {
  * salian trece seguidas: gritaba tanto que ya no decia nada. Lo que falta se
  * cuenta arriba, en el rotulo del apartado, y aqui basta con no estar en negro.
  */
-function Campo({ k, v, obligatorio, faltaSet }) {
-  const vacio = !String(v || "").trim();
-  const falta = vacio && obligatorio && faltaSet.has(obligatorio);
+/**
+ * Un dato de la ficha, editable.
+ *
+ * En mayusculas porque asi va al impreso: lo que el asesor ve aqui es lo que
+ * va a salir en el EX-00, y verlo en minusculas mientras el impreso lo pone en
+ * mayusculas invita a «corregir» lo que ya estaba bien. El correo no, que en
+ * mayusculas parece roto y no va a ningun impreso.
+ */
+function CampoEdit({ label, valor, onChange, falta, tipo = "text", opciones }) {
+  const mayus = tipo === "text";
+  const clase = `text-[12.5px] border rounded-lg px-2.5 py-1.5 bg-white w-full min-w-0
+    focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] ${
+    mayus ? "uppercase" : ""
+  } ${falta ? "border-amber-400 bg-amber-50/50" : "border-neutral-300"}`;
+
   return (
-    <div className="min-w-0 flex items-baseline gap-3 py-[7px] border-b border-neutral-100">
-      <p className="text-[11.5px] text-neutral-500 leading-snug w-[44%] shrink-0" title={k}>{k}</p>
-      <p className={`text-[12.5px] leading-snug break-words min-w-0 flex-1 ${
-        !vacio ? "text-neutral-900 font-medium"
-          : falta ? "text-amber-600" : "text-neutral-300"
-      }`}>{!vacio ? v : falta ? "falta" : "—"}</p>
-    </div>
+    <label className="min-w-0 flex flex-col gap-1">
+      <span className="text-[11px] text-neutral-500 leading-tight truncate" title={label}>
+        {label}
+      </span>
+      {opciones ? (
+        <select className={clase} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}>
+          <option value="">—</option>
+          {opciones.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      ) : (
+        <input type={tipo} className={clase} value={valor ?? ""}
+          onChange={(e) => onChange(e.target.value)} />
+      )}
+    </label>
   );
 }
 
-function Seccion({ titulo, campos, faltaSet }) {
+function SeccionEdit({ titulo, campos, faltaSet, borrador, set }) {
   const sinCompletar = campos.filter(
-    ([, v, ob]) => ob && faltaSet.has(ob) && !String(v || "").trim()
+    ([, k, ob]) => ob && faltaSet.has(ob) && !String(borrador[k] || "").trim()
   ).length;
 
   return (
@@ -171,84 +190,120 @@ function Seccion({ titulo, campos, faltaSet }) {
           </span>
         )}
       </div>
-      <div className="rounded-xl border border-neutral-200 bg-white px-3 py-0.5
-        grid grid-cols-1 sm:grid-cols-2 gap-x-7">
-        {campos.map(([k, v, ob]) => (
-          <Campo key={k} k={k} v={v} obligatorio={ob} faltaSet={faltaSet} />
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-2.5">
+        {campos.map(([label, k, ob, extra]) => (
+          <CampoEdit
+            key={k} label={label} valor={borrador[k]} onChange={set(k)}
+            falta={Boolean(ob) && faltaSet.has(ob) && !String(borrador[k] || "").trim()}
+            tipo={extra?.tipo} opciones={extra?.opciones}
+          />
         ))}
       </div>
     </div>
   );
 }
 
+/**
+ * La ficha del asesorado.
+ *
+ * Editable: el asesorado rellena lo suyo, pero quien tiene delante la carta de
+ * admision cuando el la escribe mal es el asesor, y hasta ahora solo podia
+ * mirarla. Se guarda solo, como en el portal.
+ */
 function Datos({ exp, onGuardar }) {
+  const [borrador, setBorrador] = useState(exp);
+  const [tocado, setTocado] = useState(false);
+  const [guardandoDatos, setGuardandoDatos] = useState(false);
+  const version = useRef(0);
+  const pendientes = useRef({});
+
+  const set = (k) => (v) => {
+    version.current += 1;
+    pendientes.current[k] = v;
+    setTocado(true);
+    setBorrador((p) => ({ ...p, [k]: v }));
+  };
+
+  // Se guarda al dejar de escribir. Solo lo tocado, no la ficha entera: dos
+  // personas pueden estar en el mismo expediente y mandar el resto de campos
+  // sobrescribiria lo que la otra acabe de poner.
+  useEffect(() => {
+    if (!tocado) return undefined;
+    const t = setTimeout(async () => {
+      const v = version.current;
+      setGuardandoDatos(true);
+      await onGuardar({ ...pendientes.current });
+      setGuardandoDatos(false);
+      if (version.current === v) { pendientes.current = {}; setTocado(false); }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [borrador, tocado, onGuardar]);
+
   const rev = exp.revision;
   const faltan = rev?.faltan || [];
   const faltaSet = new Set(faltan);
-  const anio = (exp.fecha_nacimiento || "").slice(0, 4);
-  const usaUni = exp.dom_usa_universidad;
+  const anio = (borrador.fecha_nacimiento || "").slice(0, 4);
+  const usaUni = borrador.dom_usa_universidad;
 
-  // [etiqueta, valor, nombre con el que el servidor lo llama al faltar]
+  // [etiqueta, campo, nombre con el que el servidor lo llama al faltar, extra]
   const SECCIONES = [
     ["Identidad", [
-      ["1er apellido", exp.apellido1, "Primer apellido"],
-      ["2º apellido", exp.apellido2, null],
-      ["Nombres", exp.nombres, "Nombres"],
-      ["Sexo", exp.sexo, "Sexo"],
-      ["Fecha de nacimiento", exp.fecha_nacimiento, "Fecha de nacimiento"],
-      ["Lugar de nacimiento", exp.lugar_nacimiento, "Lugar de nacimiento"],
-      ["País de nacimiento", exp.pais_nacimiento, "País de nacimiento"],
-      ["Nacionalidad", exp.nacionalidad, "Nacionalidad"],
-      ["Estado civil", exp.estado_civil, "Estado civil"],
-      ["Padre", exp.nombre_padre, "Nombre del padre"],
-      ["Madre", exp.nombre_madre, "Nombre de la madre"],
+      ["1er apellido", "apellido1", "Primer apellido"],
+      ["2º apellido", "apellido2", null],
+      ["Nombres", "nombres", "Nombres"],
+      ["Sexo", "sexo", "Sexo", { opciones: ["Hombre", "Mujer"] }],
+      ["Fecha de nacimiento", "fecha_nacimiento", "Fecha de nacimiento", { tipo: "date" }],
+      ["Lugar de nacimiento", "lugar_nacimiento", "Lugar de nacimiento"],
+      ["País de nacimiento", "pais_nacimiento", "País de nacimiento"],
+      ["Nacionalidad", "nacionalidad", "Nacionalidad"],
+      ["Estado civil", "estado_civil", "Estado civil",
+        { opciones: ["Soltero/a", "Casado/a", "Viudo/a", "Divorciado/a"] }],
+      ["Padre", "nombre_padre", "Nombre del padre"],
+      ["Madre", "nombre_madre", "Nombre de la madre"],
     ]],
     ["Documentación y contacto", [
-      ["Nº pasaporte", exp.pasaporte_numero, "Nº de pasaporte"],
-      ["DNI", exp.dni, "DNI"],
-      ["Emisión pasaporte", exp.pasaporte_emision, "Fecha de emisión del pasaporte"],
-      ["Caducidad pasaporte", exp.pasaporte_caducidad, "Fecha de caducidad del pasaporte"],
-      ["Correo", exp.correo, "Correo electrónico"],
-      ["Teléfono", exp.telefono, "Teléfono"],
+      ["Nº pasaporte", "pasaporte_numero", "Nº de pasaporte"],
+      ["DNI", "dni", "DNI"],
+      ["Emisión pasaporte", "pasaporte_emision", "Fecha de emisión del pasaporte", { tipo: "date" }],
+      ["Caducidad pasaporte", "pasaporte_caducidad", "Fecha de caducidad del pasaporte", { tipo: "date" }],
+      ["Correo", "correo", "Correo electrónico", { tipo: "email" }],
+      ["Teléfono", "telefono", "Teléfono", { tipo: "tel" }],
     ]],
     ["Fechas", [
-      ["Admisión", exp.fecha_admision, "Fecha de admisión"],
-      ["Llegada a España", exp.fecha_llegada_espana, "Fecha de llegada a España"],
-      ["Inicio de clases", exp.fecha_inicio_clases, "Inicio de clases según la carta de admisión"],
-      ["Fin de estudios", exp.prog_fin, "Fin del programa"],
-      ["Schengen 180 días", exp.viaje_schengen_180 === true ? "Sí, ha viajado"
-        : exp.viaje_schengen_180 === false ? "No" : "", null],
+      ["Admisión", "fecha_admision", "Fecha de admisión", { tipo: "date" }],
+      ["Llegada a España", "fecha_llegada_espana", "Fecha de llegada a España", { tipo: "date" }],
+      ["Inicio de clases", "fecha_inicio_clases",
+        "Inicio de clases según la carta de admisión", { tipo: "date" }],
+      ["Fin de estudios", "prog_fin", "Fin del programa", { tipo: "date" }],
     ]],
     ["Estudios", [
-      ["Universidad", exp.uni_denominacion, "Nombre de la universidad"],
-      ["Programa", exp.prog_denominacion, "Nombre del programa"],
-      ["Tipo de estudios", exp.tipo_estudios, "Tipo de estudios"],
-      ["Tipo de título", exp.tipo_titulo, "Tipo de título"],
-      ["Tipo de máster", exp.master_tipo, null],
-      ["Créditos", exp.creditos, null],
-      ["Modalidad", exp.prog_modalidad, "Modalidad"],
-      ["Código", exp.prog_codigo, null],
+      ["Universidad", "uni_denominacion", "Nombre de la universidad"],
+      ["Programa", "prog_denominacion", "Nombre del programa"],
+      ["Tipo de estudios", "tipo_estudios", "Tipo de estudios",
+        { opciones: ["INTERCAMBIO", "GRADO", "MASTER", "DOCTORADO", "INVESTIGACION"] }],
+      ["Tipo de título", "tipo_titulo", "Tipo de título", { opciones: ["OFICIAL", "PROPIO"] }],
+      ["Tipo de máster", "master_tipo", null,
+        { opciones: ["OFICIAL", "FORMACION_PERMANENTE", "PROPIO"] }],
+      ["Créditos", "creditos", null],
+      ["Modalidad", "prog_modalidad", "Modalidad",
+        { opciones: ["PRESENCIAL", "SEMIPRESENCIAL"] }],
+      ["Código", "prog_codigo", null],
     ]],
     ["Universidad · dirección", [
-      ["Dirección", exp.uni_direccion, null],
-      ["Localidad", exp.uni_localidad, null],
-      ["C.P.", exp.uni_cp, null],
-      ["Provincia", exp.uni_provincia, "Provincia de la universidad"],
-      ["Registro", exp.uni_registro_tipo, null],
-      ["Nº registro", exp.uni_registro_num, null],
+      ["Dirección", "uni_direccion", null],
+      ["Localidad", "uni_localidad", null],
+      ["C.P.", "uni_cp", null],
+      ["Provincia", "uni_provincia", "Provincia de la universidad"],
+      ["Registro", "uni_registro_tipo", null, { opciones: ["RUCT", "RCD", "OTRO"] }],
+      ["Nº registro", "uni_registro_num", null],
     ]],
-    ["Domicilio en España", usaUni ? [
-      ["Domicilio", "Usa el de la universidad", null],
-      ["Localidad", exp.uni_localidad, null],
-      ["C.P.", exp.uni_cp, null],
-      ["Provincia", exp.uni_provincia, null],
-    ] : [
-      ["Calle", exp.dom_direccion, "Domicilio en España"],
-      ["Número", exp.dom_numero, null],
-      ["Piso", exp.dom_piso, null],
-      ["Localidad", exp.dom_localidad, "Localidad en España"],
-      ["C.P.", exp.dom_cp, "Código postal en España"],
-      ["Provincia", exp.dom_provincia, "Provincia en España"],
+    ["Domicilio en España", [
+      ["Calle", "dom_direccion", "Domicilio en España"],
+      ["Número", "dom_numero", null],
+      ["Piso", "dom_piso", null],
+      ["Localidad", "dom_localidad", "Localidad en España"],
+      ["C.P.", "dom_cp", "Código postal en España"],
+      ["Provincia", "dom_provincia", "Provincia en España"],
     ]],
   ];
 
@@ -256,10 +311,15 @@ function Datos({ exp, onGuardar }) {
     <div id="bloque-datos" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
       <Cabecera numero="1" titulo="El asesorado"
         extra={
-          <span className={`ml-auto text-[11.5px] font-semibold ${
-            faltan.length ? "text-amber-600" : "text-[#1D6A4A]"
-          }`}>
-            {faltan.length ? `${faltan.length} datos sin completar` : "✓ datos completos"}
+          <span className="ml-auto flex items-center gap-3">
+            <span className="text-[11px] text-neutral-400">
+              {guardandoDatos ? "guardando…" : tocado ? "sin guardar…" : "se guarda solo"}
+            </span>
+            <span className={`text-[11.5px] font-semibold ${
+              faltan.length ? "text-amber-600" : "text-[#1D6A4A]"
+            }`}>
+              {faltan.length ? `${faltan.length} datos sin completar` : "✓ datos completos"}
+            </span>
           </span>
         } />
 
@@ -279,21 +339,38 @@ function Datos({ exp, onGuardar }) {
       ))}
 
       {SECCIONES.map(([titulo, campos]) => (
-        <Seccion key={titulo} titulo={titulo} campos={campos} faltaSet={faltaSet} />
+        <SeccionEdit key={titulo} titulo={titulo} campos={campos} faltaSet={faltaSet}
+          borrador={borrador} set={set} />
       ))}
 
-      {exp.notas && (
-        <>
-          <div className="flex items-center gap-2 mt-3.5 mb-1.5">
-            <p className="text-[11.5px] font-semibold text-neutral-600">
-              Lo que nos ha contado
-            </p>
-            <span className="flex-1 h-px bg-neutral-100" />
-          </div>
-          <p className="text-[12.5px] text-neutral-700 bg-neutral-50 border border-neutral-200
-            rounded-lg px-3 py-2 leading-relaxed">{exp.notas}</p>
-        </>
-      )}
+      <div className="flex items-center gap-4 flex-wrap mt-3">
+        <label className="flex items-center gap-2 text-[12px] text-neutral-600">
+          <input type="checkbox" className="accent-[#023A4B]"
+            checked={Boolean(usaUni)} onChange={(e) => set("dom_usa_universidad")(e.target.checked)} />
+          Usa la dirección de la universidad
+        </label>
+        <label className="flex items-center gap-2 text-[12px] text-neutral-600">
+          <span>Schengen 180 días</span>
+          <select className={input}
+            value={borrador.viaje_schengen_180 === true ? "si"
+              : borrador.viaje_schengen_180 === false ? "no" : ""}
+            onChange={(e) => set("viaje_schengen_180")(
+              e.target.value === "si" ? true : e.target.value === "no" ? false : null
+            )}>
+            <option value="">Sin preguntar</option>
+            <option value="si">Sí, ha viajado</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="flex items-center gap-2 mt-3.5 mb-1.5">
+        <p className="text-[11.5px] font-semibold text-neutral-600">Lo que nos ha contado</p>
+        <span className="flex-1 h-px bg-neutral-100" />
+      </div>
+      <textarea rows={2} value={borrador.notas ?? ""} onChange={(e) => set("notas")(e.target.value)}
+        placeholder="Un NIE anterior, una estancia previa, cualquier cosa…"
+        className={`${input} w-full`} />
 
       {/* Seguimiento en la sede */}
       <div className="flex items-center gap-2 mt-4 mb-2">

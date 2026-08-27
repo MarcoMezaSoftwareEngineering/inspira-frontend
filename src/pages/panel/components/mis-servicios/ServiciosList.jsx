@@ -36,22 +36,21 @@ function AlertaChip({ tipo, count }) {
 }
 
 function ServicioCard({ s, onVerDetalle }) {
+  // «Borrador» es el primer estado del flujo administrativo genérico. Para un
+  // servicio que el asesor ya dio de alta es falso: está contratado y en
+  // marcha. Cuando el servicio tiene recorrido propio, se enseña el suyo.
   const estadoBadge = badgeEstadoSolicitud(s.estado?.nombre, s.estado?.es_final);
   const r = s.resumen || {};
 
-  // El informe de compatibilidad y la elección de universidades son del máster.
-  // Una estancia por estudios no los tiene, y sacarlos ahí le decía al
-  // asesorado que le faltaba algo que en su proceso no existe.
-  const esEstancia =
-    Number(s.id_tipo_solicitud) === 18 ||
-    String(s.tipo?.nombre || s.titulo || "").toLowerCase().includes("estancia");
-
+  // Qué avisos tocan lo decide el servidor: es él quien sabe qué tiene cada
+  // servicio. Filtrarlo aquí por el nombre obligaba a acordarse en cada
+  // servicio nuevo, y ya falló dos veces.
   const alertas = [];
   if (r.docs_pendientes > 0)   alertas.push({ tipo: "docs_pendientes", count: r.docs_pendientes });
   if (r.docs_observados > 0)   alertas.push({ tipo: "docs_observados", count: r.docs_observados });
   if (!r.formulario_completo)  alertas.push({ tipo: "formulario" });
-  if (!esEstancia && !r.informe_disponible) alertas.push({ tipo: "informe" });
-  if (!esEstancia && !r.eleccion_completa)  alertas.push({ tipo: "eleccion" });
+  if (!r.informe_disponible)   alertas.push({ tipo: "informe" });
+  if (!r.eleccion_completa)    alertas.push({ tipo: "eleccion" });
 
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm hover:shadow-md hover:border-neutral-300 transition-all duration-200 flex flex-col">
@@ -60,7 +59,14 @@ function ServicioCard({ s, onVerDetalle }) {
       <div className="px-5 pt-5 pb-4 flex-1 space-y-3">
         {/* Badges de estado */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className={estadoBadge.classes}>{estadoBadge.text}</span>
+          {r.etapa_propia ? (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#EEF2F8]
+              text-[#1A3557] font-semibold border border-[#1A3557]/20">
+              {r.etapa_propia}
+            </span>
+          ) : (
+            <span className={estadoBadge.classes}>{estadoBadge.text}</span>
+          )}
           {s.tipo?.nombre && (
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#023A4B]/8 text-[#023A4B] font-medium border border-[#023A4B]/15">
               {s.tipo.nombre}

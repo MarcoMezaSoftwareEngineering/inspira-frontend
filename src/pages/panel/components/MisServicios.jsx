@@ -5,6 +5,15 @@ import ServiciosList from "./mis-servicios/ServiciosList";
 import DetalleSolicitud from "./mis-servicios/DetalleSolicitud";
 import DetalleSolicitudVisado from "./mis-servicios/DetalleSolicitudVisado";
 import DetalleSolicitudEstancia from "./mis-servicios/DetalleSolicitudEstancia";
+import DetalleSolicitudModificatoria from "./mis-servicios/DetalleSolicitudModificatoria";
+
+function esModificatoria(s) {
+  if (Number(s?.id_tipo_solicitud) === 20) return true;
+  const txt = String(
+    s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.titulo || s?.nombre_servicio || ""
+  ).toLowerCase();
+  return txt.includes("modificatoria") || txt.includes("modificacion") || txt.includes("modificación");
+}
 
 function esEstancia(s) {
   if (Number(s?.id_tipo_solicitud) === 18) return true;
@@ -80,7 +89,10 @@ export default function MisServicios({ onIrAGuia }) {
         {/* La estancia por estudios es un proceso aparte: ni el formulario del
             visado ni el del master le sirven. Antes caia en el del master, que
             es el que sale por defecto para todo lo que no es visado. */}
-        {esEstancia(seleccionada) ? (
+        {esModificatoria(seleccionada) ? (
+          <DetalleSolicitudModificatoria
+            solicitudBase={seleccionada} onVolver={manejarVolverLista} />
+        ) : esEstancia(seleccionada) ? (
           <DetalleSolicitudEstancia
             solicitudBase={seleccionada} onVolver={manejarVolverLista} onIrAGuia={onIrAGuia} />
         ) : esVisado(seleccionada) ? (

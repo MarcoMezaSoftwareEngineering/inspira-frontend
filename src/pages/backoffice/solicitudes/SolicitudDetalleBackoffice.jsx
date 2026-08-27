@@ -14,6 +14,7 @@ import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
 import VisaDeclaracionAdmin from "./components/visa/VisaDeclaracionAdmin";
 import VisaImpresoAdmin from "./components/visa/VisaImpresoAdmin";
 import EstanciaAdmin from "./components/estancia/EstanciaAdmin";
+import ModificatoriaAdmin from "./components/modificatoria/ModificatoriaAdmin";
 import VisaRecordatoriosAdmin from "./components/visa/VisaRecordatoriosAdmin";
 import VisaFlujoInternoAdmin from "./components/visa/VisaFlujoInternoAdmin";
 import VisaEstadoVisadoAdmin from "./components/visa/VisaEstadoVisadoAdmin";
@@ -139,6 +140,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const isVisado = bloquesServidor.some((b) => b.id === "solvencia");
   // La estancia por estudios no es una variante del visado ni del master: su
   // panel entero es otro, asi que se detecta aqui y se muestra el suyo.
+  const isModificatoria =
+    Number(detalle?.id_tipo_solicitud) === 20 ||
+    /modificatoria|modificaci/i.test(String(detalle?.tipo?.nombre || detalle?.titulo || ""));
   const isEstancia =
     Number(detalle?.id_tipo_solicitud) === 18 ||
     String(detalle?.tipo?.nombre || detalle?.titulo || "").toLowerCase().includes("estancia");
@@ -155,6 +159,16 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const bloques = useMemo(() => {
     // La estancia lleva su propia navegacion dentro del panel; la lista
     // lateral del master aqui no significa nada.
+    if (isModificatoria) {
+      return [
+        { id: "flujo",       numero: "0", label: "Estado del expediente", estado: "pendiente" },
+        { id: "datos",       numero: "1", label: "Datos del expediente",  estado: "pendiente" },
+        { id: "documentos",  numero: "2", label: "Documentos",            estado: "pendiente" },
+        { id: "carpeta",     numero: "3", label: "Cerrar carpeta",        estado: "pendiente" },
+        { id: "generadores", numero: "5", label: "Cartas",               estado: "pendiente" },
+        { id: "extranjeria", numero: "4", label: "Extranjeria",           estado: "pendiente" },
+      ];
+    }
     if (isEstancia) {
       const doc = detalle?.estancia_docs;
       return [
@@ -189,7 +203,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       { id: "cierre",      numero: "7", label: "Cierre del expediente", estado: hecho(visaExp?.cierre_estado === "CERRADO") },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEstancia, isVisado, bloquesServidor, visaExp, visaSesiones]);
+  }, [isModificatoria, isEstancia, isVisado, bloquesServidor, visaExp, visaSesiones]);
 
   // Cargar expediente, sesiones y documentos entregables del visado
   useEffect(() => {
@@ -469,7 +483,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           {/* La estancia por estudios NO comparte bloques con el master ni con
               el visado: ni informe de IA, ni eleccion de universidades, ni
               postulaciones. Su panel es todo lo que hay. */}
-          {isEstancia ? (
+          {isModificatoria ? (
+            <ModificatoriaAdmin idSolicitud={detalle?.id_solicitud} />
+          ) : isEstancia ? (
             <EstanciaAdmin idSolicitud={detalle?.id_solicitud} />
           ) : (
           <>

@@ -14,6 +14,12 @@ function AlertaChip({ tipo, count }) {
       {count} doc{count > 1 ? "s" : ""}. observado{count > 1 ? "s" : ""}
     </span>
   );
+  if (tipo === "datos") return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+      {count} dato{count > 1 ? "s" : ""} por completar
+    </span>
+  );
   if (tipo === "formulario") return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
@@ -46,6 +52,7 @@ function ServicioCard({ s, onVerDetalle }) {
   // servicio. Filtrarlo aquí por el nombre obligaba a acordarse en cada
   // servicio nuevo, y ya falló dos veces.
   const alertas = [];
+  if (r.datos_faltan > 0)      alertas.push({ tipo: "datos", count: r.datos_faltan });
   if (r.docs_pendientes > 0)   alertas.push({ tipo: "docs_pendientes", count: r.docs_pendientes });
   if (r.docs_observados > 0)   alertas.push({ tipo: "docs_observados", count: r.docs_observados });
   if (!r.formulario_completo)  alertas.push({ tipo: "formulario" });

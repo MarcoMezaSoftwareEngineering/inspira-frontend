@@ -108,7 +108,6 @@ function Aviso({ titulo, tono = "naranja", children }) {
 
 /* ── La ventana de presentación ──────────────────────────────────────────── */
 
-const MES = 30.44; // días, para el cálculo aproximado
 
 function sumarMeses(iso, meses) {
   const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -270,28 +269,59 @@ const REQUISITOS_EMPRESA = [
     "Con tu título, tu formación o tu experiencia. Si la profesión está regulada, además el título homologado y la colegiación."],
 ];
 
+/**
+ * Lo que se le va a pedir, en el mismo orden y con el mismo nombre que en su
+ * portal. Si aquí dice una cosa y allí se le pide otra, la guía estorba.
+ */
 const DOCS_TUYOS = [
+  ["doc-precontrato", "Precontrato de trabajo",
+    "Firmado por las dos partes. Salario igual o superior al SMI, jornada de 40 horas y duración de un año o indefinido. Es el documento que decide el expediente."],
+  ["doc-notas", "Certificado de notas",
+    "Con los estudios ya finalizados. No vale que te falte una asignatura."],
+  ["doc-tie", "Último TIE o resolución",
+    "Tu tarjeta actual, o la resolución de la autorización si aún no la tienes."],
   ["doc-pasaporte", "Pasaporte completo",
-    "Todas las páginas, nítidas y actualizadas. Tengan sellos o no."],
-  ["doc-titulo", "Tu título o certificado de estudios",
-    "El de la formación por la que te dieron la estancia."],
-  ["doc-tie", "Tu TIE",
-    "No es obligatorio según la hoja oficial, pero conviene adjuntarlo."],
-  ["doc-beca", "Certificado de no haber sido becado",
-    "Uno de la AECID (España) y otro de las autoridades de tu país, apostillado y traducido. Si tu país no lo emite, se sustituye por un certificado del consulado más una declaración jurada tuya."],
-  ["doc-capacit", "Lo que acredite tu capacitación",
-    "Título, certificados de formación, cartas de experiencia. Traducidos por traductor jurado si están en otro idioma."],
+    "Todas las páginas, de la primera a la última, en un único PDF."],
+  ["doc-beca-es", "No haber sido becado · España",
+    "Se pide por correo a la AECID desde tu propia dirección. Suele demorar unos 3 días."],
+  ["doc-beca-pe", "No haber sido becado · Perú",
+    "Se solicita en línea en Pronabec, con tu DNI y tus datos."],
   ["doc-penales", "Antecedentes penales",
-    "Apostillados y recientes."],
+    "Apostillados."],
+  ["doc-cv", "Currículum",
+    "Al día, con toda tu experiencia."],
+  ["doc-memoria", "Memoria descriptiva de funciones",
+    "Qué vas a hacer en el puesto, con detalle. La preparas con tu empresa."],
+  ["doc-padron", "Empadronamiento",
+    "El de tu domicilio actual en España."],
+  ["doc-cualif", "Cualificación profesional previa",
+    "Títulos o experiencia que acrediten que puedes ocupar ese puesto."],
 ];
 
 const DOCS_EMPRESA = [
-  ["emd-contrato", "El contrato de trabajo firmado"],
-  ["emd-cif", "CIF de la empresa"],
-  ["emd-repr", "Documento que acredite al representante legal",
-    "La escritura notarial, salvo que la representación esté inscrita en el Registro Mercantil o se firme con certificado digital de persona jurídica."],
-  ["emd-solvencia", "Solvencia de la empresa",
-    "Última declaración del Impuesto de Sociedades, o las autoliquidaciones de IVA de los cuatro últimos trimestres."],
+  ["emd-nif", "Tarjeta acreditativa del NIF",
+    "La descarga en línea en la sede de la Agencia Tributaria."],
+  ["emd-escritura", "Escritura de constitución",
+    "Copia."],
+  ["emd-repr", "Acreditación del representante legal",
+    "Que demuestre que quien firma puede firmar por la empresa."],
+  ["emd-autoriza", "Autorización del representante legal a Inspira",
+    "Para que podamos presentar el trámite en su nombre. Se la preparamos nosotros."],
+  ["emd-modelo200", "Modelo 200 · última declaración",
+    "Se obtiene en la web de la Agencia Tributaria. Acredita la solvencia de la empresa."],
+  ["emd-ss", "Al corriente con la Seguridad Social",
+    "Certificado de estar al día en los pagos, de la web de la Seguridad Social."],
+];
+
+/**
+ * Las dos tasas.
+ *
+ * Van con su importe y con el aviso de no adelantarse: se pagan cuando
+ * Extranjería las requiere, y pagarlas antes no acelera nada.
+ */
+const TASAS = [
+  ["Tasa 062", "203,84 €", "La de la autorización de trabajo."],
+  ["Tasa 052", "10,94 €", "La de residencia. Sólo se puede pagar si ya tienes NIE."],
 ];
 
 const CLAUSULA =
@@ -414,7 +444,7 @@ export default function GuiaModificatoria() {
 
       {/* Documentos tuyos */}
       <Seccion numero="4" icono="📄" titulo="Documentos que aportas tú"
-        subtitulo="Súbelos en «Ver servicio»" avance={cuenta(DOCS_TUYOS)}>
+        subtitulo="Los once que subes tú, en «Ver servicio»" avance={cuenta(DOCS_TUYOS)}>
         {lista(DOCS_TUYOS)}
         <Aviso tono="naranja" titulo="Traducción y legalización">
           Todo documento público extranjero va <b>legalizado o apostillado y traducido</b> al
@@ -424,11 +454,30 @@ export default function GuiaModificatoria() {
 
       {/* Documentos de la empresa */}
       <Seccion numero="5" icono="🏛" titulo="Documentos que aporta tu empresa"
-        subtitulo="Pídeselos cuanto antes: no dependen de ti" avance={cuenta(DOCS_EMPRESA)}>
+        subtitulo="Los seis que no dependen de ti. Pídeselos hoy" avance={cuenta(DOCS_EMPRESA)}>
         {lista(DOCS_EMPRESA)}
         <Aviso tono="azul" titulo="Un consejo">
           Estos son los que más demoran, porque hay que pedírselos a la gestoría de la empresa
           y no a ti. Mándales la lista <b>el mismo día</b> que sepas que te van a contratar.
+        </Aviso>
+      </Seccion>
+
+      {/* Las tasas */}
+      <Seccion numero="5b" icono="€" titulo="Las dos tasas"
+        subtitulo="No las pagues antes de tiempo">
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-3">
+          {TASAS.map(([nombre, importe, detalle]) => (
+            <div key={nombre} className="flex items-baseline gap-2 flex-wrap mb-2 last:mb-0">
+              <span className="text-[13.5px] font-bold text-neutral-900">{nombre}</span>
+              <span className="text-[13.5px] font-bold text-amber-700">{importe}</span>
+              <span className="text-[12.5px] text-neutral-600 w-full">{detalle}</span>
+            </div>
+          ))}
+        </div>
+        <Aviso tono="rojo" titulo="Espera a que te lo digamos">
+          Se abonan <b>cuando Extranjería las requiere</b>, no antes. Pagarlas por adelantado
+          no acelera nada y, si el expediente cambia, puedes acabar pagando una tasa que no
+          tocaba. Te avisamos cuando sea el momento.
         </Aviso>
       </Seccion>
 

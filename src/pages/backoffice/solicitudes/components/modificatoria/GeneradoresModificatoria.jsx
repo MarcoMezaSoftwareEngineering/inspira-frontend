@@ -1,4 +1,8 @@
-// Cartas de representación de la modificatoria.
+// Los impresos de la modificatoria: el EX-03 y las dos cartas.
+//
+// El EX-03 se rellena con lo que ya está en el expediente, así que no hay que
+// copiar nada a mano: el error clásico de estos impresos es un apellido mal
+// tecleado al pasarlo del portal al PDF.
 //
 // Son dos, y no una: en este trámite hay dos partes que tienen que autorizar a
 // Inspira. El asesorado otorga la representación de su propio expediente; la
@@ -8,6 +12,9 @@
 // Las dos las firma a mano quien las otorga, así que se deja el espacio.
 import { useState } from "react";
 import { boFetch } from "../../../../../services/backofficeApi";
+import {
+  valoresEX03, casillasEX03, faltaParaEX03, casillasPendientes,
+} from "./ex03";
 
 /** La letrada que representa. Es siempre la misma; lo que cambia es quién otorga. */
 const REPRESENTANTE = {
@@ -18,6 +25,48 @@ const REPRESENTANTE = {
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
   "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+const RUTA_EX03 = "/formularios/ex03-modificatoria.pdf";
+
+/**
+ * El EX-03, relleno.
+ *
+ * La plantilla pide una fuente que no lleva incrustada; sin pasarla, pdf-lib
+ * cae en otra y el impreso sale con dos tipografías distintas.
+ */
+async function construirEX03(exp) {
+  const [{ PDFDocument, StandardFonts }, resp] = await Promise.all([
+    import("pdf-lib"),
+    fetch(RUTA_EX03),
+  ]);
+  if (!resp.ok) throw new Error("No se encontró la plantilla del EX-03");
+
+  const pdf = await PDFDocument.load(await resp.arrayBuffer());
+  const form = pdf.getForm();
+  const times = await pdf.embedFont(StandardFonts.TimesRoman);
+
+  for (const [campo, valor] of Object.entries(valoresEX03(exp))) {
+    if (!valor) continue;
+    try {
+      const c = form.getTextField(campo);
+      c.setText(String(valor));
+      c.setFontSize(9);
+    } catch { /* casilla ausente en esta versión de la plantilla */ }
+  }
+  for (const casilla of casillasEX03(exp)) {
+    try { form.getCheckBox(casilla).check(); } catch { /* idem */ }
+  }
+  for (const c of form.getFields()) {
+    try { c.updateAppearances?.(times); } catch { /* no todos aceptan fuente */ }
+  }
+  form.updateFieldAppearances(times);
+
+  const apellido = (exp.apellido1 || "solicitud").split(" ")[0].toLowerCase();
+  return {
+    blob: new Blob([await pdf.save()], { type: "application/pdf" }),
+    nombre: `EX03-${apellido}.pdf`,
+  };
+}
 
 function hoyLargo() {
   const d = new Date();
@@ -233,16 +282,43 @@ export default function GeneradoresModificatoria({ id, exp, onArchivado }) {
     !exp.emp_nif && "NIF",
   ].filter(Boolean);
 
+  // Las que el impreso tiene y el expediente no puede decidir: se enseñan aquí
+  // para que se repasen antes de firmar, no para que las descubra extranjería.
+  const pendientes = casillasPendientes(exp);
+
   return (
     <div id="bloque-generadores" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <span className="shrink-0 w-7 h-7 rounded-lg grid place-items-center text-[12px]
           font-bold text-white font-serif" style={{ background: "#023A4B" }}>5</span>
-        <span className="text-[13.5px] font-bold text-[#1A3557]">Cartas de representación</span>
-        <span className="ml-auto text-[11.5px] text-neutral-400">a nombre de {REPRESENTANTE.nombre}</span>
+        <span className="text-[13.5px] font-bold text-[#1A3557]">Documentos que generamos</span>
+        <span className="ml-auto text-[11.5px] text-neutral-400">con los datos del expediente</span>
       </div>
 
       <div className="space-y-2">
+        <Generador
+          id={id} exp={exp} faltan={faltaParaEX03(exp)} onArchivado={onArchivado}
+          construir={construirEX03} ranura="formulario"
+          titulo="Formulario EX-03"
+          descripcion="Solicitud de residencia temporal y trabajo por cuenta ajena, con los datos del asesorado, de la empresa y del contrato."
+        />
+
+        {pendientes.length > 0 && (
+          <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8]/60 px-3.5 py-3">
+            <p className="text-[11.5px] font-bold text-[#1A3557] mb-1.5">
+              Casillas del EX-03 que hay que decidir a mano
+            </p>
+            <ul className="space-y-1">
+              {pendientes.map((t) => (
+                <li key={t} className="text-[11.5px] text-neutral-600 leading-relaxed flex gap-2">
+                  <span className="shrink-0 text-neutral-400">·</span>
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <Generador
           id={id} exp={exp} faltan={faltaAsesorado} onArchivado={onArchivado}
           construir={construirCartaAsesorado} ranura="otros_asesor"
@@ -258,7 +334,8 @@ export default function GeneradoresModificatoria({ id, exp, onArchivado }) {
       </div>
 
       <p className="text-[11px] text-neutral-400 leading-relaxed mt-3">
-        Las dos salen de los datos del expediente. Revísalas antes de mandarlas a firmar.
+        Los tres salen de los datos del expediente: si algo está mal escrito allí, saldrá mal
+        aquí. Revísalos antes de presentarlos o de mandarlos a firmar.
       </p>
     </div>
   );

@@ -12,7 +12,7 @@
 // que un documento esté subido no significa que sirva. Extranjería devuelve
 // los que no cumplen, así que alguien tiene que mirarlos antes de presentar y
 // el asesorado tiene que saber si el suyo pasó.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backofficeApi";
 import GeneradoresModificatoria from "./GeneradoresModificatoria";
 
@@ -152,23 +152,40 @@ function Condiciones({ exp, revision }) {
  * salian trece seguidas: gritaba tanto que ya no decia nada. Lo que falta se
  * cuenta arriba, en el rotulo del apartado, y aqui basta con no estar en negro.
  */
-function Campo({ k, v, obligatorio, faltaSet }) {
-  const vacio = !String(v || "").trim();
-  const falta = vacio && obligatorio && faltaSet.has(obligatorio);
+/**
+ * Un dato de la ficha, editable.
+ *
+ * En mayusculas porque asi va al impreso. El correo no, que en mayusculas
+ * parece roto y no va a ningun formulario.
+ */
+function CampoEdit({ label, valor, onChange, falta, tipo = "text", opciones }) {
+  const mayus = tipo === "text";
+  const clase = `text-[12.5px] border rounded-lg px-2.5 py-1.5 bg-white w-full min-w-0
+    focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] ${
+    mayus ? "uppercase" : ""
+  } ${falta ? "border-amber-400 bg-amber-50/50" : "border-neutral-300"}`;
+
   return (
-    <div className="min-w-0 flex items-baseline gap-3 py-[7px] border-b border-neutral-100">
-      <p className="text-[11.5px] text-neutral-500 leading-snug w-[44%] shrink-0" title={k}>{k}</p>
-      <p className={`text-[12.5px] leading-snug break-words min-w-0 flex-1 ${
-        !vacio ? "text-neutral-900 font-medium"
-          : falta ? "text-amber-600" : "text-neutral-300"
-      }`}>{!vacio ? v : falta ? "falta" : "—"}</p>
-    </div>
+    <label className="min-w-0 flex flex-col gap-1">
+      <span className="text-[11px] text-neutral-500 leading-tight truncate" title={label}>
+        {label}
+      </span>
+      {opciones ? (
+        <select className={clase} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}>
+          <option value="">—</option>
+          {opciones.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      ) : (
+        <input type={tipo} className={clase} value={valor ?? ""}
+          onChange={(e) => onChange(e.target.value)} />
+      )}
+    </label>
   );
 }
 
-function Seccion({ titulo, campos, faltaSet }) {
+function SeccionEdit({ titulo, campos, faltaSet, borrador, set }) {
   const sinCompletar = campos.filter(
-    ([, v, ob]) => ob && faltaSet.has(ob) && !String(v || "").trim()
+    ([, k, ob]) => ob && faltaSet.has(ob) && !String(borrador[k] || "").trim()
   ).length;
 
   return (
@@ -182,83 +199,120 @@ function Seccion({ titulo, campos, faltaSet }) {
           </span>
         )}
       </div>
-      <div className="rounded-xl border border-neutral-200 bg-white px-3 py-0.5
-        grid grid-cols-1 sm:grid-cols-2 gap-x-7">
-        {campos.map(([k, v, ob]) => (
-          <Campo key={k} k={k} v={v} obligatorio={ob} faltaSet={faltaSet} />
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-2.5">
+        {campos.map(([label, k, ob, extra]) => (
+          <CampoEdit
+            key={k} label={label} valor={borrador[k]} onChange={set(k)}
+            falta={Boolean(ob) && faltaSet.has(ob) && !String(borrador[k] || "").trim()}
+            tipo={extra?.tipo} opciones={extra?.opciones}
+          />
         ))}
       </div>
     </div>
   );
 }
 
+/**
+ * La ficha del expediente.
+ *
+ * Editable: el asesorado rellena lo suyo, pero los datos de la empresa y del
+ * precontrato llegan casi siempre por otro lado —los manda la empresa—, y
+ * quien los tiene delante es el asesor. Se guarda solo, como en el portal.
+ */
 function Datos({ exp, onGuardar }) {
+  const [borrador, setBorrador] = useState(exp);
+  const [tocado, setTocado] = useState(false);
+  const [guardandoDatos, setGuardandoDatos] = useState(false);
+  const version = useRef(0);
+  const pendientes = useRef({});
+
+  const set = (k) => (v) => {
+    version.current += 1;
+    pendientes.current[k] = v;
+    setTocado(true);
+    setBorrador((p) => ({ ...p, [k]: v }));
+  };
+
+  // Solo lo tocado, no la ficha entera: dos personas pueden estar en el mismo
+  // expediente y mandar el resto sobrescribiria lo que la otra acabe de poner.
+  useEffect(() => {
+    if (!tocado) return undefined;
+    const t = setTimeout(async () => {
+      const v = version.current;
+      setGuardandoDatos(true);
+      await onGuardar({ ...pendientes.current });
+      setGuardandoDatos(false);
+      if (version.current === v) { pendientes.current = {}; setTocado(false); }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [borrador, tocado, onGuardar]);
+
   const rev = exp.revision;
   const faltan = rev?.faltan || [];
   const faltaSet = new Set(faltan);
-  const anio = (exp.fecha_nacimiento || "").slice(0, 4);
+  const anio = (borrador.fecha_nacimiento || "").slice(0, 4);
 
-  // [etiqueta, valor, nombre con el que el servidor lo llama al faltar]
+  // [etiqueta, campo, nombre con el que el servidor lo llama al faltar, extra]
   const SECCIONES = [
     ["La persona", [
-      ["1er apellido", exp.apellido1, "Primer apellido"],
-      ["2º apellido", exp.apellido2, null],
-      ["Nombres", exp.nombres, "Nombres"],
-      ["Sexo", exp.sexo, "Sexo"],
-      ["Pasaporte", exp.pasaporte_numero, "Nº de pasaporte"],
-      ["NIE", exp.nie, "NIE"],
-      ["Fecha de nacimiento", exp.fecha_nacimiento, "Fecha de nacimiento"],
-      ["Lugar de nacimiento", exp.lugar_nacimiento, "Lugar de nacimiento"],
-      ["País de nacimiento", exp.pais_nacimiento, "País de nacimiento"],
-      ["Nacionalidad", exp.nacionalidad, "Nacionalidad"],
-      ["Estado civil", exp.estado_civil, "Estado civil"],
-      ["Padre", exp.nombre_padre, "Nombre del padre"],
-      ["Madre", exp.nombre_madre, "Nombre de la madre"],
-      ["Teléfono", exp.telefono, "Teléfono"],
-      ["Correo", exp.correo, "Correo electrónico"],
-      ["Hijos escolarizados", exp.hijos_escolarizacion === true ? "Sí"
-        : exp.hijos_escolarizacion === false ? "No" : "", null],
+      ["1er apellido", "apellido1", "Primer apellido"],
+      ["2º apellido", "apellido2", null],
+      ["Nombres", "nombres", "Nombres"],
+      ["Sexo", "sexo", "Sexo", { opciones: ["Hombre", "Mujer", "X"] }],
+      ["Pasaporte", "pasaporte_numero", "Nº de pasaporte"],
+      ["NIE", "nie", "NIE"],
+      ["Fecha de nacimiento", "fecha_nacimiento", "Fecha de nacimiento", { tipo: "date" }],
+      ["Lugar de nacimiento", "lugar_nacimiento", "Lugar de nacimiento"],
+      ["País de nacimiento", "pais_nacimiento", "País de nacimiento"],
+      ["Nacionalidad", "nacionalidad", "Nacionalidad"],
+      ["Estado civil", "estado_civil", "Estado civil",
+        { opciones: ["Soltero/a", "Casado/a", "Viudo/a", "Divorciado/a", "Separado/a"] }],
+      ["Padre", "nombre_padre", "Nombre del padre"],
+      ["Madre", "nombre_madre", "Nombre de la madre"],
+      ["Teléfono", "telefono", "Teléfono", { tipo: "tel" }],
+      ["Correo", "correo", "Correo electrónico", { tipo: "email" }],
     ]],
     ["Su domicilio", [
-      ["Calle", exp.dom_direccion, "Domicilio en España"],
-      ["Número", exp.dom_numero, null],
-      ["Piso", exp.dom_piso, null],
-      ["Localidad", exp.dom_localidad, "Localidad"],
-      ["C.P.", exp.dom_cp, "Código postal"],
-      ["Provincia", exp.dom_provincia, "Provincia"],
+      ["Calle", "dom_direccion", "Domicilio en España"],
+      ["Número", "dom_numero", null],
+      ["Piso", "dom_piso", null],
+      ["Localidad", "dom_localidad", "Localidad"],
+      ["C.P.", "dom_cp", "Código postal"],
+      ["Provincia", "dom_provincia", "Provincia"],
     ]],
     ["La empresa", [
-      ["Razón social", exp.emp_razon_social, "Razón social de la empresa"],
-      ["NIF", exp.emp_nif, "NIF de la empresa"],
-      ["Actividad", exp.emp_actividad, "Actividad de la empresa"],
-      ["CNAE", exp.emp_cnae, null],
-      ["Domicilio social", exp.emp_direccion, "Domicilio social"],
-      ["Localidad", exp.emp_localidad, "Localidad de la empresa"],
-      ["C.P.", exp.emp_cp, "C.P. de la empresa"],
-      ["Provincia", exp.emp_provincia, "Provincia de la empresa"],
-      ["Teléfono", exp.emp_telefono, null],
-      ["Correo", exp.emp_correo, null],
+      ["Razón social", "emp_razon_social", "Razón social de la empresa"],
+      ["NIF", "emp_nif", "NIF de la empresa"],
+      ["Actividad", "emp_actividad", "Actividad de la empresa"],
+      ["CNAE", "emp_cnae", null],
+      ["Domicilio social", "emp_direccion", "Domicilio social"],
+      ["Localidad", "emp_localidad", "Localidad de la empresa"],
+      ["C.P.", "emp_cp", "C.P. de la empresa"],
+      ["Provincia", "emp_provincia", "Provincia de la empresa"],
+      ["Teléfono", "emp_telefono", null, { tipo: "tel" }],
+      ["Correo", "emp_correo", null, { tipo: "email" }],
     ]],
     ["El contrato", [
-      ["Puesto", exp.con_puesto, "Puesto de trabajo"],
-      ["Retribución", exp.con_retribucion, "Retribución bruta anual"],
-      ["Jornada", exp.con_jornada_horas, "Horas de jornada"],
-      ["Duración", exp.con_duracion, "Duración del contrato"],
-      ["Grupo cotización", exp.con_grupo_cotizacion, null],
-      ["CNO SEPE", exp.con_cno_sepe, null],
-      ["Cód. convenio", exp.con_codigo_convenio, null],
-      ["Convenio", exp.con_denom_convenio, null],
-      ["Cód. contrato", exp.con_codigo_contrato, null],
-      ["Denom. contrato", exp.con_denom_contrato, null],
-      ["Cuenta cotización", exp.con_cuenta_cotizacion, null],
+      ["Puesto", "con_puesto", "Puesto de trabajo"],
+      ["Retribución bruta anual", "con_retribucion", "Retribución bruta anual"],
+      ["Jornada (horas)", "con_jornada_horas", "Horas de jornada"],
+      ["Duración", "con_duracion", "Duración del contrato",
+        { opciones: ["1 año", "Indefinido"] }],
+      ["Grupo cotización", "con_grupo_cotizacion", null],
+      ["CNO SEPE", "con_cno_sepe", null],
+      ["Cód. convenio", "con_codigo_convenio", null],
+      ["Convenio", "con_denom_convenio", null],
+      ["Cód. contrato", "con_codigo_contrato", null],
+      ["Denom. contrato", "con_denom_contrato", null],
+      ["Cuenta cotización", "con_cuenta_cotizacion", null],
     ]],
     ["Centro de trabajo", [
-      ["Dirección", exp.con_centro_direccion, "Dirección del centro de trabajo"],
-      ["Número", exp.con_centro_numero, null],
-      ["Piso", exp.con_centro_piso, null],
-      ["Localidad", exp.con_centro_localidad, "Localidad del centro de trabajo"],
-      ["C.P.", exp.con_centro_cp, null],
-      ["Provincia", exp.con_centro_provincia, "Provincia del centro de trabajo"],
+      ["Dirección", "con_centro_direccion", "Dirección del centro de trabajo"],
+      ["Número", "con_centro_numero", null],
+      ["Piso", "con_centro_piso", null],
+      ["Localidad", "con_centro_localidad", "Localidad del centro de trabajo"],
+      ["C.P.", "con_centro_cp", null],
+      ["Provincia", "con_centro_provincia", "Provincia del centro de trabajo"],
     ]],
   ];
 
@@ -266,15 +320,20 @@ function Datos({ exp, onGuardar }) {
     <div id="bloque-datos" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
       <Cabecera numero="1" titulo="El expediente"
         extra={
-          <span className={`ml-auto text-[11.5px] font-semibold ${
-            faltan.length ? "text-amber-600" : "text-[#1D6A4A]"
-          }`}>
-            {faltan.length ? `${faltan.length} datos sin completar` : "✓ datos completos"}
+          <span className="ml-auto flex items-center gap-3">
+            <span className="text-[11px] text-neutral-400">
+              {guardandoDatos ? "guardando…" : tocado ? "sin guardar…" : "se guarda solo"}
+            </span>
+            <span className={`text-[11.5px] font-semibold ${
+              faltan.length ? "text-amber-600" : "text-[#1D6A4A]"
+            }`}>
+              {faltan.length ? `${faltan.length} datos sin completar` : "✓ datos completos"}
+            </span>
           </span>
         } />
 
       {/* Las condiciones del contrato, primero: si alguna falla, lo deniegan */}
-      <Condiciones exp={exp} revision={rev} />
+      <Condiciones exp={borrador} revision={rev} />
 
       {rev?.avisos?.map((a, i) => (
         <p key={i} className="text-[12px] text-red-700 bg-red-50 border border-red-200
@@ -282,21 +341,31 @@ function Datos({ exp, onGuardar }) {
       ))}
 
       {SECCIONES.map(([titulo, campos]) => (
-        <Seccion key={titulo} titulo={titulo} campos={campos} faltaSet={faltaSet} />
+        <SeccionEdit key={titulo} titulo={titulo} campos={campos} faltaSet={faltaSet}
+          borrador={borrador} set={set} />
       ))}
 
-      {exp.notas && (
-        <>
-          <div className="flex items-center gap-2 mt-3.5 mb-1.5">
-            <p className="text-[11.5px] font-semibold text-neutral-600">
-              Lo que nos ha contado
-            </p>
-            <span className="flex-1 h-px bg-neutral-100" />
-          </div>
-          <p className="text-[12.5px] text-neutral-700 bg-neutral-50 border border-neutral-200
-            rounded-lg px-3 py-2 leading-relaxed">{exp.notas}</p>
-        </>
-      )}
+      <label className="flex items-center gap-2 text-[12px] text-neutral-600 mt-3">
+        <span>Hijos escolarizados</span>
+        <select className={input}
+          value={borrador.hijos_escolarizacion === true ? "si"
+            : borrador.hijos_escolarizacion === false ? "no" : ""}
+          onChange={(e) => set("hijos_escolarizacion")(
+            e.target.value === "si" ? true : e.target.value === "no" ? false : null
+          )}>
+          <option value="">Sin preguntar</option>
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <div className="flex items-center gap-2 mt-3.5 mb-1.5">
+        <p className="text-[11.5px] font-semibold text-neutral-600">Lo que nos ha contado</p>
+        <span className="flex-1 h-px bg-neutral-100" />
+      </div>
+      <textarea rows={2} value={borrador.notas ?? ""} onChange={(e) => set("notas")(e.target.value)}
+        placeholder="Cualquier cosa que convenga tener anotada…"
+        className={`${input} w-full`} />
 
       {/* Seguimiento en la sede */}
       <div className="flex items-center gap-2 mt-4 mb-2">

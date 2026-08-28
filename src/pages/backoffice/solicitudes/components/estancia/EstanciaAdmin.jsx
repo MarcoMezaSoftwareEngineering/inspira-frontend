@@ -619,6 +619,16 @@ function Documentos({ id, docs, onCambio }) {
   const [viendo, setViendo] = useState(null);
   const [abriendoCarpeta, setAbriendoCarpeta] = useState(false);
 
+  /** Aprobar u observar sin salir del documento, que es como se revisa. */
+  async function revisarDesdeVisor(archivo, estado, observacion = null) {
+    const r = await boPATCH(
+      `/backoffice/solicitudes/${id}/estancia/documentos/archivo/${archivo.id_documento}/revision`,
+      { estado, observacion },
+    );
+    if (r?.ok) onCambio();
+    else dialog.toast("No se pudo guardar la revisión", "error");
+  }
+
   /**
    * Abre en Drive la carpeta del asesorado.
    *
@@ -720,6 +730,9 @@ function Documentos({ id, docs, onCambio }) {
           ruta={`/backoffice/solicitudes/${id}/estancia/documentos/archivo/${viendo.id_documento}`}
           nombre={viendo.nombre}
           mime={viendo.mime}
+          tamano={viendo.tamano}
+          onAprobar={() => revisarDesdeVisor(viendo, "APROBADO")}
+          onObservar={(motivo) => revisarDesdeVisor(viendo, "OBSERVADO", motivo)}
           onCerrar={() => setViendo(null)}
         />
       )}

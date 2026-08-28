@@ -375,6 +375,7 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
           ruta={`/solicitudes/${id}/modificatoria/documentos/archivo/${viendo.id_documento}`}
           nombre={viendo.nombre}
           mime={viendo.mime}
+          tamano={viendo.tamano}
           onCerrar={() => setViendo(null)}
         />
       )}

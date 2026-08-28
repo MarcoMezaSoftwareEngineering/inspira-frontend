@@ -22,8 +22,24 @@ function tipoDe(mime, nombre) {
   return "otro";
 }
 
-export default function VisorArchivo({ ruta, nombre, mime, interno = false, onCerrar }) {
+/** «213.9 KB». Sin tamaño no se pinta nada, en vez de un «—» que no dice nada. */
+function comoPesa(bytes) {
+  if (!bytes) return null;
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/**
+ * @param onAprobar  si se pasa, sale el botón: revisar sin cerrar el documento,
+ *                   que es como se revisa de verdad. Solo para el asesor.
+ * @param onObservar idem, y pide el motivo que verá el asesorado.
+ */
+export default function VisorArchivo({
+  ruta, nombre, mime, tamano, interno = false, onCerrar, onAprobar, onObservar,
+}) {
   const tipo = tipoDe(mime, nombre);
+  const peso = comoPesa(tamano);
 
   // Un formato que no sabemos pintar no tiene nada que cargar: arranca ya
   // resuelto, en vez de poner el estado a false dentro del efecto.
@@ -88,29 +104,47 @@ export default function VisorArchivo({ ruta, nombre, mime, interno = false, onCe
         <p className="text-[13px] font-semibold text-neutral-900 truncate flex-1 min-w-0" title={nombre}>
           📄 {nombre}
         </p>
-        {/* Safari en iOS no pinta los PDF dentro de un iframe: se queda en
-            blanco. Este botón es la salida cuando eso pasa, y no estorba a
-            quien lo ve bien. */}
-        <button
-          type="button"
-          onClick={() => abrirArchivo(ruta, { interno, nombre })}
-          className="text-[12px] px-3 py-1.5 rounded-lg border border-neutral-300 hover:bg-neutral-50 shrink-0"
-        >
-          Abrir en otra ventana
+
+        {peso && <span className="text-[11.5px] text-neutral-400 shrink-0">{peso}</span>}
+
+        {/* Safari en iOS no pinta los PDF dentro de un iframe, y hay
+            escritorios donde tampoco. Esta es la salida cuando eso pasa. */}
+        <button type="button" onClick={() => abrirArchivo(ruta, { interno, nombre })}
+          className="text-[12px] px-3 py-1.5 rounded-lg border border-neutral-300 hover:bg-neutral-50 shrink-0">
+          Nueva ventana ↗
         </button>
-        <button
-          type="button"
-          onClick={() => descargarArchivo(ruta, { interno, nombre })}
-          className="text-[12px] px-3 py-1.5 rounded-lg border border-neutral-300 hover:bg-neutral-50 shrink-0"
-        >
+
+        <button type="button" onClick={() => descargarArchivo(ruta, { interno, nombre })}
+          className="text-[12px] px-3 py-1.5 rounded-lg border border-neutral-300 hover:bg-neutral-50 shrink-0">
           Descargar
         </button>
-        <button
-          type="button"
-          onClick={onCerrar}
-          className="text-[12px] px-3 py-1.5 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 shrink-0"
-        >
-          Cerrar
+
+        {/* Revisar sin cerrar el documento: es como se revisa de verdad. */}
+        {onAprobar && (
+          <button type="button" onClick={() => { onAprobar(); onCerrar(); }}
+            className="text-[12px] px-3 py-1.5 rounded-lg border border-[#1D6A4A]/40 text-[#1D6A4A]
+              hover:bg-[#E8F5EE] shrink-0 font-semibold">
+            Aprobar
+          </button>
+        )}
+        {onObservar && (
+          <button
+            type="button"
+            onClick={() => {
+              const motivo = window.prompt("¿Qué hay que corregir? El asesorado lo va a leer.");
+              if (!motivo?.trim()) return;
+              onObservar(motivo.trim());
+              onCerrar();
+            }}
+            className="text-[12px] px-3 py-1.5 rounded-lg border border-amber-400 text-amber-700
+              hover:bg-amber-50 shrink-0 font-semibold">
+            Observar
+          </button>
+        )}
+
+        <button type="button" onClick={onCerrar} aria-label="Cerrar"
+          className="text-[15px] leading-none px-2 py-1 text-neutral-400 hover:text-neutral-900 shrink-0">
+          ✕
         </button>
       </div>
 

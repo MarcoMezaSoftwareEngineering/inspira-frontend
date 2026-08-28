@@ -174,6 +174,7 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
           ruta={`${base}/documentos/archivo/${viendo.id_documento}`}
           nombre={viendo.nombre}
           mime={viendo.mime}
+          tamano={viendo.tamano}
           onCerrar={() => setViendo(null)}
         />
       )}

@@ -14,6 +14,12 @@ const SERVICIO = {
   legal:  { corto: "Extranjería", tono: "bg-[#FDEDEC] text-[#C0392B]" },
 };
 
+/* En el distintivo solo cabe el nombre de pila del titular: los nombres
+   legales completos pasan de 35 caracteres y romperían la fila. */
+function primerNombre(nombre) {
+  return String(nombre || "").trim().split(/\s+/)[0] || "otro cliente";
+}
+
 function iniciales(nombre) {
   return String(nombre || "?")
     .trim().split(/\s+/).slice(0, 2)
@@ -89,9 +95,28 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
               <span className="text-[10.5px] text-neutral-400">
                 {c.total_servicios} servicio{c.total_servicios > 1 ? "s" : ""}, ninguno activo
               </span>
-            ) : (
+            ) : c.solo_invitado ? null : (
               <span className="text-[10.5px] font-semibold text-amber-600">Sin servicios</span>
             )}
+
+            {/* A qué expedientes AJENOS entra. Sin esto, la madre de una
+                asesorada con acceso de edición a un expediente activo salía
+                como "Sin servicios" en ámbar, que se lee como contacto frío
+                al que hay que venderle algo. */}
+            {c.invitado_en?.map((i) => {
+              const sv = SERVICIO[i.servicio] || SERVICIO.master;
+              return (
+                <span
+                  key={i.id_solicitud}
+                  title={`${i.quien} · ${i.puede_editar ? "puede subir documentos y rellenar datos" : "solo lectura"}${i.ha_entrado ? "" : " · invitada, aún no ha entrado"}`}
+                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border border-dashed ${sv.tono} border-current/30`}
+                >
+                  invitada · {sv.corto} de {primerNombre(i.titular)}
+                  {i.puede_editar && " ✎"}
+                  {!i.ha_entrado && " · sin entrar"}
+                </span>
+              );
+            })}
 
             {c.debe > 0 && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">

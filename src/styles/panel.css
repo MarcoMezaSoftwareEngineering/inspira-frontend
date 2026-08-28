@@ -32,7 +32,12 @@
    encima la retícula de 46 px. Es lo que hace que el panel se reconozca
    como el mismo sitio y no como una herramienta prestada. */
 .pnl-side {
-  position: relative;
+  /* OJO: aqui NO va `position`. Este fichero se importa despues de Tailwind,
+     asi que un `position: relative` aqui le gana al `fixed` de la clase de
+     Tailwind y en movil la barra se quedaba ocupando sus 288 px en el flex
+     --desplazada fuera de pantalla por -translate-x-full-- dejando al
+     contenido unos 140 px. El `:before` no lo necesita: `fixed` (movil) y
+     `md:relative` (escritorio) ya crean contexto de posicionamiento. */
   overflow: hidden;
   background:
     radial-gradient(420px 300px at 88% 2%, rgba(136, 196, 252, .20), transparent 70%),
@@ -299,7 +304,7 @@
 }
 .pnl-nota { font-size: 11.5px; color: #8ba6b4; }
 
-.pnl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
+.pnl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 16px; }
 
 @media (max-width: 767px) {
   .pnl-burger { display: inline-flex; }
@@ -308,7 +313,10 @@
   .pnl-head h2 { font-size: 20px; }
   .pnl-vacio { padding: 40px 20px; border-radius: 20px; }
   .pnl-vacio h3 { font-size: 21px; }
-  .pnl-grid { grid-template-columns: 1fr; }
+  .pnl-grid { grid-template-columns: minmax(0, 1fr); }
+  /* Un solo distintivo mas ancho que la pantalla no puede estirar la tarjeta. */
+  .pnl-chip { white-space: normal; }
+  .pnl-top-eyebrow { white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pnl-card-link:hover, .pnl-btn:hover, .pnl-btn-cta:hover, .pnl-vacio-fantasma:hover { transform: none; }

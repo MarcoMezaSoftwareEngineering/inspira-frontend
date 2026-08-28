@@ -9,6 +9,7 @@
 // tiene sentido descubrirlo con el expediente ya presentado.
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { apiGET, apiPUT, apiPOST, apiUpload, apiDELETE } from "../../../../services/api";
+import { abrirArchivo } from "../../../../services/archivos";
 
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
@@ -354,11 +355,10 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
 
       {def.archivos.map((a) => (
         <div key={a.id_documento} className="flex items-center gap-2">
-          <a href={`/api/solicitudes/${id}/modificatoria/documentos/archivo/${a.id_documento}`}
-            target="_blank" rel="noreferrer"
+          <button type="button" onClick={() => abrirArchivo(`/solicitudes/${id}/modificatoria/documentos/archivo/${a.id_documento}`, { nombre: a.nombre })}
             className="text-[11.5px] text-[#046C8C] hover:underline truncate flex-1">
             📄 {a.nombre}
-          </a>
+          </button>
           {a.subido_por === "CLIENTE" && (
             <button type="button" onClick={() => quitar(a.id_documento)}
               className="shrink-0 text-[11px] text-neutral-400 hover:text-red-600">quitar</button>
@@ -911,12 +911,11 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
                     </p>
                   )}
                   {r.tiene_archivo && (
-                    <a href={`/api/solicitudes/${id}/modificatoria/extranjeria/${r.id_registro}/archivo`}
-                      target="_blank" rel="noreferrer"
+                    <button type="button" onClick={() => abrirArchivo(`/solicitudes/${id}/modificatoria/extranjeria/${r.id_registro}/archivo`, {})}
                       className="inline-block text-[11.5px] font-semibold text-[#046C8C]
                         hover:underline mt-1.5">
                       📄 Ver el documento
-                    </a>
+                    </button>
                   )}
                 </div>
               ))}

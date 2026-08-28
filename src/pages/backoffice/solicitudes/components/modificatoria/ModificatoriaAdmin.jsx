@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backofficeApi";
 import Invitados from "../Invitados";
 import GeneradoresModificatoria from "./GeneradoresModificatoria";
+import { abrirArchivo } from "../../../../../services/archivos";
 
 
 const TONOS = {
@@ -539,12 +540,11 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo }) {
           )}
 
           {def.archivos.map((a) => (
-            <a key={a.id_documento}
-              href={`/api/backoffice/solicitudes/${id}/modificatoria/documentos/archivo/${a.id_documento}`}
-              target="_blank" rel="noreferrer"
+            <button type="button" key={a.id_documento}
+              onClick={() => abrirArchivo(`/backoffice/solicitudes/${id}/modificatoria/documentos/archivo/${a.id_documento}`, { interno: true, nombre: a.nombre })}
               className="block text-[11.5px] text-[#046C8C] hover:underline truncate mt-1">
               📄 {a.nombre}
-            </a>
+            </button>
           ))}
 
           {ultimo?.observacion && (
@@ -759,9 +759,8 @@ function Extranjeria({ id, registros, onCambio }) {
               </div>
               {r.plazo && <p className="text-[11.5px] text-red-700 mt-0.5">Plazo: {r.plazo}</p>}
               {r.tiene_archivo && (
-                <a href={`/api/backoffice/solicitudes/${id}/modificatoria/extranjeria/${r.id_registro}/archivo`}
-                  target="_blank" rel="noreferrer"
-                  className="text-[11px] text-[#046C8C] hover:underline">📄 {r.archivo_nombre}</a>
+                <button type="button" onClick={() => abrirArchivo(`/backoffice/solicitudes/${id}/modificatoria/extranjeria/${r.id_registro}/archivo`, { interno: true })}
+                  className="text-[11px] text-[#046C8C] hover:underline">📄 {r.archivo_nombre}</button>
               )}
             </div>
           ))}

@@ -14,6 +14,7 @@ import { apiGET, apiPUT, apiPOST } from "../../../../services/api";
 import { Campo, Selector, Guardado } from "./campos";
 import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
 import AcompanantesCliente from "./AcompanantesCliente";
+import { abrirArchivo } from "../../../../services/archivos";
 
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
@@ -895,12 +896,11 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                     </p>
                   )}
                   {r.tiene_archivo && (
-                    <a href={`/api/solicitudes/${id}/estancia/extranjeria/${r.id_registro}/archivo`}
-                      target="_blank" rel="noreferrer"
+                    <button type="button" onClick={() => abrirArchivo(`/solicitudes/${id}/estancia/extranjeria/${r.id_registro}/archivo`, {})}
                       className="inline-block text-[11.5px] font-semibold text-[#046C8C]
                         hover:underline mt-1.5">
                       📄 Ver el documento
-                    </a>
+                    </button>
                   )}
                 </div>
               ))}

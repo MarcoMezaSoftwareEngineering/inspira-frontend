@@ -87,29 +87,55 @@ export default function RecordatorioEstancia({ id }) {
               <Lista titulo="Datos por completar"
                 items={datos.datos_faltan} tono="text-amber-600" />
 
+              {/* Los DOS plazos, y cual es la fecha. Antes solo salia el mas
+                  cercano, asi que a quien se le habia pasado la antelacion se
+                  le daba por fecha una vencida y se le ocultaba el tope, que
+                  era el unico que aun podia cumplir. */}
+              {datos.plazos?.length > 0 && (
+                <div className="mt-3 space-y-1.5">
+                  {datos.plazos.map((p) => (
+                    <div
+                      key={p.motivo}
+                      className={`flex items-baseline gap-2 text-[11.5px] px-2.5 py-1.5 rounded-lg border ${
+                        p.manda
+                          ? "bg-[#FEF3E7] border-amber-300/60"
+                          : "bg-neutral-50 border-neutral-200"
+                      }`}
+                    >
+                      <span className="font-semibold text-neutral-700 flex-1">{p.etiqueta}</span>
+                      <span className={p.vencido ? "text-red-600 font-semibold" : "text-neutral-700"}>
+                        {p.limite_largo}
+                      </span>
+                      <span className={`shrink-0 ${p.vencido ? "text-red-500" : "text-neutral-400"}`}>
+                        {p.vencido ? `pasó hace ${Math.abs(p.dias_restantes)} d` : `${p.dias_restantes} d`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {datos.plazo ? (
-                <div className="mt-3 rounded-lg bg-[#FEF3E7] border border-amber-300/60 px-3 py-2.5">
-                  <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-amber-800">
-                    Todo aprobado, como muy tarde
+                <div className="mt-2 rounded-lg bg-[#023A4B] px-3 py-2.5 text-white">
+                  <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-amber-300">
+                    {datos.plazo.vencido
+                      ? "El tope ya pasó"
+                      : "Todo aprobado, como muy tarde"}
                   </p>
-                  <p className="text-[15px] font-bold text-amber-900 mt-0.5">
-                    {datos.plazo.todo_listo_para_largo}
+                  <p className="text-[15px] font-bold mt-0.5">
+                    {datos.plazo.vencido
+                      ? datos.plazo.limite_largo
+                      : datos.plazo.todo_listo_para_largo}
                   </p>
-                  <p className="text-[11.5px] text-amber-800/90 leading-relaxed mt-1">
-                    Presentación: {datos.plazo.limite_largo} ·{" "}
-                    {datos.plazo.dias_para_todo_listo > 0
-                      ? `quedan ${datos.plazo.dias_para_todo_listo} días`
-                      : datos.plazo.dias_para_todo_listo === 0
-                        ? "es hoy"
-                        : `pasó hace ${Math.abs(datos.plazo.dias_para_todo_listo)} días`}
+                  <p className="text-[11.5px] text-white/70 leading-relaxed mt-1">
+                    {datos.plazo.vencido
+                      ? "Habla con el asesorado antes de presentar nada."
+                      : `Tope: ${datos.plazo.limite_largo} · ${datos.plazo.dias_de_margen} días de margen para revisar` }
                   </p>
                 </div>
               ) : (
-                // Sin fecha de clases ni de llegada no hay plazo que calcular, y
-                // es mejor decirlo que mandar un recordatorio mudo de fechas.
                 <p className="mt-3 text-[11.5px] text-neutral-500 leading-relaxed">
-                  Sin fecha de inicio de clases ni de llegada a España no se puede
-                  calcular su plazo. El mensaje irá sin fechas.
+                  Sin fecha de llegada a España no hay tope que calcular, y el tope es la
+                  fecha que se le da. El mensaje irá sin ella.
                 </p>
               )}
 

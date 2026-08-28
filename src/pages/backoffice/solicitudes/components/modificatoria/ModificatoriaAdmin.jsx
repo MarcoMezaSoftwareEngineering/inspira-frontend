@@ -17,6 +17,8 @@ import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backoff
 import Invitados from "../Invitados";
 import GeneradoresModificatoria from "./GeneradoresModificatoria";
 import { abrirArchivo } from "../../../../../services/archivos";
+import VisorArchivo from "../../../../../components/common/VisorArchivo";
+import { dialog } from "../../../../../services/dialogService";
 
 
 const TONOS = {
@@ -485,7 +487,7 @@ const ESTADO_DOC = {
   OBSERVADO: { icono: "✕", label: "observado",   clase: "text-red-600" },
 };
 
-function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo }) {
+function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo, onVer }) {
   const [observando, setObservando] = useState(false);
   const [texto, setTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -541,7 +543,7 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo }) {
 
           {def.archivos.map((a) => (
             <button type="button" key={a.id_documento}
-              onClick={() => abrirArchivo(`/backoffice/solicitudes/${id}/modificatoria/documentos/archivo/${a.id_documento}`, { interno: true, nombre: a.nombre })}
+              onClick={() => onVer(a)}
               className="block text-[11.5px] text-[#046C8C] hover:underline truncate mt-1">
               📄 {a.nombre}
             </button>
@@ -604,6 +606,25 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo }) {
 
 function Documentos({ id, docs, onCambio }) {
   const [subiendo, setSubiendo] = useState("");
+  // Qué documento se está mirando. null = ninguno, no hay ventana.
+  const [viendo, setViendo] = useState(null);
+  const [abriendoCarpeta, setAbriendoCarpeta] = useState(false);
+
+  /**
+   * Abre en Drive la carpeta del asesorado.
+   *
+   * La pestaña se pide ANTES de la llamada: si se abriera al recibir la
+   * respuesta, el navegador la trataría como emergente y la bloquearía.
+   */
+  async function abrirCarpeta() {
+    const ventana = window.open("", "_blank", "noopener");
+    setAbriendoCarpeta(true);
+    const r = await boGET(`/backoffice/solicitudes/${id}/modificatoria/carpeta-drive`);
+    setAbriendoCarpeta(false);
+    if (r?.ok && r.url) { if (ventana) ventana.location = r.url; return; }
+    ventana?.close();
+    dialog.toast(r?.msg || "No se pudo abrir la carpeta en Drive", "error");
+  }
 
   async function subir(clave, archivo) {
     if (!archivo) return;
@@ -626,9 +647,22 @@ function Documentos({ id, docs, onCambio }) {
     <div id="bloque-documentos" className="bg-white border border-neutral-200 rounded-xl p-4 scroll-mt-4">
       <Cabecera numero="2" titulo="Documentos"
         extra={
-          <span className="ml-auto text-[11.5px] text-neutral-500">
-            {aprobados} de {oblig.length} aprobados
-          </span>
+          <>
+            <span className="ml-auto text-[11.5px] text-neutral-500">
+              {aprobados} de {oblig.length} aprobados
+            </span>
+            {/* Hasta ahora este enlace solo salía al avisar a la abogada, así
+                que para ver los archivos había que mandarle un correo. */}
+            <button
+              type="button"
+              onClick={abrirCarpeta}
+              disabled={abriendoCarpeta}
+              className="text-[11.5px] px-2.5 py-1 rounded-lg border border-neutral-300
+                hover:bg-neutral-50 disabled:opacity-50 shrink-0"
+            >
+              {abriendoCarpeta ? "Abriendo…" : "📁 Abrir carpeta del asesorado"}
+            </button>
+          </>
         } />
 
       {/* De un vistazo, cuánto falta para poder presentar */}
@@ -645,11 +679,21 @@ function Documentos({ id, docs, onCambio }) {
           <div className="space-y-1.5">
             {porGrupo(g).map(([clave, d]) => (
               <FilaDocumento key={clave} id={id} clave={clave} def={d}
-                onCambio={onCambio} onSubir={subir} subiendo={subiendo} />
+                onCambio={onCambio} onSubir={subir} subiendo={subiendo} onVer={setViendo} />
             ))}
           </div>
         </div>
       ))}
+
+      {viendo && (
+        <VisorArchivo
+          interno
+          ruta={`/backoffice/solicitudes/${id}/modificatoria/documentos/archivo/${viendo.id_documento}`}
+          nombre={viendo.nombre}
+          mime={viendo.mime}
+          onCerrar={() => setViendo(null)}
+        />
+      )}
     </div>
   );
 }

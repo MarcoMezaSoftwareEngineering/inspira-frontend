@@ -21,14 +21,50 @@ import { dialog } from "./dialogService";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 /**
+ * Los tres argumentos que comparten las tres funciones:
+ *
  * @param {string}  ruta      ruta del backend ya montada, p. ej.
  *                            "/backoffice/solicitudes/12/estancia/documentos/archivo/34"
- * @param {object}  opciones
  * @param {boolean} opciones.interno  true = usuario del backoffice (bo_token),
  *                                    false = asesorado en su panel (token)
- * @param {string}  opciones.nombre   nombre con el que descargarlo si el
- *                                    navegador no puede enseñarlo
+ * @param {string}  opciones.nombre   con qué nombre guardarlo en el disco
  */
+
+/** El archivo en bruto, para que lo pinte el visor. */
+export async function pedirArchivo(ruta, { interno = false } = {}) {
+  const token = localStorage.getItem(interno ? "bo_token" : "token");
+  if (!token) return { error: "Tu sesión ha caducado, vuelve a entrar" };
+  try {
+    const r = await fetch(`${API_URL}${ruta}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) {
+      return {
+        error:
+          r.status === 401 || r.status === 403 ? "No tienes acceso a ese archivo"
+          : r.status === 404 ? "Ese archivo ya no está"
+          : "No se pudo cargar el archivo",
+      };
+    }
+    return { blob: await r.blob() };
+  } catch {
+    return { error: "Error al cargar el archivo" };
+  }
+}
+
+/** Descargarlo al disco, con su nombre. */
+export async function descargarArchivo(ruta, { interno = false, nombre } = {}) {
+  const { blob, error } = await pedirArchivo(ruta, { interno });
+  if (error) { dialog.toast(error, "error"); return; }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombre || "documento";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+/** Abrirlo en una pestaña: para un PDF, eso es verlo. */
 export async function abrirArchivo(ruta, { interno = false, nombre } = {}) {
   const token = localStorage.getItem(interno ? "bo_token" : "token");
   if (!token) {

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Modelo · Extracto bancario — Inspira Legal</title>
+<style>
+  :root { --tinta:#0d2c3a; --petroleo:#013446; --naranja:#fa943a; --linea:#d8e7f5; --gris:#62808f; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:28px 16px 64px; background:#f4f9fe; color:var(--tinta);
+         font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.6; }
+  .hoja { max-width:820px; margin:0 auto; }
+  .cab { background:linear-gradient(150deg,#012938,#013446 46%,#02506b);
+         color:#fff; border-radius:18px; padding:26px 28px; margin-bottom:22px; }
+  .cab .eyebrow { font-size:11px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+                  color:var(--naranja); margin:0 0 8px; }
+  .cab h1 { font-family:Merriweather,Georgia,serif; font-size:26px; margin:0 0 8px; letter-spacing:-.02em; }
+  .cab p { margin:0; color:rgba(255,255,255,.78); font-size:14px; }
+  .aviso { background:#fdf3e3; border:1px solid rgba(250,148,58,.4); border-radius:12px;
+           padding:14px 16px; margin-bottom:22px; font-size:13.5px; }
+  .aviso b { color:#96591a; }
+  .tarjeta { background:#fff; border:1px solid var(--linea); border-radius:16px;
+             padding:22px 24px; margin-bottom:18px; box-shadow:0 8px 22px rgba(1,52,70,.05); }
+  .tarjeta h2 { font-family:Merriweather,Georgia,serif; font-size:17px; margin:0 0 12px; color:var(--petroleo); }
+  .extracto { border:2px solid #9db8c6; border-radius:8px; padding:18px 20px; background:#fcfdff;
+              font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:12.5px;
+              overflow-x:auto; position:relative; }
+  .extracto pre { margin:0; white-space:pre; line-height:1.7; }
+  .clave { background:#fff6d9; box-shadow:inset 0 -8px 0 #ffe9a8; }
+  .sello { margin-top:18px; border:2px solid #c0392b; color:#c0392b; border-radius:50%/30%;
+           padding:10px 18px; display:inline-block; transform:rotate(-8deg);
+           font-family:Montserrat,sans-serif; font-size:12px; font-weight:700; text-align:center; line-height:1.4; }
+  ul.check { margin:0; padding-left:0; list-style:none; }
+  ul.check li { padding:9px 0 9px 30px; border-bottom:1px solid #eef4f9; position:relative; font-size:14px; }
+  ul.check li:last-child { border-bottom:0; }
+  ul.check li::before { content:"✓"; position:absolute; left:6px; color:#1d6a4a; font-weight:bold; }
+  ul.no li::before { content:"✕"; color:#c0392b; }
+  .cifra { background:#E8F5EE; border:1px solid rgba(29,106,74,.3); border-radius:10px;
+           padding:14px 16px; margin:16px 0 0; }
+  .cifra .n { font-size:24px; font-weight:800; color:#14532d; }
+  .pie { text-align:center; color:var(--gris); font-size:12.5px; margin-top:26px; }
+  @media print { body { background:#fff; padding:0; } .cab { background:#013446 !important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; } .tarjeta { box-shadow:none; } }
+</style>
+</head>
+<body>
+<div class="hoja">
+
+  <div class="cab">
+    <p class="eyebrow">Modelo de ejemplo · Estancia por estudios</p>
+    <h1>Extracto bancario</h1>
+    <p>Así tiene que ser el tuyo. Los datos son inventados: fíjate en el formato, en el sello y en el saldo.</p>
+  </div>
+
+  <div class="aviso">
+    <b>Lo que más se rechaza:</b> una captura de pantalla de la app del banco. No sirve.
+    Tiene que ser el extracto impreso en la oficina, <b>con el sello y la firma</b> puestos
+    sobre el papel.
+  </div>
+
+  <div class="tarjeta">
+    <h2>Cómo se ve un extracto válido</h2>
+    <div class="extracto">
+<pre>SUCURSAL: MADRID, ALCALA, 6
+
+              CONSULTA DE MOVIMIENTOS      DESDE  12/08/2026  HASTA  22/08/2026
+FECHA  : 22/08/2026
+HORA   : 10.39
+C.C.C. : 0000 0000 00 0000000000            <span class="clave">TITULAR(ES): TU NOMBRE COMPLETO</span>
+CUENTA ONLINE - ESTANDAR BASICO
+MONEDA : EURO             CONCEPTO: 000 SALDO PRINCIPAL CTA. PERSONAL
+
+FECHA   VALOR      OPE   C O N C E P T O                    IMPORTE      SALDO
+-----   -------    ---   -------------------------------   ---------   ---------
+18/08   18/08/26    43   INGRESO EN EFECTIVO                1.000,00 H  1.000,00 H
+19/08   19/08/26    43   INGRESO                              950,00 H  1.950,00 H
+20/08   20/08/26    43   INGRESO                            2.000,00 H  3.950,00 H
+21/08   21/08/26    71   TRANSFERENCIA INMEDIATA            2.000,00 H  5.950,00 H
+22/08   22/08/26    43   INGRESO EN EFECTIVO                <span class="clave">2.050,00 H  8.000,00 H</span>
+</pre>
+      <div class="sello">Banco · 22 AGO 2026<br />Sello y firma de la oficina</div>
+    </div>
+  </div>
+
+  <div class="cifra">
+    <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#14532d">
+      Saldo mínimo exigido
+    </div>
+    <div class="n">7.200 €</div>
+    <div style="font-size:13px;color:#14532d">
+      El saldo final tiene que ser igual o superior. En el ejemplo son 8.000 €, con margen:
+      si te quedas justo y el banco cobra una comisión, el extracto deja de valer.
+    </div>
+  </div>
+
+  <div class="tarjeta" style="margin-top:18px">
+    <h2>Comprueba antes de subirlo</h2>
+    <ul class="check">
+      <li>Es una <b>cuenta española</b> a tu nombre, y tu nombre aparece como titular.</li>
+      <li>Lleva el <b>sello y la firma</b> de la oficina sobre el papel.</li>
+      <li>La <b>fecha es reciente</b>: cuanto más cerca de la presentación, mejor.</li>
+      <li>El <b>saldo final llega a 7.200 €</b> y se lee con claridad.</li>
+      <li>Se ven el <b>número de cuenta</b> y los <b>movimientos</b> del periodo.</li>
+      <li>Está escaneado <b>completo</b>, en un único PDF.</li>
+    </ul>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Lo que hace que te lo rechacen</h2>
+    <ul class="check no">
+      <li>Una captura de pantalla o un PDF descargado de la banca online, sin sello.</li>
+      <li>Una cuenta que no es española.</li>
+      <li>Una cuenta a nombre de otra persona, aunque sea familiar.</li>
+      <li>Un saldo por debajo de 7.200 €, o justo en el límite.</li>
+      <li>Un extracto de hace meses.</li>
+    </ul>
+  </div>
+
+  <p class="pie">
+    Inspira Legal · Pide en tu oficina «un extracto de movimientos sellado». Es un trámite de ventanilla.
+  </p>
+</div>
+</body>
+</html>

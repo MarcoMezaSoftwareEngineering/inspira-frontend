@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Modelo · Certificado médico — Inspira Legal</title>
+<style>
+  :root { --tinta:#0d2c3a; --petroleo:#013446; --naranja:#fa943a; --linea:#d8e7f5; --gris:#62808f; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:28px 16px 64px; background:#f4f9fe; color:var(--tinta);
+         font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.6; }
+  .hoja { max-width:820px; margin:0 auto; }
+  .cab { background:linear-gradient(150deg,#012938,#013446 46%,#02506b);
+         color:#fff; border-radius:18px; padding:26px 28px; margin-bottom:22px; }
+  .cab .eyebrow { font-size:11px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+                  color:var(--naranja); margin:0 0 8px; }
+  .cab h1 { font-family:Merriweather,Georgia,serif; font-size:26px; margin:0 0 8px; letter-spacing:-.02em; }
+  .cab p { margin:0; color:rgba(255,255,255,.78); font-size:14px; }
+  .aviso { background:#fdf3e3; border:1px solid rgba(250,148,58,.4); border-radius:12px;
+           padding:14px 16px; margin-bottom:22px; font-size:13.5px; }
+  .aviso b { color:#96591a; }
+  .tarjeta { background:#fff; border:1px solid var(--linea); border-radius:16px;
+             padding:22px 24px; margin-bottom:18px; box-shadow:0 8px 22px rgba(1,52,70,.05); }
+  .tarjeta h2 { font-family:Merriweather,Georgia,serif; font-size:17px; margin:0 0 12px; color:var(--petroleo); }
+  .impreso { border:2px solid #9db8c6; border-radius:8px; padding:22px 24px; background:#fcfdff;
+             font-family:Georgia,serif; }
+  .impreso .marca { display:flex; justify-content:space-between; align-items:flex-start;
+                    border-bottom:1px solid #cfe0ea; padding-bottom:12px; margin-bottom:16px; }
+  .impreso .marca .omc { font-size:22px; font-weight:bold; letter-spacing:.04em; color:#556; }
+  .impreso .marca .serie { text-align:right; font-size:12.5px; color:#667; line-height:1.5; }
+  .impreso h3 { text-align:center; font-size:16px; letter-spacing:.04em; margin:0 0 18px; }
+  .campo { margin-bottom:12px; font-size:14px; }
+  .campo .et { color:var(--gris); font-family:Montserrat,sans-serif; font-size:12px; }
+  .relleno { display:inline-block; min-width:180px; border-bottom:1px solid #93a; color:#1a3d8f;
+             font-family:"Segoe Script","Bradley Hand",cursive; padding:0 6px; }
+  .clave { background:#fff6d9; box-shadow:inset 0 -8px 0 #ffe9a8; padding:1px 3px; }
+  .nota { display:block; margin-top:5px; font-family:Montserrat,sans-serif; font-size:12px;
+          color:#96591a; }
+  ul.check { margin:0; padding-left:0; list-style:none; }
+  ul.check li { padding:9px 0 9px 30px; border-bottom:1px solid #eef4f9; position:relative; font-size:14px; }
+  ul.check li:last-child { border-bottom:0; }
+  ul.check li::before { content:"✓"; position:absolute; left:6px; color:#1d6a4a; font-weight:bold; }
+  ul.no li::before { content:"✕"; color:#c0392b; }
+  .pie { text-align:center; color:var(--gris); font-size:12.5px; margin-top:26px; }
+  @media print { body { background:#fff; padding:0; } .cab { background:#013446 !important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; } .tarjeta { box-shadow:none; } }
+</style>
+</head>
+<body>
+<div class="hoja">
+
+  <div class="cab">
+    <p class="eyebrow">Modelo de ejemplo · Estancia por estudios</p>
+    <h1>Certificado médico</h1>
+    <p>Así tiene que ser el tuyo. Los datos de abajo son inventados: lo que importa es el formato y, sobre todo, la frase exacta.</p>
+  </div>
+
+  <div class="aviso">
+    <b>Lo que más se rechaza:</b> un certificado que dice «apto», «goza de buena salud» o
+    «no presenta patologías». No sirve. Tiene que aparecer <b>la frase completa</b> que está
+    resaltada abajo, con la mención al Reglamento Sanitario Internacional de 2005.
+  </div>
+
+  <div class="tarjeta">
+    <h2>Cómo se ve el impreso relleno</h2>
+    <div class="impreso">
+      <div class="marca">
+        <div>
+          <div class="omc">OMC §</div>
+          <div style="font-size:11px;color:#667;letter-spacing:.03em">
+            ORGANIZACIÓN MÉDICA COLEGIAL · CONSEJO GENERAL DE COLEGIOS OFICIALES DE MÉDICOS
+          </div>
+        </div>
+        <div class="serie">
+          Clase 1.ª Ordinaria<br />Serie B<br />N.º 00000000
+        </div>
+      </div>
+
+      <h3>CERTIFICADO MÉDICO OFICIAL</h3>
+
+      <div class="campo">
+        <span class="et">Colegio de</span>
+        <span class="relleno">Vigo Pontevedra</span>
+      </div>
+      <div class="campo">
+        <span class="et">D./D.ª</span>
+        <span class="relleno">Nombre del médico o médica</span>
+        <span class="et">colegiado/a en</span>
+        <span class="relleno">Provincia</span>
+        <span class="et">n.º</span>
+        <span class="relleno" style="min-width:110px">000000000</span>
+        <span class="nota">El número de colegiado tiene que estar, y coincidir con el del sello.</span>
+      </div>
+
+      <div class="campo" style="margin-top:18px">
+        <span class="et">CERTIFICO: Que</span><br />
+        <span class="relleno" style="min-width:280px">NOMBRE Y APELLIDOS DEL PACIENTE</span>,
+        <span class="et">con F. N.</span> <span class="relleno" style="min-width:110px">00/00/0000</span>,
+        <span class="et">con n.º de pasaporte</span> <span class="relleno" style="min-width:130px">000000000</span>,
+        <span class="et">con nacionalidad</span> <span class="relleno" style="min-width:110px">peruana</span>,
+        <br /><br />
+        <span class="clave" style="font-family:Georgia,serif;color:#0d2c3a">
+          no padece ninguna de las enfermedades que pueden tener graves repercusiones
+          de salud pública de conformidad con lo dispuesto en el Reglamento Sanitario
+          Internacional de 2005.
+        </span>
+        <span class="nota">Esta es la parte que no se puede cambiar. Palabra por palabra.</span>
+      </div>
+
+      <div class="campo" style="margin-top:20px;display:flex;justify-content:space-between;gap:20px">
+        <div>
+          <span class="et">Y para que así conste, a instancia de</span><br />
+          <span class="relleno">la interesada</span>
+        </div>
+        <div style="text-align:center">
+          <div style="height:42px"></div>
+          <div style="border-top:1px solid #93a;padding-top:4px;font-size:12px;color:#667">
+            Firma y sello del Colegio de Médicos
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Comprueba antes de subirlo</h2>
+    <ul class="check">
+      <li>Está en el <b>impreso oficial</b> del Consejo General de Colegios Oficiales de Médicos (el que lleva serie y número).</li>
+      <li>Lleva el <b>sello del Colegio Médico provincial</b> estampado.</li>
+      <li>Aparece el <b>número de colegiado</b> de quien firma.</li>
+      <li>Están tu <b>nombre completo, fecha de nacimiento, número de pasaporte y nacionalidad</b>, y coinciden con tu pasaporte.</li>
+      <li>Aparece la <b>frase completa</b> sobre el Reglamento Sanitario Internacional de 2005.</li>
+      <li>Lo escaneas <b>completo y legible</b>, en un único PDF.</li>
+    </ul>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Lo que hace que te lo rechacen</h2>
+    <ul class="check no">
+      <li>Un certificado en papel del centro médico o en receta, sin el impreso oficial.</li>
+      <li>Que ponga solo «apto», «sano» o «goza de buena salud».</li>
+      <li>Sin sello del Colegio, aunque esté firmado.</li>
+      <li>Una foto torcida, oscura o cortada en la que no se lee el texto.</li>
+    </ul>
+  </div>
+
+  <p class="pie">
+    Inspira Legal · Si tu médico tiene dudas sobre la fórmula, enséñale esta página.<br />
+    Preferiblemente español; vale del país de origen si cumple todo lo anterior.
+  </p>
+</div>
+</body>
+</html>

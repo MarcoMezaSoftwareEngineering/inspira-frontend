@@ -106,6 +106,20 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
         </p>
       )}
 
+      {def.modelo && (
+        <a href={def.modelo} target="_blank" rel="noreferrer"
+          className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-[#046C8C]
+            hover:underline w-fit">
+          Ver un ejemplo ↗
+        </a>
+      )}
+      {def.modelo_nota && (
+        <p className="text-[11.5px] text-neutral-500 leading-relaxed bg-neutral-50
+          border border-neutral-200 rounded-lg px-2.5 py-2">
+          {def.modelo_nota}
+        </p>
+      )}
+
       {def.archivos.length > 0 && (
         <div className="space-y-1">
           {def.archivos.map((a) => (

@@ -551,6 +551,15 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo, onVer }) {
             <p className="text-[11px] text-neutral-400 leading-snug mt-0.5">{def.requisito}</p>
           )}
 
+          {/* El asesor tiene que poder ver el mismo ejemplo que ve el asesorado,
+              para saber que le esta ensenando cuando se lo reclama. */}
+          {def.modelo && (
+            <a href={def.modelo} target="_blank" rel="noreferrer"
+              className="inline-block text-[11px] font-semibold text-[#046C8C] hover:underline mt-1">
+              Ver el ejemplo ↗
+            </a>
+          )}
+
           {def.archivos.map((a) => (
             <button type="button" key={a.id_documento}
               onClick={() => onVer(a)}

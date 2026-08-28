@@ -2,6 +2,8 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { apiGET } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
+import Avatar from "../../components/common/Avatar";
+import { datosUsuario } from "../../components/common/usuario";
 import PerfilCliente from "./components/PerfilCliente";
 import MisServicios from "./components/MisServicios";
 import WizardPerfilCliente from "./components/WizardPerfilCliente";
@@ -17,10 +19,10 @@ const VALID_TABS = ["servicios", "perfil", "becas", "guia", "apostilla", "estanc
 
 function LoadingPage() {
   return (
-    <div className="flex-1 flex items-center justify-center py-16">
-      <div className="flex items-center gap-3 text-neutral-400">
-        <div className="w-5 h-5 border-2 border-[#1D6A4A] border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm">Cargando…</span>
+    <div className="pnl flex-1 flex items-center justify-center py-16">
+      <div className="text-center">
+        <div className="pnl-spinner" />
+        <span className="pnl-nota">Cargando…</span>
       </div>
     </div>
   );
@@ -114,8 +116,10 @@ export default function PanelCliente() {
     modificatoria: "Guía Residencia y Trabajo",
   };
 
+  const { nombre, corto, iniciales, foto } = datosUsuario(user);
+
   return (
-    <div className="h-screen overflow-hidden flex bg-[#F4F6F9] relative">
+    <div className="pnl h-screen overflow-hidden flex relative">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -133,41 +137,34 @@ export default function PanelCliente() {
       />
 
       <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>
-        {/* Topbar */}
-        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-[#E2E8F0] px-5 sm:px-7 py-3 flex items-center gap-4 shrink-0 shadow-[0_1px_4px_rgba(0,0,0,.06)]">
+        {/* Barra superior */}
+        <div className="pnl-top sticky top-0 z-10 shrink-0">
           <button
-            className="md:hidden flex flex-col justify-center gap-[5px] w-9 h-9 p-2 rounded-lg bg-white border border-[#E2E8F0] shadow-sm shrink-0"
+            className="pnl-burger"
             onClick={() => setSidebarOpen(true)}
             aria-label="Abrir menú"
           >
-            <span className="block w-full h-[2px] bg-neutral-600 rounded" />
-            <span className="block w-full h-[2px] bg-neutral-600 rounded" />
-            <span className="block w-full h-[2px] bg-neutral-600 rounded" />
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
           </button>
+
           <div className="min-w-0">
-            <p className="text-[10px] font-bold text-[#1D6A4A] uppercase tracking-widest leading-none mb-0.5 font-mono">
+            <p className="pnl-top-eyebrow">
+              <span className="punto" />
               Panel de cliente
             </p>
-            <h1 className="text-[17px] font-serif font-bold text-[#1A3557] leading-tight truncate">
-              {titles[tab] || "Mi panel"}
-            </h1>
+            <h1>{titles[tab] || "Mi panel"}</h1>
           </div>
-          {/* min-w-0 en vez de shrink-0: con shrink-0 el bloque del nombre no
-              cedia nunca, y un nombre largo -los hay de 38 caracteres- aplastaba
-              contra el el titulo de la pagina. Ahora el que se recorta es el
-              nombre, que ademas se lee entero al pasar el raton. */}
-          {user?.nombre && (
-            <div className="ml-auto flex items-center gap-2 min-w-0">
-              <span
-                className="hidden sm:block text-[12px] text-neutral-500 truncate max-w-[150px] lg:max-w-[220px]"
-                title={user.nombre}
-              >
-                {user.nombre}
-              </span>
-              <div className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[13px] font-bold text-[#1A3557] font-serif"
-                style={{ background: "linear-gradient(135deg, #E8F5EE, #EEF2F8)" }}>
-                {user.nombre?.[0]?.toUpperCase() || "?"}
-              </div>
+
+          {/* Solo el primer nombre. Aqui se volcaba el nombre legal completo
+              -los hay de 38 caracteres- y aplastaba contra el titulo de la
+              pagina; el entero se lee al pasar el raton. */}
+          {user && (
+            <div className="pnl-top-user ml-auto">
+              <span className="pnl-top-nombre hidden sm:block" title={nombre}>{corto}</span>
+              <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={34} />
             </div>
           )}
         </div>

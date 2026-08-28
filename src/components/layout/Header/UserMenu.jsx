@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 import Icono from "../../common/Icono";
-import Avatar from "./Avatar";
-import { datosUsuario } from "./usuario";
+import Avatar from "../../common/Avatar";
+import { datosUsuario } from "../../common/usuario";
 
 export default function UserMenu({ user }) {
   const { logout } = useAuth();

@@ -1,6 +1,6 @@
 // src/components/layout/Header/MobileMenuUserSection.jsx
-import Avatar from "./Avatar";
-import { datosUsuario } from "./usuario";
+import Avatar from "../../common/Avatar";
+import { datosUsuario } from "../../common/usuario";
 
 export default function MobileMenuUserSection({ user, onLogin, onLogout }) {
   const { nombre, iniciales, correo, foto } = datosUsuario(user);

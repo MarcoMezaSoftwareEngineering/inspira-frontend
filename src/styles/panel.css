@@ -1,0 +1,286 @@
+/* ==========================================================================
+   PANEL DE CLIENTE — mismo lenguaje visual que la portada (v4).
+   Todo va scopeado bajo .pnl para no colisionar con Tailwind ni con el
+   backoffice, que tiene su propia estética.
+   ========================================================================== */
+
+.pnl {
+  --ink: #0d2c3a;
+  --muted: #62808f;
+  --primary: #013446;
+  --primary-2: #02506b;
+  --accent: #fa943a;
+  --accent-2: #ffb066;
+  --sky: #88c4fc;
+  --sky-2: #4e9ee8;
+  --sky-soft: #e3f0fe;
+  --sun: #f9c846;
+  --green: #1d6a4a;
+  --surface: #f4f9fe;
+  --line: #d8e7f5;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  font-family: Montserrat, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+}
+.pnl * { box-sizing: border-box; }
+
+/* ── Barra lateral ───────────────────────────────────────────────────
+   El mismo fondo del hero de la portada: dos halos —celeste arriba a la
+   derecha, naranja abajo a la izquierda— sobre el degradado petróleo, y
+   encima la retícula de 46 px. Es lo que hace que el panel se reconozca
+   como el mismo sitio y no como una herramienta prestada. */
+.pnl-side {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(420px 300px at 88% 2%, rgba(136, 196, 252, .20), transparent 70%),
+    radial-gradient(360px 320px at 0% 100%, rgba(250, 148, 58, .16), transparent 68%),
+    linear-gradient(165deg, #012938 0%, #013446 46%, #02506b 100%);
+}
+.pnl-side:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+.pnl-side > * { position: relative; z-index: 1; }
+
+.pnl-side-logo img { display: block; width: 104px; height: 34px; object-fit: contain; object-position: left center; }
+
+/* Ficha del usuario: cristal sobre el degradado, como las píldoras del hero. */
+.pnl-side-user {
+  display: flex; align-items: center; gap: 11px;
+  margin: 0 12px; padding: 11px 12px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px;
+  background: rgba(255,255,255,.07);
+  backdrop-filter: blur(6px);
+}
+.pnl-side-user-datos { display: flex; flex-direction: column; min-width: 0; }
+/* Dos líneas: el nombre legal completo cabe sin estirar la barra. */
+.pnl-side-nombre {
+  font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #fff;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.pnl-side-correo {
+  margin-top: 3px; font-size: 11px; color: rgba(255,255,255,.55);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.pnl-side-grupo {
+  padding: 0 14px; margin: 20px 0 7px;
+  font-size: 9.5px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(255,255,255,.38);
+}
+
+/* Ítems del menú. El activo lleva la barra naranja de la marca a la
+   izquierda, que es el acento que la portada usa para «esto es lo tuyo». */
+.pnl-item {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 13px; margin-bottom: 2px;
+  border: 0; border-radius: 11px;
+  background: transparent; color: rgba(255,255,255,.72);
+  font: inherit; font-size: 13px; font-weight: 600; text-align: left;
+  cursor: pointer; transition: .18s var(--ease);
+}
+.pnl-item svg { color: rgba(255,255,255,.5); flex: 0 0 auto; transition: color .18s; }
+.pnl-item:hover { background: rgba(255,255,255,.1); color: #fff; }
+.pnl-item:hover svg { color: rgba(255,255,255,.85); }
+.pnl-item:focus-visible { outline: 2px solid var(--sky); outline-offset: -2px; }
+.pnl-item.activo {
+  background: rgba(255,255,255,.14);
+  color: #fff; font-weight: 750;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
+}
+.pnl-item.activo svg { color: var(--sky); }
+.pnl-item.activo:before {
+  content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 18px; border-radius: 0 3px 3px 0; background: var(--accent);
+}
+
+.pnl-side-pie { border-top: 1px solid rgba(255,255,255,.1); }
+.pnl-side-pie .pnl-item { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.6); }
+.pnl-salir:hover { background: rgba(200, 60, 70, .55) !important; color: #fff !important; }
+.pnl-salir:hover svg { color: #fff !important; }
+.pnl-side-dominio { padding: 6px 14px 0; font-size: 10px; color: rgba(255,255,255,.24); letter-spacing: .04em; }
+
+/* ── Barra superior ──────────────────────────────────────────────────
+   Cristal, como el nav flotante de la portada. */
+.pnl-top {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(14px);
+}
+.pnl-top-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 9.5px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 3px;
+}
+.pnl-top-eyebrow .punto { width: 5px; height: 5px; border-radius: 999px; background: currentColor; }
+.pnl-top h1 {
+  margin: 0; font-family: Merriweather, Georgia, serif;
+  font-size: 19px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15;
+  color: var(--primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pnl-top-user { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.pnl-top-nombre {
+  font-size: 12px; font-weight: 650; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+}
+.pnl-burger {
+  display: none; flex: 0 0 auto;
+  width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 11px;
+  background: #fff; cursor: pointer; color: var(--primary);
+  align-items: center; justify-content: center;
+}
+
+/* ── Cabecera de sección y tarjetas ─────────────────────────────────── */
+.pnl-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.pnl-head h2 {
+  margin: 0; font-family: Merriweather, Georgia, serif;
+  font-size: 24px; font-weight: 800; letter-spacing: -.028em; color: var(--primary);
+}
+.pnl-head p { margin: 5px 0 0; font-size: 13.5px; color: var(--muted); }
+
+.pnl-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 16px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: #fff; color: var(--primary);
+  font: inherit; font-size: 12.5px; font-weight: 750; cursor: pointer;
+  transition: .2s var(--ease);
+}
+.pnl-btn:hover { border-color: var(--sky-2); background: var(--sky-soft); transform: translateY(-1px); }
+.pnl-btn svg { color: var(--sky-2); }
+
+/* CTA naranja, el mismo de «Agenda tu asesoría». */
+.pnl-btn-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 18px; border: 0; border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), #e07f22);
+  color: #fff; font: inherit; font-size: 12.5px; font-weight: 800; cursor: pointer;
+  box-shadow: 0 8px 18px rgba(250, 148, 58, .28); transition: .2s var(--ease);
+  text-decoration: none;
+}
+.pnl-btn-cta:hover { transform: translateY(-2px); box-shadow: 0 13px 26px rgba(250, 148, 58, .36); }
+
+.pnl-card {
+  border: 1px solid var(--line); border-radius: 20px; background: #fff;
+  box-shadow: 0 10px 28px rgba(1, 52, 70, .06);
+  display: flex; flex-direction: column;
+  transition: .22s var(--ease);
+}
+.pnl-card-link:hover { transform: translateY(-3px); border-color: var(--sky-2); box-shadow: 0 18px 40px rgba(1, 52, 70, .12); }
+.pnl-card-cuerpo { padding: 20px 20px 16px; flex: 1; display: flex; flex-direction: column; gap: 11px; }
+.pnl-card h3 { margin: 0; font-size: 15.5px; font-weight: 750; line-height: 1.35; color: var(--primary); }
+.pnl-card-desc { margin: 4px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.pnl-card-pie {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 13px 20px; border-top: 1px solid #eef4f9;
+}
+.pnl-card-meta { font-size: 11px; color: #8ba6b4; min-width: 0; line-height: 1.5; }
+.pnl-card-meta .codigo { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Distintivos. Mismo repertorio de formas que las píldoras de la portada. */
+.pnl-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+  border: 1px solid transparent;
+}
+.pnl-chip .punto { width: 6px; height: 6px; border-radius: 999px; background: currentColor; flex: 0 0 auto; }
+.pnl-chip-etapa { background: var(--sky-soft); color: #17608f; border-color: rgba(78,158,232,.28); }
+.pnl-chip-tipo  { background: #eef4f7; color: #2c4a58; border-color: rgba(6,63,80,.12); }
+.pnl-chip-ok    { background: #e7f5ed; color: #15603f; border-color: rgba(29,106,74,.22); }
+.pnl-chip-aviso { background: #fdf3e3; color: #96591a; border-color: rgba(250,148,58,.3); }
+.pnl-chip-alto  { background: #fdecec; color: #a5262f; border-color: rgba(190,60,66,.25); }
+.pnl-chip-info  { background: var(--sky-soft); color: #17608f; border-color: rgba(78,158,232,.28); }
+.pnl-chip-titular { background: #fdf3e3; color: #96591a; border-color: rgba(250,148,58,.3); }
+
+/* ── Estado vacío ────────────────────────────────────────────────────
+   Era un cuadro gris con un maletín gris. Es la primera pantalla que ve
+   quien acaba de entrar y todavía no ha contratado nada, así que aquí es
+   donde el panel tiene que parecerse a la portada y ofrecerle el paso
+   siguiente en vez de dejarle mirando un vacío. */
+.pnl-vacio {
+  position: relative; overflow: hidden;
+  border-radius: 24px; padding: 52px 32px; text-align: center;
+  background:
+    radial-gradient(520px 320px at 82% 6%, rgba(136, 196, 252, .22), transparent 70%),
+    radial-gradient(420px 340px at 6% 96%, rgba(250, 148, 58, .18), transparent 68%),
+    linear-gradient(150deg, #012938 0%, #013446 46%, #02506b 100%);
+}
+.pnl-vacio:before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: linear-gradient(to bottom, black, transparent 84%);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 84%);
+}
+.pnl-vacio > * { position: relative; z-index: 1; }
+.pnl-vacio-icono {
+  width: 62px; height: 62px; margin: 0 auto 20px;
+  border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+  color: var(--sky); backdrop-filter: blur(6px);
+}
+.pnl-vacio h3 {
+  margin: 0 0 10px; font-family: Merriweather, Georgia, serif;
+  font-size: 25px; font-weight: 800; letter-spacing: -.03em; color: #fff;
+}
+.pnl-vacio p { margin: 0 auto 26px; max-width: 430px; font-size: 14px; line-height: 1.65; color: rgba(255,255,255,.72); }
+.pnl-vacio-acciones { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; }
+.pnl-vacio-fantasma {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 18px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08);
+  color: #fff; font: inherit; font-size: 12.5px; font-weight: 700;
+  cursor: pointer; text-decoration: none; backdrop-filter: blur(6px);
+  transition: .2s var(--ease);
+}
+.pnl-vacio-fantasma:hover { background: rgba(255,255,255,.16); transform: translateY(-2px); }
+
+/* ── Estados de carga y error ───────────────────────────────────────── */
+.pnl-cargando { padding: 56px 24px; text-align: center; border: 1px solid var(--line); border-radius: 20px; background: #fff; }
+.pnl-spinner {
+  width: 26px; height: 26px; margin: 0 auto 14px;
+  border: 2.5px solid var(--sky-soft); border-top-color: var(--sky-2);
+  border-radius: 999px; animation: pnlGiro .8s linear infinite;
+}
+@keyframes pnlGiro { to { transform: rotate(360deg); } }
+.pnl-error {
+  padding: 15px 18px; border-radius: 16px;
+  border: 1px solid rgba(190,60,66,.25); background: #fdecec; color: #a5262f;
+  font-size: 13px; font-weight: 600;
+}
+.pnl-nota { font-size: 11.5px; color: #8ba6b4; }
+
+.pnl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
+
+@media (max-width: 767px) {
+  .pnl-burger { display: inline-flex; }
+  .pnl-top { padding: 11px 15px; }
+  .pnl-top h1 { font-size: 16px; }
+  .pnl-head h2 { font-size: 20px; }
+  .pnl-vacio { padding: 40px 20px; border-radius: 20px; }
+  .pnl-vacio h3 { font-size: 21px; }
+  .pnl-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pnl-card-link:hover, .pnl-btn:hover, .pnl-btn-cta:hover, .pnl-vacio-fantasma:hover { transform: none; }
+  .pnl-spinner { animation-duration: 2s; }
+}

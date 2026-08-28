@@ -1,16 +1,23 @@
 // src/pages/panel/components/SidebarItem.jsx
-export default function SidebarItem({ label, active, onClick, icon }) {
+import Icono from "../../../components/common/Icono";
+
+/**
+ * Un ítem del menú lateral.
+ *
+ * Los iconos eran emoji (👤 📁 🎓). Cada sistema operativo los dibuja a su
+ * manera y con su propio color, así que el menú se veía distinto en cada
+ * ordenador y nunca combinaba con la paleta. Ahora usa el mismo juego de
+ * trazo que la portada, que hereda el color del contenedor.
+ */
+export default function SidebarItem({ label, active, onClick, icono }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={
-        "w-full text-left flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-medium rounded-[9px] mb-0.5 transition-all " +
-        (active
-          ? "bg-white/20 text-white font-semibold shadow-sm"
-          : "text-white/70 hover:bg-white/10 hover:text-white")
-      }
+      aria-current={active ? "page" : undefined}
+      className={`pnl-item${active ? " activo" : ""}`}
     >
-      {icon && <span className="text-[15px] shrink-0 w-5 text-center">{icon}</span>}
+      {icono && <Icono nombre={icono} size={17} />}
       {label}
     </button>
   );

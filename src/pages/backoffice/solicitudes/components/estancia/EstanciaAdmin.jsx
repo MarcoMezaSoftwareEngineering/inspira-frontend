@@ -12,6 +12,7 @@ import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backoff
 import Invitados from "../Invitados";
 import AcompanantesAdmin from "./AcompanantesAdmin";
 import GeneradoresEstancia from "./GeneradoresEstancia";
+import RecordatorioEstancia from "./RecordatorioEstancia";
 import { abrirArchivo } from "../../../../../services/archivos";
 import VisorArchivo from "../../../../../components/common/VisorArchivo";
 import { dialog } from "../../../../../services/dialogService";
@@ -1222,6 +1223,9 @@ export default function EstanciaAdmin({ idSolicitud }) {
       <Invitados idSolicitud={idSolicitud} numero="0b" />
       <Datos exp={exp} onGuardar={guardar} />
       <Documentos id={idSolicitud} docs={docs} onCambio={cargar} />
+      {/* Va justo despues de los documentos: es donde el asesor acaba de ver
+          lo que falta y donde tiene sentido reclamarselo. */}
+      <RecordatorioEstancia id={idSolicitud} />
       <AcompanantesAdmin idSolicitud={idSolicitud} exp={exp} numero="3" />
       <CerrarCarpeta id={idSolicitud} exp={exp} docs={docs} onHecho={cargar} />
       <PasarAAbogada id={idSolicitud} exp={exp} onHecho={cargar} />

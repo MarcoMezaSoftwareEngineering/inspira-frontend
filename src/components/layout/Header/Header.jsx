@@ -19,7 +19,7 @@ export default function Header() {
   const [path, setPath] = useState(
     typeof window !== "undefined" ? window.location.pathname : "/"
   );
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -194,13 +194,21 @@ export default function Header() {
           </nav>
 
           <div className="v4-nav-actions">
-            {!user && (
+            {/* Mientras se resuelve /auth/me no se decide nada: pintar el botón
+                de entrar y cambiarlo por el avatar medio segundo después hacía
+                saltar la barra en cada carga de página a quien ya había
+                entrado. Al deslogueado no le cuesta nada, porque sin token el
+                contexto se resuelve sin ir a la red. */}
+            {loading ? (
+              <span className="v4-user-cargando" aria-hidden="true" />
+            ) : user ? (
+              <UserMenu user={user} />
+            ) : (
               <button className="v4-login-btn" type="button" onClick={loginGoogle}>
                 <span className="v4-login-long">Iniciar con Google</span>
                 <span className="v4-login-short">Iniciar</span>
               </button>
             )}
-            {user && <UserMenu user={user} />}
             <button
               className="v4-menu-btn"
               type="button"

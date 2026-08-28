@@ -10,8 +10,15 @@ export function AuthProvider({ children }) {
 
   const fetchMe = async () => {
     try {
+      const token = localStorage.getItem("token");
+
+      // Se mandan las dos credenciales: la cookie de sesión OAuth y el JWT.
+      // La sesión de passport vive en memoria del backend y desaparece en cada
+      // reinicio, así que sin el Bearer el usuario aparecía deslogueado en la
+      // cabecera aunque su token siguiera siendo válido.
       const res = await fetch(`${API}/auth/me`, {
         credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
       if (!res.ok) {
@@ -20,7 +27,9 @@ export function AuthProvider({ children }) {
       }
 
       const data = await res.json();
-      setUser(data.user);
+      setUser(data.ok ? data.user : null);
+    } catch {
+      setUser(null);
     } finally {
       setLoading(false);
     }

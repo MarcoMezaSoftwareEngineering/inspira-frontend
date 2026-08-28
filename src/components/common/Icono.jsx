@@ -149,6 +149,27 @@ const PATHS = {
   destello: (
     <path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z" />
   ),
+  panel: (
+    <>
+      <rect x="3" y="3" width="7.5" height="7.5" rx="1.8" />
+      <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8" />
+      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8" />
+      <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8" />
+    </>
+  ),
+  salir: (
+    <>
+      <path d="M15 3h3.5A2.5 2.5 0 0 1 21 5.5v13a2.5 2.5 0 0 1-2.5 2.5H15" />
+      <path d="M10 17l-5-5 5-5" />
+      <path d="M5 12h11" />
+    </>
+  ),
+  usuario: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
+    </>
+  ),
 };
 
 export default function Icono({ nombre, size = 24, className = "", strokeWidth = 1.7 }) {

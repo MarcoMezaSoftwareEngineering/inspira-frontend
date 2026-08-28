@@ -1,14 +1,9 @@
 // src/components/layout/Header/MobileMenuUserSection.jsx
-
-function getUserInfo(user) {
-  const nombre = user?.nombre || user?.name || user?.nombres || "Usuario";
-  const correo = user?.email || user?.correo || "";
-  const foto = user?.foto || user?.picture || user?.avatarUrl || null;
-  return { nombre, correo, foto };
-}
+import Avatar from "./Avatar";
+import { datosUsuario } from "./usuario";
 
 export default function MobileMenuUserSection({ user, onLogin, onLogout }) {
-  const { nombre, correo, foto } = getUserInfo(user);
+  const { nombre, iniciales, correo, foto } = datosUsuario(user);
 
   return (
     <div className="mt-auto flex flex-col gap-4">
@@ -24,25 +19,19 @@ export default function MobileMenuUserSection({ user, onLogin, onLogout }) {
 
       {user && (
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            {foto ? (
-              <img
-                src={foto}
-                alt={nombre}
-                className="h-10 w-10 rounded-full object-cover"
-              />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-primary font-bold">
-                {(nombre?.[0] || "U").toUpperCase()}
-              </div>
-            )}
+          <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3">
+            <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={40} />
 
-            <div>
-              <div className="text-sm font-semibold text-primary">
+            {/* min-w-0 es lo que permite que truncate funcione dentro del flex:
+                sin él, un nombre legal completo ensancha el cajón del menú. */}
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-primary" title={nombre}>
                 {nombre}
               </div>
               {correo && (
-                <div className="text-xs text-neutral-500">{correo}</div>
+                <div className="truncate text-xs text-neutral-500" title={correo}>
+                  {correo}
+                </div>
               )}
             </div>
           </div>

@@ -6,6 +6,8 @@
 // la firma su representante legal, que casi siempre es el titular.
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boFetch } from "../../../../../services/backofficeApi";
+import VisorArchivo from "../../../../../components/common/VisorArchivo";
+import { dialog } from "../../../../../services/dialogService";
 import {
   REPRESENTANTE, valoresEX00Acompanante, casillasEX00Acompanante,
   faltaParaEX00Acompanante, nombreAcompanante, domicilioAcompanante,
@@ -228,7 +230,7 @@ function Dato({ k, v }) {
   );
 }
 
-function FilaDoc({ base, def, onCambio }) {
+function FilaDoc({ base, def, onCambio, onVer }) {
   const [ocupado, setOcupado] = useState(false);
   const est = ESTADO_DOC[def.estado] || ESTADO_DOC.SIN_SUBIR;
   const ultimo = def.archivos[0];
@@ -252,11 +254,10 @@ function FilaDoc({ base, def, onCambio }) {
     <div className="flex items-center gap-2.5 py-2 border-b border-neutral-100 flex-wrap">
       <span className="text-[12.5px] text-neutral-800 min-w-0 flex-1">{def.etiqueta}</span>
       {ultimo && (
-        <a href={`/api${base}/documentos/archivo/${ultimo.id_documento}`}
-          target="_blank" rel="noreferrer"
+        <button type="button" onClick={() => onVer(ultimo)}
           className="text-[11.5px] text-[#046C8C] hover:underline truncate max-w-[45%]">
           {ultimo.nombre}
-        </a>
+        </button>
       )}
       <span className={`text-[11px] font-semibold ${est.clase}`}>{est.label}</span>
       {ultimo && (
@@ -275,6 +276,34 @@ function FilaDoc({ base, def, onCambio }) {
 
 function Ficha({ idSolicitud, a, exp, abierta, onAbrir, onCambio }) {
   const base = `/backoffice/solicitudes/${idSolicitud}/estancia/acompanantes/${a.id_acompanante}`;
+  const [viendo, setViendo] = useState(null);
+  const [abriendoCarpeta, setAbriendoCarpeta] = useState(false);
+
+  /**
+   * Su subcarpeta en Drive, dentro de la del titular. Cada acompañante tiene
+   * la suya porque un expediente con familia se revisa persona a persona.
+   *
+   * Sin "noopener": con esa opción `window.open` devuelve null y no queda
+   * referencia para mandar la pestaña a Drive. Y si el navegador la bloquea
+   * igual —en el móvil pasa casi siempre— se navega en la misma pestaña.
+   */
+  async function abrirCarpeta(e) {
+    e.stopPropagation();
+    const ventana = window.open("", "_blank");
+    if (ventana) { try { ventana.opener = null; } catch { /* da igual */ } }
+
+    setAbriendoCarpeta(true);
+    const r = await boGET(`${base}/carpeta-drive`);
+    setAbriendoCarpeta(false);
+
+    if (r?.ok && r.url) {
+      if (ventana) ventana.location.replace(r.url);
+      else window.location.assign(r.url);
+      return;
+    }
+    ventana?.close();
+    dialog.toast(r?.msg || "No se pudo abrir la carpeta en Drive", "error");
+  }
   const rev = a.revision || {};
   const docs = a.documentos || {};
   const ranuras = Object.entries(docs.ranuras || {});
@@ -332,12 +361,33 @@ function Ficha({ idSolicitud, a, exp, abierta, onAbrir, onCambio }) {
             <p key={t} className="text-[11.5px] text-amber-700 leading-relaxed mt-2">⚠ {t}</p>
           ))}
 
-          <p className="text-[12px] font-semibold text-neutral-700 mt-4 mb-1">Sus documentos</p>
+          <div className="flex items-center gap-2 mt-4 mb-1">
+            <p className="text-[12px] font-semibold text-neutral-700">Sus documentos</p>
+            <button
+              type="button"
+              onClick={abrirCarpeta}
+              disabled={abriendoCarpeta}
+              className="ml-auto text-[11px] px-2 py-1 rounded-lg border border-neutral-300
+                hover:bg-neutral-50 disabled:opacity-50 shrink-0"
+            >
+              {abriendoCarpeta ? "Abriendo…" : "📁 Su carpeta en Drive"}
+            </button>
+          </div>
           <div>
             {ranuras.map(([clave, def]) => (
-              <FilaDoc key={clave} base={base} def={def} onCambio={onCambio} />
+              <FilaDoc key={clave} base={base} def={def} onCambio={onCambio} onVer={setViendo} />
             ))}
           </div>
+
+          {viendo && (
+            <VisorArchivo
+              interno
+              ruta={`${base}/documentos/archivo/${viendo.id_documento}`}
+              nombre={viendo.nombre}
+              mime={viendo.mime}
+              onCerrar={() => setViendo(null)}
+            />
+          )}
 
           <p className="text-[12px] font-semibold text-neutral-700 mt-4 mb-2">Sus impresos</p>
           <div className="space-y-2">

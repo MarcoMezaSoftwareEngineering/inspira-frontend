@@ -8,6 +8,7 @@
 // el trozo de URL del que cuelgan sus documentos.
 import { useRef, useState } from "react";
 import { apiUpload, apiDELETE } from "../../../../services/api";
+import VisorArchivo from "../../../../components/common/VisorArchivo";
 
 const ESTADO_DOC = {
   SIN_SUBIR: { label: "Pendiente",   bg: "bg-amber-50",   text: "text-amber-700",   borde: "border-neutral-200 bg-white" },
@@ -41,6 +42,9 @@ export function ResumenDocumentos({ ranuras }) {
 }
 
 export default function TarjetaDocumento({ base, clave, def, onCambio }) {
+  // Qué documento está mirando. El asesorado también merece verlos sin
+  // descargarlos: son suyos.
+  const [viendo, setViendo] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
   const [encima, setEncima] = useState(false);
   const [error, setError] = useState("");
@@ -106,11 +110,10 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
         <div className="space-y-1">
           {def.archivos.map((a) => (
             <div key={a.id_documento} className="flex items-center gap-2">
-              <a href={`/api${base}/documentos/archivo/${a.id_documento}`}
-                target="_blank" rel="noreferrer"
-                className="text-[12px] text-[#046C8C] hover:underline truncate flex-1">
+              <button type="button" onClick={() => setViendo(a)}
+                className="text-[12px] text-[#046C8C] hover:underline truncate flex-1 text-left">
                 📄 {a.nombre}
-              </a>
+              </button>
               {/* Quién lo subió. Con dos personas entrando al expediente,
                   «lo subió el cliente» ya no dice de quién fue. */}
               {a.subido_por_quien && a.subido_por !== "ASESOR" && (
@@ -165,6 +168,15 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
       )}
 
       {error && <p className="text-[12px] text-red-600">{error}</p>}
+
+      {viendo && (
+        <VisorArchivo
+          ruta={`${base}/documentos/archivo/${viendo.id_documento}`}
+          nombre={viendo.nombre}
+          mime={viendo.mime}
+          onCerrar={() => setViendo(null)}
+        />
+      )}
     </div>
   );
 }

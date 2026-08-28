@@ -7,7 +7,7 @@
 // no sirven para estancia ni para modificatoria. Este recibe la ruta, así que
 // vale para cualquiera de los tres.
 import { useEffect, useState } from "react";
-import { pedirArchivo, descargarArchivo } from "../../services/archivos";
+import { pedirArchivo, descargarArchivo, abrirArchivo } from "../../services/archivos";
 
 /** Cuando el backend no guardó el mime, la extensión lo dice igual de bien. */
 function tipoDe(mime, nombre) {
@@ -30,6 +30,12 @@ export default function VisorArchivo({ ruta, nombre, mime, interno = false, onCe
   const [cargando, setCargando] = useState(tipo !== "otro");
   const [error, setError] = useState("");
   const [src, setSrc] = useState(null);
+  // Chrome pinta el PDF con su propio visor interno, y hay entornos donde no
+  // arranca y deja el marco en gris. No hay forma fiable de detectarlo desde
+  // fuera, asi que si pasados unos segundos no ha dicho "cargado", se ofrece
+  // la salida en vez de dejar a la persona mirando un rectangulo vacio.
+  const [marcoListo, setMarcoListo] = useState(false);
+  const [tardando, setTardando] = useState(false);
 
   useEffect(() => {
     const handler = (e) => e.key === "Escape" && onCerrar();
@@ -64,18 +70,34 @@ export default function VisorArchivo({ ruta, nombre, mime, interno = false, onCe
     };
   }, [ruta, interno, tipo]);
 
+  useEffect(() => {
+    if (tipo !== "pdf" || !src || marcoListo) return;
+    const t = setTimeout(() => setTardando(true), 3500);
+    return () => clearTimeout(t);
+  }, [tipo, src, marcoListo]);
+
   return (
     <div
       className="fixed inset-0 z-[60] flex flex-col bg-black/70 backdrop-blur-sm"
       onClick={onCerrar}
     >
       <div
-        className="flex items-center gap-3 px-4 py-3 bg-white/95 shrink-0"
+        className="flex items-center gap-2 px-3 py-2.5 bg-white/95 shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-[13px] font-semibold text-neutral-900 truncate flex-1" title={nombre}>
+        <p className="text-[13px] font-semibold text-neutral-900 truncate flex-1 min-w-0" title={nombre}>
           📄 {nombre}
         </p>
+        {/* Safari en iOS no pinta los PDF dentro de un iframe: se queda en
+            blanco. Este botón es la salida cuando eso pasa, y no estorba a
+            quien lo ve bien. */}
+        <button
+          type="button"
+          onClick={() => abrirArchivo(ruta, { interno, nombre })}
+          className="text-[12px] px-3 py-1.5 rounded-lg border border-neutral-300 hover:bg-neutral-50 shrink-0"
+        >
+          Abrir en otra ventana
+        </button>
         <button
           type="button"
           onClick={() => descargarArchivo(ruta, { interno, nombre })}
@@ -125,7 +147,29 @@ export default function VisorArchivo({ ruta, nombre, mime, interno = false, onCe
         )}
 
         {!cargando && !error && src && tipo === "pdf" && (
-          <iframe src={src} title={nombre} className="w-full h-full rounded-lg bg-white" />
+          <div className="relative w-full h-full">
+            <iframe
+              src={src}
+              title={nombre}
+              onLoad={() => setMarcoListo(true)}
+              className="w-full h-full rounded-lg bg-white"
+            />
+            {tardando && !marcoListo && (
+              <div className="absolute inset-x-0 bottom-0 p-3 bg-white/95 border-t border-neutral-200
+                text-center rounded-b-lg">
+                <p className="text-[12px] text-neutral-600 mb-2">
+                  ¿No se ve el documento? Tu navegador puede estar bloqueando la vista previa.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => abrirArchivo(ruta, { interno, nombre })}
+                  className="text-[12px] px-3 py-1.5 rounded-lg bg-[#1D6A4A] text-white hover:bg-[#17573c]"
+                >
+                  Abrirlo en otra pestaña
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
         {!cargando && !error && src && tipo === "imagen" && (

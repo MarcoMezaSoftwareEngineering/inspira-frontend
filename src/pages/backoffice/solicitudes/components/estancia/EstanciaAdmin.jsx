@@ -624,13 +624,28 @@ function Documentos({ id, docs, onCambio }) {
    *
    * La pestaña se pide ANTES de la llamada: si se abriera al recibir la
    * respuesta, el navegador la trataría como emergente y la bloquearía.
+   *
+   * Sin "noopener": con esa opción `window.open` devuelve null por
+   * especificación, y sin referencia no hay forma de mandar la pestaña a Drive
+   * después. El aislamiento se consigue anulando `opener` a mano.
+   *
+   * Y si aun así no hay pestaña —en el móvil las emergentes se bloquean casi
+   * siempre— se navega en la misma. Es peor que abrir al lado, pero llega.
    */
   async function abrirCarpeta() {
-    const ventana = window.open("", "_blank", "noopener");
+    const ventana = window.open("", "_blank");
+    if (ventana) { try { ventana.opener = null; } catch { /* da igual */ } }
+
     setAbriendoCarpeta(true);
     const r = await boGET(`/backoffice/solicitudes/${id}/estancia/carpeta-drive`);
     setAbriendoCarpeta(false);
-    if (r?.ok && r.url) { if (ventana) ventana.location = r.url; return; }
+
+    if (r?.ok && r.url) {
+      if (ventana) ventana.location.replace(r.url);
+      else window.location.assign(r.url);
+      return;
+    }
+
     ventana?.close();
     dialog.toast(r?.msg || "No se pudo abrir la carpeta en Drive", "error");
   }

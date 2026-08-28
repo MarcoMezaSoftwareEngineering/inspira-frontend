@@ -72,10 +72,18 @@ export async function abrirArchivo(ruta, { interno = false, nombre } = {}) {
     return;
   }
 
+  // Dos cosas, y las dos importan:
+  //
   // La pestaña se abre AHORA, no después del await: si se abriera al terminar
   // la descarga, el navegador lo trataría como una ventana emergente no pedida
   // por la persona y la bloquearía.
-  const ventana = window.open("", "_blank", "noopener");
+  //
+  // Y va SIN "noopener". Con esa opción, `window.open` devuelve null por
+  // especificación —quien abre no puede conservar referencia a la ventana—, así
+  // que no había forma de mandarla a ningún sitio después. La referencia hace
+  // falta, y el aislamiento se consigue anulando `opener` a mano.
+  const ventana = window.open("", "_blank");
+  if (ventana) { try { ventana.opener = null; } catch { /* da igual */ } }
 
   try {
     const r = await fetch(`${API_URL}${ruta}`, {

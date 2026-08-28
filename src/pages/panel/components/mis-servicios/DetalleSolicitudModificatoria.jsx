@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { apiGET, apiPUT, apiPOST, apiUpload, apiDELETE } from "../../../../services/api";
 import { abrirArchivo } from "../../../../services/archivos";
+import VisorArchivo from "../../../../components/common/VisorArchivo";
 
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
@@ -293,6 +294,9 @@ const ESTADO_DOC = {
 };
 
 function TarjetaDocumento({ id, clave, def, onCambio }) {
+  // El asesorado ve sus documentos con el mismo visor que en estancia:
+  // antes aqui se abrian en otra pestaña y en estancia no, sin motivo.
+  const [viendo, setViendo] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState("");
   const cfg = ESTADO_DOC[def.estado] || ESTADO_DOC.SIN_SUBIR;
@@ -355,8 +359,8 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
 
       {def.archivos.map((a) => (
         <div key={a.id_documento} className="flex items-center gap-2">
-          <button type="button" onClick={() => abrirArchivo(`/solicitudes/${id}/modificatoria/documentos/archivo/${a.id_documento}`, { nombre: a.nombre })}
-            className="text-[11.5px] text-[#046C8C] hover:underline truncate flex-1">
+          <button type="button" onClick={() => setViendo(a)}
+            className="text-[11.5px] text-[#046C8C] hover:underline truncate flex-1 text-left">
             📄 {a.nombre}
           </button>
           {a.subido_por === "CLIENTE" && (
@@ -365,6 +369,15 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
           )}
         </div>
       ))}
+
+      {viendo && (
+        <VisorArchivo
+          ruta={`/solicitudes/${id}/modificatoria/documentos/archivo/${viendo.id_documento}`}
+          nombre={viendo.nombre}
+          mime={viendo.mime}
+          onCerrar={() => setViendo(null)}
+        />
+      )}
 
       {!esDelAsesor && (
         <label className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold

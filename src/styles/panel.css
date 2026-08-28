@@ -53,6 +53,18 @@
 }
 .pnl-side > * { position: relative; z-index: 1; }
 
+/* El logotipo es tinta azul marino sobre transparente: pensado para fondo
+   claro. Puesto tal cual sobre el degradado petroleo de la barra, la palabra
+   "inspira" se perdia entera y solo quedaban visibles el punto y el avion
+   naranjas. Va sobre una placa blanca, que ademas le da el aire de sello de
+   marca que tiene el nav flotante de la portada. */
+.pnl-side-logo {
+  display: inline-flex; align-items: center;
+  padding: 9px 14px;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(1, 20, 30, .28);
+}
 .pnl-side-logo img { display: block; width: 104px; height: 34px; object-fit: contain; object-position: left center; }
 
 /* Ficha del usuario: cristal sobre el degradado, como las píldoras del hero. */
@@ -78,7 +90,7 @@
 .pnl-side-grupo {
   padding: 0 14px; margin: 20px 0 7px;
   font-size: 9.5px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
-  color: rgba(255,255,255,.38);
+  color: rgba(255,255,255,.5);
 }
 
 /* Ítems del menú. El activo lleva la barra naranja de la marca a la
@@ -112,6 +124,24 @@
 .pnl-salir:hover { background: rgba(200, 60, 70, .55) !important; color: #fff !important; }
 .pnl-salir:hover svg { color: #fff !important; }
 .pnl-side-dominio { padding: 6px 14px 0; font-size: 10px; color: rgba(255,255,255,.24); letter-spacing: .04em; }
+
+/* Cabecera de la ficha de perfil. Llevaba un degradado propio
+   (#1A3557 -> #023A4B) que no sale en ningun otro sitio del rediseño. */
+.pnl-perfil-cab {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(360px 220px at 88% 0%, rgba(136, 196, 252, .20), transparent 70%),
+    radial-gradient(300px 240px at 2% 100%, rgba(250, 148, 58, .16), transparent 68%),
+    linear-gradient(150deg, #012938 0%, #013446 48%, #02506b 100%);
+}
+.pnl-perfil-cab:before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+.pnl-perfil-cab > * { position: relative; z-index: 1; }
 
 /* ── Barra superior ──────────────────────────────────────────────────
    Cristal, como el nav flotante de la portada. */

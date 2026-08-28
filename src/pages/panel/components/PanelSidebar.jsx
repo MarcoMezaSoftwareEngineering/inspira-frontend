@@ -37,8 +37,10 @@ export default function PanelSidebar({
       {/* El logotipo de verdad, el mismo del nav. Antes era la palabra
           "inspira" recompuesta con dos <span> y una tipografía distinta, así
           que la marca no coincidía con la de la portada. */}
-      <div className="pnl-side-logo px-4 pt-5 pb-4 shrink-0">
-        <img src={logo} alt="Inspira Legal" />
+      <div className="px-4 pt-5 pb-4 shrink-0">
+        <div className="pnl-side-logo">
+          <img src={logo} alt="Inspira Legal" />
+        </div>
       </div>
 
       <div className="pnl-side-user shrink-0">

@@ -7,6 +7,8 @@ import {
   Combobox, FL, TI, ErrMsg,
   TelefonoInput, SliderPresupuesto, MesAnioSelect,
 } from "./perfil.shared";
+import Avatar from "../../../components/common/Avatar";
+import { datosUsuario } from "../../../components/common/usuario";
 
 function fmtFecha(iso) {
   if (!iso) return null;
@@ -188,23 +190,23 @@ export default function PerfilCliente({ user, onUserUpdated }) {
     const de = user.datos_extra || {};
     const tp = parseTelefono(user.telefono);
     const paisObj = PAISES.find(p => p.nombre === user.pais_origen);
+    const u = datosUsuario(user);
 
     return (
       <div className="space-y-3">
         <div className="bg-white border border-neutral-100 rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-[#1A3557] to-[#023A4B] px-5 py-4 flex items-center justify-between gap-4">
+          <div className="pnl-perfil-cab px-5 py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                <span className="text-xl font-bold text-white">
-                  {(user.nombre || user.email_contacto || "?")[0].toUpperCase()}
-                </span>
-              </div>
+              {/* Se pintaba aqui la inicial a mano, asi que esta ficha seguia
+                  con la letra en un cuadro mientras la barra lateral y la
+                  cabecera ya mostraban la foto de Google. */}
+              <Avatar foto={u.foto} iniciales={u.iniciales} nombre={u.nombre} size={48} />
               <div className="min-w-0">
                 {/* Los nombres completos peruanos llevan dos apellidos y pasan
                     de 35 caracteres: sin sitio para respirar, el nombre, el
                     correo y la fecha se apelotonaban en tres lineas pegadas. */}
-                <p className="text-sm font-bold text-white leading-snug break-words" title={user.nombre}>
-                  {user.nombre || "Sin nombre"}
+                <p className="text-sm font-bold text-white leading-snug break-words" title={u.nombre}>
+                  {u.nombre}
                 </p>
                 <p className="text-xs text-white/60 truncate mt-1" title={user.email_contacto}>
                   {user.email_contacto}

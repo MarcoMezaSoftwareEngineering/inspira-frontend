@@ -427,6 +427,24 @@ function Datos({ exp, onGuardar }) {
         </>
       )}
 
+      {/* De esta fecha salen los tres plazos del trámite, así que va sola y
+          arriba: si está mal, todas las demás lo están. */}
+      <div className="flex items-center gap-2 mt-4 mb-2">
+        <p className="text-[11.5px] font-semibold text-neutral-600">Plazos</p>
+        <span className="flex-1 h-px bg-neutral-100" />
+      </div>
+      <label className="flex flex-col gap-1">
+        <span className="text-[11px] text-neutral-500">
+          Caducidad del permiso actual (TIE)</span>
+        <input type="date" className={`${input} w-44`} defaultValue={exp.venc_tie || ""}
+          onBlur={(e) => onGuardar({ venc_tie: e.target.value })} />
+      </label>
+      <p className="text-[10.5px] text-neutral-400 mt-1.5">
+        Se puede presentar desde dos meses antes y hasta tres meses después, pero conviene
+        hacerlo antes de que caduque: entre la caducidad y la resolución no hay permiso en
+        vigor.
+      </p>
+
       {/* Seguimiento en la sede */}
       <div className="flex items-center gap-2 mt-4 mb-2">
         <p className="text-[11.5px] font-semibold text-neutral-600">

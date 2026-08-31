@@ -1051,9 +1051,25 @@ function PasarAAbogada({ id, exp, onHecho }) {
  * Lo ideal sería que se disparase solo al dejar el archivo en la carpeta de
  * Drive; mientras esa parte no exista, se sube desde aquí.
  */
-function Presentado({ id, docs, onCambio }) {
+function Presentado({ id, docs, ext, onCambio }) {
   const [subiendo, setSubiendo] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [adoptando, setAdoptando] = useState(null);
+
+  // Lo que el vigilante encontró en la carpeta y nadie ha clasificado. Puede
+  // haber varios: ahí caen también requerimientos y resoluciones, así que
+  // cuál es el justificante lo dice una persona y no el nombre del archivo.
+  const candidatos = (ext || []).filter((r) => r.sin_clasificar);
+
+  async function adoptar(idRegistro) {
+    setAdoptando(idRegistro);
+    const r = await boPOST(
+      `/backoffice/solicitudes/${id}/estancia/extranjeria/${idRegistro}/es-justificante`,
+    );
+    setAdoptando(null);
+    if (r?.ok) { dialog.toast(r.msg || "Guardado", "exito"); onCambio(); }
+    else dialog.toast(r?.msg || "No se pudo guardar", "error");
+  }
 
   const ranura = docs?.ranuras?.justificante;
   const archivo = ranura?.archivos?.[0] || null;
@@ -1090,6 +1106,33 @@ function Presentado({ id, docs, onCambio }) {
             presentado
           </span>
         ) : null} />
+
+      {!archivo && candidatos.length > 0 && (
+        <div className="mb-3 rounded-lg border border-[#1A3557]/25 bg-[#EEF2F8] px-3 py-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-[#1A3557]">
+            Encontrados en la carpeta de Drive
+          </p>
+          <p className="text-[11.5px] text-[#1A3557]/80 leading-relaxed mt-1 mb-2">
+            El vigilante los vio ahí y nadie los ha clasificado. Marca cuál es el
+            justificante de registro; los demás se quedan en Extranjería.
+          </p>
+          <ul className="space-y-1.5">
+            {candidatos.map((c) => (
+              <li key={c.id_registro} className="flex items-center gap-2 flex-wrap">
+                <span className="text-[12px] text-[#1A3557] min-w-0 flex-1 truncate">
+                  📄 {c.archivo_nombre || c.titulo}
+                </span>
+                <button type="button" disabled={adoptando === c.id_registro}
+                  onClick={() => adoptar(c.id_registro)}
+                  className="shrink-0 text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg
+                    bg-[#1A3557] text-white hover:opacity-90 disabled:opacity-40">
+                  {adoptando === c.id_registro ? "…" : "Es el justificante"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {archivo ? (
         <div className="flex items-center gap-3 flex-wrap">
@@ -1532,7 +1575,7 @@ export default function EstanciaAdmin({ idSolicitud }) {
       <CerrarCarpeta id={idSolicitud} exp={exp} docs={docs} onHecho={cargar} />
       <PasarAAbogada id={idSolicitud} exp={exp} onHecho={cargar} />
       <GeneradoresEstancia id={idSolicitud} exp={exp} onArchivado={cargar} />
-      <Presentado id={idSolicitud} docs={docs} onCambio={cargar} />
+      <Presentado id={idSolicitud} docs={docs} ext={ext} onCambio={cargar} />
       <Extranjeria id={idSolicitud} registros={ext} onCambio={cargar} />
     </div>
   );

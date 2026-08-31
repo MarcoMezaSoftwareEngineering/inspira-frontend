@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST, boDELETE, boFetch } from "../../../../../services/backofficeApi";
 import Invitados from "../Invitados";
 import GeneradoresModificatoria from "./GeneradoresModificatoria";
+import RecordatorioModificatoria from "./RecordatorioModificatoria";
 import { abrirArchivo } from "../../../../../services/archivos";
 import VisorArchivo from "../../../../../components/common/VisorArchivo";
 import { dialog } from "../../../../../services/dialogService";
@@ -1364,6 +1365,7 @@ export default function ModificatoriaAdmin({ idSolicitud }) {
       <Invitados idSolicitud={idSolicitud} numero="0b" />
       <Datos exp={exp} onGuardar={guardar} />
       <Documentos id={idSolicitud} docs={docs} onCambio={cargar} />
+      <RecordatorioModificatoria id={idSolicitud} docs={docs} onCambio={cargar} />
       <CerrarCarpeta id={idSolicitud} exp={exp} docs={docs} onHecho={cargar} />
       
       <GeneradoresModificatoria id={idSolicitud} exp={exp} onArchivado={cargar} />

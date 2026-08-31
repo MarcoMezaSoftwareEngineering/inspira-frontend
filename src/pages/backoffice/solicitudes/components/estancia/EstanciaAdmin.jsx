@@ -485,7 +485,7 @@ function Datos({ id, exp, onGuardar }) {
         Son los cuatro datos con los que se consulta en la sede. El asesorado los ve en su portal.
       </p>
 
-      <ExplicarSeguimiento id={id} exp={exp} />
+      <ExplicarSeguimiento id={id} />
     </div>
   );
 }
@@ -501,9 +501,8 @@ function Datos({ id, exp, onGuardar }) {
  * Pide el nº de justificante para habilitarse. Sin él el correo mandaría a un
  * formulario que el asesorado no podría rellenar.
  */
-function ExplicarSeguimiento({ id, exp }) {
+function ExplicarSeguimiento({ id }) {
   const [enviando, setEnviando] = useState(false);
-  const listo = Boolean(exp.expediente_justificante);
 
   async function enviar() {
     setEnviando(true);
@@ -516,19 +515,17 @@ function ExplicarSeguimiento({ id, exp }) {
   return (
     <div className="flex items-center gap-3 flex-wrap mt-3 pt-3 border-t border-neutral-100">
       <p className="text-[11.5px] text-neutral-500 leading-relaxed min-w-0 flex-1">
-        {listo
-          ? "Le explica dónde consultar, con qué datos, y que las notificaciones le llegan a él y a nosotros y se suben al portal."
-          : "Al apuntar el nº de justificante podrás mandarle la guía de seguimiento."}
+        Esta guía sale sola al subir el justificante de registro. Desde aquí se le
+        vuelve a mandar, por ejemplo cuando ya tengas el nº de expediente formal.
       </p>
       <button
         type="button"
         onClick={enviar}
-        disabled={enviando || !listo}
-        title={listo ? "" : "Falta el nº de justificante"}
+        disabled={enviando}
         className="shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg bg-[#1D6A4A]
           text-white hover:opacity-90 disabled:opacity-40"
       >
-        {enviando ? "Enviando…" : "Explicarle el seguimiento"}
+        {enviando ? "Enviando…" : "Volver a explicarle el seguimiento"}
       </button>
     </div>
   );

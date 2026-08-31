@@ -183,6 +183,9 @@ export default function ClientesLista({
   onServicios, onActivo, onPurgar, isAdmin,
 }) {
   const [filtro, setFiltro] = useState("");
+  // Va aparte de los chips para poder cruzarlos: «Estancia» con «Con deuda»
+  // es la pregunta que de verdad se hace, y con un solo selector no cabría.
+  const [servicio, setServicio] = useState("");
   // Se fija al montar: leer el reloj en cada render hace impuro el componente.
   const [ahora] = useState(() => Date.now());
 
@@ -194,13 +197,29 @@ export default function ClientesLista({
     sin_resp: clientes.filter((c) => c.sin_responsable && c.activos > 0).length,
   }), [clientes]);
 
+  // Cuántos tienen algo en marcha de cada servicio.
+  //
+  // Sale de `etapas`, que son sus procesos activos. Las invitaciones viven
+  // aparte en `invitado_en` y no cuentan: quien está invitado al expediente de
+  // otra persona no tiene ese servicio, lo está mirando.
+  const porServicio = useMemo(() => {
+    const n = {};
+    for (const c of clientes) {
+      for (const clave of new Set((c.etapas || []).map((e) => e.servicio))) {
+        n[clave] = (n[clave] || 0) + 1;
+      }
+    }
+    return n;
+  }, [clientes]);
+
   const visibles = useMemo(() => clientes.filter((c) => {
+    if (servicio && !(c.etapas || []).some((e) => e.servicio === servicio)) return false;
     if (filtro === "activos") return c.activos > 0;
     if (filtro === "sin_servicio") return c.total_servicios === 0;
     if (filtro === "deuda") return c.debe > 0;
     if (filtro === "sin_resp") return c.sin_responsable && c.activos > 0;
     return true;
-  }), [clientes, filtro]);
+  }), [clientes, filtro, servicio]);
 
   const chip = (id, texto, n, tono) => (
     <button
@@ -228,8 +247,24 @@ export default function ClientesLista({
         {chip("sin_resp", "Sin responsable", contadores.sin_resp, "bg-amber-50 text-amber-700")}
 
         <select
+          value={servicio} onChange={(e) => setServicio(e.target.value)}
+          className={`shrink-0 ml-auto text-[12px] border rounded-lg px-2 py-1.5 focus:outline-none ${
+            servicio
+              ? "border-[#1D6A4A] bg-[#1D6A4A] text-white font-semibold"
+              : "border-neutral-200 bg-white text-neutral-600 focus:border-[#1D6A4A]"
+          }`}
+        >
+          <option value="">Todos los servicios</option>
+          {Object.entries(SERVICIO)
+            .filter(([clave]) => porServicio[clave])
+            .map(([clave, sv]) => (
+              <option key={clave} value={clave}>{sv.corto} ({porServicio[clave]})</option>
+            ))}
+        </select>
+
+        <select
           value={orden} onChange={(e) => onOrden(e.target.value)}
-          className="shrink-0 ml-auto text-[12px] text-neutral-600 border border-neutral-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]"
+          className="shrink-0 text-[12px] text-neutral-600 border border-neutral-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]"
         >
           <option value="recientes">Últimos creados</option>
           <option value="antiguos">Más antiguos</option>
@@ -256,10 +291,14 @@ export default function ClientesLista({
       ) : visibles.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-[13px] font-semibold text-neutral-600">
-            {filtro ? "Ningún cliente en este filtro" : "Todavía no hay clientes"}
+            {filtro || servicio ? "Ningún cliente en este filtro" : "Todavía no hay clientes"}
           </p>
           <p className="text-[12px] text-neutral-400 mt-1">
-            {filtro ? "Prueba con otro." : "Usa «Nuevo cliente» para dar de alta al primero."}
+            {filtro && servicio
+              ? "Los dos filtros a la vez no dejan a nadie. Prueba quitando uno."
+              : filtro || servicio
+                ? "Prueba con otro."
+                : "Usa «Nuevo cliente» para dar de alta al primero."}
           </p>
         </div>
       ) : (

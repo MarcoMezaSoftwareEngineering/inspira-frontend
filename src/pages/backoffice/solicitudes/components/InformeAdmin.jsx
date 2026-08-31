@@ -1,6 +1,6 @@
 // src/pages/backoffice/solicitudes/components/InformeAdmin.jsx
 import { useEffect, useRef, useState } from "react";
-import { boGET, boPATCH, boUpload } from "../../../../services/backofficeApi";
+import { boGET, boPATCH, boPOST, boUpload } from "../../../../services/backofficeApi";
 import { dialog } from "../../../../services/dialogService";
 import { API_URL, formatearFecha } from "../utils";
 import ModalMaster from "../../catalogo/ModalMaster";
@@ -319,6 +319,40 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     } catch { /* si falla solo no lo agrega */ }
   }
 
+
+  const [revisando, setRevisando] = useState(false);
+  const revision = detalle.informe_revision_estado || "BORRADOR";
+
+  /** Se lo manda a quien tiene que darle el visto bueno. */
+  async function mandarARevision() {
+    setRevisando(true);
+    const r = await boPOST(
+      `/backoffice/solicitudes/${detalle.id_solicitud}/informe/revision`,
+      { filtros: filtros || null },
+    );
+    setRevisando(false);
+    if (r?.ok) { dialog.toast(`Avisado a ${r.avisado_a}`, "success"); recargar?.(); }
+    else dialog.toast(r?.msg || "No se pudo mandar a revisión", "error");
+  }
+
+  /** Aprobar, o devolverlo diciendo qué corregir. */
+  async function resolverRevision(estado) {
+    let nota = null;
+    if (estado === "DEVUELTO") {
+      nota = window.prompt("¿Qué hay que corregir?");
+      if (!nota?.trim()) return;
+    }
+    setRevisando(true);
+    const r = await boPATCH(
+      `/backoffice/solicitudes/${detalle.id_solicitud}/informe/revision`,
+      { estado, nota },
+    );
+    setRevisando(false);
+    if (r?.ok) {
+      dialog.toast(estado === "APROBADO" ? "Informe aprobado" : "Devuelto con observaciones", "success");
+      recargar?.();
+    } else dialog.toast(r?.msg || "No se pudo guardar", "error");
+  }
   async function publicarInforme() {
     setPublicando(true);
     try {
@@ -483,6 +517,26 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                 <span className="text-[#F5C842] text-[10px] font-semibold">✏️ Lista curada · Sin publicar</span>
               </div>
             )}
+
+            {!detalle.informe_publicado && revision === "EN_REVISION" && (
+              <span className="text-[#1A3557] bg-[#EEF2F8] border border-[#1A3557]/25
+                px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                ⏳ En revisión
+              </span>
+            )}
+            {!detalle.informe_publicado && revision === "APROBADO" && (
+              <span className="text-[#14532d] bg-[#E8F5EE] border border-[#1D6A4A]/35
+                px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                ✓ Aprobado · listo para publicar
+              </span>
+            )}
+            {!detalle.informe_publicado && revision === "DEVUELTO" && (
+              <span className="text-amber-800 bg-amber-50 border border-amber-300
+                px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                title={detalle.informe_revision_nota || ""}>
+                ↩ Devuelto · hay que corregirlo
+              </span>
+            )}
             {detalle.informe_publicado && (
               <div className="flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/30 rounded-lg px-2.5 py-1.5">
                 <span className="text-emerald-300 text-[10px] font-semibold">✓ Publicado al cliente</span>
@@ -582,6 +636,31 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                     </button>
                   </>
                 )}
+                {listaVista.length > 0 && !detalle.informe_publicado
+                  && ["BORRADOR", "DEVUELTO"].includes(revision) && (
+                  <button onClick={mandarARevision} disabled={revisando}
+                    className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg
+                      bg-[#1A3557] text-white hover:opacity-90 disabled:opacity-50 font-semibold">
+                    {revisando ? "Avisando…" : "Mandar a revisión"}
+                  </button>
+                )}
+
+                {listaVista.length > 0 && revision === "EN_REVISION" && (
+                  <>
+                    <button onClick={() => resolverRevision("APROBADO")} disabled={revisando}
+                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg
+                        bg-[#1D6A4A] text-white hover:opacity-90 disabled:opacity-50 font-semibold">
+                      Aprobar
+                    </button>
+                    <button onClick={() => resolverRevision("DEVUELTO")} disabled={revisando}
+                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg
+                        border border-amber-300 text-amber-800 hover:bg-amber-50
+                        disabled:opacity-50 font-semibold">
+                      Devolver
+                    </button>
+                  </>
+                )}
+
                 {listaVista.length > 0 && (
                   <button onClick={publicarInforme} disabled={publicando}
                     className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-all duration-200 disabled:opacity-50 font-semibold">
@@ -596,6 +675,11 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                     )}
                     {detalle.informe_publicado ? "Volver a publicar" : "Publicar al cliente"}
                   </button>
+                )}
+                {listaVista.length > 0 && !detalle.informe_publicado && revision !== "APROBADO" && (
+                  <span className="text-[10.5px] text-amber-700 leading-tight max-w-[220px]">
+                    Se puede publicar sin aprobación, pero queda anotado que salió sin revisar.
+                  </span>
                 )}
               </>
             ) : (

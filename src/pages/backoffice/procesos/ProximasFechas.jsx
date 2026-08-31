@@ -116,27 +116,50 @@ export default function ProximasFechas({ onAbrirProceso }) {
                     key={`${f.id_solicitud}-${f.tipo}-${i}`}
                     type="button"
                     onClick={() => onAbrirProceso?.(f.id_solicitud)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-neutral-50/60 flex items-center gap-2.5"
+                    className="w-full text-left px-3 py-2.5 hover:bg-neutral-50/60"
                   >
-                    <span className={`shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded border ${TONOS[f.tono]}`}>
-                      {f.tipo_label}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[12.5px] font-semibold text-neutral-800 truncate">
-                        {f.cliente}
+                    <span className="flex items-center gap-2.5">
+                      <span className={`shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded border ${TONOS[f.tono]}`}>
+                        {f.tipo_label}
                       </span>
-                      <span className="block text-[11px] text-neutral-400 truncate">
-                        {f.detalle || f.responsable || "sin responsable"}
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[12.5px] font-semibold text-neutral-800 truncate">
+                          {f.cliente}
+                        </span>
+                        <span className="block text-[11px] text-neutral-400 truncate">
+                          {f.detalle || f.responsable || "sin responsable"}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span className={`block text-[12px] font-bold ${
+                          f.vencido ? "text-red-600" : f.urgente ? "text-amber-700" : "text-neutral-600"
+                        }`}>
+                          {cuando(f)}
+                        </span>
+                        <span className="block text-[10.5px] text-neutral-400">{f.fecha}</span>
                       </span>
                     </span>
-                    <span className="shrink-0 text-right">
-                      <span className={`block text-[12px] font-bold ${
-                        f.vencido ? "text-red-600" : f.urgente ? "text-amber-700" : "text-neutral-600"
-                      }`}>
-                        {cuando(f)}
+
+                    {/* Los tres plazos reglamentarios, discretos y al costado.
+                        La fecha que manda es la recomendada; estos están para
+                        explicar de dónde sale, no para competir con ella. Los
+                        vencidos se tachan: el de antelación se salva con el
+                        escrito, los otros dos no. */}
+                    {f.plazos?.length > 0 && (
+                      <span className="flex items-baseline gap-x-3 gap-y-0.5 flex-wrap mt-1 pl-1">
+                        {f.plazos.map((pl) => (
+                          <span key={pl.clave}
+                            title={`${pl.etiqueta}${pl.vencido
+                              ? pl.salvable ? " · vencido, se salva con el escrito" : " · vencido"
+                              : ""}`}
+                            className={`text-[10px] tabular-nums ${
+                              pl.vencido ? "text-neutral-300 line-through" : "text-neutral-400"
+                            }`}>
+                            {pl.corto} {pl.fecha.slice(5)}
+                          </span>
+                        ))}
                       </span>
-                      <span className="block text-[10.5px] text-neutral-400">{f.fecha}</span>
-                    </span>
+                    )}
                   </button>
                 ))}
               </div>

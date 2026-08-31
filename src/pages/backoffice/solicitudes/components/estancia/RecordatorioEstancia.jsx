@@ -27,11 +27,80 @@ function Lista({ titulo, items, tono }) {
   );
 }
 
-export default function RecordatorioEstancia({ id }) {
+/**
+ * Las observaciones que el asesor ha escrito y el asesorado todavía no ha
+ * recibido.
+ *
+ * Van aquí y no junto a cada documento porque aquí es donde el asesor mira qué
+ * le queda por decirle. El correo sale con todas juntas: revisar un expediente
+ * son seis o siete documentos seguidos, y avisando al observar cada uno el
+ * asesorado se encontraría seis correos en cinco minutos sin saber cuál mirar.
+ */
+function ObservacionesSinAvisar({ id, docs, onCambio }) {
+  const [enviando, setEnviando] = useState(false);
+
+  const porDocumento = Object.values(docs?.ranuras || {})
+    .map((d) => ({
+      etiqueta: d.etiqueta,
+      textos: (d.archivos?.[0]?.observaciones || [])
+        .filter((o) => !o.avisada_at)
+        .map((o) => o.texto),
+    }))
+    .filter((d) => d.textos.length);
+
+  const cuantas = porDocumento.reduce((n, d) => n + d.textos.length, 0);
+  if (!cuantas) return null;
+
+  async function avisar() {
+    setEnviando(true);
+    const r = await boPOST(`/backoffice/solicitudes/${id}/estancia/avisar-observaciones`);
+    setEnviando(false);
+    if (r?.ok) {
+      dialog.toast(r.msg || "Avisado", r.avisado ? "exito" : "info");
+      onCambio?.();
+    } else dialog.toast(r?.msg || "No se pudo avisar", "error");
+  }
+
+  return (
+    <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5">
+      <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-amber-700">
+        Observaciones sin comunicar
+      </p>
+      <ul className="mt-1.5 space-y-1.5">
+        {porDocumento.map((d) => (
+          <li key={d.etiqueta}>
+            <p className="text-[12px] font-semibold text-amber-900">{d.etiqueta}</p>
+            {d.textos.map((t, i) => (
+              <p key={i} className="text-[11.5px] text-amber-800 leading-relaxed pl-2.5
+                border-l-2 border-amber-300 mt-0.5">{t}</p>
+            ))}
+          </li>
+        ))}
+      </ul>
+      <button
+        type="button"
+        onClick={avisar}
+        disabled={enviando}
+        className="mt-2.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[#B45309]
+          text-white hover:opacity-90 disabled:opacity-40"
+      >
+        {enviando ? "Enviando…" : `Mandarle ${cuantas === 1 ? "la observación" : "las observaciones"}`}
+      </button>
+    </div>
+  );
+}
+
+export default function RecordatorioEstancia({ id, docs, onCambio }) {
   const [abierto, setAbierto] = useState(false);
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [enviando, setEnviando] = useState(false);
+
+  // Se cuenta aquí y no al abrir: el asesor tiene que ver que hay algo que
+  // mandar sin desplegar el bloque, o no lo despliega nunca.
+  const sinAvisar = Object.values(docs?.ranuras || {})
+    .flatMap((d) => d.archivos?.[0]?.observaciones || [])
+    .filter((o) => !o.avisada_at).length;
 
   // Se pide al desplegar, no al montar: la pantalla del expediente ya hace
   // varias llamadas y esta solo hace falta si el asesor abre el panel.
@@ -65,11 +134,19 @@ export default function RecordatorioEstancia({ id }) {
         <span className="text-[13px] font-semibold text-neutral-900 flex-1">
           Recordarle lo que falta
         </span>
+        {sinAvisar > 0 && (
+          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded
+            border bg-amber-50 text-amber-800 border-amber-300">
+            {sinAvisar} sin comunicar
+          </span>
+        )}
         <span className="text-[11px] text-neutral-400">{abierto ? "▲" : "▼"}</span>
       </button>
 
       {abierto && (
         <div className="mt-3 pt-3 border-t border-neutral-100">
+          <ObservacionesSinAvisar id={id} docs={docs} onCambio={onCambio} />
+
           {cargando && <p className="text-[12px] text-neutral-400">Preparando…</p>}
 
           {!cargando && datos && !datos.hay_pendientes && (

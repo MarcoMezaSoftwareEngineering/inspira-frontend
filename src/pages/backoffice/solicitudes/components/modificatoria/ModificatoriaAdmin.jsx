@@ -13,7 +13,7 @@
 // los que no cumplen, así que alguien tiene que mirarlos antes de presentar y
 // el asesorado tiene que saber si el suyo pasó.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { boGET, boPATCH, boPOST, boFetch } from "../../../../../services/backofficeApi";
+import { boGET, boPATCH, boPOST, boDELETE, boFetch } from "../../../../../services/backofficeApi";
 import Invitados from "../Invitados";
 import GeneradoresModificatoria from "./GeneradoresModificatoria";
 import { abrirArchivo } from "../../../../../services/archivos";
@@ -487,6 +487,83 @@ const ESTADO_DOC = {
   OBSERVADO: { icono: "✕", label: "observado",   clase: "text-red-600" },
 };
 
+
+/**
+ * Una observación del documento.
+ *
+ * Van de una en una y no como un texto corrido porque son cosas distintas que
+ * corregir, y porque el asesor tiene que poder arreglar la redacción de una sin
+ * borrar las demás —antes, para cambiar una coma había que aprobar el documento
+ * y volver a observarlo—.
+ *
+ * El punto ámbar dice que aún no ha salido hacia el asesorado.
+ */
+function Observacion({ id, obs, onCambio }) {
+  const [editando, setEditando] = useState(false);
+  const [texto, setTexto] = useState(obs.texto);
+  const [ocupado, setOcupado] = useState(false);
+
+  async function guardar() {
+    const limpio = texto.trim();
+    if (!limpio || limpio === obs.texto) { setEditando(false); setTexto(obs.texto); return; }
+    setOcupado(true);
+    const r = await boPATCH(
+      `/backoffice/solicitudes/${id}/modificatoria/observaciones/${obs.id_observacion}`,
+      { texto: limpio },
+    );
+    setOcupado(false);
+    if (r?.ok) { setEditando(false); onCambio(); }
+    else dialog.toast(r?.msg || "No se pudo editar la observación", "error");
+  }
+
+  async function retirar() {
+    if (!(await dialog.confirm("¿Retirar esta observación?"))) return;
+    setOcupado(true);
+    const r = await boDELETE(
+      `/backoffice/solicitudes/${id}/modificatoria/observaciones/${obs.id_observacion}`,
+    );
+    setOcupado(false);
+    if (r?.ok) onCambio();
+    else dialog.toast(r?.msg || "No se pudo retirar la observación", "error");
+  }
+
+  if (editando) {
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-1.5">
+        <input autoFocus className={`${input} flex-1 min-w-[160px]`}
+          value={texto} onChange={(e) => setTexto(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") guardar();
+            if (e.key === "Escape") { setEditando(false); setTexto(obs.texto); }
+          }} />
+        <button type="button" disabled={ocupado || !texto.trim()} onClick={guardar}
+          className="text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg bg-[#1A3557]
+            text-white disabled:opacity-40">Guardar</button>
+        <button type="button" onClick={() => { setEditando(false); setTexto(obs.texto); }}
+          className="text-[11.5px] text-neutral-500 hover:text-neutral-800">cancelar</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-1.5 text-[11.5px] text-red-700 bg-red-50
+      border border-red-200 rounded-lg px-2 py-1.5 mt-1.5 leading-relaxed">
+      {!obs.avisada_at && (
+        <span title="Todavía no se le ha comunicado"
+          className="shrink-0 mt-[5px] w-1.5 h-1.5 rounded-full bg-amber-500" />
+      )}
+      <span className="flex-1 min-w-0 break-words">{obs.texto}</span>
+      <button type="button" onClick={() => setEditando(true)} disabled={ocupado}
+        className="shrink-0 text-[11px] text-red-500 hover:text-red-800 disabled:opacity-40">
+        editar
+      </button>
+      <button type="button" onClick={retirar} disabled={ocupado}
+        className="shrink-0 text-[11px] text-neutral-400 hover:text-neutral-700 disabled:opacity-40"
+        title="Retirar">×</button>
+    </div>
+  );
+}
+
 function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo, onVer }) {
   const [observando, setObservando] = useState(false);
   const [texto, setTexto] = useState("");
@@ -498,12 +575,21 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo, onVer }) {
   async function revisar(estado, observacion) {
     if (!ultimo) return;
     setEnviando(true);
-    const r = await boPATCH(
-      `/backoffice/solicitudes/${id}/modificatoria/documentos/archivo/${ultimo.id_documento}/revision`,
-      { estado, observacion }
-    );
+    // Una observación sobre un documento ya observado se añade a las que tiene;
+    // el PATCH de revisión sólo se usa para la primera y para aprobar.
+    const yaObservado = def.estado === "OBSERVADO" && estado === "OBSERVADO";
+    const r = yaObservado
+      ? await boPOST(
+        `/backoffice/solicitudes/${id}/modificatoria/documentos/archivo/${ultimo.id_documento}/observaciones`,
+        { texto: observacion },
+      )
+      : await boPATCH(
+        `/backoffice/solicitudes/${id}/modificatoria/documentos/archivo/${ultimo.id_documento}/revision`,
+        { estado, observacion },
+      );
     setEnviando(false);
     if (r?.ok) { setObservando(false); setTexto(""); onCambio(); }
+    else dialog.toast(r?.msg || "No se pudo guardar", "error");
   }
 
   const fondo =
@@ -549,12 +635,9 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo, onVer }) {
             </button>
           ))}
 
-          {ultimo?.observacion && (
-            <p className="text-[11.5px] text-red-700 bg-red-50 border border-red-200
-              rounded-lg px-2 py-1.5 mt-1.5 leading-relaxed">
-              <b>Observado:</b> {ultimo.observacion}
-            </p>
-          )}
+          {(ultimo?.observaciones || []).map((o) => (
+            <Observacion key={o.id_observacion} id={id} obs={o} onCambio={onCambio} />
+          ))}
 
           {observando && (
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -582,13 +665,11 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo, onVer }) {
                   Aprobar
                 </button>
               )}
-              {def.estado !== "OBSERVADO" && (
-                <button type="button" disabled={enviando} onClick={() => setObservando(true)}
-                  className="text-[11px] font-semibold px-2 py-1 rounded-lg border
-                    border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40">
-                  Observar
-                </button>
-              )}
+              <button type="button" disabled={enviando} onClick={() => setObservando(true)}
+                className="text-[11px] font-semibold px-2 py-1 rounded-lg border
+                  border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40">
+                {def.estado === "OBSERVADO" ? "+ observación" : "Observar"}
+              </button>
             </>
           )}
           {def.de === "asesor" && (
@@ -600,6 +681,100 @@ function FilaDocumento({ id, clave, def, onCambio, onSubir, subiendo, onVer }) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+
+/**
+ * Lo que aún no se le ha comunicado al asesorado.
+ *
+ * El correo sale a mano y con todo junto: revisar un expediente son seis o
+ * siete documentos seguidos, y avisando al observar cada uno el asesorado se
+ * encontraría seis correos en cinco minutos sin saber cuál mirar.
+ */
+function AvisoObservaciones({ id, docs, onCambio }) {
+  const [enviando, setEnviando] = useState(false);
+
+  const pendientes = Object.values(docs?.ranuras || {})
+    .flatMap((d) => d.archivos?.[0]?.observaciones || [])
+    .filter((o) => !o.avisada_at);
+
+  if (!pendientes.length) return null;
+
+  async function avisar() {
+    setEnviando(true);
+    const r = await boPOST(`/backoffice/solicitudes/${id}/modificatoria/avisar-observaciones`);
+    setEnviando(false);
+    if (r?.ok) {
+      dialog.toast(r.msg || "Avisado", r.avisado ? "exito" : "info");
+      onCambio();
+    } else dialog.toast(r?.msg || "No se pudo avisar", "error");
+  }
+
+  return (
+    <div className="flex items-center gap-3 flex-wrap mb-3 rounded-xl border
+      border-amber-300 bg-amber-50 px-3 py-2.5">
+      <p className="text-[12px] text-amber-900 leading-relaxed min-w-0 flex-1">
+        <b>{pendientes.length} observaci{pendientes.length === 1 ? "ón" : "ones"} sin
+        comunicar.</b> Termina de revisar y mándaselas todas de una vez.
+      </p>
+      <button type="button" onClick={avisar} disabled={enviando}
+        className="shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg bg-[#B45309]
+          text-white hover:opacity-90 disabled:opacity-40">
+        {enviando ? "Enviando…" : "Avisar al asesorado"}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Documentos que constan entregados y no están en la carpeta de Drive.
+ *
+ * La copia a Drive va en segundo plano para que un fallo suyo no impida
+ * entregar el documento, y ese fallo no se veía en ningún sitio: el expediente
+ * contaba el documento y la carpeta estaba vacía. Sólo se descubría abriendo
+ * Drive y contando a mano, normalmente tarde.
+ */
+function AvisoDrive({ id, docs, onCambio }) {
+  const [reponiendo, setReponiendo] = useState(false);
+
+  const faltan = Object.values(docs?.ranuras || {})
+    .flatMap((d) => (d.archivos || []).map((a) => ({ ...a, etiqueta: d.etiqueta })))
+    .filter((a) => a.en_drive === false);
+
+  if (!faltan.length) return null;
+
+  async function reponer() {
+    setReponiendo(true);
+    const r = await boPOST(`/backoffice/solicitudes/${id}/modificatoria/reponer-drive`);
+    setReponiendo(false);
+    if (r?.ok) { dialog.toast(r.msg || "Repuesto", "exito"); onCambio(); }
+    else dialog.toast(r?.msg || "No se pudo reponer", "error");
+  }
+
+  return (
+    <div className="mb-3 rounded-xl border border-orange-300 bg-orange-50 px-3 py-2.5">
+      <div className="flex items-center gap-3 flex-wrap">
+        <p className="text-[12px] text-orange-900 leading-relaxed min-w-0 flex-1">
+          <b>{faltan.length} documento{faltan.length === 1 ? "" : "s"} sin copia en Drive.</b>{" "}
+          Está{faltan.length === 1 ? "" : "n"} en el expediente, pero la carpeta que abre la
+          abogada no lo{faltan.length === 1 ? "" : "s"} tiene.
+        </p>
+        <button type="button" onClick={reponer} disabled={reponiendo}
+          className="shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg bg-[#B45309]
+            text-white hover:opacity-90 disabled:opacity-40">
+          {reponiendo ? "Subiendo…" : "Subirlos a Drive"}
+        </button>
+      </div>
+      <ul className="mt-2 space-y-0.5">
+        {faltan.map((a) => (
+          <li key={a.id_documento} className="text-[11.5px] text-orange-800 leading-relaxed">
+            · {a.etiqueta}
+            {a.drive_error && <span className="text-orange-600"> — {a.drive_error}</span>}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -694,6 +869,9 @@ function Documentos({ id, docs, onCambio }) {
       <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden mb-4">
         <div className="h-full bg-[#1D6A4A] transition-all" style={{ width: `${pct}%` }} />
       </div>
+
+      <AvisoDrive id={id} docs={docs} onCambio={onCambio} />
+      <AvisoObservaciones id={id} docs={docs} onCambio={onCambio} />
 
       {[["extranjero", "Los aporta el asesorado"],
         ["empresa", "Los aporta la empresa"],
@@ -918,13 +1096,21 @@ function CerrarCarpeta({ id, exp, docs, onHecho }) {
           )
         } />
 
-      {yaCerrada ? (
-        <p className="text-[12.5px] text-neutral-600 leading-relaxed">
-          Cerrada el {new Date(exp.carpeta_lista_at).toLocaleDateString("es-ES",
-            { day: "2-digit", month: "long", year: "numeric" })}
-          {exp.presentacion_prevista && <> · presentacion prevista el <b>{exp.presentacion_prevista}</b></>}.
-          El asesorado ya fue avisado.
-        </p>
+      {yaCerrada && !abierto ? (
+        <div className="flex items-center gap-3 flex-wrap">
+          <p className="text-[12.5px] text-neutral-600 leading-relaxed min-w-0 flex-1">
+            Cerrada el {new Date(exp.carpeta_lista_at).toLocaleDateString("es-ES",
+              { day: "2-digit", month: "long", year: "numeric" })}
+            {exp.presentacion_prevista && <> · presentacion prevista el <b>{exp.presentacion_prevista}</b></>}.
+            El asesorado ya fue avisado. Si ha subsanado algo, revisalo y vuelve a enviarlo:
+            el correo sale con el estado de ese momento.
+          </p>
+          <button type="button" onClick={() => setAbierto(true)}
+            className="shrink-0 text-[12px] font-semibold px-4 py-2 rounded-lg border
+              border-neutral-300 text-neutral-600 hover:border-neutral-400">
+            Revisar y reenviar
+          </button>
+        </div>
       ) : !abierto ? (
         <div className="flex items-center gap-3 flex-wrap">
           <p className="text-[12.5px] text-neutral-600 leading-relaxed min-w-0 flex-1">
@@ -945,7 +1131,9 @@ function CerrarCarpeta({ id, exp, docs, onHecho }) {
             <p className="text-[12px] text-amber-800 bg-amber-50 border border-amber-300
               rounded-lg px-3 py-2 leading-relaxed">
               Todavia hay {oblig.length - aprobados} documento(s) obligatorio(s) sin aprobar.
-              Puedes cerrarla igual, pero revisa que no falte nada.
+              Puedes cerrarla igual: el correo al asesorado saldra con el detalle de cada
+              observacion y con la advertencia legal de que el expediente se presenta por
+              plazo y de que lo aportado es responsabilidad suya.
             </p>
           )}
           <label className="flex items-center gap-2 text-[12px] text-neutral-600">
@@ -961,7 +1149,7 @@ function CerrarCarpeta({ id, exp, docs, onHecho }) {
             <button type="button" onClick={cerrar} disabled={enviando}
               className="text-[12px] font-semibold px-4 py-2 rounded-lg bg-[#1D6A4A]
                 text-white disabled:opacity-40">
-              {enviando ? "Cerrando…" : "Cerrar y avisar"}
+              {enviando ? "Enviando…" : yaCerrada ? "Reenviar aviso" : "Cerrar y avisar"}
             </button>
             <button type="button" onClick={() => setAbierto(false)}
               className="text-[12px] text-neutral-500 hover:text-neutral-800">Cancelar</button>

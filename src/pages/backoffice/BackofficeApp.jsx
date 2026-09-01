@@ -22,6 +22,7 @@ import Procesos from "./procesos/Procesos";
 import PresupuestosPortal from "./presupuestos/PresupuestosPortal";
 import CatalogoMasters from "./catalogo/CatalogoMasters";
 import TrackerUniversidades from "./tracker/TrackerUniversidades";
+import HerramientasAsesor from "./herramientas/HerramientasAsesor";
 import ConfiguracionPanel from "./configuracion/ConfiguracionPanel";
 
 // Módulo unificado de Configuración: las rutas antiguas siguen funcionando y
@@ -196,6 +197,8 @@ export default function BackofficeApp() {
             {path === "/backoffice/documentos" && <DocumentosBackoffice />}
 
             {path === "/backoffice/clientes" && <Clientes />}
+
+            {path === "/backoffice/herramientas" && <HerramientasAsesor />}
 
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
 

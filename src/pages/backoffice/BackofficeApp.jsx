@@ -23,6 +23,10 @@ import PresupuestosPortal from "./presupuestos/PresupuestosPortal";
 import CatalogoMasters from "./catalogo/CatalogoMasters";
 import TrackerUniversidades from "./tracker/TrackerUniversidades";
 import HerramientasAsesor from "./herramientas/HerramientasAsesor";
+import PresupuestoAsesor from "./presupuesto/PresupuestoAsesor";
+import GuiasAsesor from "./guias/GuiasAsesor";
+import UniversidadesLista from "./universidades/UniversidadesLista";
+import SistematizadorMasteres from "./sistematizador/SistematizadorMasteres";
 import ConfiguracionPanel from "./configuracion/ConfiguracionPanel";
 
 // Módulo unificado de Configuración: las rutas antiguas siguen funcionando y
@@ -199,6 +203,14 @@ export default function BackofficeApp() {
             {path === "/backoffice/clientes" && <Clientes />}
 
             {path === "/backoffice/herramientas" && <HerramientasAsesor />}
+
+            {path === "/backoffice/presupuesto" && <PresupuestoAsesor />}
+
+            {path === "/backoffice/guias" && <GuiasAsesor />}
+
+            {path === "/backoffice/universidades" && <UniversidadesLista />}
+
+            {path === "/backoffice/sistematizador" && <SistematizadorMasteres />}
 
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
 

@@ -1,35 +1,52 @@
-// El catálogo de universidades: la hoja de cálculo, pero buscable.
+// El buscador de universidades.
 //
-// Sustituye a una hoja que envejecía sola y cuyos enlaces se morían sin que
-// nadie lo notara. Aquí cada universidad lleva su comunidad, su ciudad, lo que
-// cuesta estudiar allí y el estado de la vigilancia de su web.
+// Es la fuente de la que sale el informe de másteres del cliente, así que lo
+// que importa aquí no es que se vea bonito sino que se pueda contestar rápido a
+// las tres preguntas que hace un asesorado: dónde, cuánto cuesta, y si todavía
+// llego.
 //
-// El precio manda en el orden por defecto: de 738 € en Galicia a 5.044 € en
-// Madrid hay siete veces de diferencia, y es lo primero que pregunta un
-// asesorado. Todo se filtra en el navegador porque son medio centenar de filas
-// y así la búsqueda responde en cada tecla.
+// El precio manda en el orden por defecto. Entre Galicia a 738 € y Madrid a
+// 5.044 € hay siete veces de diferencia, y para quien viene de Latinoamérica esa
+// es la variable que decide antes que el prestigio o la ciudad.
+//
+// Todo se filtra en el navegador: son medio centenar de filas y así la búsqueda
+// responde en cada tecla, sin ir y volver del servidor.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 
-const NIVEL = {
-  ECONOMICA:  { corto: "Económica",  tono: "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35" },
-  INTERMEDIA: { corto: "Intermedia", tono: "bg-[#FEF3E7] text-[#B9770E] border-amber-300/60" },
-  PREMIUM:    { corto: "Premium",    tono: "bg-[#FDEDEC] text-[#C0392B] border-red-200" },
+const LISTA = {
+  LISTA_1: { corto: "Económica",  tono: "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35" },
+  LISTA_2: { corto: "Intermedia", tono: "bg-[#FEF3E7] text-[#B9770E] border-amber-300/60" },
+  LISTA_3: { corto: "Premium",    tono: "bg-[#FDEDEC] text-[#C0392B] border-red-200" },
+};
+
+const VENTANA = {
+  abierta:      { texto: "plazo abierto",  tono: "text-[#1D6A4A]", punto: "bg-[#1D6A4A]" },
+  "próxima":    { texto: "abre pronto",    tono: "text-[#B9770E]", punto: "bg-[#B9770E]" },
+  cerrada:      { texto: "plazo cerrado",  tono: "text-neutral-400", punto: "bg-neutral-300" },
+  "sin fecha":  { texto: "sin fechas",     tono: "text-neutral-400", punto: "bg-neutral-200" },
 };
 
 const VIGILANCIA = {
-  activa:          { texto: "vigilada",     tono: "text-[#1D6A4A]", punto: "bg-[#1D6A4A]" },
-  "sin estrenar":  { texto: "sin estrenar", tono: "text-neutral-400", punto: "bg-neutral-300" },
-  error:           { texto: "no responde",  tono: "text-red-600",   punto: "bg-red-500" },
-  apagada:         { texto: "apagada",      tono: "text-neutral-400", punto: "bg-neutral-200" },
+  activa:         { texto: "vigilada", tono: "text-neutral-400" },
+  "sin estrenar": { texto: "sin estrenar", tono: "text-neutral-400" },
+  error:          { texto: "web caída", tono: "text-red-600" },
+  apagada:        { texto: "sin vigilar", tono: "text-neutral-400" },
 };
 
 const eur = (n) => (n == null ? null : `${Math.round(n).toLocaleString("es-ES")} €`);
 
-/** Sin tildes y en minúsculas: quien busca «malaga» quiere encontrar Málaga. */
+/** Sin tildes: quien escribe «malaga» quiere encontrar Málaga. */
 const plano = (s) => String(s || "")
   .normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+const fechaCorta = (iso) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
+};
 
 export default function UniversidadesLista() {
   const [datos, setDatos] = useState(null);
@@ -38,26 +55,34 @@ export default function UniversidadesLista() {
   const [q, setQ] = useState("");
   const [comunidad, setComunidad] = useState("");
   const [ciudad, setCiudad] = useState("");
-  const [nivel, setNivel] = useState("");
-  const [tipo, setTipo] = useState("");
-  const [area, setArea] = useState("");
-  const [soloProblemas, setSoloProblemas] = useState(false);
+  const [lista, setLista] = useState("");
+  const [ventana, setVentana] = useState("");
   const [orden, setOrden] = useState("precio");
+  const [soloProblemas, setSoloProblemas] = useState(false);
 
-  const cargar = useCallback(() => {
+  /** Volver a pedirlo tras editar algo. */
+  const recargar = useCallback(() => {
     setCargando(true);
     return boGET("/backoffice/universidades")
       .then((r) => { if (r?.ok) setDatos(r); })
       .finally(() => setCargando(false));
   }, []);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    let vivo = true;
+    boGET("/backoffice/universidades")
+      .then((r) => { if (vivo && r?.ok) setDatos(r); })
+      .finally(() => { if (vivo) setCargando(false); });
+    // Si el asesor sale de la pantalla mientras llega la respuesta, no se
+    // escribe sobre un componente que ya no está.
+    return () => { vivo = false; };
+  }, []);
 
-  const todas = datos?.universidades || [];
+  const todas = useMemo(() => datos?.universidades || [], [datos]);
   const facetas = datos?.facetas || {};
 
-  // Las ciudades se recortan a la comunidad elegida: ofrecer las 48 cuando ya
-  // has dicho «Andalucía» es ruido.
+  // Las ciudades se recortan a la comunidad elegida: ofrecer las cuarenta y
+  // ocho cuando ya has dicho «Andalucía» es ruido.
   const ciudades = useMemo(() => {
     const base = comunidad ? todas.filter((u) => u.comunidad === comunidad) : todas;
     return [...new Set(base.map((u) => u.ciudad).filter(Boolean))].sort();
@@ -68,9 +93,8 @@ export default function UniversidadesLista() {
     const filtradas = todas.filter((u) => {
       if (comunidad && u.comunidad !== comunidad) return false;
       if (ciudad && u.ciudad !== ciudad) return false;
-      if (tipo && u.tipo !== tipo) return false;
-      if (nivel && u.precio?.nivel !== nivel) return false;
-      if (area && !(u.areas || []).includes(area)) return false;
+      if (lista && u.lista_inspira !== lista) return false;
+      if (ventana && u.ventana?.estado !== ventana) return false;
       if (soloProblemas && u.vigilancia !== "error") return false;
       if (!busca) return true;
       return [u.nombre, u.sigla, u.ciudad, u.comunidad, u.especialidad]
@@ -81,23 +105,31 @@ export default function UniversidadesLista() {
       // Sin precio al final: no se ordena por un dato que falta.
       precio: (a, b) => (a.precio?.eur_60ects ?? 1e9) - (b.precio?.eur_60ects ?? 1e9),
       nombre: (a, b) => String(a.nombre).localeCompare(String(b.nombre), "es"),
-      masteres: (a, b) => (b.n_masteres || 0) - (a.n_masteres || 0),
-      ranking: (a, b) => (a.ranking_pos ?? 1e9) - (b.ranking_pos ?? 1e9),
+      masteres: (a, b) => (b.masteres_cargados || 0) - (a.masteres_cargados || 0),
+      ranking: (a, b) => (a.ranking_internacional ?? 1e9) - (b.ranking_internacional ?? 1e9),
     }[orden];
 
     return [...filtradas].sort(cmp);
-  }, [todas, q, comunidad, ciudad, tipo, nivel, area, soloProblemas, orden]);
+  }, [todas, q, comunidad, ciudad, lista, ventana, soloProblemas, orden]);
 
   const rotas = todas.filter((u) => u.vigilancia === "error").length;
-  const limpiar = () => {
-    setQ(""); setComunidad(""); setCiudad(""); setNivel("");
-    setTipo(""); setArea(""); setSoloProblemas(false);
-  };
-  const hayFiltro = q || comunidad || ciudad || nivel || tipo || area || soloProblemas;
+  const abiertas = todas.filter((u) => u.ventana?.estado === "abierta").length;
 
-  async function guardarCampo(u, campo, valor) {
-    const r = await boPATCH(`/backoffice/universidades/${u.id_universidad}`, { [campo]: valor });
-    if (r?.ok) { dialog.toast("Guardado", "exito"); cargar(); }
+  const hayFiltro = q || comunidad || ciudad || lista || ventana || soloProblemas;
+  const limpiar = () => {
+    setQ(""); setComunidad(""); setCiudad(""); setLista(""); setVentana(""); setSoloProblemas(false);
+  };
+
+  async function cambiarUrl(u) {
+    const nueva = window.prompt(
+      `URL de preinscripción de ${u.sigla || u.nombre}`,
+      u.url_preinscripcion || u.url_masteres || "",
+    );
+    if (nueva === null) return;
+    const r = await boPATCH(`/backoffice/universidades/${u.id_universidad}`, {
+      url_preinscripcion: nueva.trim() || null,
+    });
+    if (r?.ok) { dialog.toast("Guardado · se vuelve a vigilar desde cero", "exito"); recargar(); }
     else dialog.toast(r?.msg || "No se pudo guardar", "error");
   }
 
@@ -109,24 +141,28 @@ export default function UniversidadesLista() {
       <div>
         <h1 className="text-[19px] font-bold text-neutral-900">Universidades</h1>
         <p className="text-[12.5px] text-neutral-500">
-          {todas.length} universidades · precios por comunidad según decreto ·
-          {" "}la web de cada una se vigila para avisar cuando abren plazos.
+          De aquí sale el informe de másteres. Precios por comunidad según decreto.
         </p>
       </div>
 
-      {rotas > 0 && (
+      {/* Lo que hay que saber de un vistazo, antes de buscar nada. */}
+      <div className="flex gap-2 flex-wrap">
+        <div className="bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 min-w-[7rem]">
+          <p className="text-[19px] font-bold text-neutral-900 tabular-nums leading-none">{todas.length}</p>
+          <p className="text-[11px] text-neutral-500 mt-0.5">universidades</p>
+        </div>
+        <div className="bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 min-w-[7rem]">
+          <p className="text-[19px] font-bold text-[#1D6A4A] tabular-nums leading-none">{abiertas}</p>
+          <p className="text-[11px] text-neutral-500 mt-0.5">con plazo abierto</p>
+        </div>
         <button type="button" onClick={() => setSoloProblemas(!soloProblemas)}
-          className={`w-full text-left rounded-xl border px-3 py-2.5 transition-colors ${
-            soloProblemas
-              ? "border-red-400 bg-red-50"
-              : "border-red-200 bg-red-50/60 hover:border-red-300"
+          className={`rounded-xl px-3.5 py-2.5 min-w-[7rem] text-left border transition-colors ${
+            soloProblemas ? "border-red-400 bg-red-50" : "bg-white border-neutral-200 hover:border-red-300"
           }`}>
-          <p className="text-[12px] text-red-800 leading-relaxed">
-            <b>{rotas} universidades con la web caída o movida.</b> Su enlace ya no responde,
-            así que nadie se enteraría si abren plazo. {soloProblemas ? "Mostrando sólo esas." : "Pulsa para verlas."}
-          </p>
+          <p className="text-[19px] font-bold text-red-600 tabular-nums leading-none">{rotas}</p>
+          <p className="text-[11px] text-neutral-500 mt-0.5">con la web caída</p>
         </button>
-      )}
+      </div>
 
       <div className="flex gap-1.5 flex-wrap items-center">
         <input value={q} onChange={(e) => setQ(e.target.value)}
@@ -143,52 +179,43 @@ export default function UniversidadesLista() {
           {ciudades.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
 
-        <select value={nivel} onChange={(e) => setNivel(e.target.value)} className={sel}>
+        <select value={lista} onChange={(e) => setLista(e.target.value)} className={sel}>
           <option value="">Cualquier precio</option>
-          {["ECONOMICA", "INTERMEDIA", "PREMIUM"]
-            .filter((n) => (facetas.niveles || []).includes(n))
-            .map((n) => <option key={n} value={n}>{NIVEL[n].corto}</option>)}
+          {["LISTA_1", "LISTA_2", "LISTA_3"]
+            .filter((l) => (facetas.listas || []).includes(l))
+            .map((l) => <option key={l} value={l}>{LISTA[l].corto}</option>)}
         </select>
 
-        <select value={tipo} onChange={(e) => setTipo(e.target.value)} className={sel}>
-          <option value="">Pública y privada</option>
-          {(facetas.tipos || []).map((t) => (
-            <option key={t} value={t}>{t === "PUBLICA" ? "Pública" : "Privada"}</option>
-          ))}
+        <select value={ventana} onChange={(e) => setVentana(e.target.value)} className={sel}>
+          <option value="">Cualquier plazo</option>
+          <option value="abierta">Plazo abierto</option>
+          <option value="próxima">Abre pronto</option>
+          <option value="cerrada">Plazo cerrado</option>
+          <option value="sin fecha">Sin fechas cargadas</option>
         </select>
-
-        {(facetas.areas || []).length > 0 && (
-          <select value={area} onChange={(e) => setArea(e.target.value)} className={sel}>
-            <option value="">Cualquier área</option>
-            {facetas.areas.map((a) => <option key={a} value={a}>{a}</option>)}
-          </select>
-        )}
 
         <select value={orden} onChange={(e) => setOrden(e.target.value)} className={`${sel} ml-auto`}>
           <option value="precio">Más barata primero</option>
           <option value="nombre">Por nombre</option>
-          <option value="masteres">Más másteres</option>
+          <option value="masteres">Más másteres cargados</option>
           <option value="ranking">Mejor ranking</option>
         </select>
 
         {hayFiltro && (
           <button type="button" onClick={limpiar}
-            className="text-[12px] text-neutral-500 hover:text-neutral-800 px-2">
-            limpiar
-          </button>
+            className="text-[12px] text-neutral-500 hover:text-neutral-800 px-2">limpiar</button>
         )}
       </div>
 
       <p className="text-[11.5px] text-neutral-400">
-        {visibles.length === todas.length
-          ? `${todas.length} universidades`
+        {visibles.length === todas.length ? `${todas.length} universidades`
           : `${visibles.length} de ${todas.length}`}
       </p>
 
       {cargando ? (
         <div className="space-y-2">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="bg-white border border-neutral-200 rounded-xl h-20 animate-pulse" />
+            <div key={i} className="bg-white border border-neutral-200 rounded-xl h-24 animate-pulse" />
           ))}
         </div>
       ) : visibles.length === 0 ? (
@@ -199,8 +226,11 @@ export default function UniversidadesLista() {
       ) : (
         <div className="space-y-2">
           {visibles.map((u) => {
-            const n = NIVEL[u.precio?.nivel];
-            const v = VIGILANCIA[u.vigilancia] || VIGILANCIA.apagada;
+            const L = LISTA[u.lista_inspira];
+            const V = VENTANA[u.ventana?.estado] || VENTANA["sin fecha"];
+            const G = VIGILANCIA[u.vigilancia] || VIGILANCIA.apagada;
+            const faltan = (u.num_masteres_total || 0) - (u.masteres_cargados || 0);
+
             return (
               <div key={u.id_universidad}
                 className="bg-white border border-neutral-200 rounded-xl px-3.5 py-3">
@@ -212,51 +242,44 @@ export default function UniversidadesLista() {
                           px-1.5 py-0.5 rounded">{u.sigla}</span>
                       )}
                       <p className="text-[13.5px] font-semibold text-neutral-900">{u.nombre}</p>
-                      {u.tipo === "PRIVADA" && (
-                        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5
-                          py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200">
-                          privada
-                        </span>
-                      )}
                     </div>
 
                     <p className="text-[11.5px] text-neutral-400 mt-0.5">
                       {[u.ciudad, u.comunidad].filter(Boolean).join(" · ")}
-                      {u.n_masteres ? ` · ${u.n_masteres} másteres` : ""}
-                      {u.ranking_pos
-                        ? ` · #${u.ranking_pos} ${u.ranking_fuente || ""} ${u.ranking_anio || ""}`.trimEnd()
+                      {u.ranking_internacional
+                        ? ` · #${u.ranking_internacional} ${u.ranking_internacional_fte || ""}`.trimEnd()
                         : ""}
                     </p>
 
                     {u.especialidad && (
-                      <p className="text-[11.5px] text-neutral-600 mt-1 leading-relaxed">
-                        {u.especialidad}
-                      </p>
+                      <p className="text-[11.5px] text-neutral-600 mt-1 leading-relaxed">{u.especialidad}</p>
                     )}
 
-                    <div className="flex items-center gap-2 flex-wrap mt-1.5">
-                      <span className={`inline-flex items-center gap-1 text-[10.5px] ${v.tono}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${v.punto}`} />
-                        {v.texto}
+                    <div className="flex items-center gap-2.5 flex-wrap mt-1.5">
+                      <span className={`inline-flex items-center gap-1 text-[10.5px] ${V.tono}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${V.punto}`} />
+                        {V.texto}
+                        {u.ventana?.fase ? ` · ${u.ventana.fase}` : ""}
+                        {u.ventana?.hasta ? ` hasta ${fechaCorta(u.ventana.hasta)}` : ""}
+                        {u.ventana?.desde ? ` el ${fechaCorta(u.ventana.desde)}` : ""}
                       </span>
-                      {u.url_preinscripcion || u.url_masteres ? (
+
+                      <span className="text-[10.5px] text-neutral-400 tabular-nums">
+                        {u.masteres_cargados} másteres cargados
+                        {faltan > 0 && <span className="text-amber-700"> · faltan ~{faltan}</span>}
+                      </span>
+
+                      <span className={`text-[10.5px] ${G.tono}`}>{G.texto}</span>
+
+                      {(u.url_preinscripcion || u.url_masteres) && (
                         <a href={u.url_preinscripcion || u.url_masteres} target="_blank" rel="noreferrer"
-                          className="text-[10.5px] text-[#046C8C] hover:underline truncate max-w-[280px]">
+                          className="text-[10.5px] text-[#046C8C] hover:underline truncate max-w-[220px]">
                           {(u.url_preinscripcion || u.url_masteres).replace(/^https?:\/\//, "")}
                         </a>
-                      ) : (
-                        <span className="text-[10.5px] text-amber-700">sin URL de preinscripción</span>
                       )}
-                      <button type="button"
-                        onClick={async () => {
-                          const nueva = window.prompt(
-                            `URL de preinscripción de ${u.sigla || u.nombre}`,
-                            u.url_preinscripcion || "",
-                          );
-                          if (nueva !== null) await guardarCampo(u, "url_preinscripcion", nueva.trim() || null);
-                        }}
+                      <button type="button" onClick={() => cambiarUrl(u)}
                         className="text-[10.5px] text-neutral-400 hover:text-neutral-700">
-                        cambiar
+                        {u.url_preinscripcion ? "cambiar enlace" : "poner enlace"}
                       </button>
                     </div>
                   </div>
@@ -264,22 +287,22 @@ export default function UniversidadesLista() {
                   <div className="shrink-0 text-right">
                     {u.precio?.eur_60ects != null ? (
                       <>
-                        <p className="text-[15px] font-bold text-neutral-800 tabular-nums">
+                        <p className="text-[15px] font-bold text-neutral-800 tabular-nums leading-none">
                           {eur(u.precio.eur_60ects)}
                         </p>
-                        <p className="text-[10px] text-neutral-400">máster de 60 ECTS</p>
-                        {n && (
+                        <p className="text-[10px] text-neutral-400 mt-0.5">máster de 60 ECTS</p>
+                        {L && (
                           <span className={`inline-block mt-1 text-[9.5px] font-bold uppercase
-                            tracking-wide px-1.5 py-0.5 rounded border ${n.tono}`}>
-                            {n.corto}
-                          </span>
+                            tracking-wide px-1.5 py-0.5 rounded border ${L.tono}`}>{L.corto}</span>
                         )}
                         {u.precio.normativa && (
                           <p className="text-[9.5px] text-neutral-300 mt-1">{u.precio.normativa}</p>
                         )}
                       </>
                     ) : (
-                      <p className="text-[11px] text-neutral-400">precio no fijado<br />por decreto</p>
+                      <p className="text-[11px] text-neutral-400 leading-tight">
+                        precio no<br />cargado
+                      </p>
                     )}
                   </div>
                 </div>

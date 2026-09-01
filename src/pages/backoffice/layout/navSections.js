@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
-  GraduationCap, Settings, Wrench,
+  GraduationCap, Settings, Wrench, Receipt, Library,
 } from "lucide-react";
 
 // Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos),
@@ -45,6 +45,8 @@ export const NAV_SECTIONS = [
       },
       { label: "Clientes", href: "/backoffice/clientes", icon: Users },
       { label: "Herramientas", href: "/backoffice/herramientas", icon: Wrench },
+      { label: "Presupuesto", href: "/backoffice/presupuesto", icon: Receipt },
+      { label: "Universidades", href: "/backoffice/universidades", icon: Library },
       {
         label: "Tracker Universidades",
         href: "/backoffice/tracker-universidades",

@@ -1,70 +1,94 @@
 // Herramientas del asesor.
 //
-// Lo que hace falta para atender un expediente, en un sitio. Nace de que las
-// piezas estaban repartidas —el presupuesto en un módulo, las guías en el
-// portal del asesorado, el catálogo en otro— y quien atiende tenía que saberse
-// dónde vive cada cosa.
+// Las piezas estaban repartidas —el presupuesto en un módulo, las guías en el
+// portal del asesorado, el catálogo en otro sitio— y quien atiende tenía que
+// saberse dónde vive cada cosa.
 //
-// Las tarjetas dicen en qué estado está cada herramienta, incluidas las que
-// todavía no existen. Enseñar sólo lo terminado esconde el plan, y quien abre
-// esta página necesita saber con qué puede contar hoy y con qué no.
+// La página no es una rejilla de accesos directos: arriba va lo que hay que
+// atender hoy, porque una herramienta que nadie sabe que tiene trabajo pendiente
+// no se abre. Debajo, las herramientas agrupadas por lo que se hace con ellas:
+// atender a una persona, o mantener el catálogo del que salen sus informes.
 import { useCallback, useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import { navigate } from "../../../services/navigate";
 
-/** Estado de cada herramienta, dicho sin rodeos. */
 const ESTADO = {
-  lista:    { texto: "disponible",   clase: "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35" },
-  media:    { texto: "a medias",     clase: "bg-[#FEF3E7] text-[#B9770E] border-amber-300/60" },
-  pendiente:{ texto: "por construir", clase: "bg-[#EEF2F8] text-[#1A3557] border-[#1A3557]/25" },
+  lista:     { texto: "disponible",    clase: "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35" },
+  media:     { texto: "a medias",      clase: "bg-[#FEF3E7] text-[#B9770E] border-amber-300/60" },
+  pendiente: { texto: "por construir", clase: "bg-[#EEF2F8] text-[#1A3557] border-[#1A3557]/25" },
 };
 
-function Tarjeta({ icono, tono, titulo, descripcion, estado, dato, href, onIr }) {
+function Herramienta({ icono, tono, titulo, descripcion, estado, dato, href }) {
   const e = ESTADO[estado] || ESTADO.pendiente;
   const activa = Boolean(href);
 
   return (
     <button
       type="button"
-      onClick={() => activa && onIr(href)}
+      onClick={() => activa && navigate(href)}
       disabled={!activa}
-      className={`text-left bg-white border rounded-xl px-4 py-3.5 flex flex-col gap-1.5
-        transition-colors ${activa
-          ? "border-neutral-200 hover:border-[#1A3557] cursor-pointer"
-          : "border-dashed border-neutral-300 cursor-default"}`}
+      className={`group text-left rounded-xl px-4 py-3.5 flex gap-3 transition-all border ${
+        activa
+          ? "bg-white border-neutral-200 hover:border-[#1A3557] hover:shadow-sm cursor-pointer"
+          : "bg-neutral-50/60 border-dashed border-neutral-300 cursor-default"}`}
     >
-      <div className="flex items-center gap-2">
-        <span className={`w-7 h-7 rounded-lg grid place-items-center text-[13px] shrink-0 ${tono}`}>
-          {icono}
+      <span className={`w-9 h-9 rounded-lg grid place-items-center text-[15px] shrink-0 ${tono}`}>
+        {icono}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2 flex-wrap">
+          <span className={`text-[13.5px] font-semibold ${
+            activa ? "text-neutral-900" : "text-neutral-500"}`}>{titulo}</span>
+          <span className={`text-[9.5px] font-bold uppercase tracking-wide px-1.5 py-0.5
+            rounded border ${e.clase}`}>{e.texto}</span>
         </span>
-        <h3 className="text-[13.5px] font-semibold text-neutral-900 flex-1">{titulo}</h3>
-      </div>
-      <p className="text-[12px] text-neutral-600 leading-relaxed">{descripcion}</p>
-      <div className="flex items-center gap-2 flex-wrap mt-0.5">
-        <span className={`text-[9.5px] font-bold uppercase tracking-wide px-1.5 py-0.5
-          rounded border ${e.clase}`}>{e.texto}</span>
-        {dato && <span className="text-[10.5px] text-neutral-400 tabular-nums">{dato}</span>}
-      </div>
+        <span className="block text-[12px] text-neutral-600 leading-relaxed mt-0.5">
+          {descripcion}
+        </span>
+        {dato && (
+          <span className="block text-[10.5px] text-neutral-400 tabular-nums mt-1">{dato}</span>
+        )}
+      </span>
+      {activa && (
+        <span className="self-center text-[15px] text-neutral-300 group-hover:text-[#1A3557]
+          transition-colors shrink-0">→</span>
+      )}
     </button>
   );
 }
 
-export default function HerramientasAsesor() {
-  const [resumen, setResumen] = useState(null);
+function Grupo({ titulo, subtitulo, children }) {
+  return (
+    <section className="space-y-2">
+      <div>
+        <h2 className="text-[10px] font-bold uppercase tracking-[.12em] font-mono text-neutral-400">
+          {titulo}
+        </h2>
+        {subtitulo && <p className="text-[11.5px] text-neutral-400 mt-0.5">{subtitulo}</p>}
+      </div>
+      <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(19rem, 1fr))" }}>
+        {children}
+      </div>
+    </section>
+  );
+}
 
-  // Los números salen del catálogo real, no escritos a mano: una tarjeta que
-  // dice «47 universidades» cuando ya son cincuenta envejece mal.
+export default function HerramientasAsesor() {
+  const [r, setR] = useState(null);
+
   const cargar = useCallback(() => {
     boGET("/backoffice/universidades")
-      .then((r) => {
-        if (!r?.ok) return;
-        const u = r.universidades || [];
-        setResumen({
+      .then((res) => {
+        if (!res?.ok) return;
+        const u = res.universidades || [];
+        setR({
           universidades: u.length,
-          comunidades: (r.facetas?.comunidades || []).length,
-          masteres: u.reduce((n, x) => n + (x.masteres_cargados || 0), 0),
-          sinUrl: u.filter((x) => !x.url_preinscripcion && !x.url_masteres).length,
+          comunidades: (res.facetas?.comunidades || []).length,
+          cargados: u.reduce((n, x) => n + (x.masteres_cargados || 0), 0),
+          ofertan: u.reduce((n, x) => n + (x.num_masteres_total || 0), 0),
+          abiertas: u.filter((x) => x.ventana?.estado === "abierta").length,
           rotas: u.filter((x) => x.vigilancia === "error").length,
+          sinFechas: u.filter((x) => x.ventana?.estado === "sin fecha").length,
         });
       })
       .catch(() => {});
@@ -72,10 +96,10 @@ export default function HerramientasAsesor() {
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  const ir = (href) => navigate(href);
+  const faltan = r ? Math.max(0, r.ofertan - r.cargados) : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
         <h1 className="text-[19px] font-bold text-neutral-900">Herramientas del asesor</h1>
         <p className="text-[12.5px] text-neutral-500">
@@ -83,83 +107,91 @@ export default function HerramientasAsesor() {
         </p>
       </div>
 
-      <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(15.5rem, 1fr))" }}>
-        <Tarjeta
-          icono="€" tono="bg-[#E8F5EE] text-[#1D6A4A]"
-          titulo="Presupuesto personalizado"
-          descripcion="Rellenas los datos del asesorado y sale el PDF con membrete, listo para mandar. Editable antes de generarlo."
-          estado="pendiente"
-        />
-
-        <Tarjeta
-          icono="◫" tono="bg-[#EEF2F8] text-[#1A3557]"
-          titulo="Guías del asesorado"
-          descripcion="Las mismas que ve él en su portal, para consultarlas mientras le atiendes."
-          estado="lista"
-          href="/backoffice/instructivos"
-          onIr={ir}
-        />
-
-        <Tarjeta
-          icono="⌕" tono="bg-[#F5EEF8] text-[#7D3C98]"
-          titulo="Buscador de universidades"
-          descripcion="Filtra por comunidad, ciudad, precio y área. Los datos ya están; falta la pantalla."
-          estado="media"
-          dato={resumen
-            ? `${resumen.universidades} universidades · ${resumen.comunidades} comunidades`
-            : null}
-        />
-
-        <Tarjeta
-          icono="⇪" tono="bg-[#FEF3E7] text-[#B9770E]"
-          titulo="Sistematizador de másteres"
-          descripcion="Pegas el enlace de una universidad, se extrae su oferta y la revisas antes de cargarla. Sale también en CSV para Excel."
-          estado="pendiente"
-          dato={resumen ? `${resumen.masteres} másteres cargados` : null}
-        />
-
-        <Tarjeta
-          icono="◷" tono="bg-[#FDEDEC] text-[#C0392B]"
-          titulo="Tracker de universidades"
-          descripcion="Las ventanas de preinscripción, curso a curso. Falta que avise de los plazos que se acercan."
-          estado="media"
-          href="/backoffice/tracker-universidades"
-          onIr={ir}
-        />
-
-        <Tarjeta
-          icono="≡" tono="bg-[#EEF2F8] text-[#1A3557]"
-          titulo="Catálogo de másteres"
-          descripcion="Ramas, subramas, comunidades y criterios de admisión. Es la fuente del informe del cliente."
-          estado="lista"
-          href="/backoffice/catalogo-masters"
-          onIr={ir}
-        />
-      </div>
-
-      {/* Lo que hay que atender antes de fiarse de lo de arriba. Va debajo y no
-          en una tarjeta: no es una herramienta, es una deuda. */}
-      {resumen && (resumen.rotas > 0 || resumen.sinUrl > 0) && (
-        <div className="bg-white border border-amber-300 rounded-xl px-4 py-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-amber-700">
-            Antes de fiarte del catálogo
-          </p>
-          <ul className="mt-1.5 space-y-1">
-            {resumen.rotas > 0 && (
-              <li className="text-[12px] text-neutral-700 leading-relaxed">
-                <b>{resumen.rotas} universidades con la web caída o movida.</b> Su enlace ya
-                no responde, así que nadie se enteraría si abren plazo.
-              </li>
-            )}
-            {resumen.sinUrl > 0 && (
-              <li className="text-[12px] text-neutral-700 leading-relaxed">
-                <b>{resumen.sinUrl} sin enlace de preinscripción.</b> Sin URL no hay nada que
-                vigilar.
-              </li>
-            )}
-          </ul>
+      {/* Lo que reclama atención va arriba y con cifra grande: si esto queda
+          escondido, nadie se entera de que el catálogo está a medias. */}
+      {r && (r.rotas > 0 || faltan > 0 || r.sinFechas > 0) && (
+        <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(13rem, 1fr))" }}>
+          {faltan > 0 && (
+            <button type="button" onClick={() => navigate("/backoffice/sistematizador")}
+              className="text-left bg-white border border-amber-300 rounded-xl px-4 py-3
+                hover:border-amber-500 transition-colors">
+              <p className="text-[22px] font-bold text-amber-700 tabular-nums leading-none">
+                ~{faltan.toLocaleString("es-ES")}
+              </p>
+              <p className="text-[11.5px] text-neutral-600 mt-1 leading-snug">
+                másteres sin cargar. El informe no puede recomendar lo que no conoce.
+              </p>
+            </button>
+          )}
+          {r.rotas > 0 && (
+            <button type="button" onClick={() => navigate("/backoffice/universidades")}
+              className="text-left bg-white border border-red-300 rounded-xl px-4 py-3
+                hover:border-red-500 transition-colors">
+              <p className="text-[22px] font-bold text-red-600 tabular-nums leading-none">{r.rotas}</p>
+              <p className="text-[11.5px] text-neutral-600 mt-1 leading-snug">
+                universidades con la web caída. Nadie se enteraría si abren plazo.
+              </p>
+            </button>
+          )}
+          {r.sinFechas > 0 && (
+            <button type="button" onClick={() => navigate("/backoffice/tracker-universidades")}
+              className="text-left bg-white border border-neutral-200 rounded-xl px-4 py-3
+                hover:border-[#1A3557] transition-colors">
+              <p className="text-[22px] font-bold text-neutral-700 tabular-nums leading-none">
+                {r.sinFechas}
+              </p>
+              <p className="text-[11.5px] text-neutral-600 mt-1 leading-snug">
+                sin fechas de postulación cargadas para este curso.
+              </p>
+            </button>
+          )}
         </div>
       )}
+
+      <Grupo titulo="Atender a un asesorado" subtitulo="Lo que se usa con una persona delante">
+        <Herramienta
+          icono="€" tono="bg-[#E8F5EE] text-[#1D6A4A]"
+          titulo="Presupuesto"
+          descripcion="Se rellena, se ve al lado, y sale en PDF de dos páginas con las condiciones. Se descarga o se manda a su correo."
+          estado="lista" href="/backoffice/presupuesto"
+        />
+        <Herramienta
+          icono="◫" tono="bg-[#EEF2F8] text-[#1A3557]"
+          titulo="Guías"
+          descripcion="Las mismas que ve él en su portal, interactivas: máster, estancia, modificatoria y apostilla."
+          estado="lista" href="/backoffice/guias"
+        />
+      </Grupo>
+
+      <Grupo titulo="Mantener el catálogo"
+        subtitulo="De aquí sale el informe de másteres que recibe el cliente">
+        <Herramienta
+          icono="⌕" tono="bg-[#F5EEF8] text-[#7D3C98]"
+          titulo="Buscador de universidades"
+          descripcion="Filtra por comunidad, ciudad, precio y estado del plazo. Ordena por lo que cuesta."
+          estado="lista" href="/backoffice/universidades"
+          dato={r ? `${r.universidades} universidades · ${r.comunidades} comunidades · ${r.abiertas} con plazo abierto` : null}
+        />
+        <Herramienta
+          icono="⇪" tono="bg-[#FEF3E7] text-[#B9770E]"
+          titulo="Sistematizador de másteres"
+          descripcion="Pegas la oferta de una universidad, se interpreta y se revisa antes de cargarla."
+          estado="media" href="/backoffice/sistematizador"
+          dato={r ? `${r.cargados.toLocaleString("es-ES")} másteres cargados` : null}
+        />
+        <Herramienta
+          icono="◷" tono="bg-[#FDEDEC] text-[#C0392B]"
+          titulo="Tracker de postulaciones"
+          descripcion="Las ventanas de preinscripción, curso a curso. Falta que avise de los plazos que se acercan."
+          estado="media" href="/backoffice/tracker-universidades"
+        />
+        <Herramienta
+          icono="≡" tono="bg-[#EEF2F8] text-[#1A3557]"
+          titulo="Catálogo de másteres"
+          descripcion="Ramas, subramas, comunidades y criterios de admisión."
+          estado="lista" href="/backoffice/catalogo-masters"
+        />
+      </Grupo>
     </div>
   );
 }

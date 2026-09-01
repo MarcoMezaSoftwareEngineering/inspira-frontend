@@ -136,8 +136,8 @@ export default function PresupuestoAsesor() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-3 flex-wrap">
-        <div className="flex-1 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+        <div className="sm:flex-1 min-w-0">
           <h1 className="text-[19px] font-bold text-neutral-900">Presupuesto</h1>
           <p className="text-[12.5px] text-neutral-500">
             Se rellena aquí, se ve al lado y sale en PDF de dos páginas con las condiciones.
@@ -145,24 +145,28 @@ export default function PresupuestoAsesor() {
         </div>
         <div className="flex gap-2 shrink-0">
           <button type="button" onClick={descargar} disabled={generando}
-            className="text-[12px] font-semibold px-3.5 py-2 rounded-lg border border-neutral-300
-              text-neutral-700 hover:border-neutral-400 disabled:opacity-40">
+            className="flex-1 sm:flex-none text-[12px] font-semibold px-3.5 py-2 rounded-lg
+              border border-neutral-300 text-neutral-700 hover:border-neutral-400
+              disabled:opacity-40">
             {generando ? "Generando…" : "Descargar PDF"}
           </button>
           <button type="button" onClick={enviar} disabled={enviando}
-            className="text-[12px] font-semibold px-3.5 py-2 rounded-lg bg-[#1D6A4A]
-              text-white hover:opacity-90 disabled:opacity-40">
+            className="flex-1 sm:flex-none text-[12px] font-semibold px-3.5 py-2 rounded-lg
+              bg-[#1D6A4A] text-white hover:opacity-90 disabled:opacity-40">
             {enviando ? "Enviando…" : "Enviar por correo"}
           </button>
         </div>
       </div>
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1.05fr)" }}>
+      {/* En el movil no caben dos columnas: el formulario va entero y la vista
+          previa debajo. Forzar dos columnas en 390px deja los campos a media
+          palabra y el presupuesto cortado por la mitad. */}
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
 
         {/* ── Formulario ── */}
         <div className="space-y-3">
           <div className="bg-white border border-neutral-200 rounded-xl p-4 space-y-2.5">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label className="space-y-1">
                 <span className="text-[11px] text-neutral-500">Cliente</span>
                 <input className={input} value={d.cliente}
@@ -251,7 +255,7 @@ export default function PresupuestoAsesor() {
             Lo que va a recibir
           </p>
           <div className="bg-white border border-neutral-300 rounded-xl overflow-hidden shadow-sm">
-            <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+            <div className="px-4 sm:px-5 pt-5 pb-3 flex items-start justify-between gap-3 flex-wrap">
               <div>
                 <p className="text-[20px] font-bold text-[#173A5E] leading-none">inspira</p>
                 <p className="text-[7.5px] tracking-[.18em] text-neutral-400 mt-1">
@@ -298,7 +302,7 @@ export default function PresupuestoAsesor() {
               </div>
             </div>
 
-            <div className="px-5 py-4 grid grid-cols-2 gap-3">
+            <div className="px-4 sm:px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="border border-[#F58220]/70 bg-[#FEF6EC] rounded-lg p-3">
                 <p className="text-[9.5px] font-bold text-[#173A5E] mb-1.5">TASAS ADICIONALES</p>
                 {(d.tasas || []).filter((t) => t.concepto || t.importe).map((t, i) => (

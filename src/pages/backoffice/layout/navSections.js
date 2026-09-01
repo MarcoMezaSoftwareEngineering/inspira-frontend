@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Calendar, FileText, Calculator, TrendingUp, Users,
-  GraduationCap, Settings, Wrench, Receipt, Library,
+  GraduationCap, Settings, Wrench, Receipt, Library, Search, Upload,
 } from "lucide-react";
 
 // Cada ítem puede llevar `perm` (clave del checklist de Roles y Permisos),
@@ -46,6 +46,10 @@ export const NAV_SECTIONS = [
       { label: "Clientes", href: "/backoffice/clientes", icon: Users },
       { label: "Herramientas", href: "/backoffice/herramientas", icon: Wrench },
       { label: "Presupuesto", href: "/backoffice/presupuesto", icon: Receipt },
+      // El catalogo, en el orden del flujo: quien busca entra por el buscador,
+      // quien mantiene entra por las otras tres. Sueltas por el menu parecian
+      // cuatro catalogos distintos, y es uno solo visto desde cuatro sitios.
+      { label: "Buscador de másteres", href: "/backoffice/masteres", icon: Search },
       { label: "Universidades", href: "/backoffice/universidades", icon: Library },
       {
         label: "Tracker Universidades",
@@ -54,6 +58,7 @@ export const NAV_SECTIONS = [
         perm: "tracker.ver",
         icon: GraduationCap,
       },
+      { label: "Sistematizador", href: "/backoffice/sistematizador", icon: Upload },
       { label: "Agenda",   href: "/backoffice/agenda", icon: Calendar },
       { label: "Leads",    href: "/backoffice/calculadora", icon: TrendingUp },
       { label: "Finanzas", href: "/backoffice/presupuestos", icon: Calculator },

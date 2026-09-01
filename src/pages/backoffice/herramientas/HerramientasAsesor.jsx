@@ -66,7 +66,7 @@ function Grupo({ titulo, subtitulo, children }) {
         </h2>
         {subtitulo && <p className="text-[11.5px] text-neutral-400 mt-0.5">{subtitulo}</p>}
       </div>
-      <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(19rem, 1fr))" }}>
+      <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(19rem, 100%), 1fr))" }}>
         {children}
       </div>
     </section>
@@ -110,7 +110,7 @@ export default function HerramientasAsesor() {
       {/* Lo que reclama atención va arriba y con cifra grande: si esto queda
           escondido, nadie se entera de que el catálogo está a medias. */}
       {r && (r.rotas > 0 || faltan > 0 || r.sinFechas > 0) && (
-        <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(13rem, 1fr))" }}>
+        <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(13rem, 100%), 1fr))" }}>
           {faltan > 0 && (
             <button type="button" onClick={() => navigate("/backoffice/sistematizador")}
               className="text-left bg-white border border-amber-300 rounded-xl px-4 py-3
@@ -163,32 +163,38 @@ export default function HerramientasAsesor() {
         />
       </Grupo>
 
-      <Grupo titulo="Mantener el catálogo"
-        subtitulo="De aquí sale el informe de másteres que recibe el cliente">
+      <Grupo titulo="El catálogo"
+        subtitulo="Un solo catálogo visto desde cuatro sitios. De aquí sale el informe de másteres">
+        <Herramienta
+          icono="≡" tono="bg-[#E8F5EE] text-[#1D6A4A]"
+          titulo="Buscador de másteres"
+          descripcion="El catálogo final: cada máster con su universidad, su precio real y su plazo ya resueltos."
+          estado="lista" href="/backoffice/masteres"
+          dato={r ? `${r.cargados.toLocaleString("es-ES")} másteres buscables` : null}
+        />
         <Herramienta
           icono="⌕" tono="bg-[#F5EEF8] text-[#7D3C98]"
-          titulo="Buscador de universidades"
-          descripcion="Filtra por comunidad, ciudad, precio y estado del plazo. Ordena por lo que cuesta."
+          titulo="Universidades"
+          descripcion="La ficha de la que cuelgan los másteres: dónde está, qué cuesta el crédito, sus enlaces."
           estado="lista" href="/backoffice/universidades"
           dato={r ? `${r.universidades} universidades · ${r.comunidades} comunidades · ${r.abiertas} con plazo abierto` : null}
         />
         <Herramienta
           icono="⇪" tono="bg-[#FEF3E7] text-[#B9770E]"
           titulo="Sistematizador de másteres"
-          descripcion="Pegas la oferta de una universidad, se interpreta y se revisa antes de cargarla."
-          estado="media" href="/backoffice/sistematizador"
-          dato={r ? `${r.cargados.toLocaleString("es-ES")} másteres cargados` : null}
+          descripcion="La puerta de carga: pegas la oferta de una universidad, se revisa y entra al catálogo."
+          estado="lista" href="/backoffice/sistematizador"
         />
         <Herramienta
           icono="◷" tono="bg-[#FDEDEC] text-[#C0392B]"
           titulo="Tracker de postulaciones"
-          descripcion="Las ventanas de preinscripción, curso a curso. Falta que avise de los plazos que se acercan."
-          estado="media" href="/backoffice/tracker-universidades"
+          descripcion="Cuándo abre cada universidad. Se cargan por comunidad y se duplica el curso entero."
+          estado="lista" href="/backoffice/tracker-universidades"
         />
         <Herramienta
-          icono="≡" tono="bg-[#EEF2F8] text-[#1A3557]"
-          titulo="Catálogo de másteres"
-          descripcion="Ramas, subramas, comunidades y criterios de admisión."
+          icono="⚙" tono="bg-[#EEF2F8] text-[#1A3557]"
+          titulo="Mantenimiento del catálogo"
+          descripcion="Ramas, subramas, comunidades y criterios de admisión, uno a uno."
           estado="lista" href="/backoffice/catalogo-masters"
         />
       </Grupo>

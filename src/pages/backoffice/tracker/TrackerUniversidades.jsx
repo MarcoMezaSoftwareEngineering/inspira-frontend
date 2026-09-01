@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { boGET, boPATCH, boPOST, boDELETE } from "../../../services/backofficeApi";
+import CargaDeFases from "./CargaDeFases";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
-const ANIO = "2025-2026";
+const ANIO_INICIAL = "2025-2026";
 
 const TODAY = (() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; })();
 
@@ -63,6 +64,19 @@ const CSS = `
 
 /* Body */
 .tkr .body{display:flex;flex:1;overflow:hidden}
+
+/* Movil: la tabla y el panel de edicion no caben lado a lado. */
+@media (max-width:900px){
+  .tkr{height:auto;overflow:visible}
+  .tkr .body{flex-direction:column;overflow:visible}
+  .tkr .tbl-wrap{flex:none !important;width:100%;max-height:60vh}
+  .tkr .panel{width:100% !important;border-left:none;border-top:2px solid #e2e8f0;max-height:none}
+  .tkr .hdr,.tkr .subbar,.tkr .alerts-lbl,.tkr .alerts-row,.tkr .alerts-ok{padding-left:12px;padding-right:12px}
+  .tkr .hdr-row{flex-wrap:wrap;gap:8px}
+  .tkr .sub-info{margin-left:0;width:100%}
+  .tkr table{font-size:11.5px}
+  .tkr th:nth-child(2),.tkr td:nth-child(2){display:none}
+}
 .tkr .tbl-wrap{overflow-y:auto;overflow-x:auto}
 .tkr table{width:100%;border-collapse:collapse;font-size:12.5px}
 .tkr thead tr{background:#f1f5f9;position:sticky;top:0;z-index:5}
@@ -180,11 +194,20 @@ export default function TrackerUniversidades() {
   const [loading, setLoading] = useState(true);
   const [toast,   setToast]   = useState({ msg: "", ok: true, show: false });
 
-  useEffect(() => {
-    boGET(`/backoffice/tracker/unis?anio=${ANIO}`)
-      .then(d => { if (d.ok) setUnis(d.unis); })
+  // El curso deja de estar clavado en el codigo. Las postulaciones de los
+  // masteres que empiezan en 2027-2028 abren en 2026, o sea ahora: sin poder
+  // cambiar de curso no habia donde cargarlas.
+  const [anio,    setAnio]    = useState(ANIO_INICIAL);
+  const [anios,   setAnios]   = useState([]);
+  const [cargaAbierta, setCargaAbierta] = useState(false);
+
+  const cargar = useCallback((curso) => {
+    boGET(`/backoffice/tracker/unis?anio=${encodeURIComponent(curso)}`)
+      .then(d => { if (d.ok) { setUnis(d.unis); if (d.anios) setAnios(d.anios); } })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { cargar(anio); }, [cargar, anio]);
 
   function showToast(msg, ok = true) {
     setToast({ msg, ok, show: true });
@@ -197,7 +220,7 @@ export default function TrackerUniversidades() {
   }
 
   async function addFase(uniId) {
-    const d = await boPOST(`/backoffice/tracker/unis/${uniId}/fases`, { anio_academico: ANIO });
+    const d = await boPOST(`/backoffice/tracker/unis/${uniId}/fases`, { anio_academico: anio });
     if (d.ok) {
       setUnis(prev => prev.map(u => u.id_universidad === uniId ? { ...u, tracker_fases: [...u.tracker_fases, d.fase] } : u));
       showToast("Fase añadida");
@@ -265,9 +288,28 @@ export default function TrackerUniversidades() {
         <div className="hdr">
           <div className="hdr-row">
             <div>
-              <div className="hdr-eyebrow">INSPIRA · Másteres España {ANIO}</div>
+              <div className="hdr-eyebrow">INSPIRA · Másteres España</div>
               <div className="hdr-title">Tracker Universidades</div>
-              <div className="hdr-sub">{unis.length} universidades · ciclo {ANIO}</div>
+              <div className="hdr-sub">
+                {unis.length} universidades · {unis.reduce((n, u) => n + (u.tracker_fases || []).length, 0)} fases cargadas
+              </div>
+            </div>
+
+            {/* Cambiar de curso y cargar fases, arriba: es lo que se viene a
+                hacer cuando toca preparar la campana siguiente. */}
+            <div className="hdr-btns">
+              <select value={anio} onChange={e => { setLoading(true); setSelId(null); setAnio(e.target.value); }}
+                className="hdr-btn" style={{ appearance: "auto", paddingRight: 6 }}>
+                {(anios.some(a => a.anio === anio) ? anios : [{ anio, fases: 0 }, ...anios])
+                  .map(a => (
+                    <option key={a.anio} value={a.anio} style={{ color: "#0f2444" }}>
+                      {a.anio}
+                    </option>
+                  ))}
+              </select>
+              <button type="button" className="hdr-btn" onClick={() => setCargaAbierta(true)}>
+                Cargar fases
+              </button>
             </div>
           </div>
           <div className="tabs">
@@ -353,6 +395,21 @@ export default function TrackerUniversidades() {
             </div>
           )}
         </div>
+
+        {cargaAbierta && (
+          <CargaDeFases
+            anio={anio}
+            anios={anios}
+            onCerrar={() => setCargaAbierta(false)}
+            onCargado={(nuevoCurso) => {
+              setCargaAbierta(false);
+              setLoading(true);
+              setSelId(null);
+              if (nuevoCurso && nuevoCurso !== anio) setAnio(nuevoCurso);
+              else cargar(anio);
+            }}
+          />
+        )}
 
         {/* Toast */}
         <div className={`toast${toast.show ? " show" : ""}`}
@@ -687,7 +744,7 @@ function FaseBlockRO({ f, idx }) {
 
 // ── Bloque de edición de una fase ─────────────────────────────────────────────
 
-function FaseBlock({ f, idx, total, hasDraft, getVal, efectiva, onChange, onDel }) {
+function FaseBlock({ idx, total, hasDraft, getVal, efectiva, onChange, onDel }) {
   const st  = computeStatus(efectiva());
   const c   = SCFG[st];
   const empty = !getVal("postulacion_inicio") && !getVal("postulacion_fin");

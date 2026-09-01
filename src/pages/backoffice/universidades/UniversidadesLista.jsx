@@ -13,6 +13,7 @@
 // responde en cada tecla, sin ir y volver del servidor.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
+import MapaDelCatalogo from "../catalogo-masteres/MapaDelCatalogo";
 import { dialog } from "../../../services/dialogService";
 
 const LISTA = {
@@ -144,6 +145,8 @@ export default function UniversidadesLista() {
           De aquí sale el informe de másteres. Precios por comunidad según decreto.
         </p>
       </div>
+
+      <MapaDelCatalogo activo="universidades" />
 
       {/* Lo que hay que saber de un vistazo, antes de buscar nada. */}
       <div className="flex gap-2 flex-wrap">

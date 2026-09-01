@@ -32,8 +32,15 @@ const VENTANA = {
 const VIGILANCIA = {
   activa:         { texto: "vigilada", tono: "text-neutral-400" },
   "sin estrenar": { texto: "sin estrenar", tono: "text-neutral-400" },
-  error:          { texto: "web caída", tono: "text-red-600" },
+  // Ya no dice «web caída» a secas: el servidor manda la clase concreta, y de
+  // siete casos «caída» era falso en seis. La UB funciona; nos bloquea.
+  error:          { texto: "no se pudo leer", tono: "text-[#B9770E]" },
   apagada:        { texto: "sin vigilar", tono: "text-neutral-400" },
+};
+
+/** Sólo una de las cuatro clases de fallo pide trabajo: el enlace que ya no existe. */
+const TONO_FALLO = {
+  "enlace roto": "text-red-600",
 };
 
 const eur = (n) => (n == null ? null : `${Math.round(n).toLocaleString("es-ES")} €`);
@@ -96,7 +103,7 @@ export default function UniversidadesLista() {
       if (ciudad && u.ciudad !== ciudad) return false;
       if (lista && u.lista_inspira !== lista) return false;
       if (ventana && u.ventana?.estado !== ventana) return false;
-      if (soloProblemas && u.vigilancia !== "error") return false;
+      if (soloProblemas && !u.fallo?.hay_que_hacer_algo && !u.vigila_portada) return false;
       if (!busca) return true;
       return [u.nombre, u.sigla, u.ciudad, u.comunidad, u.especialidad]
         .some((c) => plano(c).includes(busca));
@@ -113,7 +120,12 @@ export default function UniversidadesLista() {
     return [...filtradas].sort(cmp);
   }, [todas, q, comunidad, ciudad, lista, ventana, soloProblemas, orden]);
 
-  const rotas = todas.filter((u) => u.vigilancia === "error").length;
+  // Lo que de verdad hay que arreglar: enlaces muertos, y los que apuntan a la
+  // portada. Un 403 no es trabajo pendiente, es una web que no nos deja mirar.
+  const rotas = todas.filter((u) => u.fallo?.hay_que_hacer_algo).length;
+  const bloqueadas = todas.filter(
+    (u) => u.vigilancia === "error" && !u.fallo?.hay_que_hacer_algo).length;
+  const portadas = todas.filter((u) => u.vigila_portada).length;
   const abiertas = todas.filter((u) => u.ventana?.estado === "abierta").length;
 
   const hayFiltro = q || comunidad || ciudad || lista || ventana || soloProblemas;
@@ -162,10 +174,29 @@ export default function UniversidadesLista() {
           className={`rounded-xl px-3.5 py-2.5 min-w-[7rem] text-left border transition-colors ${
             soloProblemas ? "border-red-400 bg-red-50" : "bg-white border-neutral-200 hover:border-red-300"
           }`}>
-          <p className="text-[19px] font-bold text-red-600 tabular-nums leading-none">{rotas}</p>
-          <p className="text-[11px] text-neutral-500 mt-0.5">con la web caída</p>
+          <p className="text-[19px] font-bold text-red-600 tabular-nums leading-none">
+            {rotas + portadas}
+          </p>
+          <p className="text-[11px] text-neutral-500 mt-0.5">con el enlace por arreglar</p>
         </button>
       </div>
+
+      {portadas > 0 && (
+        <div className="bg-white border border-amber-300 rounded-xl px-3.5 py-2.5">
+          <p className="text-[12px] text-neutral-700 leading-relaxed">
+            <b>{portadas} de {todas.length} vigilan la portada de la universidad</b>, no su página
+            de másteres. Una portada cambia cada vez que publican una noticia —o sea, avisa de
+            nada— y no cambia cuando abre la preinscripción, que es justo lo que se quería
+            detectar. El enlace se corrige aquí mismo, en cada fila.
+          </p>
+          {bloqueadas > 0 && (
+            <p className="text-[11px] text-neutral-500 leading-relaxed mt-1.5">
+              Otras {bloqueadas} no se pueden leer porque su web rechaza las consultas
+              automáticas. Ésas funcionan: no hay nada que arreglar por nuestra parte.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-1.5 flex-wrap items-center">
         <input value={q} onChange={(e) => setQ(e.target.value)}
@@ -272,7 +303,18 @@ export default function UniversidadesLista() {
                         {faltan > 0 && <span className="text-amber-700"> · faltan ~{faltan}</span>}
                       </span>
 
-                      <span className={`text-[10.5px] ${G.tono}`}>{G.texto}</span>
+                      <span className={`text-[10.5px] ${
+                        u.fallo ? (TONO_FALLO[u.fallo.clase] || "text-[#B9770E]") : G.tono
+                      }`} title={u.fallo?.dice || ""}>
+                        {u.fallo ? u.fallo.clase : G.texto}
+                      </span>
+
+                      {u.vigila_portada && (
+                        <span className="text-[10.5px] text-[#B9770E]"
+                          title="Se está vigilando la portada, no la página de másteres.">
+                          vigila la portada
+                        </span>
+                      )}
 
                       {(u.url_preinscripcion || u.url_masteres) && (
                         <a href={u.url_preinscripcion || u.url_masteres} target="_blank" rel="noreferrer"

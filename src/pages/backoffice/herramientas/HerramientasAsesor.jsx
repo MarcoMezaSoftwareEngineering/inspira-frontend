@@ -87,7 +87,9 @@ export default function HerramientasAsesor() {
           cargados: u.reduce((n, x) => n + (x.masteres_cargados || 0), 0),
           ofertan: u.reduce((n, x) => n + (x.num_masteres_total || 0), 0),
           abiertas: u.filter((x) => x.ventana?.estado === "abierta").length,
-          rotas: u.filter((x) => x.vigilancia === "error").length,
+          // Trabajo pendiente de verdad: enlaces muertos y enlaces que apuntan
+          // a la portada. Un 403 no es trabajo: es una web que no nos deja mirar.
+          rotas: u.filter((x) => x.fallo?.hay_que_hacer_algo || x.vigila_portada).length,
           sinFechas: u.filter((x) => x.ventana?.estado === "sin fecha").length,
         });
       })
@@ -129,7 +131,7 @@ export default function HerramientasAsesor() {
                 hover:border-red-500 transition-colors">
               <p className="text-[22px] font-bold text-red-600 tabular-nums leading-none">{r.rotas}</p>
               <p className="text-[11.5px] text-neutral-600 mt-1 leading-snug">
-                universidades con la web caída. Nadie se enteraría si abren plazo.
+                vigilan el enlace equivocado. Nadie se enteraría si abren plazo.
               </p>
             </button>
           )}

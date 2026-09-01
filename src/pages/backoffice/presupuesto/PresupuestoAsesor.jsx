@@ -39,10 +39,15 @@ function Filas({ titulo, filas, onCambio, campos, minimo = 1 }) {
         <button type="button" onClick={() => onCambio([...filas, {}])}
           className="text-[11px] font-semibold text-[#1D6A4A] hover:underline">+ añadir</button>
       </div>
+      {/* En el movil el concepto y el importe no caben en la misma linea: el
+          concepto se aplastaba a un cuadrado vacio y solo se veia la cifra, asi
+          que no habia forma de saber que se estaba cobrando. El concepto ocupa
+          su propia fila y el importe baja debajo. */}
       {filas.map((f, i) => (
-        <div key={i} className="flex gap-1.5 items-center">
+        <div key={i} className="flex flex-wrap gap-1.5 items-center">
           {campos.map((c) => (
-            <input key={c.k} className={`${input} ${c.ancho || "flex-1"}`}
+            <input key={c.k}
+              className={`${input} ${c.ancho || "basis-full sm:basis-0 sm:flex-1 min-w-0"}`}
               type={c.tipo || "text"} placeholder={c.ph}
               value={f[c.k] ?? ""} onChange={(e) => set(i, c.k, e.target.value)} />
           ))}
@@ -194,14 +199,16 @@ export default function PresupuestoAsesor() {
             <Filas titulo="Servicios y honorarios" filas={d.servicios}
               onCambio={(v) => set("servicios", v)}
               campos={[
-                { k: "concepto", ph: "Servicio" },
-                { k: "importe", ph: "0,00", tipo: "number", ancho: "w-24" },
+                { k: "concepto", ph: "Servicio (p. ej. Tramitación de estancia por estudios)" },
+                { k: "importe", ph: "0,00 €", tipo: "number",
+                  ancho: "flex-1 sm:flex-none sm:w-24 min-w-0" },
               ]} />
             <Filas titulo="Tasas adicionales" filas={d.tasas}
               onCambio={(v) => set("tasas", v)} minimo={0}
               campos={[
-                { k: "concepto", ph: "Concepto" },
-                { k: "importe", ph: "0,00", tipo: "number", ancho: "w-24" },
+                { k: "concepto", ph: "Concepto de la tasa" },
+                { k: "importe", ph: "0,00 €", tipo: "number",
+                  ancho: "flex-1 sm:flex-none sm:w-24 min-w-0" },
               ]} />
             <label className="block space-y-1">
               <span className="text-[11px] text-neutral-500">Nota sobre las tasas</span>

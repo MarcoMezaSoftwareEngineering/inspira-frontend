@@ -10,8 +10,16 @@
 // se recalcula nada: si la pantalla y el informe hicieran sus propias cuentas,
 // tarde o temprano dirían importes distintos del mismo máster.
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ArrowLeft, ArrowRight, Building2, CalendarClock, Copy, ExternalLink, GraduationCap, Search, SlidersHorizontal, Upload,
+} from "lucide-react";
 import { boGET } from "../../../services/backofficeApi";
+import { dialog } from "../../../services/dialogService";
+import { navigate } from "../../../services/navigate";
 import MapaDelCatalogo from "./MapaDelCatalogo";
+import {
+  Pagina, Cabecera, Cuerpo, Boton, Chip, Pill, Campo, Ventana, Vacio, Esqueleto,
+} from "../ui";
 
 const RAMA_ETIQ = {
   ARTES_HUMANIDADES: "Artes y Humanidades",
@@ -22,14 +30,20 @@ const RAMA_ETIQ = {
 };
 
 const VENTANA = {
-  abierta: { texto: "plazo abierto", clase: "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35" },
-  "abre pronto": { texto: "abre pronto", clase: "bg-[#EEF2F8] text-[#1A3557] border-[#1A3557]/25" },
-  cerrada: { texto: "plazo cerrado", clase: "bg-neutral-100 text-neutral-500 border-neutral-300" },
-  "sin fecha": { texto: "sin fechas", clase: "bg-[#FEF3E7] text-[#B9770E] border-amber-300/60" },
+  abierta: { texto: "plazo abierto", tono: "verde" },
+  "abre pronto": { texto: "abre pronto", tono: "petrol" },
+  cerrada: { texto: "plazo cerrado", tono: "gris" },
+  "sin fecha": { texto: "sin fechas", tono: "ambar" },
 };
 
 const eur = (n) =>
   n == null ? "—" : `${Number(n).toLocaleString("es-ES", { maximumFractionDigits: 0 })} €`;
+
+const fecha = (iso) => {
+  if (!iso) return "";
+  const d = new Date(`${iso}T12:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("es-ES", { day: "numeric", month: "long" });
+};
 
 /** Un retardo corto: sin él, cada tecla dispara una consulta a mil filas. */
 function useRetardo(valor, ms = 350) {
@@ -41,78 +55,55 @@ function useRetardo(valor, ms = 350) {
   return v;
 }
 
-function Ficha({ m }) {
+/** La línea del plazo, en claro: la etiqueta dice el estado; esto, la fecha. */
+function plazoEnClaro(v) {
+  if (!v) return null;
+  if (v.estado === "abierta" && v.cierra) {
+    return `Cierra el ${fecha(v.cierra)}${v.dias != null ? ` · quedan ${v.dias} días` : ""}`;
+  }
+  if (v.estado === "abre pronto" && v.abre) return `Abre el ${fecha(v.abre)} · ${v.fase}`;
+  if (v.estado === "cerrada" && v.cerro) return `Cerró el ${fecha(v.cerro)} · ${v.fase}`;
+  return null;
+}
+
+function Ficha({ m, onAbrir }) {
   const v = VENTANA[m.ventana?.estado] || VENTANA["sin fecha"];
   const u = m.universidad || {};
+  const plazo = plazoEnClaro(m.ventana);
 
   return (
-    <article className="bg-white border border-neutral-200 rounded-xl p-3.5 hover:border-neutral-300
-      transition-colors">
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="text-[13.5px] font-semibold text-neutral-900 leading-snug min-w-0">
-          {m.nombre}
-        </h3>
-        <div className="text-right shrink-0">
-          <p className="text-[15px] font-bold text-[#1A3557] tabular-nums leading-none">
-            {eur(m.precio)}
-          </p>
-          <p className="text-[9.5px] text-neutral-400 mt-0.5">
-            {m.precio_origen === "confirmado" ? "confirmado" : "estimado"}
-          </p>
-        </div>
-      </div>
+    <button type="button" className="ase-ficha" onClick={() => onAbrir(m)}>
+      <span style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+        <span className="ase-ficha-t" style={{ minWidth: 0 }}>{m.nombre}</span>
+        <span style={{ textAlign: "right", flexShrink: 0 }}>
+          <span className="ase-precio" style={{ fontSize: 17, display: "block" }}>{eur(m.precio)}</span>
+          <span style={{ fontSize: 9.5, color: "#9fb3c0" }}>{m.precio_origen === "confirmado" ? "confirmado" : "estimado"}</span>
+        </span>
+      </span>
 
-      <p className="text-[11.5px] text-neutral-600 mt-1.5 leading-snug">
-        {u.sigla ? <b className="text-neutral-800">{u.sigla}</b> : null}
+      <span className="ase-ficha-s">
+        {u.sigla ? <b style={{ color: "var(--primary)" }}>{u.sigla}</b> : null}
         {u.nombre ? ` · ${u.nombre}` : ""}
-      </p>
-      <p className="text-[11px] text-neutral-500 mt-0.5">
-        {[u.ciudad, u.comunidad].filter(Boolean).join(" · ")}
-        {u.ranking_nacional ? ` · nº ${u.ranking_nacional} de España` : ""}
-      </p>
-
-      <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
-        <span className={`text-[9.5px] font-bold uppercase tracking-wide px-1.5 py-0.5
-          rounded border ${v.clase}`}>{v.texto}</span>
-        <span className="text-[10.5px] text-neutral-500 px-1.5 py-0.5 rounded bg-neutral-100">
-          {RAMA_ETIQ[m.rama] || m.rama}
+        <span style={{ display: "block", marginTop: 1 }}>
+          {[u.ciudad, u.comunidad].filter(Boolean).join(" · ")}
+          {u.ranking_nacional ? ` · nº ${u.ranking_nacional} de España` : ""}
         </span>
-        <span className="text-[10.5px] text-neutral-500 tabular-nums px-1.5 py-0.5 rounded bg-neutral-100">
-          {m.ects} ECTS
+      </span>
+
+      <span style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+        <Chip tono={v.tono} punto>{v.texto}</Chip>
+        <Chip>{RAMA_ETIQ[m.rama] || m.rama}</Chip>
+        <Chip>{m.ects} ECTS</Chip>
+        {m.modalidad !== "PRESENCIAL" && <Chip tono="cielo">{String(m.modalidad).toLowerCase()}</Chip>}
+        {m.es_habilitante && <Chip tono="morado">habilitante</Chip>}
+      </span>
+
+      {plazo && (
+        <span style={{ fontSize: 11.5, color: v.tono === "verde" ? "var(--green)" : "var(--muted)", fontWeight: 600 }}>
+          {plazo}
         </span>
-        {m.modalidad !== "PRESENCIAL" && (
-          <span className="text-[10.5px] text-neutral-500 px-1.5 py-0.5 rounded bg-neutral-100">
-            {String(m.modalidad).toLowerCase()}
-          </span>
-        )}
-        {m.es_habilitante && (
-          <span className="text-[10.5px] text-[#7D3C98] px-1.5 py-0.5 rounded bg-[#F5EEF8]">
-            habilitante
-          </span>
-        )}
-      </div>
-
-      {/* El plazo, en claro. La etiqueta dice el estado; esto dice la fecha,
-          que es lo que hay que decirle al asesorado. */}
-      {m.ventana?.estado === "abierta" && m.ventana.cierra && (
-        <p className="text-[11px] text-[#14532d] mt-2">
-          Cierra el {m.ventana.cierra}
-          {m.ventana.dias != null ? ` · quedan ${m.ventana.dias} días` : ""}
-        </p>
       )}
-      {m.ventana?.estado === "abre pronto" && m.ventana.abre && (
-        <p className="text-[11px] text-[#1A3557] mt-2">
-          Abre el {m.ventana.abre} · {m.ventana.fase}
-        </p>
-      )}
-
-      {u.url && (
-        <a href={u.url} target="_blank" rel="noreferrer"
-          className="inline-block text-[11px] text-[#046C8C] hover:underline mt-2">
-          web de la universidad ↗
-        </a>
-      )}
-    </article>
+    </button>
   );
 }
 
@@ -124,10 +115,12 @@ export default function BuscadorMasteres() {
   const [precioMax, setPrecioMax] = useState("");
   const [orden, setOrden] = useState("precio");
   const [pagina, setPagina] = useState(1);
+  const [masFiltros, setMasFiltros] = useState(false);
+  const [abierto, setAbierto] = useState(null);
 
-  // La respuesta se guarda junto a la consulta que la produjo, y de ahi sale si
-  // esta cargando. Marcar «cargando» dentro del efecto obliga a un render de
-  // mas por cada tecla, y aqui se teclea mucho.
+  // La respuesta se guarda junto a la consulta que la produjo, y de ahí sale si
+  // está cargando. Marcar «cargando» dentro del efecto obliga a un render de
+  // más por cada tecla, y aquí se teclea mucho.
   const [respuesta, setRespuesta] = useState(null);
   const [unis, setUnis] = useState([]);
 
@@ -148,6 +141,7 @@ export default function BuscadorMasteres() {
     () => [...new Set(unis.map((u) => u.comunidad).filter(Boolean))].sort(),
     [unis],
   );
+  const conOferta = useMemo(() => unis.filter((u) => (u.masteres_cargados || 0) > 0).length, [unis]);
 
   const consulta = useMemo(() => {
     const p = new URLSearchParams();
@@ -165,7 +159,7 @@ export default function BuscadorMasteres() {
     let vivo = true;
     boGET(`/backoffice/masteres?${consulta}`)
       .then((r) => { if (vivo) setRespuesta({ consulta, datos: r?.ok ? r : null }); })
-      // Sin esto, un fallo de red dejaria «Buscando…» puesto para siempre.
+      // Sin esto, un fallo de red dejaría «Buscando…» puesto para siempre.
       .catch(() => { if (vivo) setRespuesta({ consulta, datos: null, fallo: true }); });
     return () => { vivo = false; };
   }, [consulta]);
@@ -177,121 +171,231 @@ export default function BuscadorMasteres() {
   // Cualquier filtro nuevo devuelve a la primera página: quedarse en la siete
   // de una búsqueda que ahora tiene dos páginas enseña una lista vacía.
   const cambiar = useCallback((set) => (e) => { set(e.target.value); setPagina(1); }, []);
+  const elegirRama = (v) => { setRama(v); setPagina(1); };
 
   const masteres = datos?.masteres || [];
   const total = datos?.total || 0;
   const paginas = datos?.paginas || 1;
+  const ramas = datos?.facetas?.ramas || [];
+  const enCatalogo = ramas.reduce((n, r) => n + (r.cuantos || 0), 0);
 
-  const sel = "text-[12px] border border-neutral-200 rounded-lg px-2 py-1.5 bg-white "
-    + "text-neutral-700 focus:outline-none focus:border-[#1D6A4A]";
+  const hayFiltro = Boolean(texto || comunidad || rama || modalidad || precioMax);
+  const limpiar = () => { setTexto(""); setComunidad(""); setRama(""); setModalidad(""); setPrecioMax(""); setPagina(1); };
+
+  async function copiar(m) {
+    const u = m.universidad || {};
+    const lineas = [
+      m.nombre,
+      `${u.sigla ? `${u.sigla} · ` : ""}${u.nombre || ""}${u.ciudad ? ` (${u.ciudad})` : ""}`,
+      `${m.ects} ECTS · ${m.duracion_anios || 1} ${m.duracion_anios > 1 ? "años" : "año"} · ${String(m.modalidad || "").toLowerCase()}`,
+      `Precio ${m.precio_origen === "confirmado" ? "" : "estimado "}${eur(m.precio)}`,
+      plazoEnClaro(m.ventana) || (VENTANA[m.ventana?.estado] || VENTANA["sin fecha"]).texto,
+      u.url || "",
+    ].filter(Boolean);
+    try {
+      await navigator.clipboard.writeText(lineas.join("\n"));
+      dialog.toast("Copiado para pegarlo al asesorado", "exito");
+    } catch {
+      dialog.toast("No se pudo copiar", "error");
+    }
+  }
+
+  const stats = [
+    { n: cargando ? 0 : total, l: hayFiltro ? "coinciden" : "en el buscador" },
+    { n: enCatalogo, l: "en el catálogo", tono: "cielo" },
+    { n: conOferta, l: "universidades con oferta", tono: "ok", onClick: () => navigate("/backoffice/universidades") },
+  ];
+
+  const va = abierto ? (VENTANA[abierto.ventana?.estado] || VENTANA["sin fecha"]) : null;
 
   return (
-    <div className="space-y-3">
-      <div>
-        <h1 className="text-[19px] font-bold text-neutral-900">Buscador de másteres</h1>
-        <p className="text-[12.5px] text-neutral-500">
-          El catálogo del que sale el informe. Cada máster con su precio real y su plazo.
-        </p>
-      </div>
+    <Pagina>
+      <Cabecera
+        eyebrow="Catálogo"
+        titulo="Buscador de másteres"
+        subtitulo="El catálogo del que sale el informe. Cada máster con su precio real, su ciudad y si el plazo sigue abierto."
+        acciones={
+          <Boton tono="cristal" icono={Upload} onClick={() => navigate("/backoffice/sistematizador")}>Cargar oferta</Boton>
+        }
+        stats={stats}
+      />
 
-      <MapaDelCatalogo activo="masteres" />
+      <Cuerpo>
+        <MapaDelCatalogo activo="masteres" />
 
-      {/* Filtros. En el móvil, dos por fila; el buscador ocupa el ancho. */}
-      <div className="space-y-1.5">
-        <input value={texto} onChange={cambiar(setTexto)}
-          placeholder="Buscar por nombre del máster o titulación de acceso…"
-          className={`${sel} w-full`} />
+        {/* La búsqueda acompaña al hacer scroll: en el móvil, volver arriba
+            para cambiar una letra es lo que hace que no se use. */}
+        <div className="ase-pegajosa">
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div className="ase-buscar" style={{ flex: 1 }}>
+              <Search />
+              <input className="ase-campo" value={texto} onChange={cambiar(setTexto)}
+                placeholder="Nombre del máster o titulación de acceso…" />
+            </div>
+            <Boton tono={masFiltros ? "primario" : "secundario"} icono={SlidersHorizontal} onClick={() => setMasFiltros((v) => !v)}
+              aria-expanded={masFiltros}>
+              <span className="hidden sm:inline">Filtros</span>
+            </Boton>
+          </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-1.5">
-          <select value={comunidad} onChange={cambiar(setComunidad)} className={sel}>
-            <option value="">Toda España</option>
-            {comunidades.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-
-          <select value={rama} onChange={cambiar(setRama)} className={sel}>
-            <option value="">Cualquier rama</option>
-            {(datos?.facetas?.ramas || []).map((r) => (
-              <option key={r.valor} value={r.valor}>
-                {RAMA_ETIQ[r.valor] || r.valor} ({r.cuantos})
-              </option>
+          <div className="ase-pills" style={{ marginTop: 8 }}>
+            <Pill on={!rama} onClick={() => elegirRama("")}>Todas las ramas</Pill>
+            {ramas.map((r) => (
+              <Pill key={r.valor} on={rama === r.valor} n={r.cuantos} onClick={() => elegirRama(r.valor)}>
+                {RAMA_ETIQ[r.valor] || r.valor}
+              </Pill>
             ))}
-          </select>
+          </div>
 
-          <select value={modalidad} onChange={cambiar(setModalidad)} className={sel}>
-            <option value="">Cualquier modalidad</option>
-            <option value="PRESENCIAL">Presencial</option>
-            <option value="SEMIPRESENCIAL">Semipresencial</option>
-            <option value="VIRTUAL">Virtual</option>
-          </select>
-
-          {/* En euros y no en tramos: el asesorado dice una cifra, no una lista. */}
-          <input value={precioMax} onChange={cambiar(setPrecioMax)} inputMode="numeric"
-            placeholder="Hasta … €" className={sel} />
-
-          <select value={orden} onChange={cambiar(setOrden)} className={sel}>
-            <option value="precio">Más barato primero</option>
-            <option value="nombre">Por nombre</option>
-            <option value="ects">Menos créditos</option>
-            <option value="duracion">Más corto</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="flex items-baseline gap-2 flex-wrap">
-        <p className="text-[12px] text-neutral-500">
-          {cargando ? "Buscando…" : (
-            <>
-              <b className="text-neutral-800 tabular-nums">{total.toLocaleString("es-ES")}</b>
-              {total === 1 ? " máster" : " másteres"}
-              {paginas > 1 ? ` · página ${pagina} de ${paginas}` : ""}
-            </>
+          {masFiltros && (
+            <div className="ase-filtros ase-entra" style={{ marginTop: 10 }}>
+              <Campo etiqueta="Comunidad">
+                <select className="ase-campo" value={comunidad} onChange={cambiar(setComunidad)}>
+                  <option value="">Toda España</option>
+                  {comunidades.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Campo>
+              <Campo etiqueta="Modalidad">
+                <select className="ase-campo" value={modalidad} onChange={cambiar(setModalidad)}>
+                  <option value="">Cualquiera</option>
+                  <option value="PRESENCIAL">Presencial</option>
+                  <option value="SEMIPRESENCIAL">Semipresencial</option>
+                  <option value="VIRTUAL">Virtual</option>
+                </select>
+              </Campo>
+              {/* En euros y no en tramos: el asesorado dice una cifra, no una lista. */}
+              <Campo etiqueta="Precio máximo">
+                <input className="ase-campo ase-num" value={precioMax} onChange={cambiar(setPrecioMax)} inputMode="numeric" placeholder="Hasta … €" />
+              </Campo>
+              <Campo etiqueta="Orden">
+                <select className="ase-campo" value={orden} onChange={cambiar(setOrden)}>
+                  <option value="precio">Más barato primero</option>
+                  <option value="nombre">Por nombre</option>
+                  <option value="ects">Menos créditos</option>
+                  <option value="duracion">Más corto</option>
+                </select>
+              </Campo>
+            </div>
           )}
-        </p>
-        {/* El catálogo está a medias y callarlo sería peor: quien busca tiene
-            que saber que el vacío puede ser del catálogo, no de la oferta. */}
-        <p className="text-[11px] text-neutral-400 sm:ml-auto">
-          Sólo másteres oficiales ya cargados en el catálogo.
-        </p>
-      </div>
+        </div>
 
-      {fallo ? (
-        <div className="bg-white border border-red-200 rounded-xl py-10 px-4 text-center">
-          <p className="text-[13px] text-red-700">No se pudo consultar el catálogo.</p>
-          <p className="text-[11.5px] text-neutral-500 mt-1">
-            Vuelve a intentarlo; si sigue igual, es el servidor y no la búsqueda.
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+          <p style={{ margin: 0, fontSize: 12.5, color: "var(--muted)" }}>
+            {cargando ? "Buscando…" : (
+              <>
+                <b className="ase-num" style={{ color: "var(--ink)" }}>{total.toLocaleString("es-ES")}</b>
+                {total === 1 ? " máster" : " másteres"}
+                {paginas > 1 ? ` · página ${pagina} de ${paginas}` : ""}
+              </>
+            )}
+          </p>
+          {hayFiltro && <Boton tono="fantasma" tam="xs" onClick={limpiar}>Quitar filtros</Boton>}
+          {/* El catálogo está a medias y callarlo sería peor: quien busca tiene
+              que saber que el vacío puede ser del catálogo, no de la oferta. */}
+          <p style={{ margin: "0 0 0 auto", fontSize: 11, color: "#9fb3c0" }}>
+            Sólo másteres oficiales ya cargados en el catálogo.
           </p>
         </div>
-      ) : !cargando && !masteres.length ? (
-        <div className="bg-white border border-dashed border-neutral-300 rounded-xl py-12 px-4 text-center">
-          <p className="text-[13px] text-neutral-600">No hay ninguno con esos filtros.</p>
-          <p className="text-[11.5px] text-neutral-400 mt-1 leading-relaxed">
-            Puede que esa universidad todavía no tenga su oferta cargada. Se carga desde el
-            sistematizador.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-2 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
-          {masteres.map((m) => <Ficha key={m.id_master} m={m} />)}
-        </div>
-      )}
 
-      {paginas > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-1">
-          <button type="button" disabled={pagina <= 1 || cargando}
-            onClick={() => setPagina((p) => Math.max(1, p - 1))}
-            className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border border-neutral-300
-              text-neutral-700 disabled:opacity-35">
-            Anterior
-          </button>
-          <span className="text-[12px] text-neutral-500 tabular-nums">{pagina} / {paginas}</span>
-          <button type="button" disabled={pagina >= paginas || cargando}
-            onClick={() => setPagina((p) => Math.min(paginas, p + 1))}
-            className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border border-neutral-300
-              text-neutral-700 disabled:opacity-35">
-            Siguiente
-          </button>
-        </div>
-      )}
-    </div>
+        {fallo ? (
+          <Vacio titulo="No se pudo consultar el catálogo"
+            texto="Vuelve a intentarlo; si sigue igual, es el servidor y no la búsqueda."
+            acciones={<Boton tono="secundario" onClick={() => setPagina((p) => p)}>Reintentar</Boton>} />
+        ) : cargando && !masteres.length ? (
+          <Esqueleto filas={5} alto={120} />
+        ) : !masteres.length ? (
+          <Vacio icono={GraduationCap} titulo="No hay ninguno con esos filtros"
+            texto="Puede que esa universidad todavía no tenga su oferta cargada. Se carga desde el sistematizador."
+            acciones={
+              <>
+                {hayFiltro && <Boton tono="secundario" onClick={limpiar}>Quitar filtros</Boton>}
+                <Boton tono="primario" icono={Upload} onClick={() => navigate("/backoffice/sistematizador")}>Ir al sistematizador</Boton>
+              </>
+            } />
+        ) : (
+          <div className="ase-rejilla ase-anim" style={{ opacity: cargando ? .6 : 1, transition: "opacity .2s" }}>
+            {masteres.map((m) => <Ficha key={m.id_master} m={m} onAbrir={setAbierto} />)}
+          </div>
+        )}
+
+        {paginas > 1 && (
+          <div className="ase-pag">
+            <Boton tono="secundario" tam="sm" icono={ArrowLeft} disabled={pagina <= 1 || cargando}
+              onClick={() => { setPagina((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+              Anterior
+            </Boton>
+            <span className="ase-pag-n">{pagina} / {paginas}</span>
+            <Boton tono="secundario" tam="sm" disabled={pagina >= paginas || cargando}
+              onClick={() => { setPagina((p) => Math.min(paginas, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+              Siguiente <ArrowRight />
+            </Boton>
+          </div>
+        )}
+      </Cuerpo>
+
+      {/* ── Ventana: la ficha del máster ── */}
+      <Ventana
+        abierta={Boolean(abierto)}
+        onCerrar={() => setAbierto(null)}
+        titulo={abierto?.nombre}
+        subtitulo={abierto ? `${abierto.universidad?.sigla ? `${abierto.universidad.sigla} · ` : ""}${abierto.universidad?.nombre || ""}` : ""}
+        ancho="md"
+        pie={abierto && (
+          <>
+            <Boton tono="secundario" icono={Copy} onClick={() => copiar(abierto)}>Copiar resumen</Boton>
+            {abierto.universidad?.url && (
+              <Boton tono="primario" icono={ExternalLink} onClick={() => window.open(abierto.universidad.url, "_blank", "noopener")}>
+                Web de la universidad
+              </Boton>
+            )}
+          </>
+        )}
+      >
+        {abierto && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 160px" }}>
+                <span className="ase-precio" style={{ fontSize: 30 }}>{eur(abierto.precio)}</span>
+                <p style={{ margin: "2px 0 0", fontSize: 11.5, color: "var(--muted)" }}>
+                  {abierto.precio_origen === "confirmado"
+                    ? "Precio confirmado por la universidad"
+                    : "Estimado con el crédito de su comunidad para extracomunitarios"}
+                </p>
+              </div>
+              <Chip tono={va.tono} punto>{va.texto}</Chip>
+            </div>
+
+            {plazoEnClaro(abierto.ventana) && (
+              <div className="ase-tarjeta" style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, background: va.tono === "verde" ? "var(--green-soft)" : "var(--ground)", borderColor: "transparent" }}>
+                <CalendarClock size={16} color={va.tono === "verde" ? "#1D6A4A" : "#62808f"} />
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: va.tono === "verde" ? "var(--green)" : "var(--ink)" }}>{plazoEnClaro(abierto.ventana)}</span>
+              </div>
+            )}
+
+            <dl className="ase-kv">
+              <dt>Créditos</dt><dd className="ase-num">{abierto.ects} ECTS · {abierto.duracion_anios || 1} {abierto.duracion_anios > 1 ? "años" : "año"}</dd>
+              <dt>Modalidad</dt><dd style={{ textTransform: "capitalize" }}>{String(abierto.modalidad || "").toLowerCase()}</dd>
+              <dt>Rama</dt><dd>{RAMA_ETIQ[abierto.rama] || abierto.rama}{abierto.sub_area ? ` · ${abierto.sub_area}` : ""}</dd>
+              <dt>Ciudad</dt><dd>{[abierto.universidad?.ciudad, abierto.universidad?.comunidad].filter(Boolean).join(" · ") || "—"}</dd>
+              {abierto.universidad?.ranking_nacional && (
+                <><dt>Ranking</dt><dd className="ase-num">nº {abierto.universidad.ranking_nacional} de España{abierto.universidad.ranking_internacional ? ` · #${abierto.universidad.ranking_internacional} internacional` : ""}</dd></>
+              )}
+              {abierto.titulo_acceso && <><dt>Acceso</dt><dd>{abierto.titulo_acceso}</dd></>}
+            </dl>
+
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {abierto.es_habilitante && <Chip tono="morado">habilitante</Chip>}
+              {abierto.es_interuniversitario && <Chip tono="cielo">interuniversitario</Chip>}
+              {abierto.tiene_practicas && <Chip tono="verde">con prácticas</Chip>}
+            </div>
+
+            <Boton tono="fantasma" tam="sm" icono={Building2}
+              onClick={() => navigate(`/backoffice/universidades?buscar=${encodeURIComponent(abierto.universidad?.sigla || abierto.universidad?.nombre || "")}`)}>
+              Ver la ficha de la universidad
+            </Boton>
+          </div>
+        )}
+      </Ventana>
+    </Pagina>
   );
 }

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./v4.css";
 @import "./panel.css";
+@import "./asesor.css";
 @config "../../tailwind.config.js";
 
 html {

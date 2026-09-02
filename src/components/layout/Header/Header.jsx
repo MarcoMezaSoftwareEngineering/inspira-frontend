@@ -10,6 +10,13 @@ import Icono from "../../common/Icono";
 import UserMenu from "./UserMenu";
 import { loginGoogle } from "./LoginButton";
 
+// Flecha de los desplegables. Gira cuando el menú está abierto (ver .caret).
+const Caret = () => (
+  <svg className="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
+
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -97,7 +104,7 @@ export default function Header() {
                       onClick={() => setAbierto(open ? null : item.label)}
                       className={`v4-mega-trigger${active ? " route-active" : ""}`}
                     >
-                      {item.label} <span className="caret">▼</span>
+                      {item.label} <Caret />
                     </button>
                     <MegaMenu
                       onNavigate={(href) => {
@@ -123,7 +130,7 @@ export default function Header() {
                       onClick={() => setAbierto(open ? null : item.label)}
                       className="v4-mega-trigger"
                     >
-                      {item.label} <span className="caret">▼</span>
+                      {item.label} <Caret />
                     </button>
                     <div className="v4-sub">
                       {item.submenu.map((s) => (
@@ -149,7 +156,7 @@ export default function Header() {
                     rel="noopener noreferrer"
                     className={item.cta ? "v4-nav-cta" : undefined}
                   >
-                    {item.cta && "📅 "}
+                    {item.cta && <Icono nombre="calendario" size={15} />}
                     {item.label}
                   </a>
                 );
@@ -163,7 +170,8 @@ export default function Header() {
                     className={`v4-pill-ia${active ? " route-active" : ""}`}
                   >
                     <Icono nombre="robot" size={16} />
-                    {item.label}
+                    {item.corto || item.label}
+                    <span className="v4-tag-gratis">gratis</span>
                   </a>
                 );
               }
@@ -176,7 +184,8 @@ export default function Header() {
                     className={`v4-pill-free${active ? " route-active" : ""}`}
                   >
                     <span className="v4-pulse" />
-                    {item.label}
+                    {item.corto || item.label}
+                    <span className="v4-tag-gratis">gratis</span>
                   </a>
                 );
               }
@@ -204,9 +213,8 @@ export default function Header() {
             ) : user ? (
               <UserMenu user={user} />
             ) : (
-              <button className="v4-login-btn" type="button" onClick={loginGoogle}>
-                <span className="v4-login-long">Iniciar con Google</span>
-                <span className="v4-login-short">Iniciar</span>
+              <button className="v4-login-btn" type="button" onClick={loginGoogle} title="Iniciar sesión con Google">
+                Iniciar
               </button>
             )}
             <button
@@ -216,7 +224,9 @@ export default function Header() {
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
             >
-              ☰
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h10" />
+              </svg>
             </button>
           </div>
         </header>

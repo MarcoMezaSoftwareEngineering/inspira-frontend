@@ -9,6 +9,8 @@
 // Esta tira se pinta arriba de las cuatro, con el paso actual marcado. Explicar
 // el flujo en una nota suelta no sirve: nadie la lee dos meses después. Tiene
 // que estar donde se trabaja.
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { navigate } from "../../../services/navigate";
 
 const PASOS = [
@@ -46,54 +48,53 @@ const PASOS = [
   },
 ];
 
-const TONO = {
-  contexto: "border-neutral-200 bg-white",
-  puerta: "border-amber-200 bg-[#FEFBF5]",
-  salida: "border-[#1D6A4A]/30 bg-[#F4FAF6]",
-};
-
 export default function MapaDelCatalogo({ activo }) {
+  // Quien ya sabe cómo va el catálogo no necesita ver la tira cada vez. Se
+  // recuerda plegada por navegador; si no hay dónde guardarlo, va abierta.
+  const [plegado, setPlegado] = useState(() => {
+    try { return localStorage.getItem("ase.mapa.plegado") === "1"; } catch { return false; }
+  });
+  const alternar = () => {
+    const v = !plegado;
+    setPlegado(v);
+    try { localStorage.setItem("ase.mapa.plegado", v ? "1" : "0"); } catch { /* sin memoria, sin más */ }
+  };
+
   return (
-    <div className="rounded-xl border border-neutral-200 bg-neutral-50/70 p-3 sm:p-3.5">
-      <p className="text-[10px] font-bold uppercase tracking-[.12em] font-mono text-neutral-400 mb-2">
-        Un solo catálogo, cuatro pantallas
-      </p>
+    <div className="ase-tarjeta" style={{ padding: "10px 14px 12px", background: "rgba(255,255,255,.7)" }}>
+      <button type="button" onClick={alternar}
+        style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", background: "transparent", border: 0, padding: "2px 0", cursor: "pointer", font: "inherit", textAlign: "left" }}>
+        <span className="ase-rotulo" style={{ margin: 0, flex: 1 }}>Un solo catálogo, cuatro pantallas</span>
+        <span style={{ fontSize: 11, color: "var(--muted)" }}>{plegado ? "ver el mapa" : "ocultar"}</span>
+        <ChevronDown size={15} color="#62808f" style={{ transition: "transform .3s var(--ease)", transform: plegado ? "rotate(-90deg)" : "none" }} />
+      </button>
 
-      {/* En pantalla ancha van en fila, como el flujo que son. En el móvil se
-          apilan: cuatro columnas de 90px no se leen. */}
-      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-        {PASOS.map((p) => {
-          const on = p.id === activo;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => !on && navigate(p.href)}
-              className={`text-left rounded-lg border px-3 py-2.5 transition-all ${
-                on
-                  ? "border-[#1A3557] bg-white shadow-sm ring-1 ring-[#1A3557]/15"
-                  : `${TONO[p.papel]} hover:border-neutral-400 cursor-pointer`
-              }`}
-            >
-              <p className="text-[9.5px] font-bold uppercase tracking-wide text-neutral-400">
-                {p.orden}
-              </p>
-              <p className={`text-[13px] font-semibold mt-0.5 ${
-                on ? "text-[#1A3557]" : "text-neutral-800"}`}>
-                {p.titulo}
-                {on && <span className="ml-1.5 text-[10px] font-normal text-neutral-400">estás aquí</span>}
-              </p>
-              <p className="text-[11.5px] text-neutral-600 leading-snug mt-1">{p.texto}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      <p className="text-[11px] text-neutral-500 leading-relaxed mt-2.5">
-        Los másteres cuelgan de su universidad y heredan de ella la ciudad, el precio del
-        crédito y las fechas. Por eso no hay dos catálogos: sólo uno, mirado desde la
-        universidad o desde el máster según lo que se necesite en ese momento.
-      </p>
+      {!plegado && (
+        <div className="ase-entra" style={{ marginTop: 10 }}>
+          <div className="ase-pasos ase-anim">
+            {PASOS.map((p, i) => {
+              const on = p.id === activo;
+              return (
+                <button key={p.id} type="button" className="ase-paso" data-on={on ? "1" : "0"} data-papel={p.papel}
+                  onClick={() => !on && navigate(p.href)} aria-current={on ? "page" : undefined}>
+                  <span className="ase-paso-orden">{p.orden}</span>
+                  <span className="ase-paso-t">
+                    <span className="ase-paso-num">{i + 1}</span>
+                    {p.titulo}
+                    {on && <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)" }}>· estás aquí</span>}
+                  </span>
+                  <span className="ase-paso-x">{p.texto}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p style={{ margin: "10px 0 0", fontSize: 11.5, color: "var(--muted)", lineHeight: 1.55 }}>
+            Los másteres cuelgan de su universidad y heredan de ella la ciudad, el precio del
+            crédito y las fechas. Por eso no hay dos catálogos: sólo uno, mirado desde la
+            universidad o desde el máster según lo que se necesite en ese momento.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -58,7 +58,7 @@ export default function AsesoriaCTA() {
   return (
     <>
       {/* Pestaña lateral fija (escritorio) */}
-      <ReservaLateral onAbrir={() => setAbierto(true)} />
+      <ReservaLateral onAbrir={() => setAbierto(true)} visible={visible} />
 
       {/* Botón flotante */}
       <button

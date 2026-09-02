@@ -5,6 +5,8 @@
 // a la tercera actualización el asesor estaría leyendo una cosa y el asesorado
 // otra, que es la peor forma de contradecirse delante de un cliente.
 import { lazy, Suspense, useState } from "react";
+import { BookOpen } from "lucide-react";
+import { Pagina, Cabecera, Cuerpo, Pill, Esqueleto } from "../ui";
 
 const GuiaMaster = lazy(() => import("../../panel/GuiaMaster"));
 const GuiaEstancia = lazy(() => import("../../panel/GuiaEstancia"));
@@ -20,41 +22,40 @@ const GUIAS = [
 
 export default function GuiasAsesor() {
   const [activa, setActiva] = useState("master");
-  const { Comp } = GUIAS.find((g) => g.id === activa) || GUIAS[0];
+  const guia = GUIAS.find((g) => g.id === activa) || GUIAS[0];
+  const { Comp } = guia;
 
   return (
-    <div className="space-y-3">
-      <div>
-        <h1 className="text-[19px] font-bold text-neutral-900">Guías</h1>
-        <p className="text-[12.5px] text-neutral-500">
-          Exactamente lo que ve el asesorado en su portal, para consultarlo mientras le
-          atiendes.
-        </p>
-      </div>
+    <Pagina>
+      <Cabecera
+        eyebrow="Guías"
+        titulo="Lo mismo que lee el asesorado"
+        subtitulo="Exactamente lo que ve en su portal, para consultarlo mientras le atiendes y no contradecirle sin querer."
+      >
+        <div className="ase-pills" style={{ marginTop: 18 }}>
+          {GUIAS.map((g) => (
+            <Pill key={g.id} on={activa === g.id} onClick={() => setActiva(g.id)}
+              style={activa === g.id ? undefined : { background: "rgba(255,255,255,.1)", color: "#fff", borderColor: "rgba(255,255,255,.25)" }}>
+              {g.label}
+            </Pill>
+          ))}
+        </div>
+      </Cabecera>
 
-      <div className="flex gap-1.5 flex-wrap">
-        {GUIAS.map((g) => (
-          <button key={g.id} type="button" onClick={() => setActiva(g.id)}
-            className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
-              activa === g.id
-                ? "border-[#1D6A4A] bg-[#1D6A4A] text-white"
-                : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
-            }`}>
-            {g.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Las guías traen su propio ancho y su propio fondo, pensados para el
-          portal. Se dejan correr enteras dentro de su caja en vez de pelearse
-          con ellas desde fuera. */}
-      <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-        <Suspense fallback={
-          <div className="py-16 text-center text-[12.5px] text-neutral-400">Cargando la guía…</div>
-        }>
-          <Comp />
-        </Suspense>
-      </div>
-    </div>
+      <Cuerpo>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12.5, color: "var(--muted)" }}>
+          <BookOpen size={15} color="#4E9EE8" />
+          <span><b style={{ color: "var(--primary)" }}>{guia.label}</b> · tal cual la ve el asesorado, sin recortes.</span>
+        </div>
+        {/* Las guías traen su propio ancho y su propio fondo, pensados para el
+            portal. Se dejan correr enteras dentro de su caja en vez de pelearse
+            con ellas desde fuera. */}
+        <div key={activa} className="ase-tarjeta ase-entra" style={{ overflow: "hidden" }}>
+          <Suspense fallback={<div style={{ padding: 20 }}><Esqueleto filas={5} alto={64} /></div>}>
+            <Comp />
+          </Suspense>
+        </div>
+      </Cuerpo>
+    </Pagina>
   );
 }

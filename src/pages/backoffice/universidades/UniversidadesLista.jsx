@@ -12,35 +12,37 @@
 // Todo se filtra en el navegador: son medio centenar de filas y así la búsqueda
 // responde en cada tecla, sin ir y volver del servidor.
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  CalendarClock, Check, ExternalLink, Link2, Search, SlidersHorizontal, Upload,
+} from "lucide-react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
-import MapaDelCatalogo from "../catalogo-masteres/MapaDelCatalogo";
 import { dialog } from "../../../services/dialogService";
+import { navigate } from "../../../services/navigate";
+import MapaDelCatalogo from "../catalogo-masteres/MapaDelCatalogo";
+import {
+  Pagina, Cabecera, Cuerpo, Boton, Chip, Pill, Campo, Ventana, Vacio, Esqueleto,
+} from "../ui";
 
 const LISTA = {
-  LISTA_1: { corto: "Económica",  tono: "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/35" },
-  LISTA_2: { corto: "Intermedia", tono: "bg-[#FEF3E7] text-[#B9770E] border-amber-300/60" },
-  LISTA_3: { corto: "Premium",    tono: "bg-[#FDEDEC] text-[#C0392B] border-red-200" },
+  LISTA_1: { corto: "Económica", tono: "verde" },
+  LISTA_2: { corto: "Intermedia", tono: "ambar" },
+  LISTA_3: { corto: "Premium", tono: "rojo" },
 };
 
 const VENTANA = {
-  abierta:      { texto: "plazo abierto",  tono: "text-[#1D6A4A]", punto: "bg-[#1D6A4A]" },
-  "próxima":    { texto: "abre pronto",    tono: "text-[#B9770E]", punto: "bg-[#B9770E]" },
-  cerrada:      { texto: "plazo cerrado",  tono: "text-neutral-400", punto: "bg-neutral-300" },
-  "sin fecha":  { texto: "sin fechas",     tono: "text-neutral-400", punto: "bg-neutral-200" },
+  abierta: { texto: "plazo abierto", tono: "verde" },
+  "próxima": { texto: "abre pronto", tono: "petrol" },
+  cerrada: { texto: "plazo cerrado", tono: "gris" },
+  "sin fecha": { texto: "sin fechas", tono: "ambar" },
 };
 
 const VIGILANCIA = {
-  activa:         { texto: "vigilada", tono: "text-neutral-400" },
-  "sin estrenar": { texto: "sin estrenar", tono: "text-neutral-400" },
+  activa: { texto: "vigilada", tono: "gris" },
+  "sin estrenar": { texto: "sin estrenar", tono: "gris" },
   // Ya no dice «web caída» a secas: el servidor manda la clase concreta, y de
   // siete casos «caída» era falso en seis. La UB funciona; nos bloquea.
-  error:          { texto: "no se pudo leer", tono: "text-[#B9770E]" },
-  apagada:        { texto: "sin vigilar", tono: "text-neutral-400" },
-};
-
-/** Sólo una de las cuatro clases de fallo pide trabajo: el enlace que ya no existe. */
-const TONO_FALLO = {
-  "enlace roto": "text-red-600",
+  error: { texto: "no se pudo leer", tono: "ambar" },
+  apagada: { texto: "sin vigilar", tono: "gris" },
 };
 
 const eur = (n) => (n == null ? null : `${Math.round(n).toLocaleString("es-ES")} €`);
@@ -56,23 +58,100 @@ const fechaCorta = (iso) => {
   return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
 };
 
+/** El plazo, en una línea: estado + fase + fecha que importa. */
+function plazoEnClaro(v) {
+  if (!v) return "";
+  const partes = [];
+  if (v.fase) partes.push(v.fase);
+  if (v.estado === "abierta" && v.hasta) partes.push(`hasta el ${fechaCorta(v.hasta)}`);
+  else if (v.estado === "próxima" && v.desde) partes.push(`abre el ${fechaCorta(v.desde)}`);
+  return partes.join(" · ");
+}
+
+/** Lo que se escribe del enlace; sin protocolo, que sólo estorba. */
+const sinProtocolo = (u) => String(u || "").replace(/^https?:\/\//, "");
+
+function Ficha({ u, onAbrir }) {
+  const L = LISTA[u.lista_inspira];
+  const V = VENTANA[u.ventana?.estado] || VENTANA["sin fecha"];
+  const faltan = (u.num_masteres_total || 0) - (u.masteres_cargados || 0);
+  const problema = u.fallo?.hay_que_hacer_algo || u.vigila_portada;
+
+  return (
+    <button type="button" className="ase-ficha" onClick={() => onAbrir(u)}>
+      <span style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+        <span style={{ minWidth: 0 }}>
+          <span className="ase-ficha-t" style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            {u.sigla && <b style={{ color: "var(--primary)", fontSize: 12, letterSpacing: ".02em" }}>{u.sigla}</b>}
+            <span>{u.nombre}</span>
+          </span>
+          <span className="ase-ficha-s" style={{ display: "block", marginTop: 2 }}>
+            {[u.ciudad, u.comunidad].filter(Boolean).join(" · ")}
+            {u.ranking_internacional ? ` · #${u.ranking_internacional} ${u.ranking_internacional_fte || ""}`.trimEnd() : ""}
+          </span>
+        </span>
+        <span style={{ textAlign: "right", flexShrink: 0 }}>
+          {u.precio?.eur_60ects != null ? (
+            <>
+              <span className="ase-precio" style={{ fontSize: 17, display: "block" }}>{eur(u.precio.eur_60ects)}</span>
+              <span style={{ fontSize: 9.5, color: "#9fb3c0" }}>máster de 60 ECTS</span>
+            </>
+          ) : (
+            <span style={{ fontSize: 11, color: "#9fb3c0" }}>precio no cargado</span>
+          )}
+        </span>
+      </span>
+
+      {u.especialidad && (
+        <span className="ase-ficha-s" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {u.especialidad}
+        </span>
+      )}
+
+      <span style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+        <Chip tono={V.tono} punto>{V.texto}</Chip>
+        {L && <Chip tono={L.tono}>{L.corto}</Chip>}
+        <Chip>
+          <span className="ase-num">{u.masteres_cargados || 0}</span>&nbsp;másteres
+          {faltan > 0 && <span style={{ color: "var(--amber)" }}>&nbsp;· faltan ~{faltan}</span>}
+        </Chip>
+        {u.fallo?.hay_que_hacer_algo && <Chip tono="rojo">{u.fallo.clase}</Chip>}
+        {u.vigila_portada && <Chip tono="ambar">vigila la portada</Chip>}
+      </span>
+
+      {(plazoEnClaro(u.ventana) || problema) && (
+        <span style={{ fontSize: 11.5, fontWeight: 600, color: V.tono === "verde" ? "var(--green)" : "var(--muted)" }}>
+          {plazoEnClaro(u.ventana) || "El enlace de preinscripción necesita arreglo"}
+        </span>
+      )}
+    </button>
+  );
+}
+
 export default function UniversidadesLista() {
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  const [q, setQ] = useState("");
+  // Desde la ficha de un máster se llega con `?buscar=SIGLA`, ya filtrado.
+  const [q, setQ] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("buscar") || ""; } catch { return ""; }
+  });
   const [comunidad, setComunidad] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [lista, setLista] = useState("");
   const [ventana, setVentana] = useState("");
   const [orden, setOrden] = useState("precio");
   const [soloProblemas, setSoloProblemas] = useState(false);
+  const [masFiltros, setMasFiltros] = useState(false);
+
+  const [abierta, setAbierta] = useState(null);
+  const [urlNueva, setUrlNueva] = useState("");
+  const [guardando, setGuardando] = useState(false);
 
   /** Volver a pedirlo tras editar algo. */
   const recargar = useCallback(() => {
-    setCargando(true);
     return boGET("/backoffice/universidades")
-      .then((r) => { if (r?.ok) setDatos(r); })
+      .then((r) => { if (r?.ok) setDatos(r); return r; })
       .finally(() => setCargando(false));
   }, []);
 
@@ -127,235 +206,282 @@ export default function UniversidadesLista() {
     (u) => u.vigilancia === "error" && !u.fallo?.hay_que_hacer_algo).length;
   const portadas = todas.filter((u) => u.vigila_portada).length;
   const abiertas = todas.filter((u) => u.ventana?.estado === "abierta").length;
+  const masteresCargados = todas.reduce((n, u) => n + (u.masteres_cargados || 0), 0);
 
   const hayFiltro = q || comunidad || ciudad || lista || ventana || soloProblemas;
   const limpiar = () => {
     setQ(""); setComunidad(""); setCiudad(""); setLista(""); setVentana(""); setSoloProblemas(false);
   };
 
-  async function cambiarUrl(u) {
-    const nueva = window.prompt(
-      `URL de preinscripción de ${u.sigla || u.nombre}`,
-      u.url_preinscripcion || u.url_masteres || "",
-    );
-    if (nueva === null) return;
-    const r = await boPATCH(`/backoffice/universidades/${u.id_universidad}`, {
-      url_preinscripcion: nueva.trim() || null,
-    });
-    if (r?.ok) { dialog.toast("Guardado · se vuelve a vigilar desde cero", "exito"); recargar(); }
-    else dialog.toast(r?.msg || "No se pudo guardar", "error");
+  // La ventana trabaja sobre la fila viva: si se guarda el enlace y se
+  // recarga, la ficha abierta tiene que reflejarlo sin cerrarse.
+  const seleccionada = abierta ? todas.find((u) => u.id_universidad === abierta) || null : null;
+
+  function abrir(u) {
+    setAbierta(u.id_universidad);
+    setUrlNueva(u.url_preinscripcion || u.url_masteres || "");
   }
 
-  const sel = "text-[12px] border border-neutral-200 rounded-lg px-2 py-1.5 bg-white "
-    + "text-neutral-600 focus:outline-none focus:border-[#1D6A4A]";
+  async function guardarUrl() {
+    if (!seleccionada || guardando) return;
+    const limpia = urlNueva.trim();
+    if (limpia && !/^https?:\/\//i.test(limpia)) {
+      dialog.toast("El enlace tiene que empezar por http:// o https://", "error");
+      return;
+    }
+    setGuardando(true);
+    try {
+      const r = await boPATCH(`/backoffice/universidades/${seleccionada.id_universidad}`, {
+        url_preinscripcion: limpia || null,
+      });
+      if (r?.ok) {
+        dialog.toast("Guardado · se vuelve a vigilar desde cero", "exito");
+        await recargar();
+      } else {
+        dialog.toast(r?.msg || "No se pudo guardar", "error");
+      }
+    } catch {
+      dialog.toast("No se pudo guardar", "error");
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  const stats = [
+    { n: todas.length, l: "universidades" },
+    { n: abiertas, l: "con plazo abierto", tono: "ok", onClick: () => { setVentana(ventana === "abierta" ? "" : "abierta"); } },
+    { n: rotas + portadas, l: soloProblemas ? "por arreglar · filtrando" : "con el enlace por arreglar", tono: rotas + portadas ? "alerta" : undefined, onClick: () => setSoloProblemas((v) => !v) },
+    { n: masteresCargados, l: "másteres cargados", tono: "cielo", onClick: () => navigate("/backoffice/masteres") },
+  ];
+
+  const S = seleccionada;
+  const SV = S ? (VENTANA[S.ventana?.estado] || VENTANA["sin fecha"]) : null;
+  const SG = S ? (VIGILANCIA[S.vigilancia] || VIGILANCIA.apagada) : null;
+  const SL = S ? LISTA[S.lista_inspira] : null;
+  const urlCambiada = S && urlNueva.trim() !== (S.url_preinscripcion || S.url_masteres || "");
 
   return (
-    <div className="space-y-3">
-      <div>
-        <h1 className="text-[19px] font-bold text-neutral-900">Universidades</h1>
-        <p className="text-[12.5px] text-neutral-500">
-          De aquí sale el informe de másteres. Precios por comunidad según decreto.
-        </p>
-      </div>
+    <Pagina>
+      <Cabecera
+        eyebrow="Catálogo"
+        titulo="Universidades"
+        subtitulo="De aquí sale el informe de másteres. Precio por comunidad según decreto, plazo vivo y el estado del enlace que se vigila."
+        acciones={
+          <>
+            <Boton tono="cristal" icono={CalendarClock} onClick={() => navigate("/backoffice/tracker-universidades")}>Plazos</Boton>
+            <Boton tono="cristal" icono={Upload} onClick={() => navigate("/backoffice/sistematizador")}>Cargar oferta</Boton>
+          </>
+        }
+        stats={stats}
+      />
 
-      <MapaDelCatalogo activo="universidades" />
+      <Cuerpo>
+        <MapaDelCatalogo activo="universidades" />
 
-      {/* Lo que hay que saber de un vistazo, antes de buscar nada. */}
-      <div className="flex gap-2 flex-wrap">
-        <div className="bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 min-w-[7rem]">
-          <p className="text-[19px] font-bold text-neutral-900 tabular-nums leading-none">{todas.length}</p>
-          <p className="text-[11px] text-neutral-500 mt-0.5">universidades</p>
-        </div>
-        <div className="bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 min-w-[7rem]">
-          <p className="text-[19px] font-bold text-[#1D6A4A] tabular-nums leading-none">{abiertas}</p>
-          <p className="text-[11px] text-neutral-500 mt-0.5">con plazo abierto</p>
-        </div>
-        <button type="button" onClick={() => setSoloProblemas(!soloProblemas)}
-          className={`rounded-xl px-3.5 py-2.5 min-w-[7rem] text-left border transition-colors ${
-            soloProblemas ? "border-red-400 bg-red-50" : "bg-white border-neutral-200 hover:border-red-300"
-          }`}>
-          <p className="text-[19px] font-bold text-red-600 tabular-nums leading-none">
-            {rotas + portadas}
-          </p>
-          <p className="text-[11px] text-neutral-500 mt-0.5">con el enlace por arreglar</p>
-        </button>
-      </div>
-
-      {portadas > 0 && (
-        <div className="bg-white border border-amber-300 rounded-xl px-3.5 py-2.5">
-          <p className="text-[12px] text-neutral-700 leading-relaxed">
-            <b>{portadas} de {todas.length} vigilan la portada de la universidad</b>, no su página
-            de másteres. Una portada cambia cada vez que publican una noticia —o sea, avisa de
-            nada— y no cambia cuando abre la preinscripción, que es justo lo que se quería
-            detectar. El enlace se corrige aquí mismo, en cada fila.
-          </p>
-          {bloqueadas > 0 && (
-            <p className="text-[11px] text-neutral-500 leading-relaxed mt-1.5">
-              Otras {bloqueadas} no se pueden leer porque su web rechaza las consultas
-              automáticas. Ésas funcionan: no hay nada que arreglar por nuestra parte.
+        {portadas > 0 && (
+          <div className="ase-tarjeta" style={{ padding: "12px 16px", borderColor: "rgba(185,119,14,.35)", background: "#fffaf1" }}>
+            <p style={{ margin: 0, fontSize: 12.5, color: "var(--ink)", lineHeight: 1.55 }}>
+              <b>{portadas} de {todas.length} vigilan la portada de la universidad</b>, no su página
+              de másteres. Una portada cambia cada vez que publican una noticia —o sea, avisa de
+              nada— y no cambia cuando abre la preinscripción, que es justo lo que se quería
+              detectar. El enlace se corrige desde la ficha de cada universidad.
             </p>
+            {bloqueadas > 0 && (
+              <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "var(--muted)", lineHeight: 1.5 }}>
+                Otras {bloqueadas} no se pueden leer porque su web rechaza las consultas
+                automáticas. Ésas funcionan: no hay nada que arreglar por nuestra parte.
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="ase-pegajosa">
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div className="ase-buscar" style={{ flex: 1 }}>
+              <Search />
+              <input className="ase-campo" value={q} onChange={(e) => setQ(e.target.value)}
+                placeholder="Universidad, sigla, ciudad o especialidad…" />
+            </div>
+            <Boton tono={masFiltros ? "primario" : "secundario"} icono={SlidersHorizontal} onClick={() => setMasFiltros((v) => !v)}
+              aria-expanded={masFiltros}>
+              <span className="hidden sm:inline">Filtros</span>
+            </Boton>
+          </div>
+
+          <div className="ase-pills" style={{ marginTop: 8, alignItems: "center" }}>
+            <Pill on={!lista} onClick={() => setLista("")}>Cualquier precio</Pill>
+            {["LISTA_1", "LISTA_2", "LISTA_3"]
+              .filter((l) => (facetas.listas || []).includes(l))
+              .map((l) => (
+                <Pill key={l} on={lista === l} n={todas.filter((u) => u.lista_inspira === l).length} onClick={() => setLista(lista === l ? "" : l)}>
+                  {LISTA[l].corto}
+                </Pill>
+              ))}
+            <label className="ase-toggle" style={{ marginLeft: "auto" }}>
+              <input type="checkbox" checked={soloProblemas} onChange={(e) => setSoloProblemas(e.target.checked)} />
+              <i />
+              <span className="hidden sm:inline">Sólo por arreglar</span>
+            </label>
+          </div>
+
+          {masFiltros && (
+            <div className="ase-filtros ase-entra" style={{ marginTop: 10 }}>
+              <Campo etiqueta="Comunidad">
+                <select className="ase-campo" value={comunidad} onChange={(e) => { setComunidad(e.target.value); setCiudad(""); }}>
+                  <option value="">Toda España</option>
+                  {(facetas.comunidades || []).map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Campo>
+              <Campo etiqueta="Ciudad">
+                <select className="ase-campo" value={ciudad} onChange={(e) => setCiudad(e.target.value)}>
+                  <option value="">Todas</option>
+                  {ciudades.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Campo>
+              <Campo etiqueta="Plazo">
+                <select className="ase-campo" value={ventana} onChange={(e) => setVentana(e.target.value)}>
+                  <option value="">Cualquiera</option>
+                  <option value="abierta">Plazo abierto</option>
+                  <option value="próxima">Abre pronto</option>
+                  <option value="cerrada">Plazo cerrado</option>
+                  <option value="sin fecha">Sin fechas cargadas</option>
+                </select>
+              </Campo>
+              <Campo etiqueta="Orden">
+                <select className="ase-campo" value={orden} onChange={(e) => setOrden(e.target.value)}>
+                  <option value="precio">Más barata primero</option>
+                  <option value="nombre">Por nombre</option>
+                  <option value="masteres">Más másteres cargados</option>
+                  <option value="ranking">Mejor ranking</option>
+                </select>
+              </Campo>
+            </div>
           )}
         </div>
-      )}
 
-      <div className="flex gap-1.5 flex-wrap items-center">
-        <input value={q} onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar universidad, sigla, ciudad…"
-          className={`${sel} flex-1 min-w-[180px]`} />
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+          <p style={{ margin: 0, fontSize: 12.5, color: "var(--muted)" }}>
+            {cargando ? "Cargando…" : visibles.length === todas.length
+              ? <><b className="ase-num" style={{ color: "var(--ink)" }}>{todas.length}</b> universidades</>
+              : <><b className="ase-num" style={{ color: "var(--ink)" }}>{visibles.length}</b> de {todas.length}</>}
+          </p>
+          {hayFiltro && <Boton tono="fantasma" tam="xs" onClick={limpiar}>Quitar filtros</Boton>}
+        </div>
 
-        <select value={comunidad} onChange={(e) => { setComunidad(e.target.value); setCiudad(""); }} className={sel}>
-          <option value="">Todas las comunidades</option>
-          {(facetas.comunidades || []).map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
-
-        <select value={ciudad} onChange={(e) => setCiudad(e.target.value)} className={sel}>
-          <option value="">Todas las ciudades</option>
-          {ciudades.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
-
-        <select value={lista} onChange={(e) => setLista(e.target.value)} className={sel}>
-          <option value="">Cualquier precio</option>
-          {["LISTA_1", "LISTA_2", "LISTA_3"]
-            .filter((l) => (facetas.listas || []).includes(l))
-            .map((l) => <option key={l} value={l}>{LISTA[l].corto}</option>)}
-        </select>
-
-        <select value={ventana} onChange={(e) => setVentana(e.target.value)} className={sel}>
-          <option value="">Cualquier plazo</option>
-          <option value="abierta">Plazo abierto</option>
-          <option value="próxima">Abre pronto</option>
-          <option value="cerrada">Plazo cerrado</option>
-          <option value="sin fecha">Sin fechas cargadas</option>
-        </select>
-
-        <select value={orden} onChange={(e) => setOrden(e.target.value)} className={`${sel} ml-auto`}>
-          <option value="precio">Más barata primero</option>
-          <option value="nombre">Por nombre</option>
-          <option value="masteres">Más másteres cargados</option>
-          <option value="ranking">Mejor ranking</option>
-        </select>
-
-        {hayFiltro && (
-          <button type="button" onClick={limpiar}
-            className="text-[12px] text-neutral-500 hover:text-neutral-800 px-2">limpiar</button>
+        {cargando ? (
+          <Esqueleto filas={5} alto={110} />
+        ) : visibles.length === 0 ? (
+          <Vacio titulo="Ninguna con estos filtros" texto="Prueba quitando alguno."
+            acciones={<Boton tono="secundario" onClick={limpiar}>Quitar filtros</Boton>} />
+        ) : (
+          <div className="ase-rejilla ase-anim">
+            {visibles.map((u) => <Ficha key={u.id_universidad} u={u} onAbrir={abrir} />)}
+          </div>
         )}
-      </div>
+      </Cuerpo>
 
-      <p className="text-[11.5px] text-neutral-400">
-        {visibles.length === todas.length ? `${todas.length} universidades`
-          : `${visibles.length} de ${todas.length}`}
-      </p>
-
-      {cargando ? (
-        <div className="space-y-2">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="bg-white border border-neutral-200 rounded-xl h-24 animate-pulse" />
-          ))}
-        </div>
-      ) : visibles.length === 0 ? (
-        <div className="py-12 text-center">
-          <p className="text-[13px] font-semibold text-neutral-600">Ninguna con estos filtros</p>
-          <p className="text-[12px] text-neutral-400 mt-1">Prueba quitando alguno.</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {visibles.map((u) => {
-            const L = LISTA[u.lista_inspira];
-            const V = VENTANA[u.ventana?.estado] || VENTANA["sin fecha"];
-            const G = VIGILANCIA[u.vigilancia] || VIGILANCIA.apagada;
-            const faltan = (u.num_masteres_total || 0) - (u.masteres_cargados || 0);
-
-            return (
-              <div key={u.id_universidad}
-                className="bg-white border border-neutral-200 rounded-xl px-3.5 py-3">
-                <div className="flex items-start gap-3 flex-wrap">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      {u.sigla && (
-                        <span className="text-[11px] font-bold text-[#1A3557] bg-[#EEF2F8]
-                          px-1.5 py-0.5 rounded">{u.sigla}</span>
-                      )}
-                      <p className="text-[13.5px] font-semibold text-neutral-900">{u.nombre}</p>
-                    </div>
-
-                    <p className="text-[11.5px] text-neutral-400 mt-0.5">
-                      {[u.ciudad, u.comunidad].filter(Boolean).join(" · ")}
-                      {u.ranking_internacional
-                        ? ` · #${u.ranking_internacional} ${u.ranking_internacional_fte || ""}`.trimEnd()
-                        : ""}
+      {/* ── Ventana: la ficha de la universidad, con el enlace editable ── */}
+      <Ventana
+        abierta={Boolean(S)}
+        onCerrar={() => setAbierta(null)}
+        titulo={S ? `${S.sigla ? `${S.sigla} · ` : ""}${S.nombre}` : ""}
+        subtitulo={S ? [S.ciudad, S.comunidad].filter(Boolean).join(" · ") : ""}
+        ancho="md"
+        pie={S && (
+          <>
+            <Boton tono="secundario" icono={Upload} onClick={() => navigate(`/backoffice/sistematizador?universidad=${S.id_universidad}`)}>
+              Cargar su oferta
+            </Boton>
+            {(S.url_preinscripcion || S.url_masteres) && (
+              <Boton tono="primario" icono={ExternalLink}
+                onClick={() => window.open(S.url_preinscripcion || S.url_masteres, "_blank", "noopener")}>
+                Abrir su web
+              </Boton>
+            )}
+          </>
+        )}
+      >
+        {S && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 160px" }}>
+                {S.precio?.eur_60ects != null ? (
+                  <>
+                    <span className="ase-precio" style={{ fontSize: 30 }}>{eur(S.precio.eur_60ects)}</span>
+                    <p style={{ margin: "2px 0 0", fontSize: 11.5, color: "var(--muted)" }}>
+                      un máster de 60 ECTS{S.precio.normativa ? ` · ${S.precio.normativa}` : ""}
                     </p>
-
-                    {u.especialidad && (
-                      <p className="text-[11.5px] text-neutral-600 mt-1 leading-relaxed">{u.especialidad}</p>
-                    )}
-
-                    <div className="flex items-center gap-2.5 flex-wrap mt-1.5">
-                      <span className={`inline-flex items-center gap-1 text-[10.5px] ${V.tono}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${V.punto}`} />
-                        {V.texto}
-                        {u.ventana?.fase ? ` · ${u.ventana.fase}` : ""}
-                        {u.ventana?.hasta ? ` hasta ${fechaCorta(u.ventana.hasta)}` : ""}
-                        {u.ventana?.desde ? ` el ${fechaCorta(u.ventana.desde)}` : ""}
-                      </span>
-
-                      <span className="text-[10.5px] text-neutral-400 tabular-nums">
-                        {u.masteres_cargados} másteres cargados
-                        {faltan > 0 && <span className="text-amber-700"> · faltan ~{faltan}</span>}
-                      </span>
-
-                      <span className={`text-[10.5px] ${
-                        u.fallo ? (TONO_FALLO[u.fallo.clase] || "text-[#B9770E]") : G.tono
-                      }`} title={u.fallo?.dice || ""}>
-                        {u.fallo ? u.fallo.clase : G.texto}
-                      </span>
-
-                      {u.vigila_portada && (
-                        <span className="text-[10.5px] text-[#B9770E]"
-                          title="Se está vigilando la portada, no la página de másteres.">
-                          vigila la portada
-                        </span>
-                      )}
-
-                      {(u.url_preinscripcion || u.url_masteres) && (
-                        <a href={u.url_preinscripcion || u.url_masteres} target="_blank" rel="noreferrer"
-                          className="text-[10.5px] text-[#046C8C] hover:underline truncate max-w-[220px]">
-                          {(u.url_preinscripcion || u.url_masteres).replace(/^https?:\/\//, "")}
-                        </a>
-                      )}
-                      <button type="button" onClick={() => cambiarUrl(u)}
-                        className="text-[10.5px] text-neutral-400 hover:text-neutral-700">
-                        {u.url_preinscripcion ? "cambiar enlace" : "poner enlace"}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 text-right">
-                    {u.precio?.eur_60ects != null ? (
-                      <>
-                        <p className="text-[15px] font-bold text-neutral-800 tabular-nums leading-none">
-                          {eur(u.precio.eur_60ects)}
-                        </p>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">máster de 60 ECTS</p>
-                        {L && (
-                          <span className={`inline-block mt-1 text-[9.5px] font-bold uppercase
-                            tracking-wide px-1.5 py-0.5 rounded border ${L.tono}`}>{L.corto}</span>
-                        )}
-                        {u.precio.normativa && (
-                          <p className="text-[9.5px] text-neutral-300 mt-1">{u.precio.normativa}</p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-[11px] text-neutral-400 leading-tight">
-                        precio no<br />cargado
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <p style={{ margin: 0, fontSize: 12.5, color: "var(--muted)" }}>Precio no cargado todavía.</p>
+                )}
               </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {SL && <Chip tono={SL.tono}>{SL.corto}</Chip>}
+                <Chip tono={SV.tono} punto>{SV.texto}</Chip>
+              </div>
+            </div>
+
+            {plazoEnClaro(S.ventana) && (
+              <div className="ase-tarjeta" style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, background: SV.tono === "verde" ? "var(--green-soft)" : "var(--ground)", borderColor: "transparent" }}>
+                <CalendarClock size={16} color={SV.tono === "verde" ? "#1D6A4A" : "#62808f"} />
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: SV.tono === "verde" ? "var(--green)" : "var(--ink)" }}>
+                  {plazoEnClaro(S.ventana)}
+                </span>
+                <Boton tono="fantasma" tam="xs" style={{ marginLeft: "auto" }} onClick={() => navigate("/backoffice/tracker-universidades")}>Ver plazos</Boton>
+              </div>
+            )}
+
+            <dl className="ase-kv">
+              {S.especialidad && <><dt>Perfil</dt><dd>{S.especialidad}</dd></>}
+              {S.ranking_internacional && (
+                <><dt>Ranking</dt><dd className="ase-num">#{S.ranking_internacional}{S.ranking_internacional_fte ? ` ${S.ranking_internacional_fte}` : ""}</dd></>
+              )}
+              <dt>Másteres</dt>
+              <dd className="ase-num">
+                {S.masteres_cargados || 0} cargados
+                {(S.num_masteres_total || 0) > (S.masteres_cargados || 0) && (
+                  <span style={{ color: "var(--amber)" }}> · faltan ~{(S.num_masteres_total || 0) - (S.masteres_cargados || 0)} de {S.num_masteres_total}</span>
+                )}
+              </dd>
+              <dt>Vigilancia</dt>
+              <dd>
+                {S.fallo ? (
+                  <span style={{ color: S.fallo.hay_que_hacer_algo ? "var(--red)" : "var(--amber)", fontWeight: 600 }}>{S.fallo.clase}</span>
+                ) : SG.texto}
+                {S.fallo?.dice && <span style={{ display: "block", fontSize: 11.5, color: "var(--muted)", marginTop: 2 }}>{S.fallo.dice}</span>}
+                {S.vigila_portada && (
+                  <span style={{ display: "block", fontSize: 11.5, color: "var(--amber)", marginTop: 2 }}>
+                    Se vigila la portada, no la página de másteres: el enlace de abajo es el que hay que corregir.
+                  </span>
+                )}
+              </dd>
+              {S.url_masteres && (
+                <><dt>Másteres</dt><dd><a href={S.url_masteres} target="_blank" rel="noreferrer" style={{ color: "#046C8C" }}>{sinProtocolo(S.url_masteres)}</a></dd></>
+              )}
+            </dl>
+
+            {/* El enlace se edita aquí, no en un prompt del navegador: se ve
+                lo que había, se corrige y se guarda con un botón claro. */}
+            <div className="ase-tarjeta" style={{ padding: 14 }}>
+              <span className="ase-rotulo" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Link2 size={13} /> Enlace de preinscripción que se vigila
+              </span>
+              <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                <input className="ase-campo ase-campo-mono" style={{ flex: "1 1 220px" }} value={urlNueva}
+                  onChange={(e) => setUrlNueva(e.target.value)} placeholder="https://…" inputMode="url" spellCheck={false} />
+                <Boton tono={urlCambiada ? "primario" : "secundario"} icono={Check} cargando={guardando} disabled={!urlCambiada} onClick={guardarUrl}>
+                  Guardar
+                </Boton>
+              </div>
+              <p style={{ margin: "8px 0 0", fontSize: 11, color: "var(--muted)", lineHeight: 1.5 }}>
+                Tiene que ser la página de admisión a másteres, no la portada. Al guardar, la vigilancia
+                empieza desde cero con el enlace nuevo.
+              </p>
+            </div>
+          </div>
+        )}
+      </Ventana>
+    </Pagina>
   );
 }

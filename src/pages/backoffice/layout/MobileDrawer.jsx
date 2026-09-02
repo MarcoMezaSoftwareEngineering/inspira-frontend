@@ -45,14 +45,14 @@ export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
       />
 
       <aside
-        className="absolute inset-y-0 left-0 w-[min(86vw,320px)] flex flex-col text-white shadow-2xl transition-transform duration-200"
+        className="bo-lado absolute inset-y-0 left-0 w-[min(86vw,320px)] flex flex-col text-white shadow-2xl overflow-hidden"
         style={{
-          background: "linear-gradient(180deg,#124f35 0%,#0b3f2a 100%)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 320ms cubic-bezier(.22,1,.36,1)",
         }}
       >
         <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 shrink-0">
-          <span className="text-sm font-bold">Inspira Core</span>
+          <span className="bo-marca text-[15px]">Inspira<i>.</i>Core</span>
           <button
             onClick={onClose}
             aria-label="Cerrar menú"
@@ -68,7 +68,7 @@ export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
             if (visibleItems.length === 0) return null;
             return (
               <div key={section.label}>
-                <p className="px-3 mb-1 text-[11px] font-extrabold uppercase tracking-[0.15em] text-white/35 select-none">
+                <p className="px-3 mb-1 text-[10.5px] font-bold uppercase tracking-[0.18em] text-[#88C4FC]/70 select-none">
                   {section.label}
                 </p>
                 <div className="space-y-0.5">
@@ -83,10 +83,11 @@ export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
                         key={it.href}
                         href={it.href}
                         onClick={(e) => handleNavClick(it.href, e)}
+                        data-on={active ? "1" : "0"}
                         className={[
-                          "flex items-center gap-3 w-full text-left px-3 py-3 rounded-[11px] transition-colors text-[14px] font-medium no-underline",
+                          "bo-nav-item flex items-center gap-3 w-full text-left px-3 py-3 rounded-[11px] text-[14px] font-medium no-underline",
                           active
-                            ? "bg-white/[0.14] font-semibold text-white shadow-[inset_3px_0_0_#67d49a]"
+                            ? "font-semibold text-white"
                             : "text-white/75 hover:bg-white/[0.08] hover:text-white",
                         ].join(" ")}
                       >
@@ -104,7 +105,7 @@ export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
         {user && (
           <div className="shrink-0 border-t border-white/10 px-3 py-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-white/20 text-white text-xs font-bold flex items-center justify-center shrink-0 select-none">
+              <div className="w-9 h-9 rounded-full bg-[#FA943A] text-white text-xs font-bold flex items-center justify-center shrink-0 select-none">
                 {initials(user)}
               </div>
               <div className="flex-1 min-w-0">

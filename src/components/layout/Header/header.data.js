@@ -9,8 +9,8 @@ export const navItems = [
   { label: "Migra a España", href: "/servicios", mega: true },
   { label: "Casos de éxito", href: "/casos-de-exito" },
   { label: "Nuestro sistema", href: "/plataforma" },
-  { label: "Asistente gratis", href: "/asistente", ia: true },
-  { label: "Calculadora gratis", href: "/calculadora-master", badge: true },
+  { label: "Asistente gratis", corto: "Asistente", href: "/asistente", ia: true },
+  { label: "Calculadora gratis", corto: "Calculadora", href: "/calculadora-master", badge: true },
   { label: "Agenda tu asesoría", href: CALENDLY_URL, externo: true, cta: true },
 ];
 

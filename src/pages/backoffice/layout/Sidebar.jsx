@@ -65,11 +65,10 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
   return (
     <aside
       ref={asideRef}
-      className="hidden md:flex shrink-0 flex-col text-white h-full overflow-hidden relative"
+      className="bo-lado hidden md:flex shrink-0 flex-col text-white h-full overflow-hidden relative"
       style={{
         width: open ? `${width}px` : "0px",
-        transition: "width 260ms ease-in-out",
-        background: "linear-gradient(180deg,#124f35 0%,#0b3f2a 100%)",
+        transition: "width 320ms cubic-bezier(.22,1,.36,1)",
       }}
     >
       <div ref={innerRef} className="flex flex-col h-full" style={{ minWidth: `${width}px` }}>
@@ -79,16 +78,16 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
           <a
             href="/backoffice/dashboard"
             onClick={(e) => handleNavClick("/backoffice/dashboard", e)}
-            className="text-sm font-bold leading-tight hover:text-white/90 transition truncate"
+            className="bo-marca text-[15px] leading-tight hover:text-white/90 transition truncate"
           >
-            Inspira Core
+            Inspira<i>.</i>Core
           </a>
 
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={onTogglePin}
               title={pinned ? "Desanclar" : "Fijar"}
-              className={`flex items-center gap-1 px-2 h-7 rounded-lg hover:bg-white/10 transition text-[11px] font-medium ${pinned ? "text-emerald-300" : "text-white/50"}`}
+              className={`flex items-center gap-1 px-2 h-7 rounded-lg hover:bg-white/10 transition text-[11px] font-medium ${pinned ? "text-[#88C4FC]" : "text-white/50"}`}
             >
               <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -119,7 +118,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
             if (visibleItems.length === 0) return null;
             return (
             <div key={section.label}>
-              <p className="px-3 mb-1 text-[11px] font-extrabold uppercase tracking-[0.15em] text-white/35 select-none">
+              <p className="px-3 mb-1 text-[10.5px] font-bold uppercase tracking-[0.18em] text-[#88C4FC]/70 select-none">
                 {section.label}
               </p>
               <div className="space-y-0.5">
@@ -134,10 +133,11 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
                       key={it.href}
                       href={it.href}
                       onClick={(e) => handleNavClick(it.href, e)}
+                      data-on={active ? "1" : "0"}
                       className={[
-                        "flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-[11px] transition-colors text-[13px] font-medium no-underline",
+                        "bo-nav-item flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-[11px] text-[13px] font-medium no-underline",
                         active
-                          ? "bg-white/[0.14] font-semibold text-white shadow-[inset_3px_0_0_#67d49a]"
+                          ? "font-semibold text-white"
                           : "text-white/75 hover:bg-white/[0.08] hover:text-white",
                       ].join(" ")}
                     >
@@ -156,7 +156,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
         {user && (
           <div className="shrink-0 border-t border-white/10 px-3 py-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-white/20 text-white text-xs font-bold flex items-center justify-center shrink-0 select-none">
+              <div className="w-8 h-8 rounded-full bg-[#FA943A] text-white text-xs font-bold flex items-center justify-center shrink-0 select-none shadow-[0_6px_14px_-6px_rgba(250,148,58,.8)]">
                 {initials(user)}
               </div>
               <div className="flex-1 min-w-0">

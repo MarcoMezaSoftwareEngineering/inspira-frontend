@@ -55,7 +55,7 @@ export default function BackofficeApp() {
   });
   // Ref siempre actualizado para leerlo dentro del listener sin stale closure
   const sidebarPinnedRef = useRef(false);
-  sidebarPinnedRef.current = sidebarPinned;
+  useEffect(() => { sidebarPinnedRef.current = sidebarPinned; }, [sidebarPinned]);
 
   // Drawer móvil: independiente del sidebar de escritorio (sin concepto de "pin")
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -158,7 +158,9 @@ export default function BackofficeApp() {
                 className="absolute inset-0 z-10"
               />
             )}
-            {/* Rutas internas */}
+            {/* Rutas internas. La clave por ruta hace que cada página entre
+                con su pequeña transición en vez de aparecer de golpe. */}
+            <div key={path} className="bo-entra">
             {path === "/backoffice" && <ModuleGate perm="dashboard.ver"><Dashboard /></ModuleGate>}
             {path === "/backoffice/dashboard" && <ModuleGate perm="dashboard.ver"><Dashboard /></ModuleGate>}
 
@@ -229,6 +231,7 @@ export default function BackofficeApp() {
             {CONFIG_TAB_BY_PATH[path] && (
               <ConfiguracionPanel initialTabId={CONFIG_TAB_BY_PATH[path]} />
             )}
+            </div>
           </main>
         </div>
       </div>

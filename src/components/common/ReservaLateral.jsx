@@ -1,12 +1,13 @@
 // src/components/common/ReservaLateral.jsx
-// Tarjeta fija al costado derecho, siempre visible en escritorio: recuerda la
-// asesoría 1:1 de 30 min. En móvil se colapsa a una pestaña estrecha.
+// Tarjeta fija al costado derecho: recuerda la asesoría 1:1 de 30 min. Entra
+// deslizándose tras el primer scroll para no tapar el hero (que ya lleva su
+// propio botón). En móvil se colapsa a una pestaña estrecha.
 import Icono from "./Icono";
 import { ASESORIA_PRINCIPAL } from "../../config/asesorias";
 
-export default function ReservaLateral({ onAbrir }) {
+export default function ReservaLateral({ onAbrir, visible = true }) {
   return (
-    <div className="reserva-lateral">
+    <div className={"reserva-lateral" + (visible ? " visible" : "")}>
       {/* Escritorio: tarjeta con el precio a la vista */}
       <button
         type="button"

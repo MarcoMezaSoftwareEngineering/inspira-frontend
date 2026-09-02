@@ -44,31 +44,30 @@ export default function DeadlineEstancia({ id }) {
     // Se confirma con la fecha escrita en largo: un dedazo en el día es la
     // diferencia entre avisar a tiempo y avisar tarde, y aquí no hay vuelta
     // atrás una vez sale el correo.
-    const ok = await dialog.confirm({
-      titulo: "Enviar el aviso de cierre",
-      mensaje: `Se le comunicará formalmente que el cierre documental es el ${fechaLarga} `
-             + `a las ${hora} h (hora peninsular española), con carácter improrrogable, y que `
-             + `después solo cabrá aportar documentación si Extranjería la requiere. ¿Se envía?`,
-      confirmar: "Enviar",
-    });
+    const ok = await dialog.confirm(
+      `Se le comunicará formalmente que el cierre documental es el ${fechaLarga} `
+      + `a las ${hora} h (hora peninsular española), con carácter improrrogable, y que `
+      + `después solo cabrá aportar documentación si Extranjería la requiere. ¿Se envía?`,
+      "Enviar el aviso de cierre",
+    );
     if (!ok) return;
 
     setEnviando(true);
     try {
-      const r = await boPOST(`/solicitudes/${id}/estancia/deadline`, {
+      const r = await boPOST(`/backoffice/solicitudes/${id}/estancia/deadline`, {
         fecha_limite: fecha,
         hora_limite: hora,
         fecha_recomendada: recomendada || null,
         incluir_pendientes: conPendientes,
       });
       if (r?.ok) {
-        dialog.success(`Aviso de cierre enviado a ${r.enviado_a}`);
+        dialog.toast(`Aviso de cierre enviado a ${r.enviado_a}`, "exito");
         setAbierto(false);
       } else {
-        dialog.error(r?.msg || "No se pudo enviar el aviso");
+        dialog.toast(r?.msg || "No se pudo enviar el aviso", "error");
       }
     } catch (e) {
-      dialog.error(e?.message || "No se pudo enviar el aviso");
+      dialog.toast(e?.message || "No se pudo enviar el aviso", "error");
     } finally {
       setEnviando(false);
     }

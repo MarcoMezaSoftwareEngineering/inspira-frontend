@@ -206,7 +206,7 @@ const SCHEMA_ORG = {
   name: "Inspira Legal",
   legalName: "PROYECTA PRODUCCIONES GROUP S.A.C.",
   taxID: "20610501941",
-  telephone: "+51908945354",
+  telephone: "+51992009397",
   email: "administracion@inspira-legal.cloud",
   url: "https://inspira-legal.cloud",
   description:

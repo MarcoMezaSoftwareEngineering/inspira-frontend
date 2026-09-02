@@ -29,8 +29,10 @@ export const TITULAR = {
   // Canal único de contacto (también para protección de datos): la empresa
   // decidió no crear un buzón separado, así que todo llega a administración.
   emailDatosPersonales: "administracion@inspira-legal.cloud",
-  telefono: "+51 908 945 354",
-  whatsapp: "+51 908 945 354",
+  // Línea corporativa de atención (Carina Meza · información y citas). El
+  // detalle de las líneas y para qué es cada una vive en config/contacto.js.
+  telefono: "+51 992 009 397",
+  whatsapp: "+51 992 009 397",
   web: "https://inspira-legal.cloud",
 };
 

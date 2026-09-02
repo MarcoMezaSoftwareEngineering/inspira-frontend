@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 export default function SEOSchema({ schema, id }) {
   useEffect(() => {
+    if (!schema) return undefined;
     const schemaId = `ld-${id || schema["@type"] || "schema"}`;
 
     const existing = document.getElementById(schemaId);

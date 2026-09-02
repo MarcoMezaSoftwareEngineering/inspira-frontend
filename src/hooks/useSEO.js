@@ -32,6 +32,11 @@ function setMeta(attr, value, content) {
   el.setAttribute("content", content);
 }
 
+function quitarMeta(selector) {
+  const el = document.querySelector(selector);
+  if (el) el.remove();
+}
+
 function setCanonical(href) {
   let el = document.querySelector('link[rel="canonical"]');
   if (!href) {
@@ -46,8 +51,23 @@ function setCanonical(href) {
   el.setAttribute("href", href);
 }
 
-export function useSEO({ title, description, path, noIndex = false }) {
+export function useSEO({
+  title,
+  description,
+  path,
+  noIndex = false,
+  tipo = "website",
+  publicado,
+  autor,
+  // Imagen propia al compartir. Sin ella se usa la de la sección.
+  imagen: imagenPropia,
+  // Las páginas cuyo SEO depende de su propio contenido (una entrada del
+  // blog) lo declaran ellas mismas: así el enrutador no necesita cargar ese
+  // contenido para saber qué título poner.
+  omitir = false,
+}) {
   useEffect(() => {
+    if (omitir) return;
     const fullTitle = title
       ? `${title} | Inspira Legal`
       : "Inspira Legal – Másteres y Visas en España";
@@ -60,7 +80,7 @@ export function useSEO({ title, description, path, noIndex = false }) {
 
     setCanonical(noIndex ? null : canonical);
 
-    const imagen = imagenDe(path);
+    const imagen = imagenPropia ? `${BASE_URL}${imagenPropia}` : imagenDe(path);
 
     setMeta("property", "og:title", fullTitle);
     setMeta("property", "og:description", description || "");
@@ -73,5 +93,16 @@ export function useSEO({ title, description, path, noIndex = false }) {
     setMeta("name", "twitter:title", fullTitle);
     setMeta("name", "twitter:description", description || "");
     setMeta("name", "twitter:image", imagen);
-  }, [title, description, path, noIndex]);
+
+    // Las entradas del blog se anuncian como artículo, con fecha y firma: es
+    // lo que distingue una noticia de una página cualquiera al compartirla y
+    // en los resultados de búsqueda.
+    setMeta("property", "og:type", tipo);
+    quitarMeta('meta[property="article:published_time"]');
+    quitarMeta('meta[property="article:author"]');
+    if (tipo === "article") {
+      if (publicado) setMeta("property", "article:published_time", publicado);
+      if (autor) setMeta("property", "article:author", autor);
+    }
+  }, [title, description, path, noIndex, tipo, publicado, autor, imagenPropia, omitir]);
 }

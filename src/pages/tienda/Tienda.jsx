@@ -20,7 +20,7 @@ const go = (e, href) => {
 
 export default function Tienda() {
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Tiendita"
         icono="reloj"
@@ -103,6 +103,6 @@ export default function Tienda() {
         </div>
       </div>
       <SigueExplorando destinos={["calculadora","asistente","blog","servicios"]} />
-    </div>
+    </main>
   );
 }

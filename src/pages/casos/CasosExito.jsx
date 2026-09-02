@@ -107,7 +107,7 @@ export default function CasosExito() {
     filtro === "todos" ? CASOS : CASOS.filter((c) => c.categoria === filtro);
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Casos de éxito"
         icono="estrella"
@@ -252,6 +252,6 @@ export default function CasosExito() {
       </section>
 
       <SigueExplorando destinos={["estudios", "rapidas", "enEspana", "asistente"]} />
-    </div>
+    </main>
   );
 }

@@ -1,5 +1,6 @@
 // src/pages/backoffice/BackofficeApp.jsx
 import { useEffect, useRef, useState } from "react";
+import "../../styles/asesor.css";
 import Sidebar from "./layout/Sidebar";
 import MobileAppBar from "./layout/MobileAppBar";
 import MobileDrawer from "./layout/MobileDrawer";
@@ -149,7 +150,7 @@ export default function BackofficeApp() {
             </button>
           )}
 
-          <main className="flex-1 flex flex-col overflow-y-auto relative pt-[60px] md:pt-0">
+          <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative pt-[60px] md:pt-0">
             {/* Overlay transparente: cierra el sidebar al hacer clic fuera cuando no está fijado */}
             {sidebarOpen && !sidebarPinned && (
               <div

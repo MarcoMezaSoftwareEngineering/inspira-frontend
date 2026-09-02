@@ -58,9 +58,11 @@ const HERO_SLIDES = [
   },
 ];
 
+// El tamaño real de cada archivo viaja aquí para que el navegador reserve el
+// hueco antes de descargar la foto y la página no dé el salto al aparecer.
 const EQUIPO_FOTOS = [
-  { foto: fotoCarina, alt: "Carina Meza, CEO y Consultora Legal de Inspira Legal — Perú" },
-  { foto: fotoSebastian, alt: "Sebastián Alpiste, equipo de Inspira Legal — Madrid" },
+  { foto: fotoCarina, ancho: 720, alto: 704, alt: "Carina Meza, CEO y Consultora Legal de Inspira Legal — Perú" },
+  { foto: fotoSebastian, ancho: 720, alto: 896, alt: "Sebastián Alpiste, equipo de Inspira Legal — Madrid" },
 ];
 
 const HERRAMIENTAS = [
@@ -864,6 +866,10 @@ export default function MasterAdsLanding() {
                 key={p.alt}
                 src={p.foto}
                 alt={p.alt}
+                width={p.ancho}
+                height={p.alto}
+                loading="lazy"
+                decoding="async"
                 className="w-full rounded-3xl shadow-2xl ring-4 ring-white/10 transition-transform duration-300 hover:scale-105 hover:-rotate-1"
               />
             ))}

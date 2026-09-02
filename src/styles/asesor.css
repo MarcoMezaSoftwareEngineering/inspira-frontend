@@ -469,7 +469,13 @@ select.ase-campo { appearance: none; padding-right: 32px; background: #fff url("
 .bo-nav-item:hover svg { transform: scale(1.12); }
 
 @keyframes boEntra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.bo-entra { animation: boEntra .35s cubic-bezier(.22,1,.36,1) both; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.bo-entra { animation: boEntra .35s cubic-bezier(.22,1,.36,1) both; flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+/* La página que va dentro se ata al ancho de la pantalla. Sin esto, un solo
+   elemento ancho (una tabla, una tira de filtros) estiraba la caja de TODA la
+   vista —título, buscador y tarjetas incluidos— y en el móvil se salía por la
+   derecha. El ancho explícito hace falta además del mínimo: la línea flex de
+   un contenedor en columna se dimensiona al contenido, no al contenedor. */
+.bo-entra > * { min-width: 0; width: 100%; }
 @media (prefers-reduced-motion: reduce) { .bo-entra { animation: none; } .bo-nav-item:hover { transform: none; } }
 
 /* ── Pasos del catálogo: una tira con el paso actual marcado ─────────── */
@@ -523,3 +529,108 @@ select.ase-campo { appearance: none; padding-right: 32px; background: #fff url("
 
 /* La textarea de código: lo pegado se lee mejor a espacio fijo. */
 .ase-campo-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.55; }
+
+
+/* ══ Vista de móvil del panel ════════════════════════════════════════════
+   El panel se usa tanto desde el móvil como desde el escritorio. Estas
+   piezas son las que hacen que en una pantalla estrecha se lea y se pulse
+   bien: cabeceras que acompañan al desplazar, tiras que avisan de que
+   siguen, y todo lo pulsable con respuesta al tacto. */
+
+/* Se queda pegada bajo la barra de la aplicación. El desplazamiento va a 0
+   a propósito: el contenedor con scroll ya reserva los 60px de la barra en su
+   relleno superior, y el pegado se mide desde ahí. Poner 60 la empujaba otros
+   60 hacia abajo y tapaba la primera fila de tarjetas. */
+.ase-sticky {
+  position: sticky; top: 0; z-index: 20; background: #fff;
+  box-shadow: 0 1px 0 rgba(1, 52, 70, .07), 0 14px 20px -22px rgba(1, 52, 70, .75);
+}
+
+/* Tira horizontal (pestañas, chips de filtro): sin barra de desplazamiento a
+   la vista, con un difuminado a la derecha que delata que hay más. */
+.ase-tira { position: relative; }
+.ase-tira-scroll {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+.ase-tira-scroll::-webkit-scrollbar { display: none; }
+.ase-tira-scroll > * { scroll-snap-align: start; }
+.ase-tira:after {
+  content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 26px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff 72%);
+  pointer-events: none;
+}
+
+/* Pestañas en forma de píldora: en el móvil el subrayado casi no se ve y la
+   zona de toque quedaba pequeña. */
+.ase-tab {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid transparent;
+  background: #f1f5f4; color: #5c7280; font-size: 12.5px; font-weight: 700;
+  white-space: nowrap; cursor: pointer;
+  transition: background .2s, color .2s, transform .18s var(--ease, cubic-bezier(.22,1,.36,1)), box-shadow .2s;
+}
+.ase-tab:hover { color: #17394a; background: #e7eeec; }
+.ase-tab:active { transform: scale(.97); }
+.ase-tab[data-on="1"] {
+  background: linear-gradient(135deg, #1d6a4a, #16543a); color: #fff;
+  box-shadow: 0 8px 18px -10px rgba(29, 106, 74, .95);
+}
+.ase-tab-n {
+  font-size: 10.5px; font-weight: 800; line-height: 1;
+  padding: 3px 6px; border-radius: 999px;
+  background: #e2e8e6; color: #5c7280; font-variant-numeric: tabular-nums;
+}
+.ase-tab[data-on="1"] .ase-tab-n { background: rgba(255, 255, 255, .22); color: #fff; }
+
+/* Tarjeta de métrica: el número manda, el color dice si urge y la franja
+   lateral solo aparece cuando hay algo de lo que ocuparse. */
+.ase-metrica {
+  position: relative; overflow: hidden; text-align: left; width: 100%;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 13px 14px 13px 16px; border-radius: 15px;
+  border: 1px solid #e6ebe9; background: #fff;
+  transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .2s, border-color .2s;
+}
+.ase-metrica:before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: #dfe6e3; transition: background .2s;
+}
+.ase-metrica[data-tono="rojo"]:before { background: #dc2626; }
+.ase-metrica[data-tono="ambar"]:before { background: #d97706; }
+.ase-metrica[data-tono="azul"]:before { background: #1a3557; }
+.ase-metrica[data-tono="calma"]:before { background: #dfe6e3; }
+.ase-metrica-n {
+  font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ase-metrica-t { font-size: 12.5px; font-weight: 700; color: #37474f; margin-top: 7px; }
+.ase-metrica-d { font-size: 11px; color: #90a4ae; line-height: 1.35; }
+/* Solo las que llevan a algún sitio se comportan como botón. */
+button.ase-metrica { cursor: pointer; }
+button.ase-metrica:hover { border-color: #cfdcd7; box-shadow: 0 12px 26px -20px rgba(1, 52, 70, .55); transform: translateY(-1px); }
+button.ase-metrica:active { transform: scale(.985); }
+.ase-metrica-ir {
+  position: absolute; right: 11px; top: 12px; font-size: 10px; font-weight: 800;
+  letter-spacing: .04em; text-transform: uppercase; color: #a8b8bf;
+  transition: color .2s, transform .2s;
+}
+button.ase-metrica:hover .ase-metrica-ir { color: #1d6a4a; transform: translateX(2px); }
+
+/* Reparto por servicio: la barra crece al entrar, no aparece de golpe. */
+@keyframes aseBarra { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.ase-barra > i {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, #1d6a4a, #2c8f66);
+  transform-origin: left; animation: aseBarra .6s cubic-bezier(.22,1,.36,1) both;
+}
+@media (prefers-reduced-motion: reduce) { .ase-barra > i { animation: none; } }
+
+/* Fila pulsable de una lista (cliente, proceso). */
+.ase-fila { transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .2s, border-color .2s; }
+.ase-fila:hover { border-color: rgba(29, 106, 74, .4); box-shadow: 0 14px 30px -24px rgba(1, 52, 70, .8); }
+.ase-fila:active { transform: scale(.99); }
+@media (prefers-reduced-motion: reduce) {
+  .ase-fila, .ase-metrica, .ase-tab { transition: none; }
+}

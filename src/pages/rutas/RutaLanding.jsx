@@ -52,7 +52,7 @@ export default function RutaLanding({ id }) {
   if (!ruta) return <NotFound />;
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta={ruta.etiqueta}
         icono={ruta.icono}
@@ -163,6 +163,6 @@ export default function RutaLanding({ id }) {
         </section>
       </div>
       <SigueExplorando destinos={["asistente","calculadora","casos","servicios"]} />
-    </div>
+    </main>
   );
 }

@@ -18,7 +18,7 @@ const incluye = [
 
 export default function EstanciaLanding() {
   return (
-    <div className="w-full">
+    <main className="w-full">
       {/* Hero */}
       <section
         className="w-full py-20 px-6 relative overflow-hidden"
@@ -141,6 +141,6 @@ export default function EstanciaLanding() {
           </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

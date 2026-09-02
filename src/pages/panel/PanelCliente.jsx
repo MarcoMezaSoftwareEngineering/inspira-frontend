@@ -1,5 +1,6 @@
 // src/pages/panel/PanelCliente.jsx
 import { useEffect, useState, lazy, Suspense } from "react";
+import "../../styles/panel.css";
 import { apiGET } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";

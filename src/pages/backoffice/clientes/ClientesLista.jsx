@@ -48,14 +48,14 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
       role="button" tabIndex={0}
       onClick={() => onAbrir(c)}
       onKeyDown={(e) => { if (e.key === "Enter") onAbrir(c); }}
-      className={`group bg-white border rounded-xl px-3.5 py-3 cursor-pointer transition-all
-        hover:border-[#1D6A4A]/40 hover:shadow-sm ${
-          c.activo === false ? "border-neutral-200 opacity-60" : "border-neutral-200"
-        }`}
+      className={`ase-fila group bg-white border border-neutral-200 rounded-2xl px-3.5 py-3 cursor-pointer
+        select-none touch-manipulation ${c.activo === false ? "opacity-60" : ""}`}
     >
       <div className="flex items-start gap-3">
-        <span className={`shrink-0 w-9 h-9 rounded-lg grid place-items-center text-[12px] font-bold ${
-          c.activos > 0 ? "bg-[#023A4B] text-white" : "bg-neutral-100 text-neutral-400"
+        <span className={`shrink-0 w-10 h-10 rounded-xl grid place-items-center text-[12.5px] font-bold ${
+          c.activos > 0
+            ? "bg-gradient-to-br from-[#023A4B] to-[#02506b] text-white shadow-[0_8px_18px_-12px_rgba(2,58,75,.95)]"
+            : "bg-neutral-100 text-neutral-400"
         }`}>
           {iniciales(c.nombre)}
         </span>
@@ -224,9 +224,11 @@ export default function ClientesLista({
   const chip = (id, texto, n, tono) => (
     <button
       key={id} type="button" onClick={() => setFiltro(filtro === id ? "" : id)}
-      className={`shrink-0 flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
+      aria-pressed={filtro === id}
+      className={`shrink-0 flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-xl border
+        transition-all active:scale-95 ${
         filtro === id
-          ? "border-[#1D6A4A] bg-[#1D6A4A] text-white"
+          ? "border-[#1D6A4A] bg-[#1D6A4A] text-white shadow-[0_8px_18px_-12px_rgba(29,106,74,.95)]"
           : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
       }`}
     >
@@ -239,7 +241,12 @@ export default function ClientesLista({
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
+      {/* La tira de filtros acompaña a la lista al desplazar. El pegado y el
+          difuminado del borde van en elementos distintos: los dos fijan
+          `position` y en el mismo nodo se anulaban. */}
+      <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-1 pb-1.5">
+        <div className="ase-tira">
+        <div className="ase-tira-scroll">
         {chip("", "Todos", contadores.todos)}
         {chip("activos", "Con proceso activo", contadores.activos, "bg-[#E8F5EE] text-[#1D6A4A]")}
         {chip("sin_servicio", "Sin servicios", contadores.sin_servicio, "bg-amber-50 text-amber-700")}
@@ -270,6 +277,8 @@ export default function ClientesLista({
           <option value="antiguos">Más antiguos</option>
           <option value="nombre">Por nombre</option>
         </select>
+        </div>
+        </div>
       </div>
 
       {loading ? (
@@ -277,9 +286,9 @@ export default function ClientesLista({
           {/* Esqueleto: mantiene la altura para que la lista no dé un salto
               cuando llegan los datos. */}
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="bg-white border border-neutral-200 rounded-xl px-3.5 py-3 animate-pulse">
+            <div key={i} className="bg-white border border-neutral-200 rounded-2xl px-3.5 py-3 animate-pulse">
               <div className="flex gap-3">
-                <div className="w-9 h-9 rounded-lg bg-neutral-100" />
+                <div className="w-10 h-10 rounded-xl bg-neutral-100" />
                 <div className="flex-1 space-y-2 py-0.5">
                   <div className="h-3 bg-neutral-100 rounded w-1/3" />
                   <div className="h-2.5 bg-neutral-50 rounded w-1/2" />

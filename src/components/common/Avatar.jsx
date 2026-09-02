@@ -27,6 +27,8 @@ export default function Avatar({ foto, iniciales, nombre, size = 32, className =
         alt={nombre || "Foto de perfil"}
         width={size}
         height={size}
+        loading="lazy"
+        decoding="async"
         // Google devuelve 403 a las peticiones que llegan con Referer de otro
         // dominio en algunas cuentas.
         referrerPolicy="no-referrer"

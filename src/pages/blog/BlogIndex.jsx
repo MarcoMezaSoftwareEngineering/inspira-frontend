@@ -21,7 +21,7 @@ export default function BlogIndex() {
   const [destacado, ...resto] = POSTS;
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Blog"
         icono="libro"
@@ -115,6 +115,6 @@ export default function BlogIndex() {
         </div>
       </div>
       <SigueExplorando destinos={["asistente","servicios","casos","tienda"]} />
-    </div>
+    </main>
   );
 }

@@ -14,14 +14,15 @@ export default function CalculadoraMaster() {
   }, []);
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <iframe
         ref={iframeRef}
         src="/calculadora-master.html"
         title="Calculadora Máster Gratis — Inspira"
+        loading="lazy"
         className="w-full border-0"
         style={{ height: "calc(100vh - 60px)", minHeight: "600px" }}
       />
-    </div>
+    </main>
   );
 }

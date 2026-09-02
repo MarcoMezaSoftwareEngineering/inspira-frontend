@@ -1,6 +1,9 @@
 // src/pages/blog/BlogPost.jsx
+import { useMemo } from "react";
 import { getPost, POSTS, autorDe, portadaDe } from "./blog.data";
+import SEOSchema from "../../components/SEOSchema";
 import { navigate } from "../../services/navigate";
+import { useSEO } from "../../hooks/useSEO";
 import { CALENDLY_URL } from "../../config/contacto";
 import NotFound from "../NotFound";
 
@@ -46,13 +49,51 @@ function Bloque({ bloque }) {
 
 export default function BlogPost({ slug }) {
   const post = getPost(slug);
+
+  useSEO(
+    post
+      ? {
+          // useSEO ya añade « | Inspira Legal» al final.
+          title: post.titulo,
+          description: post.extracto,
+          path: `/blog/${post.slug}`,
+          imagen: portadaDe(post),
+          tipo: "article",
+          publicado: post.fecha,
+          autor: autorDe(post).nombre,
+        }
+      : { omitir: true }
+  );
+
+  // La ficha Article es lo que permite a Google mostrar fecha y autor junto al
+  // resultado. Se memoriza porque SEOSchema reescribe el <script> cada vez que
+  // cambia el objeto.
+  const schema = useMemo(() => {
+    if (!post) return null;
+    const autorPost = autorDe(post);
+    return {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.titulo,
+      description: post.extracto,
+      image: `https://inspira-legal.cloud${portadaDe(post)}`,
+      datePublished: post.fecha,
+      dateModified: post.fecha,
+      inLanguage: "es",
+      author: { "@type": "Person", name: autorPost.nombre, jobTitle: autorPost.cargo },
+      publisher: { "@type": "Organization", name: "Inspira Legal" },
+      mainEntityOfPage: `https://inspira-legal.cloud/blog/${post.slug}`,
+    };
+  }, [post]);
+
   if (!post) return <NotFound />;
   const autor = autorDe(post);
 
   const relacionados = POSTS.filter((p) => p.slug !== slug).slice(0, 2);
 
   return (
-    <div className="w-full">
+    <main className="w-full">
+      <SEOSchema schema={schema} id="post" />
       <article className="mx-auto max-w-3xl px-6 py-14">
         <a
           href="/blog"
@@ -76,6 +117,8 @@ export default function BlogPost({ slug }) {
           alt=""
           width="1200"
           height="600"
+          fetchPriority="high"
+          decoding="async"
           className="mt-5 aspect-[2/1] w-full rounded-2xl object-cover"
         />
 
@@ -152,6 +195,6 @@ export default function BlogPost({ slug }) {
           </div>
         </section>
       )}
-    </div>
+    </main>
   );
 }

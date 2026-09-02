@@ -3,47 +3,59 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { Header } from "./components/layout/Header";
 import Home from "./pages/home/Home";
-import AuthSuccess from "./pages/auth/AuthSuccess";
-import MasterLanding from "./pages/servicios/master/MasterLanding";
+import Footer from "./components/layout/footer";
+import CookieConsent from "./components/legal/CookieConsent";
+import AsesoriaCTA from "./components/common/AsesoriaCTA";
+import BarraProgreso from "./components/common/BarraProgreso";
+import BarraInferior from "./components/layout/BarraInferior";
+import { registrarVista } from "./lib/analytics";
+import { getServicio } from "./config/servicios";
+import { getRuta } from "./config/rutas";
+import { useSEO } from "./hooks/useSEO";
+import SEOSchema from "./components/SEOSchema";
+
+// Solo la portada y el armazón común (cabecera, pie, CTA) viajan en el paquete
+// inicial. Cada una de las demás páginas se descarga la primera vez que se
+// visita: así la portada carga con menos JavaScript y publicar un cambio en una
+// página no invalida la caché de las otras.
+const AuthSuccess = lazy(() => import("./pages/auth/AuthSuccess"));
 const PortalServiciosMaster = lazy(() => import("./pages/servicios/master/PortalServiciosMaster"));
-import EstanciaLanding from "./pages/servicios/estancia/EstanciaLanding";
+const EstanciaLanding = lazy(() => import("./pages/servicios/estancia/EstanciaLanding"));
+const ServiciosCatalogo = lazy(() => import("./pages/servicios/ServiciosCatalogo"));
+const ServicioDetalle = lazy(() => import("./pages/servicios/ServicioDetalle"));
 const BackofficeApp = lazy(() => import("./pages/backoffice/BackofficeApp"));
 const CalculadoraMaster = lazy(() => import("./pages/calculadora/CalculadoraMaster"));
 const PanelCliente = lazy(() => import("./pages/panel/PanelCliente"));
 const ReservarCita = lazy(() => import("./pages/reservar/ReservarCita"));
 const MasterAdsLanding = lazy(() => import("./pages/landing/MasterAdsLanding"));
-import ServiciosCatalogo from "./pages/servicios/ServiciosCatalogo";
-import ServicioDetalle from "./pages/servicios/ServicioDetalle";
-import { getServicio } from "./config/servicios";
-import AsesoriaCTA from "./components/common/AsesoriaCTA";
-import BarraProgreso from "./components/common/BarraProgreso";
-import { registrarVista } from "./lib/analytics";
-import BarraInferior from "./components/layout/BarraInferior";
-import Eventos from "./pages/eventos/Eventos";
-import CasosExito from "./pages/casos/CasosExito";
-import Asistente from "./pages/asistente/Asistente";
-import RutaLanding from "./pages/rutas/RutaLanding";
-import Plataforma from "./pages/plataforma/Plataforma";
-import { getRuta } from "./config/rutas";
-import Nosotros from "./pages/nosotros/Nosotros";
-import Tienda from "./pages/tienda/Tienda";
-import BlogIndex from "./pages/blog/BlogIndex";
-import BlogPost from "./pages/blog/BlogPost";
-import { getPost } from "./pages/blog/blog.data";
-import { PagoExitoso, PagoFallido, PagoPendiente } from "./pages/pago/PagoResultado";
-import NotFound from "./pages/NotFound";
+const Eventos = lazy(() => import("./pages/eventos/Eventos"));
+const CasosExito = lazy(() => import("./pages/casos/CasosExito"));
+const Asistente = lazy(() => import("./pages/asistente/Asistente"));
+const RutaLanding = lazy(() => import("./pages/rutas/RutaLanding"));
+const Plataforma = lazy(() => import("./pages/plataforma/Plataforma"));
+const Nosotros = lazy(() => import("./pages/nosotros/Nosotros"));
+const Tienda = lazy(() => import("./pages/tienda/Tienda"));
+const BlogIndex = lazy(() => import("./pages/blog/BlogIndex"));
+const BlogPost = lazy(() => import("./pages/blog/BlogPost"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PagoExitoso = lazy(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoExitoso })));
+const PagoFallido = lazy(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoFallido })));
+const PagoPendiente = lazy(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoPendiente })));
 
-// ── Legales ────────────────────────────────────────────────────────────────
-import Footer from "./components/layout/footer";
-import CookieConsent from "./components/legal/CookieConsent";
-import PoliticaPrivacidad from "./pages/legal/PoliticaPrivacidad";
-import PoliticaCookies from "./pages/legal/PoliticaCookies";
-import TerminosCondiciones from "./pages/legal/TerminosCondiciones";
-import DerechosArco from "./pages/legal/DerechosArco";
-import LibroReclamaciones from "./pages/legal/LibroReclamaciones";
+// ── Legales ───────────────────────────────────────────────
+const PoliticaPrivacidad = lazy(() => import("./pages/legal/PoliticaPrivacidad"));
+const PoliticaCookies = lazy(() => import("./pages/legal/PoliticaCookies"));
+const TerminosCondiciones = lazy(() => import("./pages/legal/TerminosCondiciones"));
+const DerechosArco = lazy(() => import("./pages/legal/DerechosArco"));
+const LibroReclamaciones = lazy(() => import("./pages/legal/LibroReclamaciones"));
 
-import { useSEO } from "./hooks/useSEO";
-import SEOSchema from "./components/SEOSchema";
+// Páginas a las que más se salta desde la portada: se adelantan en tiempo
+// ocioso, ya pintada la pantalla, para que el primer clic no espere descarga.
+const PRECARGA = [
+  () => import("./pages/servicios/ServiciosCatalogo"),
+  () => import("./pages/servicios/ServicioDetalle"),
+  () => import("./pages/blog/BlogIndex"),
+];
 
 // ── Configuración SEO por ruta ─────────────────────────────────────────────
 const SEO_PAGES = {
@@ -258,18 +270,17 @@ function RouteSEO({ path }) {
       };
     }
   }
-  // Entradas del blog: SEO dinámico a partir del post
-  if (!config && path.startsWith("/blog/")) {
-    const post = getPost(path.slice("/blog/".length));
-    if (post) {
-      config = {
-        title: `${post.titulo} – Inspira Legal`,
-        description: post.extracto,
-        path,
-      };
-    }
-  }
-  useSEO(isPrivate ? { noIndex: true } : (config || { noIndex: true }));
+  // Las entradas del blog declaran su propio SEO: el título, la fecha y la
+  // firma salen del artículo, que solo se descarga al abrirlo.
+  const esEntradaBlog = path.startsWith("/blog/") && path.length > "/blog/".length;
+
+  useSEO(
+    esEntradaBlog
+      ? { omitir: true }
+      : isPrivate
+        ? { noIndex: true }
+        : config || { noIndex: true }
+  );
   return null;
 }
 
@@ -319,6 +330,20 @@ export default function App() {
     registrarVista(path);
   }, [path]);
 
+  // Precarga de las páginas más visitadas. No en los portales privados (no las
+  // necesitan) ni cuando el visitante pidió al navegador ahorrar datos.
+  useEffect(() => {
+    if (/^\/(backoffice|panel)/.test(window.location.pathname)) return;
+    if (navigator.connection?.saveData) return;
+    const precargar = () => PRECARGA.forEach((cargar) => cargar().catch(() => {}));
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(precargar, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = setTimeout(precargar, 2500);
+    return () => clearTimeout(t);
+  }, []);
+
   if (path.startsWith("/backoffice")) {
     return (
       <Suspense fallback={<div className="min-h-screen" />}>
@@ -330,7 +355,10 @@ export default function App() {
 
   const isPanel = path.startsWith("/panel");
   const isLandingAds = LANDING_ADS_PATHS.includes(path);
-  const isBlogPost = path.startsWith("/blog/") && !!getPost(path.slice("/blog/".length));
+  // Optimista: cualquier /blog/<algo> monta la entrada, y es ella quien decide
+  // si existe. Comprobarlo aquí obligaba a meter el blog entero en el paquete
+  // inicial de la web pública.
+  const isBlogPost = path.startsWith("/blog/") && path.length > "/blog/".length;
   const servicioId = path.startsWith("/servicios/")
     ? path.slice("/servicios/".length)
     : null;

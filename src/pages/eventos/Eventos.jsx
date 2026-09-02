@@ -15,7 +15,7 @@ export default function Eventos() {
   const principal = eventos[0];
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Evento gratuito"
         icono="calendario"
@@ -147,6 +147,6 @@ export default function Eventos() {
         </div>
       )}
       <SigueExplorando destinos={["estudios","calculadora","asistente","casos"]} />
-    </div>
+    </main>
   );
 }

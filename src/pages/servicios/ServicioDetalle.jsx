@@ -34,7 +34,7 @@ export default function ServicioDetalle({ id }) {
   ).slice(0, 3);
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta={servicio.categoria}
         icono="brujula"
@@ -256,6 +256,6 @@ export default function ServicioDetalle({ id }) {
         )}
       </div>
       <SigueExplorando destinos={["asistente","casos","calculadora","servicios"]} />
-    </div>
+    </main>
   );
 }

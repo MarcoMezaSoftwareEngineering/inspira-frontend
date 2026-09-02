@@ -11,7 +11,7 @@ export default function TopBar({ onOpenMenu }) {
       <div className="w-full flex items-center justify-between px-6 py-3">
         {/* Logo */}
         <a href="/" className="flex items-center">
-          <img src={logo} alt="Inspira" className="h-9 w-auto object-contain" />
+          <img src={logo} alt="Inspira" width="320" height="107" className="h-9 w-auto object-contain" />
         </a>
 
         {/* Right Desktop */}

@@ -14,7 +14,7 @@ const go = (e, href) => {
 
 export default function Plataforma() {
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Sistema propio"
         icono="laptop"
@@ -248,6 +248,6 @@ export default function Plataforma() {
       </section>
 
       <SigueExplorando destinos={["casos", "servicios", "asistente", "nosotros"]} />
-    </div>
+    </main>
   );
 }

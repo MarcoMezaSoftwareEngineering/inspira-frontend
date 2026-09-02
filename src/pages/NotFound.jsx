@@ -5,7 +5,7 @@ export default function NotFound() {
   useSEO({ noIndex: true });
 
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
+    <main className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
       <p className="text-7xl font-bold text-[#1D6A4A] mb-4 font-serif">404</p>
       <h1 className="text-2xl font-serif font-bold text-[#1A3557] mb-3">
         Página no encontrada
@@ -20,6 +20,6 @@ export default function NotFound() {
       >
         Volver al inicio
       </button>
-    </div>
+    </main>
   );
 }

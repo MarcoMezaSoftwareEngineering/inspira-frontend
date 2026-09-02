@@ -1,7 +1,9 @@
 @import "tailwindcss";
 @import "./v4.css";
-@import "./panel.css";
-@import "./asesor.css";
+/* panel.css y asesor.css ya no se importan aquí: solo los usan el panel del
+   cliente y el backoffice, y cada uno los carga en su propio módulo
+   (PanelCliente.jsx / BackofficeApp.jsx). Así la web pública no descarga
+   estilos que nunca pinta. */
 @config "../../tailwind.config.js";
 
 html {

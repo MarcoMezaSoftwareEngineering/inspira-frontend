@@ -94,7 +94,7 @@ export default function ServiciosCatalogo() {
   }, []);
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Todos nuestros servicios"
         icono="brujula"
@@ -238,6 +238,6 @@ export default function ServiciosCatalogo() {
         </section>
       </div>
       <SigueExplorando destinos={["asistente","calculadora","casos","eventos"]} />
-    </div>
+    </main>
   );
 }

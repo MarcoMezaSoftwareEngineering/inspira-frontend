@@ -4,7 +4,7 @@
 // Tres cosas se hacen desde aquí porque son las que más se repiten y obligaban
 // a entrar al expediente: mover un proceso de etapa, registrar un cobro y dar
 // de alta a un cliente nuevo.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import AltaRapida from "../clientes/AltaRapida";
 import ProximasFechas from "./ProximasFechas";
@@ -341,58 +341,63 @@ export default function Procesos({ onAbrirProceso }) {
     else setError(r.msg || "No se pudieron actualizar");
   }
 
+  // La tira de pestañas no cabe entera en el móvil: al cambiar de vista, la
+  // pestaña activa se trae al centro para que se vea cuál está abierta.
+  const tiraRef = useRef(null);
+  useEffect(() => {
+    tiraRef.current?.querySelector('[data-on="1"]')
+      ?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [pestana]);
+
   const etapasDelFiltro = svcActivo ? (filtros.etapas?.[svcActivo] || []) : [];
   const sel = "text-[12px] text-neutral-700 border border-neutral-300 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]";
 
   return (
-    <div className="space-y-3">
-      {/* Cabecera compacta: título y la acción que más se busca */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="min-w-0 flex-1">
-          <h1 className="font-serif text-[19px] text-[#1A3557] leading-tight">Procesos</h1>
-          <p className="text-[11.5px] text-neutral-500">Todo lo que está en marcha</p>
-        </div>
-        <button
-          type="button" onClick={() => setAltaAbierta((v) => !v)}
-          className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 bg-[#1D6A4A] text-white text-[12.5px] font-semibold rounded-lg hover:bg-[#15533a] transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          {altaAbierta ? "Cerrar" : "Nuevo cliente"}
-        </button>
-      </div>
-
-      {/* Pestañas */}
-      <div className="flex gap-1 border-b border-neutral-200 overflow-x-auto [&::-webkit-scrollbar]:hidden"
-        style={{ scrollbarWidth: "none" }}>
-        {[
-          { clave: "metricas", label: "Métricas" },
-          { clave: "fechas", label: "Próximas fechas" },
-          ...(filtros.servicios || []),
-        ].map((sv) => {
-          const t = { id: sv.clave, txt: sv.label };
-          const n = ["metricas", "fechas"].includes(sv.clave)
-            ? null
-            : procesos.filter((p) => p.servicio === sv.clave && !p.cerrado).length;
-          return (
+    <div className="px-3 pb-6 sm:px-6 space-y-3">
+      {/* Cabecera y pestañas acompañan al desplazar: en el móvil, perderlas
+          obligaba a subir del todo para cambiar de vista. */}
+      <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-3.5 pb-2 space-y-2.5">
+        <div className="flex items-center gap-3 md:pl-11">
+          <div className="min-w-0 flex-1">
+            <h1 className="font-serif text-[19px] text-[#1A3557] leading-tight">Procesos</h1>
+            <p className="text-[11.5px] text-neutral-500 truncate">Todo lo que está en marcha</p>
+          </div>
           <button
-            key={t.id} type="button" onClick={() => setPestana(t.id)}
-            className={`shrink-0 flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-semibold border-b-2 -mb-px transition-colors ${
-              pestana === t.id
-                ? "border-[#1D6A4A] text-[#1D6A4A]"
-                : "border-transparent text-neutral-500 hover:text-neutral-800"
-            }`}
+            type="button" onClick={() => setAltaAbierta((v) => !v)}
+            aria-expanded={altaAbierta}
+            className="shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 bg-[#1D6A4A] text-white text-[12.5px] font-semibold rounded-xl hover:bg-[#15533a] active:scale-95 transition-all"
           >
-            {t.txt}
-            {n !== null && (
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                pestana === t.id ? "bg-[#1D6A4A] text-white" : "bg-neutral-100 text-neutral-500"
-              }`}>{n}</span>
-            )}
+            <svg className={`w-3.5 h-3.5 transition-transform ${altaAbierta ? "rotate-45" : ""}`}
+              fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            {altaAbierta ? "Cerrar" : "Nuevo cliente"}
           </button>
-          );
-        })}
+        </div>
+
+        <div className="ase-tira">
+          <div className="ase-tira-scroll" ref={tiraRef}>
+            {[
+              { clave: "metricas", label: "Métricas" },
+              { clave: "fechas", label: "Próximas fechas" },
+              ...(filtros.servicios || []),
+            ].map((sv) => {
+              const n = ["metricas", "fechas"].includes(sv.clave)
+                ? null
+                : procesos.filter((p) => p.servicio === sv.clave && !p.cerrado).length;
+              return (
+                <button
+                  key={sv.clave} type="button" onClick={() => setPestana(sv.clave)}
+                  className="ase-tab" data-on={pestana === sv.clave ? "1" : "0"}
+                  aria-pressed={pestana === sv.clave}
+                >
+                  {sv.label}
+                  {n !== null && <span className="ase-tab-n">{n}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {altaAbierta && (
@@ -407,19 +412,35 @@ export default function Procesos({ onAbrirProceso }) {
         <div className="space-y-3">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
-              { n: resumen.activos,    t: "Procesos activos",   c: "text-[#1A3557]", d: "En marcha ahora mismo" },
-              { n: resumen.vencidos,   t: "Vencidos",           c: "text-red-600",   d: "Su fecha ya pasó" },
-              { n: resumen.semana,     t: "Esta semana",        c: "text-amber-600", d: "Vencen en 7 días o menos" },
-              { n: resumen.observados, t: "Con observaciones",  c: "text-red-600",   d: "Documentos que corregir" },
-              { n: resumen.sinResp,    t: "Sin responsable",    c: "text-amber-600", d: "Nadie los está llevando" },
-              { n: resumen.debiendo,   t: "Con deuda",          c: "text-red-600",   d: "Queda dinero por cobrar" },
-            ].map((c) => (
-              <div key={c.t} className="bg-white border border-neutral-200 rounded-xl px-4 py-3">
-                <p className={`text-[26px] font-bold leading-none ${c.c}`}>{c.n}</p>
-                <p className="text-[12.5px] font-semibold text-neutral-700 mt-1.5">{c.t}</p>
-                <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">{c.d}</p>
-              </div>
-            ))}
+              { n: resumen.activos,    t: "Procesos activos",  c: "text-[#1A3557]", tono: "azul",  d: "En marcha ahora mismo" },
+              { n: resumen.vencidos,   t: "Vencidos",          c: "text-red-600",   tono: "rojo",  d: "Su fecha ya pasó", ir: "fechas" },
+              { n: resumen.semana,     t: "Esta semana",       c: "text-amber-600", tono: "ambar", d: "Vencen en 7 días o menos", ir: "fechas" },
+              { n: resumen.observados, t: "Con observaciones", c: "text-red-600",   tono: "rojo",  d: "Documentos que corregir" },
+              { n: resumen.sinResp,    t: "Sin responsable",   c: "text-amber-600", tono: "ambar", d: "Nadie los está llevando" },
+              { n: resumen.debiendo,   t: "Con deuda",         c: "text-red-600",   tono: "rojo",  d: "Queda dinero por cobrar" },
+            ].map((c) => {
+              // Un cero no es una alarma: la franja de color solo se enciende
+              // cuando de verdad hay algo que atender.
+              const tono = c.n > 0 ? c.tono : "calma";
+              const contenido = (
+                <>
+                  <span className={`ase-metrica-n ${c.n > 0 ? c.c : "text-neutral-300"}`}>{c.n}</span>
+                  <span className="ase-metrica-t">{c.t}</span>
+                  <span className="ase-metrica-d">{c.d}</span>
+                </>
+              );
+              // Solo lleva a otra vista lo que se puede mirar de verdad allí.
+              return c.ir && c.n > 0 ? (
+                <button key={c.t} type="button" className="ase-metrica" data-tono={tono}
+                  onClick={() => setPestana(c.ir)}
+                  title="Ver en Próximas fechas">
+                  {contenido}
+                  <span className="ase-metrica-ir">ver →</span>
+                </button>
+              ) : (
+                <div key={c.t} className="ase-metrica" data-tono={tono}>{contenido}</div>
+              );
+            })}
           </div>
 
           {/* Reparto por servicio: pulsando se va a esa pestaña */}
@@ -439,8 +460,8 @@ export default function Procesos({ onAbrirProceso }) {
                       <span className="ml-auto font-bold text-neutral-800">{delSvc.length}</span>
                       <span className="text-neutral-400 w-9 text-right">{pct}%</span>
                     </div>
-                    <div className="h-1.5 bg-neutral-100 rounded-full mt-1 overflow-hidden">
-                      <div className="h-full bg-[#1D6A4A] rounded-full" style={{ width: `${pct}%` }} />
+                    <div className="ase-barra h-1.5 bg-neutral-100 rounded-full mt-1 overflow-hidden">
+                      <i style={{ width: `${pct}%` }} />
                     </div>
                   </button>
                 );
@@ -494,7 +515,7 @@ export default function Procesos({ onAbrirProceso }) {
       </div>
 
       {seleccion.size > 0 && (
-        <div className="flex items-center gap-2 flex-wrap bg-[#023A4B] text-white rounded-xl px-3 py-2.5">
+        <div className="sticky bottom-3 z-30 flex items-center gap-2 flex-wrap bg-[#023A4B] text-white rounded-xl px-3 py-2.5 shadow-[0_18px_40px_-18px_rgba(2,58,75,.9)]">
           <span className="text-[12.5px] font-semibold">
             {seleccion.size} seleccionado{seleccion.size > 1 ? "s" : ""}
           </span>
@@ -610,28 +631,33 @@ export default function Procesos({ onAbrirProceso }) {
           {/* Móvil: filas densas, no tarjetas grandes */}
           <div className="lg:hidden divide-y divide-neutral-100">
             {visibles.map((p) => (
-              <div key={p.id_solicitud} className="px-3 py-2.5">
+              <div key={p.id_solicitud} className="px-3 py-3 active:bg-neutral-50 transition-colors">
                 <div className="flex items-start gap-2">
-                  <div className="min-w-0 flex-1" onClick={() => onAbrirProceso?.(p.id_solicitud)}>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded ${COLOR_SERVICIO[p.servicio]}`}>
+                  {/* Solo el nombre abre el expediente: la etapa se cambia sin
+                      salir de la lista, y va fuera de esta zona. */}
+                  <button type="button" className="min-w-0 flex-1 text-left"
+                    onClick={() => onAbrirProceso?.(p.id_solicitud)}>
+                    <span className="flex items-center gap-1.5">
+                      <span className={`shrink-0 text-[9.5px] font-bold px-1.5 py-0.5 rounded ${COLOR_SERVICIO[p.servicio]}`}>
                         {CORTO[p.servicio]}
                       </span>
-                      <p className="text-[13px] font-semibold text-neutral-800 truncate">{p.cliente}</p>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      {!p.responsable && <span className="text-[10.5px] font-semibold text-amber-600">sin asignar</span>}
-                      {p.docs_observados > 0 && <span className="text-[10.5px] font-semibold text-red-600">{p.docs_observados} obs</span>}
-                      {p.pago.pendiente > 0 && (
-                        <span className={`text-[10.5px] font-semibold ${p.pago.vencido ? "text-red-600" : "text-neutral-500"}`}>
-                          debe {p.pago.pendiente.toFixed(0)}
-                        </span>
-                      )}
-                      <span className="ml-auto"><Proximo p={p.proximo} /></span>
-                    </div>
-                  </div>
+                      <span className="text-[13px] font-semibold text-neutral-800 truncate">{p.cliente}</span>
+                    </span>
+                  </button>
+                  <span className="shrink-0 text-right"><Proximo p={p.proximo} /></span>
                 </div>
-                <div className="mt-1.5"><Etapa p={p} onCambiar={cambiarEtapa} /></div>
+                {/* Etapa y avisos comparten línea: la fila pasa de tres alturas
+                    a dos y en el móvil caben el doble de procesos. */}
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <Etapa p={p} onCambiar={cambiarEtapa} />
+                  {!p.responsable && <span className="text-[10.5px] font-semibold text-amber-600">sin asignar</span>}
+                  {p.docs_observados > 0 && <span className="text-[10.5px] font-semibold text-red-600">{p.docs_observados} obs</span>}
+                  {p.pago.pendiente > 0 && (
+                    <span className={`text-[10.5px] font-semibold ${p.pago.vencido ? "text-red-600" : "text-neutral-500"}`}>
+                      debe {p.pago.pendiente.toFixed(0)}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

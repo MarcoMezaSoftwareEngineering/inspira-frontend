@@ -81,7 +81,7 @@ export default function Header() {
       <div className={`v4-nav-wrap${scrolled ? " scrolled" : ""}`}>
         <header className="v4-nav">
           <a href="/" onClick={(e) => go(e, "/")} className="v4-logo-brand">
-            <img src={logo} alt="Inspira Legal" />
+            <img src={logo} alt="Inspira Legal" width="320" height="107" fetchPriority="high" />
           </a>
 
           <nav className="v4-navlinks">

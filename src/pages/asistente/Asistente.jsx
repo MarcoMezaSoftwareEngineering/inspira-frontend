@@ -73,7 +73,7 @@ export default function Asistente() {
     : "";
 
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Diagnóstico gratuito"
         icono="brujula"
@@ -388,6 +388,6 @@ export default function Asistente() {
       <SigueExplorando
         destinos={["servicios", "casos", "calculadora", "eventos"]}
       />
-    </div>
+    </main>
   );
 }

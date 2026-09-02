@@ -12,7 +12,7 @@ const go = (e, href) => {
 
 export default function Nosotros() {
   return (
-    <div className="w-full">
+    <main className="w-full">
       <PageHero
         etiqueta="Nosotros"
         icono="usuarios"
@@ -112,6 +112,6 @@ export default function Nosotros() {
         </div>
       </section>
       <SigueExplorando destinos={["casos","servicios","eventos","asistente"]} />
-    </div>
+    </main>
   );
 }

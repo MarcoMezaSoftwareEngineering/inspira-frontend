@@ -260,38 +260,44 @@ export default function Clientes() {
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-4 max-w-6xl mx-auto">
+    <div className="p-3 sm:p-6 space-y-4 max-w-6xl mx-auto">
       {/* Cabecera */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-primary">Clientes</h1>
-          <p className="text-sm text-neutral-500">Buscar y gestionar clientes de la plataforma.</p>
-        </div>
-        {isAdmin && (
-          <div className="shrink-0 flex items-center gap-2">
+      <div className="space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-primary">Clientes</h1>
+            <p className="text-[12.5px] sm:text-sm text-neutral-500">Buscar y gestionar clientes de la plataforma.</p>
+          </div>
+          {isAdmin && (
             <button
               type="button"
               onClick={() => setAltaAbierta((v) => !v)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity shadow-sm"
+              aria-expanded={altaAbierta}
+              className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <svg className={`w-4 h-4 transition-transform ${altaAbierta ? "rotate-45" : ""}`}
+                fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
               {altaAbierta ? "Cerrar" : "Nuevo cliente"}
             </button>
-            {/* El alta suelta se conserva para cuando de verdad solo se quiere
-                registrar a alguien sin contratarle nada todavia. */}
+          )}
+        </div>
+        {/* Accesos secundarios: el alta suelta se conserva para cuando solo se
+            quiere registrar a alguien sin contratarle nada todavía. */}
+        {isAdmin && (
+          <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => openModal("nuevo")}
-              className="text-[12px] font-semibold text-neutral-500 hover:text-primary transition-colors"
+              className="text-[12px] font-semibold text-neutral-500 hover:text-primary active:scale-95 transition-all py-1"
             >
               Solo ficha
             </button>
             <button
               type="button"
               onClick={() => setVerDuplicados(true)}
-              className="text-[12px] font-semibold text-neutral-500 hover:text-primary transition-colors"
+              className="text-[12px] font-semibold text-neutral-500 hover:text-primary active:scale-95 transition-all py-1"
             >
               Duplicados
             </button>

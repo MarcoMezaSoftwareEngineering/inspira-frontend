@@ -1,5 +1,6 @@
 import Reveal from "../../../components/common/Reveal";
 import BotonAsesoria from "../../../components/common/BotonAsesoria";
+import SEOSchema from "../../../components/SEOSchema";
 
 const preguntas = [
   {
@@ -28,9 +29,22 @@ const preguntas = [
   },
 ];
 
+// Las mismas preguntas, en el formato que Google entiende: con esto pueden
+// aparecer desplegadas bajo el resultado de búsqueda.
+const SCHEMA_FAQ = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: preguntas.map((p) => ({
+    "@type": "Question",
+    name: p.q,
+    acceptedAnswer: { "@type": "Answer", text: p.a },
+  })),
+};
+
 export default function Faq() {
   return (
     <section className="faq">
+      <SEOSchema schema={SCHEMA_FAQ} id="faq" />
       <div className="v4-container">
         <Reveal className="section-head">
           <div>

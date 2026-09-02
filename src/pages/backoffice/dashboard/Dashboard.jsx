@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import {
   TrendingUp, Users, FileText, FileWarning, RefreshCw,
-  CheckCircle2, AlertTriangle, ArrowUpRight,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -50,11 +49,7 @@ export default function Dashboard() {
   );
 
   const { kpis, clientes_por_mes, solicitudes_por_tipo, documentos_por_estado, top_clientes } = stats;
-  const docsMap = Object.fromEntries(documentos_por_estado.map((d) => [d.estado, d.count]));
   const totalDocs = documentos_por_estado.reduce((s, d) => s + d.count, 0);
-  const pendientes = docsMap["SUBIDO"] || 0;
-  const observados = docsMap["OBSERVADO"] || 0;
-  const aprobados = docsMap["APROBADO"] || 0;
   const totalClientesNuevos = clientes_por_mes.reduce((s, d) => s + d.count, 0);
 
   const chartData = clientes_por_mes.map((d) => {
@@ -141,52 +136,10 @@ export default function Dashboard() {
         <TopClientes data={top_clientes || []} />
       </div>
 
-      {/* Fila 2: servicios + documentos */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.12fr_0.88fr] gap-3">
+      {/* Fila 2: reparto de expedientes por servicio */}
+      <div className="grid grid-cols-1 gap-3">
         <HorizontalBarChart title="Expedientes por servicio" subtitle={`Distribución de los ${kpis.expedientes_activos} expedientes activos`} data={solicitudes_por_tipo.slice(0, 8)} labelKey="nombre" valueKey="count" total={kpis.expedientes_activos} barColor="#173454" />
 
-        <section className="bg-white border border-neutral-200 rounded-2xl shadow-[0_2px_10px_rgba(20,35,27,0.045)]">
-          <div className="flex items-start justify-between gap-4 px-5 pt-4 pb-3">
-            <div>
-              <h2 className="text-[13px] font-extrabold text-[#26352c]">Centro de revisión documental</h2>
-              <p className="text-[10px] text-neutral-400 mt-0.5">Estado actual de los {totalDocs} documentos</p>
-            </div>
-          </div>
-
-          <div className="px-5 pb-5">
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <DocCard label="Pendientes" count={pendientes} pct={totalDocs ? (pendientes / totalDocs) * 100 : 0} dot="#e6a400" tone="#a86f00" bg="#fffaf0" border="#f3e2ae" />
-              <DocCard label="Aprobados" count={aprobados} pct={totalDocs ? (aprobados / totalDocs) * 100 : 0} dot="#147a4d" tone="#0f5b3a" bg="#f4faf7" border="#d5e8dc" />
-              <DocCard label="Observados" count={observados} pct={totalDocs ? (observados / totalDocs) * 100 : 0} dot="#d55757" tone="#a83838" bg="#fff6f6" border="#f0d4d4" />
-            </div>
-
-            {totalDocs > 0 && (
-              <div className="flex h-2 rounded-full overflow-hidden bg-[#edf1ee] mb-4">
-                {pendientes > 0 && <span style={{ width: `${(pendientes / totalDocs) * 100}%`, background: "#e6a400" }} />}
-                {aprobados > 0 && <span style={{ width: `${(aprobados / totalDocs) * 100}%`, background: "#147a4d" }} />}
-                {observados > 0 && <span style={{ width: `${(observados / totalDocs) * 100}%`, background: "#d55757" }} />}
-              </div>
-            )}
-
-            <div className="border-t border-neutral-100 pt-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#435149]">Prioridad operativa</span>
-                <span className="text-[9px] font-extrabold text-[#a86f00] bg-[#fff6dc] px-2 py-1 rounded-full">requiere atención</span>
-              </div>
-              <div className="space-y-1.5">
-                {pendientes > 0 && (
-                  <AttentionItem icon={AlertTriangle} color="#a86f00" bg="#fff6dc" title={`${pendientes} documentos sin revisar`} sub="Principal cuello de botella operativo actual" />
-                )}
-                {observados > 0 && (
-                  <AttentionItem icon={AlertTriangle} color="#ba3c3c" bg="#fff0f0" title={`${observados} documentos observados`} sub="Necesitan corrección o nueva validación" />
-                )}
-                {pendientes === 0 && observados === 0 && (
-                  <AttentionItem icon={CheckCircle2} color="#147a4d" bg="#e7f4ed" title="Todo al día" sub="No hay documentos que requieran atención" />
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );
@@ -316,32 +269,3 @@ function HorizontalBarChart({ title, subtitle, data, labelKey, valueKey, total, 
   );
 }
 
-/* ── Doc estado card ──────────────────────────────────────────── */
-function DocCard({ label, count, pct, dot, tone, bg, border }) {
-  return (
-    <div className="rounded-[13px] p-2.5 border" style={{ background: bg, borderColor: border }}>
-      <div className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-500">
-        <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
-        {label}
-      </div>
-      <div className="text-xl font-extrabold tracking-tight mt-1.5" style={{ color: tone }}>{count}</div>
-      <div className="text-[9px] text-neutral-400">{pct.toFixed(1).replace(".", ",")}%</div>
-    </div>
-  );
-}
-
-/* ── Attention item ───────────────────────────────────────────── */
-function AttentionItem({ icon: Icon, color, bg, title, sub }) {
-  return (
-    <div className="flex items-center gap-2.5 border border-neutral-100 rounded-[11px] px-2.5 py-2 bg-white">
-      <span className="w-7 h-7 rounded-[9px] flex items-center justify-center shrink-0" style={{ background: bg, color }}>
-        <Icon className="w-3.5 h-3.5" strokeWidth={2} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <strong className="block text-[10.5px] text-[#34443b] font-bold truncate">{title}</strong>
-        <small className="text-[9px] text-neutral-400">{sub}</small>
-      </div>
-      <ArrowUpRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" strokeWidth={2} />
-    </div>
-  );
-}

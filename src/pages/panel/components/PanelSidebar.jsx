@@ -7,10 +7,22 @@ import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 import logo from "../../../assets/images/logo.png";
 
+// Cada recurso, con la etiqueta y el icono con los que aparece en el menú.
+// El orden es el de la lista; se enseñan los que estén en `accesos`.
+const RECURSOS = [
+  { clave: "becas", icono: "birrete", label: "Becas España" },
+  { clave: "guia", icono: "libro", label: "Guía Máster" },
+  { clave: "apostilla", icono: "documento", label: "Guía Apostilla" },
+  { clave: "estancia", icono: "bandera", label: "Guía Estancia" },
+  { clave: "modificatoria", icono: "laptop", label: "Guía Residencia y Trabajo" },
+];
+
 export default function PanelSidebar({
-  user, activeTab, onChangeTab, isOpen, onClose,
-  tieneSolicitudes, tieneEstancia, tieneModificatoria, soloInvitado,
+  user, activeTab, onChangeTab, isOpen, onClose, accesos,
 }) {
+  // Qué recursos le corresponden por sus servicios. Lo decide servicios.js:
+  // aquí solo se pintan. A quien no tiene nada contratado no le sale ninguno.
+  const visibles = RECURSOS.filter((r) => accesos?.has(r.clave));
   const { logout } = useAuth();
   const { nombre, iniciales, correo, foto } = datosUsuario(user);
 
@@ -66,47 +78,21 @@ export default function PanelSidebar({
           onClick={() => onChangeTab("servicios")}
         />
 
-        {/* Recursos: sólo si tiene algo suyo. A quien entra únicamente porque
-            le invitaron a un expediente ajeno, las becas y las guías no le
-            pertenecen: viene a ayudar con un trámite concreto. */}
-        {tieneSolicitudes && !soloInvitado && (
+        {/* Recursos: los que abre cada servicio contratado, y ninguno más.
+            Quien entra invitado a un expediente ajeno no ve ninguno: las guías
+            son del titular, él viene a ayudar con un trámite concreto. */}
+        {visibles.length > 0 && (
           <>
             <p className="pnl-side-grupo">Recursos Inspira</p>
-            <SidebarItem
-              icono="birrete"
-              label="Becas España"
-              active={activeTab === "becas"}
-              onClick={() => onChangeTab("becas")}
-            />
-            <SidebarItem
-              icono="libro"
-              label="Guía Máster"
-              active={activeTab === "guia"}
-              onClick={() => onChangeTab("guia")}
-            />
-            <SidebarItem
-              icono="documento"
-              label="Guía Apostilla"
-              active={activeTab === "apostilla"}
-              onClick={() => onChangeTab("apostilla")}
-            />
-            {/* Sólo para quien tiene el servicio: al resto no le dice nada. */}
-            {tieneEstancia && (
+            {visibles.map((r) => (
               <SidebarItem
-                icono="bandera"
-                label="Guía Estancia"
-                active={activeTab === "estancia"}
-                onClick={() => onChangeTab("estancia")}
+                key={r.clave}
+                icono={r.icono}
+                label={r.label}
+                active={activeTab === r.clave}
+                onClick={() => onChangeTab(r.clave)}
               />
-            )}
-            {tieneModificatoria && (
-              <SidebarItem
-                icono="laptop"
-                label="Guía Residencia y Trabajo"
-                active={activeTab === "modificatoria"}
-                onClick={() => onChangeTab("modificatoria")}
-              />
-            )}
+            ))}
           </>
         )}
       </nav>

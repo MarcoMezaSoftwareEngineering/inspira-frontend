@@ -1,11 +1,14 @@
 // src/pages/panel/components/mis-servicios/ServiciosList.jsx
 import Icono from "../../../../components/common/Icono";
+import { LINEAS, whatsappLinea } from "../../../../config/contacto";
 import { formatearFecha, badgeEstadoSolicitud } from "./utils";
 
 /** Los avisos que puede llevar una tarjeta, con su tono y su redacción. */
+// No hay aviso de «documentos pendientes»: contaba lo que el asesor todavía
+// no había revisado, y el asesorado ya había hecho su parte. Lo que sí es suyo
+// —lo que falta por subir y lo que hay que corregir— sigue avisando.
 const AVISOS = {
   datos:          { tono: "aviso", texto: (n) => `${n} dato${n > 1 ? "s" : ""} por completar` },
-  docs_pendientes:{ tono: "aviso", texto: (n) => `${n} doc${n > 1 ? "s" : ""}. pendiente${n > 1 ? "s" : ""}` },
   docs_observados:{ tono: "alto",  texto: (n) => `${n} doc${n > 1 ? "s" : ""}. observado${n > 1 ? "s" : ""}` },
   formulario:     { tono: "info",  texto: () => "Formulario pendiente" },
   informe:        { tono: "info",  texto: () => "Informe en preparación" },
@@ -33,7 +36,6 @@ function ServicioCard({ s, onVerDetalle }) {
   // servicio nuevo, y ya falló dos veces.
   const avisos = [];
   if (r.datos_faltan > 0)      avisos.push(["datos", r.datos_faltan]);
-  if (r.docs_pendientes > 0)   avisos.push(["docs_pendientes", r.docs_pendientes]);
   if (r.docs_observados > 0)   avisos.push(["docs_observados", r.docs_observados]);
   if (!r.formulario_completo)  avisos.push(["formulario"]);
   if (!r.informe_disponible)   avisos.push(["informe"]);
@@ -92,29 +94,45 @@ function ServicioCard({ s, onVerDetalle }) {
 }
 
 /**
- * El estado vacío es la primera pantalla de quien acaba de crear su cuenta y
- * todavía no ha contratado nada. Era un recuadro gris con un maletín gris y
- * una frase pasiva —"cuando se apruebe un pago aparecerá aquí"—, es decir, el
- * sitio le decía que esperase. Ahora lleva el fondo del hero de la portada y
- * las dos salidas que de verdad tiene delante.
+ * Quien no tiene ningún servicio contratado no tiene expediente que mirar: el
+ * panel no le abre nada. Lo único que puede hacer aquí es dejar sus datos
+ * completos —el asistente se los pide al entrar— y pedir el acceso por
+ * teléfono, que es quien lo concede. Por eso el número va escrito y no
+ * escondido detrás de un botón: se lee también desde un ordenador sin
+ * WhatsApp.
  */
-function SinServicios() {
+function SinAcceso() {
   return (
     <div className="pnl-vacio">
       <div className="pnl-vacio-icono">
-        <Icono nombre="brujula" size={28} />
+        <Icono nombre="escudo" size={28} />
       </div>
-      <h3>Aún no tienes servicios contratados</h3>
+      <h3>Tu panel todavía no tiene acceso</h3>
       <p>
-        Cuando contrates un servicio o se apruebe un pago, tu expediente aparecerá
-        aquí con todo su seguimiento. Mientras tanto, puedes empezar por una
-        asesoría o ver qué camino encaja con tu caso.
+        El acceso se activa cuando tienes un servicio contratado con nosotros.
+        Completa tus datos en «Mi perfil» y escríbenos para que te lo demos.
       </p>
+      {/* Las dos líneas, con el número escrito y para qué es cada una: se lee
+          también desde un ordenador sin WhatsApp, y evita que quien pregunta
+          por una cita escriba a la línea de clientes. */}
+      <div className="pnl-lineas">
+        {LINEAS.map((l) => (
+          <a
+            key={l.id}
+            href={whatsappLinea(l, "Hola Inspira, acabo de crear mi cuenta y quiero acceso a mi panel.")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pnl-linea"
+          >
+            <Icono nombre="chat" size={16} />
+            <span className="pnl-linea-datos">
+              <strong>{l.numero}</strong>
+              <small>{l.nombre} · {l.para}</small>
+            </span>
+          </a>
+        ))}
+      </div>
       <div className="pnl-vacio-acciones">
-        <a href="/reservar" className="pnl-btn-cta">
-          <Icono nombre="calendario" size={15} />
-          Agenda tu asesoría
-        </a>
         <a href="/servicios" className="pnl-vacio-fantasma">
           Ver todos los servicios
         </a>
@@ -152,7 +170,7 @@ function ServiciosList({ servicios, loading, error, onRecargar, onVerDetalle }) 
 
       {!loading && error && <div className="pnl-error">{error}</div>}
 
-      {!loading && !error && (!servicios || servicios.length === 0) && <SinServicios />}
+      {!loading && !error && (!servicios || servicios.length === 0) && <SinAcceso />}
 
       {hayServicios && (
         <div className="pnl-grid">

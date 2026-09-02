@@ -1,6 +1,5 @@
 // src/pages/panel/components/MisServicios.jsx
-import { useEffect, useState } from "react";
-import { apiGET } from "../../../services/api";
+import { useState } from "react";
 import ServiciosList from "./mis-servicios/ServiciosList";
 import DetalleSolicitud from "./mis-servicios/DetalleSolicitud";
 import DetalleSolicitudVisado from "./mis-servicios/DetalleSolicitudVisado";
@@ -32,11 +31,9 @@ function esVisado(s) {
   return cod.includes("VISADO");
 }
 
-export default function MisServicios({ onIrAGuia }) {
-  const [servicios, setServicios] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
+// La lista llega del panel, que ya la pide para armar el menú: pedirla otra
+// vez aquí era la misma petición dos veces en cada entrada al portal.
+export default function MisServicios({ servicios, loading, error, onRecargar, onIrAGuia }) {
   // Al entrar en «Mis servicios» se ve la lista, siempre.
   //
   // Antes se recordaba el ultimo servicio abierto y se entraba directo en el.
@@ -45,23 +42,6 @@ export default function MisServicios({ onIrAGuia }) {
   // servicios contratados era ademas desconcertante, porque abria uno sin que
   // nadie lo hubiera pedido.
   const [seleccionada, setSeleccionada] = useState(null);
-
-  useEffect(() => { cargarServicios(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function cargarServicios() {
-    setLoading(true);
-    setError("");
-    try {
-      const resp = await apiGET("/solicitudes/mias");
-      if (!resp.ok) throw new Error(resp.msg || resp.message || "No se pudieron cargar los servicios");
-      const lista = resp.solicitudes || [];
-      setServicios(lista);
-    } catch (e) {
-      setError(e.message || "Error al cargar servicios");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function manejarVerDetalle(servicio) {
     setSeleccionada(servicio);
@@ -98,7 +78,7 @@ export default function MisServicios({ onIrAGuia }) {
       servicios={servicios}
       loading={loading}
       error={error}
-      onRecargar={cargarServicios}
+      onRecargar={onRecargar}
       onVerDetalle={manejarVerDetalle}
     />
   );

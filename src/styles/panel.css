@@ -278,6 +278,24 @@
   font-size: 25px; font-weight: 800; letter-spacing: -.03em; color: #fff;
 }
 .pnl-vacio p { margin: 0 auto 26px; max-width: 430px; font-size: 14px; line-height: 1.65; color: rgba(255,255,255,.72); }
+/* Las líneas de atención de la pantalla sin acceso: el número se lee grande
+   —también desde un ordenador, donde el enlace de WhatsApp no sirve— y debajo
+   va para qué es cada una. */
+.pnl-lineas {
+  display: grid; gap: 10px; max-width: 430px; margin: 0 auto 22px;
+}
+.pnl-linea {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  padding: 12px 16px; border-radius: 15px; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.09);
+  color: #fff; backdrop-filter: blur(6px); transition: .2s var(--ease);
+}
+.pnl-linea:hover { background: rgba(255,255,255,.17); transform: translateY(-2px); }
+.pnl-linea > svg { flex: 0 0 auto; color: var(--sky); }
+.pnl-linea-datos { display: flex; flex-direction: column; min-width: 0; }
+.pnl-linea-datos strong { font-size: 15px; font-weight: 800; letter-spacing: .01em; }
+.pnl-linea-datos small { font-size: 11.5px; color: rgba(255,255,255,.66); line-height: 1.4; }
+
 .pnl-vacio-acciones { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; }
 .pnl-vacio-fantasma {
   display: inline-flex; align-items: center; gap: 8px;

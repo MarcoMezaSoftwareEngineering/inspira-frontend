@@ -8,6 +8,8 @@ import {
   TelefonoInput, SliderPresupuesto, MesAnioSelect,
 } from "./perfil.shared";
 
+// El paso académico solo se le pide a quien tiene un servicio de estudios;
+// el resto termina en los documentos de viaje.
 const STEPS = [
   {
     icon: "👤",
@@ -316,7 +318,9 @@ function StepAcademico({ form, errs, set, handleChange }) {
 }
 
 // ── Componente principal ───────────────────────────────────────────────────────
-export default function WizardPerfilCliente({ user, onComplete }) {
+export default function WizardPerfilCliente({ user, onComplete, conAcademico = true }) {
+  const pasos = conAcademico ? STEPS : STEPS.slice(0, 3);
+  const ultimo = pasos.length - 1;
   const [step, setStep]     = useState(0);
   const [form, setForm]     = useState(() => initFormFromUser(user));
   const [errs, setErrs]     = useState({});
@@ -351,7 +355,7 @@ export default function WizardPerfilCliente({ user, onComplete }) {
   }
 
   async function handleSubmit() {
-    const stepErrs = validateStep(3, form);
+    const stepErrs = validateStep(ultimo, form);
     if (Object.keys(stepErrs).length > 0) { setErrs(stepErrs); return; }
 
     setSaving(true);
@@ -405,7 +409,7 @@ export default function WizardPerfilCliente({ user, onComplete }) {
     }
   }
 
-  const numSteps = STEPS.length;
+  const numSteps = pasos.length;
 
   return (
     <div
@@ -429,11 +433,11 @@ export default function WizardPerfilCliente({ user, onComplete }) {
           <p className="text-[10px] font-bold text-[#1D6A4A] uppercase tracking-widest font-mono mb-4">
             Paso {step + 1} de {numSteps}
           </p>
-          <div className="text-4xl mb-3 select-none">{STEPS[step].icon}</div>
+          <div className="text-4xl mb-3 select-none">{pasos[step].icon}</div>
           <h2 className="text-xl font-serif font-bold text-[#1A3557] leading-tight">
-            {STEPS[step].title}
+            {pasos[step].title}
           </h2>
-          <p className="text-sm text-neutral-500 mt-1">{STEPS[step].subtitle}</p>
+          <p className="text-sm text-neutral-500 mt-1">{pasos[step].subtitle}</p>
         </div>
 
         <div className="h-px bg-neutral-100 mx-7 shrink-0" />
@@ -467,7 +471,7 @@ export default function WizardPerfilCliente({ user, onComplete }) {
 
           {/* Dots */}
           <div className="flex items-center gap-1.5">
-            {STEPS.map((_, i) => (
+            {pasos.map((_, i) => (
               <div key={i}
                 className={`rounded-full transition-all duration-300 ${
                   i === step

@@ -1,5 +1,5 @@
 // src/pages/panel/PanelCliente.jsx
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import "../../styles/panel.css";
 import { apiGET } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
@@ -9,6 +9,7 @@ import PerfilCliente from "./components/PerfilCliente";
 import MisServicios from "./components/MisServicios";
 import WizardPerfilCliente from "./components/WizardPerfilCliente";
 import { usePerfilIncompletoBool } from "./hooks/usePerfilIncompletoBool";
+import { accesosDe, esSoloInvitado, pideAcademico } from "./servicios";
 
 const BecasEspana   = lazy(() => import("./BecasEspana"));
 const GuiaMaster    = lazy(() => import("./GuiaMaster"));
@@ -16,7 +17,11 @@ const GuiaApostilla = lazy(() => import("./GuiaApostilla"));
 const GuiaEstancia  = lazy(() => import("./GuiaEstancia"));
 const GuiaModificatoria = lazy(() => import("./GuiaModificatoria"));
 
-const VALID_TABS = ["servicios", "perfil", "becas", "guia", "apostilla", "estancia", "modificatoria"];
+// Las dos primeras son de todos; el resto solo se abre si algún servicio
+// suyo lo incluye (ver servicios.js).
+const TABS_BASE = ["servicios", "perfil"];
+const TABS_RECURSO = ["becas", "guia", "apostilla", "estancia", "modificatoria"];
+const VALID_TABS = [...TABS_BASE, ...TABS_RECURSO];
 
 function LoadingPage() {
   return (
@@ -38,17 +43,27 @@ export default function PanelCliente() {
 
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [tieneSolicitudes, setTieneSolicitudes] = useState(null);
-  // La guía de estancia sólo se le enseña a quien tiene ese servicio: al
-  // resto no le dice nada y le ensucia el menú.
-  const [tieneEstancia, setTieneEstancia] = useState(false);
-  const [tieneModificatoria, setTieneModificatoria] = useState(false);
-  // Quien entra solo porque le invitaron a un expediente ajeno no tiene
-  // servicios propios: las becas, las guías y el resto del portal no son suyos.
-  const [soloInvitado, setSoloInvitado] = useState(false);
+  // La lista de servicios se pide una sola vez y se reparte: el menú decide
+  // con ella qué recursos abrir y «Mis servicios» la pinta. Antes cada uno
+  // hacía su propia petición al mismo sitio.
+  const [servicios, setServicios] = useState(null); // null = todavía cargando
+  const [cargandoServicios, setCargandoServicios] = useState(true);
+  const [errorServicios, setErrorServicios] = useState("");
 
-  const perfilIncompleto = usePerfilIncompletoBool(user);
-  const mostrarWizard = user !== null && tieneSolicitudes !== null && tieneSolicitudes && perfilIncompleto;
+  const lista = useMemo(() => servicios || [], [servicios]);
+  const cargado = servicios !== null;
+  const sinServicios = cargado && lista.length === 0;
+  // Solo ve expedientes ajenos: viene a ayudar con el trámite de otra persona.
+  const soloInvitado = esSoloInvitado(lista);
+  // Qué guías y recursos abre lo que tiene contratado.
+  const accesos = useMemo(() => accesosDe(lista), [lista]);
+
+  // A quien no tiene ningún servicio se le piden los datos completos —es el
+  // paso previo para que un asesor pueda darle acceso—. Al invitado, solo sus
+  // datos generales: el expediente y su formulario son de otra persona.
+  const conAcademico = !soloInvitado && (sinServicios || pideAcademico(lista));
+  const perfilIncompleto = usePerfilIncompletoBool(user, conAcademico);
+  const mostrarWizard = user !== null && cargado && perfilIncompleto;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -67,39 +82,31 @@ export default function PanelCliente() {
       if (!r.ok) { window.location.href = "/"; return; }
       setUser(r.cliente || r.user || r);
     } catch { window.location.href = "/"; }
+    cargarServicios();
+  }
+
+  async function cargarServicios() {
+    setCargandoServicios(true);
+    setErrorServicios("");
     try {
       const rs = await apiGET("/solicitudes/mias");
-      const lista = rs.ok ? (rs.solicitudes || []) : [];
-      const tieneNoVisado = lista.some((s) => {
-        const cod = String(
-          s?.tipo_solicitud || s?.tipo || s?.categoria ||
-          s?.servicio?.codigo || s?.codigo_servicio || s?.nombre_servicio || ""
-        ).toUpperCase();
-        return !cod.includes("VISADO") && String(s?.codigo_servicio || s?.servicio?.codigo || "") !== "017";
-      });
-      setTieneSolicitudes(tieneNoVisado);
-
-      // Todo lo que ve es de otra persona: no tiene nada suyo.
-      setSoloInvitado(lista.length > 0 && lista.every((s) => s?.invitado));
-
-      // Cada guia se le enseña solo a quien tiene ese servicio: al resto no le
-      // dice nada y le ensucia el menu.
-      const textoDe = (s) => String(
-        s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.titulo || s?.nombre_servicio || ""
-      ).toLowerCase();
-
-      setTieneModificatoria(lista.some((s) => (
-        Number(s?.id_tipo_solicitud) === 20 || /modificatoria|modificaci/.test(textoDe(s))
-      )));
-
-      setTieneEstancia(lista.some((s) => {
-        if (Number(s?.id_tipo_solicitud) === 20) return false; // esa es la otra
-        if (Number(s?.id_tipo_solicitud) === 18) return true;
-        const txt = textoDe(s);
-        return txt.includes("estancia") && !/modificatoria|modificaci/.test(txt);
-      }));
-    } catch { setTieneSolicitudes(false); }
+      if (!rs.ok) throw new Error(rs.msg || rs.message || "No se pudieron cargar los servicios");
+      setServicios(rs.solicitudes || []);
+    } catch (e) {
+      setServicios([]);
+      setErrorServicios(e.message || "Error al cargar servicios");
+    } finally {
+      setCargandoServicios(false);
+    }
   }
+
+  // El panel recuerda la última pestaña abierta. Si era una guía que ya no le
+  // corresponde —porque cerró ese servicio, o porque nunca fue suya— se vuelve
+  // a sus servicios en vez de dejarle mirando algo que no ha contratado.
+  useEffect(() => {
+    if (!cargado) return;
+    if (TABS_RECURSO.includes(tab) && !accesos.has(tab)) setTab("servicios");
+  }, [cargado, accesos, tab]);
 
   function handleChangeTab(newTab) {
     setTab(newTab);
@@ -131,10 +138,7 @@ export default function PanelCliente() {
         onChangeTab={handleChangeTab}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        tieneSolicitudes={tieneSolicitudes}
-        tieneEstancia={tieneEstancia}
-        tieneModificatoria={tieneModificatoria}
-        soloInvitado={soloInvitado}
+        accesos={accesos}
       />
 
       <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>
@@ -176,7 +180,13 @@ export default function PanelCliente() {
           {/* Servicios: scroll interno */}
           {esServicios && (
             <div className="flex-1 min-h-0 flex flex-col w-full px-4 sm:px-6 py-5">
-              <MisServicios onIrAGuia={handleChangeTab} />
+              <MisServicios
+                servicios={lista}
+                loading={cargandoServicios}
+                error={errorServicios}
+                onRecargar={cargarServicios}
+                onIrAGuia={handleChangeTab}
+              />
             </div>
           )}
 
@@ -188,33 +198,33 @@ export default function PanelCliente() {
           )}
 
           {/* Becas España */}
-          {tab === "becas" && (
+          {tab === "becas" && accesos.has("becas") && (
             <Suspense fallback={<LoadingPage />}>
               <BecasEspana />
             </Suspense>
           )}
 
           {/* Guía Máster */}
-          {tab === "guia" && (
+          {tab === "guia" && accesos.has("guia") && (
             <Suspense fallback={<LoadingPage />}>
               <GuiaMaster />
             </Suspense>
           )}
 
           {/* Guía Apostilla Digital */}
-          {tab === "estancia" && (
+          {tab === "estancia" && accesos.has("estancia") && (
             <Suspense fallback={<LoadingPage />}>
               <GuiaEstancia />
             </Suspense>
           )}
 
-          {tab === "modificatoria" && (
+          {tab === "modificatoria" && accesos.has("modificatoria") && (
             <Suspense fallback={<LoadingPage />}>
               <GuiaModificatoria />
             </Suspense>
           )}
 
-          {tab === "apostilla" && (
+          {tab === "apostilla" && accesos.has("apostilla") && (
             <Suspense fallback={<LoadingPage />}>
               <GuiaApostilla />
             </Suspense>
@@ -225,6 +235,7 @@ export default function PanelCliente() {
       {mostrarWizard && (
         <WizardPerfilCliente
           user={user}
+          conAcademico={conAcademico}
           onComplete={(updatedUser) => setUser(updatedUser)}
         />
       )}

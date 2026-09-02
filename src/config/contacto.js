@@ -15,6 +15,39 @@ export const whatsappUrl = (mensaje) =>
     mensaje || "Hola Inspira, quiero información sobre la primera asesoría."
   )}`;
 
+/**
+ * Líneas corporativas de atención.
+ *
+ * No son intercambiables: una atiende consultas y citas, la otra es solo para
+ * quien ya es cliente. Por eso cada una lleva escrito para qué sirve — quien
+ * mira la pantalla decide a cuál escribe.
+ *
+ * Ojo: el teléfono del titular (config/legal.js) es otro y sigue siendo el que
+ * consta en los documentos legales y en el Libro de Reclamaciones.
+ */
+export const LINEAS = [
+  {
+    id: "citas",
+    nombre: "Carina Meza",
+    numero: "+51 992 009 397",
+    para: "Información y citas",
+  },
+  {
+    id: "clientes",
+    nombre: "Nicole Valencia",
+    numero: "+51 992 013 351",
+    para: "Línea exclusiva para clientes",
+  },
+];
+
+export const lineaDe = (id) => LINEAS.find((l) => l.id === id) || LINEAS[0];
+
+/** Enlace de WhatsApp a una línea concreta. */
+export const whatsappLinea = (linea, mensaje) =>
+  `https://wa.me/${soloDigitos(linea.numero)}?text=${encodeURIComponent(
+    mensaje || "Hola Inspira, quiero información."
+  )}`;
+
 // Datos de la sesión que se vende, repetidos en toda la web.
 export const ASESORIA = {
   duracion: "30 minutos",

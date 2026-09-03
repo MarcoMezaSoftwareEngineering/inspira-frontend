@@ -5,6 +5,13 @@
 import { useEffect, useState } from "react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
 
+// El nombre suele delatar al título propio, así que la casilla se propone
+// sola y el asesor la corrige si se equivoca. Anclado a «máster de formación
+// permanente/profesional»: buscar «formación profesional» suelta marcaba el
+// Máster en Formación del Profesorado, que es oficial y habilitante.
+const NOMBRE_TITULO_PROPIO =
+  new RegExp("(^|\\b)m[aá]ster\\s+(universitario\\s+)?de\\s+formaci[oó]n\\s+(permanente|profesional)\\b|t[ií]tulo\\s+propio|\\bexperto\\s+universitario\\b|microcredencial", "i");
+
 const COLORES_PRIORIDAD = ["bg-[#1A3557]", "bg-[#1D6A4A]", "bg-amber-500", "bg-neutral-400", "bg-neutral-300"];
 
 // ── Tarjeta máster para el modo picker ───────────────────────────────────────
@@ -84,13 +91,7 @@ function FormManual({ onAnadir, onCancelar, guardando }) {
   const [f, setF] = useState(VACIO);
   const listo = f.nombre_limpio.trim() && f.universidad.trim();
 
-  // El nombre suele decirlo, así que se propone solo; el asesor lo corrige si
-  // se equivoca. Un título propio se añade a veces a propósito —para algunos
-  // asesorados encaja—, y lo que no puede pasar es que llegue al informe sin
-  // que se sepa lo que es.
-  const pareceTituloPropio =
-    /formaci[oó]n\s+permanente|formaci[oó]n\s+profesional|t[ií]tulo\s+propio|experto\s+universitario|microcredencial/i
-      .test(f.nombre_limpio);
+  const pareceTituloPropio = NOMBRE_TITULO_PROPIO.test(f.nombre_limpio);
 
   const campo = "w-full text-[12px] border border-neutral-200 rounded-lg px-2.5 py-1.5 text-neutral-800 placeholder:text-neutral-300 outline-none focus:border-[#1A3557] transition";
 

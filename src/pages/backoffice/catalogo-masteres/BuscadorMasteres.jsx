@@ -11,9 +11,9 @@
 // tarde o temprano dirían importes distintos del mismo máster.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, Building2, CalendarClock, Copy, ExternalLink, GraduationCap, Search, SlidersHorizontal, Upload,
+  ArrowLeft, ArrowRight, Building2, CalendarClock, Copy, ExternalLink, GraduationCap, Pencil, Save, Search, SlidersHorizontal, Upload, X,
 } from "lucide-react";
-import { boGET } from "../../../services/backofficeApi";
+import { boGET, boPATCH } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import { navigate } from "../../../services/navigate";
 import MapaDelCatalogo from "./MapaDelCatalogo";
@@ -45,6 +45,39 @@ const fecha = (iso) => {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("es-ES", { day: "numeric", month: "long" });
 };
 
+// Con el año, siempre. La convocatoria va por delante del curso: para empezar
+// clases en septiembre de 2027 se postula desde noviembre de 2026, y «17 nov»
+// a secas se lee como el mes que viene.
+const fechaCorta = (iso) => {
+  if (!iso) return "—";
+  const d = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "2-digit" })
+    .replace(".", "");
+};
+
+const eur2 = (n) =>
+  n == null ? "—" : `${Number(n).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+
+// 393 criterios de una carga antigua guardaron la categoría y dejaron el texto
+// en blanco. Se rotulan desde la categoría: es lo que el texto habría dicho.
+const CATEGORIA_ETIQ = {
+  EXPEDIENTE_ACADEMICO: "Expediente académico",
+  ADECUACION_TITULO: "Adecuación del título de acceso",
+  CURRICULUM_VITAE: "Currículum vitae",
+  EXPERIENCIA_PROFESIONAL: "Experiencia profesional",
+  MOTIVACION: "Carta de motivación",
+  ENTREVISTA: "Entrevista",
+  IDIOMAS: "Idiomas",
+  OTROS_MERITOS: "Otros méritos",
+  FORMACION_COMPLEMENTARIA: "Formación complementaria",
+  INVESTIGACION: "Investigación y publicaciones",
+  CARTAS_REFERENCIA: "Cartas de referencia",
+  DOSSIER_PORTFOLIO: "Dossier o portfolio",
+};
+const rotuloCriterio = (c) =>
+  (c.criterio || "").trim() || CATEGORIA_ETIQ[c.categoria] || "";
+
 /** Un retardo corto: sin él, cada tecla dispara una consulta a mil filas. */
 function useRetardo(valor, ms = 350) {
   const [v, setV] = useState(valor);
@@ -64,6 +97,86 @@ function plazoEnClaro(v) {
   if (v.estado === "abre pronto" && v.abre) return `Abre el ${fecha(v.abre)} · ${v.fase}`;
   if (v.estado === "cerrada" && v.cerro) return `Cerró el ${fecha(v.cerro)} · ${v.fase}`;
   return null;
+}
+
+/**
+ * El baremo de admisión: qué puntúa la universidad y con qué peso.
+ *
+ * En barras y no solo en números porque un 60 % y un 10 % tienen que
+ * distinguirse de un vistazo. Y no es el requisito de acceso: que un máster
+ * valore el expediente al 100 % no quiere decir que acepte cualquier título.
+ */
+function Baremo({ criterios, sinPublicar }) {
+  const utiles = (criterios || []).filter(rotuloCriterio);
+  if (!utiles.length) {
+    return (
+      <p style={{ margin: 0, fontSize: 12, color: "var(--muted)", lineHeight: 1.5 }}>
+        {sinPublicar
+          ? "No publica baremo. Se pondera solo el expediente y el comité puede valorar méritos adicionales."
+          : "Sin datos del baremo en el catálogo."}
+      </p>
+    );
+  }
+  const max = Math.max(...utiles.map((c) => c.peso || 0), 1);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      {utiles.map((c, i) => (
+        <div key={i}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 12 }}>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {rotuloCriterio(c)}
+            </span>
+            <span className="ase-num" style={{ color: "var(--muted)", fontWeight: 600 }}>
+              {c.peso == null ? "" : `${c.peso}%`}
+            </span>
+          </div>
+          <div style={{ height: 4, borderRadius: 999, background: "var(--ground)", marginTop: 3, overflow: "hidden" }}>
+            <i style={{
+              display: "block", height: "100%", borderRadius: 999,
+              width: `${c.peso == null ? 0 : Math.round((c.peso / max) * 100)}%`,
+              background: "linear-gradient(90deg,var(--sky-2),var(--primary-2))",
+            }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Todas las convocatorias, con su adjudicación enfrentada. */
+function Fases({ fases }) {
+  if (!fases || !fases.length) {
+    return <p style={{ margin: 0, fontSize: 12, color: "var(--muted)" }}>Sin fechas en el catálogo.</p>;
+  }
+  return (
+    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+      <thead>
+        <tr style={{ color: "var(--muted)", textAlign: "left" }}>
+          <th style={{ fontWeight: 700, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", padding: "0 0 4px" }}>Fase</th>
+          <th style={{ fontWeight: 700, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", padding: "0 0 4px" }}>Solicitud</th>
+          <th style={{ fontWeight: 700, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", padding: "0 0 4px" }}>Resultados</th>
+        </tr>
+      </thead>
+      <tbody>
+        {fases.map((f, i) => (
+          <tr key={i} style={{ borderTop: "1px solid var(--line)" }}>
+            <td style={{ padding: "5px 8px 5px 0", lineHeight: 1.35 }}>{f.nombre}</td>
+            <td className="ase-num" style={{ padding: "5px 8px 5px 0", whiteSpace: "nowrap" }}>
+              {fechaCorta(f.inicio)} – {fechaCorta(f.fin)}
+              {f.estimada && (
+                <span title="Fecha del ciclo anterior: suele moverse unos días. Confirmar antes de comprometerla."
+                  style={{ marginLeft: 5, fontSize: 9, fontWeight: 700, letterSpacing: ".05em",
+                           textTransform: "uppercase", color: "var(--amber)" }}>est.</span>
+              )}
+            </td>
+            <td className="ase-num" style={{ padding: "5px 0", whiteSpace: "nowrap", color: f.resultados ? "inherit" : "var(--muted)" }}>
+              {f.resultados ? fechaCorta(f.resultados) : "sin fecha"}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 function Ficha({ m, onAbrir }) {
@@ -92,10 +205,14 @@ function Ficha({ m, onAbrir }) {
 
       <span style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
         <Chip tono={v.tono} punto>{v.texto}</Chip>
-        <Chip>{RAMA_ETIQ[m.rama] || m.rama}</Chip>
         <Chip>{m.ects} ECTS</Chip>
-        {m.modalidad !== "PRESENCIAL" && <Chip tono="cielo">{String(m.modalidad).toLowerCase()}</Chip>}
         {m.es_habilitante && <Chip tono="morado">habilitante</Chip>}
+        {m.universidad?.requiere_estudio_titulo === true && (
+          <Chip tono="ambar">
+            trámite previo{m.universidad.tasa_estudio_titulo
+              ? ` · ${eur2(m.universidad.tasa_estudio_titulo)}` : " · sin tasa"}
+          </Chip>
+        )}
       </span>
 
       {plazo && (
@@ -104,6 +221,214 @@ function Ficha({ m, onAbrir }) {
         </span>
       )}
     </button>
+  );
+}
+
+/**
+ * Corregir el máster a mano.
+ *
+ * El catálogo se llena leyendo boletines y webs, y eso deja huecos: 862
+ * másteres no publican su modalidad y 1.828 no publican el idioma. El asesor
+ * que llama a la universidad y lo averigua tiene que poder escribirlo aquí.
+ *
+ * Cada campo que se guarda queda marcado como manual en la base, y la
+ * siguiente recarga del censo NO lo pisa. Sin esa marca esto sería una trampa:
+ * la corrección duraría hasta la próxima carga.
+ */
+function FormularioEdicion({ m, onGuardado, onCancelar }) {
+  const [v, setV] = useState({
+    modalidad: m.modalidad || "",
+    idioma_imparticion: m.idioma || "",
+    ects: m.ects ?? "",
+    precio_final: m.precio_final ?? "",
+    curso: m.curso || "",
+    url_ficha: m.url_ficha || "",
+    titulo_acceso: m.titulo_acceso || "",
+    notas: m.notas || "",
+  });
+  const [guardando, setGuardando] = useState(false);
+  const set = (k) => (e) => setV((p) => ({ ...p, [k]: e.target.value }));
+
+  // Solo viaja lo que cambió: mandar el formulario entero marcaría como
+  // «corregido a mano» hasta lo que el asesor no tocó, y a partir de ahí el
+  // censo dejaría de actualizar ese máster nunca más.
+  async function guardar() {
+    const original = {
+      modalidad: m.modalidad || "", idioma_imparticion: m.idioma || "",
+      ects: m.ects ?? "", precio_final: m.precio_final ?? "", curso: m.curso || "",
+      url_ficha: m.url_ficha || "", titulo_acceso: m.titulo_acceso || "",
+      notas: m.notas || "",
+    };
+    const cambios = {};
+    for (const k of Object.keys(v)) {
+      if (String(v[k]) !== String(original[k])) cambios[k] = v[k];
+    }
+    if (!Object.keys(cambios).length) { onCancelar(); return; }
+    setGuardando(true);
+    try {
+      const r = await boPATCH(`/backoffice/masteres/${m.id_master}`, cambios);
+      if (r?.ok) {
+        dialog.toast("Guardado. La recarga del censo ya no lo pisará", "exito");
+        onGuardado(cambios);
+      } else {
+        dialog.toast(r?.msg || "No se pudo guardar", "error");
+      }
+    } catch {
+      dialog.toast("No se pudo guardar", "error");
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <p style={{ margin: 0, fontSize: 12, color: "var(--muted)", lineHeight: 1.5 }}>
+        Lo que corrija aquí queda marcado como dato confirmado a mano: las
+        recargas del catálogo respetarán estos campos y no volverán a
+        sobrescribirlos.
+      </p>
+      <div className="ase-filtros">
+        <Campo etiqueta="Modalidad">
+          <select className="ase-campo" value={v.modalidad} onChange={set("modalidad")}>
+            <option value="">Sin dato</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="SEMIPRESENCIAL">Semipresencial</option>
+            <option value="VIRTUAL">Virtual</option>
+          </select>
+        </Campo>
+        <Campo etiqueta="Idioma de impartición">
+          <input className="ase-campo" value={v.idioma_imparticion} onChange={set("idioma_imparticion")}
+            placeholder="Español, Español / Inglés…" />
+        </Campo>
+        <Campo etiqueta="Créditos ECTS">
+          <input className="ase-campo ase-num" value={v.ects} onChange={set("ects")}
+            inputMode="numeric" placeholder="60" />
+        </Campo>
+        <Campo etiqueta="Precio confirmado">
+          <input className="ase-campo ase-num" value={v.precio_final} onChange={set("precio_final")}
+            inputMode="decimal" placeholder="El que confirme la universidad" />
+        </Campo>
+        <Campo etiqueta="Curso publicado">
+          <input className="ase-campo" value={v.curso} onChange={set("curso")} placeholder="2027-28" />
+        </Campo>
+        <Campo etiqueta="Enlace a la ficha">
+          <input className="ase-campo" value={v.url_ficha} onChange={set("url_ficha")} placeholder="https://…" />
+        </Campo>
+      </div>
+      <Campo etiqueta="Titulaciones de acceso">
+        <textarea className="ase-campo" rows={2} value={v.titulo_acceso} onChange={set("titulo_acceso")}
+          placeholder="Qué titulaciones dan acceso, tal como lo publica la universidad" />
+      </Campo>
+      <Campo etiqueta="Observación">
+        <textarea className="ase-campo" rows={2} value={v.notas} onChange={set("notas")}
+          placeholder="Lo que haya que recordar de este máster" />
+      </Campo>
+      <div style={{ display: "flex", gap: 8 }}>
+        <Boton tono="primario" icono={Save} cargando={guardando} onClick={guardar}>Guardar</Boton>
+        <Boton tono="secundario" icono={X} onClick={onCancelar}>Cancelar</Boton>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * La vista de tabla: todo a la vista, para comparar muchos de una vez.
+ *
+ * Es otro trabajo distinto del de la ficha. La ficha sirve para elegir UNO —se
+ * lee entera, se copia y se le manda al asesorado—. La tabla sirve para
+ * comparar VEINTE: precio contra precio, plazo contra plazo, baremo contra
+ * baremo, que es lo que se hace con una hoja de cálculo delante.
+ *
+ * Por eso las dos conviven en el mismo buscador y sobre los mismos filtros: no
+ * son dos herramientas, son dos maneras de mirar la misma consulta.
+ */
+function TablaMasteres({ masteres, onAbrir }) {
+  return (
+    <div className="ase-tabla-scroll">
+      <table className="ase-tabla">
+        <thead>
+          <tr>
+            <th>Máster</th>
+            <th>Universidad</th>
+            <th>Comunidad</th>
+            <th>Créditos</th>
+            <th style={{ textAlign: "right" }}>Precio</th>
+            <th>Postulación</th>
+            <th>Resultados</th>
+            <th>Baremo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {masteres.map((m) => {
+            const u = m.universidad || {};
+            const fases = m.fases || [];
+            const criterios = (m.baremo || []).filter(rotuloCriterio);
+            const maxPeso = Math.max(...criterios.map((c) => c.peso || 0), 1);
+            return (
+              <tr key={m.id_master} onClick={() => onAbrir(m)} tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter") onAbrir(m); }}>
+                <td className="ase-td-nombre">{m.nombre}</td>
+                <td className="ase-td-uni">
+                  <b>{u.sigla}</b>
+                  <span>{u.ciudad || u.nombre}</span>
+                </td>
+                <td>
+                  {u.comunidad}
+                  {u.requiere_estudio_titulo === true && (
+                    <span className="ase-td-recon">
+                      trámite previo{u.tasa_estudio_titulo ? ` · ${eur2(u.tasa_estudio_titulo)}` : " · sin tasa"}
+                    </span>
+                  )}
+                  {u.requiere_estudio_titulo === false && (
+                    <span className="ase-td-recon ok">sin trámite previo</span>
+                  )}
+                </td>
+                <td className="ase-num">
+                  {m.ects ? `${m.ects} ECTS` : <i className="ase-td-vacio">sin dato</i>}
+                  {m.duracion_anios && (
+                    <span className="ase-td-sec">
+                      {m.duracion_anios === 1 ? "1 año"
+                        : m.duracion_anios === 1.5 ? "año y medio" : `${m.duracion_anios} años`}
+                    </span>
+                  )}
+                </td>
+                <td className="ase-td-precio" title={m.precio_fuente || ""}>
+                  <b>{eur(m.precio)}</b>
+                  {m.precio_credito && <span>{eur2(m.precio_credito)}/crédito</span>}
+                </td>
+                <td className="ase-num ase-td-fases">
+                  {fases.length ? fases.map((f, i) => (
+                    <div key={i}>
+                      <span className="ase-td-fn">{f.nombre.replace(/^Fase\s*/i, "F").split(" — ")[0]}</span>
+                      {" "}{fechaCorta(f.inicio)} – {fechaCorta(f.fin)}
+                      {f.estimada && <span className="ase-td-est">est.</span>}
+                    </div>
+                  )) : <i className="ase-td-vacio">sin fechas</i>}
+                </td>
+                <td className="ase-num ase-td-fases">
+                  {fases.length ? fases.map((f, i) => (
+                    <div key={i}>{f.resultados ? fechaCorta(f.resultados) : <i className="ase-td-vacio">—</i>}</div>
+                  )) : null}
+                </td>
+                <td className="ase-td-baremo">
+                  {criterios.length ? criterios.map((c, i) => (
+                    <div key={i} className="ase-td-crit">
+                      <span>{rotuloCriterio(c)}</span>
+                      <b className="ase-num">{c.peso == null ? "" : `${c.peso}%`}</b>
+                      <i style={{ width: `${c.peso == null ? 0 : Math.round((c.peso / maxPeso) * 100)}%` }} />
+                    </div>
+                  )) : (
+                    <i className="ase-td-vacio">
+                      {m.baremo_sin_publicar ? "no publica baremo" : "sin dato"}
+                    </i>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -117,6 +442,17 @@ export default function BuscadorMasteres() {
   const [pagina, setPagina] = useState(1);
   const [masFiltros, setMasFiltros] = useState(false);
   const [abierto, setAbierto] = useState(null);
+  const [editando, setEditando] = useState(false);
+  // Fichas para elegir uno, tabla para comparar veinte. La elección se recuerda
+  // porque cada asesora trabaja de una manera y no va a repetirla cada vez.
+  const [vista, setVista] = useState(() => {
+    try { return localStorage.getItem("inspira.masteres.vista") || "fichas"; }
+    catch { return "fichas"; }
+  });
+  const cambiarVista = (v) => {
+    setVista(v);
+    try { localStorage.setItem("inspira.masteres.vista", v); } catch { /* sin recuerdo, no pasa nada */ }
+  };
 
   // La respuesta se guarda junto a la consulta que la produjo, y de ahí sale si
   // está cargando. Marcar «cargando» dentro del efecto obliga a un render de
@@ -236,6 +572,12 @@ export default function BuscadorMasteres() {
               aria-expanded={masFiltros}>
               <span className="hidden sm:inline">Filtros</span>
             </Boton>
+            <div className="ase-vista" role="group" aria-label="Cómo ver los resultados">
+              <button type="button" aria-pressed={vista === "fichas"}
+                onClick={() => cambiarVista("fichas")}>Fichas</button>
+              <button type="button" aria-pressed={vista === "tabla"}
+                onClick={() => cambiarVista("tabla")}>Tabla</button>
+            </div>
           </div>
 
           <div className="ase-pills" style={{ marginTop: 8 }}>
@@ -313,8 +655,14 @@ export default function BuscadorMasteres() {
               </>
             } />
         ) : (
-          <div className="ase-rejilla ase-anim" style={{ opacity: cargando ? .6 : 1, transition: "opacity .2s" }}>
-            {masteres.map((m) => <Ficha key={m.id_master} m={m} onAbrir={setAbierto} />)}
+          <div className="ase-anim" style={{ opacity: cargando ? .6 : 1, transition: "opacity .2s" }}>
+            {vista === "tabla" ? (
+              <TablaMasteres masteres={masteres} onAbrir={setAbierto} />
+            ) : (
+              <div className="ase-rejilla">
+                {masteres.map((m) => <Ficha key={m.id_master} m={m} onAbrir={setAbierto} />)}
+              </div>
+            )}
           </div>
         )}
 
@@ -336,30 +684,62 @@ export default function BuscadorMasteres() {
       {/* ── Ventana: la ficha del máster ── */}
       <Ventana
         abierta={Boolean(abierto)}
-        onCerrar={() => setAbierto(null)}
+        onCerrar={() => { setAbierto(null); setEditando(false); }}
         titulo={abierto?.nombre}
         subtitulo={abierto ? `${abierto.universidad?.sigla ? `${abierto.universidad.sigla} · ` : ""}${abierto.universidad?.nombre || ""}` : ""}
         ancho="md"
-        pie={abierto && (
+        pie={abierto && !editando && (
           <>
+            <Boton tono="secundario" icono={Pencil} onClick={() => setEditando(true)}>Corregir</Boton>
             <Boton tono="secundario" icono={Copy} onClick={() => copiar(abierto)}>Copiar resumen</Boton>
+            {abierto.url_ficha && (
+              <Boton tono="secundario" icono={ExternalLink} onClick={() => window.open(abierto.url_ficha, "_blank", "noopener")}>
+                Ficha del máster
+              </Boton>
+            )}
             {abierto.universidad?.url && (
               <Boton tono="primario" icono={ExternalLink} onClick={() => window.open(abierto.universidad.url, "_blank", "noopener")}>
-                Web de la universidad
+                Preinscripción
               </Boton>
             )}
           </>
         )}
       >
-        {abierto && (
+        {abierto && editando && (
+          <FormularioEdicion
+            m={abierto}
+            onCancelar={() => setEditando(false)}
+            onGuardado={(cambios) => {
+              // Se refleja al momento en la ficha abierta y se relee la lista,
+              // para que la tarjeta de detrás no siga enseñando el dato viejo.
+              setAbierto((a) => ({
+                ...a,
+                ...cambios,
+                idioma: cambios.idioma_imparticion ?? a.idioma,
+                ects: cambios.ects != null && cambios.ects !== "" ? Number(cambios.ects) : a.ects,
+              }));
+              setEditando(false);
+              setRespuesta(null);
+            }}
+          />
+        )}
+
+        {abierto && !editando && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {abierto.editado_por && (
+              <p style={{ margin: 0, fontSize: 11.5, color: "var(--muted)" }}>
+                Corregido a mano por {abierto.editado_por}. Las recargas del
+                catálogo respetan esos campos.
+              </p>
+            )}
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <div style={{ flex: "1 1 160px" }}>
                 <span className="ase-precio" style={{ fontSize: 30 }}>{eur(abierto.precio)}</span>
-                <p style={{ margin: "2px 0 0", fontSize: 11.5, color: "var(--muted)" }}>
+                <p style={{ margin: "2px 0 0", fontSize: 11.5, color: "var(--muted)", lineHeight: 1.45 }}>
                   {abierto.precio_origen === "confirmado"
                     ? "Precio confirmado por la universidad"
-                    : "Estimado con el crédito de su comunidad para extracomunitarios"}
+                    : (abierto.precio_fuente
+                        || "Estimado con el crédito de su comunidad para extracomunitarios")}
                 </p>
               </div>
               <Chip tono={va.tono} punto>{va.texto}</Chip>
@@ -374,14 +754,46 @@ export default function BuscadorMasteres() {
 
             <dl className="ase-kv">
               <dt>Créditos</dt><dd className="ase-num">{abierto.ects} ECTS · {abierto.duracion_anios || 1} {abierto.duracion_anios > 1 ? "años" : "año"}</dd>
-              <dt>Modalidad</dt><dd style={{ textTransform: "capitalize" }}>{String(abierto.modalidad || "").toLowerCase()}</dd>
-              <dt>Rama</dt><dd>{RAMA_ETIQ[abierto.rama] || abierto.rama}{abierto.sub_area ? ` · ${abierto.sub_area}` : ""}</dd>
               <dt>Ciudad</dt><dd>{[abierto.universidad?.ciudad, abierto.universidad?.comunidad].filter(Boolean).join(" · ") || "—"}</dd>
               {abierto.universidad?.ranking_nacional && (
                 <><dt>Ranking</dt><dd className="ase-num">nº {abierto.universidad.ranking_nacional} de España{abierto.universidad.ranking_internacional ? ` · #${abierto.universidad.ranking_internacional} internacional` : ""}</dd></>
               )}
-              {abierto.titulo_acceso && <><dt>Acceso</dt><dd>{abierto.titulo_acceso}</dd></>}
+              {abierto.curso && <><dt>Curso publicado</dt><dd className="ase-num">{abierto.curso}</dd></>}
+              {abierto.notas && <><dt>Observación</dt><dd>{abierto.notas}</dd></>}
             </dl>
+
+            {/* El trámite previo va antes que las fases a propósito: si su
+                comunidad lo exige, hay que empezarlo meses antes de postular. */}
+            <div>
+              <h4 className="ase-sub">Reconocimiento previo del título extranjero</h4>
+              {abierto.universidad?.requiere_estudio_titulo === true ? (
+                <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.5 }}>
+                  <b>{abierto.universidad.tasa_estudio_titulo
+                    ? `Obligatorio · tasa de ${eur2(abierto.universidad.tasa_estudio_titulo)}`
+                    : "Obligatorio · sin tasa"}</b>
+                  {abierto.universidad.proceso_previo ? ` — ${abierto.universidad.proceso_previo}` : ""}
+                </p>
+              ) : abierto.universidad?.requiere_estudio_titulo === false ? (
+                <p style={{ margin: 0, fontSize: 12.5, color: "var(--muted)", lineHeight: 1.5 }}>
+                  Ninguno. Se presenta el título, las notas, los créditos, las horas,
+                  el pasaporte y la nota media.
+                </p>
+              ) : (
+                <p style={{ margin: 0, fontSize: 12.5, color: "var(--muted)" }}>
+                  No consta para esta comunidad.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <h4 className="ase-sub">Convocatorias</h4>
+              <Fases fases={abierto.fases} />
+            </div>
+
+            <div>
+              <h4 className="ase-sub">Baremo de admisión</h4>
+              <Baremo criterios={abierto.baremo} sinPublicar={abierto.baremo_sin_publicar} />
+            </div>
 
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {abierto.es_habilitante && <Chip tono="morado">habilitante</Chip>}

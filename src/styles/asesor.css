@@ -634,3 +634,91 @@ button.ase-metrica:hover .ase-metrica-ir { color: #1d6a4a; transform: translateX
 @media (prefers-reduced-motion: reduce) {
   .ase-fila, .ase-metrica, .ase-tab { transition: none; }
 }
+
+/* ── Vista de tabla del buscador de másteres ─────────────────────────────────
+   Otro trabajo que el de las fichas: la ficha sirve para elegir uno, la tabla
+   para comparar veinte —precio contra precio, plazo contra plazo—, que es lo
+   que se hace con una hoja de cálculo delante. Por eso conviven sobre los
+   mismos filtros y se elige con el interruptor de arriba.                    */
+.ase .ase-vista {
+  display: inline-flex; background: var(--ground); border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px; gap: 2px; flex: 0 0 auto;
+}
+.ase .ase-vista button {
+  border: 0; background: transparent; cursor: pointer; border-radius: 999px;
+  padding: 6px 14px; font: 600 12.5px Montserrat, sans-serif; color: var(--muted);
+  transition: .2s var(--ease);
+}
+.ase .ase-vista button:hover { color: var(--primary); }
+.ase .ase-vista button[aria-pressed="true"] {
+  background: var(--primary); color: #fff; box-shadow: var(--sombra);
+}
+
+/* La tabla scrollea dentro de su marco: el cuerpo de la página nunca se mueve
+   de lado, que es lo que descoloca al leer una fila larga. */
+.ase .ase-tabla-scroll {
+  overflow-x: auto; border: 1px solid var(--line); border-radius: 14px;
+  background: #fff; box-shadow: var(--sombra);
+}
+.ase .ase-tabla { border-collapse: collapse; width: 100%; min-width: 1180px; }
+.ase .ase-tabla thead th {
+  position: sticky; top: 0; z-index: 2; background: var(--sky-soft);
+  color: var(--primary); font: 700 9.5px/1.3 Montserrat, sans-serif;
+  letter-spacing: .1em; text-transform: uppercase; text-align: left;
+  padding: 11px 13px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.ase .ase-tabla tbody tr {
+  border-bottom: 1px solid var(--line); cursor: pointer;
+  transition: background .18s var(--ease);
+}
+.ase .ase-tabla tbody tr:nth-child(even) { background: #fafcfe; }
+.ase .ase-tabla tbody tr:hover { background: var(--sky-soft); }
+.ase .ase-tabla td { padding: 11px 13px; vertical-align: top; font-size: 12.5px; }
+
+.ase .ase-td-nombre { font-weight: 600; color: var(--ink); min-width: 230px; max-width: 300px; line-height: 1.35; }
+.ase .ase-td-ruct { display: block; margin-top: 3px; font: 500 10px/1 "IBM Plex Mono", monospace; color: #9fb3c0; }
+.ase .ase-td-uni { white-space: nowrap; }
+.ase .ase-td-uni b { color: var(--primary); }
+.ase .ase-td-uni span { display: block; font-size: 11px; color: var(--muted); }
+.ase .ase-td-sec { display: block; font-size: 11px; color: var(--muted); }
+.ase .ase-td-vacio { color: #b08a90; font-style: italic; font-size: 11.5px; }
+
+/* El trámite previo es un plazo ANTES del plazo: va en ámbar, como el aviso
+   que es, y no como un dato más de la fila. */
+.ase .ase-td-recon {
+  display: inline-block; margin-top: 5px; padding: 3px 7px; border-radius: 999px;
+  background: var(--amber-soft); color: var(--amber);
+  font: 700 9px/1.3 Montserrat, sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; white-space: nowrap;
+}
+.ase .ase-td-recon.ok { background: var(--sky-soft); color: var(--primary-2); }
+
+.ase .ase-td-precio { text-align: right; white-space: nowrap; }
+.ase .ase-td-precio b { font: 600 15px/1.15 "IBM Plex Mono", monospace; color: var(--primary-2); }
+.ase .ase-td-precio span { display: block; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+/* Postulación y resultados comparten altura de línea: si se desalinean, se lee
+   la resolución de otra fase. */
+.ase .ase-td-fases { white-space: nowrap; font-size: 11.5px; }
+.ase .ase-td-fases > div { height: 19px; line-height: 19px; overflow: hidden; }
+.ase .ase-td-fn { color: var(--muted); font-family: Montserrat, sans-serif; font-size: 10.5px; font-weight: 600; }
+.ase .ase-td-est {
+  margin-left: 4px; padding: 1px 5px; border-radius: 999px;
+  background: var(--amber-soft); color: var(--amber);
+  font: 700 8.5px Montserrat, sans-serif; text-transform: uppercase;
+}
+
+/* El baremo en barras: un 60 % y un 10 % tienen que distinguirse sin leer. */
+.ase .ase-td-baremo { min-width: 210px; max-width: 260px; }
+.ase .ase-td-crit {
+  display: grid; grid-template-columns: 1fr auto; gap: 0 8px;
+  align-items: center; margin-bottom: 4px;
+}
+.ase .ase-td-crit > span {
+  font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ase .ase-td-crit > b { font-size: 10.5px; color: var(--muted); }
+.ase .ase-td-crit > i {
+  grid-column: 1 / -1; height: 3px; border-radius: 999px; margin-top: 2px;
+  background: linear-gradient(90deg, var(--sky-2), var(--primary-2));
+}

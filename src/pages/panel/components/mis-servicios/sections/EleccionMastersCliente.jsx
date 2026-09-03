@@ -54,6 +54,26 @@ function MasterCard({ master, score, prioridad, selected, comentario, onToggle, 
         </div>
       </button>
 
+      {/* El enlace a la ficha del máster.
+          Va FUERA del botón: un <a> dentro de un <button> es HTML inválido y
+          en algunos navegadores el clic se lo come el botón, con lo que el
+          enlace no abre y encima cambia la selección. Y sin enlace el informe
+          le daba al asesorado veinte nombres que no podía ir a mirar. */}
+      {(master.url_ficha || master.universidad?.url) && (
+        <div className="px-3 pb-2.5 -mt-1">
+          <a
+            href={master.url_ficha || master.universidad.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-[#023A4B] hover:underline"
+          >
+            {master.url_ficha ? "Ver la ficha del máster" : "Ver la web de la universidad"}
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      )}
+
       {selected && onComentario && (
         <div className="px-3 pb-2.5 border-t border-neutral-100">
           <textarea

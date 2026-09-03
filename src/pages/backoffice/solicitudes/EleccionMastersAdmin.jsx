@@ -73,7 +73,8 @@ function MasterPickCard({ r, selected, prioridad, onToggle }) {
  * había que dejarlo fuera del bloque —y por tanto fuera del tracker.
  */
 function FormManual({ onAnadir, onCancelar, guardando }) {
-  const [f, setF] = useState({ nombre_limpio: "", universidad: "", ciudad: "" });
+  const [f, setF] = useState({ nombre_limpio: "", universidad: "", ciudad: "",
+                               url_ficha: "", ects: "", precio_final: "" });
   const listo = f.nombre_limpio.trim() && f.universidad.trim();
 
   const campo = "w-full text-[12px] border border-neutral-200 rounded-lg px-2.5 py-1.5 text-neutral-800 placeholder:text-neutral-300 outline-none focus:border-[#1A3557] transition";
@@ -91,10 +92,28 @@ function FormManual({ onAnadir, onCancelar, guardando }) {
         <input className={campo} placeholder="Ciudad" value={f.ciudad}
           onChange={(e) => setF({ ...f, ciudad: e.target.value })} />
       </div>
+      {/* Un máster añadido a mano llegaba al informe con nombre y universidad y
+          nada más: sin enlace el asesorado no puede ir a mirarlo, y sin precio
+          ni créditos queda descolgado al lado de los del catálogo, que sí los
+          llevan. Los tres son opcionales, pero estar, están. */}
+      <div className="grid sm:grid-cols-3 gap-2">
+        <input className={`${campo} sm:col-span-2`} placeholder="Enlace a la ficha del máster"
+          value={f.url_ficha} onChange={(e) => setF({ ...f, url_ficha: e.target.value })} />
+        <div className="grid grid-cols-2 gap-2">
+          <input className={campo} placeholder="ECTS" inputMode="numeric"
+            value={f.ects} onChange={(e) => setF({ ...f, ects: e.target.value })} />
+          <input className={campo} placeholder="Precio €" inputMode="numeric"
+            value={f.precio_final} onChange={(e) => setF({ ...f, precio_final: e.target.value })} />
+        </div>
+      </div>
       <div className="flex items-center gap-2">
         <button
           type="button" disabled={!listo || guardando}
-          onClick={() => { onAnadir(f); setF({ nombre_limpio: "", universidad: "", ciudad: "" }); }}
+          onClick={() => {
+            onAnadir(f);
+            setF({ nombre_limpio: "", universidad: "", ciudad: "",
+                   url_ficha: "", ects: "", precio_final: "" });
+          }}
           className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#142a45] disabled:opacity-40 transition"
         >
           {guardando ? "Guardando…" : "Añadir al bloque"}
@@ -203,6 +222,11 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
         nombre_limpio: datos.nombre_limpio.trim(),
         universidad: datos.universidad.trim(),
         ciudad: datos.ciudad.trim(),
+        // Lo opcional se guarda solo si se escribió: una cadena vacía en el
+        // enlace pintaría un «ver la ficha» que no lleva a ninguna parte.
+        url_ficha: (datos.url_ficha || "").trim() || null,
+        ects: datos.ects ? Number(datos.ects) : null,
+        precio_final: datos.precio_final ? Number(datos.precio_final) : null,
         score: null,
         prioridad: filas.length + 1,
         comentario: "",

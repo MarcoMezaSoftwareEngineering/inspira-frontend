@@ -1,6 +1,7 @@
 // src/pages/panel/components/mis-servicios/sections/EleccionMastersCliente.jsx
 import { useEffect, useRef, useState } from "react";
 import SeccionPanel from "./SeccionPanel";
+import BaremoMaster from "../../../../../components/BaremoMaster";
 
 // ── Tarjeta compacta de máster ────────────────────────────────────────────────
 
@@ -61,11 +62,15 @@ function MasterCard({ master, score, prioridad, selected, comentario, onToggle, 
         </div>
       </button>
 
-      {/* El enlace a la ficha del máster.
-          Va FUERA del botón: un <a> dentro de un <button> es HTML inválido y
-          en algunos navegadores el clic se lo come el botón, con lo que el
-          enlace no abre y encima cambia la selección. Y sin enlace el informe
-          le daba al asesorado veinte nombres que no podía ir a mirar. */}
+      {/* La baremación, siempre visible: es lo primero que pregunta quien ve un
+          máster que le gusta —«¿qué posibilidades tengo de entrar?»— y hasta
+          ahora solo estaba en el buscador interno del asesor. */}
+      {master.baremo?.length > 0 && (
+        <div className="px-3 pb-2">
+          <BaremoMaster baremo={master.baremo} />
+        </div>
+      )}
+
       {/* Qué significa la etiqueta. Sin esto, «título propio» no le dice nada
           a quien no conoce el sistema español, y es justo lo que necesita
           saber para comparar este programa con el resto. */}
@@ -80,6 +85,11 @@ function MasterCard({ master, score, prioridad, selected, comentario, onToggle, 
         </div>
       )}
 
+      {/* El enlace a la ficha del máster.
+          Va FUERA del botón: un <a> dentro de un <button> es HTML inválido y
+          en algunos navegadores el clic se lo come el botón, con lo que el
+          enlace no abre y encima cambia la selección. Y sin enlace el informe
+          le daba al asesorado veinte nombres que no podía ir a mirar. */}
       {(master.url_ficha || master.universidad?.url) && (
         <div className="px-3 pb-2.5 -mt-1">
           <a

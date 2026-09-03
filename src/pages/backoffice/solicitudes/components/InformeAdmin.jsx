@@ -4,6 +4,7 @@ import { boGET, boPATCH, boPOST, boUpload } from "../../../../services/backoffic
 import { dialog } from "../../../../services/dialogService";
 import { API_URL, formatearFecha } from "../utils";
 import ModalMaster from "../../catalogo/ModalMaster";
+import BaremoMaster from "../../../../components/BaremoMaster";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -130,12 +131,35 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
           {dur && (
             <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded-md">{dur}</span>
           )}
+          {master.es_titulo_oficial === false && (
+            <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md">
+              título propio
+            </span>
+          )}
           {!editMode && (
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(score)}`}>
               {score != null ? `${score}% match` : "Sin score"}
             </span>
           )}
         </div>
+
+        {/* El asesor tiene que poder abrir la ficha desde aquí: es lo que va a
+            mirar antes de decidir si el máster entra en el informe, y es el
+            mismo enlace que le llegará al asesorado. */}
+        {(master.url_ficha || master.universidad?.url) && (
+          <a href={master.url_ficha || master.universidad.url}
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 mt-1.5 text-[10.5px] font-semibold text-[#1D6A4A] hover:underline">
+            {master.url_ficha ? "Ver la ficha del máster" : "Ver la web de la universidad"}
+            <span aria-hidden="true">↗</span>
+          </a>
+        )}
+
+        {/* La baremación. En modo edición estorba —ahí se ordena y se puntúa—,
+            así que solo se enseña al revisar. */}
+        {!editMode && master.baremo?.length > 0 && (
+          <BaremoMaster baremo={master.baremo} maxVisible={3} compacto />
+        )}
       </div>
 
       {/* Score: ring en vista, input editable en edición */}

@@ -43,6 +43,13 @@ function MasterCard({ master, score, prioridad, selected, comentario, onToggle, 
           <div className="flex flex-wrap gap-1 mt-1.5">
             {precio && <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">{precio}</span>}
             {dur    && <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">{dur}</span>}
+            {/* Hay asesorados a quienes un título propio les encaja, así que
+                esto informa, no advierte: se dice qué es y se explica debajo. */}
+            {master.es_titulo_oficial === false && (
+              <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded">
+                Título propio
+              </span>
+            )}
             {score  && (
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                 score >= 80 ? "bg-emerald-50 text-emerald-700"
@@ -59,6 +66,20 @@ function MasterCard({ master, score, prioridad, selected, comentario, onToggle, 
           en algunos navegadores el clic se lo come el botón, con lo que el
           enlace no abre y encima cambia la selección. Y sin enlace el informe
           le daba al asesorado veinte nombres que no podía ir a mirar. */}
+      {/* Qué significa la etiqueta. Sin esto, «título propio» no le dice nada
+          a quien no conoce el sistema español, y es justo lo que necesita
+          saber para comparar este programa con el resto. */}
+      {master.es_titulo_oficial === false && (
+        <div className="px-3 pb-2">
+          <p className="text-[10.5px] leading-snug text-amber-800 bg-amber-50/70 border border-amber-200 rounded-lg px-2 py-1.5">
+            Es un <strong>título propio</strong> de la universidad, no un título
+            oficial: no se homologa ni convalida y no da acceso al doctorado.
+            Sirve para estudiar en España; consúltenos si le interesa este
+            programa y le explicamos qué implica en su caso.
+          </p>
+        </div>
+      )}
+
       {(master.url_ficha || master.universidad?.url) && (
         <div className="px-3 pb-2.5 -mt-1">
           <a

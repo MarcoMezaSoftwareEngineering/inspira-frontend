@@ -207,6 +207,9 @@ function Ficha({ m, onAbrir }) {
         <Chip tono={v.tono} punto>{v.texto}</Chip>
         <Chip>{m.ects} ECTS</Chip>
         {m.es_habilitante && <Chip tono="morado">habilitante</Chip>}
+        {/* No es un error: hay asesorados a quienes un título propio les
+            encaja. Se marca para que se elija sabiendo qué es. */}
+        {m.es_titulo_oficial === false && <Chip tono="ambar">título propio</Chip>}
         {m.universidad?.requiere_estudio_titulo === true && (
           <Chip tono="ambar">
             trámite previo{m.universidad.tasa_estudio_titulo
@@ -245,6 +248,10 @@ function FormularioEdicion({ m, onGuardado, onCancelar }) {
     url_ficha: m.url_ficha || "",
     titulo_acceso: m.titulo_acceso || "",
     notas: m.notas || "",
+    // Se guarda como texto para poder compararlo igual que el resto; al
+    // enviarlo se convierte. Un booleano en este diff se leería mal: false y
+    // "" no son lo mismo aquí.
+    es_titulo_oficial: m.es_titulo_oficial === false ? "no" : "si",
   });
   const [guardando, setGuardando] = useState(false);
   const set = (k) => (e) => setV((p) => ({ ...p, [k]: e.target.value }));
@@ -258,12 +265,16 @@ function FormularioEdicion({ m, onGuardado, onCancelar }) {
       ects: m.ects ?? "", precio_final: m.precio_final ?? "", curso: m.curso || "",
       url_ficha: m.url_ficha || "", titulo_acceso: m.titulo_acceso || "",
       notas: m.notas || "",
+      es_titulo_oficial: m.es_titulo_oficial === false ? "no" : "si",
     };
     const cambios = {};
     for (const k of Object.keys(v)) {
       if (String(v[k]) !== String(original[k])) cambios[k] = v[k];
     }
     if (!Object.keys(cambios).length) { onCancelar(); return; }
+    if (cambios.es_titulo_oficial !== undefined) {
+      cambios.es_titulo_oficial = cambios.es_titulo_oficial === "si";
+    }
     setGuardando(true);
     try {
       const r = await boPATCH(`/backoffice/masteres/${m.id_master}`, cambios);
@@ -294,6 +305,13 @@ function FormularioEdicion({ m, onGuardado, onCancelar }) {
             <option value="PRESENCIAL">Presencial</option>
             <option value="SEMIPRESENCIAL">Semipresencial</option>
             <option value="VIRTUAL">Virtual</option>
+          </select>
+        </Campo>
+        <Campo etiqueta="Tipo de título">
+          <select className="ase-campo" value={v.es_titulo_oficial}
+            onChange={set("es_titulo_oficial")}>
+            <option value="si">Oficial (con código RUCT)</option>
+            <option value="no">Título propio de la universidad</option>
           </select>
         </Campo>
         <Campo etiqueta="Idioma de impartición">
@@ -797,6 +815,7 @@ export default function BuscadorMasteres() {
 
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {abierto.es_habilitante && <Chip tono="morado">habilitante</Chip>}
+              {abierto.es_titulo_oficial === false && <Chip tono="ambar">título propio</Chip>}
               {abierto.es_interuniversitario && <Chip tono="cielo">interuniversitario</Chip>}
               {abierto.tiene_practicas && <Chip tono="verde">con prácticas</Chip>}
             </div>

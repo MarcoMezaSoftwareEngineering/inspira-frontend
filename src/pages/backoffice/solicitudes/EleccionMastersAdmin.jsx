@@ -49,6 +49,12 @@ function MasterPickCard({ r, selected, prioridad, onToggle }) {
         <div className="flex flex-wrap gap-1 mt-1.5">
           {precio && <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">{precio}</span>}
           {dur    && <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">{dur}</span>}
+          {/* Se ve al elegir, que es cuando sirve de algo. */}
+          {master.es_titulo_oficial === false && (
+            <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded">
+              título propio
+            </span>
+          )}
           {score  && (
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
               score >= 80 ? "bg-emerald-50 text-emerald-700"
@@ -73,9 +79,18 @@ function MasterPickCard({ r, selected, prioridad, onToggle }) {
  * había que dejarlo fuera del bloque —y por tanto fuera del tracker.
  */
 function FormManual({ onAnadir, onCancelar, guardando }) {
-  const [f, setF] = useState({ nombre_limpio: "", universidad: "", ciudad: "",
-                               url_ficha: "", ects: "", precio_final: "" });
+  const VACIO = { nombre_limpio: "", universidad: "", ciudad: "",
+                  url_ficha: "", ects: "", precio_final: "", es_titulo_oficial: true };
+  const [f, setF] = useState(VACIO);
   const listo = f.nombre_limpio.trim() && f.universidad.trim();
+
+  // El nombre suele decirlo, así que se propone solo; el asesor lo corrige si
+  // se equivoca. Un título propio se añade a veces a propósito —para algunos
+  // asesorados encaja—, y lo que no puede pasar es que llegue al informe sin
+  // que se sepa lo que es.
+  const pareceTituloPropio =
+    /formaci[oó]n\s+permanente|formaci[oó]n\s+profesional|t[ií]tulo\s+propio|experto\s+universitario|microcredencial/i
+      .test(f.nombre_limpio);
 
   const campo = "w-full text-[12px] border border-neutral-200 rounded-lg px-2.5 py-1.5 text-neutral-800 placeholder:text-neutral-300 outline-none focus:border-[#1A3557] transition";
 
@@ -106,13 +121,20 @@ function FormManual({ onAnadir, onCancelar, guardando }) {
             value={f.precio_final} onChange={(e) => setF({ ...f, precio_final: e.target.value })} />
         </div>
       </div>
+      <label className="flex items-center gap-2 text-[11px] text-neutral-600 cursor-pointer">
+        <input type="checkbox" className="accent-amber-600"
+          checked={f.es_titulo_oficial === false || (pareceTituloPropio && f.es_titulo_oficial !== true)}
+          onChange={(e) => setF({ ...f, es_titulo_oficial: !e.target.checked })} />
+        Es un <strong className="font-semibold">título propio</strong> de la universidad,
+        no un título oficial
+      </label>
       <div className="flex items-center gap-2">
         <button
           type="button" disabled={!listo || guardando}
           onClick={() => {
-            onAnadir(f);
-            setF({ nombre_limpio: "", universidad: "", ciudad: "",
-                   url_ficha: "", ects: "", precio_final: "" });
+            onAnadir({ ...f,
+              es_titulo_oficial: f.es_titulo_oficial === false ? false : !pareceTituloPropio });
+            setF(VACIO);
           }}
           className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#142a45] disabled:opacity-40 transition"
         >
@@ -192,6 +214,7 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
           nombre_limpio: r.master.nombre_limpio,
           universidad:   r.master.universidad.nombre_completo,
           ciudad:        r.master.universidad.ciudad,
+          es_titulo_oficial: r.master.es_titulo_oficial,
           score:         r.score,
           prioridad:     prev.length + 1,
           comentario:    "",
@@ -227,6 +250,7 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
         url_ficha: (datos.url_ficha || "").trim() || null,
         ects: datos.ects ? Number(datos.ects) : null,
         precio_final: datos.precio_final ? Number(datos.precio_final) : null,
+        es_titulo_oficial: datos.es_titulo_oficial !== false,
         score: null,
         prioridad: filas.length + 1,
         comentario: "",
@@ -483,6 +507,13 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
                 {fila.manual && (
                   <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500 align-middle">
                     manual
+                  </span>
+                )}
+                {/* El asesor tiene que verlo aquí, antes de publicar el
+                    informe, no enterarse cuando el asesorado pregunte. */}
+                {fila.es_titulo_oficial === false && (
+                  <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 align-middle">
+                    título propio
                   </span>
                 )}
               </p>

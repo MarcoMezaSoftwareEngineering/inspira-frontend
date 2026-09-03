@@ -4,6 +4,7 @@ import "../../styles/asesor.css";
 import Sidebar from "./layout/Sidebar";
 import MobileAppBar from "./layout/MobileAppBar";
 import MobileDrawer from "./layout/MobileDrawer";
+import BottomNav from "./layout/BottomNav";
 import ProtectedRoute from "./layout/ProtectedRoute";
 import ModuleGate from "./layout/ModuleGate";
 import TabView from "./layout/TabView";
@@ -126,6 +127,14 @@ export default function BackofficeApp() {
           onLogout={logout}
         />
 
+        {/* En móvil, los cuatro destinos de uso diario al alcance del pulgar.
+            El cajón sigue teniendo los trece: esto es el atajo, no el menú. */}
+        <BottomNav
+          path={path}
+          drawerAbierto={mobileDrawerOpen}
+          onMas={() => setMobileDrawerOpen((v) => !v)}
+        />
+
         <MobileAppBar onMenuToggle={() => setMobileDrawerOpen(true)} user={user} />
         <MobileDrawer
           open={mobileDrawerOpen}
@@ -150,7 +159,7 @@ export default function BackofficeApp() {
             </button>
           )}
 
-          <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative pt-[60px] md:pt-0">
+          <main className="ux-con-barra-abajo flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative pt-[60px] md:pt-0">
             {/* Overlay transparente: cierra el sidebar al hacer clic fuera cuando no está fijado */}
             {sidebarOpen && !sidebarPinned && (
               <div

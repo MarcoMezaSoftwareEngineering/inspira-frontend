@@ -16,13 +16,12 @@ function MasterCard({ master, score, prioridad, selected, comentario, onToggle, 
     : null;
 
   return (
-    <div className={`border rounded-xl overflow-hidden transition-all ${
-      selected
-        ? "border-[#023A4B] bg-[#023A4B]/[0.03]"
-        : "border-neutral-200 bg-white hover:border-neutral-300"
-    }`}>
+    // El estado se dice con el filete de color y el fondo tenue, no con una
+    // sombra distinta: dos señales de profundidad compitiendo aplanan la lista.
+    <div className="ux-tarjeta overflow-hidden" data-sel={selected ? "1" : "0"}>
       <button type="button" onClick={onToggle}
-        className="w-full text-left flex items-center gap-2.5 px-3 py-2.5">
+        aria-pressed={selected}
+        className="ux-tap w-full text-left flex items-center gap-3 px-3.5 py-3">
         <div className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
           selected ? "border-[#023A4B] bg-[#023A4B]" : "border-neutral-300 bg-white"
         }`}>
@@ -36,8 +35,8 @@ function MasterCard({ master, score, prioridad, selected, comentario, onToggle, 
         )}
 
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-neutral-800 leading-tight">{master.nombre_limpio}</p>
-          <p className="text-[11px] text-neutral-500 leading-tight truncate mt-0.5">
+          <p className="text-[14.5px] font-semibold text-neutral-900 leading-snug">{master.nombre_limpio}</p>
+          <p className="text-[11.5px] text-neutral-500 leading-snug mt-1">
             {master.universidad.nombre_completo}
             {master.universidad.ciudad ? ` · ${master.universidad.ciudad}` : ""}
           </p>
@@ -322,7 +321,12 @@ export default function EleccionMastersCliente({
           )}
         </div>
 
-        <div className="shrink-0 border-t border-neutral-100 bg-white px-4 py-3 flex items-center justify-between gap-3">
+        {/* La acción principal, pegada abajo en el móvil: es donde llega el
+            pulgar de quien sostiene el teléfono con una mano, y el asesorado
+            elige másteres desplazando una lista larga. El respiro de abajo
+            evita que la barra de gestos de iOS se coma el botón. */}
+        <div className="shrink-0 sticky bottom-0 z-20 border-t border-neutral-100 bg-white/95 backdrop-blur px-4 py-3 flex items-center justify-between gap-3"
+          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}>
           <div className="flex items-center gap-3">
             <p className="text-xs text-neutral-500">
               {filled > 0
@@ -333,7 +337,7 @@ export default function EleccionMastersCliente({
               <button
                 type="button"
                 onClick={limpiarSeleccion}
-                className="text-[11px] text-neutral-400 hover:text-red-500 underline transition"
+                className="ux-tap ux-tap-invisible text-[11.5px] text-neutral-400 hover:text-red-500 underline px-1"
               >
                 Limpiar
               </button>
@@ -342,7 +346,7 @@ export default function EleccionMastersCliente({
           <button
             onClick={handleGuardar}
             disabled={saving || filled === 0}
-            className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2 rounded-lg bg-[#023A4B] text-white hover:bg-[#035670] disabled:opacity-40 transition active:scale-95"
+            className="ux-tap inline-flex items-center justify-center gap-2 text-sm font-semibold px-5 min-h-[48px] rounded-xl bg-[#023A4B] text-white hover:bg-[#035670] disabled:opacity-40 shadow-sm"
           >
             {saving ? (
               <>

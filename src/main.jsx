@@ -3,6 +3,12 @@ import { createRoot } from "react-dom/client";
 
 import App from "./App.jsx";
 import "./styles/globals.css";
+// La escala y el tacto compartidos por las dos mitades del producto.
+// Va aquí y no en cada shell a propósito: importada desde BackofficeApp y
+// desde PanelCliente a la vez, Vite la metía en un fragmento perezoso
+// —el de Documentos— y los estilos no existían hasta entrar en esa
+// pantalla. En la entrada está siempre, y pesa 6 KB.
+import "./styles/ergonomia.css";
 
 import { AuthProvider } from "./context/AuthContext";
 import InspiraDialog from "./components/ui/InspiraDialog";

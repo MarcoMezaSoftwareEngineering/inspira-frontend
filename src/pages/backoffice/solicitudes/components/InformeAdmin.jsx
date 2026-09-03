@@ -81,10 +81,10 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
     : "bg-neutral-100 text-neutral-500";
 
   return (
-    <div className={`group relative flex items-center gap-2.5 p-3 rounded-xl border transition-all duration-200 ${
+    <div className={`group relative flex items-start sm:items-center gap-3 p-3 sm:p-3.5 rounded-2xl transition-all duration-200 ${
       editMode
-        ? "border-neutral-200 bg-white hover:border-[#1D6A4A]/30 hover:shadow-sm"
-        : "border-transparent hover:bg-neutral-50/80"
+        ? "ux-tarjeta"
+        : "border border-transparent hover:bg-neutral-50/80 md:rounded-xl"
     }`}>
 
       {/* Reorder arrows */}
@@ -112,8 +112,8 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
 
       {/* Datos máster */}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-[#1A3557] leading-tight">{master.nombre_limpio}</p>
-        <p className="text-[11px] text-neutral-500 leading-tight mt-0.5 truncate">
+        <p className="text-[14px] sm:text-[13px] font-semibold text-[#1A3557] leading-snug">{master.nombre_limpio}</p>
+        <p className="text-[11.5px] text-neutral-500 leading-snug mt-1 truncate">
           {master.universidad.nombre_completo}
           {master.universidad.ciudad ? ` · ${master.universidad.ciudad}` : ""}
           {master.universidad.comunidad ? ` · ${master.universidad.comunidad?.nombre ?? master.universidad.comunidad}` : ""}
@@ -149,7 +149,8 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
         {(master.url_ficha || master.universidad?.url) && (
           <a href={master.url_ficha || master.universidad.url}
             target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 mt-1.5 text-[10.5px] font-semibold text-[#1D6A4A] hover:underline">
+            onClick={(e) => e.stopPropagation()}
+            className="ux-tap inline-flex items-center gap-1 mt-2 py-1.5 pr-2 text-[11.5px] font-semibold text-[#1D6A4A] hover:underline">
             {master.url_ficha ? "Ver la ficha del máster" : "Ver la web de la universidad"}
             <span aria-hidden="true">↗</span>
           </a>

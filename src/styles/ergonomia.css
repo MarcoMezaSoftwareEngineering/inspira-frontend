@@ -1,0 +1,472 @@
+/* ==========================================================================
+   Ergonomía: escala, aire y tacto
+   --------------------------------------------------------------------------
+   Va después de `asesor.css` y de `panel.css`, y no redefine ningún color:
+   la paleta de Inspira ya está y tocarla aquí crearía dos verdades.
+
+   Lo que añade son las tres cosas que faltaban para que el portal se use
+   igual de bien en un escritorio y en un móvil con una sola mano:
+
+     1. Una escala. Radios, sombras y espaciados salían a ojo en cada
+        pantalla, y a la tercera ya no parecían del mismo sitio.
+     2. Tacto. Un dedo no es un ratón: necesita 48 px de destino, respuesta
+        al pulsar (no hay hover que valga) y separación entre botones para
+        no darle al de al lado.
+     3. Sitio para el pulgar. El móvil se usa por abajo; las acciones
+        principales y la navegación bajan ahí.
+   ========================================================================== */
+
+:root {
+  /* ── Radios ───────────────────────────────────────────────────────────── */
+  --r-xs: 8px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-full: 999px;
+
+  /* ── Aire. Es el separador principal: antes de poner una línea, pon aire. */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 24px;
+  --e-6: 32px;
+  --e-7: 48px;
+
+  /* ── Elevación ────────────────────────────────────────────────────────────
+     Cuatro alturas y ninguna más. Una sombra por cada estado de una tarjeta
+     —quieta, señalada, levantada, flotando— evita que cada pantalla invente
+     la suya y que todo acabe pareciendo que levita. */
+  --el-0: none;
+  --el-1: 0 1px 2px rgba(1, 52, 70, .05), 0 6px 18px -8px rgba(1, 52, 70, .10);
+  --el-2: 0 2px 4px rgba(1, 52, 70, .06), 0 12px 28px -10px rgba(1, 52, 70, .16);
+  --el-3: 0 18px 40px rgba(1, 52, 70, .14);
+
+  /* ── Tipografía ───────────────────────────────────────────────────────────
+     El contraste lo hace el peso y el color, no solo el tamaño: un título a
+     15px en 700 y tinta oscura manda sobre un cuerpo a 13px en 400 y gris. */
+  --t-micro: 9.5px;
+  --t-mini: 11px;
+  --t-cuerpo: 13px;
+  --t-lectura: 14.5px;
+  --t-titulo: 17px;
+  --t-display: 22px;
+
+  /* ── Tacto ────────────────────────────────────────────────────────────────
+     48px es el mínimo con el que un adulto acierta sin mirar. El área puede
+     ser invisible: el botón se ve de 36 y se pulsa de 48. */
+  --tap: 48px;
+  --tap-min: 44px;
+
+  /* Zona segura del móvil: la barra de gestos de iOS se come 34px, y una
+     acción principal debajo de ella no se puede pulsar. */
+  --abajo: env(safe-area-inset-bottom, 0px);
+
+  --transicion: 160ms var(--ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+/* ==========================================================================
+   1. Tarjetas
+   ========================================================================== */
+
+.ux-tarjeta {
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  box-shadow: var(--el-1);
+  transition: box-shadow var(--transicion), transform var(--transicion),
+              border-color var(--transicion);
+}
+
+/* El degradado va muy suave y desde arriba: da profundidad sin que se note
+   que hay un degradado. En cuanto se ve, parece un botón de hace quince años. */
+.ux-tarjeta-realce {
+  background: linear-gradient(180deg, #fff 0%, var(--ground, #f4f8fb) 180%);
+}
+
+.ux-tarjeta[data-pulsable="1"] { cursor: pointer; }
+
+@media (hover: hover) and (pointer: fine) {
+  .ux-tarjeta[data-pulsable="1"]:hover {
+    box-shadow: var(--el-2);
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--primary, #013446) 12%, transparent);
+  }
+}
+
+/* En el móvil no hay hover: la respuesta es el hundido al pulsar. Sin esto
+   el usuario no sabe si el toque ha entrado y acaba pulsando dos veces. */
+.ux-tarjeta[data-pulsable="1"]:active { transform: scale(.985); box-shadow: var(--el-1); }
+
+/* Seleccionada: un filete de color y un fondo tenue. Ni borde entero ni
+   sombra distinta, que compiten con la jerarquía de la propia tarjeta. */
+.ux-tarjeta[data-sel="1"] {
+  border-color: color-mix(in srgb, var(--primary, #013446) 28%, transparent);
+  background: color-mix(in srgb, var(--primary, #013446) 3%, #fff);
+}
+
+/* ==========================================================================
+   2. Tacto: destinos, respuesta al pulsar y separación
+   ========================================================================== */
+
+/* Se aplica solo donde el puntero es grueso —un dedo—, para no agrandar
+   toda la interfaz de escritorio sin motivo. */
+@media (pointer: coarse) {
+  .ase-btn,
+  .ux-tap,
+  .ase-pill,
+  button[class*="ase-"],
+  .ux-nav-item {
+    min-height: var(--tap);
+    min-width: var(--tap);
+  }
+
+  /* El área crece por fuera sin mover el dibujo del botón. */
+  .ux-tap-invisible { position: relative; }
+  .ux-tap-invisible::after {
+    content: "";
+    position: absolute;
+    inset: 50% 50% 50% 50%;
+    width: var(--tap);
+    height: var(--tap);
+    transform: translate(-50%, -50%);
+  }
+
+  /* Dos acciones pegadas son un toque equivocado esperando. */
+  .ux-acciones > * + * { margin-left: var(--e-3); }
+}
+
+/* La respuesta al pulsar, en cualquier dispositivo. */
+.ase-btn:active,
+.ux-tap:active { transform: scale(.97); }
+
+.ase-btn,
+.ux-tap {
+  transition: transform var(--transicion), box-shadow var(--transicion),
+              background-color var(--transicion), color var(--transicion);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;   /* quita el retardo de 300ms del doble toque */
+}
+
+/* Quien navega con teclado tiene que ver dónde está. Solo en foco de
+   teclado: un anillo tras cada clic de ratón es ruido. */
+.ase-btn:focus-visible,
+.ux-tap:focus-visible,
+.ux-nav-item:focus-visible,
+.ase-campo:focus-visible {
+  outline: 2px solid var(--sky, #88c4fc);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   3. Campos: foco, error y acierto
+   --------------------------------------------------------------------------
+   El estado se dice con color Y con un icono o un texto, nunca solo con
+   color: hay quien no distingue el rojo del verde.
+   ========================================================================== */
+
+.ux-campo { display: block; }
+
+.ux-campo-etq {
+  display: block;
+  font-size: var(--t-mini);
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--muted, #62808f);
+  margin-bottom: var(--e-1);
+}
+
+.ux-campo input,
+.ux-campo select,
+.ux-campo textarea {
+  width: 100%;
+  border: 1px solid var(--line, #d8e4ef);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-size: var(--t-lectura);   /* 14.5px: por debajo de 16 iOS hace zoom */
+  color: var(--ink, #0d2c3a);
+  background: #fff;
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+
+@media (pointer: coarse) {
+  .ux-campo input,
+  .ux-campo select,
+  .ux-campo textarea {
+    min-height: var(--tap);
+    font-size: 16px;   /* iOS hace zoom en cualquier campo por debajo de 16 */
+  }
+}
+
+.ux-campo input:focus,
+.ux-campo select:focus,
+.ux-campo textarea:focus {
+  outline: none;
+  border-color: var(--primary, #013446);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sky, #88c4fc) 45%, transparent);
+}
+
+.ux-campo[data-estado="error"] input,
+.ux-campo[data-estado="error"] select,
+.ux-campo[data-estado="error"] textarea { border-color: var(--red, #c0392b); }
+
+.ux-campo[data-estado="error"] input:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red, #c0392b) 22%, transparent);
+}
+
+.ux-campo[data-estado="ok"] input,
+.ux-campo[data-estado="ok"] select { border-color: var(--green, #1d6a4a); }
+
+.ux-campo-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: var(--t-mini);
+  line-height: 1.4;
+  color: var(--muted, #62808f);
+}
+
+.ux-campo[data-estado="error"] .ux-campo-nota { color: var(--red, #c0392b); }
+.ux-campo[data-estado="ok"] .ux-campo-nota { color: var(--green, #1d6a4a); }
+
+/* Una columna en el móvil, varias en el escritorio. Un formulario a dos
+   columnas en una pantalla de 390px obliga a hacer zoom para leer la
+   etiqueta. */
+.ux-form { display: grid; gap: var(--e-4); grid-template-columns: 1fr; }
+@media (min-width: 768px) {
+  .ux-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4) var(--e-5); }
+  .ux-form .ux-ancho { grid-column: 1 / -1; }
+}
+
+/* ==========================================================================
+   4. Tablas que se vuelven tarjetas
+   --------------------------------------------------------------------------
+   Una tabla de ocho columnas en un móvil se lee en horizontal o no se lee.
+   Debajo de 768px cada fila pasa a ser una tarjeta y cada celda se rotula
+   con su cabecera, que viaja en `data-etq`.
+   ========================================================================== */
+
+/* La clase va repetida a propósito. `asesor.css` fija la tabla del buscador
+   con `.ase .ase-tabla { min-width: 1180px }` —dos clases— y una regla de una
+   sola clase pierde contra ella: la tabla seguiría midiendo 1180px en un móvil
+   de 390 y no se apilaría nada. Repetir el nombre sube la especificidad sin
+   recurrir a `!important`, que dejaría el estilo sin forma de corregirse
+   después. */
+@media (max-width: 767px) {
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt {
+    min-width: 0;
+    width: 100%;
+    display: block;
+  }
+
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt thead { display: none; }
+
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt tbody,
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt tr,
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td { display: block; width: 100%; }
+
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt tbody tr {
+    background: #fff;
+    border-radius: var(--r-md);
+    box-shadow: var(--el-1);
+    padding: var(--e-3);
+    margin-bottom: var(--e-3);
+  }
+
+  /* El rayado de filas pares y el hover de escritorio no significan nada
+     cuando cada fila es ya una tarjeta suelta. */
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt tbody tr:nth-child(even) { background: #fff; }
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt tbody tr:hover { background: #fff; }
+
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--e-4);
+    padding: 5px 0;
+    border: none;
+    text-align: right;
+    vertical-align: baseline;
+    font-size: var(--t-cuerpo);
+  }
+
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td::before {
+    content: attr(data-etq);
+    flex: 0 0 auto;
+    text-align: left;
+    font-size: var(--t-mini);
+    font-weight: 700;
+    letter-spacing: .03em;
+    color: var(--muted, #62808f);
+    white-space: nowrap;
+  }
+
+  /* Una celda vacía con solo su rótulo es ruido: se esconde. */
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td:empty { display: none; }
+
+  /* La celda del nombre manda: toda la fila, sin rótulo y en grande. */
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-principal] {
+    display: block;
+    text-align: left;
+    font-size: var(--t-lectura);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink, #0d2c3a);
+    padding: 0 0 var(--e-2);
+  }
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-principal]::before { content: none; }
+
+  /* El baremo son barras: apiladas se leen, en una línea a la derecha no. */
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-etq="Baremo"],
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-etq="Postulación"],
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-etq="Resultados"] {
+    display: block;
+    text-align: left;
+    padding-top: var(--e-2);
+  }
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-etq="Baremo"]::before,
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-etq="Postulación"]::before,
+  .ux-tabla-adapt.ux-tabla-adapt.ux-tabla-adapt td[data-etq="Resultados"]::before {
+    display: block;
+    margin-bottom: 3px;
+  }
+}
+
+/* En escritorio, la tabla se desplaza dentro de su caja y nunca empuja la
+   página a lo ancho. */
+.ux-scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ==========================================================================
+   5. Acordeón
+   ========================================================================== */
+
+.ux-acordeon { border-radius: var(--r-md); background: #fff; box-shadow: var(--el-1); }
+
+.ux-acordeon-cab {
+  width: 100%;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink, #0d2c3a);
+  border-radius: var(--r-md);
+}
+
+.ux-acordeon-flecha { transition: transform var(--transicion); flex-shrink: 0; }
+.ux-acordeon[data-abierto="1"] .ux-acordeon-flecha { transform: rotate(180deg); }
+
+.ux-acordeon-cuerpo { padding: 0 var(--e-4) var(--e-4); }
+
+/* ==========================================================================
+   6. Sitio para el pulgar
+   ========================================================================== */
+
+/* La acción principal, fija abajo en el móvil, por encima de la barra de
+   gestos. En escritorio no se fija: ahí el ratón llega a todas partes y una
+   barra pegada abajo solo roba pantalla. */
+.ux-accion-pulgar {
+  position: sticky;
+  bottom: calc(var(--e-3) + var(--abajo));
+  z-index: 20;
+  padding-top: var(--e-3);
+}
+
+@media (min-width: 768px) {
+  .ux-accion-pulgar { position: static; padding-top: 0; }
+}
+
+/* La barra inferior de navegación (solo móvil). */
+.ux-barra-abajo {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 45;
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, .92);
+  backdrop-filter: saturate(140%) blur(12px);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  border-top: 1px solid var(--line, #d8e4ef);
+  padding-bottom: var(--abajo);
+  box-shadow: 0 -6px 20px -12px rgba(1, 52, 70, .3);
+}
+
+@media (min-width: 768px) { .ux-barra-abajo { display: none; } }
+
+.ux-nav-item {
+  flex: 1 1 0;
+  min-height: var(--tap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 2px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted, #62808f);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .02em;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color var(--transicion);
+}
+
+.ux-nav-item:active { transform: none; }        /* la barra no se hunde entera */
+.ux-nav-item:active .ux-nav-icono { transform: scale(.88); }
+
+.ux-nav-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  transition: transform var(--transicion), color var(--transicion);
+}
+
+.ux-nav-item[data-on="1"] { color: var(--primary, #013446); }
+
+/* El punto marca dónde estás sin robar la altura que necesita el texto. */
+.ux-nav-item[data-on="1"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 22px;
+  height: 3px;
+  border-radius: 0 0 var(--r-full) var(--r-full);
+  background: var(--accent, #fa943a);
+}
+
+.ux-nav-item { position: relative; }
+
+/* Cuando hay barra abajo, el contenido necesita sitio para no quedar
+   tapado por ella. */
+.ux-con-barra-abajo { padding-bottom: calc(64px + var(--abajo)); }
+@media (min-width: 768px) { .ux-con-barra-abajo { padding-bottom: 0; } }
+
+/* ==========================================================================
+   7. Movimiento
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-tarjeta,
+  .ase-btn,
+  .ux-tap,
+  .ux-nav-item,
+  .ux-nav-icono,
+  .ux-acordeon-flecha {
+    transition: none !important;
+  }
+  .ux-tarjeta[data-pulsable="1"]:active,
+  .ase-btn:active,
+  .ux-tap:active { transform: none; }
+}

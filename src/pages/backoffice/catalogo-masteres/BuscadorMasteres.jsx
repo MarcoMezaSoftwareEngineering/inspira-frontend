@@ -360,10 +360,18 @@ function FormularioEdicion({ m, onGuardado, onCancelar }) {
  * Por eso las dos conviven en el mismo buscador y sobre los mismos filtros: no
  * son dos herramientas, son dos maneras de mirar la misma consulta.
  */
+/**
+ * La tabla para comparar veinte másteres de un vistazo.
+ *
+ * En el móvil no es una tabla: `ux-tabla-adapt` apila cada fila como una
+ * tarjeta y pone delante de cada dato el rótulo de su columna, que viaja en
+ * `data-etq`. Ocho columnas en una pantalla de 390px se leen en horizontal, y
+ * leer en horizontal es lo que hace que nadie mire el catálogo desde el móvil.
+ */
 function TablaMasteres({ masteres, onAbrir }) {
   return (
-    <div className="ase-tabla-scroll">
-      <table className="ase-tabla">
+    <div className="ase-tabla-scroll ux-scroll-x">
+      <table className="ase-tabla ux-tabla-adapt">
         <thead>
           <tr>
             <th>Máster</th>
@@ -385,12 +393,12 @@ function TablaMasteres({ masteres, onAbrir }) {
             return (
               <tr key={m.id_master} onClick={() => onAbrir(m)} tabIndex={0}
                 onKeyDown={(e) => { if (e.key === "Enter") onAbrir(m); }}>
-                <td className="ase-td-nombre">{m.nombre}</td>
-                <td className="ase-td-uni">
+                <td className="ase-td-nombre" data-etq="Máster" data-principal="1">{m.nombre}</td>
+                <td className="ase-td-uni" data-etq="Universidad">
                   <b>{u.sigla}</b>
                   <span>{u.ciudad || u.nombre}</span>
                 </td>
-                <td>
+                <td data-etq="Comunidad">
                   {u.comunidad}
                   {u.requiere_estudio_titulo === true && (
                     <span className="ase-td-recon">
@@ -401,7 +409,7 @@ function TablaMasteres({ masteres, onAbrir }) {
                     <span className="ase-td-recon ok">sin trámite previo</span>
                   )}
                 </td>
-                <td className="ase-num">
+                <td className="ase-num" data-etq="Créditos">
                   {m.ects ? `${m.ects} ECTS` : <i className="ase-td-vacio">sin dato</i>}
                   {m.duracion_anios && (
                     <span className="ase-td-sec">
@@ -410,11 +418,11 @@ function TablaMasteres({ masteres, onAbrir }) {
                     </span>
                   )}
                 </td>
-                <td className="ase-td-precio" title={m.precio_fuente || ""}>
+                <td className="ase-td-precio" data-etq="Precio" title={m.precio_fuente || ""}>
                   <b>{eur(m.precio)}</b>
                   {m.precio_credito && <span>{eur2(m.precio_credito)}/crédito</span>}
                 </td>
-                <td className="ase-num ase-td-fases">
+                <td className="ase-num ase-td-fases" data-etq="Postulación">
                   {fases.length ? fases.map((f, i) => (
                     <div key={i}>
                       <span className="ase-td-fn">{f.nombre.replace(/^Fase\s*/i, "F").split(" — ")[0]}</span>
@@ -423,12 +431,12 @@ function TablaMasteres({ masteres, onAbrir }) {
                     </div>
                   )) : <i className="ase-td-vacio">sin fechas</i>}
                 </td>
-                <td className="ase-num ase-td-fases">
+                <td className="ase-num ase-td-fases" data-etq="Resultados">
                   {fases.length ? fases.map((f, i) => (
                     <div key={i}>{f.resultados ? fechaCorta(f.resultados) : <i className="ase-td-vacio">—</i>}</div>
                   )) : null}
                 </td>
-                <td className="ase-td-baremo">
+                <td className="ase-td-baremo" data-etq="Baremo">
                   {criterios.length ? criterios.map((c, i) => (
                     <div key={i} className="ase-td-crit">
                       <span>{rotuloCriterio(c)}</span>

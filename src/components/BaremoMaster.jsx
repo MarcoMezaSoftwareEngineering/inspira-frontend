@@ -47,7 +47,10 @@ export default function BaremoMaster({ baremo, maxVisible = 4, compacto = false 
   const ocultos = utiles.length - visibles.length;
 
   return (
-    <div className={compacto ? "mt-2" : "mt-2.5"}>
+    // Ancho acotado. En una pantalla de escritorio la tarjeta mide 900px y
+    // una barra de 900px con el porcentaje en la otra punta no se lee: el ojo
+    // tiene que viajar. A 440px el rótulo, la barra y el número se ven juntos.
+    <div className={compacto ? "mt-2" : "mt-2.5"} style={{ maxWidth: 440 }}>
       <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1.5">
         Qué valoran para admitir
       </p>

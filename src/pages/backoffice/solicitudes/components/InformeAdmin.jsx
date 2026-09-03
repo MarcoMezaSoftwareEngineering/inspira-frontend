@@ -81,7 +81,7 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
     : "bg-neutral-100 text-neutral-500";
 
   return (
-    <div className={`group relative flex items-start sm:items-center gap-3 p-3 sm:p-3.5 rounded-2xl transition-all duration-200 ${
+    <div className={`group relative flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl transition-all duration-200 ${
       editMode
         ? "ux-tarjeta"
         : "border border-transparent hover:bg-neutral-50/80 md:rounded-xl"
@@ -106,7 +106,7 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
       )}
 
       {/* Número posición */}
-      <div className={`shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center ${numBg}`}>
+      <div className={`shrink-0 w-6 h-6 mt-0.5 rounded-full text-[11px] font-bold flex items-center justify-center ${numBg}`}>
         {posicion}
       </div>
 

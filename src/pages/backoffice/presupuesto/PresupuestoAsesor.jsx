@@ -71,9 +71,10 @@ const VACIO = () => ({
     { texto: "50 % antes de la presentación del expediente" },
   ],
   nota_pago: "",
-  // El contravalor en la moneda del asesorado, orientativo. Se rellena a mano
-  // con el cambio del día: no hay una fuente que valga para un presupuesto.
-  tipo_cambio: "",
+  // El contravalor en la moneda del asesorado, orientativo. Arranca en 4,30
+  // soles por euro —el cambio con el que trabaja Inspira— y se ajusta a mano
+  // al del día: no hay una fuente automática que valga para un presupuesto.
+  tipo_cambio: "4.30",
   moneda_cambio: "PEN",
   // Qué juego de cláusulas lleva: el general o el del paquete de máster.
   juego_condiciones: "general",
@@ -488,7 +489,7 @@ export default function PresupuestoAsesor() {
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                   <span style={{ fontSize: 12.5, color: "var(--muted)" }}>1 € =</span>
                   <input className="ase-campo ase-num" type="number" inputMode="decimal" step="0.01" min="0"
-                    style={{ flex: "0 1 120px", minWidth: 0 }} placeholder="4,10"
+                    style={{ flex: "0 1 120px", minWidth: 0 }} placeholder="4,30"
                     value={d.tipo_cambio} onChange={(e) => set("tipo_cambio", e.target.value)} />
                   <select className="ase-campo" style={{ flex: "0 1 150px" }}
                     value={d.moneda_cambio} onChange={(e) => set("moneda_cambio", e.target.value)}>

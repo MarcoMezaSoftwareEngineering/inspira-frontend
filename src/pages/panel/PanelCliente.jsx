@@ -10,10 +10,10 @@ import MisServicios from "./components/MisServicios";
 import WizardPerfilCliente from "./components/WizardPerfilCliente";
 import { usePerfilIncompletoBool, datosQueFaltan } from "./hooks/usePerfilIncompletoBool";
 import AvisoPerfil from "./components/AvisoPerfil";
+import Bienvenida from "./components/Bienvenida";
 import { accesosDe, esSoloInvitado, pideAcademico } from "./servicios";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
-import { loginGoogle } from "../../components/layout/Header/LoginButton";
 
 const BecasEspana   = lazy(() => import("./BecasEspana"));
 const GuiaMaster    = lazy(() => import("./GuiaMaster"));
@@ -71,14 +71,17 @@ export default function PanelCliente({ path }) {
   const avisarPerfil = user !== null && cargado && perfilIncompleto && !sinServicios && tab !== "perfil";
   const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico) : 0;
 
-  // Sin sesión no se manda a la portada a buscar el botón: se va a Google y se
-  // vuelve a esta misma URL. Es lo que hace que un enlace de correo a un
-  // expediente funcione aunque la sesión haya caducado.
+  // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
+  // ofrece entrar. Al pulsar, el login conserva esta misma URL, así que un
+  // enlace de correo a un expediente sigue funcionando con la sesión caducada.
+  const [sinSesion] = useState(() => {
+    try { return !localStorage.getItem("token"); } catch { return true; }
+  });
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) { loginGoogle(); return; }
+    if (sinSesion) return;
     cargarMe();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sinSesion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function cargarMe() {
     try {
@@ -133,6 +136,8 @@ export default function PanelCliente({ path }) {
   };
 
   const { nombre, corto, iniciales, foto } = datosUsuario(user);
+
+  if (sinSesion) return <Bienvenida />;
 
   // `h-dvh` y no `h-screen`: en Safari de iPhone 100vh cuenta la barra del
   // navegador y el borde de abajo quedaba tapado. El backoffice ya lo usa.

@@ -28,6 +28,11 @@ function cuando(dias) {
 
 const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 
+// El nombre del servicio arrastra el plan y las comunidades («Postulación a
+// Máster · Plan Full Económico · Andalucía, Castilla…»): en una línea de
+// pendientes basta con saber de cuál es.
+const recorta = (t, n = 44) => (t && t.length > n ? t.slice(0, n - 1).trim() + "…" : t);
+
 /**
  * Lo pendiente, con su peso: 0 es lo que no puede esperar. Solo entra lo que
  * depende del asesorado; lo que está en manos de Inspira —un informe en
@@ -51,7 +56,7 @@ function pendientesDe(servicios, perfil, conAcademico) {
     // Estancia y modificatoria no tienen secciones con URL: se abre el expediente.
     const conSecciones = !r.servicio_propio;
     const ir = (seccion) => rutaDe({ idServicio: s.id_solicitud, seccion: conSecciones ? seccion : null });
-    const de = s.invitado ? `Expediente de ${s.titular}` : s.titulo;
+    const de = recorta(s.invitado ? `Expediente de ${s.titular}` : s.titulo);
     const id = s.id_solicitud;
 
     for (const q of r.requerimientos || []) {
@@ -206,6 +211,13 @@ export default function Inicio({ servicios, perfil, conAcademico, loading, error
                 ? `${plural(items.length, "cosa pendiente", "cosas pendientes")}, por orden de urgencia`
                 : "Lo que te toca hacer"}</p>
             </div>
+            {/* Atajo a la lista: las tarjetas van debajo de los pendientes y en un
+                teléfono quedan lejos. */}
+            <button type="button" className="pnl-btn ux-tap"
+              onClick={() => navigate(rutaDe({ tab: "servicios" }))}>
+              <Icono nombre="maletin" size={15} />
+              Mis servicios{lista.length ? ` (${lista.length})` : ""}
+            </button>
           </div>
           {loading
             ? <div className="pnl-esq" style={{ height: 64, borderRadius: 16 }} />

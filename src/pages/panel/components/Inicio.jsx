@@ -85,9 +85,9 @@ function Pendientes({ items }) {
   );
 }
 
-export default function Inicio({ servicios, perfil, conAcademico, loading, error, onRecargar, onVerDetalle }) {
+export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle }) {
   const lista = servicios || [];
-  const items = loading ? [] : pendientesDe(lista, perfil, conAcademico);
+  const items = loading ? [] : pendientesDe(lista, perfil, conAcademico, conCompleto);
   const hayServicios = lista.length > 0;
 
   return (

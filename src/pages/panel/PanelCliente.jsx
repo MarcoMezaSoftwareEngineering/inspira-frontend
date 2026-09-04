@@ -12,7 +12,7 @@ import { usePerfilIncompletoBool, datosQueFaltan } from "./hooks/usePerfilIncomp
 import AvisoPerfil from "./components/AvisoPerfil";
 import Bienvenida from "./components/Bienvenida";
 import { pendientesDe } from "./pendientes";
-import { accesosDe, esSoloInvitado, pideAcademico } from "./servicios";
+import { accesosDe, esSoloInvitado, pideAcademico, pideCompleto } from "./servicios";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
 
@@ -64,18 +64,20 @@ export default function PanelCliente({ path }) {
   // paso previo para que un asesor pueda darle acceso—. Al invitado, solo sus
   // datos generales: el expediente y su formulario son de otra persona.
   const conAcademico = !soloInvitado && (sinServicios || pideAcademico(lista));
-  const perfilIncompleto = usePerfilIncompletoBool(user, conAcademico);
+  // Paquete de máster: el perfil entero es condición del servicio.
+  const conCompleto = !soloInvitado && pideCompleto(lista);
+  const perfilIncompleto = usePerfilIncompletoBool(user, conAcademico, conCompleto);
   // El asistente solo cierra el paso a quien todavía no tiene nada contratado:
   // completar sus datos es lo previo a que un asesor le dé acceso. A quien ya
   // tiene expediente se le avisa arriba de lo que falta, y sigue trabajando.
   const mostrarWizard = user !== null && cargado && perfilIncompleto && sinServicios;
   const avisarPerfil = user !== null && cargado && perfilIncompleto && !sinServicios && tab !== "perfil";
-  const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico) : 0;
+  const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico, conCompleto) : 0;
   // Cuántas cosas esperan: sale en el menú junto a «Inicio» y como punto sobre
   // el botón del menú, para saberlo sin abrir nada.
   const nPendientes = useMemo(
-    () => (user && cargado ? pendientesDe(lista, user, conAcademico).length : 0),
-    [user, cargado, lista, conAcademico],
+    () => (user && cargado ? pendientesDe(lista, user, conAcademico, conCompleto).length : 0),
+    [user, cargado, lista, conAcademico, conCompleto],
   );
 
   // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
@@ -209,7 +211,7 @@ export default function PanelCliente({ path }) {
         <div key={claveVista} className="pnl-entra pnl-entra-llena">
           {avisarPerfil && (
             <div className="px-4 sm:px-6 pt-4 shrink-0">
-              <AvisoPerfil faltan={faltanDatos} onIr={() => handleChangeTab("perfil")} />
+              <AvisoPerfil faltan={faltanDatos} imprescindible={conCompleto} onIr={() => handleChangeTab("perfil")} />
             </div>
           )}
 
@@ -220,6 +222,7 @@ export default function PanelCliente({ path }) {
                 ruta={ruta}
                 perfil={user}
                 conAcademico={conAcademico}
+                conCompleto={conCompleto}
                 servicios={lista}
                 loading={cargandoServicios}
                 error={errorServicios}

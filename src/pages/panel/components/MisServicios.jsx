@@ -22,7 +22,7 @@ const DetalleSolicitudModificatoria = lazy(() => import("./mis-servicios/Detalle
  * (`/panel/servicios/155/post`). Recargar conserva el sitio, «atrás» vuelve a
  * la lista, y un correo puede enlazar a una sección concreta.
  */
-export default function MisServicios({ ruta, perfil, conAcademico, servicios, loading, error, onRecargar, onIrAGuia }) {
+export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia }) {
   const { idServicio, seccion, tab } = ruta;
   const seleccionada = idServicio
     ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
@@ -86,6 +86,7 @@ export default function MisServicios({ ruta, perfil, conAcademico, servicios, lo
       servicios={servicios}
       perfil={perfil}
       conAcademico={conAcademico}
+      conCompleto={conCompleto}
       loading={loading}
       error={error}
       onRecargar={onRecargar}

@@ -28,14 +28,17 @@ export const recorta = (t, n = 44) => (t && t.length > n ? t.slice(0, n - 1).tri
  * depende del asesorado; lo que está en manos de Inspira —un informe en
  * preparación— no es una tarea suya y no se le pone en la lista.
  */
-export function pendientesDe(servicios, perfil, conAcademico) {
+export function pendientesDe(servicios, perfil, conAcademico, conCompleto = false) {
   const items = [];
 
-  const faltan = datosQueFaltan(perfil, conAcademico);
+  // Con paquete de máster el perfil entero es condición del servicio: va
+  // arriba y en rojo hasta que esté, y dice para qué hace falta.
+  const faltan = datosQueFaltan(perfil, conAcademico, conCompleto);
   if (faltan > 0) {
     items.push({
-      clave: "perfil", peso: 3, tono: "aviso", icono: "usuario",
-      texto: `Te ${faltan === 1 ? "falta un dato" : `faltan ${faltan} datos`} del perfil`,
+      clave: "perfil", peso: conCompleto ? 1 : 3, tono: conCompleto ? "alto" : "aviso", icono: "usuario",
+      texto: `Completa tu perfil: ${faltan === 1 ? "falta un dato" : `faltan ${faltan} datos`}`,
+      detalle: conCompleto ? "Imprescindible para preparar tu informe y tu postulación" : null,
       accion: "Completar", href: rutaDe({ tab: "perfil" }),
     });
   }

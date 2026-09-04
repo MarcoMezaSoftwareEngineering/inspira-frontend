@@ -8,14 +8,16 @@
 // dice qué falta y lleva al perfil, sin bloquear nada.
 import Icono from "../../../components/common/Icono";
 
-export default function AvisoPerfil({ faltan, onIr }) {
+export default function AvisoPerfil({ faltan, onIr, imprescindible = false }) {
   if (!faltan) return null;
   return (
     <div className="pnl-aviso" role="status">
       <span className="pnl-aviso-icono"><Icono nombre="usuario" size={16} /></span>
       <p className="pnl-aviso-texto">
         Te {faltan === 1 ? "falta un dato" : `faltan ${faltan} datos`} del perfil.
-        Nos hacen falta para los trámites.
+        {imprescindible
+          ? " Con tu paquete de máster el perfil completo es imprescindible: con él preparamos tu informe y tu postulación."
+          : " Nos hacen falta para los trámites."}
       </p>
       <button type="button" className="pnl-btn ux-tap" onClick={onIr}>
         Completar

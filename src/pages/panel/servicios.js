@@ -89,6 +89,14 @@ export function accesosDe(solicitudes = []) {
   return abiertos;
 }
 
+/**
+ * ¿Tiene contratado el paquete de máster? Entonces el perfil entero es
+ * condición del servicio y se le recuerda hasta que esté.
+ */
+export function pideCompleto(solicitudes = []) {
+  return solicitudes.some((s) => !s?.invitado && servicioDe(s) === SERVICIO.MASTER);
+}
+
 /** ¿Alguno de sus servicios necesita su historial académico? */
 export function pideAcademico(solicitudes = []) {
   return solicitudes.some((s) => !s?.invitado && DE_ESTUDIOS.includes(servicioDe(s)));

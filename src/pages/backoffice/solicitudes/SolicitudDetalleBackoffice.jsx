@@ -9,6 +9,7 @@ import CierreServicioMasterAdmin from "./CierreServicioMasterAdmin";
 import { useSolicitudDetalle } from "./hooks/useSolicitudDetalle";
 import ChecklistSolicitudAdmin from "./components/ChecklistSolicitudAdmin";
 import RecordatorioMaster from "./components/RecordatorioMaster";
+import MensajesAdmin from "./components/MensajesAdmin";
 import InformeAdmin from "./components/InformeAdmin";
 import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
 import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
@@ -483,6 +484,10 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       {/* ── MAIN SCROLL ── */}
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-3 sm:p-[22px] pb-20">
+
+          {/* El hilo con el asesorado, en cualquier tipo de expediente y arriba
+              del todo: si hay un mensaje sin leer, es lo primero. */}
+          {detalle?.id_solicitud && <MensajesAdmin idSolicitud={detalle.id_solicitud} />}
 
           {/* La estancia por estudios NO comparte bloques con el master ni con
               el visado: ni informe de IA, ni eleccion de universidades, ni

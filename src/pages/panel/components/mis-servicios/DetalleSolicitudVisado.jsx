@@ -1,6 +1,6 @@
 // src/pages/panel/components/mis-servicios/DetalleSolicitudVisado.jsx
 import { useEffect, useMemo, useState } from "react";
-import { apiGET } from "../../../../services/api";
+import { apiGET, apiPOST } from "../../../../services/api";
 import { SeccionSiempreAbiertoCtx } from "./sections/SeccionPanel";
 import SeccionPanel from "./sections/SeccionPanel";
 import ChecklistDocumentos from "./sections/ChecklistDocumentos";
@@ -9,6 +9,7 @@ import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
 import { estadoVisado, TONOS } from "../../../../lib/visaFlujoInterno";
 import { EsqueletoExpediente } from "../Esqueleto";
+import HiloMensajes from "../../../../components/common/HiloMensajes";
 import SelectorSeccionMovil from "./SelectorSeccionMovil";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -291,6 +292,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
   // asesor, salvo lo que es puramente interno: el checklist de gestión, el
   // estado del proceso y las notas no se le muestran. Y de la declaración
   // jurada y el formulario ve el documento terminado, nunca el generador.
+  const sinLeer = solicitudBase?.resumen?.mensajes_sin_leer || 0;
   const navSections = [
     { id: "datos",       num: 1, titulo: "Mis datos",              subtitulo: datosCompletos ? "Datos completos" : "Completa tus datos" },
     { id: "sesion",      num: 2, titulo: "Mi sesión de diagnóstico", subtitulo: sesionDiag?.fecha || "Por agendar" },
@@ -298,7 +300,8 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
     { id: "docs",        num: 4, titulo: "Mis documentos",          subtitulo: total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
     { id: "entregables", num: 5, titulo: "Preparado por Inspira",   subtitulo: (visaDocs?.dj || visaDocs?.formulario) ? "Ya tienes documentos" : "Lo preparamos nosotros" },
     { id: "estado",      num: 6, titulo: "Estado de mi visa",       subtitulo: estadoVisado(visaExp || {}).texto },
-  ].map((x) => ({ ...x, estado: estadoBloque(x.id) }));
+    { id: "mensajes",    num: 7, titulo: "Mensajes",                subtitulo: sinLeer > 0 ? `${sinLeer} sin leer` : "Con tu asesor, por escrito" },
+  ].map((x) => ({ ...x, estado: x.id === "mensajes" ? (sinLeer > 0 ? "pendiente" : "completado") : estadoBloque(x.id) }));
 
   // Una sección que no existe para este expediente —un enlace viejo, un
   // tipo de servicio distinto— cae en la primera en vez de en una pantalla vacía.
@@ -311,6 +314,15 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
 
   function renderBody(key) {
     switch (key) {
+      case "mensajes":
+        return (
+          <HiloMensajes
+            lado="cliente"
+            aviso="Lo que se escribe aquí forma parte de tu expediente: queda con fecha, con quién lo escribió y con constancia de cuándo lo leyó tu asesor. Para lo que importa, mejor aquí que por WhatsApp."
+            cargar={() => apiGET(`/solicitudes/${idSolicitud}/mensajes`)}
+            enviar={(texto) => apiPOST(`/solicitudes/${idSolicitud}/mensajes`, { texto })}
+          />
+        );
       case "sesion":
         return (
           <div className="space-y-3">

@@ -52,6 +52,15 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
     const de = recorta(s.invitado ? `Expediente de ${s.titular}` : s.titulo);
     const id = s.id_solicitud;
 
+    // Un mensaje del asesor sin leer va antes que casi todo: si escribió, es
+    // porque hace falta algo o hay una novedad.
+    if (r.mensajes_sin_leer > 0) {
+      items.push({
+        clave: `msg-${id}`, peso: 0, tono: "alto", icono: "chat",
+        texto: `${plural(r.mensajes_sin_leer, "mensaje", "mensajes")} de tu asesor sin leer`,
+        servicio: de, accion: "Leer", href: ir("mensajes"),
+      });
+    }
     for (const q of r.requerimientos || []) {
       items.push({
         clave: `req-${id}-${q.titulo}`, peso: 0, tono: "alto", icono: "escudo",

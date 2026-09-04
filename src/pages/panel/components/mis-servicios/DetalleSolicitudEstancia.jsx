@@ -15,6 +15,7 @@ import { Campo, Selector, Guardado } from "./campos";
 import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
 import AcompanantesCliente from "./AcompanantesCliente";
 import { abrirArchivo } from "../../../../services/archivos";
+import HiloMensajes from "../../../../components/common/HiloMensajes";
 
 import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
 const TONOS = {
@@ -248,7 +249,9 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
   const [exp, setExp] = useState(null);
   const [docs, setDocs] = useState(null);
   const [ext, setExt] = useState([]);
-  const [bloque, setBloque] = useState(1);
+  const sinLeer = solicitudBase?.resumen?.mensajes_sin_leer || 0;
+  // Si el asesor escribió, se entra por ahí.
+  const [bloque, setBloque] = useState(sinLeer > 0 ? 6 : 1);
   const [paso, setPaso] = useState(1);
   const [guardando, setGuardando] = useState(false);
   const [tocado, setTocado] = useState(false);
@@ -733,6 +736,17 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
               ))}
             </div>
           )}
+        </Bloque>
+        {/* ── 6 · Mensajes: lo que tiene que quedar por escrito ── */}
+        <Bloque numero="6" titulo="Mensajes con tu asesor"
+          subtitulo={sinLeer > 0 ? `${sinLeer} sin leer` : "Queda en tu expediente, con fecha y constancia de lectura"}
+          abierto={bloque === 6} onToggle={() => setBloque(bloque === 6 ? 0 : 6)}>
+          <HiloMensajes
+            lado="cliente"
+            aviso="Lo que se escribe aquí forma parte de tu expediente: queda con fecha, con quién lo escribió y con constancia de cuándo lo leyó tu asesor. Para lo que importa, mejor aquí que por WhatsApp."
+            cargar={() => apiGET(`/solicitudes/${id}/mensajes`)}
+            enviar={(texto) => apiPOST(`/solicitudes/${id}/mensajes`, { texto })}
+          />
         </Bloque>
       </div>
     </div>

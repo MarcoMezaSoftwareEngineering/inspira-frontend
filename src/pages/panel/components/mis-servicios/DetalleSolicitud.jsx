@@ -15,6 +15,7 @@ import PortalesYJustificantesCliente from "./sections/PortalesYJustificantesClie
 import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
 import { EsqueletoExpediente } from "../Esqueleto";
+import HiloMensajes from "../../../../components/common/HiloMensajes";
 import SelectorSeccionMovil from "./SelectorSeccionMovil";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
@@ -253,6 +254,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
   ).length;
 
   const eleccionesGuardadas = elecciones.filter((e) => e.id_master).length;
+  const sinLeer = solicitudBase?.resumen?.mensajes_sin_leer || 0;
 
   const navSections = [
     {
@@ -333,6 +335,14 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
       subtitulo: null,
       estado:   null,
       show:     !esVisado,
+    },
+    {
+      id:       "mensajes",
+      num:      10,
+      titulo:   "Mensajes",
+      subtitulo: sinLeer > 0 ? `${sinLeer} sin leer` : "Con tu asesor, por escrito",
+      estado:   sinLeer > 0 ? "pendiente" : null,
+      show:     true,
     },
   ].filter((s) => s.show);
 
@@ -486,6 +496,18 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
 
               {activeSection === "cierre" && !esVisado && (
                 <CierreServicioMasterCliente idSolicitud={idSolicitud} />
+              )}
+
+              {activeSection === "mensajes" && (
+                <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 sm:p-5 flex-1 min-h-0 flex flex-col">
+                  <h3 className="text-[15px] font-bold text-primary mb-1">Mensajes con tu asesor</h3>
+                  <HiloMensajes
+                    lado="cliente"
+                    aviso="Lo que se escribe aquí forma parte de tu expediente: queda con fecha, con quién lo escribió y con constancia de cuándo lo leyó tu asesor. Para lo que importa, mejor aquí que por WhatsApp."
+                    cargar={() => apiGET(`/solicitudes/${idSolicitud}/mensajes`)}
+                    enviar={(texto) => apiPOST(`/solicitudes/${idSolicitud}/mensajes`, { texto })}
+                  />
+                </div>
               )}
 
             </SeccionSiempreAbiertoCtx.Provider>

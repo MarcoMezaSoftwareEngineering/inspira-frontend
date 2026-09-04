@@ -1,6 +1,7 @@
 // F:\PROGRAMACION\paginaweb_insipira\inspira-frontend\src\App.jsx
 
 import { useEffect, useState, lazy, Suspense } from "react";
+import { dialog } from "./services/dialogService";
 import { Header } from "./components/layout/Header";
 import Home from "./pages/home/Home";
 import Footer from "./components/layout/footer";
@@ -259,7 +260,8 @@ const LANDING_ADS_PATHS = ["/master-espana"];
 
 function RouteSEO({ path }) {
   const isPrivate =
-    PRIVATE_PATHS.includes(path) || path.startsWith("/backoffice") || LANDING_ADS_PATHS.includes(path);
+    PRIVATE_PATHS.includes(path) || path.startsWith("/panel")
+    || path.startsWith("/backoffice") || LANDING_ADS_PATHS.includes(path);
   let config = SEO_PAGES[path];
   // Páginas de servicio: SEO dinámico a partir del catálogo
   if (!config && path.startsWith("/servicios/")) {
@@ -332,6 +334,18 @@ export default function App() {
     registrarVista(path);
   }, [path]);
 
+  // Si se llegó aquí porque la sesión caducó a mitad de faena, se explica.
+  // El sitio exacto donde estaba ya quedó guardado: al volver a entrar
+  // aterriza allí.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("inspira:sesion-caducada")) {
+        sessionStorage.removeItem("inspira:sesion-caducada");
+        dialog.toast("Tu sesión caducó. Vuelve a entrar y seguirás donde estabas.", "info");
+      }
+    } catch { /* noop */ }
+  }, []);
+
   // Precarga de las páginas más visitadas. No en los portales privados (no las
   // necesitan) ni cuando el visitante pidió al navegador ahorrar datos.
   useEffect(() => {
@@ -372,7 +386,7 @@ export default function App() {
   const rutaId = path.startsWith("/ruta/") ? path.slice("/ruta/".length) : null;
   const isRuta = !!getRuta(rutaId);
   const isNotFound =
-    !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle;
+    !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle && !isPanel;
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -386,8 +400,11 @@ export default function App() {
 
       {!isPanel && !isLandingAds && !isNotFound && <Header />}
 
-      {/* `key` fuerza el remontaje al navegar: cada página entra con animación */}
-      <div key={path} className={isPanel ? undefined : "v4-page-enter"}>
+      {/* `key` fuerza el remontaje al navegar: cada página entra con animación.
+          El panel NO: sus rutas internas cambian a cada clic y remontarlo
+          volvería a pedir el perfil y los servicios en cada sección. Se monta
+          una vez y anima por dentro lo que cambia. */}
+      <div key={isPanel ? "panel" : path} className={isPanel ? undefined : "v4-page-enter"}>
       <Suspense fallback={<div className="min-h-[60vh]" />}>
       {path === "/" && <Home />}
       {path === "/auth/success" && <AuthSuccess />}
@@ -405,7 +422,7 @@ export default function App() {
       {path === "/blog" && <BlogIndex />}
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}
-      {path === "/panel" && <PanelCliente />}
+      {isPanel && <PanelCliente path={path} />}
       {path === "/reservar" && <ReservarCita />}
       {path === "/master-espana" && <MasterAdsLanding />}
       {path === "/pago-exitoso" && <PagoExitoso />}

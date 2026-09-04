@@ -14,6 +14,7 @@ import ProgramacionPostulacionesCliente from "./sections/ProgramacionPostulacion
 import PortalesYJustificantesCliente from "./sections/PortalesYJustificantesCliente";
 import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
+import { EsqueletoExpediente } from "../Esqueleto";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -82,7 +83,7 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia }) {
+export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, seccion, onSeccion, perfil }) {
   const [detalle,           setDetalle]           = useState(null);
   const [checklist,         setChecklist]         = useState([]);
   const [formData,          setFormData]          = useState({});
@@ -99,8 +100,10 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
   const [seleccionKey,      setSeleccionKey]      = useState(0);
   const [postulacionesKey,  setPostulacionesKey]  = useState(0);
 
-  // Sección activa del panel lateral
-  const [activeSection, setActiveSection] = useState("docs");
+  // La sección viene en la URL y se cambia navegando: así «atrás» vuelve a
+  // la anterior y recargar conserva el sitio. El nombre `setActiveSection` se
+  // conserva para no tocar cada botón que lo llama.
+  const setActiveSection = onSeccion;
 
   const idSolicitud = solicitudBase.id_solicitud;
 
@@ -122,16 +125,22 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
     setCompat(null);
     setFormGuardado(false);
     try {
-      const rDetalle = await apiGET(`/solicitudes/${idSolicitud}`);
-      if (rDetalle.ok) setDetalle(rDetalle.solicitud);
+      // Todo a la vez. Iban una detrás de otra —siete viajes al servidor con
+      // la pantalla en «Cargando…» hasta el último— y ninguna dependía de la
+      // anterior. El perfil viene del panel, que ya lo tenía; solo se pide si
+      // alguien monta esto suelto.
+      const [rDetalle, rChecklist, rForm, rPerfil, rInst, rElec] = await Promise.all([
+        apiGET(`/solicitudes/${idSolicitud}`),
+        apiGET(`/checklist/${idSolicitud}`),
+        apiGET(`/solicitudes/${idSolicitud}/formulario`),
+        perfil ? Promise.resolve({ ok: true, cliente: perfil }) : apiGET("/cliente/me"),
+        apiGET(`/solicitudes/${idSolicitud}/instructivos`),
+        apiGET(`/solicitudes/${idSolicitud}/eleccion-masters`),
+      ]);
 
-      const rChecklist = await apiGET(`/checklist/${idSolicitud}`);
+      if (rDetalle.ok) setDetalle(rDetalle.solicitud);
       if (rChecklist.ok) setChecklist(rChecklist.checklist || []);
 
-      const [rForm, rPerfil] = await Promise.all([
-        apiGET(`/solicitudes/${idSolicitud}/formulario`),
-        apiGET("/cliente/me"),
-      ]);
       const datosPerfil = rPerfil.ok ? (rPerfil.cliente?.datos_extra || {}) : {};
       const datosForm   = (rForm.ok && rForm.datos) ? rForm.datos : {};
       const merged = {
@@ -147,7 +156,6 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
         cargarCompatibilidad();
       }
 
-      const rInst = await apiGET(`/solicitudes/${idSolicitud}/instructivos`);
       if (rInst.ok) {
         const base = (API_URL || "").replace(/\/+$/, "");
         setInstructivos((rInst.instructivos || []).map((i) => {
@@ -159,7 +167,6 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
         setInstructivos([]);
       }
 
-      const rElec = await apiGET(`/solicitudes/${idSolicitud}/eleccion-masters`);
       const base5 = Array.from({ length: 5 }, (_, idx) => ({ prioridad: idx + 1, programa: "", comentario: "" }));
       if (rElec.ok && Array.isArray(rElec.elecciones)) {
         setElecciones(rElec.elecciones.length > 0 ? rElec.elecciones : base5);
@@ -225,9 +232,6 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
     }
   }
 
-  const hasFormData = CAMPOS_REQUERIDOS_FORMULARIO.every(
-    (campo) => formData?.[campo] !== undefined && formData?.[campo] !== null && formData?.[campo] !== ""
-  );
   const tipoNombre = (detalle?.tipo?.nombre || "").toLowerCase().trim();
   const esVisado = tipoNombre === "visado";
 
@@ -331,6 +335,10 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
     },
   ].filter((s) => s.show);
 
+  // Una sección que no existe para este expediente —un enlace viejo, un
+  // tipo de servicio distinto— cae en la primera en vez de en una pantalla vacía.
+  const activeSection = navSections.some((x) => x.id === seccion) ? seccion : navSections[0]?.id;
+
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
@@ -348,12 +356,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
           Mis servicios
         </button>
 
-        {loading && (
-          <div className="flex items-center gap-2 text-neutral-400">
-            <div className="w-4 h-4 border-2 border-[#046C8C] border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm">Cargando…</span>
-          </div>
-        )}
+
         {error && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
             <span className="text-red-500 text-sm">⚠</span>
@@ -386,6 +389,8 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
           </div>
         )}
       </div>
+
+      {loading && <EsqueletoExpediente />}
 
       {/* Panel principal */}
       {!loading && !error && detalle && (
@@ -430,8 +435,9 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia })
             ))}
           </div>
 
-          {/* ── Contenido de la sección activa ── */}
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          {/* ── Contenido de la sección activa. La clave por sección hace que
+              cada una entre con su transición; el expediente no se remonta. ── */}
+          <div key={activeSection} className="pnl-entra flex-1 min-h-0 overflow-hidden flex flex-col">
             <SeccionSiempreAbiertoCtx.Provider value={true}>
 
               {activeSection === "docs" && (

@@ -8,6 +8,7 @@ import VisaDatosCliente from "./sections/VisaDatosCliente";
 import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
 import { estadoVisado, TONOS } from "../../../../lib/visaFlujoInterno";
+import { EsqueletoExpediente } from "../Esqueleto";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -160,7 +161,7 @@ function DescargaDoc({ slot, doc, idSolicitud }) {
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
-export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
+export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion }) {
   const [detalle, setDetalle] = useState(null);
   const [checklist, setChecklist] = useState([]);
   const [visaExp, setVisaExp] = useState(null);
@@ -168,7 +169,10 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   const [visaDocs, setVisaDocs] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeSection, setActiveSection] = useState("docs");
+  // La sección viene en la URL y se cambia navegando: así «atrás» vuelve a
+  // la anterior y recargar conserva el sitio. El nombre `setActiveSection` se
+  // conserva para no tocar cada botón que lo llama.
+  const setActiveSection = onSeccion;
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   const idSolicitud = solicitudBase.id_solicitud;
@@ -197,23 +201,22 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
   async function cargarTodo({ silent = false } = {}) {
     if (!silent) { setLoading(true); setError(""); }
     try {
-      const rDetalle = await apiGET(`/solicitudes/${idSolicitud}`);
+      // Las cinco a la vez: iban en fila india y ninguna dependía de la
+      // anterior. `visa-documentos` es lo que Inspira ya le dejó listo —acta
+      // de la sesión, declaración jurada y formulario—; el cliente no ve los
+      // generadores, sólo esto.
+      const [rDetalle, rChecklist, rExp, rSes, rDocs] = await Promise.all([
+        apiGET(`/solicitudes/${idSolicitud}`),
+        apiGET(`/checklist/${idSolicitud}`),
+        apiGET(`/solicitudes/${idSolicitud}/visa-expediente`),
+        apiGET(`/solicitudes/${idSolicitud}/sesiones`),
+        apiGET(`/solicitudes/${idSolicitud}/visa-documentos`),
+      ]);
       if (rDetalle.ok) setDetalle(rDetalle.solicitud);
-
-      const rChecklist = await apiGET(`/checklist/${idSolicitud}`);
       if (rChecklist.ok) setChecklist(rChecklist.checklist || []);
-
-      const rExp = await apiGET(`/solicitudes/${idSolicitud}/visa-expediente`);
       if (rExp.ok) setVisaExp(rExp.expediente || null);
-
-      const rSes = await apiGET(`/solicitudes/${idSolicitud}/sesiones`);
       if (rSes.ok) setSesiones(rSes.sesiones || []);
-
-      // Lo que Inspira ya le dejó listo: acta de la sesión, declaración
-      // jurada y formulario. El cliente no ve los generadores, sólo esto.
-      const rDocs = await apiGET(`/solicitudes/${idSolicitud}/visa-documentos`);
       if (rDocs.ok) setVisaDocs(rDocs.documentos || {});
-
     } catch (e) {
       console.error(e);
       if (!silent) setError("Error al cargar información.");
@@ -296,6 +299,10 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
     { id: "entregables", num: 5, titulo: "Preparado por Inspira",   subtitulo: (visaDocs?.dj || visaDocs?.formulario) ? "Ya tienes documentos" : "Lo preparamos nosotros" },
     { id: "estado",      num: 6, titulo: "Estado de mi visa",       subtitulo: estadoVisado(visaExp || {}).texto },
   ].map((x) => ({ ...x, estado: estadoBloque(x.id) }));
+
+  // Una sección que no existe para este expediente —un enlace viejo, un
+  // tipo de servicio distinto— cae en la primera en vez de en una pantalla vacía.
+  const activeSection = navSections.some((x) => x.id === seccion) ? seccion : navSections[0]?.id;
 
   const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
   const pct = Math.round((bloquesDone / navSections.length) * 100);
@@ -515,12 +522,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
           <span className="hidden sm:inline">Mis servicios</span>
         </button>
 
-        {loading && (
-          <div className="flex items-center gap-2 text-neutral-400">
-            <div className="w-4 h-4 border-2 border-[#046C8C] border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm">Cargando…</span>
-          </div>
-        )}
+
         {error && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
             <span className="text-red-500 text-sm">⚠</span>
@@ -554,6 +556,8 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
           </div>
         )}
       </div>
+
+      {loading && <EsqueletoExpediente />}
 
       {/* Panel principal */}
       {!loading && !error && detalle && (
@@ -661,8 +665,9 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver }) {
             ))}
           </div>
 
-          {/* Contenido de la sección activa (llena el área) */}
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          {/* Contenido de la sección activa (llena el área). La clave por
+              sección hace que cada una entre con su transición. */}
+          <div key={activeSection} className="pnl-entra flex-1 min-h-0 overflow-hidden flex flex-col">
             <SeccionSiempreAbiertoCtx.Provider value={true}>
               {/* Medios y datos economicos van juntos: lo que se marca aqui es
                   lo que decide que documentos se piden en el bloque siguiente. */}

@@ -1,74 +1,66 @@
 // src/pages/panel/components/MisServicios.jsx
-import { useState } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import ServiciosList from "./mis-servicios/ServiciosList";
-import DetalleSolicitud from "./mis-servicios/DetalleSolicitud";
-import DetalleSolicitudVisado from "./mis-servicios/DetalleSolicitudVisado";
-import DetalleSolicitudEstancia from "./mis-servicios/DetalleSolicitudEstancia";
-import DetalleSolicitudModificatoria from "./mis-servicios/DetalleSolicitudModificatoria";
+import { navigate } from "../../../services/navigate";
+import { rutaDe } from "../ruta";
+import { SERVICIO, servicioDe } from "../servicios";
+import { EsqueletoExpediente } from "./Esqueleto";
 
-function esModificatoria(s) {
-  if (Number(s?.id_tipo_solicitud) === 20) return true;
-  const txt = String(
-    s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.titulo || s?.nombre_servicio || ""
-  ).toLowerCase();
-  return txt.includes("modificatoria") || txt.includes("modificacion") || txt.includes("modificación");
-}
+// Cada tipo de expediente se descarga solo cuando se abre. Los cuatro juntos
+// eran 3.000 líneas en el paquete del panel, y un asesorado de máster nunca
+// va a abrir el de modificatoria.
+const DetalleSolicitud = lazy(() => import("./mis-servicios/DetalleSolicitud"));
+const DetalleSolicitudVisado = lazy(() => import("./mis-servicios/DetalleSolicitudVisado"));
+const DetalleSolicitudEstancia = lazy(() => import("./mis-servicios/DetalleSolicitudEstancia"));
+const DetalleSolicitudModificatoria = lazy(() => import("./mis-servicios/DetalleSolicitudModificatoria"));
 
-function esEstancia(s) {
-  if (Number(s?.id_tipo_solicitud) === 18) return true;
-  const txt = String(
-    s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.titulo || s?.nombre_servicio || ""
-  ).toLowerCase();
-  return txt.includes("estancia");
-}
+/**
+ * La lista, o el expediente que diga la URL.
+ *
+ * El expediente abierto ya no se guarda en memoria: viene en la ruta
+ * (`/panel/servicios/155/post`). Recargar conserva el sitio, «atrás» vuelve a
+ * la lista, y un correo puede enlazar a una sección concreta.
+ */
+export default function MisServicios({ ruta, perfil, servicios, loading, error, onRecargar, onIrAGuia }) {
+  const { idServicio, seccion } = ruta;
+  const seleccionada = idServicio
+    ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
+    : null;
 
-function esVisado(s) {
-  if (Number(s?.id_tipo_solicitud) === 15) return true;
-  const cod = String(
-    s?.tipo?.nombre || s?.tipo_solicitud || s?.tipo || s?.categoria || s?.titulo ||
-    s?.servicio?.codigo || s?.codigo_servicio || s?.nombre_servicio || ""
-  ).toUpperCase();
-  return cod.includes("VISADO");
-}
+  // Un id que no es suyo —o que ya no existe— no puede quedarse en la barra:
+  // se vuelve a la lista sustituyendo la entrada, para que «atrás» no
+  // devuelva a la misma ruta rota.
+  useEffect(() => {
+    if (idServicio && !loading && servicios && !seleccionada) {
+      navigate("/panel", { replace: true });
+    }
+  }, [idServicio, loading, servicios, seleccionada]);
 
-// La lista llega del panel, que ya la pide para armar el menú: pedirla otra
-// vez aquí era la misma petición dos veces en cada entrada al portal.
-export default function MisServicios({ servicios, loading, error, onRecargar, onIrAGuia }) {
-  // Al entrar en «Mis servicios» se ve la lista, siempre.
-  //
-  // Antes se recordaba el ultimo servicio abierto y se entraba directo en el.
-  // Ayudaba al recargar a mitad de faena, pero rompia lo esencial: quien pulsa
-  // «Mi panel» quiere ver sus servicios, no caer dentro de uno. Con varios
-  // servicios contratados era ademas desconcertante, porque abria uno sin que
-  // nadie lo hubiera pedido.
-  const [seleccionada, setSeleccionada] = useState(null);
+  const abrir = (s) => navigate(rutaDe({ idServicio: s.id_solicitud }));
+  const volver = () => navigate("/panel");
+  const irSeccion = (sec) => navigate(rutaDe({ idServicio, seccion: sec }));
 
-  function manejarVerDetalle(servicio) {
-    setSeleccionada(servicio);
-  }
-
-  function manejarVolverLista() {
-    setSeleccionada(null);
+  if (idServicio && loading) {
+    return <EsqueletoExpediente />;
   }
 
   if (seleccionada) {
-    // Propaga la altura completa al detalle
+    const tipo = servicioDe(seleccionada);
+    // El perfil ya lo tiene el panel: el expediente lo recibe en vez de volver a pedirlo.
+    const comunes = { solicitudBase: seleccionada, onVolver: volver, onIrAGuia, perfil };
     return (
       <div className="flex-1 min-h-0 flex flex-col">
-        {/* La estancia por estudios es un proceso aparte: ni el formulario del
-            visado ni el del master le sirven. Antes caia en el del master, que
-            es el que sale por defecto para todo lo que no es visado. */}
-        {esModificatoria(seleccionada) ? (
-          <DetalleSolicitudModificatoria
-            solicitudBase={seleccionada} onVolver={manejarVolverLista} onIrAGuia={onIrAGuia} />
-        ) : esEstancia(seleccionada) ? (
-          <DetalleSolicitudEstancia
-            solicitudBase={seleccionada} onVolver={manejarVolverLista} onIrAGuia={onIrAGuia} />
-        ) : esVisado(seleccionada) ? (
-          <DetalleSolicitudVisado solicitudBase={seleccionada} onVolver={manejarVolverLista} />
-        ) : (
-          <DetalleSolicitud solicitudBase={seleccionada} onVolver={manejarVolverLista} onIrAGuia={onIrAGuia} />
-        )}
+        <Suspense fallback={<EsqueletoExpediente />}>
+          {tipo === SERVICIO.MODIFICATORIA ? (
+            <DetalleSolicitudModificatoria {...comunes} />
+          ) : tipo === SERVICIO.ESTANCIA ? (
+            <DetalleSolicitudEstancia {...comunes} />
+          ) : tipo === SERVICIO.VISADO ? (
+            <DetalleSolicitudVisado {...comunes} seccion={seccion} onSeccion={irSeccion} />
+          ) : (
+            <DetalleSolicitud {...comunes} seccion={seccion} onSeccion={irSeccion} />
+          )}
+        </Suspense>
       </div>
     );
   }
@@ -79,7 +71,7 @@ export default function MisServicios({ servicios, loading, error, onRecargar, on
       loading={loading}
       error={error}
       onRecargar={onRecargar}
-      onVerDetalle={manejarVerDetalle}
+      onVerDetalle={abrir}
     />
   );
 }

@@ -32,7 +32,7 @@ export default function PanelSidebar({
         "pnl pnl-side flex flex-col overflow-hidden flex-none",
         "fixed inset-y-0 left-0 z-30 w-72 transition-transform duration-300 ease-in-out",
         isOpen ? "translate-x-0" : "-translate-x-full",
-        "md:relative md:z-auto md:translate-x-0 md:w-64 md:h-screen",
+        "md:relative md:z-auto md:translate-x-0 md:w-64 md:h-dvh",
       ].join(" ")}
     >
       {/* Cerrar, solo en móvil */}

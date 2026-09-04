@@ -213,7 +213,7 @@ export default function Header() {
             ) : user ? (
               <UserMenu user={user} />
             ) : (
-              <button className="v4-login-btn" type="button" onClick={loginGoogle} title="Iniciar sesión con Google">
+              <button className="v4-login-btn" type="button" onClick={() => loginGoogle()} title="Iniciar sesión con Google">
                 Iniciar
               </button>
             )}

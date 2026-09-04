@@ -340,3 +340,27 @@
   .pnl-card-link:hover, .pnl-btn:hover, .pnl-btn-cta:hover, .pnl-vacio-fantasma:hover { transform: none; }
   .pnl-spinner { animation-duration: 2s; }
 }
+
+/* ── Entrada de contenido ────────────────────────────────────────────
+   Lo mismo que `.bo-entra` en el backoffice: cada pantalla y cada sección
+   entra con un desplazamiento corto en vez de aparecer de golpe. */
+@keyframes pnlEntra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.pnl-entra { animation: pnlEntra .32s var(--ease, cubic-bezier(.22,1,.36,1)) both; }
+.pnl-entra-llena { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+
+/* ── Esqueletos de carga ─────────────────────────────────────────────
+   Un bloque gris que respira donde va a ir el contenido. Se ve la forma de
+   lo que llega y la página no salta cuando llega. */
+@keyframes pnlRespira { 50% { opacity: .55; } }
+.pnl-esq {
+  background: linear-gradient(90deg, #e9f1f8 0%, #f4f9fe 50%, #e9f1f8 100%);
+  border-radius: 10px; animation: pnlRespira 1.4s ease-in-out infinite;
+}
+.pnl-esq-linea { height: 12px; }
+.pnl-esq-titulo { height: 18px; width: 60%; }
+.pnl-esq-tarjeta { border: 1px solid var(--line); border-radius: 20px; background: #fff; padding: 20px; display: grid; gap: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pnl-entra { animation: none; }
+  .pnl-esq { animation: none; }
+}

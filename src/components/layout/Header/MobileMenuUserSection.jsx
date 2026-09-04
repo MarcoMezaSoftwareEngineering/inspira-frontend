@@ -1,4 +1,5 @@
 // src/components/layout/Header/MobileMenuUserSection.jsx
+import { navigate } from "../../../services/navigate";
 import Avatar from "../../common/Avatar";
 import { datosUsuario } from "../../common/usuario";
 
@@ -38,6 +39,7 @@ export default function MobileMenuUserSection({ user, onLogin, onLogout }) {
 
           <a
             href="/panel"
+            onClick={(e) => { e.preventDefault(); navigate("/panel"); }}
             className="w-full text-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-light transition"
           >
             Mi Panel

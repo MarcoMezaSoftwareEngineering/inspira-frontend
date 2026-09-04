@@ -2,6 +2,7 @@
 import Icono from "../../../../components/common/Icono";
 import { LINEAS, whatsappLinea } from "../../../../config/contacto";
 import { formatearFecha, badgeEstadoSolicitud } from "./utils";
+import { EsqueletoTarjetas } from "../Esqueleto";
 
 /** Los avisos que puede llevar una tarjeta, con su tono y su redacción. */
 // No hay aviso de «documentos pendientes»: contaba lo que el asesor todavía
@@ -161,12 +162,7 @@ function ServiciosList({ servicios, loading, error, onRecargar, onVerDetalle }) 
         </button>
       </div>
 
-      {loading && (
-        <div className="pnl-cargando">
-          <div className="pnl-spinner" />
-          <p className="pnl-nota">Cargando tus servicios…</p>
-        </div>
-      )}
+      {loading && <EsqueletoTarjetas n={2} />}
 
       {!loading && error && <div className="pnl-error">{error}</div>}
 

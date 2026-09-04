@@ -10,6 +10,9 @@ import MisServicios from "./components/MisServicios";
 import WizardPerfilCliente from "./components/WizardPerfilCliente";
 import { usePerfilIncompletoBool } from "./hooks/usePerfilIncompletoBool";
 import { accesosDe, esSoloInvitado, pideAcademico } from "./servicios";
+import { leerRuta, rutaDe } from "./ruta";
+import { navigate } from "../../services/navigate";
+import { loginGoogle } from "../../components/layout/Header/LoginButton";
 
 const BecasEspana   = lazy(() => import("./BecasEspana"));
 const GuiaMaster    = lazy(() => import("./GuiaMaster"));
@@ -19,9 +22,7 @@ const GuiaModificatoria = lazy(() => import("./GuiaModificatoria"));
 
 // Las dos primeras son de todos; el resto solo se abre si algún servicio
 // suyo lo incluye (ver servicios.js).
-const TABS_BASE = ["servicios", "perfil"];
 const TABS_RECURSO = ["becas", "guia", "apostilla", "estancia", "modificatoria"];
-const VALID_TABS = [...TABS_BASE, ...TABS_RECURSO];
 
 function LoadingPage() {
   return (
@@ -34,12 +35,11 @@ function LoadingPage() {
   );
 }
 
-export default function PanelCliente() {
-  const [tab, setTab] = useState(() => {
-    if (typeof window === "undefined") return "servicios";
-    const saved = window.localStorage.getItem("panel_tab");
-    return VALID_TABS.includes(saved) ? saved : "servicios";
-  });
+export default function PanelCliente({ path }) {
+  // La pestaña sale de la URL, no de localStorage: así «atrás» vuelve a la
+  // anterior y un enlace puede abrir el panel por donde haga falta.
+  const ruta = useMemo(() => leerRuta(path), [path]);
+  const tab = ruta.tab || "servicios";
 
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -65,16 +65,14 @@ export default function PanelCliente() {
   const perfilIncompleto = usePerfilIncompletoBool(user, conAcademico);
   const mostrarWizard = user !== null && cargado && perfilIncompleto;
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try { window.localStorage.setItem("panel_tab", tab); } catch { /* noop */ }
-  }, [tab]);
-
+  // Sin sesión no se manda a la portada a buscar el botón: se va a Google y se
+  // vuelve a esta misma URL. Es lo que hace que un enlace de correo a un
+  // expediente funcione aunque la sesión haya caducado.
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) { window.location.href = "/"; return; }
+    if (!token) { loginGoogle(); return; }
     cargarMe();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function cargarMe() {
     try {
@@ -104,17 +102,19 @@ export default function PanelCliente() {
   // corresponde —porque cerró ese servicio, o porque nunca fue suya— se vuelve
   // a sus servicios en vez de dejarle mirando algo que no ha contratado.
   useEffect(() => {
+    if (ruta.tab === null) { navigate("/panel", { replace: true }); return; }
     if (!cargado) return;
-    if (TABS_RECURSO.includes(tab) && !accesos.has(tab)) setTab("servicios");
-  }, [cargado, accesos, tab]);
+    if (TABS_RECURSO.includes(tab) && !accesos.has(tab)) navigate("/panel", { replace: true });
+  }, [cargado, accesos, tab, ruta.tab]);
 
   function handleChangeTab(newTab) {
-    setTab(newTab);
+    navigate(rutaDe({ tab: newTab }));
     setSidebarOpen(false);
   }
 
   const esServicios = tab === "servicios";
   const esScrollInterno = esServicios;
+  const claveVista = ruta.idServicio ? `expediente-${ruta.idServicio}` : tab;
 
   // Tab titles
   const titles = {
@@ -126,8 +126,10 @@ export default function PanelCliente() {
 
   const { nombre, corto, iniciales, foto } = datosUsuario(user);
 
+  // `h-dvh` y no `h-screen`: en Safari de iPhone 100vh cuenta la barra del
+  // navegador y el borde de abajo quedaba tapado. El backoffice ya lo usa.
   return (
-    <div className="pnl h-screen overflow-hidden flex relative">
+    <div className="pnl h-dvh overflow-hidden flex relative">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -174,13 +176,19 @@ export default function PanelCliente() {
           )}
         </div>
 
-        {/* Contenido */}
+        {/* Contenido. La clave cambia al cambiar de vista —pestaña o expediente—
+            y cada una entra con su transición. No cambia al cambiar de sección
+            dentro de un expediente: eso lo anima el propio expediente, sin
+            remontarse ni volver a pedir nada. */}
         <div className={`flex-1 min-h-0 flex flex-col ${esScrollInterno ? "" : "overflow-auto"}`}>
+        <div key={claveVista} className="pnl-entra pnl-entra-llena">
 
           {/* Servicios: scroll interno */}
           {esServicios && (
             <div className="flex-1 min-h-0 flex flex-col w-full px-4 sm:px-6 py-5">
               <MisServicios
+                ruta={ruta}
+                perfil={user}
                 servicios={lista}
                 loading={cargandoServicios}
                 error={errorServicios}
@@ -229,6 +237,7 @@ export default function PanelCliente() {
               <GuiaApostilla />
             </Suspense>
           )}
+        </div>
         </div>
       </main>
 

@@ -14,6 +14,14 @@ function authHeaders() {
 function handleUnauthorized() {
   if (!localStorage.getItem("token")) return false; // no había sesión que cerrar
   localStorage.removeItem("token");
+  // Se guarda dónde estaba: al volver a entrar aterriza en el mismo sitio, no
+  // en la portada. Y se deja una marca para explicárselo, que sin ella el
+  // asesorado veía la portada de golpe y pensaba que la web se había roto.
+  try {
+    const aqui = window.location.pathname + window.location.search + window.location.hash;
+    localStorage.setItem("post_login_redirect", aqui.startsWith("/") ? aqui : "/panel");
+    sessionStorage.setItem("inspira:sesion-caducada", "1");
+  } catch { /* sin almacenamiento, sin memoria: se sigue igual */ }
   window.location.href = "/";
   return true;
 }

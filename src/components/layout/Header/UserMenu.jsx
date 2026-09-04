@@ -36,15 +36,10 @@ export default function UserMenu({ user }) {
     };
   }, [open]);
 
-  // El panel no lleva la pestaña en la URL: la lee de localStorage al montar.
-  // Dejarla escrita antes de navegar es la única forma de abrirlo por una
-  // sección concreta sin rehacer su enrutado.
-  const ir = (e, href, tab) => {
+  // El panel lleva la pestaña en la URL: basta con navegar a ella.
+  const ir = (e, href) => {
     e.preventDefault();
     setOpen(false);
-    if (tab) {
-      try { localStorage.setItem("panel_tab", tab); } catch { /* noop */ }
-    }
     navigate(href);
   };
 
@@ -79,7 +74,7 @@ export default function UserMenu({ user }) {
 
           <a
             href="/panel"
-            onClick={(e) => ir(e, "/panel", "servicios")}
+            onClick={(e) => ir(e, "/panel")}
             className="v4-user-item"
           >
             <Icono nombre="panel" size={17} />
@@ -87,8 +82,8 @@ export default function UserMenu({ user }) {
           </a>
 
           <a
-            href="/panel"
-            onClick={(e) => ir(e, "/panel", "perfil")}
+            href="/panel/perfil"
+            onClick={(e) => ir(e, "/panel/perfil")}
             className="v4-user-item"
           >
             <Icono nombre="usuario" size={17} />

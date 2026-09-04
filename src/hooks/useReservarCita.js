@@ -21,7 +21,7 @@ export function useReservarCita() {
   async function reservarSlot(id_slot) {
     // Requiere sesión de cliente (login con Google)
     if (!user) {
-      loginGoogle(); // guarda post_login_redirect (ruta actual) y va a Google
+      loginGoogle({ volverAqui: true }); // vuelve a esta página tras Google, no al panel
       return;
     }
 

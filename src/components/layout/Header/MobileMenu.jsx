@@ -3,17 +3,7 @@ import { useAuth } from "../../../context/AuthContext";
 import MobileMenuHeader from "./MobileMenuHeader";
 import MobileMenuNavLinks from "./MobileMenuNavLinks";
 import MobileMenuUserSection from "./MobileMenuUserSection";
-
-const API_URL =
-  import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
-
-function getCurrentPath() {
-  return (
-    window.location.pathname +
-    window.location.search +
-    window.location.hash
-  );
-}
+import { loginGoogle } from "./LoginButton";
 
 export default function MobileMenu({ open, onClose }) {
   const { user, logout } = useAuth();
@@ -25,11 +15,9 @@ export default function MobileMenu({ open, onClose }) {
     onClose();
   };
 
-  const handleLogin = () => {
-    const current = getCurrentPath();
-    localStorage.setItem("post_login_redirect", current || "/");
-    window.location.href = `${API_URL}/auth/google`;
-  };
+  // Mismo arranque que el botón de la cabecera: quien pulsa «Iniciar» va a su
+  // panel, no a la página donde estaba el botón.
+  const handleLogin = () => loginGoogle();
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">

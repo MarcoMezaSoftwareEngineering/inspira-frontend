@@ -48,6 +48,130 @@ function partir(texto, fuente, tam, ancho) {
   return lineas;
 }
 
+/**
+ * La línea del contravalor: «Referencia: 1 € = 4,10 PEN · ≈ 17.390 PEN».
+ * Vacía si no hay tipo de cambio. La usan el PDF y la vista previa, para que
+ * los dos digan exactamente lo mismo.
+ */
+// Sin «≈» ni ningún símbolo fuera de WinAnsi: la fuente estándar del PDF no
+// lo puede escribir y la generación entera revienta con el presupuesto a
+// medias. «aprox.» dice lo mismo.
+/**
+ * Deja el texto en lo que la fuente estándar del PDF sabe escribir.
+ *
+ * pdf-lib usa Helvetica con codificación WinAnsi: acentos, eñes, «», € y —
+ * entran; un emoji, una flecha o un «≈» no, y en vez de saltarse el carácter
+ * revienta la generación entera. Como el texto lo escribe la asesora —y un
+ * nombre copiado de WhatsApp trae lo que trae—, se limpia todo antes de
+ * dibujar. Lo que tiene sustituto razonable se sustituye; lo demás se quita.
+ */
+const SUSTITUTOS = {
+  "\u2248": "aprox.", "\u2192": "->", "\u2190": "<-", "\u2026": "...",
+  "\u2013": "-", "\u2012": "-", "\u2015": "-",
+  "\u2018": "'", "\u2019": "'", "\u201A": "'", "\u201C": '"', "\u201D": '"', "\u201E": '"',
+  "\u00A0": " ", "\u202F": " ", "\u2009": " ",
+  "\u2022": "\u00B7", "\u2713": "si", "\u2714": "si", "\u2717": "no", "\u2718": "no",
+};
+const WINANSI = /[\u0020-\u007E\u00A0-\u00FF\u20AC\u2014\u00AB\u00BB\u2039\u203A\u0160\u0161\u017D\u017E\u0152\u0153\u0178\u0192\u02C6\u02DC\u2020\u2021\u2030\u2122\n]/;
+export function limpiar(texto) {
+  return String(texto == null ? "" : texto)
+    .replace(/[\s\S]/g, (ch) => (SUSTITUTOS[ch] !== undefined ? SUSTITUTOS[ch] : (WINANSI.test(ch) ? ch : "")))
+    .replace(/[ \t]{2,}/g, " ");
+}
+
+/** Lo mismo, a todo lo que sea texto dentro de un objeto. */
+export function limpiarTodo(v) {
+  if (typeof v === "string") return limpiar(v);
+  if (Array.isArray(v)) return v.map(limpiarTodo);
+  if (v && typeof v === "object") {
+    const out = {};
+    for (const k of Object.keys(v)) out[k] = limpiarTodo(v[k]);
+    return out;
+  }
+  return v;
+}
+
+export function contravalor(d, totalEur) {
+  const tc = parseFloat(String(d.tipo_cambio || "").replace(",", "."));
+  const mon = String(d.moneda_cambio || "").trim().toUpperCase();
+  if (!tc || tc <= 0 || !mon || !totalEur) return "";
+  const fmt = (n, dec) => Number(n).toLocaleString("es-ES", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  return `Referencia orientativa: 1 € = ${fmt(tc, 2)} ${mon} · total honorarios aprox. ${fmt(totalEur * tc, 2)} ${mon}. `
+       + `El cobro se realiza en euros; el contravalor varía con el cambio del día.`;
+}
+
+// Las cláusulas del paquete de máster. Un asesorado que contrata la búsqueda y
+// la postulación a másteres no firma lo mismo que quien tramita un visado: aquí
+// lo que hay que dejar escrito es qué se busca, quién decide la admisión, qué
+// pasa con los plazos de cada universidad y qué queda fuera. Van en el mismo
+// tono que las generales, y son texto contractual: quien las cambie, a
+// conciencia.
+export const CONDICIONES_MASTER = [
+  {
+    t: "Objeto del servicio",
+    p: "Esta asesoría realiza la búsqueda de másteres universitarios oficiales de "
+     + "España adecuados al perfil académico, la experiencia y los intereses del "
+     + "asesorado, le entrega un informe con la selección y le acompaña en la "
+     + "postulación a los programas incluidos en el paquete contratado.",
+  },
+  {
+    t: "Qué incluye el paquete",
+    p: "El paquete comprende el informe de másteres y el número de postulaciones que "
+     + "figura en la primera página. No incluye las tasas universitarias de "
+     + "preinscripción, estudio de título o matrícula, ni traducciones juradas, "
+     + "apostillas o legalizaciones, que se abonan aparte a quien corresponda.",
+  },
+  {
+    t: "Títulos oficiales",
+    p: "La selección se limita a títulos oficiales inscritos en el registro del "
+     + "Ministerio. Si el asesorado solicita expresamente un título propio de una "
+     + "universidad, se incluirá haciéndolo constar como tal, con la advertencia de "
+     + "que no se homologa ni da acceso al doctorado.",
+  },
+  {
+    t: "Sobre la admisión",
+    p: "La admisión la decide cada universidad conforme a su propio baremo y a las "
+     + "plazas disponibles. Los honorarios retribuyen el trabajo de búsqueda, "
+     + "preparación y postulación, no la admisión en un programa determinado.",
+  },
+  {
+    t: "Plazos de las universidades",
+    p: "Cada universidad fija sus fases de admisión, que son improrrogables y pueden "
+     + "cambiar sin previo aviso. Esta asesoría prioriza su cumplimiento, y "
+     + "presentará la postulación en la fecha prevista con la documentación disponible "
+     + "aun cuando faltara algún documento, advirtiéndolo al asesorado.",
+  },
+  {
+    t: "Documentación del asesorado",
+    p: "El expediente académico, los títulos, las acreditaciones de idioma y el resto "
+     + "de documentos que se aporten son responsabilidad exclusiva de quien los aporta. "
+     + "Esta asesoría verifica su presencia y su forma, y no responde de su "
+     + "autenticidad, vigencia ni suficiencia ante la universidad.",
+  },
+  {
+    t: "Cambios tras la elección",
+    p: "Una vez elegidos los programas y comenzada la postulación, el cambio de "
+     + "universidad o de máster a petición del asesorado puede suponer honorarios "
+     + "adicionales, que se presupuestarán aparte antes de realizar ningún trámite.",
+  },
+  {
+    t: "Visado y estancia",
+    p: "La tramitación del visado o de la autorización de estancia por estudios es un "
+     + "servicio distinto, y solo forma parte de este presupuesto si figura "
+     + "expresamente en la primera página.",
+  },
+  {
+    t: "Validez",
+    p: "Este presupuesto tiene una validez de treinta (30) días naturales desde su fecha "
+     + "de emisión. Transcurrido ese plazo, los importes quedan sujetos a revisión.",
+  },
+  {
+    t: "Aceptación",
+    p: "El abono de la primera cuota supone la aceptación de este presupuesto y de las "
+     + "presentes condiciones.",
+  },
+];
+
 export const CONDICIONES_POR_DEFECTO = [
   {
     t: "Objeto del presupuesto",
@@ -99,11 +223,20 @@ export const CONDICIONES_POR_DEFECTO = [
   },
 ];
 
+/** Los juegos de cláusulas entre los que se elige en la pantalla. */
+export const JUEGOS_CONDICIONES = {
+  general: { etiqueta: "Generales (visado, estancia, residencia)", lista: CONDICIONES_POR_DEFECTO },
+  master:  { etiqueta: "Paquete de máster", lista: CONDICIONES_MASTER },
+};
+
 /**
  * @param {object} d datos del formulario
  * @returns {Promise<Uint8Array>}
  */
 export async function construirPresupuestoPDF(d) {
+  // Antes de nada, para que ningún carácter fuera de la fuente tumbe el PDF.
+  d = limpiarTodo(d || {});
+
   const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
   const pdf = await PDFDocument.create();
 
@@ -221,7 +354,20 @@ export async function construirPresupuestoPDF(d) {
     x: A4[0] - MARGEN - 16 - negrita.widthOfTextAtSize(tot, 13), y: y - 21,
     size: 13, font: negrita, color: col(NAVY),
   });
-  y -= 48;
+  y -= 36;
+
+  // El contravalor en la moneda del asesorado. Es orientativo y se dice: el
+  // cobro es en euros y el cambio del día lo mueve. Sin esta línea, el
+  // asesorado hace la cuenta por su lado con el cambio que encuentre y luego
+  // discute la diferencia.
+  const cambio = contravalor(d, total);
+  if (cambio) {
+    for (const l of partir(cambio, normal, 8, ancho - 28).slice(0, 2)) {
+      p1.drawText(l, { x: MARGEN + 14, y: y - 4, size: 8, font: normal, color: col(SUAVE) });
+      y -= 10;
+    }
+  }
+  y -= 12;
 
   // ── Dos columnas: tasas y formas de pago ──
   const colW = (ancho - 16) / 2;
@@ -229,7 +375,11 @@ export async function construirPresupuestoPDF(d) {
 
   // Tasas
   const tasas = (d.tasas || []).filter((t) => t.concepto || t.importe);
-  const altoTasas = 44 + tasas.length * 16 + (d.nota_tasas ? 34 : 0);
+  // Cada tasa puede llevar una nota debajo —a quién se paga, cuándo, si el
+  // importe es estimado—: dos líneas de 8 puntos como mucho.
+  const notasDe = (t) => (t.nota ? partir(t.nota, normal, 8, colW - 34).slice(0, 2) : []);
+  const altoNotas = tasas.reduce((n, t) => n + notasDe(t).length * 10, 0);
+  const altoTasas = 44 + tasas.length * 16 + altoNotas + (d.nota_tasas ? 34 : 0);
   p1.drawRectangle({
     x: MARGEN, y: y - altoTasas, width: colW, height: altoTasas,
     color: col(CREMA), borderColor: col(NARANJA), borderWidth: 0.8,
@@ -247,7 +397,12 @@ export async function construirPresupuestoPDF(d) {
       x: MARGEN + colW - 14 - negrita.widthOfTextAtSize(imp, 9), y: yt,
       size: 9, font: negrita, color: col(TINTA),
     });
-    yt -= 16;
+    yt -= 12;
+    for (const l of notasDe(t)) {
+      p1.drawText(l, { x: MARGEN + 20, y: yt, size: 8, font: normal, color: col(SUAVE) });
+      yt -= 10;
+    }
+    yt -= 4;
   }
   if (d.nota_tasas) {
     for (const l of partir(d.nota_tasas, normal, 8, colW - 28).slice(0, 3)) {

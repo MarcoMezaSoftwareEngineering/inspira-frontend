@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
-import { construirPresupuestoPDF, CONDICIONES_POR_DEFECTO } from "./presupuestoPdf";
+import { construirPresupuestoPDF, CONDICIONES_POR_DEFECTO, JUEGOS_CONDICIONES, contravalor } from "./presupuestoPdf";
 import {
   Pagina, Cabecera, Cuerpo, Boton, Chip, Campo, Ventana, Vacio, Esqueleto,
 } from "../ui";
@@ -71,6 +71,12 @@ const VACIO = () => ({
     { texto: "50 % antes de la presentación del expediente" },
   ],
   nota_pago: "",
+  // El contravalor en la moneda del asesorado, orientativo. Se rellena a mano
+  // con el cambio del día: no hay una fuente que valga para un presupuesto.
+  tipo_cambio: "",
+  moneda_cambio: "PEN",
+  // Qué juego de cláusulas lleva: el general o el del paquete de máster.
+  juego_condiciones: "general",
   web: "www.inspira-legal.cloud",
   email: "administracion@inspira-legal.cloud",
 });
@@ -278,11 +284,22 @@ export default function PresupuestoAsesor() {
 
   const datos = () => ({ ...d, condiciones });
 
+  /** Ejecuta un paso y, si falla, dice cuál. «No se pudo enviar» a secas no
+   *  deja saber si fue el borrador, el PDF o el correo, y sin eso no se
+   *  arregla: la asesora prueba tres veces y llama. */
+  async function paso(nombre, fn) {
+    try { return await fn(); }
+    catch (e) {
+      console.error(`[presupuesto][${nombre}]`, e);
+      throw new Error(`${nombre}: ${e?.message || "error desconocido"}`);
+    }
+  }
+
   async function descargar() {
     setGenerando(true);
     try {
-      const idActual = await asegurarGuardado();
-      const bytes = await construirPresupuestoPDF(datos());
+      const idActual = await paso("No se pudo guardar el borrador", asegurarGuardado);
+      const bytes = await paso("No se pudo generar el PDF", () => construirPresupuestoPDF(datos()));
       const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
       const a = document.createElement("a");
       a.href = url;
@@ -307,17 +324,17 @@ export default function PresupuestoAsesor() {
     setEnviando(true);
     try {
       if (para !== d.correo) set("correo", para);
-      const idActual = await asegurarGuardado();
-      const bytes = await construirPresupuestoPDF({ ...datos(), correo: para });
+      const idActual = await paso("No se pudo guardar el borrador", asegurarGuardado);
+      const bytes = await paso("No se pudo generar el PDF", () => construirPresupuestoPDF({ ...datos(), correo: para }));
       // Se manda en base64 dentro del cuerpo: el PDF lo arma el navegador y el
       // servidor sólo lo adjunta, así que no hace falta subirlo a ningún sitio.
       let bin = "";
       const b = new Uint8Array(bytes);
       for (let i = 0; i < b.length; i += 1) bin += String.fromCharCode(b[i]);
-      const r = await boPOST("/backoffice/presupuesto/enviar", {
+      const r = await paso("No se pudo enviar el correo", () => boPOST("/backoffice/presupuesto/enviar", {
         para, cliente: d.cliente, numero: d.numero, total,
         pdf_base64: btoa(bin), id_presupuesto: idActual,
-      });
+      }));
       if (r?.ok) {
         dialog.toast(`Enviado a ${r.enviado_a}`, "exito");
         setEstado("enviado");
@@ -450,6 +467,9 @@ export default function PresupuestoAsesor() {
                 campos={[
                   { k: "concepto", ph: "Concepto de la tasa" },
                   { k: "importe", ph: "0,00 €", tipo: "number", estilo: IMPORTE },
+                  // A quién se paga, cuándo, si el importe es estimado. Sale
+                  // debajo de la tasa en el PDF, en letra pequeña.
+                  { k: "nota", ph: "Detalle de esta tasa (opcional)" },
                 ]} />
               <Campo etiqueta="Nota sobre las tasas">
                 <textarea rows={2} className="ase-campo" value={d.nota_tasas}
@@ -458,6 +478,32 @@ export default function PresupuestoAsesor() {
               <Filas titulo="Formas de pago" filas={d.pagos}
                 onCambio={(v) => set("pagos", v)} minimo={0}
                 campos={[{ k: "texto", ph: "50 % al contratar…" }]} />
+
+              {/* El asesorado piensa en soles o en dólares. Sin el contravalor
+                  hace la cuenta por su lado con el cambio que encuentre y luego
+                  discute la diferencia; con él, queda escrito que es orientativo
+                  y que el cobro es en euros. */}
+              <div>
+                <p className="ase-rotulo" style={{ margin: "0 0 8px" }}>Moneda de referencia</p>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  <span style={{ fontSize: 12.5, color: "var(--muted)" }}>1 € =</span>
+                  <input className="ase-campo ase-num" type="number" inputMode="decimal" step="0.01" min="0"
+                    style={{ flex: "0 1 120px", minWidth: 0 }} placeholder="4,10"
+                    value={d.tipo_cambio} onChange={(e) => set("tipo_cambio", e.target.value)} />
+                  <select className="ase-campo" style={{ flex: "0 1 150px" }}
+                    value={d.moneda_cambio} onChange={(e) => set("moneda_cambio", e.target.value)}>
+                    <option value="PEN">PEN · soles</option>
+                    <option value="USD">USD · dólares</option>
+                    <option value="COP">COP · pesos colombianos</option>
+                    <option value="MXN">MXN · pesos mexicanos</option>
+                    <option value="CLP">CLP · pesos chilenos</option>
+                    <option value="ARS">ARS · pesos argentinos</option>
+                  </select>
+                  {contravalor(d, total) && (
+                    <span style={{ flex: "1 1 100%", fontSize: 11.5, color: "var(--muted)" }}>{contravalor(d, total)}</span>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="ase-tarjeta ase-tarjeta-p" style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
@@ -469,7 +515,22 @@ export default function PresupuestoAsesor() {
                   condiciones es una cifra suelta: cuando alguien discute qué incluía, no hay a qué mirar.
                 </p>
               </div>
-              <Boton tono="secundario" tam="sm" onClick={() => setVerCondiciones(true)}>Editar cláusulas</Boton>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                {/* Cambiar de juego sustituye las cláusulas enteras: quien haya
+                    retocado alguna a mano la pierde, y se avisa antes. */}
+                <select className="ase-campo" style={{ minWidth: 200 }} value={d.juego_condiciones || "general"}
+                  onChange={(e) => {
+                    const j = e.target.value;
+                    const base = JUEGOS_CONDICIONES[d.juego_condiciones || "general"]?.lista;
+                    const retocadas = JSON.stringify(condiciones) !== JSON.stringify(base);
+                    if (retocadas && !window.confirm("Hay cláusulas retocadas a mano. Al cambiar de juego se sustituyen por las del nuevo. ¿Seguir?")) return;
+                    set("juego_condiciones", j);
+                    setCondiciones(JUEGOS_CONDICIONES[j]?.lista || CONDICIONES_POR_DEFECTO);
+                  }}>
+                  {Object.entries(JUEGOS_CONDICIONES).map(([k, v]) => <option key={k} value={k}>{v.etiqueta}</option>)}
+                </select>
+                <Boton tono="secundario" tam="sm" onClick={() => setVerCondiciones(true)}>Editar cláusulas</Boton>
+              </div>
             </div>
           </div>
 
@@ -519,15 +580,21 @@ export default function PresupuestoAsesor() {
                   <span style={{ fontSize: 11, fontWeight: 700, color: "#173A5E", flex: 1 }}>Total honorarios</span>
                   <span className="ase-num" style={{ fontSize: 14, fontWeight: 800, color: "#173A5E" }}>{eur(total)}</span>
                 </div>
+                {contravalor(d, total) && (
+                  <p style={{ margin: "6px 2px 0", fontSize: 8.5, color: "#8aa0ad", lineHeight: 1.4 }}>{contravalor(d, total)}</p>
+                )}
               </div>
 
               <div style={{ padding: "16px 22px", display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 12rem), 1fr))" }}>
                 <div style={{ border: "1px solid rgba(245,130,32,.7)", background: "#FEF6EC", borderRadius: 8, padding: 12 }}>
                   <p style={{ margin: "0 0 6px", fontSize: 9.5, fontWeight: 700, color: "#173A5E" }}>TASAS ADICIONALES</p>
                   {(d.tasas || []).filter((t) => t.concepto || t.importe).map((t, i) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                      <span style={{ fontSize: 10, color: "#33505e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {t.concepto}</span>
-                      <span className="ase-num" style={{ fontSize: 10, fontWeight: 600, color: "#33505e" }}>{eur(t.importe)}</span>
+                    <div key={i}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                        <span style={{ fontSize: 10, color: "#33505e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {t.concepto}</span>
+                        <span className="ase-num" style={{ fontSize: 10, fontWeight: 600, color: "#33505e" }}>{eur(t.importe)}</span>
+                      </div>
+                      {t.nota && <p style={{ margin: "1px 0 3px 10px", fontSize: 8.5, color: "#8aa0ad", lineHeight: 1.35 }}>{t.nota}</p>}
                     </div>
                   ))}
                   {totalTasas > 0 && (
@@ -621,7 +688,7 @@ export default function PresupuestoAsesor() {
         ancho="lg"
         pie={
           <>
-            <Boton tono="secundario" onClick={() => setCondiciones(CONDICIONES_POR_DEFECTO)}>Volver a las de siempre</Boton>
+            <Boton tono="secundario" onClick={() => setCondiciones(JUEGOS_CONDICIONES[d.juego_condiciones || "general"]?.lista || CONDICIONES_POR_DEFECTO)}>Volver a las del juego</Boton>
             <Boton tono="primario" icono={Check} onClick={() => setVerCondiciones(false)}>Listo</Boton>
           </>
         }

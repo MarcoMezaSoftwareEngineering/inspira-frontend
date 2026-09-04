@@ -65,7 +65,7 @@ function ScoreRing({ score }) {
 
 // ── Master row ─────────────────────────────────────────────────────────────────
 
-function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEliminar, onScoreChange, esFirst, esLast }) {
+export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEliminar, onScoreChange, esFirst, esLast }) {
   const { master, score } = resultado;
   const dur = durLabel(master.duracion_anios);
   const precioFinal = master.precio_final != null
@@ -81,7 +81,10 @@ function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEl
     : "bg-neutral-100 text-neutral-500";
 
   return (
-    <div className={`group relative flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl transition-all duration-200 ${
+    // `min-w-0` en la propia fila: como hija de una rejilla o de un flex, sin
+    // esto su mínimo es el ancho natural del contenido y se sale del móvil
+    // por la derecha en vez de encoger.
+    <div className={`group relative flex items-start gap-3 min-w-0 w-full p-3 sm:p-3.5 rounded-2xl transition-all duration-200 ${
       editMode
         ? "ux-tarjeta"
         : "border border-transparent hover:bg-neutral-50/80 md:rounded-xl"

@@ -23,8 +23,10 @@ function MasterPickCard({ r, selected, prioridad, onToggle }) {
     : master.duracion_anios === 1.5 ? "18 meses"
     : master.duracion_anios         ? `${master.duracion_anios} años`
     : null;
-  const precio = master.precio_total_estimado
-    ? `€${Math.round(master.precio_total_estimado).toLocaleString("es-ES")}`
+  // El final si lo hay, el estimado si no: el mismo criterio que el informe.
+  const importe = master.precio_final ?? master.precio_total_estimado;
+  const precio = importe
+    ? `€${Math.round(importe).toLocaleString("es-ES")}`
     : null;
 
   return (

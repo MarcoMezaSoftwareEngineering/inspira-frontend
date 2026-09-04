@@ -5,14 +5,18 @@ import BaremoMaster from "../../../../../components/BaremoMaster";
 
 // ── Tarjeta compacta de máster ────────────────────────────────────────────────
 
-function MasterCard({ master, score, prioridad, selected, comentario, onToggle, onComentario }) {
+export function MasterCard({ master, score, prioridad, selected, comentario, onToggle, onComentario }) {
   const dur =
     master.duracion_anios === 1    ? "1 año"
     : master.duracion_anios === 1.5 ? "18 meses"
     : master.duracion_anios         ? `${master.duracion_anios} años`
     : null;
-  const precio = master.precio_total_estimado
-    ? `€${Math.round(master.precio_total_estimado).toLocaleString("es-ES")}`
+  // El precio que ve el asesorado es el final si lo hay —el que fija la
+  // universidad—, y solo si no, el estimado por decreto. Estaba al revés:
+  // ignoraba el final, y un máster privado de 6.750 € salía como 4.241 €.
+  const importe = master.precio_final ?? master.precio_total_estimado;
+  const precio = importe
+    ? `€${Math.round(importe).toLocaleString("es-ES")}`
     : null;
 
   return (

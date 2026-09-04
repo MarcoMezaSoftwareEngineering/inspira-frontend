@@ -24,6 +24,8 @@ const EstanciaLanding = lazy(() => import("./pages/servicios/estancia/EstanciaLa
 const ServiciosCatalogo = lazy(() => import("./pages/servicios/ServiciosCatalogo"));
 const ServicioDetalle = lazy(() => import("./pages/servicios/ServicioDetalle"));
 const BackofficeApp = lazy(() => import("./pages/backoffice/BackofficeApp"));
+// Solo en desarrollo: una página con las piezas de interfaz y datos de ejemplo.
+const MuestraUX = import.meta.env.DEV ? lazy(() => import("./pages/dev/MuestraUX")) : null;
 const CalculadoraMaster = lazy(() => import("./pages/calculadora/CalculadoraMaster"));
 const PanelCliente = lazy(() => import("./pages/panel/PanelCliente"));
 const ReservarCita = lazy(() => import("./pages/reservar/ReservarCita"));
@@ -343,6 +345,10 @@ export default function App() {
     const t = setTimeout(precargar, 2500);
     return () => clearTimeout(t);
   }, []);
+
+  if (import.meta.env.DEV && MuestraUX && path === "/dev/muestra") {
+    return <Suspense fallback={null}><MuestraUX /></Suspense>;
+  }
 
   if (path.startsWith("/backoffice")) {
     return (

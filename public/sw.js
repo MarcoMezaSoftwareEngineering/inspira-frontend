@@ -40,7 +40,11 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       fetch(req)
         .then((r) => {
-          if (r.ok) caches.open(CACHE).then((c) => c.put(CASCARA, r.clone())).catch(() => {});
+          // La cáscara guardada es la de index.html. La de /backoffice es otro
+          // HTML (Inspira Core, con su manifiesto): no debe pisarla.
+          if (r.ok && !url.pathname.startsWith("/backoffice")) {
+            caches.open(CACHE).then((c) => c.put(CASCARA, r.clone())).catch(() => {});
+          }
           return r;
         })
         .catch(() => caches.match(CASCARA)),

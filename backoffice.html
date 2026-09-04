@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Aplicación instalable: en Android Chrome ofrece «Instalar»; en iPhone,
+         Compartir → Añadir a pantalla de inicio. Es la misma web, sin tienda. -->
+    <link rel="manifest" href="/manifest-backoffice.webmanifest" />
+    <meta name="theme-color" content="#013446" />
+    <link rel="apple-touch-icon" href="/icons/core-apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Inspira Core" />
+
+    <!-- script-src ya NO lleva 'unsafe-inline': el build no genera ningún script
+         inline (el de "pageshow" se movió a src/main.jsx), y gtag.js se carga
+         como script externo desde googletagmanager.com, que sí está permitido.
+         Sin 'unsafe-inline', un XSS que inyecte <script> queda bloqueado por el
+         navegador — importante porque el JWT vive en localStorage.
+         style-src sí lo conserva: React aplica estilos en línea (style={{…}}).
+         ⚠️ Verificar tras el despliegue que Google Analytics sigue registrando
+         visitas. Si dejara de hacerlo, volver a añadir 'unsafe-inline' aquí. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.inspira-legal.cloud https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-src 'self' blob:; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
+    <!-- La misma aplicación que index.html, servida para /backoffice: cambia el
+         manifiesto, el icono y el nombre de la app instalada (Inspira Core). Safari
+         lee el manifiesto del HTML inicial al añadir a pantalla de inicio; cambiarlo
+         con JavaScript después no llega a tiempo. -->
+    <title>Inspira Core</title>
+    <meta name="description" content="Backoffice de Inspira Legal." />
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <!-- El manejador de "pageshow" (recarga al volver desde bfcache) se movió a
+         src/main.jsx: era el único script inline propio del sitio y obligaba a
+         mantener 'unsafe-inline' en la CSP. No añadir scripts inline aquí. -->
+  </body>
+</html>

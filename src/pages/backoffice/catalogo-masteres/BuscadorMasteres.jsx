@@ -127,7 +127,7 @@ function Baremo({ criterios, sinPublicar }) {
               {rotuloCriterio(c)}
             </span>
             <span className="ase-num" style={{ color: "var(--muted)", fontWeight: 600 }}>
-              {c.peso == null ? "" : `${c.peso}%`}
+              {c.peso == null ? "" : `${c.peso}${c.escala === "PUNTOS" ? " pt" : "%"}`}
             </span>
           </div>
           <div style={{ height: 4, borderRadius: 999, background: "var(--ground)", marginTop: 3, overflow: "hidden" }}>
@@ -440,7 +440,7 @@ function TablaMasteres({ masteres, onAbrir }) {
                   {criterios.length ? criterios.map((c, i) => (
                     <div key={i} className="ase-td-crit">
                       <span>{rotuloCriterio(c)}</span>
-                      <b className="ase-num">{c.peso == null ? "" : `${c.peso}%`}</b>
+                      <b className="ase-num">{c.peso == null ? "" : `${c.peso}${c.escala === "PUNTOS" ? " pt" : "%"}`}</b>
                       <i style={{ width: `${c.peso == null ? 0 : Math.round((c.peso / maxPeso) * 100)}%` }} />
                     </div>
                   )) : (

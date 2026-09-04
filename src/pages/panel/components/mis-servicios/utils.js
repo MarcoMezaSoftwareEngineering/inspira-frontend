@@ -88,3 +88,10 @@ export function badgeEstadoItemChecklist(estado) {
   // pendiente
   return "bg-neutral-100 text-neutral-700 border border-neutral-200";
 }
+
+/**
+ * El código de la solicitud, para leerlo en voz alta: los ocho primeros
+ * caracteres en mayúsculas. El identificador entero es un UUID que al
+ * asesorado no le dice nada y en la tarjeta parecía un error.
+ */
+export const refCorta = (c) => (c ? `Ref. ${String(c).slice(0, 8).toUpperCase()}` : "");

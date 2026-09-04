@@ -1,6 +1,7 @@
 // src/pages/panel/components/mis-servicios/sections/EncabezadoSolicitud.jsx
 import { formatearFecha, badgeEstadoSolicitud } from "../utils";
 
+import { refCorta } from "../utils";
 export default function EncabezadoSolicitud({ detalle, solicitudBase, progresoChecklist }) {
   const estadoBadge = badgeEstadoSolicitud(detalle?.estado?.nombre, detalle?.estado?.es_final);
 
@@ -24,7 +25,7 @@ export default function EncabezadoSolicitud({ detalle, solicitudBase, progresoCh
           )}
           <span className={estadoBadge.classes}>{estadoBadge.text}</span>
           <span className="text-xs text-neutral-400 font-mono bg-neutral-100 px-2 py-0.5 rounded hidden sm:inline">
-            {detalle.codigo_publico}
+            {refCorta(detalle.codigo_publico)}
           </span>
           <span className="text-xs text-neutral-400">
             · {formatearFecha(detalle.fecha_creacion)}

@@ -6,6 +6,7 @@ import { datosUsuario } from "../../../components/common/usuario";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 import logo from "../../../assets/images/logo.png";
+import { recorta } from "../pendientes";
 
 // Cada recurso, con la etiqueta y el icono con los que aparece en el menú.
 // El orden es el de la lista; se enseñan los que estén en `accesos`.
@@ -19,7 +20,11 @@ const RECURSOS = [
 
 export default function PanelSidebar({
   user, activeTab, onChangeTab, isOpen, onClose, accesos,
+  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio,
 }) {
+  // Los expedientes, por nombre, como accesos directos. Cuatro como mucho:
+  // el menú es para llegar rápido, no para listar.
+  const directos = (servicios || []).slice(0, 4);
   // Qué recursos le corresponden por sus servicios. Lo decide servicios.js:
   // aquí solo se pintan. A quien no tiene nada contratado no le sale ninguno.
   const visibles = RECURSOS.filter((r) => accesos?.has(r.clave));
@@ -68,15 +73,26 @@ export default function PanelSidebar({
         <SidebarItem
           icono="panel"
           label="Inicio"
+          badge={pendientes}
           active={activeTab === "inicio"}
           onClick={() => onChangeTab("inicio")}
         />
         <SidebarItem
           icono="maletin"
           label="Mis servicios"
-          active={activeTab === "servicios"}
+          active={activeTab === "servicios" && !idServicioActivo}
           onClick={() => onChangeTab("servicios")}
         />
+        {directos.map((s) => (
+          <SidebarItem
+            key={s.id_solicitud}
+            sub
+            icono="documento"
+            label={recorta(s.invitado ? `De ${s.titular}` : s.titulo, 30)}
+            active={idServicioActivo === s.id_solicitud}
+            onClick={() => onAbrirServicio?.(s.id_solicitud)}
+          />
+        ))}
         <SidebarItem
           icono="usuario"
           label="Perfil"

@@ -11,6 +11,7 @@ import WizardPerfilCliente from "./components/WizardPerfilCliente";
 import { usePerfilIncompletoBool, datosQueFaltan } from "./hooks/usePerfilIncompletoBool";
 import AvisoPerfil from "./components/AvisoPerfil";
 import Bienvenida from "./components/Bienvenida";
+import { pendientesDe } from "./pendientes";
 import { accesosDe, esSoloInvitado, pideAcademico } from "./servicios";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
@@ -70,6 +71,12 @@ export default function PanelCliente({ path }) {
   const mostrarWizard = user !== null && cargado && perfilIncompleto && sinServicios;
   const avisarPerfil = user !== null && cargado && perfilIncompleto && !sinServicios && tab !== "perfil";
   const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico) : 0;
+  // Cuántas cosas esperan: sale en el menú junto a «Inicio» y como punto sobre
+  // el botón del menú, para saberlo sin abrir nada.
+  const nPendientes = useMemo(
+    () => (user && cargado ? pendientesDe(lista, user, conAcademico).length : 0),
+    [user, cargado, lista, conAcademico],
+  );
 
   // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
   // ofrece entrar. Al pulsar, el login conserva esta misma URL, así que un
@@ -154,6 +161,10 @@ export default function PanelCliente({ path }) {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         accesos={accesos}
+        pendientes={nPendientes}
+        servicios={lista}
+        idServicioActivo={ruta.idServicio}
+        onAbrirServicio={(id) => { navigate(rutaDe({ idServicio: id })); setSidebarOpen(false); }}
       />
 
       <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>
@@ -168,6 +179,7 @@ export default function PanelCliente({ path }) {
               strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
+            {nPendientes > 0 && <span className="pnl-burger-punto" aria-hidden="true">{nPendientes}</span>}
           </button>
 
           <div className="min-w-0">

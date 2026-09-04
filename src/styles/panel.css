@@ -434,3 +434,22 @@
   .pnl-pend-item { flex-wrap: wrap; }
   .pnl-pend .pnl-btn { margin-left: 46px; }
 }
+
+/* ── Contador y accesos directos del menú ────────────────────────────── */
+.pnl-item-texto { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pnl-badge {
+  flex: 0 0 auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff; background: var(--accent);
+}
+.pnl-item.pnl-sub { padding: 7px 13px 7px 22px; margin-bottom: 1px; font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.62); }
+.pnl-item.pnl-sub.activo { color: #fff; }
+.pnl-item.pnl-sub:before { display: none; }
+/* El punto sobre el botón del menú: hay cosas pendientes sin abrirlo. */
+.pnl-burger { position: relative; }
+.pnl-burger-punto {
+  position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 999px; background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 800; display: grid; place-items: center;
+  box-shadow: 0 0 0 2px #fff;
+}

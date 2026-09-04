@@ -1,7 +1,7 @@
 // src/pages/panel/components/mis-servicios/ServiciosList.jsx
 import Icono from "../../../../components/common/Icono";
 import { LINEAS, whatsappLinea } from "../../../../config/contacto";
-import { formatearFecha, badgeEstadoSolicitud } from "./utils";
+import { formatearFecha, badgeEstadoSolicitud, refCorta } from "./utils";
 import { EsqueletoTarjetas } from "../Esqueleto";
 
 /** Los avisos que puede llevar una tarjeta, con su tono y su redacción. */
@@ -80,7 +80,7 @@ function ServicioCard({ s, onVerDetalle }) {
       <div className="pnl-card-pie">
         <div className="pnl-card-meta">
           <span>Creada el {formatearFecha(s.fecha_creacion)}</span>
-          <span className="codigo">{s.codigo_publico}</span>
+          <span className="codigo">{refCorta(s.codigo_publico)}</span>
         </div>
         <button type="button" onClick={() => onVerDetalle(s)} className="pnl-btn-cta shrink-0">
           Ver servicio

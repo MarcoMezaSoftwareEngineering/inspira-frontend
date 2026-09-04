@@ -31,6 +31,15 @@ window.addEventListener("pageshow", (e) => {
   if (e.persisted) window.location.reload();
 });
 
+// La aplicación instalable: el service worker sirve la cáscara al instante y
+// los trozos con hash desde caché. Solo en producción: en desarrollo
+// cachearía código que cambia cada minuto.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

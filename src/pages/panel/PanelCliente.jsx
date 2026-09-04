@@ -124,7 +124,7 @@ export default function PanelCliente({ path }) {
 
   // Tab titles
   const titles = {
-    servicios: "Mis Servicios", perfil: "Mi Perfil", becas: "Becas España",
+    servicios: "Inicio", perfil: "Mi Perfil", becas: "Becas España",
     guia: "Guía Máster", apostilla: "Guía Apostilla Digital",
     estancia: "Guía Estancia por Estudios",
     modificatoria: "Guía Residencia y Trabajo",
@@ -200,6 +200,7 @@ export default function PanelCliente({ path }) {
               <MisServicios
                 ruta={ruta}
                 perfil={user}
+                conAcademico={conAcademico}
                 servicios={lista}
                 loading={cargandoServicios}
                 error={errorServicios}

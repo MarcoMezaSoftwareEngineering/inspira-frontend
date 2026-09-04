@@ -66,16 +66,16 @@ export default function PanelSidebar({
       <nav className="flex-1 px-3 pb-4 overflow-y-auto min-h-0">
         <p className="pnl-side-grupo">Mi cuenta</p>
         <SidebarItem
+          icono="panel"
+          label="Inicio"
+          active={activeTab === "servicios"}
+          onClick={() => onChangeTab("servicios")}
+        />
+        <SidebarItem
           icono="usuario"
           label="Perfil"
           active={activeTab === "perfil"}
           onClick={() => onChangeTab("perfil")}
-        />
-        <SidebarItem
-          icono="maletin"
-          label="Mis servicios"
-          active={activeTab === "servicios"}
-          onClick={() => onChangeTab("servicios")}
         />
 
         {/* Recursos: los que abre cada servicio contratado, y ninguno más.

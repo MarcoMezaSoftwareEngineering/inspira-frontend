@@ -379,3 +379,58 @@
 }
 .pnl-aviso-texto { margin: 0; flex: 1 1 200px; min-width: 0; font-size: 13px; font-weight: 600; line-height: 1.4; }
 .pnl-aviso .pnl-btn { height: 36px; padding: 0 14px; }
+
+/* ── Tu asesor ───────────────────────────────────────────────────────
+   Cristal sobre el degradado, como la ficha de usuario de la barra: es la
+   misma persona de siempre, no un anuncio. */
+.pnl-asesor {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 16px 18px; border-radius: 20px; color: #fff;
+  background:
+    radial-gradient(360px 220px at 88% 0%, rgba(136, 196, 252, .22), transparent 70%),
+    radial-gradient(300px 240px at 2% 100%, rgba(250, 148, 58, .16), transparent 68%),
+    linear-gradient(150deg, #012938 0%, #013446 48%, #02506b 100%);
+}
+.pnl-asesor-avatar {
+  display: grid; place-items: center; width: 46px; height: 46px; flex: 0 0 auto;
+  border-radius: 14px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.1);
+  color: var(--sky); backdrop-filter: blur(6px);
+}
+.pnl-asesor-datos { display: flex; flex-direction: column; min-width: 0; flex: 1 1 180px; }
+.pnl-asesor-eyebrow { font-size: 9.5px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); }
+.pnl-asesor-datos strong { font-family: Merriweather, Georgia, serif; font-size: 17px; font-weight: 800; letter-spacing: -.02em; margin-top: 2px; }
+.pnl-asesor-datos small { font-size: 12px; color: rgba(255,255,255,.66); margin-top: 2px; }
+.pnl-asesor-contacto { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.pnl-asesor-contacto small { font-size: 10.5px; color: rgba(255,255,255,.55); padding-left: 4px; }
+
+/* ── Pendientes ──────────────────────────────────────────────────────
+   Una línea por cosa, con su color por urgencia y el botón que la resuelve. */
+.pnl-pend { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pnl-pend-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px 11px 14px; border-radius: 16px; background: #fff;
+  border: 1px solid var(--line); border-left-width: 4px;
+  box-shadow: 0 6px 18px -10px rgba(1, 52, 70, .12);
+}
+.pnl-pend-item[data-tono="alto"]  { border-left-color: #c0392b; }
+.pnl-pend-item[data-tono="aviso"] { border-left-color: var(--accent); }
+.pnl-pend-item[data-tono="info"]  { border-left-color: var(--sky-2); }
+.pnl-pend-icono {
+  display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 10px;
+  background: var(--sky-soft); color: #17608f;
+}
+.pnl-pend-item[data-tono="alto"] .pnl-pend-icono  { background: #fdecec; color: #a5262f; }
+.pnl-pend-item[data-tono="aviso"] .pnl-pend-icono { background: #fdf3e3; color: #96591a; }
+.pnl-pend-cuerpo { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.pnl-pend-texto { font-size: 13.5px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.pnl-pend-detalle { font-size: 11.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pnl-pend .pnl-btn { height: 36px; padding: 0 14px; flex: 0 0 auto; }
+.pnl-pend-vacio { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-radius: 16px; background: #fff; border: 1px solid var(--line); }
+.pnl-pend-vacio p { margin: 0; font-size: 13px; color: var(--muted); flex: 1 1 240px; }
+
+@media (max-width: 767px) {
+  .pnl-pend-detalle { white-space: normal; }
+  .pnl-pend-item { flex-wrap: wrap; }
+  .pnl-pend .pnl-btn { margin-left: 46px; }
+}

@@ -42,8 +42,13 @@ export default function AuthSuccess() {
       localStorage.removeItem("post_login_redirect");
 
       try {
-        const resp = await fetch(`${API_URL}/auth/claim-token`, {
-          credentials: "include", // necesario para enviar la cookie __cb_token
+        // El código de un solo uso viene en la URL: es lo que hace que el login
+        // funcione también en la aplicación instalada en iPhone, donde la
+        // cookie del dominio de la API se queda en Safari y no llega aquí.
+        const codigo = new URLSearchParams(window.location.search).get("c");
+        const url = `${API_URL}/auth/claim-token${codigo ? `?c=${encodeURIComponent(codigo)}` : ""}`;
+        const resp = await fetch(url, {
+          credentials: "include", // la cookie __cb_token, como respaldo
         });
         const data = resp.ok ? await resp.json() : null;
 

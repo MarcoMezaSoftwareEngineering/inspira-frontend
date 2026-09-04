@@ -1,6 +1,6 @@
 // src/pages/panel/components/MisServicios.jsx
 import { lazy, Suspense, useEffect } from "react";
-import ServiciosList from "./mis-servicios/ServiciosList";
+import Inicio from "./Inicio";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
 import { SERVICIO, servicioDe } from "../servicios";
@@ -21,7 +21,7 @@ const DetalleSolicitudModificatoria = lazy(() => import("./mis-servicios/Detalle
  * (`/panel/servicios/155/post`). Recargar conserva el sitio, «atrás» vuelve a
  * la lista, y un correo puede enlazar a una sección concreta.
  */
-export default function MisServicios({ ruta, perfil, servicios, loading, error, onRecargar, onIrAGuia }) {
+export default function MisServicios({ ruta, perfil, conAcademico, servicios, loading, error, onRecargar, onIrAGuia }) {
   const { idServicio, seccion } = ruta;
   const seleccionada = idServicio
     ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
@@ -66,8 +66,10 @@ export default function MisServicios({ ruta, perfil, servicios, loading, error, 
   }
 
   return (
-    <ServiciosList
+    <Inicio
       servicios={servicios}
+      perfil={perfil}
+      conAcademico={conAcademico}
       loading={loading}
       error={error}
       onRecargar={onRecargar}

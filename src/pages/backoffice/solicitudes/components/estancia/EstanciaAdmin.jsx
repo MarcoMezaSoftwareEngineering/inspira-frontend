@@ -1056,6 +1056,7 @@ function Presentado({ id, docs, ext, onCambio }) {
   const [subiendo, setSubiendo] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [adoptando, setAdoptando] = useState(null);
+  const [viendo, setViendo] = useState(false);
 
   // Lo que el vigilante encontró en la carpeta y nadie ha clasificado. Puede
   // haber varios: ahí caen también requerimientos y resoluciones, así que
@@ -1145,6 +1146,14 @@ function Presentado({ id, docs, ext, onCambio }) {
             explica dónde consultar, con qué datos, y que las notificaciones le llegan a él
             y a nosotros.
           </p>
+          {/* Poder abrirlo no es un lujo desde que el vigilante lo adopta solo:
+              quien firma la presentación tiene que ver qué archivo quedó
+              registrado, y el nombre no lo dice —todos se llaman igual. */}
+          <button type="button" onClick={() => setViendo(true)}
+            className="shrink-0 text-[12px] font-semibold px-3 py-2 rounded-lg border
+              border-neutral-300 text-neutral-600 hover:border-neutral-400">
+            Ver el justificante
+          </button>
           <label className="shrink-0 text-[12px] font-semibold px-3 py-2 rounded-lg border
             border-neutral-300 text-neutral-600 hover:border-neutral-400 cursor-pointer">
             {subiendo ? "Subiendo…" : "Reemplazar"}
@@ -1174,6 +1183,17 @@ function Presentado({ id, docs, ext, onCambio }) {
               onChange={(e) => subir(e.target.files?.[0])} />
           </label>
         </div>
+      )}
+
+      {viendo && archivo && (
+        <VisorArchivo
+          interno
+          ruta={`/backoffice/solicitudes/${id}/estancia/documentos/archivo/${archivo.id_documento}`}
+          nombre={archivo.nombre}
+          mime={archivo.mime}
+          tamano={archivo.tamano}
+          onCerrar={() => setViendo(false)}
+        />
       )}
 
       <p className="text-[10.5px] text-neutral-400 mt-2 leading-relaxed">

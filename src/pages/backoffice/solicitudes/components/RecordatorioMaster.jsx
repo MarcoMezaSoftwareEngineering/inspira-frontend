@@ -29,6 +29,7 @@ export default function RecordatorioMaster({ detalle }) {
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [enviandoPerfil, setEnviandoPerfil] = useState(false);
 
   // Si el asesorado pidió revisión, el asesor tiene que verlo sin desplegar nada.
   const revision = detalle?.datos_panel?.revision_solicitada_at
@@ -44,6 +45,18 @@ export default function RecordatorioMaster({ detalle }) {
     setCargando(false);
     if (r?.ok) setDatos(r.recordatorio);
     else dialog.toast(r?.msg || "No se pudo preparar el recordatorio", "error");
+  }
+
+  // Solo el perfil. Iba a ser automático cada cinco días; Carina prefirió que
+  // lo mande una persona, sabiendo cuándo se mandó el anterior.
+  async function enviarPerfil() {
+    setEnviandoPerfil(true);
+    const r = await boPOST(`/backoffice/solicitudes/${id}/master/recordatorio-perfil`, {});
+    setEnviandoPerfil(false);
+    if (r?.ok) {
+      dialog.toast(`Recordatorio de perfil enviado a ${r.enviado_a}`, "exito");
+      setDatos((d) => d ? { ...d, perfil: { ...d.perfil, ultimo_recordatorio: new Date().toISOString() } } : d);
+    } else dialog.toast(r?.msg || "No se pudo enviar el correo", "error");
   }
 
   async function enviarCorreo() {
@@ -75,6 +88,29 @@ export default function RecordatorioMaster({ detalle }) {
       {abierto && (
         <div className="mt-3 pt-3 border-t border-neutral-100">
           {cargando && <p className="text-[12px] text-neutral-400">Preparando…</p>}
+          {!cargando && datos?.perfil && (
+            <div className={`mb-3 rounded-lg border px-3 py-2.5 ${datos.perfil.faltan.length
+              ? "border-amber-300 bg-amber-50" : "border-[#1D6A4A]/30 bg-[#E8F5EE]"}`}>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-[12px] font-semibold text-neutral-800 flex-1 min-w-0">
+                  Perfil: {datos.perfil.faltan.length
+                    ? `le ${datos.perfil.faltan.length === 1 ? "falta un dato" : `faltan ${datos.perfil.faltan.length} datos`}`
+                    : "completo"}
+                  <span className="block text-[11px] font-normal text-neutral-500">
+                    {datos.perfil.ultimo_recordatorio
+                      ? `Último recordatorio: ${fechaLarga(datos.perfil.ultimo_recordatorio)}${datos.perfil.por ? ` · ${datos.perfil.por}` : ""}`
+                      : "Nunca se le ha recordado"}
+                  </span>
+                </p>
+                {datos.perfil.faltan.length > 0 && (
+                  <button type="button" onClick={enviarPerfil} disabled={enviandoPerfil || !datos.correo}
+                    className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[#B45309] text-white hover:opacity-90 disabled:opacity-40">
+                    {enviandoPerfil ? "Enviando…" : "Recordarle el perfil"}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
           {!cargando && datos && !datos.hay_pendientes && (
             <p className="text-[12.5px] text-[#1D6A4A] font-semibold">No le falta nada. No hay nada que recordarle.</p>
           )}

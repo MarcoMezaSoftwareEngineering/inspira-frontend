@@ -78,6 +78,25 @@ export default function BackofficeApp() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  // El backoffice es su propia app instalable: «Inspira Core», con icono
+  // propio y que abre en /backoffice. El manifiesto de la página es el del
+  // asesorado; aquí se cambia por el del backoffice mientras esta parte esté
+  // montada —el navegador lee el manifiesto al instalar— y se restaura al salir.
+  useEffect(() => {
+    const cambios = [
+      ["link[rel='manifest']", "href", "/manifest-backoffice.webmanifest"],
+      ["link[rel='apple-touch-icon']", "href", "/icons/core-apple-touch-icon.png"],
+      ["meta[name='apple-mobile-web-app-title']", "content", "Inspira Core"],
+    ];
+    const previos = cambios.map(([sel, attr, valor]) => {
+      const el = document.querySelector(sel);
+      const antes = el?.getAttribute(attr);
+      el?.setAttribute(attr, valor);
+      return [el, attr, antes];
+    });
+    return () => previos.forEach(([el, attr, antes]) => { if (el && antes != null) el.setAttribute(attr, antes); });
+  }, []);
+
   function navigate(to) {
     window.history.pushState({}, "", to);
     window.dispatchEvent(new PopStateEvent("popstate"));

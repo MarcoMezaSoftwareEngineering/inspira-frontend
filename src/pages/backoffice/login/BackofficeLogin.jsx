@@ -8,6 +8,26 @@ import logo from "../../../assets/images/logo.png";
 
 const SITE_URL = "https://www.inspira-legal.cloud/";
 
+// Llevar el backoffice como app, en el teléfono o en el ordenador. Solo se
+// enseña en el navegador: dentro de la app instalada no tiene sentido.
+function InstalarApp() {
+  const enApp = window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone;
+  if (enApp) return null;
+  const ua = navigator.userAgent || "";
+  const ios = /iPhone|iPad|iPod/i.test(ua);
+  const android = /Android/i.test(ua);
+  const como = ios
+    ? "en Safari, toca Compartir y luego «Añadir a pantalla de inicio»."
+    : android
+      ? "en Chrome, menú ⋮ y luego «Instalar aplicación»."
+      : "en Chrome, el icono «Instalar» a la derecha de la barra de direcciones.";
+  return (
+    <p className="mt-4 text-center text-[11.5px] leading-relaxed text-neutral-400">
+      <b className="text-neutral-500">Lleva Inspira Core como app:</b> {como}
+    </p>
+  );
+}
+
 export default function BackofficeLogin({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +59,7 @@ export default function BackofficeLogin({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-neutral-50 px-4 py-10 overflow-hidden">
+    <div className="min-h-dvh relative flex items-center justify-center bg-neutral-50 px-4 py-10 overflow-hidden">
       {/* Fondo decorativo */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-24 w-96 h-96 rounded-full bg-primary/10 blur-3xl" />
@@ -119,6 +139,7 @@ export default function BackofficeLogin({ onLogin }) {
           <ArrowLeft className="w-3.5 h-3.5" />
           Volver al sitio principal
         </a>
+        <InstalarApp />
       </div>
     </div>
   );

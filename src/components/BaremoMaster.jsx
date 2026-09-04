@@ -39,10 +39,16 @@ export default function BaremoMaster({ baremo, maxVisible = 4, compacto = false 
   const utiles = (baremo || []).filter(rotuloCriterio);
   if (!utiles.length) return null;
 
-  // Las barras se dibujan contra el criterio que más pesa, no contra 100: en
-  // un baremo de 60/25/15 las tres se verían pegadas al suelo y no se
-  // distinguiría cuál manda.
+  // Dos escalas, y hay que saber cuál es. Un «10» puede ser el 10 % de la
+  // nota o 10 puntos sobre 30; en la base viene dicho (`escala`). En
+  // porcentaje las barras se miden contra 100, que es lo que el lector espera;
+  // en puntos, contra el criterio que más pesa, porque no hay un total fijo.
+  // Antes todo se pintaba con «%» y contra el máximo: un baremo de 5/5/5/5
+  // puntos salía como cuatro barras llenas al «5 %», que no significa nada.
+  const enPuntos = utiles.some((c) => c.escala === "PUNTOS");
   const max = Math.max(...utiles.map((c) => c.peso || 0), 1);
+  const base = enPuntos ? max : 100;
+  const unidad = enPuntos ? " pt" : "%";
   const visibles = abierto ? utiles : utiles.slice(0, maxVisible);
   const ocultos = utiles.length - visibles.length;
 
@@ -61,13 +67,13 @@ export default function BaremoMaster({ baremo, maxVisible = 4, compacto = false 
               <span className="text-neutral-600 truncate">{rotuloCriterio(c)}</span>
               {c.peso != null && (
                 <span className="text-neutral-400 font-semibold tabular-nums shrink-0">
-                  {c.peso}%
+                  {c.peso}{unidad}
                 </span>
               )}
             </div>
             <div className="h-[3px] rounded-full bg-neutral-100 mt-0.5 overflow-hidden">
               <i className="block h-full rounded-full"
-                style={{ width: `${c.peso == null ? 0 : Math.round((c.peso / max) * 100)}%`,
+                style={{ width: `${c.peso == null ? 0 : Math.min(100, Math.round((c.peso / base) * 100))}%`,
                          background: "linear-gradient(90deg,#88C4FC,#013446)" }} />
             </div>
           </div>

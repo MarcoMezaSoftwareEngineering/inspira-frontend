@@ -210,6 +210,13 @@ function Ficha({ m, onAbrir }) {
         {/* No es un error: hay asesorados a quienes un título propio les
             encaja. Se marca para que se elija sabiendo qué es. */}
         {m.es_titulo_oficial === false && <Chip tono="ambar">título propio</Chip>}
+        {/* Consta en el registro del Ministerio, con su código RUCT y su
+            curso, pero no lo hemos encontrado en la web de la universidad:
+            no podemos afirmar que se siga ofertando. Se enseña con el
+            aviso puesto, no se esconde. */}
+        {m.estado_ficha === "no_hallado" && (
+          <Chip tono="ambar">sin confirmar en su web</Chip>
+        )}
         {m.universidad?.requiere_estudio_titulo === true && (
           <Chip tono="ambar">
             trámite previo{m.universidad.tasa_estudio_titulo
@@ -824,6 +831,9 @@ export default function BuscadorMasteres() {
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {abierto.es_habilitante && <Chip tono="morado">habilitante</Chip>}
               {abierto.es_titulo_oficial === false && <Chip tono="ambar">título propio</Chip>}
+              {abierto.estado_ficha === "no_hallado" && (
+                <Chip tono="ambar">sin confirmar en su web</Chip>
+              )}
               {abierto.es_interuniversitario && <Chip tono="cielo">interuniversitario</Chip>}
               {abierto.tiene_practicas && <Chip tono="verde">con prácticas</Chip>}
             </div>

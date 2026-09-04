@@ -18,7 +18,7 @@ function TuAsesor({ servicios }) {
   const a = propio?.asesor || null;
   const linea = LINEAS.find((l) => l.id === "clientes") || LINEAS[0];
   return (
-    <div className="pnl-asesor">
+    <div className="pnl-asesor" data-tour="asesor">
       <div className="pnl-asesor-avatar"><Icono nombre="usuarios" size={20} /></div>
       <div className="pnl-asesor-datos">
         <span className="pnl-asesor-eyebrow">Te atiende</span>
@@ -95,7 +95,7 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
       {hayServicios && <TuAsesor servicios={lista} />}
 
       {hayServicios && (
-        <section>
+        <section data-tour="hoy">
           <div className="pnl-head mb-3">
             <div>
               <h2>Hoy</h2>
@@ -117,13 +117,15 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
         </section>
       )}
 
-      <ServiciosList
-        servicios={servicios}
-        loading={loading}
-        error={error}
-        onRecargar={onRecargar}
-        onVerDetalle={onVerDetalle}
-      />
+      <div data-tour="servicios">
+        <ServiciosList
+          servicios={servicios}
+          loading={loading}
+          error={error}
+          onRecargar={onRecargar}
+          onVerDetalle={onVerDetalle}
+        />
+      </div>
     </div>
   );
 }

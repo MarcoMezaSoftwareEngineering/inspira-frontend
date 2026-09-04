@@ -20,7 +20,7 @@ const RECURSOS = [
 
 export default function PanelSidebar({
   user, activeTab, onChangeTab, isOpen, onClose, accesos,
-  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio,
+  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour,
 }) {
   // Los expedientes, por nombre, como accesos directos. Cuatro como mucho:
   // el menú es para llegar rápido, no para listar.
@@ -68,7 +68,7 @@ export default function PanelSidebar({
         </div>
       </div>
 
-      <nav className="flex-1 px-3 pb-4 overflow-y-auto min-h-0">
+      <nav className="flex-1 px-3 pb-4 overflow-y-auto min-h-0" data-tour="menu">
         <p className="pnl-side-grupo">Mi cuenta</p>
         <SidebarItem
           icono="panel"
@@ -120,6 +120,12 @@ export default function PanelSidebar({
       </nav>
 
       <div className="pnl-side-pie px-3 py-4 shrink-0">
+        {onTour && (
+          <button type="button" onClick={onTour} className="pnl-item">
+            <Icono nombre="brujula" size={16} />
+            ¿Cómo funciona?
+          </button>
+        )}
         <button type="button" onClick={() => navigate("/")} className="pnl-item">
           <Icono nombre="casa" size={16} />
           Volver al inicio

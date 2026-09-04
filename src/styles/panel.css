@@ -453,3 +453,28 @@
   font-size: 10px; font-weight: 800; display: grid; place-items: center;
   box-shadow: 0 0 0 2px #fff;
 }
+
+/* ── Recorrido guiado ────────────────────────────────────────────────
+   Todo oscuro menos lo que se señala: el foco es un recuadro con una sombra
+   enorme alrededor, que es lo que hace de velo. */
+.pnl-tour { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.pnl-tour-velo { position: absolute; inset: 0; background: rgba(1, 20, 30, .55); pointer-events: auto; }
+.pnl-tour-foco {
+  position: fixed; border-radius: 16px; pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(1, 20, 30, .55), 0 0 0 3px var(--accent);
+  transition: top .25s var(--ease), left .25s var(--ease), width .25s var(--ease), height .25s var(--ease);
+}
+.pnl-tour-tarjeta {
+  position: fixed; pointer-events: auto;
+  background: #fff; border-radius: 18px; padding: 16px 18px 14px;
+  box-shadow: 0 18px 44px rgba(1, 52, 70, .28);
+  font-family: Montserrat, system-ui, sans-serif; color: var(--ink);
+}
+.pnl-tour-paso { display: block; font-size: 9.5px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.pnl-tour-tarjeta h4 { margin: 0 0 6px; font-family: Merriweather, Georgia, serif; font-size: 17px; font-weight: 800; letter-spacing: -.02em; color: var(--primary); }
+.pnl-tour-tarjeta p { margin: 0 0 14px; font-size: 13.5px; line-height: 1.55; color: var(--muted); }
+.pnl-tour-botones { display: flex; align-items: center; gap: 8px; }
+.pnl-tour-botones .pnl-btn, .pnl-tour-botones .pnl-btn-cta { height: 38px; padding: 0 14px; }
+.pnl-tour-saltar { border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0; }
+.pnl-tour-saltar:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .pnl-tour-foco { transition: none; } }

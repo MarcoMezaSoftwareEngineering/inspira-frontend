@@ -1,7 +1,7 @@
 // src/pages/panel/PanelCliente.jsx
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import "../../styles/panel.css";
-import { apiGET } from "../../services/api";
+import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";
 import { datosUsuario } from "../../components/common/usuario";
@@ -12,6 +12,7 @@ import { usePerfilIncompletoBool, datosQueFaltan } from "./hooks/usePerfilIncomp
 import AvisoPerfil from "./components/AvisoPerfil";
 import Bienvenida from "./components/Bienvenida";
 import { pendientesDe } from "./pendientes";
+import Tour from "./components/Tour";
 import { accesosDe, esSoloInvitado, pideAcademico, pideCompleto } from "./servicios";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
@@ -25,6 +26,31 @@ const GuiaModificatoria = lazy(() => import("./GuiaModificatoria"));
 // Las dos primeras son de todos; el resto solo se abre si algún servicio
 // suyo lo incluye (ver servicios.js).
 const TABS_RECURSO = ["becas", "guia", "apostilla", "estancia", "modificatoria"];
+
+/** Los pasos de la portada. El orden es el de la pantalla, de arriba abajo. */
+const PASOS_INICIO = [
+  {
+    clave: "asesor",
+    titulo: "Quién te atiende",
+    texto: "Aquí ves siempre quién lleva tu expediente y cómo escribirle por WhatsApp.",
+  },
+  {
+    clave: "hoy",
+    titulo: "Lo que te toca hacer",
+    texto: "Cada línea es una tarea tuya, ordenada por urgencia. El botón te lleva justo a donde se resuelve.",
+  },
+  {
+    clave: "servicios",
+    titulo: "Tus servicios",
+    texto: "Cada trámite contratado es una tarjeta. Entra con «Ver servicio»: dentro está tu expediente por secciones —documentos, formulario, informe, plazos—.",
+  },
+  {
+    clave: "menu",
+    titulo: "El menú",
+    texto: "Desde aquí vuelves a Inicio, abres tus servicios, tu perfil y las guías de tu trámite. Y si quieres ver este recorrido otra vez, está en «¿Cómo funciona?».",
+  },
+];
+
 
 function LoadingPage() {
   return (
@@ -45,6 +71,9 @@ export default function PanelCliente({ path }) {
 
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // El recorrido: sale solo la primera vez que entra con servicios —se apunta
+  // en su perfil, no en el teléfono— y se repite desde «¿Cómo funciona?».
+  const [tour, setTour] = useState(false);
   // La lista de servicios se pide una sola vez y se reparte: el menú decide
   // con ella qué recursos abrir y «Mis servicios» la pinta. Antes cada uno
   // hacía su propia petición al mismo sitio.
@@ -136,6 +165,29 @@ export default function PanelCliente({ path }) {
   const esScrollInterno = esServicios;
   const claveVista = ruta.idServicio ? `expediente-${ruta.idServicio}` : tab;
 
+  const tourPendiente = user !== null && cargado && lista.length > 0 && !mostrarWizard
+    && tab === "inicio" && !ruta.idServicio && !user?.datos_extra?.tour_visto_at;
+  useEffect(() => {
+    if (!tourPendiente) return undefined;
+    const t = setTimeout(() => setTour(true), 700); // que la portada termine de pintarse
+    return () => clearTimeout(t);
+  }, [tourPendiente]);
+
+  async function terminarTour() {
+    setTour(false);
+    if (user?.datos_extra?.tour_visto_at) return;
+    try {
+      const r = await apiPOST("/cliente/me/tour", {});
+      if (r?.ok && r.cliente) setUser(r.cliente);
+      else setUser((u) => ({ ...u, datos_extra: { ...(u?.datos_extra || {}), tour_visto_at: new Date().toISOString() } }));
+    } catch { /* si no se guarda, saldrá otra vez; no pasa nada */ }
+  }
+  function verTour() {
+    setSidebarOpen(false);
+    if (tab !== "inicio" || ruta.idServicio) navigate("/panel");
+    setTimeout(() => setTour(true), tab === "inicio" && !ruta.idServicio ? 0 : 500);
+  }
+
   // Tab titles
   const titles = {
     inicio: "Inicio", servicios: "Mis servicios", perfil: "Mi Perfil", becas: "Becas España",
@@ -167,6 +219,7 @@ export default function PanelCliente({ path }) {
         servicios={lista}
         idServicioActivo={ruta.idServicio}
         onAbrirServicio={(id) => { navigate(rutaDe({ idServicio: id })); setSidebarOpen(false); }}
+        onTour={verTour}
       />
 
       <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>
@@ -174,6 +227,7 @@ export default function PanelCliente({ path }) {
         <div className="pnl-top sticky top-0 z-10 shrink-0">
           <button
             className="pnl-burger"
+            data-tour="menu"
             onClick={() => setSidebarOpen(true)}
             aria-label="Abrir menú"
           >
@@ -274,6 +328,8 @@ export default function PanelCliente({ path }) {
         </div>
         </div>
       </main>
+
+      {tour && <Tour pasos={PASOS_INICIO} onFin={terminarTour} />}
 
       {mostrarWizard && (
         <WizardPerfilCliente

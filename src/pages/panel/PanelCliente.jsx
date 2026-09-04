@@ -162,7 +162,10 @@ export default function PanelCliente({ path }) {
   // Inicio y la lista de servicios comparten el marco: son las dos vistas
   // desde las que se abre un expediente.
   const esServicios = tab === "servicios" || tab === "inicio";
-  const esScrollInterno = esServicios;
+  // Solo un expediente abierto gestiona su propio scroll (sus secciones llenan
+  // la altura). Inicio y la lista se desplazan dentro de <main>, con la barra
+  // de arriba fija: si no, en el móvil el botón del menú se iba con el scroll.
+  const esScrollInterno = esServicios && Boolean(ruta.idServicio);
   const claveVista = ruta.idServicio ? `expediente-${ruta.idServicio}` : tab;
 
   const tourPendiente = user !== null && cargado && lista.length > 0 && !mostrarWizard

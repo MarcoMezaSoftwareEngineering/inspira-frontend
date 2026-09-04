@@ -1,12 +1,12 @@
+import { fechaHoraDoble } from "../../../../lib/horas";
 // src/pages/panel/components/mis-servicios/utils.js
 
 export function formatearFecha(fechaIso) {
   if (!fechaIso) return null;
   try {
-    return new Date(fechaIso).toLocaleString("es-ES", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
+    // Con la hora de Perú y la de España: una sola siempre es la equivocada
+    // para alguien.
+    return fechaHoraDoble(fechaIso) || fechaIso;
   } catch {
     return fechaIso;
   }

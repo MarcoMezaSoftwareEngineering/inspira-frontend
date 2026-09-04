@@ -8,12 +8,10 @@
 // con su API y el backoffice con la suya. `lado` dice cuál de los dos es
 // «yo», para pintar los míos a la derecha.
 import { useEffect, useRef, useState } from "react";
+import { fechaHoraDoble } from "../../lib/horas";
 
-function fecha(iso) {
-  const d = new Date(iso);
-  if (isNaN(d)) return "";
-  return d.toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-}
+// Con la hora de Perú y la de España: quien escribe está en una y el plazo en la otra.
+const fecha = (iso) => fechaHoraDoble(iso);
 
 export default function HiloMensajes({ cargar, enviar, lado, aviso }) {
   const [mensajes, setMensajes] = useState(null);

@@ -478,3 +478,15 @@
 .pnl-tour-saltar { border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0; }
 .pnl-tour-saltar:hover { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .pnl-tour-foco { transition: none; } }
+
+/* ── Área segura de la app instalada ─────────────────────────────────
+   Con viewport-fit=cover, en la app instalada el contenido empieza bajo la
+   hora del sistema y termina bajo la barra de gestos. La barra de arriba y
+   la lateral se apartan de la hora; el contenido, de la barra de abajo. En
+   el navegador estos valores son cero y nada cambia. */
+.pnl-top { padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+.pnl-side { padding-top: env(safe-area-inset-top, 0px); }
+.pnl-entra-llena { padding-bottom: env(safe-area-inset-bottom, 0px); }
+@media (max-width: 767px) {
+  .pnl-top { padding-top: calc(11px + env(safe-area-inset-top, 0px)); }
+}

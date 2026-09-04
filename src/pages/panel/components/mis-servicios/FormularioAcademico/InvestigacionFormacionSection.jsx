@@ -21,7 +21,7 @@ export default function InvestigacionFormacionSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("investigacion_experiencia", e.target.value)
                 }
-                className="text-[#023A4B]"
+                className="text-primary"
               />
               <span>
                 Tengo publicaciones o he participado en grupos de investigación
@@ -36,7 +36,7 @@ export default function InvestigacionFormacionSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("investigacion_experiencia", e.target.value)
                 }
-                className="text-[#023A4B]"
+                className="text-primary"
               />
               <span>No tengo experiencia en investigación</span>
             </label>
@@ -54,7 +54,7 @@ export default function InvestigacionFormacionSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("investigacion_detalle", e.target.value)
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           )}
@@ -132,7 +132,7 @@ export default function InvestigacionFormacionSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("formacion_otros_detalle", e.target.value)
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           )}

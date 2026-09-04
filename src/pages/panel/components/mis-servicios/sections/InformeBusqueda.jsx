@@ -115,7 +115,7 @@ function ModalListadoCompleto({ resultados, total, curado, onClose }) {
         <div className="shrink-0 px-5 py-4 border-t">
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-[#023A4B] text-white text-sm font-semibold hover:bg-[#035670] transition"
+            className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-light transition"
           >
             Cerrar
           </button>
@@ -208,8 +208,8 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
       {/* ── Cargando ──────────────────────────────────────────────────────── */}
       {loadingCompat && (
         <div className="flex flex-col items-center gap-4 py-10">
-          <div className="w-14 h-14 rounded-2xl bg-[#023A4B]/10 flex items-center justify-center">
-            <div className="w-7 h-7 border-[3px] border-[#023A4B] border-t-transparent rounded-full animate-spin" />
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <div className="w-7 h-7 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
           </div>
           <div className="text-center">
             <p className="text-sm font-semibold text-neutral-800">Tu informe está cargando</p>
@@ -222,12 +222,12 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
 
       {/* ── Informe en creación (asesor trabajando) ───────────────────────── */}
       {hasFormData && !loadingCompat && enCreacion && !disponible && (
-        <div className="flex items-start gap-4 bg-[#1A3557]/5 border border-[#1A3557]/15 rounded-xl p-5">
-          <div className="w-10 h-10 rounded-xl bg-[#1A3557]/10 flex items-center justify-center shrink-0 text-xl">
+        <div className="flex items-start gap-4 bg-primary/5 border border-primary/15 rounded-xl p-5">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-xl">
             ⏳
           </div>
           <div>
-            <p className="text-sm font-semibold text-[#1A3557]">Informe en preparación</p>
+            <p className="text-sm font-semibold text-primary">Informe en preparación</p>
             <p className="text-sm text-neutral-500 mt-1 leading-relaxed">
               Nuestro equipo está analizando tu perfil y seleccionando los mejores másteres para ti.
               Te notificaremos por email cuando esté listo.
@@ -277,7 +277,7 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
               </div>
               <div className="flex gap-2 shrink-0">
                 <button onClick={() => manejarPDF("ver")}
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border-2 border-[#023A4B] text-[#023A4B] bg-white hover:bg-[#023A4B] hover:text-white transition-all active:scale-95">
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border-2 border-primary text-primary bg-white hover:bg-primary hover:text-white transition-all active:scale-95">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -285,7 +285,7 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
                   Ver
                 </button>
                 <button onClick={() => manejarPDF("descargar")}
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-[#023A4B] text-white hover:bg-[#035670] transition-all active:scale-95">
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-light transition-all active:scale-95">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 10l-4 4-4-4M12 4v10" />
                   </svg>
@@ -309,7 +309,7 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
               </div>
 
               <div className="border border-neutral-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="bg-[#023A4B] text-white px-5 py-4 flex items-center gap-3">
+                <div className="bg-primary text-white px-5 py-4 flex items-center gap-3">
                   <span className="text-2xl shrink-0">🎓</span>
                   <div className="min-w-0">
                     <p className="text-sm font-bold leading-snug">
@@ -360,7 +360,7 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
                     <div className="text-center mt-4">
                       <button
                         onClick={() => setModal(true)}
-                        className="px-5 py-2 rounded-xl border-2 border-[#023A4B] text-[#023A4B] text-sm font-semibold hover:bg-[#023A4B] hover:text-white transition-all active:scale-95"
+                        className="px-5 py-2 rounded-xl border-2 border-primary text-primary text-sm font-semibold hover:bg-primary hover:text-white transition-all active:scale-95"
                       >
                         Ver los {compat.total} programas →
                       </button>

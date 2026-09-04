@@ -139,7 +139,7 @@ export default function BecasEspana() {
     <div className="flex-1 overflow-y-auto">
       {/* Header */}
       <div className="px-5 py-8 text-center relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #312e81 0%, #1A3557 45%, #1D6A4A 100%)" }}>
+        style={{ background: "linear-gradient(135deg, #312e81 0%, #013446 45%, #1D6A4A 100%)" }}>
         <div className="text-3xl mb-2">🎓</div>
         <h1 className="font-serif text-2xl font-bold text-white mb-1">Becas para Latinos · España</h1>
         <p className="text-white/60 text-xs mb-4">Historial 2024–2026 · AUIP · TalentUnileon · Luis Vives · USAL · F. Carolina · MAEC · Santander · Erasmus Mundus</p>
@@ -163,7 +163,7 @@ export default function BecasEspana() {
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-all whitespace-nowrap ${
-              tab === t.id ? "text-[#1A3557] border-[#1A3557]" : "text-neutral-400 border-transparent hover:text-neutral-600"
+              tab === t.id ? "text-primary border-primary" : "text-neutral-400 border-transparent hover:text-neutral-600"
             }`}
           >
             {t.label}
@@ -223,7 +223,7 @@ export default function BecasEspana() {
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ec.bg} ${ec.text} ${ec.border}`}>{ec.label}</span>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${tc}`}>{b.tipo}</span>
                       </div>
-                      <p className="font-semibold text-[#1A3557] text-[14px] leading-snug">{b.grupo}</p>
+                      <p className="font-semibold text-primary text-[14px] leading-snug">{b.grupo}</p>
                       <p className="text-[12px] text-[#1D6A4A] font-medium mt-1">{b.dot}</p>
                       <p className="text-[11px] text-neutral-500 mt-0.5">{b.becas}</p>
                     </div>
@@ -243,9 +243,9 @@ export default function BecasEspana() {
                           </ul>
                         </div>
                         <div>
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-[#1A3557] mb-1.5 font-mono">Requisitos</p>
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-primary mb-1.5 font-mono">Requisitos</p>
                           <ul className="space-y-1">
-                            {b.req.map((r,i)=><li key={i} className="text-[12px] text-neutral-700 flex gap-2"><span className="text-[#1A3557] shrink-0">→</span>{r}</li>)}
+                            {b.req.map((r,i)=><li key={i} className="text-[12px] text-neutral-700 flex gap-2"><span className="text-primary shrink-0">→</span>{r}</li>)}
                           </ul>
                         </div>
                       </div>
@@ -262,7 +262,7 @@ export default function BecasEspana() {
                       )}
                       <div className="flex gap-2 pt-1">
                         <a href={b.link} target="_blank" rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1A3557] text-white text-[12px] font-semibold rounded-lg hover:bg-[#1D6A4A] transition">
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-[12px] font-semibold rounded-lg hover:bg-[#1D6A4A] transition">
                           Ver convocatoria →
                         </a>
                       </div>
@@ -289,23 +289,23 @@ export default function BecasEspana() {
       {/* TAB AUIP */}
       {tab === "auip" && (
         <div className="max-w-3xl mx-auto px-4 py-5">
-          <div className="bg-[#EEF2F8] border border-[#1A3557]/15 rounded-2xl p-4 mb-4">
-            <h2 className="font-serif text-[#1A3557] text-[15px] font-bold mb-2">🏫 ¿Mi universidad está en AUIP?</h2>
+          <div className="bg-[#EEF2F8] border border-primary/15 rounded-2xl p-4 mb-4">
+            <h2 className="font-serif text-primary text-[15px] font-bold mb-2">🏫 ¿Mi universidad está en AUIP?</h2>
             <p className="text-[13px] text-neutral-600 leading-relaxed mb-1">Para la mayoría de becas AUIP tu universidad debe ser <strong>institución asociada activa</strong>. Si no aparece puedes aplicar igualmente a <strong>TalentUnileon, Fundación Carolina, Erasmus Mundus y MAEC-AECID</strong>.</p>
-            <p className="text-[12px] text-neutral-500">Lista oficial completa (+310): <strong className="text-[#1A3557]">auip.org/es/instituciones-asociadas</strong></p>
+            <p className="text-[12px] text-neutral-500">Lista oficial completa (+310): <strong className="text-primary">auip.org/es/instituciones-asociadas</strong></p>
           </div>
           <input
             type="search"
             value={paisBusq}
             onChange={(e)=>setPaisBusq(e.target.value)}
             placeholder="🔍  Buscar por país o universidad..."
-            className="w-full px-3 py-2.5 text-[13px] border border-[#E2E8F0] rounded-xl bg-white text-neutral-800 placeholder:text-neutral-400 outline-none focus:border-[#1A3557] mb-3"
+            className="w-full px-3 py-2.5 text-[13px] border border-[#E2E8F0] rounded-xl bg-white text-neutral-800 placeholder:text-neutral-400 outline-none focus:border-primary mb-3"
           />
           <div className="space-y-2">
             {paisesFiltrados.map((p)=>(
               <div key={p.p} className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
                 <div className="px-4 py-2.5 bg-[#F4F6F9] border-b border-[#E2E8F0]">
-                  <p className="font-semibold text-[#1A3557] text-[13px]">{p.p}</p>
+                  <p className="font-semibold text-primary text-[13px]">{p.p}</p>
                 </div>
                 <div className="px-4 py-3">
                   {p.u.map((u,i)=>(
@@ -324,22 +324,22 @@ export default function BecasEspana() {
       {/* TAB CCAA */}
       {tab === "ccaa" && (
         <div className="max-w-3xl mx-auto px-4 py-5">
-          <div className="bg-[#EEF2F8] border border-[#1A3557]/15 rounded-2xl p-4 mb-4">
-            <h2 className="font-serif text-[#1A3557] text-[15px] font-bold mb-2">🏠 Ayudas cuando ya estás en España</h2>
+          <div className="bg-[#EEF2F8] border border-primary/15 rounded-2xl p-4 mb-4">
+            <h2 className="font-serif text-primary text-[15px] font-bold mb-2">🏠 Ayudas cuando ya estás en España</h2>
             <p className="text-[13px] text-neutral-600 leading-relaxed">Con <strong>TIE</strong> y <strong>empadronamiento</strong> puedes acceder a estas ayudas. Son compatibles con tu beca de máster.</p>
           </div>
           <div className="space-y-3">
             {CCAA_DATA.map((region)=>(
               <div key={region.ccaa} className="bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F4F6F9]">
-                  <h3 className="font-semibold text-[#1A3557] text-[14px]">{region.ccaa}</h3>
+                  <h3 className="font-semibold text-primary text-[14px]">{region.ccaa}</h3>
                 </div>
                 <div className="p-4 space-y-3">
                   {region.ayudas.map((a,i)=>(
                     <div key={i} className="pl-3 border-l-2 border-[#E2E8F0]">
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="font-semibold text-[13px] text-neutral-800">{a.n}</p>
-                        <span className="text-[10px] bg-[#EEF2F8] text-[#1A3557] px-1.5 py-0.5 rounded border border-[#1A3557]/10">{a.t}</span>
+                        <span className="text-[10px] bg-[#EEF2F8] text-primary px-1.5 py-0.5 rounded border border-primary/10">{a.t}</span>
                       </div>
                       <p className="text-[12px] text-neutral-600 leading-relaxed">{a.d}</p>
                       <p className="text-[11px] text-neutral-400 mt-0.5">→ {a.r}</p>
@@ -350,7 +350,7 @@ export default function BecasEspana() {
               </div>
             ))}
           </div>
-          <div className="bg-[#EEF2F8] border border-[#1A3557]/15 rounded-xl p-3 mt-3 text-[12px] text-[#1A3557]">
+          <div className="bg-[#EEF2F8] border border-primary/15 rounded-xl p-3 mt-3 text-[12px] text-primary">
             <strong>💡 Primeros pasos:</strong> 1) Empadronarte en el ayuntamiento. 2) Con TIE + empadronamiento pides tarjeta sanitaria gratuita. 3) La Beca MEC es compatible con la mayoría de becas universitarias.
           </div>
         </div>

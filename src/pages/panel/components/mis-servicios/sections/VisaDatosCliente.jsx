@@ -113,7 +113,7 @@ function Campo({ label, valor, onChange, tipo = "text", ancho, pista, opciones, 
     "w-full bg-transparent border-none outline-none p-0 text-[13.5px] font-semibold text-neutral-800 " +
     "placeholder:font-normal placeholder:text-neutral-300 disabled:text-neutral-400";
   return (
-    <div className={`${clase} rounded-xl px-3 py-2.5 border transition-colors focus-within:border-[#046C8C] focus-within:bg-white ${
+    <div className={`${clase} rounded-xl px-3 py-2.5 border transition-colors focus-within:border-primary-light focus-within:bg-white ${
       falta ? "bg-amber-50/60 border-amber-300" : "bg-neutral-50 border-neutral-200"
     }`}>
       <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">
@@ -157,7 +157,7 @@ function OpcionTarjeta({ activa, icono, titulo, descripcion, onClick, disabled }
       <div className="flex items-center gap-3">
         <span className="shrink-0 w-10 h-10 rounded-xl bg-neutral-100 grid place-items-center text-xl">{icono}</span>
         <div className="min-w-0">
-          <p className="text-[14px] font-bold text-[#023A4B]">{titulo}</p>
+          <p className="text-[14px] font-bold text-primary">{titulo}</p>
           <p className="text-[12px] text-neutral-500 mt-0.5">{descripcion}</p>
         </div>
       </div>
@@ -253,7 +253,7 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
             type="button"
             onClick={() => setPestana(n)}
             className={`flex-1 py-2 rounded-lg text-[12.5px] font-semibold transition-all ${
-              pestana === n ? "bg-[#023A4B] text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+              pestana === n ? "bg-primary text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
             }`}
           >
             {txt}
@@ -376,7 +376,7 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
                 <button
                   type="button"
                   onClick={() => setVerPass((v) => !v)}
-                  className="sm:col-span-2 text-left text-[11.5px] font-semibold text-[#046C8C] hover:underline px-1"
+                  className="sm:col-span-2 text-left text-[11.5px] font-semibold text-primary-light hover:underline px-1"
                 >
                   {verPass ? "Ocultar contraseña" : "Ver contraseña"}
                 </button>

@@ -54,11 +54,11 @@ export default function InstructivosPlantillas({
           {lista.map((doc) => (
             <li
               key={doc.url}
-              className="flex items-center justify-between gap-4 bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3.5 hover:border-[#046C8C]/30 hover:bg-[#046C8C]/5 transition-all"
+              className="flex items-center justify-between gap-4 bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3.5 hover:border-primary-light/30 hover:bg-primary-light/5 transition-all"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-[#023A4B]/10 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 text-[#023A4B]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                   </svg>
                 </div>
@@ -69,7 +69,7 @@ export default function InstructivosPlantillas({
                 target="_blank"
                 rel="noreferrer"
                 download
-                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-white border-2 border-[#023A4B] text-[#023A4B] hover:bg-[#023A4B] hover:text-white transition-all active:scale-95"
+                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all active:scale-95"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 10l-4 4-4-4M12 4v10" />

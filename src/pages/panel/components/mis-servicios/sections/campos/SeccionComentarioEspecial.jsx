@@ -10,7 +10,7 @@ export default function SeccionComentarioEspecial({ formData, setFormData }) {
         rows={6}
         value={formData.comentario_especial || ""}
         onChange={(e) => setFormData((p) => ({ ...p, comentario_especial: e.target.value }))}
-        className="w-full rounded-xl border border-neutral-200 px-3 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+        className="w-full rounded-xl border border-neutral-200 px-3 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
         placeholder="Escribe aquí…"
       />
       <p className="mt-2 text-[10px] text-neutral-400">

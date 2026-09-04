@@ -25,8 +25,8 @@ export default function SeccionExperiencia({ formData, setFormData }) {
               onClick={() => set("experiencia_anios", formData.experiencia_anios === opt.value ? "" : opt.value)}
               className={`px-4 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.experiencia_anios === opt.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {opt.label}
@@ -51,8 +51,8 @@ export default function SeccionExperiencia({ formData, setFormData }) {
               onClick={() => set("experiencia_vinculada", formData.experiencia_vinculada === opt.value ? "" : opt.value)}
               className={`px-4 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.experiencia_vinculada === opt.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {opt.label}
@@ -69,7 +69,7 @@ export default function SeccionExperiencia({ formData, setFormData }) {
               rows={3}
               value={formData.experiencia_vinculada_detalle || ""}
               onChange={(e) => set("experiencia_vinculada_detalle", e.target.value)}
-              className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+              className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
               placeholder="Describe en 3–4 líneas tu experiencia relevante."
             />
           </div>

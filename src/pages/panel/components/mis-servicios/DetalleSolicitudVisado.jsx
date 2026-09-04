@@ -9,6 +9,7 @@ import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
 import { estadoVisado, TONOS } from "../../../../lib/visaFlujoInterno";
 import { EsqueletoExpediente } from "../Esqueleto";
+import SelectorSeccionMovil from "./SelectorSeccionMovil";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -26,11 +27,11 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
       type="button"
       onClick={onClick}
       className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center gap-2.5 ${
-        active ? "bg-[#023A4B] shadow-sm" : "hover:bg-neutral-100"
+        active ? "bg-primary shadow-sm" : "hover:bg-neutral-100"
       }`}
     >
       <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-colors ${
-        active ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
+        active ? "bg-white/20 text-white" : "bg-primary-light/10 text-primary-light"
       }`}>
         {num}
       </div>
@@ -88,7 +89,7 @@ function SesionView({ sesion, etiqueta, vacio, pie }) {
       : "border-dashed border-neutral-300 bg-neutral-50"
     }`}>
       <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">{etiqueta}</p>
-      <p className={`font-bold mt-1 ${agendada ? "text-[20px] text-[#023A4B]" : "text-[17px] text-neutral-400"}`}>
+      <p className={`font-bold mt-1 ${agendada ? "text-[20px] text-primary" : "text-[17px] text-neutral-400"}`}>
         {agendada && sesion.fecha ? sesion.fecha : "Por agendar"}
         {agendada && sesion.hora ? ` · ${sesion.hora}` : ""}
       </p>
@@ -173,7 +174,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
   // la anterior y recargar conserva el sitio. El nombre `setActiveSection` se
   // conserva para no tocar cada botón que lo llama.
   const setActiveSection = onSeccion;
-  const [menuAbierto, setMenuAbierto] = useState(false);
 
   const idSolicitud = solicitudBase.id_solicitud;
 
@@ -498,12 +498,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
   }
 
   const sec = navSections.find((s) => s.id === activeSection) || navSections[0];
-  const indiceActivo = Math.max(0, navSections.findIndex((s) => s.id === sec.id));
-
-  function irBloque(paso) {
-    const destino = navSections[indiceActivo + paso];
-    if (destino) { setActiveSection(destino.id); setMenuAbierto(false); }
-  }
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -513,7 +507,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
         <button
           onClick={onVolver}
           aria-label="Volver a mis servicios"
-          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] min-w-[44px] justify-center px-3 sm:px-3.5 py-2 rounded-xl bg-[#023A4B] text-white text-xs font-semibold hover:bg-[#035670] active:scale-95 transition-all shadow-sm group"
+          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] min-w-[44px] justify-center px-3 sm:px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary-light active:scale-95 transition-all shadow-sm group"
         >
           <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -533,7 +527,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
         {!loading && !error && detalle && (
           <div className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-3 sm:px-4 py-2.5 flex items-center gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold text-[#046C8C] uppercase tracking-widest leading-none">
+              <p className="text-[10px] font-bold text-primary-light uppercase tracking-widest leading-none">
                 Solicitud #{detalle.id_solicitud}
               </p>
               <p className="text-[13px] sm:text-sm font-bold text-neutral-900 leading-snug truncate mt-0.5">
@@ -562,93 +556,6 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
       {/* Panel principal */}
       {!loading && !error && detalle && (
         <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
-
-          {/* Móvil: selector de bloque. Con 10 bloques una tira deslizable
-              obliga a buscar a ciegas; un desplegable los muestra todos de
-              una vez, con su estado, y deja avanzar paso a paso. */}
-          <div className="md:hidden shrink-0 space-y-2">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => irBloque(-1)}
-                disabled={indiceActivo <= 0}
-                className="shrink-0 w-11 h-11 rounded-xl border border-neutral-200 bg-white grid place-items-center text-neutral-500 disabled:opacity-30 active:scale-95 transition-all"
-                aria-label="Bloque anterior"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMenuAbierto((v) => !v)}
-                className="flex-1 min-w-0 flex items-center gap-2.5 bg-white border border-neutral-200 rounded-xl shadow-sm px-3 py-2.5 text-left"
-                aria-expanded={menuAbierto}
-              >
-                <span className="shrink-0 w-7 h-7 rounded-lg bg-[#046C8C]/10 text-[#046C8C] grid place-items-center text-[11px] font-black">
-                  {sec.num}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-bold text-neutral-900 truncate">{sec.titulo}</span>
-                  <span className="block text-[10.5px] text-neutral-400 truncate">
-                    Bloque {indiceActivo + 1} de {navSections.length}
-                  </span>
-                </span>
-                {sec.estado && (
-                  <span className={`shrink-0 w-2 h-2 rounded-full ${DOT_COLORS[sec.estado] || "bg-neutral-300"}`} />
-                )}
-                <svg className={`shrink-0 w-4 h-4 text-neutral-400 transition-transform ${menuAbierto ? "rotate-180" : ""}`}
-                  fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => irBloque(1)}
-                disabled={indiceActivo >= navSections.length - 1}
-                className="shrink-0 w-11 h-11 rounded-xl border border-neutral-200 bg-white grid place-items-center text-neutral-500 disabled:opacity-30 active:scale-95 transition-all"
-                aria-label="Bloque siguiente"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
-            </div>
-
-            {menuAbierto && (
-              <div className="bg-white border border-neutral-200 rounded-2xl shadow-lg p-1.5 max-h-[60vh] overflow-y-auto">
-                {navSections.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => { setActiveSection(s.id); setMenuAbierto(false); }}
-                    className={`w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-left transition-colors ${
-                      activeSection === s.id ? "bg-[#023A4B]" : "active:bg-neutral-100"
-                    }`}
-                  >
-                    <span className={`shrink-0 w-7 h-7 rounded-lg grid place-items-center text-[11px] font-black ${
-                      activeSection === s.id ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
-                    }`}>{s.num}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className={`block text-[13px] font-semibold truncate ${activeSection === s.id ? "text-white" : "text-neutral-800"}`}>
-                        {s.titulo}
-                      </span>
-                      <span className={`block text-[10.5px] truncate ${activeSection === s.id ? "text-white/60" : "text-neutral-400"}`}>
-                        {s.subtitulo}
-                      </span>
-                    </span>
-                    {s.estado && (
-                      <span className={`shrink-0 w-2 h-2 rounded-full ${
-                        activeSection === s.id ? "bg-white/40" : (DOT_COLORS[s.estado] || "bg-neutral-300")
-                      }`} />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Desktop: sidebar vertical */}
           <div className="hidden md:flex w-64 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
@@ -717,6 +624,9 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
               )}
             </SeccionSiempreAbiertoCtx.Provider>
           </div>
+
+          {/* Móvil: el selector de sección, abajo. */}
+          <SelectorSeccionMovil secciones={navSections} activa={activeSection} onCambiar={setActiveSection} />
         </div>
       )}
     </div>

@@ -137,7 +137,7 @@ export default function GuiaMaster() {
   return (
     <div className="min-h-screen bg-[#F4F6F9] font-sans">
       {/* ── Header ── */}
-      <div className="bg-gradient-to-r from-[#1A3557] to-[#1D6A4A] px-6 py-10">
+      <div className="bg-gradient-to-r from-primary to-[#1D6A4A] px-6 py-10">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1.5 mb-4">
             <span className="text-white text-xs font-semibold">⚖️ Inspira Legal · Asesoría Especializada</span>
@@ -168,8 +168,8 @@ export default function GuiaMaster() {
               onClick={() => setTabActiva(t.id)}
               className={`px-4 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors font-sans ${
                 tabActiva === t.id
-                  ? "border-[#1A3557] text-[#1A3557]"
-                  : "border-transparent text-slate-500 hover:text-[#1A3557] hover:border-[#1A3557]/30"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-slate-500 hover:text-primary hover:border-primary/30"
               }`}
             >
               {t.label}
@@ -184,7 +184,7 @@ export default function GuiaMaster() {
         {tabActiva === "inicio" && (
           <div>
             {/* Welcome banner */}
-            <div className="bg-gradient-to-r from-[#1A3557] to-[#1D6A4A] rounded-2xl p-7 mb-6 text-white">
+            <div className="bg-gradient-to-r from-primary to-[#1D6A4A] rounded-2xl p-7 mb-6 text-white">
               <p className="text-xs uppercase tracking-widest text-white/60 mb-2">Bienvenido/a</p>
               <h2 className="font-serif text-2xl font-bold mb-3">Tu camino al máster en España</h2>
               <p className="text-white/80 text-sm leading-relaxed max-w-2xl">
@@ -200,7 +200,7 @@ export default function GuiaMaster() {
                   🎓
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-[#1A3557] mb-2">¿Qué es un Máster Oficial?</h3>
+                  <h3 className="font-serif text-lg font-bold text-primary mb-2">¿Qué es un Máster Oficial?</h3>
                   <p className="text-sm text-slate-600 leading-relaxed mb-3">
                     Un máster oficial en España (también llamado máster universitario) es un título de posgrado regulado por el
                     Espacio Europeo de Educación Superior (EEES). Tiene entre <strong>60 y 120 ECTS</strong> (European Credits)
@@ -216,7 +216,7 @@ export default function GuiaMaster() {
                       <div key={item.label} className="bg-[#F4F6F9] rounded-xl p-3 text-center">
                         <p className="text-xl mb-1">{item.icon}</p>
                         <p className="text-xs text-slate-400 font-sans">{item.label}</p>
-                        <p className="text-sm font-semibold text-[#1A3557]">{item.val}</p>
+                        <p className="text-sm font-semibold text-primary">{item.val}</p>
                       </div>
                     ))}
                   </div>
@@ -231,7 +231,7 @@ export default function GuiaMaster() {
                   ⚖️
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-[#1A3557] mb-2">¿Por qué Inspira Legal?</h3>
+                  <h3 className="font-serif text-lg font-bold text-primary mb-2">¿Por qué Inspira Legal?</h3>
                   <ul className="space-y-2">
                     {[
                       "Asesoría jurídica especializada en visas de estudios y autorizaciones de estancia",
@@ -269,13 +269,13 @@ export default function GuiaMaster() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setTabActiva("proceso")}
-                className="bg-[#1A3557] text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#1A3557]/90 transition-colors"
+                className="bg-primary text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors"
               >
                 Ver el proceso completo →
               </button>
               <button
                 onClick={() => setTabActiva("checklist")}
-                className="bg-white border border-[#E2E8F0] text-[#1A3557] font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#F4F6F9] transition-colors"
+                className="bg-white border border-[#E2E8F0] text-primary font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#F4F6F9] transition-colors"
               >
                 Ir al checklist
               </button>
@@ -296,7 +296,7 @@ export default function GuiaMaster() {
               ].map((phase) => (
                 <div key={phase.num} className={`border rounded-2xl p-5 ${phase.color}`}>
                   <span className={`font-serif text-3xl font-bold ${phase.numColor} leading-none`}>{phase.num}</span>
-                  <h3 className={`font-serif font-bold text-[#1A3557] text-lg mt-1 mb-2`}>{phase.title}</h3>
+                  <h3 className={`font-serif font-bold text-primary text-lg mt-1 mb-2`}>{phase.title}</h3>
                   <p className="text-sm text-slate-600 leading-relaxed">{phase.desc}</p>
                 </div>
               ))}
@@ -304,7 +304,7 @@ export default function GuiaMaster() {
 
             {/* Calendar timeline */}
             <Card>
-              <h3 className="font-serif text-lg font-bold text-[#1A3557] mb-4">Calendario recomendado</h3>
+              <h3 className="font-serif text-lg font-bold text-primary mb-4">Calendario recomendado</h3>
               <div className="space-y-3">
                 {[
                   { mes: "Ene–Feb", icon: "🔍", accion: "Investigar másteres y universidades objetivo. Consultar con Inspira Legal." },
@@ -316,7 +316,7 @@ export default function GuiaMaster() {
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">
                     <div className="w-20 shrink-0 text-right">
-                      <span className="text-xs font-bold text-[#1A3557] font-sans">{item.mes}</span>
+                      <span className="text-xs font-bold text-primary font-sans">{item.mes}</span>
                     </div>
                     <div className="w-8 flex flex-col items-center shrink-0">
                       <div className="w-8 h-8 rounded-full bg-[#F4F6F9] border-2 border-[#E2E8F0] flex items-center justify-center text-base">
@@ -332,7 +332,7 @@ export default function GuiaMaster() {
 
             {/* Steps 1–10 */}
             <Card>
-              <h3 className="font-serif text-lg font-bold text-[#1A3557] mb-5">Los 10 pasos del proceso</h3>
+              <h3 className="font-serif text-lg font-bold text-primary mb-5">Los 10 pasos del proceso</h3>
               <div className="space-y-4">
                 {[
                   { n: 1, icon: "🔎", t: "Elige tu área y máster", d: "Define el área de estudio, las universidades españolas que te interesan y el tipo de máster (presencial, semipresencial, doble titulación)." },
@@ -347,11 +347,11 @@ export default function GuiaMaster() {
                   { n: 10, icon: "🏠", t: "Llega y regularízate", d: "Al llegar: empadrónate, solicita el NIE/TIE, abre cuenta bancaria y pide la tarjeta sanitaria gratuita." },
                 ].map((step) => (
                   <div key={step.n} className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#1A3557] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">
                       {step.n}
                     </div>
                     <div className="flex-1 pt-0.5">
-                      <p className="font-semibold text-[#1A3557] text-sm mb-0.5">
+                      <p className="font-semibold text-primary text-sm mb-0.5">
                         {step.icon} {step.t}
                       </p>
                       <p className="text-sm text-slate-600 leading-relaxed">{step.d}</p>
@@ -380,7 +380,7 @@ export default function GuiaMaster() {
             </div>
 
             {/* Navy banner */}
-            <div className="bg-[#1A3557] text-white rounded-2xl p-5 mb-4 flex items-start gap-3">
+            <div className="bg-primary text-white rounded-2xl p-5 mb-4 flex items-start gap-3">
               <span className="text-2xl shrink-0">📋</span>
               <div>
                 <p className="font-semibold mb-1">Cumple TODAS las etapas del proceso</p>
@@ -395,7 +395,7 @@ export default function GuiaMaster() {
             <div className="bg-[#F5C842]/10 border border-[#F5C842]/40 rounded-2xl p-5 mb-6 flex items-start gap-3">
               <span className="text-2xl shrink-0">💡</span>
               <div>
-                <p className="font-semibold text-[#1A3557] mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
+                <p className="font-semibold text-primary mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
                 <p className="text-sm text-slate-700 leading-relaxed">
                   Cuando envíes documentos digitalmente, el diploma y su apostilla deben ir <strong>combinados en un solo archivo PDF</strong>.
                   Sube primero el diploma y luego la apostilla en el mismo documento.
@@ -405,7 +405,7 @@ export default function GuiaMaster() {
             </div>
 
             {/* Doc list */}
-            <h3 className="font-serif text-lg font-bold text-[#1A3557] mb-4">Documentos habituales requeridos</h3>
+            <h3 className="font-serif text-lg font-bold text-primary mb-4">Documentos habituales requeridos</h3>
             <div className="space-y-3">
               {[
                 {
@@ -454,7 +454,7 @@ export default function GuiaMaster() {
                 },
               ].map((cat) => (
                 <Card key={cat.cat}>
-                  <h4 className="font-serif font-bold text-[#1A3557] mb-3 flex items-center gap-2">
+                  <h4 className="font-serif font-bold text-primary mb-3 flex items-center gap-2">
                     <span>{cat.icon}</span>
                     {cat.cat}
                   </h4>
@@ -480,7 +480,7 @@ export default function GuiaMaster() {
           <div>
             {/* What is apostille */}
             <Card>
-              <h3 className="font-serif text-lg font-bold text-[#1A3557] mb-3">¿Qué es la Apostilla de La Haya?</h3>
+              <h3 className="font-serif text-lg font-bold text-primary mb-3">¿Qué es la Apostilla de La Haya?</h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-4">
                 La Apostilla es una certificación internacional que valida la autenticidad de un documento público
                 emitido en un país firmante del Convenio de La Haya (1961). En el contexto del máster en España,
@@ -495,7 +495,7 @@ export default function GuiaMaster() {
                 ].map((item) => (
                   <div key={item.t} className="bg-[#F4F6F9] rounded-xl p-4 text-center">
                     <p className="text-2xl mb-2">{item.icon}</p>
-                    <p className="text-xs font-bold text-[#1A3557] mb-1">{item.t}</p>
+                    <p className="text-xs font-bold text-primary mb-1">{item.t}</p>
                     <p className="text-xs text-slate-500 leading-relaxed">{item.d}</p>
                   </div>
                 ))}
@@ -523,7 +523,7 @@ export default function GuiaMaster() {
               </div>
               <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5">
                 <p className="text-lg mb-2">📄</p>
-                <h4 className="font-serif font-bold text-[#1A3557] mb-2">Apostilla Física</h4>
+                <h4 className="font-serif font-bold text-primary mb-2">Apostilla Física</h4>
                 <ul className="space-y-1.5">
                   {[
                     "Sello/sticker sobre el documento original",
@@ -544,7 +544,7 @@ export default function GuiaMaster() {
             <div className="bg-[#F5C842]/10 border border-[#F5C842]/40 rounded-2xl p-5 mb-6 flex items-start gap-3">
               <span className="text-2xl shrink-0">💡</span>
               <div>
-                <p className="font-semibold text-[#1A3557] mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
+                <p className="font-semibold text-primary mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
                 <p className="text-sm text-slate-700 leading-relaxed">
                   Al enviar tus documentos digitalmente, combina el diploma y su apostilla en <strong>un solo archivo PDF</strong>.
                   Ordena: página 1 = diploma, página 2 en adelante = apostilla. No los envíes como archivos separados.
@@ -553,7 +553,7 @@ export default function GuiaMaster() {
             </div>
 
             {/* By country */}
-            <h3 className="font-serif text-lg font-bold text-[#1A3557] mb-4">Proceso por país</h3>
+            <h3 className="font-serif text-lg font-bold text-primary mb-4">Proceso por país</h3>
             <div className="space-y-3">
               {[
                 {
@@ -601,7 +601,7 @@ export default function GuiaMaster() {
               ].map((item) => (
                 <Card key={item.pais}>
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h4 className="font-serif font-bold text-[#1A3557] text-base">{item.pais}</h4>
+                    <h4 className="font-serif font-bold text-primary text-base">{item.pais}</h4>
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${item.digital ? "bg-[#E8F5EE] text-[#1D6A4A]" : "bg-amber-50 text-amber-700"}`}>
                       {item.digital ? "Digital disponible" : "Proceso mixto"}
                     </span>
@@ -624,12 +624,12 @@ export default function GuiaMaster() {
             </div>
 
             {/* Inspira CTA */}
-            <div className="mt-6 bg-[#1A3557] text-white rounded-2xl p-6 text-center">
+            <div className="mt-6 bg-primary text-white rounded-2xl p-6 text-center">
               <p className="font-serif text-lg font-bold mb-2">¿Tienes dudas con tu apostilla?</p>
               <p className="text-white/80 text-sm mb-4">Inspira Legal te orienta en cada paso del proceso de legalización documental.</p>
               <a
                 href="mailto:administracion@inspira-legal.cloud"
-                className="inline-block bg-[#F5C842] text-[#1A3557] font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
+                className="inline-block bg-[#F5C842] text-primary font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
               >
                 Consultar con Inspira Legal
               </a>
@@ -641,7 +641,7 @@ export default function GuiaMaster() {
         {tabActiva === "visa" && (
           <div>
             {/* Visa hero */}
-            <div className="bg-gradient-to-r from-[#1A3557] to-[#1D6A4A] rounded-2xl p-7 mb-6 text-white">
+            <div className="bg-gradient-to-r from-primary to-[#1D6A4A] rounded-2xl p-7 mb-6 text-white">
               <p className="text-xs uppercase tracking-widest text-white/60 mb-2">Trámite migratorio</p>
               <h2 className="font-serif text-2xl font-bold mb-3">Visa y autorización de estancia</h2>
               <p className="text-white/80 text-sm leading-relaxed max-w-xl">
@@ -653,11 +653,11 @@ export default function GuiaMaster() {
             {/* Visa cards */}
             <div className="grid sm:grid-cols-2 gap-5 mb-6">
               {/* Visa estudios */}
-              <div className="bg-white border-2 border-[#1A3557]/20 rounded-2xl p-6 shadow-sm">
-                <div className="w-12 h-12 rounded-xl bg-[#1A3557]/10 flex items-center justify-center text-2xl mb-4">
+              <div className="bg-white border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl mb-4">
                   ✈️
                 </div>
-                <h3 className="font-serif font-bold text-[#1A3557] text-lg mb-1">Visa de Estudios</h3>
+                <h3 className="font-serif font-bold text-primary text-lg mb-1">Visa de Estudios</h3>
                 <p className="text-xs text-amber-600 font-semibold bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 inline-block mb-3">
                   Duración del máster &gt;90 días
                 </p>
@@ -692,7 +692,7 @@ export default function GuiaMaster() {
                 <div className="w-12 h-12 rounded-xl bg-[#E8F5EE] border border-[#1D6A4A]/20 flex items-center justify-center text-2xl mb-4">
                   📋
                 </div>
-                <h3 className="font-serif font-bold text-[#1A3557] text-lg mb-1">Autorización de Estancia</h3>
+                <h3 className="font-serif font-bold text-primary text-lg mb-1">Autorización de Estancia</h3>
                 <p className="text-xs text-[#1D6A4A] font-semibold bg-[#E8F5EE] border border-[#1D6A4A]/20 rounded-full px-2.5 py-1 inline-block mb-3">
                   Estancias ≤90 días
                 </p>
@@ -724,7 +724,7 @@ export default function GuiaMaster() {
 
             {/* Tips */}
             <Card>
-              <h3 className="font-serif font-bold text-[#1A3557] mb-4">Consejos clave para el proceso</h3>
+              <h3 className="font-serif font-bold text-primary mb-4">Consejos clave para el proceso</h3>
               <div className="space-y-3">
                 {[
                   { icon: "🗓️", tip: "Solicita cita consular con al menos 3 meses de anticipación. La demanda en temporada alta puede ser muy alta." },
@@ -742,7 +742,7 @@ export default function GuiaMaster() {
             </Card>
 
             {/* Inspira CTA */}
-            <div className="bg-gradient-to-r from-[#1A3557] to-[#1D6A4A] text-white rounded-2xl p-7 text-center mt-2">
+            <div className="bg-gradient-to-r from-primary to-[#1D6A4A] text-white rounded-2xl p-7 text-center mt-2">
               <p className="font-serif text-xl font-bold mb-2">Inspira Legal te acompaña en ambos procesos</p>
               <p className="text-white/80 text-sm mb-5 max-w-md mx-auto leading-relaxed">
                 Desde determinar qué tipo de autorización necesitas hasta preparar el expediente completo para el consulado.
@@ -750,7 +750,7 @@ export default function GuiaMaster() {
               <div className="flex flex-wrap gap-3 justify-center">
                 <a
                   href="mailto:administracion@inspira-legal.cloud"
-                  className="inline-block bg-[#F5C842] text-[#1A3557] font-bold text-sm px-7 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
+                  className="inline-block bg-[#F5C842] text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
                 >
                   Consultar ahora
                 </a>
@@ -773,12 +773,12 @@ export default function GuiaMaster() {
             {/* Progress */}
             <Card>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-serif font-bold text-[#1A3557] text-lg">Tu progreso</h3>
+                <h3 className="font-serif font-bold text-primary text-lg">Tu progreso</h3>
                 <span className="text-sm font-semibold text-[#1D6A4A]">{doneCount}/{totalCount} completados</span>
               </div>
               <div className="w-full bg-[#E2E8F0] rounded-full h-3 mb-2">
                 <div
-                  className="bg-gradient-to-r from-[#1D6A4A] to-[#1A3557] h-3 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-[#1D6A4A] to-primary h-3 rounded-full transition-all duration-500"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -799,7 +799,7 @@ export default function GuiaMaster() {
                 return (
                   <div key={section.id}>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-serif font-bold text-[#1A3557] flex items-center gap-2">
+                      <h3 className="font-serif font-bold text-primary flex items-center gap-2">
                         <span>{section.icon}</span>
                         {section.title}
                       </h3>
@@ -844,7 +844,7 @@ export default function GuiaMaster() {
 
             {/* CTA */}
             {pct === 100 && (
-              <div className="mt-6 bg-gradient-to-r from-[#1D6A4A] to-[#1A3557] text-white rounded-2xl p-7 text-center">
+              <div className="mt-6 bg-gradient-to-r from-[#1D6A4A] to-primary text-white rounded-2xl p-7 text-center">
                 <p className="text-3xl mb-3">🎉</p>
                 <p className="font-serif text-xl font-bold mb-2">¡Lo lograste!</p>
                 <p className="text-white/80 text-sm mb-5 leading-relaxed">
@@ -852,7 +852,7 @@ export default function GuiaMaster() {
                 </p>
                 <a
                   href="mailto:administracion@inspira-legal.cloud"
-                  className="inline-block bg-[#F5C842] text-[#1A3557] font-bold text-sm px-7 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
+                  className="inline-block bg-[#F5C842] text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
                 >
                   Contactar a Inspira Legal
                 </a>

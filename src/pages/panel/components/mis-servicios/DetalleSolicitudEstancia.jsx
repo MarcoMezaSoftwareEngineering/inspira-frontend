@@ -15,10 +15,11 @@ import { Campo, Selector, Guardado } from "./campos";
 import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
 import AcompanantesCliente from "./AcompanantesCliente";
 import { abrirArchivo } from "../../../../services/archivos";
-
+
+import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
-  azul:    "bg-[#EEF2F8] text-[#1A3557] border-[#1A3557]/20",
+  azul:    "bg-[#EEF2F8] text-primary border-primary/20",
   ambar:   "bg-amber-50 text-amber-800 border-amber-300",
   violeta: "bg-violet-50 text-violet-800 border-violet-300",
   rojo:    "bg-red-50 text-red-800 border-red-300",
@@ -44,82 +45,7 @@ const OPCIONES = {
 
 /* ── Campos con ayuda ────────────────────────────────────────────────────── */
 
-/**
- * La ayuda va detrás de una ⓘ y no siempre visible: con treinta campos, un
- * párrafo bajo cada uno convierte el formulario en un muro. Quien sabe qué
- * poner no la abre; quien duda, la tiene a un clic.
- */
-function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, onSiguiente, children }) {
-  const completo = faltan === 0;
-  return (
-    <div className={`rounded-xl border overflow-hidden ${
-      completo ? "border-[#1D6A4A]/25" : "border-neutral-200"
-    }`}>
-      <button type="button" onClick={onToggle}
-        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-neutral-50/60">
-        <span className={`shrink-0 w-6 h-6 rounded-lg grid place-items-center text-[11px] font-bold ${
-          completo ? "bg-[#1D6A4A] text-white" : "bg-neutral-200 text-neutral-500"
-        }`}>{completo ? "✓" : numero}</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-semibold text-neutral-800">{titulo}</span>
-          {subtitulo && <span className="block text-[11px] text-neutral-400">{subtitulo}</span>}
-        </span>
-        {!completo && (
-          <span className="shrink-0 text-[10.5px] font-bold text-amber-600">faltan {faltan}</span>
-        )}
-        <span className="shrink-0 text-neutral-300 text-[11px]">{abierto ? "▲" : "▼"}</span>
-      </button>
-      {abierto && (
-        <div className="px-3.5 pb-4 pt-1 border-t border-neutral-100">
-          {children}
-          {onSiguiente && (
-            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-neutral-100">
-              <button type="button" onClick={onSiguiente}
-                className="text-[12.5px] font-semibold px-4 py-2 rounded-lg
-                  bg-neutral-900 text-white hover:opacity-90">
-                Continuar
-              </button>
-              <span className="text-[11.5px] text-neutral-400">
-                {completo ? "Este paso está completo" : "Puedes volver luego a lo que falta"}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /* ── Estado y plazos ─────────────────────────────────────────────────────── */
-
-function EstadoProceso({ revision }) {
-  const etapa = revision?.etapa;
-  const recorrido = revision?.recorrido || [];
-  if (!etapa) return null;
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl px-4 py-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
-        En qué va tu expediente
-      </p>
-      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border mb-3 ${TONOS[etapa.tono]}`}>
-        <span className="text-[14px] font-bold">{etapa.cliente}</span>
-      </div>
-      <p className="text-[13px] text-neutral-600 leading-relaxed mb-4">{etapa.explica_cliente}</p>
-      <div className="flex items-center gap-1">
-        {recorrido.map((e) => (
-          <div key={e.clave} className="flex-1 min-w-0" title={e.cliente}>
-            <div className={`h-1.5 rounded-full ${
-              e.actual ? "bg-[#1A3557]" : e.pasada ? "bg-[#1D6A4A]" : "bg-neutral-200"
-            }`} />
-            <p className={`text-[9px] mt-1 truncate ${
-              e.actual ? "text-[#1A3557] font-bold" : "text-neutral-400"
-            }`}>{e.cliente}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function CajaPlazo({ titulo, dato }) {
   if (!dato) return null;
@@ -189,22 +115,22 @@ function SeguimientoExpediente({ exp }) {
   }
 
   return (
-    <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8] px-3.5 py-3 mb-3">
+    <div className="rounded-xl border border-primary/20 bg-[#EEF2F8] px-3.5 py-3 mb-3">
       <p className="text-[10px] font-bold uppercase tracking-widest font-mono
-        text-[#1A3557] mb-2">Para consultar tu expediente</p>
+        text-primary mb-2">Para consultar tu expediente</p>
       <table className="w-full">
         <tbody>
           {filas.map(([k, v]) => (
             <tr key={k}>
               <td className="text-[11.5px] text-neutral-500 py-0.5 pr-3 align-top w-[45%]">{k}</td>
-              <td className="text-[12.5px] font-bold text-[#1A3557] py-0.5 select-all">{v}</td>
+              <td className="text-[12.5px] font-bold text-primary py-0.5 select-all">{v}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <a href="https://infoext2.delegaciondelgobierno.gob.es/infoext2/consulta.html"
         target="_blank" rel="noreferrer"
-        className="inline-block text-[11.5px] font-semibold text-[#046C8C] hover:underline mt-2">
+        className="inline-block text-[11.5px] font-semibold text-primary-light hover:underline mt-2">
         Consultar en la sede de la Delegación del Gobierno →
       </a>
     </div>
@@ -314,105 +240,6 @@ function PedirRevision({ id, docs, exp, onHecho }) {
 }
 
 /* ── Bloque plegable ─────────────────────────────────────────────────────── */
-
-/**
- * Quién más entra a este expediente.
- *
- * Se le enseña sin que tenga que buscarlo. Sus datos son suyos: si hay otra
- * persona entrando tiene que saberlo, y poder decir que no.
- */
-function OtraPersona({ invitados }) {
-  if (!invitados?.length) return null;
-  const plural = invitados.length > 1;
-  return (
-    <div className="rounded-xl border border-[#1A3557]/25 bg-[#EEF2F8]/60 px-3.5 py-3 mb-3
-      flex items-start gap-2.5">
-      <span className="shrink-0 text-[15px]" aria-hidden="true">👥</span>
-      <div className="min-w-0">
-        <p className="text-[12.5px] font-semibold text-[#1A3557]">
-          {plural ? "Otras personas entran" : "Otra persona entra"} a tu expediente
-        </p>
-        <p className="text-[12px] text-neutral-600 leading-relaxed mt-0.5">
-          {invitados.map((i) => (
-            <span key={i.correo} className="block">
-              <b>{i.correo}</b>{i.quien ? ` · ${i.quien}` : ""}
-            </span>
-          ))}
-          <span className="block mt-1">
-            {plural ? "Ven" : "Ve"} tu expediente y {plural ? "reciben" : "recibe"} los mismos
-            avisos que tú. Si prefieres que no, dínoslo y lo quitamos.
-          </span>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Cuando quien mira NO es el titular.
- *
- * Sin esto, alguien invitado abre «Mis servicios», ve el expediente de otra
- * persona con sus apellidos y su pasaporte, y no entiende qué está pasando.
- */
-function ComoInvitado({ solicitud }) {
-  if (!solicitud?.invitado) return null;
-  return (
-    <div className="rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-3 mb-3">
-      <p className="text-[12.5px] text-amber-900 leading-relaxed">
-        Estás viendo el expediente de <b>{solicitud.titular}</b>, que te dio acceso. Lo que
-        subas o completes aquí queda en su expediente.
-      </p>
-    </div>
-  );
-}
-
-/** Cómo tienen que verse los documentos. Se dice antes de que suba el primero. */
-function ComoEscanear() {
-  const [abierto, setAbierto] = useState(false);
-  return (
-    <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8]/50 px-3.5 py-2.5 mb-3">
-      <button type="button" onClick={() => setAbierto((v) => !v)}
-        className="w-full flex items-center gap-2 text-left">
-        <span className="shrink-0 text-[14px]" aria-hidden="true">📷</span>
-        <span className="text-[12.5px] font-semibold text-[#1A3557] min-w-0 flex-1">
-          Cómo escanear: un archivo, nítido, menos de 4 MB
-        </span>
-        <span className="shrink-0 text-neutral-400 text-[11px]">{abierto ? "▲" : "▼"}</span>
-      </button>
-      {abierto && (
-        <p className="text-[12.5px] text-neutral-700 leading-relaxed mt-2">
-          Tienen que verse <b>nítidos y completos</b>: un documento borroso o con una esquina
-          cortada te lo devuelven y hay que rehacerlo. Desde el celular puedes usar
-          <b> CamScanner</b> o la app de escaneo que ya traiga tu teléfono —recorta, endereza y
-          lo guarda en PDF—; y si tienes escáner a mano, mejor todavía. Foto suelta con el
-          fondo de la mesa, no.
-          <br /><br />
-          <b>Cada documento va en un solo archivo</b>: si el pasaporte tiene diez páginas, van
-          las diez en un PDF, no diez fotos sueltas. Y que <b>pese menos de 4 MB</b>. Si se te
-          pasa, lo achicamos nosotros al subirlo, pero un escaneo que ya venía borroso no se
-          arregla achicándolo.
-        </p>
-      )}
-    </div>
-  );
-}
-function Bloque({ numero, titulo, subtitulo, abierto, onToggle, children }) {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
-      <button type="button" onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-neutral-50/60">
-        <span className="shrink-0 w-8 h-8 rounded-xl grid place-items-center text-[13px]
-          font-bold text-white font-serif" style={{ background: "#1A3557" }}>{numero}</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-bold text-[#1A3557]">{titulo}</span>
-          {subtitulo && <span className="block text-[11.5px] text-neutral-500 mt-0.5">{subtitulo}</span>}
-        </span>
-        <span className="shrink-0 text-neutral-300 text-[13px]">{abierto ? "▲" : "▼"}</span>
-      </button>
-      {abierto && <div className="px-4 pb-5 pt-1 border-t border-neutral-100">{children}</div>}
-    </div>
-  );
-}
 
 /* ── Principal ───────────────────────────────────────────────────────────── */
 
@@ -537,7 +364,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
     <div className="flex-1 min-h-0 overflow-auto">
       <div className="max-w-4xl mx-auto p-4 sm:p-5 space-y-3">
         <button type="button" onClick={onVolver}
-          className="text-[12px] font-semibold text-neutral-500 hover:text-[#1A3557]">
+          className="text-[12px] font-semibold text-neutral-500 hover:text-primary">
           ← Mis servicios
         </button>
 
@@ -545,7 +372,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
           <p className="text-[10px] font-bold uppercase tracking-[.2em] font-mono text-[#1D6A4A]">
             Estancia por estudios
           </p>
-          <h1 className="font-serif text-xl font-bold text-[#1A3557]">Tu expediente</h1>
+          <h1 className="font-serif text-xl font-bold text-primary">Tu expediente</h1>
         </div>
 
         <EstadoProceso revision={rev} />
@@ -735,7 +562,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
               faltan={usaUni ? 0 : cuenta(PASOS[5])} abierto={paso === 5} onToggle={() => abrir(5)}>
 
               <label className="flex items-start gap-2 mb-3 text-[12.5px] text-neutral-700
-                rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8] px-3 py-2.5 cursor-pointer">
+                rounded-xl border border-primary/20 bg-[#EEF2F8] px-3 py-2.5 cursor-pointer">
                 <input type="checkbox" className="mt-0.5 accent-[#1D6A4A]"
                   checked={usaUni} onChange={(e) => set("dom_usa_universidad")(e.target.checked)} />
                 <span>
@@ -789,7 +616,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
           <button type="button" onClick={() => onIrAGuia?.("estancia")}
             className="inline-flex items-center gap-2 text-[13px] font-semibold px-4 py-2.5
               rounded-lg text-white hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #1A3557 0%, #023A4B 100%)" }}>
+            style={{ background: "linear-gradient(135deg, #013446 0%, #013446 100%)" }}>
             📖 Abrir la guía de estancia por estudios
           </button>
         </Bloque>
@@ -812,7 +639,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                   hasta que completes tus datos</b>: se copian al formulario oficial.
                 </p>
                 <button type="button" onClick={() => { setBloque(1); setPaso(1); }}
-                  className="text-[12px] font-semibold text-[#023A4B] hover:underline mt-1">
+                  className="text-[12px] font-semibold text-primary hover:underline mt-1">
                   Ir a completar mis datos →
                 </button>
               </div>
@@ -897,7 +724,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                   )}
                   {r.tiene_archivo && (
                     <button type="button" onClick={() => abrirArchivo(`/solicitudes/${id}/estancia/extranjeria/${r.id_registro}/archivo`, {})}
-                      className="inline-block text-[11.5px] font-semibold text-[#046C8C]
+                      className="inline-block text-[11.5px] font-semibold text-primary-light
                         hover:underline mt-1.5">
                       📄 Ver el documento
                     </button>

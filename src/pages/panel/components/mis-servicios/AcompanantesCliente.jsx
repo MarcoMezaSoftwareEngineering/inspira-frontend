@@ -113,7 +113,7 @@ function Ficha({ idSolicitud, a, abierta, onAbrir, onCambio, onQuitar }) {
             {[["datos", "Sus datos"], ["docs", "Sus documentos"]].map(([k, t]) => (
               <button key={k} type="button" onClick={() => setPestana(k)}
                 className={`text-[12.5px] font-semibold px-3 py-1.5 rounded-lg ${
-                  pestana === k ? "bg-[#023A4B] text-white" : "bg-neutral-100 text-neutral-500"
+                  pestana === k ? "bg-primary text-white" : "bg-neutral-100 text-neutral-500"
                 }`}>
                 {t}
               </button>

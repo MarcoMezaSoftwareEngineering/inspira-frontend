@@ -27,8 +27,8 @@ export default function SeccionIdiomas({ formData, setFormData }) {
               onClick={() => set("ingles_situacion", formData.ingles_situacion === o.value ? "" : o.value)}
               className={`w-full text-left px-4 py-2.5 rounded-xl border text-xs font-medium transition-all ${
                 formData.ingles_situacion === o.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {o.label}
@@ -48,8 +48,8 @@ export default function SeccionIdiomas({ formData, setFormData }) {
                   onClick={() => set("ingles_uni_nivel", formData.ingles_uni_nivel === n ? "" : n)}
                   className={`px-4 py-1.5 rounded-full border text-xs font-medium transition-all ${
                     formData.ingles_uni_nivel === n
-                      ? "bg-[#023A4B] text-white border-[#023A4B]"
-                      : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] bg-white"
+                      ? "bg-primary text-white border-primary"
+                      : "border-neutral-200 text-neutral-600 hover:border-primary bg-white"
                   }`}
                 >
                   {n}
@@ -72,8 +72,8 @@ export default function SeccionIdiomas({ formData, setFormData }) {
                     onClick={() => set("ingles_intl_tipo", formData.ingles_intl_tipo === t ? "" : t)}
                     className={`px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all ${
                       formData.ingles_intl_tipo === t
-                        ? "bg-[#023A4B] text-white border-[#023A4B]"
-                        : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] bg-white"
+                        ? "bg-primary text-white border-primary"
+                        : "border-neutral-200 text-neutral-600 hover:border-primary bg-white"
                     }`}
                   >
                     {t}
@@ -87,7 +87,7 @@ export default function SeccionIdiomas({ formData, setFormData }) {
                 type="text"
                 value={formData.ingles_intl_puntaje || ""}
                 onChange={(e) => set("ingles_intl_puntaje", e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+                className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
                 placeholder="Ej: 6.5, 90, C1"
               />
             </div>
@@ -119,8 +119,8 @@ export default function SeccionIdiomas({ formData, setFormData }) {
               }}
               className={`w-full text-left px-4 py-2.5 rounded-xl border text-xs font-medium transition-all ${
                 formData[key]
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {label}

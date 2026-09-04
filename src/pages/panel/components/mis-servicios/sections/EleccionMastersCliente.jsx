@@ -27,13 +27,13 @@ export function MasterCard({ master, score, prioridad, selected, comentario, onT
         aria-pressed={selected}
         className="ux-tap w-full text-left flex items-center gap-3 px-3.5 py-3">
         <div className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-          selected ? "border-[#023A4B] bg-[#023A4B]" : "border-neutral-300 bg-white"
+          selected ? "border-primary bg-primary" : "border-neutral-300 bg-white"
         }`}>
           {selected && <span className="text-white text-[9px] font-black leading-none">✓</span>}
         </div>
 
         {selected && (
-          <div className="shrink-0 w-5 h-5 rounded-full bg-[#023A4B] text-white text-[10px] font-black flex items-center justify-center">
+          <div className="shrink-0 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-black flex items-center justify-center">
             {prioridad}
           </div>
         )}
@@ -100,7 +100,7 @@ export function MasterCard({ master, score, prioridad, selected, comentario, onT
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-[#023A4B] hover:underline"
+            className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-primary hover:underline"
           >
             {master.url_ficha ? "Ver la ficha del máster" : "Ver la web de la universidad"}
             <span aria-hidden="true">↗</span>
@@ -116,7 +116,7 @@ export function MasterCard({ master, score, prioridad, selected, comentario, onT
             onChange={(e) => onComentario(e.target.value)}
             onClick={(e) => e.stopPropagation()}
             placeholder="Comentario opcional…"
-            className="w-full mt-2 text-xs border border-neutral-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#023A4B] resize-none bg-white text-neutral-700 placeholder-neutral-400"
+            className="w-full mt-2 text-xs border border-neutral-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary resize-none bg-white text-neutral-700 placeholder-neutral-400"
           />
         </div>
       )}
@@ -241,8 +241,8 @@ export default function EleccionMastersCliente({
           {/* Cargando másteres */}
           {loadingCompat && (
             <div className="flex items-center gap-3 py-6 px-4 bg-neutral-50 rounded-xl">
-              <div className="w-10 h-10 rounded-xl bg-[#023A4B]/10 flex items-center justify-center shrink-0">
-                <div className="w-5 h-5 border-2 border-[#046C8C] border-t-transparent rounded-full animate-spin" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 border-2 border-primary-light border-t-transparent rounded-full animate-spin" />
               </div>
               <div>
                 <p className="text-sm font-medium text-neutral-800">Cargando másteres recomendados…</p>
@@ -254,7 +254,7 @@ export default function EleccionMastersCliente({
           {/* Informe disponible */}
           {hasFormData && !loadingCompat && compat && (
             <>
-              <div className="flex items-start gap-2 bg-[#023A4B]/5 rounded-xl px-3 py-2.5 mb-2 text-xs text-neutral-600">
+              <div className="flex items-start gap-2 bg-primary/5 rounded-xl px-3 py-2.5 mb-2 text-xs text-neutral-600">
                 <span className="shrink-0 mt-0.5">ℹ️</span>
                 <span>Toca un programa para seleccionarlo. <strong>El orden importa</strong> — el primero es tu primera opción.</span>
               </div>
@@ -350,7 +350,7 @@ export default function EleccionMastersCliente({
           <button
             onClick={handleGuardar}
             disabled={saving || filled === 0}
-            className="ux-tap inline-flex items-center justify-center gap-2 text-sm font-semibold px-5 min-h-[48px] rounded-xl bg-[#023A4B] text-white hover:bg-[#035670] disabled:opacity-40 shadow-sm"
+            className="ux-tap inline-flex items-center justify-center gap-2 text-sm font-semibold px-5 min-h-[48px] rounded-xl bg-primary text-white hover:bg-primary-light disabled:opacity-40 shadow-sm"
           >
             {saving ? (
               <>

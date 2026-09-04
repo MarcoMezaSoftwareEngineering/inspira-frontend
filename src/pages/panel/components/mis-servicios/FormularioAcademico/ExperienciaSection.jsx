@@ -31,7 +31,7 @@ export default function ExperienciaSection({ form, updateField }) {
                   onChange={(e) =>
                     updateField("experiencia_anios", e.target.value)
                   }
-                  className="text-[#023A4B]"
+                  className="text-primary"
                 />
                 <span>{opt.label}</span>
               </label>
@@ -61,7 +61,7 @@ export default function ExperienciaSection({ form, updateField }) {
                   onChange={(e) =>
                     updateField("experiencia_vinculada", e.target.value)
                   }
-                  className="text-[#023A4B]"
+                  className="text-primary"
                 />
                 <span>{opt.label}</span>
               </label>
@@ -83,7 +83,7 @@ export default function ExperienciaSection({ form, updateField }) {
                     e.target.value
                   )
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Describe en 3–4 líneas tu experiencia relevante."
               />
             </div>

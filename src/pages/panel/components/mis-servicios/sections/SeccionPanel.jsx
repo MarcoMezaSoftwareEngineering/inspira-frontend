@@ -48,7 +48,7 @@ export default function SeccionPanel({
         }`}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-6 h-6 rounded-lg bg-[#046C8C] flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded-lg bg-primary-light flex items-center justify-center shrink-0">
             <span className="text-white text-xs font-bold">{numero}</span>
           </div>
           <div className="min-w-0">

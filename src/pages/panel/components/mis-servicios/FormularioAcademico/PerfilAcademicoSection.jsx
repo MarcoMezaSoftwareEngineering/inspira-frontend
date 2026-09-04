@@ -20,7 +20,7 @@ export default function PerfilAcademicoSection({ form, updateField }) {
             onChange={(e) =>
               updateField("promedio_peru", e.target.value.trim())
             }
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Ej: 15.75"
           />
           <p className="mt-1 text-xs text-neutral-500">
@@ -58,7 +58,7 @@ export default function PerfilAcademicoSection({ form, updateField }) {
                       e.target.value.trim()
                     )
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Ej: 8.5"
                 />
               </div>
@@ -71,7 +71,7 @@ export default function PerfilAcademicoSection({ form, updateField }) {
                   onChange={(e) =>
                     updateField("promedio_otra_escala_tipo", e.target.value)
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Selecciona escala</option>
                   <option value="0-10">0–10</option>
@@ -105,7 +105,7 @@ export default function PerfilAcademicoSection({ form, updateField }) {
                   value={opt.value}
                   checked={form.ubicacion_grupo === opt.value}
                   onChange={(e) => updateField("ubicacion_grupo", e.target.value)}
-                  className="text-[#023A4B]"
+                  className="text-primary"
                 />
                 <span>{opt.label}</span>
               </label>
@@ -135,7 +135,7 @@ export default function PerfilAcademicoSection({ form, updateField }) {
                   onChange={(e) =>
                     updateField("otra_maestria_tiene", e.target.value)
                   }
-                  className="text-[#023A4B]"
+                  className="text-primary"
                 />
                 <span>{opt.label}</span>
               </label>
@@ -153,7 +153,7 @@ export default function PerfilAcademicoSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("otra_maestria_detalle", e.target.value)
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Ej: Máster en Enfermería Pediátrica – Universidad de Barcelona"
               />
             </div>

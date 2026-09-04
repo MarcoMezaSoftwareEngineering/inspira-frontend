@@ -13,7 +13,7 @@
 // no pasa nada — lo que vale de verdad es lo que sube al portal.
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-const AZUL = "#1A3557";
+const AZUL = "#013446";
 const NARANJA = "#E8730C";
 const CLAVE = "inspira:guia-estancia";
 
@@ -70,13 +70,13 @@ function Marcable({ id, marcado, alternar, titulo, children }) {
 function Seccion({ numero, icono, titulo, subtitulo, children, avance }) {
   const [abierto, setAbierto] = useState(true);
   return (
-    <div className="bg-white border border-[#1A3557]/12 rounded-2xl mb-3 overflow-hidden shadow-sm">
+    <div className="bg-white border border-primary/12 rounded-2xl mb-3 overflow-hidden shadow-sm">
       <button type="button" onClick={() => setAbierto((v) => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-neutral-50/60">
         <span className="shrink-0 w-9 h-9 rounded-xl grid place-items-center text-white text-[14px] font-bold"
           style={{ background: AZUL }}>{icono || numero}</span>
         <span className="min-w-0 flex-1">
-          <span className="block font-serif text-[15px] font-bold text-[#1A3557] leading-tight">{titulo}</span>
+          <span className="block font-serif text-[15px] font-bold text-primary leading-tight">{titulo}</span>
           {subtitulo && <span className="block text-[11.5px] text-neutral-500 mt-0.5">{subtitulo}</span>}
         </span>
         {avance && (
@@ -96,7 +96,7 @@ function Aviso({ titulo, tono = "naranja", children }) {
     naranja: "bg-orange-50 border-orange-300 text-orange-900",
     rojo: "bg-red-50 border-red-300 text-red-900",
     verde: "bg-[#E8F5EE] border-[#1D6A4A]/30 text-[#14532d]",
-    azul: "bg-[#EEF2F8] border-[#1A3557]/20 text-[#1A3557]",
+    azul: "bg-[#EEF2F8] border-primary/20 text-primary",
   };
   return (
     <div className={`border rounded-xl px-3.5 py-3 ${tonos[tono]}`}>
@@ -157,8 +157,8 @@ function Calculadora() {
   const res = (llegada || clases) ? r : null;
 
   return (
-    <div className="rounded-2xl border border-[#1A3557]/15 overflow-hidden">
-      <div className="px-4 py-3" style={{ background: "linear-gradient(135deg,#1A3557,#023A4B)" }}>
+    <div className="rounded-2xl border border-primary/15 overflow-hidden">
+      <div className="px-4 py-3" style={{ background: "linear-gradient(135deg,#013446,#013446)" }}>
         <p className="text-[13px] font-bold text-white">🗓️ Calcula tus fechas</p>
         <p className="text-[11.5px] text-white/70 mt-0.5">
           Pon tus dos fechas y te digo cuándo hay que presentarlo.
@@ -254,9 +254,9 @@ export default function GuiaEstancia() {
   const pestana = (id, texto, sub) => (
     <button type="button" onClick={() => setFase(id)}
       className={`flex-1 rounded-xl px-3 py-2.5 text-left transition-all border ${
-        fase === id ? "border-[#1A3557] bg-white shadow-sm" : "border-transparent bg-white/50 hover:bg-white"
+        fase === id ? "border-primary bg-white shadow-sm" : "border-transparent bg-white/50 hover:bg-white"
       }`}>
-      <span className={`block text-[13px] font-bold ${fase === id ? "text-[#1A3557]" : "text-neutral-500"}`}>
+      <span className={`block text-[13px] font-bold ${fase === id ? "text-primary" : "text-neutral-500"}`}>
         {texto}
       </span>
       <span className="block text-[11px] text-neutral-400 mt-0.5">{sub}</span>
@@ -267,7 +267,7 @@ export default function GuiaEstancia() {
     <div className="max-w-3xl mx-auto pb-10">
       {/* Portada */}
       <div className="rounded-2xl px-6 py-6 mb-4 text-white"
-        style={{ background: "linear-gradient(135deg, #1A3557 0%, #023A4B 100%)" }}>
+        style={{ background: "linear-gradient(135deg, #013446 0%, #013446 100%)" }}>
         <p className="text-[10px] font-bold uppercase tracking-[.2em] text-white/60 font-mono mb-2">
           Guía del proceso
         </p>
@@ -365,8 +365,8 @@ export default function GuiaEstancia() {
             subtitulo="No tienes que hacer nada con esto">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {["Formulario EX-00", "Carta de representación", "Tasa 790"].map((x) => (
-                <div key={x} className="rounded-xl border border-[#1A3557]/15 bg-[#EEF2F8] px-3 py-2.5">
-                  <p className="text-[12.5px] font-semibold text-[#1A3557]">{x}</p>
+                <div key={x} className="rounded-xl border border-primary/15 bg-[#EEF2F8] px-3 py-2.5">
+                  <p className="text-[12.5px] font-semibold text-primary">{x}</p>
                 </div>
               ))}
             </div>
@@ -394,11 +394,11 @@ export default function GuiaEstancia() {
             </p>
             <a href="https://infoext2.delegaciondelgobierno.gob.es/infoext2/consulta.html"
               target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2.5 rounded-xl px-4 py-3 border border-[#1A3557]/20
+              className="flex items-center gap-2.5 rounded-xl px-4 py-3 border border-primary/20
                 hover:bg-[#EEF2F8] transition-colors no-underline">
               <span className="text-lg">🌐</span>
               <span className="min-w-0">
-                <span className="block text-[12.5px] font-bold text-[#1A3557]">
+                <span className="block text-[12.5px] font-bold text-primary">
                   Consulta de expedientes de extranjería
                 </span>
                 <span className="block text-[11px] text-neutral-500 truncate">
@@ -423,7 +423,7 @@ export default function GuiaEstancia() {
       )}
 
       <div className="rounded-2xl px-5 py-4 text-white text-center mt-4"
-        style={{ background: "linear-gradient(135deg, #1A3557 0%, #023A4B 100%)" }}>
+        style={{ background: "linear-gradient(135deg, #013446 0%, #013446 100%)" }}>
         <p className="text-[13px] font-semibold mb-1">El trámite tarda de 1 a 3 meses</p>
         <p className="text-[12px] text-white/70 leading-relaxed">
           Varía según la carga de la Oficina de Extranjería y la complejidad del expediente.

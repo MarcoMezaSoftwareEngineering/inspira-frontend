@@ -38,7 +38,7 @@ export default function BotonSubirDocumento({ solicitudId, item, onUploaded }) {
         className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border-2 cursor-pointer transition-all whitespace-nowrap select-none ${
           subiendo
             ? "border-neutral-200 bg-neutral-50 text-neutral-400 cursor-wait"
-            : "border-[#023A4B] bg-[#023A4B] text-white hover:bg-[#035670] hover:border-[#035670] active:scale-95"
+            : "border-primary bg-primary text-white hover:bg-primary-light hover:border-primary-light active:scale-95"
         }`}
       >
         {subiendo ? (

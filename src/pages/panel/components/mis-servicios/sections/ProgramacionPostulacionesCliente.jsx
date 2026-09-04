@@ -38,7 +38,7 @@ async function verArchivo(idSolicitud, storagePath) {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const P_COLORS = ["#1A3557", "#1D6A4A", "#f59e0b", "#9ca3af", "#d1d5db"];
+const P_COLORS = ["#013446", "#1D6A4A", "#f59e0b", "#9ca3af", "#d1d5db"];
 
 const ESTADOS_OPT = [
   { val: "pendiente", label: "⏳ Pendiente" },
@@ -71,7 +71,7 @@ function KanbanMini({ posts }) {
     <div className="grid grid-cols-4 gap-2">
       {[
         { key: "pendiente", label: "Pendiente", cls: "text-neutral-400",  bg: "bg-neutral-50 border-neutral-100" },
-        { key: "proceso",   label: "En proceso", cls: "text-[#023A4B]",   bg: "bg-[#023A4B]/5 border-[#023A4B]/15" },
+        { key: "proceso",   label: "En proceso", cls: "text-primary",   bg: "bg-primary/5 border-primary/15" },
         { key: "postulado", label: "Postulado",  cls: "text-amber-500",   bg: "bg-amber-50 border-amber-100" },
         { key: "admitido",  label: "Admitido",   cls: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100" },
       ].map(({ key, label, cls, bg }) => (
@@ -143,8 +143,8 @@ function TabFechas({ post, onSave }) {
       </div>
       {post.fase_nombre && (
         <p className="text-[10.5px] text-neutral-500 bg-neutral-50 border border-neutral-200 rounded-lg px-2.5 py-1.5">
-          Convocatoria mas cercana: <strong className="text-[#1A3557]">{post.fase_nombre}</strong>
-          {post.fase_curso ? <> — para empezar el curso <strong className="text-[#1A3557]">{post.fase_curso}</strong></> : null}.
+          Convocatoria mas cercana: <strong className="text-primary">{post.fase_nombre}</strong>
+          {post.fase_curso ? <> — para empezar el curso <strong className="text-primary">{post.fase_curso}</strong></> : null}.
           Si el plan es entrar un curso mas tarde, el plazo que le toca es otro.
           Las fechas las publica la universidad y pueden cambiar.
         </p>
@@ -164,7 +164,7 @@ function TabFechas({ post, onSave }) {
                   const next = post.alertas.map((a, i) => i === idx ? { ...a, activo: !a.activo } : a);
                   onSave("alertas", next);
                 }}
-                className={`w-9 h-5 rounded-full relative shrink-0 transition-colors ${al.activo ? "bg-[#023A4B]" : "bg-neutral-200"}`}
+                className={`w-9 h-5 rounded-full relative shrink-0 transition-colors ${al.activo ? "bg-primary" : "bg-neutral-200"}`}
               >
                 <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${al.activo ? "left-[calc(100%-18px)]" : "left-0.5"}`} />
               </button>
@@ -263,7 +263,7 @@ function TabPortal({ post, onSave }) {
             Mis portales adicionales
           </p>
           <button type="button" onClick={() => setAdding((v) => !v)}
-            className="text-[11px] font-semibold text-[#023A4B] hover:underline">
+            className="text-[11px] font-semibold text-primary hover:underline">
             + Añadir
           </button>
         </div>
@@ -294,13 +294,13 @@ function TabPortal({ post, onSave }) {
                   value={nuevo[key]}
                   onChange={(e) => setNuevo((v) => ({ ...v, [key]: e.target.value }))}
                   placeholder={placeholder}
-                  className="w-full text-xs border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#023A4B]"
+                  className="w-full text-xs border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-primary"
                 />
               </div>
             ))}
             <div className="flex gap-2 pt-1">
               <button type="button" onClick={addPortalCliente}
-                className="flex-1 text-xs font-semibold py-1.5 rounded-lg bg-[#023A4B] text-white">
+                className="flex-1 text-xs font-semibold py-1.5 rounded-lg bg-primary text-white">
                 Guardar
               </button>
               <button type="button" onClick={() => setAdding(false)}
@@ -351,7 +351,7 @@ function TabDocs({ post, idSolicitud, onSave }) {
           {doc.url_archivo && (
             <button type="button"
               onClick={() => verArchivo(idSolicitud, doc.url_archivo)}
-              className="shrink-0 text-[10px] text-[#023A4B] underline">
+              className="shrink-0 text-[10px] text-primary underline">
               Ver
             </button>
           )}
@@ -419,7 +419,7 @@ function MasterPostCard({ post, idSolicitud, onUpdate, onSave }) {
         <select
           value={post.estado}
           onChange={(e) => onSaveF("estado", e.target.value)}
-          className="shrink-0 text-[11px] font-semibold border border-neutral-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-[#023A4B] cursor-pointer"
+          className="shrink-0 text-[11px] font-semibold border border-neutral-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-primary cursor-pointer"
         >
           {ESTADOS_OPT.map((o) => (
             <option key={o.val} value={o.val}>{o.label}</option>
@@ -433,7 +433,7 @@ function MasterPostCard({ post, idSolicitud, onUpdate, onSave }) {
           <button key={t.id} type="button" onClick={() => setTab(t.id)}
             className={`shrink-0 px-3.5 py-2 text-[11px] font-semibold border-b-2 transition-colors whitespace-nowrap ${
               tab === t.id
-                ? "border-[#023A4B] text-[#023A4B]"
+                ? "border-primary text-primary"
                 : "border-transparent text-neutral-400 hover:text-neutral-600"
             }`}>
             {t.label}
@@ -523,7 +523,7 @@ export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey
     >
       {loading && (
         <div className="flex items-center gap-2 py-3 text-neutral-400 text-sm">
-          <div className="w-4 h-4 border-2 border-[#023A4B]/30 border-t-[#023A4B] rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
           Cargando…
         </div>
       )}

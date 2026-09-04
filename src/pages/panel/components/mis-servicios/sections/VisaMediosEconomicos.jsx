@@ -59,7 +59,7 @@ function Numero({ valor, onChange, disabled }) {
       value={valor}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
-      className="w-28 shrink-0 text-right border border-neutral-200 rounded-lg px-2.5 py-2 text-[14px] font-bold text-[#023A4B] outline-none focus:border-[#1D6A4A] disabled:opacity-60"
+      className="w-28 shrink-0 text-right border border-neutral-200 rounded-lg px-2.5 py-2 text-[14px] font-bold text-primary outline-none focus:border-[#1D6A4A] disabled:opacity-60"
     />
   );
 }
@@ -190,7 +190,7 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
             <div className="flex items-center gap-3">
               <span className="shrink-0 w-10 h-10 rounded-xl bg-neutral-100 grid place-items-center text-xl">{v.icono}</span>
               <div className="min-w-0">
-                <p className="text-[14px] font-bold text-[#023A4B]">{v.nombre}</p>
+                <p className="text-[14px] font-bold text-primary">{v.nombre}</p>
                 <p className="text-[12px] text-neutral-500 mt-0.5">{v.desc}</p>
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
               key={String(v)} type="button" disabled={off}
               onClick={() => setC("larga", v)}
               className={`flex-1 py-2 rounded-lg text-[12px] font-bold transition-all disabled:opacity-60 ${
-                calc.larga === v ? "bg-[#023A4B] text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+                calc.larga === v ? "bg-primary text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
               }`}
             >
               {txt}
@@ -265,7 +265,7 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
         </details>
 
         {/* Resultado */}
-        <div className="mt-3.5 rounded-xl bg-gradient-to-br from-[#023A4B] to-[#035670] text-white p-4">
+        <div className="mt-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-light text-white p-4">
           <div className="space-y-1">
             <div className="flex justify-between text-[13px] text-white/70">
               <span>100% IPREM {calc.larga ? "(año)" : `(${calc.meses || 0} meses)`}</span>
@@ -346,7 +346,7 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
           </p>
           <div className="flex flex-wrap gap-1.5 mb-3">
             {["papá", "mamá", "hermano/a", "tío/a", "abuelo/a"].map((f) => (
-              <span key={f} className="text-[11.5px] font-bold text-[#023A4B] bg-neutral-50 border border-neutral-200 px-2.5 py-1 rounded-full">
+              <span key={f} className="text-[11.5px] font-bold text-primary bg-neutral-50 border border-neutral-200 px-2.5 py-1 rounded-full">
                 {f}
               </span>
             ))}

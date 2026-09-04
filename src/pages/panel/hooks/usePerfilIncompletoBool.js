@@ -26,13 +26,16 @@ const ACADEMICOS = [
  * @param conAcademico si además de los datos generales hay que exigirle el
  *                     perfil académico.
  */
+/** Cuántos de esos datos faltan. Es lo que se le dice en el aviso. */
+export function datosQueFaltan(user, conAcademico = true) {
+  if (!user) return 0;
+  const checks = conAcademico ? [...GENERALES, ...ACADEMICOS] : GENERALES;
+  return checks.filter((fn) => {
+    const v = fn(user);
+    return !v || !String(v).trim();
+  }).length;
+}
+
 export function usePerfilIncompletoBool(user, conAcademico = true) {
-  return useMemo(() => {
-    if (!user) return false;
-    const checks = conAcademico ? [...GENERALES, ...ACADEMICOS] : GENERALES;
-    return checks.some((fn) => {
-      const v = fn(user);
-      return !v || !String(v).trim();
-    });
-  }, [user, conAcademico]);
+  return useMemo(() => datosQueFaltan(user, conAcademico) > 0, [user, conAcademico]);
 }

@@ -434,7 +434,7 @@ export default function WizardPerfilCliente({ user, onComplete, conAcademico = t
             Paso {step + 1} de {numSteps}
           </p>
           <div className="text-4xl mb-3 select-none">{pasos[step].icon}</div>
-          <h2 className="text-xl font-serif font-bold text-[#1A3557] leading-tight">
+          <h2 className="text-xl font-serif font-bold text-primary leading-tight">
             {pasos[step].title}
           </h2>
           <p className="text-sm text-neutral-500 mt-1">{pasos[step].subtitle}</p>
@@ -462,7 +462,7 @@ export default function WizardPerfilCliente({ user, onComplete, conAcademico = t
           {step > 0
             ? (
               <button onClick={handleBack} disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-[#1A3557] transition disabled:opacity-40">
+                className="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-primary transition disabled:opacity-40">
                 ← Atrás
               </button>
             )
@@ -487,7 +487,7 @@ export default function WizardPerfilCliente({ user, onComplete, conAcademico = t
           {step < numSteps - 1
             ? (
               <button onClick={handleNext}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#1A3557] text-white text-sm font-semibold hover:bg-[#152b47] transition">
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-[#152b47] transition">
                 Siguiente →
               </button>
             )

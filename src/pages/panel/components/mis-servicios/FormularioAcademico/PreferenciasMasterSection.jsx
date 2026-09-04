@@ -14,7 +14,7 @@ export default function PreferenciasMasterSection({ form, updateField }) {
           <select
             value={form.duracion_preferida}
             onChange={(e) => updateField("duracion_preferida", e.target.value)}
-            className="w-full max-w-md rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+            className="w-full max-w-md rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">Selecciona una opción</option>
             <option value="indiferente">Me da igual (1–2 años)</option>
@@ -56,7 +56,7 @@ export default function PreferenciasMasterSection({ form, updateField }) {
                   onChange={(e) =>
                     updateField("practicas_preferencia", e.target.value)
                   }
-                  className="mt-1 text-[#023A4B]"
+                  className="mt-1 text-primary"
                 />
                 <span>{opt.label}</span>
               </label>
@@ -82,7 +82,7 @@ export default function PreferenciasMasterSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("presupuesto_desde", e.target.value.trim())
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Ej: 3000"
               />
             </div>
@@ -98,7 +98,7 @@ export default function PreferenciasMasterSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("presupuesto_hasta", e.target.value.trim())
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Ej: 9000"
               />
             </div>

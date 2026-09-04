@@ -24,7 +24,7 @@ export default function IdiomasSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("ingles_situacion", e.target.value)
                 }
-                className="mt-1 text-[#023A4B]"
+                className="mt-1 text-primary"
               />
               <span>Tengo certificación de inglés emitida por mi universidad</span>
             </label>
@@ -39,7 +39,7 @@ export default function IdiomasSection({ form, updateField }) {
                   onChange={(e) =>
                     updateField("ingles_uni_nivel", e.target.value)
                   }
-                  className="w-full max-w-xs rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                  className="w-full max-w-xs rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Selecciona nivel</option>
                   <option value="B1">B1</option>
@@ -60,7 +60,7 @@ export default function IdiomasSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("ingles_situacion", e.target.value)
                 }
-                className="mt-1 text-[#023A4B]"
+                className="mt-1 text-primary"
               />
               <span>
                 Tengo certificación internacional (IELTS, TOEFL, Cambridge, etc.)
@@ -78,7 +78,7 @@ export default function IdiomasSection({ form, updateField }) {
                     onChange={(e) =>
                       updateField("ingles_intl_tipo", e.target.value)
                     }
-                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Selecciona</option>
                     <option value="IELTS">IELTS</option>
@@ -97,7 +97,7 @@ export default function IdiomasSection({ form, updateField }) {
                     onChange={(e) =>
                       updateField("ingles_intl_puntaje", e.target.value)
                     }
-                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Ej: 6.5, 90, C1"
                   />
                 </div>
@@ -113,7 +113,7 @@ export default function IdiomasSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("ingles_situacion", e.target.value)
                 }
-                className="mt-1 text-[#023A4B]"
+                className="mt-1 text-primary"
               />
               <span>Tengo inglés de instituto (sin certificación oficial)</span>
             </label>
@@ -127,7 +127,7 @@ export default function IdiomasSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("ingles_situacion", e.target.value)
                 }
-                className="mt-1 text-[#023A4B]"
+                className="mt-1 text-primary"
               />
               <span>Sé inglés pero aún no lo he certificado</span>
             </label>
@@ -141,7 +141,7 @@ export default function IdiomasSection({ form, updateField }) {
                 onChange={(e) =>
                   updateField("ingles_situacion", e.target.value)
                 }
-                className="mt-1 text-[#023A4B]"
+                className="mt-1 text-primary"
               />
               <span>No tengo inglés</span>
             </label>

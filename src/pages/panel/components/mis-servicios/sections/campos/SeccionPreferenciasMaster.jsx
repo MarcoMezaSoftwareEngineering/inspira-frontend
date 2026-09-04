@@ -64,8 +64,8 @@ export default function SeccionPreferenciasMaster({ formData, setFormData }) {
               onClick={() => set("area_interes_master", formData.area_interes_master === m.value ? "" : m.value)}
               className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.area_interes_master === m.value
-                  ? "bg-[#1A3557] text-white border-[#1A3557] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#1A3557] hover:text-[#1A3557] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {m.label}
@@ -92,8 +92,8 @@ export default function SeccionPreferenciasMaster({ formData, setFormData }) {
               onClick={() => set("duracion_preferida", formData.duracion_preferida === o.value ? "" : o.value)}
               className={`px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.duracion_preferida === o.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {o.label}
@@ -117,8 +117,8 @@ export default function SeccionPreferenciasMaster({ formData, setFormData }) {
               onClick={() => set("practicas_preferencia", formData.practicas_preferencia === o.value ? "" : o.value)}
               className={`px-3 py-2.5 rounded-xl border text-xs font-medium text-center transition-all ${
                 formData.practicas_preferencia === o.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {o.label}
@@ -132,7 +132,7 @@ export default function SeccionPreferenciasMaster({ formData, setFormData }) {
         <p className="text-xs font-semibold text-neutral-700 mb-2">
           ¿Cuánto puedes invertir en matrícula por año? <span className="font-normal text-neutral-400">(solo estudios)</span>
         </p>
-        <div className="text-2xl font-bold text-[#023A4B] mb-3">
+        <div className="text-2xl font-bold text-primary mb-3">
           {presMax.toLocaleString("es-ES")} €
         </div>
         <input
@@ -147,17 +147,17 @@ export default function SeccionPreferenciasMaster({ formData, setFormData }) {
             [&::-webkit-slider-thumb]:h-5
             [&::-webkit-slider-thumb]:w-5
             [&::-webkit-slider-thumb]:rounded-full
-            [&::-webkit-slider-thumb]:bg-[#023A4B]
+            [&::-webkit-slider-thumb]:bg-primary
             [&::-webkit-slider-thumb]:shadow-md
             [&::-webkit-slider-thumb]:cursor-pointer
             [&::-moz-range-thumb]:h-5
             [&::-moz-range-thumb]:w-5
             [&::-moz-range-thumb]:rounded-full
-            [&::-moz-range-thumb]:bg-[#023A4B]
+            [&::-moz-range-thumb]:bg-primary
             [&::-moz-range-thumb]:border-0
             [&::-moz-range-thumb]:cursor-pointer"
           style={{
-            background: `linear-gradient(to right, #023A4B 0%, #023A4B ${pct}%, #e5e7eb ${pct}%, #e5e7eb 100%)`,
+            background: `linear-gradient(to right, #013446 0%, #013446 ${pct}%, #e5e7eb ${pct}%, #e5e7eb 100%)`,
           }}
         />
         <div className="flex justify-between text-[10px] text-neutral-400 mt-1.5">
@@ -182,13 +182,13 @@ export default function SeccionPreferenciasMaster({ formData, setFormData }) {
               key={c}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer text-xs font-medium transition-all ${
                 comunidades.includes(c)
-                  ? "bg-[#023A4B]/8 border-[#023A4B] text-[#023A4B]"
+                  ? "bg-primary/8 border-primary text-primary"
                   : "border-neutral-200 text-neutral-600 hover:border-neutral-300 bg-white"
               }`}
             >
               <input type="checkbox" className="hidden" checked={comunidades.includes(c)} onChange={() => toggleComunidad(c)} />
               <span className={`w-3.5 h-3.5 rounded flex-shrink-0 flex items-center justify-center border ${
-                comunidades.includes(c) ? "bg-[#023A4B] border-[#023A4B]" : "border-neutral-300"
+                comunidades.includes(c) ? "bg-primary border-primary" : "border-neutral-300"
               }`}>
                 {comunidades.includes(c) && (
                   <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">

@@ -18,7 +18,7 @@ export default function BecasSection({ form, updateField }) {
                 value="si"
                 checked={form.beca_desea === "si"}
                 onChange={(e) => updateField("beca_desea", e.target.value)}
-                className="text-[#023A4B]"
+                className="text-primary"
               />
               <span>Sí</span>
             </label>
@@ -29,7 +29,7 @@ export default function BecasSection({ form, updateField }) {
                 value="no"
                 checked={form.beca_desea === "no"}
                 onChange={(e) => updateField("beca_desea", e.target.value)}
-                className="text-[#023A4B]"
+                className="text-primary"
               />
               <span>No</span>
             </label>

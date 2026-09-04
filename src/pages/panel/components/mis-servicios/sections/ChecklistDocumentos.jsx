@@ -202,7 +202,7 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
           para no enterrar el estado del documento bajo un muro de texto. */}
       {requisitos && (
         <details className="group -mt-0.5">
-          <summary className="cursor-pointer select-none text-[11.5px] font-semibold text-[#046C8C] hover:underline list-none">
+          <summary className="cursor-pointer select-none text-[11.5px] font-semibold text-primary-light hover:underline list-none">
             <span className="group-open:hidden">Ver requisitos ▾</span>
             <span className="hidden group-open:inline">Ocultar requisitos ▴</span>
           </summary>

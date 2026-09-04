@@ -21,7 +21,7 @@
 //    si falta una asignatura, el expediente se cae.
 import { useCallback, useState } from "react";
 
-const AZUL = "#1A3557";
+const AZUL = "#013446";
 const CLAVE = "inspira:guia-modificatoria";
 
 /* ── Persistencia local del marcado ──────────────────────────────────────── */
@@ -75,13 +75,13 @@ function Marcable({ id, marcado, alternar, titulo, children }) {
 function Seccion({ numero, icono, titulo, subtitulo, children, avance }) {
   const [abierto, setAbierto] = useState(true);
   return (
-    <div className="bg-white border border-[#1A3557]/12 rounded-2xl mb-3 overflow-hidden shadow-sm">
+    <div className="bg-white border border-primary/12 rounded-2xl mb-3 overflow-hidden shadow-sm">
       <button type="button" onClick={() => setAbierto((v) => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-neutral-50/60">
         <span className="shrink-0 w-9 h-9 rounded-xl grid place-items-center text-white text-[14px] font-bold"
           style={{ background: AZUL }}>{icono || numero}</span>
         <span className="min-w-0 flex-1">
-          <span className="block font-serif text-[15px] font-bold text-[#1A3557] leading-tight">{titulo}</span>
+          <span className="block font-serif text-[15px] font-bold text-primary leading-tight">{titulo}</span>
           {subtitulo && <span className="block text-[11.5px] text-neutral-500 mt-0.5">{subtitulo}</span>}
         </span>
         {avance && (
@@ -101,7 +101,7 @@ function Aviso({ titulo, tono = "naranja", children }) {
     naranja: "bg-orange-50 border-orange-300 text-orange-900",
     rojo: "bg-red-50 border-red-300 text-red-900",
     verde: "bg-[#E8F5EE] border-[#1D6A4A]/30 text-[#14532d]",
-    azul: "bg-[#EEF2F8] border-[#1A3557]/20 text-[#1A3557]",
+    azul: "bg-[#EEF2F8] border-primary/20 text-primary",
   };
   return (
     <div className={`border rounded-xl px-3.5 py-3 ${tonos[tono]}`}>
@@ -159,8 +159,8 @@ function Ventana() {
     : "abierta";
 
   return (
-    <div className="rounded-2xl border border-[#1A3557]/15 bg-[#EEF2F8]/40 p-4">
-      <p className="font-serif text-[14px] font-bold text-[#1A3557] mb-0.5">
+    <div className="rounded-2xl border border-primary/15 bg-[#EEF2F8]/40 p-4">
+      <p className="font-serif text-[14px] font-bold text-primary mb-0.5">
         ¿Cuándo puedo presentar?
       </p>
       <p className="text-[12px] text-neutral-600 leading-relaxed mb-3">
@@ -190,7 +190,7 @@ function Ventana() {
               <p className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-500">
                 Se abre el
               </p>
-              <p className="text-[17px] font-bold text-[#1A3557] leading-tight mt-0.5">
+              <p className="text-[17px] font-bold text-primary leading-tight mt-0.5">
                 {enLetra(desde)}
               </p>
               <p className="text-[11px] text-neutral-500 mt-0.5">
@@ -348,13 +348,13 @@ function Clausula() {
   }
 
   return (
-    <div className="rounded-xl border border-[#1A3557]/20 bg-[#EEF2F8]/50 px-3.5 py-3">
+    <div className="rounded-xl border border-primary/20 bg-[#EEF2F8]/50 px-3.5 py-3">
       <div className="flex items-start gap-2 flex-wrap mb-2">
-        <p className="text-[11.5px] font-bold text-[#1A3557] min-w-0 flex-1">
+        <p className="text-[11.5px] font-bold text-primary min-w-0 flex-1">
           Cláusula que el contrato tiene que incluir, palabra por palabra
         </p>
         <button type="button" onClick={copiar}
-          className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#023A4B]
+          className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary
             text-white hover:opacity-90">
           {copiado ? "✓ copiada" : "Copiar"}
         </button>
@@ -389,7 +389,7 @@ export default function GuiaModificatoria() {
     <div className="max-w-3xl mx-auto pb-10">
       {/* Portada */}
       <div className="rounded-2xl overflow-hidden mb-4 shadow-sm">
-        <div className="px-5 py-6" style={{ background: `linear-gradient(135deg, ${AZUL} 0%, #023A4B 100%)` }}>
+        <div className="px-5 py-6" style={{ background: `linear-gradient(135deg, ${AZUL} 0%, #013446 100%)` }}>
           <p className="text-[10.5px] font-bold uppercase tracking-[.18em] text-white/60 mb-1.5">
             Guía del proceso
           </p>
@@ -529,8 +529,8 @@ export default function GuiaModificatoria() {
         </div>
       </Seccion>
 
-      <div className="rounded-2xl border border-[#1A3557]/15 bg-white px-4 py-4">
-        <p className="font-serif text-[14px] font-bold text-[#1A3557] mb-1">¿Dudas?</p>
+      <div className="rounded-2xl border border-primary/15 bg-white px-4 py-4">
+        <p className="font-serif text-[14px] font-bold text-primary mb-1">¿Dudas?</p>
         <p className="text-[12.5px] text-neutral-600 leading-relaxed">
           Escríbenos por el portal o responde a cualquiera de nuestros correos. Es mejor una
           consulta a tiempo que un documento rehecho tres veces.

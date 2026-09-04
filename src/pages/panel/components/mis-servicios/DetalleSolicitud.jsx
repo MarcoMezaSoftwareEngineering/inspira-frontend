@@ -15,6 +15,7 @@ import PortalesYJustificantesCliente from "./sections/PortalesYJustificantesClie
 import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
 import { EsqueletoExpediente } from "../Esqueleto";
+import SelectorSeccionMovil from "./SelectorSeccionMovil";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -51,14 +52,14 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
       onClick={onClick}
       className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center gap-2.5 ${
         active
-          ? "bg-[#023A4B] shadow-sm"
+          ? "bg-primary shadow-sm"
           : "hover:bg-neutral-100"
       }`}
     >
       <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-colors ${
         active
           ? "bg-white/20 text-white"
-          : "bg-[#046C8C]/10 text-[#046C8C]"
+          : "bg-primary-light/10 text-primary-light"
       }`}>
         {num}
       </div>
@@ -348,7 +349,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
       <div className="shrink-0 flex items-center gap-3 mb-3">
         <button
           onClick={onVolver}
-          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] px-3.5 py-2 rounded-xl bg-[#023A4B] text-white text-xs font-semibold hover:bg-[#035670] active:scale-95 transition-all shadow-sm group"
+          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary-light active:scale-95 transition-all shadow-sm group"
         >
           <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -367,7 +368,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
         {!loading && !error && detalle && (
           <div className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-4 py-2.5 flex items-center gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold text-[#046C8C] uppercase tracking-widest leading-none">
+              <p className="text-[10px] font-bold text-primary-light uppercase tracking-widest leading-none">
                 Solicitud #{detalle.id_solicitud}
               </p>
               <p className="text-sm font-bold text-neutral-900 leading-snug truncate mt-0.5">
@@ -381,7 +382,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
               </div>
               <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-700 bg-[#F49E4B]"
+                  className="h-full rounded-full transition-all duration-700 bg-accent"
                   style={{ width: `${progresoChecklist}%` }}
                 />
               </div>
@@ -395,30 +396,6 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
       {/* Panel principal */}
       {!loading && !error && detalle && (
         <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
-
-          {/* ── Móvil: tab bar horizontal ── */}
-          <div className="md:hidden shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 flex gap-1 overflow-x-auto">
-            {navSections.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setActiveSection(s.id)}
-                className={`shrink-0 flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all ${
-                  activeSection === s.id
-                    ? "bg-[#023A4B] text-white"
-                    : "text-neutral-600 hover:bg-neutral-100"
-                }`}
-              >
-                <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${
-                  activeSection === s.id ? "bg-white/20 text-white" : "bg-[#046C8C]/10 text-[#046C8C]"
-                }`}>{s.num}</span>
-                {s.titulo}
-                {s.estado && (
-                  <span className={`w-1.5 h-1.5 rounded-full ${activeSection === s.id ? "bg-white/40" : (DOT_COLORS[s.estado] || "bg-neutral-300")}`} />
-                )}
-              </button>
-            ))}
-          </div>
 
           {/* ── Desktop: sidebar vertical ── */}
           <div className="hidden md:flex w-52 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
@@ -512,6 +489,9 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
 
             </SeccionSiempreAbiertoCtx.Provider>
           </div>
+
+          {/* Móvil: el selector de sección, abajo. */}
+          <SelectorSeccionMovil secciones={navSections} activa={activeSection} onCambiar={setActiveSection} />
         </div>
       )}
     </div>

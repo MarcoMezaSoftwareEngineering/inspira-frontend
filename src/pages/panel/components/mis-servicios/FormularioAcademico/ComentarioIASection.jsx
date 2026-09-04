@@ -13,7 +13,7 @@ export default function ComentarioIASection({ form, updateField }) {
           rows={5}
           value={form.comentario_especial}
           onChange={(e) => updateField("comentario_especial", e.target.value)}
-          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary"
           placeholder="Cuéntanos cualquier detalle importante que debamos tener en cuenta (situación familiar, tiempos, si quieres luego hacer doctorado, si no puedes mudarte de ciudad, etc.). Este comentario también ayudará a la IA a priorizar los másteres para tu informe."
         />
       </div>

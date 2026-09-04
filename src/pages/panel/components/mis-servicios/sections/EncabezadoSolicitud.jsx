@@ -4,13 +4,13 @@ import { formatearFecha, badgeEstadoSolicitud } from "../utils";
 export default function EncabezadoSolicitud({ detalle, solicitudBase, progresoChecklist }) {
   const estadoBadge = badgeEstadoSolicitud(detalle?.estado?.nombre, detalle?.estado?.es_final);
 
-  const progresoColor = progresoChecklist >= 100 ? "bg-emerald-500" : "bg-[#F49E4B]";
+  const progresoColor = progresoChecklist >= 100 ? "bg-emerald-500" : "bg-accent";
 
   return (
     <div className="flex items-center justify-between gap-6">
       {/* Info izquierda */}
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-[#046C8C] uppercase tracking-widest mb-1">
+        <p className="text-xs font-bold text-primary-light uppercase tracking-widest mb-1">
           Solicitud #{detalle.id_solicitud}
         </p>
         <h2 className="text-xl font-bold text-neutral-900 leading-tight truncate">
@@ -18,7 +18,7 @@ export default function EncabezadoSolicitud({ detalle, solicitudBase, progresoCh
         </h2>
         <div className="flex flex-wrap items-center gap-2 mt-2">
           {detalle.tipo?.nombre && (
-            <span className="text-xs px-2.5 py-1 rounded-full bg-[#023A4B]/10 text-[#023A4B] font-semibold">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-semibold">
               {detalle.tipo.nombre}
             </span>
           )}

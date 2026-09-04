@@ -22,8 +22,8 @@ export default function SeccionBecas({ formData, setFormData }) {
               onClick={() => set("beca_desea", formData.beca_desea === opt.value ? "" : opt.value)}
               className={`px-5 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.beca_desea === opt.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {opt.label}
@@ -48,8 +48,8 @@ export default function SeccionBecas({ formData, setFormData }) {
                 onClick={() => set(key, !formData[key])}
                 className={`px-3 py-2.5 rounded-xl border text-xs font-medium text-center transition-all ${
                   formData[key]
-                    ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                    : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
                 }`}
               >
                 {label}

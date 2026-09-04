@@ -185,7 +185,7 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
           type="text"
           value={formData.carrera_titulo || ""}
           onChange={(e) => set("carrera_titulo", e.target.value)}
-          className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+          className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
           placeholder="Ej: Ingeniería Industrial, Derecho, Psicología…"
         />
       </div>
@@ -203,8 +203,8 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
               onClick={() => set("area_carrera", formData.area_carrera === a.value ? "" : a.value)}
               className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.area_carrera === a.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {a.label}
@@ -223,7 +223,7 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
           value={uniQ}
           onChange={(e) => { handleUniChange(e.target.value); setShowSugg(true); }}
           onFocus={() => { if (uniQ.length >= 2) setShowSugg(true); }}
-          className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+          className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
           placeholder="Empieza a escribir… (PUCP, UNMSM, UBA, UNAM…)"
           autoComplete="off"
         />
@@ -239,7 +239,7 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
                 <button
                   type="button"
                   onMouseDown={() => selectSugerencia(u)}
-                  className="w-full text-left px-4 py-2.5 text-sm text-neutral-700 hover:bg-[#023A4B]/5 hover:text-[#023A4B] transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-sm text-neutral-700 hover:bg-primary/5 hover:text-primary transition-colors"
                 >
                   {u}
                 </button>
@@ -308,13 +308,13 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
             min="0"
             value={formData.promedio_peru || ""}
             onChange={(e) => set("promedio_peru", e.target.value.trim())}
-            className="flex-1 rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+            className="flex-1 rounded-xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
             placeholder="Ej: 15.75"
           />
           <select
             value={formData.promedio_escala || "20"}
             onChange={(e) => set("promedio_escala", e.target.value)}
-            className="w-44 rounded-xl border border-neutral-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+            className="w-44 rounded-xl border border-neutral-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
           >
             <option value="20">Escala /20 — Perú</option>
             <option value="10">Escala /10</option>
@@ -343,8 +343,8 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
               onClick={() => set("ubicacion_grupo", formData.ubicacion_grupo === o.value ? "" : o.value)}
               className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.ubicacion_grupo === o.value
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {o.label}
@@ -364,8 +364,8 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
               onClick={() => set("otra_maestria_tiene", v)}
               className={`px-5 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 formData.otra_maestria_tiene === v
-                  ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                  : "border-neutral-200 text-neutral-600 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "border-neutral-200 text-neutral-600 hover:border-primary hover:text-primary bg-white"
               }`}
             >
               {v === "si" ? "Sí" : "No"}
@@ -381,7 +381,7 @@ export default function SeccionPerfilCuantitativo({ formData, setFormData }) {
               type="text"
               value={formData.otra_maestria_detalle || ""}
               onChange={(e) => set("otra_maestria_detalle", e.target.value)}
-              className="w-full border border-neutral-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 transition"
+              className="w-full border border-neutral-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
               placeholder="Ej: Máster en Enfermería Pediátrica – U. Barcelona"
             />
           </div>

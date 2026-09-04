@@ -8,7 +8,8 @@ import { datosUsuario } from "../../components/common/usuario";
 import PerfilCliente from "./components/PerfilCliente";
 import MisServicios from "./components/MisServicios";
 import WizardPerfilCliente from "./components/WizardPerfilCliente";
-import { usePerfilIncompletoBool } from "./hooks/usePerfilIncompletoBool";
+import { usePerfilIncompletoBool, datosQueFaltan } from "./hooks/usePerfilIncompletoBool";
+import AvisoPerfil from "./components/AvisoPerfil";
 import { accesosDe, esSoloInvitado, pideAcademico } from "./servicios";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
@@ -63,7 +64,12 @@ export default function PanelCliente({ path }) {
   // datos generales: el expediente y su formulario son de otra persona.
   const conAcademico = !soloInvitado && (sinServicios || pideAcademico(lista));
   const perfilIncompleto = usePerfilIncompletoBool(user, conAcademico);
-  const mostrarWizard = user !== null && cargado && perfilIncompleto;
+  // El asistente solo cierra el paso a quien todavía no tiene nada contratado:
+  // completar sus datos es lo previo a que un asesor le dé acceso. A quien ya
+  // tiene expediente se le avisa arriba de lo que falta, y sigue trabajando.
+  const mostrarWizard = user !== null && cargado && perfilIncompleto && sinServicios;
+  const avisarPerfil = user !== null && cargado && perfilIncompleto && !sinServicios && tab !== "perfil";
+  const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico) : 0;
 
   // Sin sesión no se manda a la portada a buscar el botón: se va a Google y se
   // vuelve a esta misma URL. Es lo que hace que un enlace de correo a un
@@ -182,6 +188,11 @@ export default function PanelCliente({ path }) {
             remontarse ni volver a pedir nada. */}
         <div className={`flex-1 min-h-0 flex flex-col ${esScrollInterno ? "" : "overflow-auto"}`}>
         <div key={claveVista} className="pnl-entra pnl-entra-llena">
+          {avisarPerfil && (
+            <div className="px-4 sm:px-6 pt-4 shrink-0">
+              <AvisoPerfil faltan={faltanDatos} onIr={() => handleChangeTab("perfil")} />
+            </div>
+          )}
 
           {/* Servicios: scroll interno */}
           {esServicios && (

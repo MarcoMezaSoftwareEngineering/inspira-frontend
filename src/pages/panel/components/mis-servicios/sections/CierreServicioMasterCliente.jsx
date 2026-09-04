@@ -23,7 +23,7 @@ function BotonVerDocumento({ id, etiqueta }) {
       type="button"
       onClick={abrir}
       disabled={cargando}
-      className="text-xs font-semibold text-[#023A4B] hover:underline disabled:opacity-50"
+      className="text-xs font-semibold text-primary hover:underline disabled:opacity-50"
     >
       {cargando ? "Abriendo…" : etiqueta}
     </button>
@@ -180,7 +180,7 @@ export default function CierreServicioMasterCliente({ idSolicitud }) {
     >
       {loading && (
         <div className="flex items-center gap-2 text-neutral-400 py-2">
-          <div className="w-4 h-4 border-2 border-neutral-300 border-t-[#046C8C] rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-neutral-300 border-t-primary-light rounded-full animate-spin" />
           <span className="text-sm">Cargando…</span>
         </div>
       )}

@@ -28,7 +28,7 @@ export default function SeccionInvestigacion({ formData, setFormData }) {
                     investigacion_experiencia: e.target.value,
                   }))
                 }
-                className="text-[#023A4B]"
+                className="text-primary"
               />
               <span>
                 Tengo publicaciones o he participado en grupos de investigación
@@ -47,7 +47,7 @@ export default function SeccionInvestigacion({ formData, setFormData }) {
                     investigacion_experiencia: e.target.value,
                   }))
                 }
-                className="text-[#023A4B]"
+                className="text-primary"
               />
               <span>No tengo experiencia en investigación</span>
             </label>
@@ -68,7 +68,7 @@ export default function SeccionInvestigacion({ formData, setFormData }) {
                     investigacion_detalle: e.target.value,
                   }))
                 }
-                className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-xs resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-xs resize-y focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           )}
@@ -164,7 +164,7 @@ export default function SeccionInvestigacion({ formData, setFormData }) {
                     formacion_otros_detalle: e.target.value,
                   }))
                 }
-                className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-xs resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]"
+                className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-xs resize-y focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           )}

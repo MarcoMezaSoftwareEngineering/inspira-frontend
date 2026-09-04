@@ -14,12 +14,12 @@ export function Ayuda({ texto }) {
       <button type="button" onClick={() => setAbierto((v) => !v)}
         aria-label="Qué va aquí"
         className="w-[15px] h-[15px] rounded-full border border-neutral-300 text-neutral-400
-          text-[10px] leading-none grid place-items-center hover:border-[#046C8C]
-          hover:text-[#046C8C] shrink-0">
+          text-[10px] leading-none grid place-items-center hover:border-primary-light
+          hover:text-primary-light shrink-0">
         i
       </button>
       {abierto && (
-        <span className="absolute z-20 left-0 top-5 w-60 rounded-lg bg-[#1A3557] text-white
+        <span className="absolute z-20 left-0 top-5 w-60 rounded-lg bg-primary text-white
           text-[11.5px] leading-relaxed px-3 py-2 shadow-lg">
           {texto}
           <button type="button" onClick={() => setAbierto(false)}

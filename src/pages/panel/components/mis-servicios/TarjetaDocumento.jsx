@@ -108,7 +108,7 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
 
       {def.modelo && (
         <a href={def.modelo} target="_blank" rel="noreferrer"
-          className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-[#046C8C]
+          className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-primary-light
             hover:underline w-fit">
           Ver un ejemplo ↗
         </a>
@@ -125,7 +125,7 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
           {def.archivos.map((a) => (
             <div key={a.id_documento} className="flex items-center gap-2">
               <button type="button" onClick={() => setViendo(a)}
-                className="text-[12px] text-[#046C8C] hover:underline truncate flex-1 text-left">
+                className="text-[12px] text-primary-light hover:underline truncate flex-1 text-left">
                 📄 {a.nombre}
               </button>
               {/* Quién lo subió. Con dos personas entrando al expediente,

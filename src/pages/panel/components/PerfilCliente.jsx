@@ -278,7 +278,7 @@ export default function PerfilCliente({ user, onUserUpdated }) {
   return (
     <div className="bg-white border border-neutral-100 rounded-2xl shadow-sm overflow-hidden">
 
-      <div className="bg-gradient-to-r from-[#1A3557] to-[#023A4B] px-5 py-3 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-primary to-primary-light px-5 py-3 flex items-center justify-between">
         <div>
           <p className="text-sm font-bold text-white">Editar mi perfil</p>
           <p className="text-[11px] text-white/50">Los datos académicos se pre-rellenan en tus solicitudes</p>

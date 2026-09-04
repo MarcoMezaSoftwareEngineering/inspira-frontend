@@ -364,3 +364,18 @@
   .pnl-entra { animation: none; }
   .pnl-esq { animation: none; }
 }
+
+/* ── Aviso de perfil ─────────────────────────────────────────────────
+   Sustituye al modal para quien ya tiene expediente: dice qué falta y
+   lleva al perfil, sin cerrar el paso. */
+.pnl-aviso {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 12px 10px 14px; border-radius: 16px;
+  border: 1px solid rgba(250,148,58,.35); background: #fdf3e3; color: #96591a;
+}
+.pnl-aviso-icono {
+  display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 auto;
+  border-radius: 10px; background: rgba(250,148,58,.16); color: #b05e12;
+}
+.pnl-aviso-texto { margin: 0; flex: 1 1 200px; min-width: 0; font-size: 13px; font-weight: 600; line-height: 1.4; }
+.pnl-aviso .pnl-btn { height: 36px; padding: 0 14px; }

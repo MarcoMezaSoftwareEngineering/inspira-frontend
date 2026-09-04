@@ -22,7 +22,7 @@ function BotonVerJustificante({ id, etiqueta }) {
       type="button"
       onClick={abrir}
       disabled={cargando}
-      className="text-sm font-semibold text-[#023A4B] hover:underline disabled:opacity-50"
+      className="text-sm font-semibold text-primary hover:underline disabled:opacity-50"
     >
       {cargando ? "Abriendo…" : etiqueta}
     </button>
@@ -47,7 +47,7 @@ function AccesoCard({ item }) {
             href={item.url_acceso}
             target="_blank"
             rel="noreferrer"
-            className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg border-2 border-[#023A4B] text-[#023A4B] bg-white hover:bg-[#023A4B] hover:text-white transition-all"
+            className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg border-2 border-primary text-primary bg-white hover:bg-primary hover:text-white transition-all"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -140,7 +140,7 @@ function Credenciales({ usuario, password, url }) {
       {url && (
         <a
           href={url} target="_blank" rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#046C8C] hover:underline"
+          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-primary-light hover:underline"
         >
           Abrir plataforma ↗
         </a>
@@ -287,7 +287,7 @@ export default function PortalesYJustificantesCliente({ idSolicitud }) {
     >
       {loading && (
         <div className="flex items-center gap-2 text-neutral-400 py-2">
-          <div className="w-4 h-4 border-2 border-neutral-300 border-t-[#046C8C] rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-neutral-300 border-t-primary-light rounded-full animate-spin" />
           <span className="text-sm">Cargando portales…</span>
         </div>
       )}

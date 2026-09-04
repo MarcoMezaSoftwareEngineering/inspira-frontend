@@ -26,7 +26,7 @@ function Aviso({ tono = "info", icono, children }) {
 
 function Campo({ label, valor, onChange, ancho, disabled, placeholder }) {
   return (
-    <div className={`${ancho === "full" ? "sm:col-span-2" : ""} bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5 focus-within:border-[#046C8C] focus-within:bg-white transition-colors`}>
+    <div className={`${ancho === "full" ? "sm:col-span-2" : ""} bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5 focus-within:border-primary-light focus-within:bg-white transition-colors`}>
       <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">{label}</label>
       <input
         value={valor || ""}

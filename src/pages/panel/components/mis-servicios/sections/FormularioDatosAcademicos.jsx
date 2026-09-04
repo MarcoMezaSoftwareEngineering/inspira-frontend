@@ -181,10 +181,10 @@ function Pill({ active, onClick, children, error = false }) {
     <button type="button" onClick={onClick}
       className={`px-4 py-2 rounded-full border text-sm font-medium transition-all active:scale-95 ${
         active
-          ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
+          ? "bg-primary text-white border-primary shadow-sm"
           : error
           ? "border-red-300 text-neutral-700 bg-white hover:border-red-400"
-          : "border-neutral-200 text-neutral-700 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+          : "border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white"
       }`}>
       {children}
     </button>
@@ -209,7 +209,7 @@ function FInput({ value, onChange, placeholder, type = "text", err = false, ...r
     <input type={type} value={value} onChange={onChange} placeholder={placeholder}
       className={`w-full rounded-xl border px-3.5 py-3 text-sm focus:outline-none focus:ring-2 transition ${
         err ? "border-red-400 focus:ring-red-200 focus:border-red-400"
-            : "border-neutral-200 focus:ring-[#023A4B]/20 focus:border-[#023A4B]"
+            : "border-neutral-200 focus:ring-primary/20 focus:border-primary"
       }`}
       {...rest} />
   );
@@ -220,10 +220,10 @@ function WBtn({ active, onClick, children, err = false }) {
     <button type="button" onClick={onClick}
       className={`w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] ${
         active
-          ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
+          ? "bg-primary text-white border-primary shadow-sm"
           : err
           ? "border-red-300 text-neutral-700 bg-white hover:border-red-400"
-          : "border-neutral-200 text-neutral-700 hover:border-[#023A4B] hover:text-[#023A4B] bg-white"
+          : "border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white"
       }`}>
       {active && <span className="float-right opacity-70">✓</span>}
       {children}
@@ -307,7 +307,7 @@ function ResumenDatos({ formData, onEditar }) {
       <button
         type="button"
         onClick={onEditar}
-        className="w-full py-2.5 text-sm font-semibold text-[#023A4B] border border-[#023A4B]/30 rounded-xl hover:bg-[#023A4B]/5 transition active:scale-[0.99]"
+        className="w-full py-2.5 text-sm font-semibold text-primary border border-primary/30 rounded-xl hover:bg-primary/5 transition active:scale-[0.99]"
       >
         ✏ Modificar datos
       </button>
@@ -546,7 +546,7 @@ export default function FormularioDatosAcademicos({
                 {suggestions.map((u) => (
                   <li key={u}>
                     <button type="button" onMouseDown={() => selectSugerencia(u)}
-                      className="w-full text-left px-4 py-3 text-sm text-neutral-700 hover:bg-[#023A4B]/5 hover:text-[#023A4B] transition-colors">
+                      className="w-full text-left px-4 py-3 text-sm text-neutral-700 hover:bg-primary/5 hover:text-primary transition-colors">
                       {u}
                     </button>
                   </li>
@@ -588,7 +588,7 @@ export default function FormularioDatosAcademicos({
                 placeholder="Ej: 15.75" err={has("promedio_peru") || has("promedio_rango")} />
               <select value={formData.promedio_escala || "20"}
                 onChange={(e) => set("promedio_escala", e.target.value)}
-                className="w-44 sm:w-52 shrink-0 rounded-xl border border-neutral-200 px-3 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition">
+                className="w-44 sm:w-52 shrink-0 rounded-xl border border-neutral-200 px-3 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                 <option value="20">Escala /20 — Perú</option>
                 <option value="10">Escala /10</option>
                 <option value="5">Escala /5 — Colombia</option>
@@ -695,7 +695,7 @@ export default function FormularioDatosAcademicos({
                   <textarea rows={3}
                     value={formData.experiencia_vinculada_detalle || ""}
                     onChange={(e) => set("experiencia_vinculada_detalle", e.target.value)}
-                    className="w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 transition"
+                    className="w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
                     placeholder="Empresa, cargo, sector…" />
                 </div>
               )}
@@ -725,7 +725,7 @@ export default function FormularioDatosAcademicos({
               <textarea rows={2}
                 value={formData.investigacion_detalle || ""}
                 onChange={(e) => set("investigacion_detalle", e.target.value)}
-                className="mt-3 w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 transition"
+                className="mt-3 w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
                 placeholder="Publicaciones, grupos de investigación, proyectos…" />
             )}
           </div>
@@ -916,8 +916,8 @@ export default function FormularioDatosAcademicos({
                         }}
                         className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all active:scale-[0.98] text-left ${
                           active
-                            ? "bg-[#023A4B] text-white border-[#023A4B] shadow-sm"
-                            : "border-neutral-200 bg-white hover:border-[#023A4B] hover:text-[#023A4B] text-neutral-700"
+                            ? "bg-primary text-white border-primary shadow-sm"
+                            : "border-neutral-200 bg-white hover:border-primary hover:text-primary text-neutral-700"
                         }`}>
                         <span className="leading-snug">{r.etiqueta}</span>
                         {active && <span className="shrink-0 text-white/80 text-xs">✓</span>}
@@ -943,11 +943,11 @@ export default function FormularioDatosAcademicos({
                         onClick={() => set("sub_area_interes", active ? "" : sa.valor)}
                         className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all active:scale-[0.98] text-left ${
                           active
-                            ? "bg-[#023A4B]/10 text-[#023A4B] border-[#023A4B] shadow-sm"
-                            : "border-neutral-200 bg-white hover:border-[#023A4B]/50 hover:text-[#023A4B] text-neutral-600"
+                            ? "bg-primary/10 text-primary border-primary shadow-sm"
+                            : "border-neutral-200 bg-white hover:border-primary/50 hover:text-primary text-neutral-600"
                         }`}>
                         <span className="leading-snug">{sa.etiqueta}</span>
-                        {active && <span className="shrink-0 text-[#023A4B] text-xs">✓</span>}
+                        {active && <span className="shrink-0 text-primary text-xs">✓</span>}
                       </button>
                     );
                   })}
@@ -967,7 +967,7 @@ export default function FormularioDatosAcademicos({
                     onClick={() => set("objetivo_master", formData.objetivo_master === val ? "" : val)}
                     className={`text-left px-4 py-3 rounded-xl border text-sm transition-all active:scale-[0.99] ${
                       formData.objetivo_master === val
-                        ? "border-[#023A4B] bg-[#023A4B]/10 text-[#023A4B] font-semibold"
+                        ? "border-primary bg-primary/10 text-primary font-semibold"
                         : "border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300"
                     }`}>
                     {label}
@@ -1020,18 +1020,18 @@ export default function FormularioDatosAcademicos({
 
           <div>
             <FLabel>¿Cuánto puedes invertir en matrícula por año?</FLabel>
-            <div className="text-3xl font-bold text-[#023A4B] mb-4">{presMax.toLocaleString("es-ES")} €</div>
+            <div className="text-3xl font-bold text-primary mb-4">{presMax.toLocaleString("es-ES")} €</div>
             <input type="range" min={PRES_MIN} max={PRES_MAX} step="250" value={presMax}
               onChange={(e) => set("presupuesto_hasta", e.target.value)}
               className="w-full h-2.5 rounded-lg appearance-none cursor-pointer outline-none
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-6
                 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:rounded-full
-                [&::-webkit-slider-thumb]:bg-[#023A4B] [&::-webkit-slider-thumb]:shadow-md
+                [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md
                 [&::-webkit-slider-thumb]:cursor-pointer
                 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:w-6
-                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#023A4B]
+                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary
                 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
-              style={{ background: `linear-gradient(to right, #023A4B 0%, #023A4B ${presPct}%, #e5e7eb ${presPct}%, #e5e7eb 100%)` }} />
+              style={{ background: `linear-gradient(to right, #013446 0%, #013446 ${presPct}%, #e5e7eb ${presPct}%, #e5e7eb 100%)` }} />
             <div className="flex justify-between text-xs text-neutral-400 mt-2">
               <span>500 €</span><span>7.500 €</span><span>15.000 €</span>
             </div>
@@ -1077,11 +1077,11 @@ export default function FormularioDatosAcademicos({
                   <button key={c} type="button" onClick={() => toggleComunidad(c)}
                     className={`flex items-center gap-2.5 px-3.5 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] ${
                       comunidades.includes(c)
-                        ? "bg-[#023A4B]/8 border-[#023A4B] text-[#023A4B]"
+                        ? "bg-primary/8 border-primary text-primary"
                         : "border-neutral-200 text-neutral-700 hover:border-neutral-300 bg-white"
                     }`}>
                     <span className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center ${
-                      comunidades.includes(c) ? "bg-[#023A4B] border-[#023A4B]" : "border-neutral-300"
+                      comunidades.includes(c) ? "bg-primary border-primary" : "border-neutral-300"
                     }`}>
                       {comunidades.includes(c) && (
                         <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
@@ -1096,11 +1096,11 @@ export default function FormularioDatosAcademicos({
                   <button type="button" onClick={() => toggleComunidad(COMUNIDAD_INDIFERENTE)}
                     className={`col-span-2 flex items-center gap-2.5 px-3.5 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] ${
                       comunidades.includes(COMUNIDAD_INDIFERENTE)
-                        ? "bg-[#023A4B]/8 border-[#023A4B] text-[#023A4B]"
+                        ? "bg-primary/8 border-primary text-primary"
                         : "border-neutral-200 text-neutral-700 hover:border-neutral-300 bg-white"
                     }`}>
                     <span className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center ${
-                      comunidades.includes(COMUNIDAD_INDIFERENTE) ? "bg-[#023A4B] border-[#023A4B]" : "border-neutral-300"
+                      comunidades.includes(COMUNIDAD_INDIFERENTE) ? "bg-primary border-primary" : "border-neutral-300"
                     }`}>
                       {comunidades.includes(COMUNIDAD_INDIFERENTE) && (
                         <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
@@ -1140,7 +1140,7 @@ export default function FormularioDatosAcademicos({
               <textarea rows={4}
                 value={formData.comentario_especial || ""}
                 onChange={(e) => set("comentario_especial", e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#023A4B]/20 focus:border-[#023A4B] transition"
+                className="w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
                 placeholder="Escribe aquí cualquier detalle relevante…" />
             </div>
           </div>
@@ -1172,13 +1172,13 @@ export default function FormularioDatosAcademicos({
             {/* Barra de progreso */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <span className="text-xs font-semibold text-[#023A4B]">
+                <span className="text-xs font-semibold text-primary">
                   {STEPS[step].icon} {STEPS[step].title}
                 </span>
                 <span className="text-[10px] text-neutral-400 font-mono">{step + 1} / {STEPS.length}</span>
               </div>
               <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-1.5 bg-[#023A4B] rounded-full transition-all duration-300"
+                <div className="h-1.5 bg-primary rounded-full transition-all duration-300"
                   style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
               </div>
             </div>
@@ -1192,8 +1192,8 @@ export default function FormularioDatosAcademicos({
                     title={s.title}
                     className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-sm font-bold transition-all active:scale-90 ${
                       i < step   ? "bg-emerald-500 text-white cursor-pointer hover:bg-emerald-400 shadow-sm"
-                      : i === step ? "bg-[#023A4B] text-white shadow-md ring-[3px] ring-[#023A4B]/25"
-                      : hasData    ? "bg-[#046C8C]/15 text-[#046C8C] cursor-pointer hover:bg-[#046C8C]/30"
+                      : i === step ? "bg-primary text-white shadow-md ring-[3px] ring-primary/25"
+                      : hasData    ? "bg-primary-light/15 text-primary-light cursor-pointer hover:bg-primary-light/30"
                       :              "bg-neutral-100 text-neutral-400 cursor-default"
                     }`}>
                     {i < step ? "✓" : i + 1}
@@ -1221,12 +1221,12 @@ export default function FormularioDatosAcademicos({
 
               {!isLast ? (
                 <button type="button" onClick={handleNext}
-                  className="px-6 py-2 text-sm font-semibold rounded-xl bg-[#023A4B] text-white hover:bg-[#035670] transition active:scale-95">
+                  className="px-6 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-light transition active:scale-95">
                   Continuar →
                 </button>
               ) : (
                 <button type="button" onClick={handleSaveInline} disabled={savingForm}
-                  className="inline-flex items-center gap-2 px-6 py-2 text-sm font-semibold rounded-xl bg-[#023A4B] text-white hover:bg-[#035670] disabled:opacity-50 transition active:scale-95">
+                  className="inline-flex items-center gap-2 px-6 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-light disabled:opacity-50 transition active:scale-95">
                   {savingForm
                     ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Guardando…</>
                     : "✓ Guardar formulario"
@@ -1241,9 +1241,9 @@ export default function FormularioDatosAcademicos({
 
             {/* Contenido del paso — scroll interno aquí */}
             <div className="flex-1 min-h-0 flex flex-col overflow-hidden border border-neutral-100 rounded-xl shadow-sm">
-              <div className="shrink-0 px-4 py-3 border-b border-neutral-100 bg-gradient-to-r from-[#023A4B]/6 to-transparent flex items-center gap-2">
+              <div className="shrink-0 px-4 py-3 border-b border-neutral-100 bg-gradient-to-r from-primary/6 to-transparent flex items-center gap-2">
                 <span className="text-base shrink-0">{STEPS[step].icon}</span>
-                <h3 className="text-sm font-bold text-[#023A4B]">{STEPS[step].title}</h3>
+                <h3 className="text-sm font-bold text-primary">{STEPS[step].title}</h3>
               </div>
               <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-4 py-4">
                 {renderStep()}
@@ -1275,7 +1275,7 @@ export default function FormularioDatosAcademicos({
             {/* Cabecera del modal */}
             <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-neutral-200">
               <div>
-                <p className="text-sm font-bold text-[#023A4B]">Formulario de datos académicos</p>
+                <p className="text-sm font-bold text-primary">Formulario de datos académicos</p>
                 <p className="text-xs text-neutral-400 mt-0.5">
                   Paso {step + 1} / {STEPS.length} — {STEPS[step].title}
                 </p>
@@ -1309,12 +1309,12 @@ export default function FormularioDatosAcademicos({
             {/* Barra de progreso */}
             <div className="shrink-0 px-5 pt-4 pb-2">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-[#023A4B]">
+                <span className="text-xs font-semibold text-primary">
                   {Math.round(((step + 1) / STEPS.length) * 100)}% completado
                 </span>
               </div>
               <div className="h-1.5 bg-neutral-100 rounded-full">
-                <div className="h-1.5 bg-[#023A4B] rounded-full transition-all duration-300"
+                <div className="h-1.5 bg-primary rounded-full transition-all duration-300"
                   style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
               </div>
             </div>
@@ -1328,8 +1328,8 @@ export default function FormularioDatosAcademicos({
                     title={s.title}
                     className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-sm font-bold transition-all active:scale-90 ${
                       i < step   ? "bg-emerald-500 text-white cursor-pointer hover:bg-emerald-400 shadow-sm"
-                      : i === step ? "bg-[#023A4B] text-white shadow-md ring-[3px] ring-[#023A4B]/25"
-                      : hasData    ? "bg-[#046C8C]/15 text-[#046C8C] cursor-pointer hover:bg-[#046C8C]/30"
+                      : i === step ? "bg-primary text-white shadow-md ring-[3px] ring-primary/25"
+                      : hasData    ? "bg-primary-light/15 text-primary-light cursor-pointer hover:bg-primary-light/30"
                       :              "bg-neutral-100 text-neutral-400 cursor-default"
                     }`}>
                     {i < step ? "✓" : i + 1}
@@ -1346,9 +1346,9 @@ export default function FormularioDatosAcademicos({
               <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-5 py-4">
                 {/* Card del paso */}
                 <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm mb-4">
-                  <div className="px-4 py-3 border-b border-neutral-100 bg-gradient-to-r from-[#023A4B]/6 to-transparent flex items-center gap-2.5">
+                  <div className="px-4 py-3 border-b border-neutral-100 bg-gradient-to-r from-primary/6 to-transparent flex items-center gap-2.5">
                     <span className="text-lg shrink-0">{STEPS[step].icon}</span>
-                    <h3 className="text-sm font-bold text-[#023A4B]">{STEPS[step].title}</h3>
+                    <h3 className="text-sm font-bold text-primary">{STEPS[step].title}</h3>
                   </div>
                   <div className="px-4 py-5">
                     {renderStep()}
@@ -1372,13 +1372,13 @@ export default function FormularioDatosAcademicos({
 
                 {!isLast && (
                   <button type="button" onClick={handleNext}
-                    className="flex items-center gap-2 px-7 py-2.5 text-sm font-semibold rounded-xl bg-[#023A4B] text-white hover:bg-[#035670] transition-all active:scale-95 shadow-sm">
+                    className="flex items-center gap-2 px-7 py-2.5 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-light transition-all active:scale-95 shadow-sm">
                     Continuar →
                   </button>
                 )}
                 {isLast && (
                   <button type="submit" disabled={savingForm}
-                    className="inline-flex items-center gap-2 px-7 py-2.5 text-sm font-semibold rounded-xl bg-[#023A4B] text-white hover:bg-[#035670] disabled:opacity-50 transition-all active:scale-95 shadow-sm">
+                    className="inline-flex items-center gap-2 px-7 py-2.5 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-light disabled:opacity-50 transition-all active:scale-95 shadow-sm">
                     {savingForm
                       ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Guardando…</>
                       : "✓ Guardar formulario"

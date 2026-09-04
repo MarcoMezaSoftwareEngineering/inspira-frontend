@@ -141,6 +141,12 @@ function TabFechas({ post, onSave }) {
         <FechaBox label="Cierre"     valor={post.fecha_cierre}     field="fecha_cierre" />
         <FechaBox label="Resultados" valor={post.fecha_resultados} field="fecha_resultados" />
       </div>
+      {post.fase_nombre && (
+        <p className="text-[10.5px] text-neutral-500 bg-neutral-50 border border-neutral-200 rounded-lg px-2.5 py-1.5">
+          Fechas de la convocatoria en curso: <strong className="text-[#1A3557]">{post.fase_nombre}</strong>.
+          Las publica la universidad y pueden cambiar.
+        </p>
+      )}
       <div>
         <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
           Alertas automáticas programadas

@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { apiDELETE, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
+import PedirRevisionMaster from "./PedirRevisionMaster";
 import { requisitosDe, NOTA_APOSTILLA } from "./visaRequisitos";
 import { listaSolvencia, VIA_ETIQUETA } from "./visaSolvencia";
 
@@ -295,6 +296,7 @@ export default function ChecklistDocumentos({
   checklist,
   cargarTodo,
   idSolicitud,
+  revisionSolicitadaAt = null,
   numero = "1",
   titulo = "Documentos requeridos",
   sectionId = "1",
@@ -471,6 +473,15 @@ export default function ChecklistDocumentos({
             </div>
           </div>
         ))}
+
+        {!bloqueado && gruposOrdenados.length > 0 && (
+          <PedirRevisionMaster
+            idSolicitud={idSolicitud}
+            subidos={(checklist || []).some((it) => (it.documentos || []).length > 0)}
+            revisionSolicitadaAt={revisionSolicitadaAt}
+            onHecho={cargarTodo}
+          />
+        )}
 
         {!bloqueado && gruposOrdenados.length > 0 && (
           <div className="flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-3 mt-4">

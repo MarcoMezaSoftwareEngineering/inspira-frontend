@@ -422,6 +422,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
                   checklist={checklist}
                   cargarTodo={cargarTodo}
                   idSolicitud={idSolicitud}
+                  revisionSolicitadaAt={detalle?.datos_panel?.revision_solicitada_at || null}
                 />
               )}
 

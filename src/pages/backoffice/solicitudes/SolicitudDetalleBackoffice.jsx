@@ -8,6 +8,7 @@ import PortalesYJustificantesAdmin from "./PortalesYJustificantesAdmin";
 import CierreServicioMasterAdmin from "./CierreServicioMasterAdmin";
 import { useSolicitudDetalle } from "./hooks/useSolicitudDetalle";
 import ChecklistSolicitudAdmin from "./components/ChecklistSolicitudAdmin";
+import RecordatorioMaster from "./components/RecordatorioMaster";
 import InformeAdmin from "./components/InformeAdmin";
 import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
 import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
@@ -618,6 +619,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                         isVisado={isVisado}
                         tipoSolvencia={visaExp?.tipo_solvencia || "PENDIENTE"}
                       />
+                      {!isVisado && <RecordatorioMaster detalle={detalle} />}
                     </div>
                   </CBox>
                 )}

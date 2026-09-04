@@ -5,6 +5,7 @@
 // que cierra en tres días y un requerimiento sin responder. Esa información
 // ya existía repartida por las tarjetas y los bloques; aquí se junta en una
 // lista, ordenada por urgencia, y cada línea lleva a donde se resuelve.
+import { useState } from "react";
 import Icono from "../../../components/common/Icono";
 import { LINEAS, whatsappLinea } from "../../../config/contacto";
 import { navigate } from "../../../services/navigate";
@@ -142,7 +143,12 @@ function TuAsesor({ servicios }) {
   );
 }
 
+// Cinco a la vista y el resto tras «ver más»: los servicios van debajo y
+// tienen que seguir viéndose sin bajar media pantalla.
+const A_LA_VISTA = 5;
+
 function Pendientes({ items }) {
+  const [todo, setTodo] = useState(false);
   if (!items.length) {
     return (
       <div className="pnl-pend-vacio">
@@ -151,9 +157,11 @@ function Pendientes({ items }) {
       </div>
     );
   }
+  const visibles = todo ? items : items.slice(0, A_LA_VISTA);
+  const ocultos = items.length - visibles.length;
   return (
     <ul className="pnl-pend">
-      {items.map((it) => (
+      {visibles.map((it) => (
         <li key={it.clave} className="pnl-pend-item" data-tono={it.tono}>
           <span className="pnl-pend-icono"><Icono nombre={it.icono} size={17} /></span>
           <span className="pnl-pend-cuerpo">
@@ -169,6 +177,13 @@ function Pendientes({ items }) {
           </button>
         </li>
       ))}
+      {ocultos > 0 && (
+        <li>
+          <button type="button" className="pnl-btn ux-tap" onClick={() => setTodo(true)}>
+            Ver {ocultos} más
+          </button>
+        </li>
+      )}
     </ul>
   );
 }

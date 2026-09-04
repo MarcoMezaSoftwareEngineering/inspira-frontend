@@ -1,6 +1,7 @@
 // Dónde está el asesorado dentro del panel, leído de la URL.
 //
-//   /panel                        → sus servicios
+//   /panel                        → inicio: lo pendiente y quién le atiende
+//   /panel/servicios              → la lista de sus servicios
 //   /panel/perfil                 → su perfil
 //   /panel/guia, /panel/becas…    → un recurso (guía, becas, apostilla)
 //   /panel/servicios/155          → un expediente
@@ -13,7 +14,7 @@
 // la única verdad; todo lo demás se deriva de ella.
 
 export const PESTANAS = [
-  "servicios", "perfil", "becas", "guia", "apostilla", "estancia", "modificatoria",
+  "inicio", "servicios", "perfil", "becas", "guia", "apostilla", "estancia", "modificatoria",
 ];
 
 /** @returns {{tab: string|null, idServicio: number|null, seccion: string|null}} */
@@ -23,7 +24,7 @@ export function leerRuta(path) {
     .split("/")
     .filter(Boolean);
 
-  if (!partes.length) return { tab: "servicios", idServicio: null, seccion: null };
+  if (!partes.length) return { tab: "inicio", idServicio: null, seccion: null };
 
   if (partes[0] === "servicios") {
     const id = Number(partes[1]);
@@ -40,7 +41,7 @@ export function leerRuta(path) {
   return { tab: null, idServicio: null, seccion: null };
 }
 
-export function rutaDe({ tab = "servicios", idServicio = null, seccion = null } = {}) {
+export function rutaDe({ tab = "inicio", idServicio = null, seccion = null } = {}) {
   if (idServicio) return `/panel/servicios/${idServicio}${seccion ? `/${seccion}` : ""}`;
-  return tab === "servicios" ? "/panel" : `/panel/${tab}`;
+  return tab === "inicio" ? "/panel" : `/panel/${tab}`;
 }

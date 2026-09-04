@@ -68,6 +68,12 @@ export default function PanelSidebar({
         <SidebarItem
           icono="panel"
           label="Inicio"
+          active={activeTab === "inicio"}
+          onClick={() => onChangeTab("inicio")}
+        />
+        <SidebarItem
+          icono="maletin"
+          label="Mis servicios"
           active={activeTab === "servicios"}
           onClick={() => onChangeTab("servicios")}
         />

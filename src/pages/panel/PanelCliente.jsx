@@ -40,7 +40,7 @@ export default function PanelCliente({ path }) {
   // La pestaña sale de la URL, no de localStorage: así «atrás» vuelve a la
   // anterior y un enlace puede abrir el panel por donde haga falta.
   const ruta = useMemo(() => leerRuta(path), [path]);
-  const tab = ruta.tab || "servicios";
+  const tab = ruta.tab || "inicio";
 
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -118,13 +118,15 @@ export default function PanelCliente({ path }) {
     setSidebarOpen(false);
   }
 
-  const esServicios = tab === "servicios";
+  // Inicio y la lista de servicios comparten el marco: son las dos vistas
+  // desde las que se abre un expediente.
+  const esServicios = tab === "servicios" || tab === "inicio";
   const esScrollInterno = esServicios;
   const claveVista = ruta.idServicio ? `expediente-${ruta.idServicio}` : tab;
 
   // Tab titles
   const titles = {
-    servicios: "Inicio", perfil: "Mi Perfil", becas: "Becas España",
+    inicio: "Inicio", servicios: "Mis servicios", perfil: "Mi Perfil", becas: "Becas España",
     guia: "Guía Máster", apostilla: "Guía Apostilla Digital",
     estancia: "Guía Estancia por Estudios",
     modificatoria: "Guía Residencia y Trabajo",

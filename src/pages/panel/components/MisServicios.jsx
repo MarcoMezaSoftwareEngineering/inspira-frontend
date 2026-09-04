@@ -1,6 +1,7 @@
 // src/pages/panel/components/MisServicios.jsx
 import { lazy, Suspense, useEffect } from "react";
 import Inicio from "./Inicio";
+import ServiciosList from "./mis-servicios/ServiciosList";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
 import { SERVICIO, servicioDe } from "../servicios";
@@ -22,7 +23,7 @@ const DetalleSolicitudModificatoria = lazy(() => import("./mis-servicios/Detalle
  * la lista, y un correo puede enlazar a una sección concreta.
  */
 export default function MisServicios({ ruta, perfil, conAcademico, servicios, loading, error, onRecargar, onIrAGuia }) {
-  const { idServicio, seccion } = ruta;
+  const { idServicio, seccion, tab } = ruta;
   const seleccionada = idServicio
     ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
     : null;
@@ -62,6 +63,21 @@ export default function MisServicios({ ruta, perfil, conAcademico, servicios, lo
           )}
         </Suspense>
       </div>
+    );
+  }
+
+  // «Mis servicios» es la lista sola, con su sitio en el menú: al meter las
+  // tarjetas debajo de los pendientes de Inicio, en un teléfono con cinco
+  // cosas pendientes quedaban fuera de la vista y parecía que no estaban.
+  if (tab === "servicios") {
+    return (
+      <ServiciosList
+        servicios={servicios}
+        loading={loading}
+        error={error}
+        onRecargar={onRecargar}
+        onVerDetalle={abrir}
+      />
     );
   }
 

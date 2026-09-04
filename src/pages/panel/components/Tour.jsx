@@ -55,6 +55,11 @@ export default function Tour({ pasos, onFin }) {
     return () => clearTimeout(t);
   }, [paso, medir]);
 
+  function siguiente() {
+    if (ultimo) onFin?.("terminado");
+    else setI((n) => n + 1);
+  }
+
   useEffect(() => {
     window.addEventListener("resize", medir);
     window.addEventListener("scroll", medir, true);
@@ -69,12 +74,7 @@ export default function Tour({ pasos, onFin }) {
       window.removeEventListener("scroll", medir, true);
       window.removeEventListener("keydown", tecla);
     };
-  }); // eslint-disable-line react-hooks/exhaustive-deps
-
-  function siguiente() {
-    if (ultimo) onFin?.("terminado");
-    else setI((n) => n + 1);
-  }
+  });
 
   useEffect(() => { if (!paso) onFin?.("vacio"); }, [paso, onFin]);
   if (!paso) return null;

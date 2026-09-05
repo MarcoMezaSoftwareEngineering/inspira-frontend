@@ -221,6 +221,10 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   // Búsqueda libre contra el catálogo completo
   const [searchResults, setSearchResults]     = useState([]);
   const [searchingMasters, setSearchingMasters] = useState(false);
+  // Parecidos a lo que el asesorado escribió que busca (sin filtros)
+  const [modoParecidos, setModoParecidos]     = useState(false);
+  // Lo que salió del recálculo y aún no está en la lista curada
+  const [nuevosCandidatos, setNuevosCandidatos] = useState(null);
 
   // Modal de crear nuevo máster
   const [modalCrear,    setModalCrear]    = useState(false);
@@ -274,14 +278,74 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     finally { setLoading(false); }
   }
 
-  async function regenerar() {
+  // Recalcula con el formulario de hoy sin tocar la lista curada: lo que ya
+  // decidió el asesor se queda; lo nuevo se ofrece aparte para que lo revise.
+  async function recalcular() {
     setCompat(null);
+    setNuevosCandidatos(null);
+    setLoading(true);
+    try {
+      const r = await boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/compatibilidad`);
+      if (r.ok) {
+        setCompat(r);
+        const curado = detalle.informe_compat_curado;
+        if (Array.isArray(curado) && curado.length) {
+          const ids = new Set(curado.map((c) => c.master.id_master));
+          const res = r.resultados || [];
+          const nuevos = res.slice(0, 20).filter((x) => !ids.has(x.master.id_master));
+          const cambiados = curado.filter((c) => {
+            const f = res.find((x) => x.master.id_master === c.master.id_master);
+            return f && f.score !== c.score;
+          }).length;
+          setNuevosCandidatos({ nuevos, cambiados, resultados: res });
+        }
+      }
+    } catch { /* silencioso */ }
+    finally { setLoading(false); }
+    onRegenerado?.();
+  }
+
+  // Lleva el recálculo a la lista curada, en modo edición: puntuaciones al
+  // día y los nuevos al final. El asesor decide y guarda.
+  function aplicarRecalculo() {
+    const curado = detalle.informe_compat_curado || [];
+    const res = nuevosCandidatos?.resultados || [];
+    const actualizada = curado.map((c) => {
+      const f = res.find((x) => x.master.id_master === c.master.id_master);
+      return f ? { ...c, score: f.score, master: { ...c.master, afinidad_deseada: f.master.afinidad_deseada } } : c;
+    });
+    setListaEdit([...actualizada, ...(nuevosCandidatos?.nuevos || []).map((n) => ({ ...n }))]);
+    setEditMode(true);
+    setSearchQ("");
+    setSearchResults([]);
+    setNuevosCandidatos(null);
+  }
+
+  async function volverAlAutomatico() {
+    const ok = await dialog.confirm("Se descarta la lista curada y el informe vuelve al cálculo automático. ¿Continuar?", "Volver al automático");
+    if (!ok) return;
     setEditMode(false);
     setListaEdit([]);
-    await boPATCH(`/backoffice/solicitudes/${detalle.id_solicitud}/informe-compat`, { lista: null });
+    setNuevosCandidatos(null);
+    await restaurarAuto();
     await cargarCompatibilidad();
-    await recargar();
     onRegenerado?.();
+  }
+
+  // Todo el catálogo, sin filtros, ordenado por parecido a lo que escribió.
+  async function buscarParecidos() {
+    setSearchingMasters(true);
+    setSearchQ("");
+    setModoParecidos(true);
+    try {
+      const r = await boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/compatibilidad/parecidos`);
+      if (r.ok) {
+        const res = (r.resultados || []).filter((x) => !listaEdit.some((e) => e.master.id_master === x.master.id_master));
+        setSearchResults(res);
+        if (!res.length) dialog.toast(r.total ? "Todos los parecidos ya están en la lista." : "El asesorado no escribió qué máster busca.", "info");
+      }
+    } catch { dialog.toast("No se pudo buscar", "error"); }
+    finally { setSearchingMasters(false); }
   }
 
   function entrarEdicion() {
@@ -314,7 +378,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     if (listaEdit.some((e) => e.master.id_master === r.master.id_master)) return;
     setListaEdit((prev) => [...prev, r]);
     setSearchQ("");
-    setSearchResults([]);
+    setSearchResults((prev) => modoParecidos ? prev.filter((x) => x.master.id_master !== r.master.id_master) : []);
     searchRef.current?.focus();
   }
 
@@ -505,7 +569,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     ["CCAA preferidas",    compat?.perfil?.ccaa?.join(", ")],
   ];
 
-  const showDropdown = searchQ.length >= 2;
+  const showDropdown = (searchQ.length >= 2) || (modoParecidos && searchResults.length > 0);
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -528,13 +592,20 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                 📦 {planLabel}
               </span>
             )}
-            <button onClick={regenerar} disabled={loadingCompat}
+            <button onClick={recalcular} disabled={loadingCompat}
+              title="Vuelve a calcular con el formulario de hoy. La lista curada no se toca."
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/12 text-white/80 border border-white/20 hover:bg-white/22 transition-all duration-200 disabled:opacity-50 shrink-0">
               <svg className={`w-3 h-3 ${loadingCompat ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Regenerar
+              Recalcular con el formulario actual
             </button>
+            {detalle.informe_compat_curado && (
+              <button onClick={volverAlAutomatico} disabled={loadingCompat || guardando}
+                className="text-[10px] text-white/60 hover:text-white underline transition shrink-0">
+                Volver al automático
+              </button>
+            )}
           </div>
         </div>
 
@@ -581,7 +652,37 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
             )}
           </div>
         )}
-      </div>
+      </div>
+      {nuevosCandidatos && (
+        <div className="mx-5 mt-4 rounded-xl border border-[#F5C842]/60 bg-[#FFFBEA] px-4 py-3 text-xs text-neutral-700">
+          <p className="font-bold text-[#7a5b00]">Recalculado con el formulario actual</p>
+          <p className="mt-0.5">
+            {nuevosCandidatos.nuevos.length} candidato{nuevosCandidatos.nuevos.length === 1 ? "" : "s"} nuevo{nuevosCandidatos.nuevos.length === 1 ? "" : "s"} que no están en tu lista ·{" "}
+            {nuevosCandidatos.cambiados} de tu lista cambiaron de puntuación. La lista curada no se ha tocado.
+          </p>
+          {nuevosCandidatos.nuevos.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {nuevosCandidatos.nuevos.slice(0, 8).map((n) => (
+                <li key={n.master.id_master} className="flex items-center gap-2 min-w-0">
+                  <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(n.score)}`}>{n.score}%</span>
+                  <span className="truncate">{n.master.nombre_limpio} · {n.master.universidad?.nombre_completo}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex gap-2 mt-2.5">
+            <button type="button" onClick={aplicarRecalculo}
+              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#1D6A4A] text-white hover:opacity-90">
+              Revisar en la lista curada
+            </button>
+            <button type="button" onClick={() => setNuevosCandidatos(null)}
+              className="text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-neutral-300 text-neutral-600 hover:bg-white">
+              Dejar como está
+            </button>
+          </div>
+        </div>
+      )}
+
 
       {/* ── PDF manual ────────────────────────────────────────────── */}
       <div className="px-5 pt-4 pb-4 border-b border-neutral-100">
@@ -821,6 +922,18 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
         {!loadingCompat && editMode && (
           <div className="space-y-3">
 
+            {/* Parecidos a lo que el asesorado escribió que busca */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button type="button" onClick={buscarParecidos} disabled={searchingMasters}
+                className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#EEF2F8] text-[#1A3557] border border-[#1A3557]/20 hover:bg-[#e2e8f3] disabled:opacity-50 transition">
+                ≈ Buscar parecidos a lo que pidió
+              </button>
+              <span className="text-[10.5px] text-neutral-400 truncate">
+                {[...(Array.isArray(datos.masteres_deseados) ? datos.masteres_deseados : []), ...(Array.isArray(datos.especializaciones) ? datos.especializaciones : [])]
+                  .filter(Boolean).join(" · ") || "El asesorado no escribió qué máster busca."}
+              </span>
+            </div>
+
             {/* Buscador libre */}
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -838,12 +951,12 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                 ref={searchRef}
                 type="text"
                 value={searchQ}
-                onChange={(e) => setSearchQ(e.target.value)}
+                onChange={(e) => { setSearchQ(e.target.value); setModoParecidos(false); }}
                 placeholder="Buscar cualquier máster del catálogo…"
                 className="w-full text-xs pl-8 pr-8 py-2.5 border border-neutral-200 rounded-xl outline-none focus:border-[#1D6A4A] focus:ring-2 focus:ring-[#1D6A4A]/10 bg-white transition-all duration-200"
               />
               {searchQ && (
-                <button onClick={() => { setSearchQ(""); setSearchResults([]); }}
+                <button onClick={() => { setSearchQ(""); setSearchResults([]); setModoParecidos(false); }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-neutral-200 hover:bg-neutral-300 flex items-center justify-center transition-colors duration-150">
                   <svg className="w-2.5 h-2.5 text-neutral-500" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -858,7 +971,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                     <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide">
                       {searchResults.length} resultado{searchResults.length !== 1 ? "s" : ""}
                     </p>
-                    <p className="text-[10px] text-neutral-400">Catálogo completo</p>
+                    <p className="text-[10px] text-neutral-400">{modoParecidos ? "Parecidos a lo que pidió · sin filtros" : "Catálogo completo"}</p>
                   </div>
                   {searchResults.map((r) => (
                     <button key={r.master.id_master} type="button" onClick={() => añadirItem(r)}
@@ -873,6 +986,9 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                             {r.master.universidad.ciudad ? ` · ${r.master.universidad.ciudad}` : ""}
                             {r.master.universidad.comunidad ? ` · ${r.master.universidad.comunidad?.nombre ?? r.master.universidad.comunidad}` : ""}
                           </p>
+                          {r.master.coincide_con && (
+                            <p className="text-[10.5px] text-[#1D6A4A] mt-0.5 truncate">≈ «{r.master.coincide_con}»</p>
+                          )}
                         </div>
                         <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(r.score)}`}>
                           {r.score != null ? `${r.score}%` : "—"}

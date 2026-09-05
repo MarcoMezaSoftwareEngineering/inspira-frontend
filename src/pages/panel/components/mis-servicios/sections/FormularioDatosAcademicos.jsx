@@ -156,9 +156,13 @@ function validateStep(s, formData, planCCAAs = null) {
         missing.push("idioma_master");
       if (!formData.beca_desea) missing.push("beca_desea");
       break;
-    case 6:
-      if (!formData.area_interes_master) missing.push("area_interes_master");
+    case 6: {
+      // La rama es opcional si ya escribió qué máster busca: se deduce de ahí.
+      const escribioMaster = Array.isArray(formData.masteres_deseados)
+        && formData.masteres_deseados.some((t) => String(t || "").trim());
+      if (!formData.area_interes_master && !escribioMaster) missing.push("area_interes_master");
       break;
+    }
     case 7:
       if (!formData.duracion_preferida)    missing.push("duracion_preferida");
       if (!formData.practicas_preferencia) missing.push("practicas_preferencia");
@@ -938,7 +942,12 @@ export default function FormularioDatosAcademicos({
             </div>
 
             <div>
-              <FLabel>¿A qué rama pertenece el máster que te interesa?</FLabel>
+              <FLabel>
+                ¿A qué rama pertenece el máster que te interesa?
+                {deseados.some((t) => String(t || "").trim()) && (
+                  <span className="font-normal text-neutral-400"> (opcional: la deducimos de lo que escribiste)</span>
+                )}
+              </FLabel>
               <p className="text-xs text-neutral-400 mb-3">
                 Puede ser diferente a tu carrera de origen.
               </p>
@@ -967,7 +976,7 @@ export default function FormularioDatosAcademicos({
                   })}
                 </div>
               )}
-              <EMsg show={has("area_interes_master")} msg="Selecciona la rama de tu interés" />
+              <EMsg show={has("area_interes_master")} msg="Selecciona la rama de tu interés o escribe arriba qué máster buscas" />
             </div>
 
             {formData.area_interes_master && subAreasFiltradas.length > 0 && (

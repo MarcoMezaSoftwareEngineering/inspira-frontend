@@ -62,6 +62,10 @@ export const FIELD_CONFIG = {
   beca_auip:                   { label: "Becas AUIP",                   section: "Becas" },
 
   // ── Preferencias del máster ──────────────────────────────────────────
+  masteres_deseados:           { label: "Máster que busca",             section: "Preferencias del máster", fullWidth: true,
+                                 format: (v) => Array.isArray(v) ? v.filter(Boolean).join(" · ") : v },
+  especializaciones:           { label: "Especialización",              section: "Preferencias del máster",
+                                 format: (v) => Array.isArray(v) ? v.filter(Boolean).join(" · ") : v },
   area_interes_master:         { label: "Rama del máster",              section: "Preferencias del máster" },
   sub_area_interes:            { label: "Sub-área de interés",          section: "Preferencias del máster" },
   duracion_preferida:          { label: "Duración",                     section: "Preferencias del máster",

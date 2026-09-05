@@ -134,6 +134,11 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
           {dur && (
             <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded-md">{dur}</span>
           )}
+          {master.afinidad_deseada === "fuerte" && (
+            <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-md">
+              lo pidió por su nombre
+            </span>
+          )}
           {master.es_titulo_oficial === false && (
             <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md">
               título propio
@@ -478,7 +483,11 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   const listaVista  = detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 20) ?? [];
   const isCurado    = !!detalle.informe_compat_curado;
 
+  // Lo que el asesorado escribió a mano va primero: es lo que de verdad busca.
+  const lista = (v) => (Array.isArray(v) && v.filter(Boolean).length ? v.filter(Boolean).join(" · ") : null);
   const paramRows = [
+    ["Máster que busca",   lista(datos.masteres_deseados)],
+    ["Especialización",    lista(datos.especializaciones)],
     ["Rama del máster",    compat?.perfil?.rama_label    || datos.area_interes_master],
     ["Sub-área",           compat?.perfil?.sub_area_label || null],
     ["Área de carrera",    datos.area_carrera],

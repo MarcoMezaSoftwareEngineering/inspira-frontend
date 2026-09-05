@@ -503,6 +503,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
                   <h3 className="text-[15px] font-bold text-primary mb-1">Mensajes con tu asesor</h3>
                   <HiloMensajes
                     lado="cliente"
+                    idSolicitud={idSolicitud}
                     aviso="Lo que se escribe aquí forma parte de tu expediente: queda con fecha, con quién lo escribió y con constancia de cuándo lo leyó tu asesor. Para lo que importa, mejor aquí que por WhatsApp."
                     cargar={() => apiGET(`/solicitudes/${idSolicitud}/mensajes`)}
                     enviar={(texto) => apiPOST(`/solicitudes/${idSolicitud}/mensajes`, { texto })}

@@ -45,8 +45,54 @@ export default function SeccionPreferenciasMaster({ formData, setFormData }) {
   const presMax = Number(formData.presupuesto_hasta) || 3000;
   const pct = (((presMax - PRESUPUESTO_MIN) / (PRESUPUESTO_MAX - PRESUPUESTO_MIN)) * 100).toFixed(1);
 
+  // Lo más directo: qué máster busca, con nombre. Con eso el informe encuentra
+  // ese y los parecidos; el área y la subárea de abajo solo acotan. Hasta tres
+  // másteres y dos especializaciones.
+  const deseados = Array.isArray(formData.masteres_deseados) ? formData.masteres_deseados : [];
+  const especialidades = Array.isArray(formData.especializaciones) ? formData.especializaciones : [];
+  const ponerLista = (key, lista, largo, i, valor) => {
+    const next = [...lista]; while (next.length < largo) next.push("");
+    next[i] = valor; set(key, next);
+  };
+  const campo = "w-full text-sm border border-neutral-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary";
+
   return (
     <div className="space-y-7">
+
+      {/* Qué máster busca, con nombre */}
+      <div>
+        <p className="text-xs font-semibold text-neutral-700 mb-1.5">
+          ¿Qué máster estás buscando?
+        </p>
+        <p className="text-[11px] text-neutral-400 mb-2.5">
+          Escribe hasta tres, con el nombre que conozcas —aunque no sepas la universidad—.
+          Buscaremos esos y los parecidos. Ej.: «Máster en Marketing Digital».
+        </p>
+        <div className="space-y-2">
+          {[0, 1, 2].map((i) => (
+            <input key={i} type="text" className={campo} value={deseados[i] || ""}
+              placeholder={["Primera opción", "Segunda opción (opcional)", "Tercera opción (opcional)"][i]}
+              onChange={(e) => ponerLista("masteres_deseados", deseados, 3, i, e.target.value)} />
+          ))}
+        </div>
+      </div>
+
+      {/* Especialización */}
+      <div>
+        <p className="text-xs font-semibold text-neutral-700 mb-1.5">
+          ¿Cuál es tu especialización, o en qué quieres profundizar?
+        </p>
+        <p className="text-[11px] text-neutral-400 mb-2.5">
+          Hasta dos. Ej.: «finanzas corporativas», «educación inclusiva», «ciberseguridad».
+        </p>
+        <div className="space-y-2">
+          {[0, 1].map((i) => (
+            <input key={i} type="text" className={campo} value={especialidades[i] || ""}
+              placeholder={["Especialización principal", "Otra (opcional)"][i]}
+              onChange={(e) => ponerLista("especializaciones", especialidades, 2, i, e.target.value)} />
+          ))}
+        </div>
+      </div>
 
       {/* Tipo de máster — pills */}
       <div>

@@ -49,6 +49,11 @@ export function MasterCard({ master, score, prioridad, selected, comentario, onT
             {dur    && <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">{dur}</span>}
             {/* Hay asesorados a quienes un título propio les encaja, así que
                 esto informa, no advierte: se dice qué es y se explica debajo. */}
+            {master.afinidad_deseada === "fuerte" && (
+              <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded">
+                Coincide con lo que buscas
+              </span>
+            )}
             {master.es_titulo_oficial === false && (
               <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded">
                 Título propio

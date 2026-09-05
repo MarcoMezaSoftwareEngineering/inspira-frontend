@@ -35,6 +35,7 @@ export default function MensajesAdmin({ idSolicitud }) {
         <div className="px-5 pb-5 border-t border-neutral-100 pt-4">
           <HiloMensajes
             lado="asesor"
+            idSolicitud={idSolicitud}
             cargar={() => boGET(`/backoffice/solicitudes/${idSolicitud}/mensajes`)}
             enviar={(texto) => boPOST(`/backoffice/solicitudes/${idSolicitud}/mensajes`, { texto })}
           />

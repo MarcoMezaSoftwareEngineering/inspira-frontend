@@ -10,10 +10,13 @@
 import { useEffect, useRef, useState } from "react";
 import { fechaHoraDoble } from "../../lib/horas";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
+
 // Con la hora de Perú y la de España: quien escribe está en una y el plazo en la otra.
 const fecha = (iso) => fechaHoraDoble(iso);
 
-export default function HiloMensajes({ cargar, enviar, lado, aviso }) {
+export default function HiloMensajes({ cargar, enviar, lado, aviso, idSolicitud }) {
+  const [abriendoPdf, setAbriendoPdf] = useState(false);
   const [mensajes, setMensajes] = useState(null);
   const [texto, setTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -32,6 +35,24 @@ export default function HiloMensajes({ cargar, enviar, lado, aviso }) {
 
   useEffect(() => { refrescar(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { finRef.current?.scrollIntoView({ block: "end" }); }, [mensajes?.length]);
+
+  // El hilo en PDF, con fecha: para guardarlo o adjuntarlo. Va con el token en
+  // la cabecera, como cualquier archivo del expediente, y se abre aparte.
+  async function descargarPdf() {
+    if (!idSolicitud || abriendoPdf) return;
+    setAbriendoPdf(true); setError("");
+    try {
+      const token = localStorage.getItem(lado === "asesor" ? "bo_token" : "token");
+      const url = lado === "asesor"
+        ? `${API_URL}/backoffice/solicitudes/${idSolicitud}/mensajes.pdf`
+        : `${API_URL}/solicitudes/${idSolicitud}/mensajes.pdf`;
+      const r = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!r.ok) throw new Error();
+      const blob = await r.blob();
+      window.open(URL.createObjectURL(blob), "_blank");
+    } catch { setError("No se pudo generar el PDF"); }
+    finally { setAbriendoPdf(false); }
+  }
 
   async function mandar() {
     const t = texto.trim();
@@ -101,6 +122,12 @@ export default function HiloMensajes({ cargar, enviar, lado, aviso }) {
               : "Tu asesor recibe una copia por correo. Queda en tu expediente y no se puede borrar."}
           </span>
           {error && <span className="text-[12px] text-red-600 font-semibold">{error}</span>}
+          {idSolicitud && (mensajes?.length > 0) && (
+            <button type="button" onClick={descargarPdf} disabled={abriendoPdf}
+              className="ux-tap ml-auto text-[12px] font-semibold text-primary-light hover:underline disabled:opacity-50">
+              {abriendoPdf ? "Preparando…" : "Descargar en PDF"}
+            </button>
+          )}
         </div>
       </div>
     </div>

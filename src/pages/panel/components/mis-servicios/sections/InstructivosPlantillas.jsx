@@ -1,5 +1,6 @@
 // src/pages/panel/components/mis-servicios/sections/InstructivosPlantillas.jsx
 import SeccionPanel from "./SeccionPanel";
+import GuiaDocumentosMaster from "./GuiaDocumentosMaster";
 
 export default function InstructivosPlantillas({
   instructivos,
@@ -8,6 +9,7 @@ export default function InstructivosPlantillas({
   subtitulo = "Descarga la guía paso a paso de tu servicio.",
   sectionId = "2",
   onIrAGuia,
+  guiaDocumentos = false,
 }) {
   const lista = Array.isArray(instructivos) ? instructivos : [];
 
@@ -44,6 +46,9 @@ export default function InstructivosPlantillas({
           </button>
         </div>
       )}
+
+      {/* La guía directa de documentos: qué es cada uno y cómo debe verse. */}
+      {guiaDocumentos && <GuiaDocumentosMaster />}
 
       {lista.length === 0 ? (
         <div className="py-6 text-center">

@@ -37,6 +37,11 @@ export default function SolicitudRow({ s, isAdmin, onVer, onEliminar }) {
             {s.estado}
           </span>
         ) : "—"}
+        {s.mensajes_sin_leer > 0 && (
+          <span title="Mensajes del asesorado sin leer" className="ml-1.5 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FA943A] text-white text-[10.5px] font-black whitespace-nowrap">
+            ✉ {s.mensajes_sin_leer}
+          </span>
+        )}
       </td>
       <td className="px-3 py-3 text-xs text-neutral-400 whitespace-nowrap">{s.origen || "—"}</td>
       <td className="px-3 py-3 text-xs text-neutral-500 whitespace-nowrap tabular-nums">
@@ -77,6 +82,11 @@ export function SolicitudCard({ s, isAdmin, onVer, onEliminar }) {
           <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-[#eaf2ff] text-[#2866b1] font-bold leading-none">
             <span className="w-1.5 h-1.5 rounded-full bg-current" />
             {s.estado}
+          </span>
+        )}
+        {s.mensajes_sin_leer > 0 && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#FA943A] text-white text-[10.5px] font-black leading-none">
+            ✉ {s.mensajes_sin_leer}
           </span>
         )}
       </div>

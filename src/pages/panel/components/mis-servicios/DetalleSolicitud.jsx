@@ -197,12 +197,8 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
       const r = await apiPOST(`/solicitudes/${idSolicitud}/formulario`, formData);
       if (!r.ok) { dialog.toast("No se pudo guardar.", "error"); return; }
       dialog.toast("Datos guardados.", "success");
-      const base5 = Array.from({ length: 5 }, (_, idx) => ({ prioridad: idx + 1, programa: "", comentario: "" }));
-      Promise.all([
-        apiPOST(`/solicitudes/${idSolicitud}/eleccion-masters`, { elecciones: [] }).catch(() => {}),
-        apiPOST(`/solicitudes/${idSolicitud}/postulaciones`, { postulaciones: [] }).catch(() => {}),
-      ]);
-      setElecciones(base5);
+      // Guardar el formulario ya no borra la elección ni las postulaciones:
+      // el informe se recalcula y el asesor decide qué cambia.
       setFormGuardado(true);
       setSeleccionKey((k) => k + 1);
       cargarCompatibilidad();
@@ -300,7 +296,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
       id:       "eleccion",
       num:      5,
       titulo:   "Elección másteres",
-      subtitulo: eleccionesGuardadas > 0 ? `${eleccionesGuardadas} seleccionados` : "Pendiente",
+      subtitulo: eleccionesGuardadas > 0 ? `${eleccionesGuardadas} seleccionados${elecciones.some((e) => e.plan_incluido != null) ? " · revisados por tu asesor" : ""}` : "Pendiente",
       estado:   eleccionesGuardadas > 0 ? "completado" : formGuardado ? "pendiente" : null,
       show:     !esVisado,
     },
@@ -433,11 +429,12 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
                   cargarTodo={cargarTodo}
                   idSolicitud={idSolicitud}
                   revisionSolicitadaAt={detalle?.datos_panel?.revision_solicitada_at || null}
+                  guiaMaster={!esVisado}
                 />
               )}
 
               {activeSection === "inst" && (
-                <InstructivosPlantillas instructivos={instructivos} onIrAGuia={onIrAGuia} />
+                <InstructivosPlantillas instructivos={instructivos} onIrAGuia={onIrAGuia} guiaDocumentos={!esVisado} />
               )}
 
               {activeSection === "form" && (

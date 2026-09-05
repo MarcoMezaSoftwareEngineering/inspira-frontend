@@ -5,6 +5,9 @@ import SeccionPanel from "./SeccionPanel";
 import PedirRevisionMaster from "./PedirRevisionMaster";
 import { requisitosDe, NOTA_APOSTILLA } from "./visaRequisitos";
 import { listaSolvencia, VIA_ETIQUETA } from "./visaSolvencia";
+import { permiteVarios } from "../../../../../lib/documentos";
+import { guiaParaItem } from "../guiaDocumentosMaster";
+import GuiaDocumento from "./GuiaDocumento";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -127,11 +130,15 @@ function VisorModal({ doc, onClose }) {
 }
 
 // ─── Tarjeta de documento ────────────────────────────────────────────────────
-function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
+function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster = false }) {
   const docs = it.documentos || [];
   const hayDocs = docs.length > 0;
   const cfg = getCfg(it.estado_item);
-  const requisitos = requisitosDe(it.item?.nombre_item);
+  // Un solo PDF con todo junto, salvo experiencia y formación complementaria.
+  const varios = permiteVarios(it.item?.nombre_item);
+  // La ficha de la guía directa (qué es, por qué importa, modelo), solo en máster.
+  const guia = guiaMaster ? guiaParaItem(it.item?.nombre_item) : null;
+  const requisitos = guia ? null : requisitosDe(it.item?.nombre_item);
   const itemAprobado = (it.estado_item || "").toLowerCase() === "aprobado";
   const [subiendo, setSubiendo] = useState(false);
   const [deleting, setDeleting] = useState(null);
@@ -189,7 +196,7 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
 
       {/* Nombre */}
       <p className="text-[13px] font-semibold text-neutral-900 pr-20 leading-snug">
-        {it.item?.nombre_item}
+        {it.numero ? <span className="text-neutral-400">{it.numero}. </span> : null}{it.item?.nombre_item}
       </p>
 
       {/* Descripción */}
@@ -212,6 +219,19 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
               <li key={r} className="text-[11.5px] text-neutral-600 leading-snug">· {r}</li>
             ))}
           </ul>
+        </details>
+      )}
+
+      {/* La guía directa: qué es, por qué importa, qué verificar y cómo debe verse. */}
+      {guia && (
+        <details className="group -mt-0.5">
+          <summary className="cursor-pointer select-none text-[11.5px] font-semibold text-primary-light hover:underline list-none">
+            <span className="group-open:hidden">¿Cómo debe verse? · guía y modelo ▾</span>
+            <span className="hidden group-open:inline">Ocultar la guía ▴</span>
+          </summary>
+          <div className="mt-2 border-l-2 border-primary/15 pl-3">
+            <GuiaDocumento guia={guia} compacta />
+          </div>
         </details>
       )}
 
@@ -274,16 +294,23 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc }) {
                   : "border-neutral-200 bg-neutral-50 text-neutral-500 hover:border-green-600 hover:bg-green-50 hover:text-green-700"
               }`}
             >
-              {subiendo ? "Subiendo…" : "↑ Subir archivo"}
+              {subiendo ? "Subiendo…" : varios ? "↑ Subir archivos" : hayDocs ? "↑ Reemplazar el archivo" : "↑ Subir el documento"}
               <input
                 type="file"
                 className="hidden"
                 onChange={handleUpload}
-                multiple
+                multiple={varios}
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
                 disabled={subiendo}
               />
             </label>
+          )}
+          {!itemAprobado && (
+            <p className="text-[10.5px] text-neutral-400 text-center leading-snug">
+              {varios
+                ? "Aquí sí puedes subir varios archivos, uno por certificado."
+                : "Todo el documento junto, en un solo PDF. Si subes otro, reemplaza al anterior."}
+            </p>
           )}
         </div>
       )}
@@ -305,6 +332,7 @@ export default function ChecklistDocumentos({
   bloqueado = false,
   mensajeBloqueo = "",
   expediente = null,
+  guiaMaster = false,
 }) {
   const [docVisor, setDocVisor] = useState(null);
 
@@ -468,6 +496,7 @@ export default function ChecklistDocumentos({
                   onEliminar={handleEliminar}
                   onUploaded={cargarTodo}
                   onVerDoc={setDocVisor}
+                  guiaMaster={guiaMaster}
                 />
               ))}
             </div>

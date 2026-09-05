@@ -4,6 +4,7 @@
 // MODO B: asesor decide Sí/No para cada master elegido por el cliente
 import { useEffect, useState } from "react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
+import { dialog } from "../../../services/dialogService";
 
 // El nombre suele delatar al título propio, así que la casilla se propone
 // sola y el asesor la corrige si se equivoca. Anclado a «máster de formación
@@ -168,6 +169,20 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
   const [loadingInf, setLoadingInf]       = useState(false);
   const [selAdmin, setSelAdmin]           = useState([]); // selección admin en modo picker
   const [manualAbierto, setManualAbierto] = useState(false);
+  const [avisando, setAvisando]           = useState(false);
+  const [avisadoAt, setAvisadoAt]         = useState(null);
+
+  // La elección llega cuando llega —el detalle se carga después de montar
+  // esto— y cambia cada vez que el asesorado guarda. Si solo se leyera al
+  // montar, el asesor caía en el selector vacío y tenía que elegir de nuevo.
+  const firma = JSON.stringify(elecciones || []);
+  const [firmaVista, setFirmaVista] = useState(firma);
+  if (firma !== firmaVista) {
+    setFirmaVista(firma);
+    setFilas(normalizar(elecciones));
+    setNota(extraerNota(elecciones));
+    if (Array.isArray(elecciones) && elecciones.length > 0) setModoSeleccion(false);
+  }
 
   function normalizar(raw) {
     if (!Array.isArray(raw) || raw.length === 0) return [];
@@ -181,12 +196,13 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
     return raw[0]?._nota_asesor ?? "";
   }
 
-  // Auto-reset a modo picker cuando el informe se regenera
+  // Cuando el informe se regenera se vuelve a cargar; la elección del
+  // asesorado se queda y solo se va al selector si no había ninguna.
   useEffect(() => {
     if (!resetKey) return;
     setSelAdmin([]);
     setInforme(null);
-    setModoSeleccion(true);
+    setModoSeleccion(filas.length === 0);
   }, [resetKey]); // eslint-disable-line
 
   // Cargar informe cuando entramos en modo picker
@@ -287,8 +303,32 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
     await guardar(filas, textoNota);
   }
 
-  async function guardar(filasActuales, notaActual) {
-    if (!idSolicitud) return;
+  // Un clic y todos entran: lo normal es aprobar lo que eligió el asesorado
+  // y dejar el «No» para las excepciones.
+  async function aprobarTodos() {
+    const nuevas = filas.map((f) => ({ ...f, plan_incluido: true }));
+    setFilas(nuevas);
+    await guardar(nuevas, nota);
+  }
+
+  // Cierra la revisión: se guarda y el asesorado recibe el correo con lo que
+  // entra en el plan y lo que queda para coordinar, con la nota.
+  async function confirmarYAvisar() {
+    const sinDecidir = filas.filter((f) => f.plan_incluido == null).length;
+    if (sinDecidir > 0) {
+      const ok = await dialog.confirm(`Hay ${sinDecidir} máster(es) sin sí o no. ¿Avisar igual? Los que no tengan decisión no entran en el plan.`);
+      if (!ok) return;
+    }
+    setAvisando(true);
+    try {
+      const r = await guardar(filas, nota, true);
+      if (r?.avisado) { setAvisadoAt(new Date().toISOString()); dialog.toast("Elección confirmada y asesorado avisado.", "success"); }
+      else dialog.toast("Se guardó, pero el correo no salió.", "error");
+    } finally { setAvisando(false); }
+  }
+
+  async function guardar(filasActuales, notaActual, avisar = false) {
+    if (!idSolicitud) return null;
     setGuardando(true);
     try {
       const payload = filasActuales.map((f, idx) => ({
@@ -297,12 +337,15 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
       }));
       const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/eleccion-plan`, {
         eleccion_masters: payload,
+        avisar,
       });
       if (r.ok && onEleccionesActualizadas) {
         onEleccionesActualizadas(r.eleccion_masters);
       }
+      return r;
     } catch (e) {
       console.error("Error guardando elección:", e);
+      return null;
     } finally {
       setGuardando(false);
     }
@@ -456,13 +499,29 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
         <div className="flex-1 min-w-0">
           <p className="font-serif text-[13px] font-bold">Selección del cliente</p>
           <p className="text-[11px] text-white/70">
-            El cliente eligió libremente. Tú decides cuáles entran en el plan contratado.
+            El asesorado eligió. Di sí o no a cada uno: los que entran pasan solos al bloque de postulaciones.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
           {guardando && (
             <span className="text-[10px] text-white/60 font-mono">Guardando…</span>
           )}
+          <button
+            type="button"
+            onClick={aprobarTodos}
+            disabled={guardando || filas.length === 0 || filas.every((f) => f.plan_incluido === true)}
+            className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-white/15 text-white hover:bg-white/25 disabled:opacity-40 transition"
+          >
+            ✓ Aprobar todos
+          </button>
+          <button
+            type="button"
+            onClick={confirmarYAvisar}
+            disabled={guardando || avisando || filas.length === 0}
+            className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-[#FA943A] text-white hover:opacity-90 disabled:opacity-40 transition"
+          >
+            {avisando ? "Avisando…" : "Confirmar y avisar al asesorado"}
+          </button>
           <button
             type="button"
             onClick={() => { setSelAdmin([]); setModoSeleccion(true); }}
@@ -488,6 +547,12 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
           <p className="font-serif text-lg font-bold text-amber-600">{nNo}</p>
         </div>
       </div>
+
+      {(avisadoAt || filas[0]?._confirmado_at) && (
+        <p className="text-[11px] text-neutral-500 px-1">
+          Asesorado avisado el {new Date(avisadoAt || filas[0]._confirmado_at).toLocaleString("es-ES")}. Si cambias algo, vuelve a confirmar.
+        </p>
+      )}
 
       {/* Filas de másteres */}
       <div className="space-y-2">

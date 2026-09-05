@@ -5,6 +5,7 @@ import { dialog } from "../../../../services/dialogService";
 import { API_URL, formatearFecha } from "../utils";
 import DocViewer from "../../documentos/DocViewer";
 import { DriveToast, useDriveToast } from "../../driveToast";
+import { nombreDescarga } from "../../../../lib/documentos";
 
 const ESTADO_CFG = {
   aprobado:   { label: "Aprobado",  bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
@@ -28,6 +29,7 @@ export default function ChecklistSolicitudAdmin({
   tipoSolvencia = "PENDIENTE",
 }) {
   const [viewingDoc, setViewingDoc] = useState(null);
+  const [descargandoTodo, setDescargandoTodo] = useState(false);
   const driveToastState = useDriveToast();
 
   // Oculta el set de solvencia que no corresponde a la vía activa. En MIXTO
@@ -108,27 +110,52 @@ export default function ChecklistSolicitudAdmin({
     }
   }
 
-  async function descargarDocumento(doc) {
+  // Cada archivo con su nombre de expediente: «1. Pasaporte.pdf». Devuelve
+  // true si bajó, para que «Descargar todos» sepa cuántos consiguió.
+  async function descargarDocumento(doc, nombre) {
     try {
       const token = localStorage.getItem("bo_token");
       if (!token) { dialog.toast("No existe sesión de backoffice", "error"); return; }
       const resp = await fetch(`${API_URL}/api/admin/documentos/${doc.id_documento}/descargar`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!resp.ok) { dialog.toast("No se pudo descargar el archivo", "error"); return; }
+      if (!resp.ok) { dialog.toast("No se pudo descargar el archivo", "error"); return false; }
       const blob = await resp.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = doc.nombre_original || "archivo";
+      a.download = nombre || doc.nombre_original || "archivo";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      window.URL.revokeObjectURL(url);
+      setTimeout(() => window.URL.revokeObjectURL(url), 4000);
+      return true;
     } catch (e) {
       console.error(e);
       dialog.toast("Error al descargar", "error");
+      return false;
     }
+  }
+
+  // Todos los archivos del expediente, uno a uno y sueltos —no en ZIP—, cada
+  // uno con su número y su nombre. El navegador pide permiso la primera vez
+  // para descargar varios seguidos; con un respiro entre archivos no los pierde.
+  async function descargarTodos(items) {
+    const pares = [];
+    for (const it of items) {
+      const docs = Array.isArray(it.documentos) ? it.documentos : it.documento ? [it.documento] : [];
+      for (const doc of docs) pares.push([it, doc]);
+    }
+    if (!pares.length) { dialog.toast("Este expediente todavía no tiene archivos.", "error"); return; }
+    setDescargandoTodo(true);
+    let ok = 0;
+    try {
+      for (const [it, doc] of pares) {
+        if (await descargarDocumento(doc, nombreDescarga(it, doc))) ok += 1;
+        await new Promise((r) => setTimeout(r, 600));
+      }
+      dialog.toast(`${ok} de ${pares.length} archivos descargados`, ok === pares.length ? "success" : "error");
+    } finally { setDescargandoTodo(false); }
   }
 
   async function subirDocumentoInterno(it) {
@@ -200,6 +227,11 @@ export default function ChecklistSolicitudAdmin({
         {nObservados > 0 && <span className="font-semibold text-red-600">● {nObservados} Observados</span>}
         {nPendientes > 0 && <span className="font-semibold text-amber-600">● {nPendientes} Pendientes</span>}
         {nSinDoc     > 0 && <span className="font-semibold text-neutral-400">● {nSinDoc} Sin doc.</span>}
+        <button type="button" onClick={() => descargarTodos(todosLosItems)} disabled={descargandoTodo}
+          title="Descarga cada archivo por separado, numerado y con el nombre del documento"
+          className="text-[11px] font-bold px-3 py-1 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50">
+          {descargandoTodo ? "Descargando…" : "⬇ Descargar todos"}
+        </button>
       </div>
     </div>
 
@@ -238,7 +270,7 @@ export default function ChecklistSolicitudAdmin({
                   <div className="flex justify-between items-start gap-2 mb-1.5">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-neutral-800 leading-snug">
-                        {it.item?.nombre_item}
+                        {it.numero ? <span className="text-neutral-400 font-bold">{it.numero}. </span> : null}{it.item?.nombre_item}
                       </p>
                       {it.item?.descripcion && (
                         <p className="text-xs text-neutral-500 mt-0.5">{it.item.descripcion}</p>
@@ -329,7 +361,7 @@ export default function ChecklistSolicitudAdmin({
                             </button>
                             <button
                               type="button"
-                              onClick={() => descargarDocumento(doc)}
+                              onClick={() => descargarDocumento(doc, nombreDescarga(it, doc))}
                               className="text-[11px] px-2 py-1 rounded-lg border border-neutral-300 hover:bg-neutral-50 transition"
                             >
                               Descargar

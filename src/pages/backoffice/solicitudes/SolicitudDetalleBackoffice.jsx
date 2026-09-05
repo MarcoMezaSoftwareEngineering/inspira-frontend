@@ -1,6 +1,6 @@
 // src/pages/backoffice/solicitudes/SolicitudDetalleBackoffice.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import { boGET, boPATCH } from "../../../services/backofficeApi";
+import { boGET } from "../../../services/backofficeApi";
 import FormularioDatosAcademicosAdmin from "./FormularioDatosAcademicosAdmin";
 import EleccionMastersAdmin from "./EleccionMastersAdmin";
 import ProgramacionPostulacionesAdmin from "./ProgramacionPostulacionesAdmin";
@@ -245,14 +245,10 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   }
 
   async function handleInformeRegenerado() {
+    // El informe cambia, pero lo que el asesorado ya eligió se conserva: el
+    // asesor lo revisa con sí o no, no vuelve a elegir desde cero.
     setEleccionResetKey((k) => k + 1);
-    try {
-      const r = await boPATCH(`/backoffice/solicitudes/${detalle.id_solicitud}/eleccion-plan`, { eleccion_masters: [] });
-      if (r.ok) {
-        setDetalle((prev) => ({ ...prev, eleccion_masters: [] }));
-        cargar({ silencioso: true });
-      }
-    } catch { /* silencioso */ }
+    cargar({ silencioso: true });
   }
 
   const completos = bloques.filter((b) => b.estado === "completado").length;

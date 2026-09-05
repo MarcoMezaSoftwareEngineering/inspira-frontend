@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../../styles/asesor.css";
 import Sidebar from "./layout/Sidebar";
+import CampanaMensajes from "./layout/CampanaMensajes";
 import MobileAppBar from "./layout/MobileAppBar";
 import MobileDrawer from "./layout/MobileDrawer";
 import BottomNav from "./layout/BottomNav";
@@ -155,6 +156,8 @@ export default function BackofficeApp() {
         />
 
         <MobileAppBar onMenuToggle={() => setMobileDrawerOpen(true)} user={user} />
+        {/* Lo que los asesorados han escrito y nadie ha leído, de todos los expedientes. */}
+        <CampanaMensajes navigate={navigate} path={path} />
         <MobileDrawer
           open={mobileDrawerOpen}
           onClose={() => setMobileDrawerOpen(false)}

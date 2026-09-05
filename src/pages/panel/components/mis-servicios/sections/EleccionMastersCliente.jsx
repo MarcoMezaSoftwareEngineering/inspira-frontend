@@ -211,6 +211,7 @@ export default function EleccionMastersCliente({
   }
 
   const noSeleccionados = resultados.filter((r) => !selectedIds.has(r.master.id_master));
+  const notaAsesor = (Array.isArray(elecciones) ? elecciones : []).find((e) => e?._nota_asesor)?._nota_asesor || "";
 
   const filled    = seleccion.length;
   const estado    = filled > 0 ? "completado" : loadingCompat ? "cargando" : "pendiente";
@@ -266,6 +267,18 @@ export default function EleccionMastersCliente({
 
               {seleccion.length > 0 && (
                 <>
+                  {/* Lo que decidió el asesor sobre cada máster, y su nota. Antes
+                      se guardaba y el asesorado no lo veía por ningún lado. */}
+                  {seleccion.some((s) => s.plan_incluido != null) && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 px-3.5 py-3 text-[12.5px] text-neutral-700 leading-relaxed">
+                      <p className="font-bold text-emerald-800">Tu asesor ya revisó tu elección.</p>
+                      <p>
+                        {seleccion.filter((s) => s.plan_incluido === true).length} entran en tu plan y ya están en «Postulaciones»;{" "}
+                        {seleccion.filter((s) => s.plan_incluido === false).length} quedan para coordinar contigo.
+                      </p>
+                      {notaAsesor && <p className="mt-1.5 italic text-neutral-600">«{notaAsesor}»</p>}
+                    </div>
+                  )}
                   <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide px-1 pt-1">
                     Seleccionados · {seleccion.length}
                   </p>
@@ -279,16 +292,22 @@ export default function EleccionMastersCliente({
                       duracion_anios: null,
                     };
                     return (
-                      <MasterCard
-                        key={s.id_master}
-                        master={masterData}
-                        score={s.score}
-                        prioridad={s.prioridad}
-                        selected={true}
-                        comentario={comentarios[s.id_master] || ""}
-                        onToggle={() => r ? toggleMaster(r) : deseleccionar(s.id_master)}
-                        onComentario={(txt) => setComentario(s.id_master, txt)}
-                      />
+                      <div key={s.id_master} className="space-y-1">
+                        {s.plan_incluido != null && (
+                          <p className={`text-[11px] font-bold px-1 ${s.plan_incluido ? "text-emerald-700" : "text-amber-700"}`}>
+                            {s.plan_incluido ? "✓ En tu plan: pasa a postulación." : "◌ Para coordinar con tu asesor."}
+                          </p>
+                        )}
+                        <MasterCard
+                          master={masterData}
+                          score={s.score}
+                          prioridad={s.prioridad}
+                          selected={true}
+                          comentario={comentarios[s.id_master] || ""}
+                          onToggle={() => r ? toggleMaster(r) : deseleccionar(s.id_master)}
+                          onComentario={(txt) => setComentario(s.id_master, txt)}
+                        />
+                      </div>
                     );
                   })}
                 </>

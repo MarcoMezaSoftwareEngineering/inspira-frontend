@@ -293,6 +293,8 @@ function ResumenDatos({ formData, onEditar }) {
     { label: "Inglés",           value: ING_LABELS[formData.ingles_situacion] },
     { label: "Idioma del máster", value: idiomasMaster },
     { label: "Becas",            value: formData.beca_desea === "si" ? "Sí" : formData.beca_desea === "no" ? "No" : null },
+    { label: "Máster que buscas", value: Array.isArray(formData.masteres_deseados) && formData.masteres_deseados.filter(Boolean).length ? formData.masteres_deseados.filter(Boolean).join(" · ") : null },
+    { label: "Especialización",  value: Array.isArray(formData.especializaciones) && formData.especializaciones.filter(Boolean).length ? formData.especializaciones.filter(Boolean).join(" · ") : null },
     { label: "Rama de interés",  value: formData.area_interes_master },
     { label: "Duración",         value: DUR_LABELS[formData.duracion_preferida] },
     { label: "Prácticas",        value: PRAC_LABELS[formData.practicas_preferencia] },
@@ -894,8 +896,47 @@ export default function FormularioDatosAcademicos({
         const subAreasFiltradas = subareas.filter(
           (sa) => sa.rama === formData.area_interes_master
         );
+        // Lo más directo primero: qué máster busca, con su nombre. Con eso el
+        // informe encuentra ese y los parecidos; la rama y la sub-área acotan.
+        // Hasta tres másteres y dos especializaciones, en texto libre.
+        const deseados = Array.isArray(formData.masteres_deseados) ? formData.masteres_deseados : [];
+        const especialidades = Array.isArray(formData.especializaciones) ? formData.especializaciones : [];
+        const ponerLista = (key, lista, largo, i, valor) => {
+          const next = [...lista]; while (next.length < largo) next.push("");
+          next[i] = valor; set(key, next);
+        };
+        const campoTexto = "w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition";
         return (
           <div className="space-y-5">
+            <div>
+              <FLabel>¿Qué máster estás buscando?</FLabel>
+              <p className="text-xs text-neutral-400 mb-3">
+                Escribe hasta tres, con el nombre que conozcas —aunque no sepas la universidad—.
+                Buscaremos esos y los parecidos. Ej.: «Máster en Marketing Digital».
+              </p>
+              <div className="space-y-2">
+                {[0, 1, 2].map((i) => (
+                  <input key={i} type="text" className={campoTexto} value={deseados[i] || ""}
+                    placeholder={["Primera opción", "Segunda opción (opcional)", "Tercera opción (opcional)"][i]}
+                    onChange={(e) => ponerLista("masteres_deseados", deseados, 3, i, e.target.value)} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <FLabel>¿Cuál es tu especialización, o en qué quieres profundizar?</FLabel>
+              <p className="text-xs text-neutral-400 mb-3">
+                Hasta dos. Ej.: «finanzas corporativas», «educación inclusiva», «ciberseguridad».
+              </p>
+              <div className="space-y-2">
+                {[0, 1].map((i) => (
+                  <input key={i} type="text" className={campoTexto} value={especialidades[i] || ""}
+                    placeholder={["Especialización principal", "Otra (opcional)"][i]}
+                    onChange={(e) => ponerLista("especializaciones", especialidades, 2, i, e.target.value)} />
+                ))}
+              </div>
+            </div>
+
             <div>
               <FLabel>¿A qué rama pertenece el máster que te interesa?</FLabel>
               <p className="text-xs text-neutral-400 mb-3">

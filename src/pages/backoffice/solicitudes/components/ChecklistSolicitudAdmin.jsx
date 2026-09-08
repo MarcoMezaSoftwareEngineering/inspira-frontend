@@ -6,6 +6,7 @@ import { API_URL, formatearFecha } from "../utils";
 import DocViewer from "../../documentos/DocViewer";
 import { DriveToast, useDriveToast } from "../../driveToast";
 import { nombreDescarga } from "../../../../lib/documentos";
+import TextoConEnlaces from "../../../../components/common/TextoConEnlaces";
 
 const ESTADO_CFG = {
   aprobado:   { label: "Aprobado",  bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
@@ -273,7 +274,7 @@ export default function ChecklistSolicitudAdmin({
                         {it.numero ? <span className="text-neutral-400 font-bold">{it.numero}. </span> : null}{it.item?.nombre_item}
                       </p>
                       {it.item?.descripcion && (
-                        <p className="text-xs text-neutral-500 mt-0.5">{it.item.descripcion}</p>
+                        <TextoConEnlaces texto={it.item.descripcion} className="text-xs text-neutral-500 mt-0.5" />
                       )}
                       {it.comentario_asesor && (
                         <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1 mt-1.5">
@@ -287,8 +288,9 @@ export default function ChecklistSolicitudAdmin({
                     </span>
                   </div>
 
-                  {/* Acciones a nivel de requisito (ítem) — solo Visado */}
-                  {isVisado && (
+                  {/* Acciones a nivel de requisito (ítem). Eran solo del
+                      visado; el máster también pide documentos adicionales. */}
+                  {(
                     <div className="flex flex-wrap gap-1.5 mb-1.5">
                       <button
                         type="button"

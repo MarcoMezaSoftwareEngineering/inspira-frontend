@@ -249,7 +249,18 @@ function SubSeccion({ codigo, titulo, descripcion, items }) {
   );
 }
 
-export default function PortalesYJustificantesCliente({ idSolicitud }) {
+// Dentro de Postulaciones va sin su propia tarjeta: el paso ya la pone.
+function SinMarco({ children }) {
+  return (
+    <div>
+      <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-2">Accesos y claves de los portales</p>
+      {children}
+    </div>
+  );
+}
+
+export default function PortalesYJustificantesCliente({ idSolicitud, sinMarco = false }) {
+  const Marco = sinMarco ? SinMarco : SeccionPanel;
   const [ministerios, setMinisterios] = useState([]);
   const [masters, setMasters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -279,11 +290,11 @@ export default function PortalesYJustificantesCliente({ idSolicitud }) {
     : "Accesos a ministerios y portales universitarios.";
 
   return (
-    <SeccionPanel
-      numero="7"
+    <Marco
+      numero="5"
       titulo="Portales, claves y justificantes"
       subtitulo={subtitulo}
-      sectionId="7"
+      sectionId="5"
     >
       {loading && (
         <div className="flex items-center gap-2 text-neutral-400 py-2">
@@ -313,17 +324,17 @@ export default function PortalesYJustificantesCliente({ idSolicitud }) {
           {ministerios.length === 0 ? (
             <EmptyMinisterios />
           ) : (
-            <SubSeccion codigo="7.1" titulo="Tus accesos a ministerios" items={ministerios} />
+            <SubSeccion codigo="5.1" titulo="Tus accesos a ministerios" items={ministerios} />
           )}
 
           {/* 7.2 */}
           {masters.length === 0 ? (
             <EmptyPortalesMaster />
           ) : (
-            <SubSeccion codigo="7.2" titulo="Tus accesos a portales de máster" items={masters} />
+            <SubSeccion codigo="5.2" titulo="Tus accesos a portales de máster" items={masters} />
           )}
         </div>
       )}
-    </SeccionPanel>
+    </Marco>
   );
 }

@@ -34,6 +34,16 @@ export const FIELD_CONFIG = {
   experiencia_vinculada:       { label: "Vinculada al área del máster", section: "Experiencia profesional",
                                  format: (v) => ({ si: "Sí, directamente", parcial: "Parcialmente", no: "No directamente" }[v] || v) },
   experiencia_vinculada_detalle: { label: "Descripción de la experiencia", section: "Experiencia profesional", fullWidth: true },
+  // Los puestos, uno por línea: cargo, entidad, sector, fechas y funciones.
+  experiencia_detalle:         { label: "Puestos de trabajo",           section: "Experiencia profesional", fullWidth: true,
+                                 format: (v) => Array.isArray(v) && v.length
+                                   ? v.map((p, i) => {
+                                       const fechas = [p.desde, p.actual ? "actualidad" : p.hasta].filter(Boolean).join(" – ");
+                                       const cab = [p.cargo, p.entidad].filter(Boolean).join(" · ");
+                                       const meta = [p.sector, fechas, p.vinculada ? "vinculado al máster" : null].filter(Boolean).join(" · ");
+                                       return `${i + 1}. ${cab || "Puesto"}${meta ? ` (${meta})` : ""}${p.funciones ? `\n   ${p.funciones}` : ""}`;
+                                     }).join("\n")
+                                   : "" },
 
   // ── Investigación y formación ────────────────────────────────────────
   investigacion_experiencia:   { label: "Experiencia en investigación", section: "Investigación y formación" },

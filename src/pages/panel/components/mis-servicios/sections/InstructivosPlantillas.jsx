@@ -1,25 +1,18 @@
 // src/pages/panel/components/mis-servicios/sections/InstructivosPlantillas.jsx
+//
+// Las guías y plantillas del servicio. Desde el 08/09/2026 ya no son un paso
+// aparte: van dentro de Documentos, debajo del checklist, porque cada guía
+// sirve para un documento. `InstructivosContenido` es lo que se incrusta;
+// el componente por defecto lo envuelve en su sección para quien lo use
+// suelto (el visado).
 import SeccionPanel from "./SeccionPanel";
 import GuiaDocumentosMaster from "./GuiaDocumentosMaster";
 
-export default function InstructivosPlantillas({
-  instructivos,
-  numero = "2",
-  titulo = "Instructivos y plantillas",
-  subtitulo = "Descarga la guía paso a paso de tu servicio.",
-  sectionId = "2",
-  onIrAGuia,
-  guiaDocumentos = false,
-}) {
+export function InstructivosContenido({ instructivos, onIrAGuia, guiaDocumentos = false }) {
   const lista = Array.isArray(instructivos) ? instructivos : [];
 
   return (
-    <SeccionPanel
-      numero={numero}
-      titulo={titulo}
-      subtitulo={subtitulo}
-      sectionId={sectionId}
-    >
+    <>
       {onIrAGuia && (
         <div className="grid sm:grid-cols-2 gap-3 mb-4">
           <button
@@ -85,6 +78,22 @@ export default function InstructivosPlantillas({
           ))}
         </ul>
       )}
+    </>
+  );
+}
+
+export default function InstructivosPlantillas({
+  instructivos,
+  numero = "2",
+  titulo = "Instructivos y plantillas",
+  subtitulo = "Descarga la guía paso a paso de tu servicio.",
+  sectionId = "2",
+  onIrAGuia,
+  guiaDocumentos = false,
+}) {
+  return (
+    <SeccionPanel numero={numero} titulo={titulo} subtitulo={subtitulo} sectionId={sectionId}>
+      <InstructivosContenido instructivos={instructivos} onIrAGuia={onIrAGuia} guiaDocumentos={guiaDocumentos} />
     </SeccionPanel>
   );
 }

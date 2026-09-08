@@ -202,7 +202,7 @@ const CLAVES = [
   ["cv_tradicional", /tradicional|formato actualizado/i],
   ["cv_europass", /europass|\bcv\b|curr[ií]cul|hoja de vida/i],
   ["investigacion", /investigaci/i],
-  ["otros_meritos", /^otros|re(f|r)erencia|becas|premios/i],
+  ["otros_meritos", /^otros|recomendaci|re(f|r)erencia|becas|premios/i],
   ["carta_motivacion", /motivaci/i],
   ["carta_acceso", /carta de (acceso|presentaci)|acceso al m[aá]ster/i],
   ["carga_horaria", /carga horaria|s[ií]labo|plan de estudios|malla/i],

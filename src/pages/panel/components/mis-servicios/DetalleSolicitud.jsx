@@ -4,10 +4,10 @@ import { apiGET, apiPOST } from "../../../../services/api";
 import { dialog } from "../../../../services/dialogService";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-import { SeccionSiempreAbiertoCtx } from "./sections/SeccionPanel";
+import SeccionPanel, { SeccionSiempreAbiertoCtx } from "./sections/SeccionPanel";
 import ChecklistDocumentos from "./sections/ChecklistDocumentos";
-import InstructivosPlantillas from "./sections/InstructivosPlantillas";
 import FormularioDatosAcademicos from "./sections/FormularioDatosAcademicos";
+import IconoPaso from "../../../../components/common/IconoPaso";
 import InformeBusqueda from "./sections/InformeBusqueda";
 import EleccionMastersCliente from "./sections/EleccionMastersCliente";
 import ProgramacionPostulacionesCliente from "./sections/ProgramacionPostulacionesCliente";
@@ -46,7 +46,7 @@ const DOT_COLORS = {
 
 // ── NavItem — botón de la barra lateral ──────────────────────────────────────
 
-function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
+function NavItem({ num, icono, titulo, subtitulo, estado, active, onClick }) {
   return (
     <button
       type="button"
@@ -62,7 +62,7 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
           ? "bg-white/20 text-white"
           : "bg-primary-light/10 text-primary-light"
       }`}>
-        {num}
+        {icono ? <IconoPaso nombre={icono} className="w-4 h-4" /> : num}
       </div>
       <div className="flex-1 min-w-0">
         <p className={`text-xs font-semibold leading-tight truncate ${active ? "text-white" : "text-neutral-800"}`}>
@@ -80,6 +80,76 @@ function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
         }`} />
       )}
     </button>
+  );
+}
+
+// ── Mensajes, siempre a mano ─────────────────────────────────────────────────
+//
+// Un botón flotante con los mensajes sin leer y, al abrirlo, el hilo con el
+// asesor en una hoja: en el móvil sube desde abajo; en pantalla grande es una
+// ventana a la derecha. El hilo es el mismo de siempre, con hora de Perú y
+// de España en cada mensaje.
+
+function MensajesFlotante({ abierto, onAbrir, onCerrar, sinLeer, idSolicitud }) {
+  useEffect(() => {
+    if (!abierto) return undefined;
+    function onKey(e) { if (e.key === "Escape") onCerrar(); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [abierto, onCerrar]);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onAbrir}
+        aria-label="Mensajes con tu asesor"
+        className="ux-tap fixed z-40 right-4 bottom-[calc(76px+env(safe-area-inset-bottom))] md:right-6 md:bottom-6 inline-flex items-center gap-2 pl-3.5 pr-4 py-3 rounded-full bg-primary text-white text-[13px] font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all"
+      >
+        <IconoPaso nombre="message" className="w-4 h-4" />
+        Mensajes
+        {sinLeer > 0 && (
+          <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-accent text-white text-[11px] font-black grid place-items-center">
+            {sinLeer}
+          </span>
+        )}
+      </button>
+
+      {abierto && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-end bg-black/45" onClick={onCerrar}>
+          <div
+            className="pnl-entra w-full md:w-[520px] md:mr-6 max-h-[88vh] bg-white rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mensajes con tu asesor"
+          >
+            <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-neutral-100 shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-primary-light/10 text-primary-light grid place-items-center">
+                <IconoPaso nombre="message" className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[15px] font-bold text-primary leading-tight">Mensajes con tu asesor</p>
+                <p className="text-[11.5px] text-neutral-500">Queda en tu expediente, con hora y constancia de lectura.</p>
+              </div>
+              <button type="button" onClick={onCerrar} aria-label="Cerrar"
+                className="w-9 h-9 rounded-full grid place-items-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <IconoPaso nombre="x" className="w-4 h-4" strokeWidth={2.4} />
+              </button>
+            </div>
+            <div className="px-4 pb-4 pt-2 flex-1 min-h-0 flex flex-col">
+              <HiloMensajes
+                lado="cliente"
+                idSolicitud={idSolicitud}
+                aviso="Lo que se escribe aquí forma parte de tu expediente: queda con fecha, con quién lo escribió y con constancia de cuándo lo leyó tu asesor. Para lo que importa, mejor aquí que por WhatsApp."
+                cargar={() => apiGET(`/solicitudes/${idSolicitud}/mensajes`)}
+                enviar={(texto) => apiPOST(`/solicitudes/${idSolicitud}/mensajes`, { texto })}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -101,6 +171,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
   const [formGuardado,      setFormGuardado]      = useState(false);
   const [seleccionKey,      setSeleccionKey]      = useState(0);
   const [postulacionesKey,  setPostulacionesKey]  = useState(0);
+  const [mensajesAbierto,   setMensajesAbierto]   = useState(false);
 
   // La sección viene en la URL y se cambia navegando: así «atrás» vuelve a
   // la anterior y recargar conserva el sitio. El nombre `setActiveSection` se
@@ -252,35 +323,34 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
   const eleccionesGuardadas = elecciones.filter((e) => e.id_master).length;
   const sinLeer = solicitudBase?.resumen?.mensajes_sin_leer || 0;
 
+  // Los seis pasos del servicio, los mismos que ve el asesor en Inspira Core
+  // (08/09/2026). Los instructivos van dentro de Documentos; los portales y
+  // los documentos del proceso, dentro de Postulaciones; los mensajes son un
+  // botón siempre a mano, no un paso.
   const navSections = [
     {
       id:       "docs",
       num:      1,
+      icono:    "folder",
       titulo:   "Documentos",
       subtitulo: checklist.length ? `${docsListas} de ${checklist.length} listos` : null,
       estado:   checklist.length ? (docsListas === checklist.length ? "completado" : "pendiente") : null,
       show:     true,
     },
     {
-      id:       "inst",
-      num:      2,
-      titulo:   "Instructivos",
-      subtitulo: null,
-      estado:   null,
-      show:     true,
-    },
-    {
       id:       "form",
-      num:      3,
-      titulo:   "Formulario",
+      num:      2,
+      icono:    "fileText",
+      titulo:   "Formulario académico",
       subtitulo: formGuardado ? "Datos guardados" : "Pendiente",
       estado:   formGuardado ? "completado" : "pendiente",
       show:     true,
     },
     {
       id:       "informe",
-      num:      4,
-      titulo:   "Informe másteres",
+      num:      3,
+      icono:    "chart",
+      titulo:   "Informe de másteres",
       subtitulo: compat?.estado === "en_creacion" ? "En preparación"
                : compat?.total != null ? `${compat.total} programas`
                : detalle?.informe_fecha_subida ? "PDF disponible"
@@ -294,51 +364,30 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
     },
     {
       id:       "eleccion",
-      num:      5,
-      titulo:   "Elección másteres",
+      num:      4,
+      icono:    "checkCircle",
+      titulo:   "Elección de másteres",
       subtitulo: eleccionesGuardadas > 0 ? `${eleccionesGuardadas} seleccionados${elecciones.some((e) => e.plan_incluido != null) ? " · revisados por tu asesor" : ""}` : "Pendiente",
       estado:   eleccionesGuardadas > 0 ? "completado" : formGuardado ? "pendiente" : null,
       show:     !esVisado,
     },
     {
       id:       "post",
-      num:      6,
+      num:      5,
+      icono:    "cap",
       titulo:   "Postulaciones",
-      subtitulo: null,
+      subtitulo: "Seguimiento, accesos y documentos",
       estado:   null,
       show:     !esVisado,
-    },
-    {
-      id:       "docsproceso",
-      num:      7,
-      titulo:   "Documentos del proceso",
-      subtitulo: null,
-      estado:   null,
-      show:     true,
-    },
-    {
-      id:       "portales",
-      num:      8,
-      titulo:   "Accesos y credenciales",
-      subtitulo: null,
-      estado:   null,
-      show:     true,
     },
     {
       id:       "cierre",
-      num:      9,
-      titulo:   "Cierre",
+      num:      6,
+      icono:    "flag",
+      titulo:   "Cierre y visado",
       subtitulo: null,
       estado:   null,
       show:     !esVisado,
-    },
-    {
-      id:       "mensajes",
-      num:      10,
-      titulo:   "Mensajes",
-      subtitulo: sinLeer > 0 ? `${sinLeer} sin leer` : "Con tu asesor, por escrito",
-      estado:   sinLeer > 0 ? "pendiente" : null,
-      show:     true,
     },
   ].filter((s) => s.show);
 
@@ -409,6 +458,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
               <NavItem
                 key={s.id}
                 num={s.num}
+                icono={s.icono}
                 titulo={s.titulo}
                 subtitulo={s.subtitulo}
                 estado={s.estado}
@@ -430,11 +480,9 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
                   idSolicitud={idSolicitud}
                   revisionSolicitadaAt={detalle?.datos_panel?.revision_solicitada_at || null}
                   guiaMaster={!esVisado}
+                  instructivos={instructivos}
+                  onIrAGuia={onIrAGuia}
                 />
-              )}
-
-              {activeSection === "inst" && (
-                <InstructivosPlantillas instructivos={instructivos} onIrAGuia={onIrAGuia} guiaDocumentos={!esVisado} />
               )}
 
               {activeSection === "form" && (
@@ -475,37 +523,31 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
                 />
               )}
 
+              {/* Postulaciones: todo el trámite en un solo sitio. El seguimiento
+                  de cada máster, los accesos a los portales y los documentos
+                  que Inspira va consiguiendo (carta de admisión, matrícula). */}
               {activeSection === "post" && !esVisado && (
-                <ProgramacionPostulacionesCliente
-                  idSolicitud={idSolicitud}
-                  resetKey={seleccionKey}
-                  reloadKey={postulacionesKey}
-                />
-              )}
-
-              {activeSection === "docsproceso" && (
-                <DocumentosProceso idSolicitud={idSolicitud} modo="cliente" />
-              )}
-
-              {activeSection === "portales" && (
-                <PortalesYJustificantesCliente idSolicitud={idSolicitud} />
+                <SeccionPanel
+                  numero="5"
+                  titulo="Postulaciones"
+                  subtitulo="Seguimiento de cada máster, accesos a los portales y documentos del proceso"
+                  sectionId="5"
+                >
+                  <div className="space-y-7">
+                    <ProgramacionPostulacionesCliente
+                      idSolicitud={idSolicitud}
+                      resetKey={seleccionKey}
+                      reloadKey={postulacionesKey}
+                      sinMarco
+                    />
+                    <PortalesYJustificantesCliente idSolicitud={idSolicitud} sinMarco />
+                    <DocumentosProceso idSolicitud={idSolicitud} modo="cliente" />
+                  </div>
+                </SeccionPanel>
               )}
 
               {activeSection === "cierre" && !esVisado && (
                 <CierreServicioMasterCliente idSolicitud={idSolicitud} />
-              )}
-
-              {activeSection === "mensajes" && (
-                <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 sm:p-5 flex-1 min-h-0 flex flex-col">
-                  <h3 className="text-[15px] font-bold text-primary mb-1">Mensajes con tu asesor</h3>
-                  <HiloMensajes
-                    lado="cliente"
-                    idSolicitud={idSolicitud}
-                    aviso="Lo que se escribe aquí forma parte de tu expediente: queda con fecha, con quién lo escribió y con constancia de cuándo lo leyó tu asesor. Para lo que importa, mejor aquí que por WhatsApp."
-                    cargar={() => apiGET(`/solicitudes/${idSolicitud}/mensajes`)}
-                    enviar={(texto) => apiPOST(`/solicitudes/${idSolicitud}/mensajes`, { texto })}
-                  />
-                </div>
               )}
 
             </SeccionSiempreAbiertoCtx.Provider>
@@ -513,6 +555,16 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
 
           {/* Móvil: el selector de sección, abajo. */}
           <SelectorSeccionMovil secciones={navSections} activa={activeSection} onCambiar={setActiveSection} />
+
+          {/* Los mensajes ya no son un paso: están siempre a mano, en
+              cualquier sección, con lo que queda por leer encima. */}
+          <MensajesFlotante
+            abierto={mensajesAbierto}
+            onAbrir={() => setMensajesAbierto(true)}
+            onCerrar={() => setMensajesAbierto(false)}
+            sinLeer={sinLeer}
+            idSolicitud={idSolicitud}
+          />
         </div>
       )}
     </div>

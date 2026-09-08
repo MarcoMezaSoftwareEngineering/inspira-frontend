@@ -8,6 +8,7 @@
 // la izquierda es la esquina más lejos del pulgar. El desplegable se abre
 // hacia arriba por lo mismo.
 import { useState } from "react";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
 const PUNTO = {
   completado: "bg-emerald-500",
@@ -67,7 +68,7 @@ export default function SelectorSeccionMovil({ secciones, activa, onCambiar }) {
                 >
                   <span className={`shrink-0 w-7 h-7 rounded-lg grid place-items-center text-[11px] font-black ${
                     on ? "bg-white/20 text-white" : "bg-primary-light/10 text-primary-light"
-                  }`}>{s.num}</span>
+                  }`}>{s.icono ? <IconoPaso nombre={s.icono} className="w-4 h-4" /> : s.num}</span>
                   <span className="min-w-0 flex-1">
                     <span className={`block text-[13px] font-semibold truncate ${on ? "text-white" : "text-neutral-800"}`}>
                       {s.titulo}
@@ -99,7 +100,7 @@ export default function SelectorSeccionMovil({ secciones, activa, onCambiar }) {
           aria-haspopup="listbox"
         >
           <span className="shrink-0 w-7 h-7 rounded-lg bg-primary-light/10 text-primary-light grid place-items-center text-[11px] font-black">
-            {sec.num}
+            {sec.icono ? <IconoPaso nombre={sec.icono} className="w-4 h-4" /> : sec.num}
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-[13px] font-bold text-neutral-900 truncate">{sec.titulo}</span>

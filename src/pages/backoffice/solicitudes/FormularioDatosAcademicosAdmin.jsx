@@ -107,7 +107,7 @@ function SectionCard({ nombre, fields, extra }) {
         <div key={f.key} className={`px-3 py-1.5 ${inline.length > 0 ? "border-t border-neutral-50" : ""}`}>
           <p className="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider mb-0.5">{f.label}</p>
           {f.value ? (
-            <p className="text-[11px] font-medium text-neutral-800 leading-relaxed">
+            <p className="text-[11px] font-medium text-neutral-800 leading-relaxed whitespace-pre-line">
               {String(f.format ? f.format(f.value, extra) : f.value)}
             </p>
           ) : (

@@ -27,6 +27,7 @@ import DocumentosProceso from "../../../components/common/DocumentosProceso";
 import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
 import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
+import IconoPaso, { ICONO_POR_BLOQUE } from "../../../components/common/IconoPaso";
 
 const RING_R = 13;
 const RING_C = 2 * Math.PI * RING_R;
@@ -185,15 +186,10 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
         { id: "extranjeria", numero: "6", label: "Extranjeria",           estado: "pendiente" },
       ];
     }
-    if (!isVisado) {
-      // El bloque de documentos del proceso vive solo en el frontend: el
-      // servidor calcula la lista sin saber de el.
-      const i = bloquesServidor.findIndex((b) => b.id === "portales");
-      if (i < 0) return bloquesServidor;
-      const copia = [...bloquesServidor];
-      copia.splice(i, 0, { id: "docsproceso", numero: "D", label: "Documentos del proceso", estado: "pendiente" });
-      return copia;
-    }
+    // Máster: los siete bloques vienen del servidor (ficha + los seis pasos
+    // del asesorado). Portales y documentos del proceso van dentro de
+    // Postulaciones desde el 08/09/2026.
+    if (!isVisado) return bloquesServidor;
     const hecho = (v) => (v ? "completado" : "pendiente");
     const diag = visaSesiones.find((x) => x.tipo === "DIAGNOSTICO");
     const via = visaExp?.tipo_solvencia && visaExp.tipo_solvencia !== "PENDIENTE";
@@ -347,7 +343,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
             className="flex-1 min-w-0 flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F4F6F9] px-2.5 py-2 text-left"
           >
             <span className="shrink-0 w-6 h-6 rounded-md bg-[#1D6A4A] text-white grid place-items-center text-[10px] font-bold font-mono">
-              {bloqueActual?.numero || "—"}
+              {bloqueActual ? <IconoPaso nombre={ICONO_POR_BLOQUE[bloqueActual.id] || "info"} className="w-3.5 h-3.5" /> : "—"}
             </span>
             <span className="flex-1 min-w-0 text-[12.5px] font-semibold text-[#1A3557] truncate">
               {bloqueActual?.label || "Bloques"}
@@ -384,7 +380,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               >
                 <span className={`shrink-0 w-6 h-6 rounded-md grid place-items-center text-[10px] font-bold font-mono ${
                   activeBloque === b.id ? "bg-[#1D6A4A] text-white" : "bg-[#F4F6F9] text-[#6B7280]"
-                }`}>{b.numero}</span>
+                }`}><IconoPaso nombre={ICONO_POR_BLOQUE[b.id] || "info"} className="w-3.5 h-3.5" /></span>
                 <span className={`flex-1 min-w-0 text-[12.5px] truncate ${
                   activeBloque === b.id ? "font-bold text-[#1D6A4A]" : "font-medium text-[#6B7280]"
                 }`}>{b.label}</span>
@@ -468,7 +464,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
             <span className={`w-[21px] h-[21px] rounded-[6px] flex items-center justify-center text-[10px] font-bold font-mono shrink-0 ${
               activo ? "bg-[#1D6A4A] text-white" : b.estado === "completado" ? "bg-[#E8F5EE] text-[#1D6A4A]" : "bg-[#F4F6F9] text-[#6B7280]"
             }`}>
-              {b.numero}
+              <IconoPaso nombre={ICONO_POR_BLOQUE[b.id] || "info"} className="w-3.5 h-3.5" />
             </span>
             <span className={`text-[11.5px] flex-1 leading-[1.3] ${activo ? "font-bold" : "font-medium"}`}>{b.label}</span>
             <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${dotColor(b.estado)}`} />
@@ -521,7 +517,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
           {/* B1 — Encabezado del cliente */}
           <div id="bloque-cliente" className="scroll-mt-4">
-            <BlqHead numero="1" titulo={isVisado ? "Datos del cliente y credenciales BLS" : "Encabezado del cliente"} estado={estadoDe("cliente")}
+            <BlqHead numero={isVisado ? "1" : "0"} titulo={isVisado ? "Datos del cliente y credenciales BLS" : "Ficha del cliente"} estado={estadoDe("cliente")}
               open={isOpen("cliente")} onToggle={() => toggleBloque("cliente")} />
             {isOpen("cliente") && (
               <CBox>
@@ -543,7 +539,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           {/* B2 — Documentos requeridos (en visado se renderiza en su orden, más abajo) */}
           {!isVisado && (
           <div id="bloque-checklist" className="scroll-mt-4">
-            <BlqHead numero="2" titulo="Documentos requeridos" estado={estadoDe("checklist")}
+            <BlqHead numero="1" titulo="Documentos" estado={estadoDe("checklist")}
               open={isOpen("checklist")} onToggle={() => toggleBloque("checklist")} />
             {isOpen("checklist") && (
               <CBox>
@@ -696,8 +692,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               {/* B3 — Formulario académico */}
               <div id="bloque-formulario" className="scroll-mt-4">
                 <BlqHead
-                  numero="3"
-                  titulo="Formulario de datos académicos"
+                  numero="2"
+                  titulo="Formulario académico"
                   estado={estadoDe("formulario")}
                   open={isOpen("formulario")} onToggle={() => toggleBloque("formulario")}
                 />
@@ -719,8 +715,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               {/* B4 — Informe de búsqueda */}
               <div id="bloque-informe" className="scroll-mt-4">
                 <BlqHead
-                  numero="4"
-                  titulo="Informe de búsqueda de másteres"
+                  numero="3"
+                  titulo="Informe de másteres"
                   estado={estadoDe("informe")}
                   open={isOpen("informe")} onToggle={() => toggleBloque("informe")}
                 />
@@ -736,8 +732,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               {/* B5 — Elección de másteres */}
               <div id="bloque-eleccion" className="scroll-mt-4">
                 <BlqHead
-                  numero="5"
-                  titulo="Elección de másteres (cliente)"
+                  numero="4"
+                  titulo="Elección del cliente"
                   estado={estadoDe("eleccion")}
                   open={isOpen("eleccion")} onToggle={() => toggleBloque("eleccion")}
                 />
@@ -755,49 +751,36 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                 )}
               </div>
 
-              {/* B6 — Programación de postulaciones */}
+              {/* B5 — Postulaciones. Todo el trámite en un solo sitio (Carina,
+                  08/09/2026): el seguimiento por máster, los portales con sus
+                  claves y justificantes, y los documentos que se generan
+                  durante el proceso (carta de admisión, matrícula…). */}
               <div id="bloque-programacion" className="scroll-mt-4">
-                <BlqHead numero="6" titulo="Programación de postulaciones" estado={estadoDe("programacion")}
+                <BlqHead numero="5" titulo="Postulaciones" estado={estadoDe("programacion")}
                   open={isOpen("programacion")} onToggle={() => toggleBloque("programacion")} />
                 {isOpen("programacion") && (
                   <CBox>
-                    <div className="p-5">
-                      <ProgramacionPostulacionesAdmin idSolicitud={detalle.id_solicitud} refreshKey={progRefreshKey} />
+                    <div className="p-5 space-y-6">
+                      <section>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-2">5.1 · Seguimiento por máster</p>
+                        <ProgramacionPostulacionesAdmin idSolicitud={detalle.id_solicitud} refreshKey={progRefreshKey} />
+                      </section>
+                      <section className="pt-5 border-t border-[#E2E8F0]">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-2">5.2 · Portales, claves y justificantes</p>
+                        <PortalesYJustificantesAdmin idSolicitud={detalle.id_solicitud} />
+                      </section>
+                      <section className="pt-5 border-t border-[#E2E8F0]">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-2">5.3 · Documentos del proceso</p>
+                        <DocumentosProceso idSolicitud={detalle.id_solicitud} modo="asesor" />
+                      </section>
                     </div>
                   </CBox>
                 )}
               </div>
 
-              {/* B7 — Portales y justificantes */}
-              {/* Documentos del proceso: lo que se genera durante el tramite.
-                  Aparte del checklist para que no se pierda entre lo pendiente. */}
-              <div id="bloque-docsproceso" className="scroll-mt-4">
-                <BlqHead numero="D" titulo="Documentos del proceso" estado="pendiente"
-                  open={isOpen("docsproceso")} onToggle={() => toggleBloque("docsproceso")} />
-                {isOpen("docsproceso") && (
-                  <CBox>
-                    <div className="p-5">
-                      <DocumentosProceso idSolicitud={detalle.id_solicitud} modo="asesor" />
-                    </div>
-                  </CBox>
-                )}
-              </div>
-
-              <div id="bloque-portales" className="scroll-mt-4">
-                <BlqHead numero="7" titulo="Portales, claves y justificantes" estado={estadoDe("portales")}
-                  open={isOpen("portales")} onToggle={() => toggleBloque("portales")} />
-                {isOpen("portales") && (
-                  <CBox>
-                    <div className="p-5">
-                      <PortalesYJustificantesAdmin idSolicitud={detalle.id_solicitud} />
-                    </div>
-                  </CBox>
-                )}
-              </div>
-
-              {/* B8 — Cierre de servicio */}
+              {/* B6 — Cierre de servicio */}
               <div id="bloque-cierre" className="scroll-mt-4">
-                <BlqHead numero="8" titulo="Cierre de servicio y derivación" estado={estadoDe("cierre")}
+                <BlqHead numero="6" titulo="Cierre de servicio y derivación" estado={estadoDe("cierre")}
                   open={isOpen("cierre")} onToggle={() => toggleBloque("cierre")} />
                 {isOpen("cierre") && (
                   <CBox>

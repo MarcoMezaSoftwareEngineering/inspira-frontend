@@ -77,6 +77,7 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
       telefono:             cli.telefono             || "",
       pasaporte:            cli.pasaporte            || "",
       pais_origen:          cli.pais_origen          || "",
+      ciudad:               extra.ciudad             || "",
       nacionalidad:         extra.nacionalidad       || cli.nacionalidad || "",
       fecha_nacimiento:     extra.fecha_nacimiento   || "",
       pasaporte_emision:    extra.pasaporte_emision  || "",
@@ -141,6 +142,18 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
   const uniOrigen      = datos.universidad_origen   ?? extra.universidad_origen ?? null;
   const inicioPrevisto = datos.inicio_previsto      ?? extra.inicio_previsto    ?? null;
 
+  // Lo que Carina quiere ver de un vistazo además de lo anterior (08/09/2026):
+  // promedio, trabajo actual, ciudad y quién lleva el expediente.
+  const promedio = datos.promedio_peru
+    ? `${datos.promedio_peru} / ${datos.promedio_escala || 20}`
+    : null;
+  const EXP = { sin: "Sin experiencia", "1-2": "1–2 años", "2-3": "2–3 años", "3-5": "3–5 años", "5-10": "5–10 años", "10+": "Más de 10 años" };
+  const puesto = Array.isArray(datos.experiencia_detalle) ? datos.experiencia_detalle.find((p) => p?.cargo || p?.entidad) : null;
+  const trabajo = puesto
+    ? [puesto.cargo, puesto.entidad].filter(Boolean).join(" · ")
+    : (EXP[datos.experiencia_anios] || null);
+  const asesores = (detalle?.asesores || []).map((a) => a.nombre).filter(Boolean).join(" · ") || null;
+
   return (
     <div className="space-y-0">
       {/* Avatar + nombre + contacto + botón editar */}
@@ -191,6 +204,7 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
             <CampoEdit label="Nombre completo"     name="nombre"     value={form.nombre}     onChange={handleChange} />
             <CampoEdit label="Teléfono"            name="telefono"   value={form.telefono}   onChange={handleChange} placeholder="+34 600..." />
             <CampoEdit label="País de origen"      name="pais_origen"  value={form.pais_origen}  onChange={handleChange} placeholder="Perú" />
+            <CampoEdit label="Ciudad"              name="ciudad"       value={form.ciudad}       onChange={handleChange} placeholder="Lima" />
             <CampoEdit label="Nacionalidad"        name="nacionalidad" value={form.nacionalidad} onChange={handleChange} placeholder="Peruana" />
           </div>
 
@@ -248,6 +262,10 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
         <Campo label="País de origen"       value={cli.pais_origen}     highlight={!!cli.pais_origen} />
         <Campo label="Inicio previsto"      value={inicioPrevisto}      highlight={!!inicioPrevisto} />
         <Campo label="Presupuesto máx."     value={presupuesto}         highlight={!!presupuesto} />
+        <Campo label="Ciudad"               value={extra.ciudad}        highlight={!!extra.ciudad} />
+        <Campo label="Promedio"             value={promedio}            highlight={!!promedio} />
+        <Campo label="Trabajo actual"       value={trabajo}             highlight={!!trabajo} />
+        <Campo label="Asesores"             value={asesores}            highlight={!!asesores} />
         {tipoUni    && <Campo label="Tipo universidad" value={tipoUni}    highlight />}
         {tipoTitulo && <Campo label="Tipo título"      value={tipoTitulo} highlight />}
       </div>

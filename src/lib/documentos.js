@@ -7,7 +7,10 @@
 // La salida se enumera «1. Pasaporte», «2. Título apostillado»… con el nombre
 // del documento, no con un código.
 
-const VARIOS = [/experiencia/i, /formaci[oó]n\s+complementaria/i, /complementari/i, /extracurricular/i, /otros\s+documentos/i, /certificados?\s+de\s+trabajo/i];
+// Ampliación de Carina (08/09/2026): el título va en dos archivos (bachiller
+// y título profesional, cada uno con su SUNEDU y su apostilla), la carta de
+// motivación es una por máster y las de recomendación son dos.
+const VARIOS = [/experiencia/i, /formaci[oó]n\s+complementaria/i, /complementari/i, /extracurricular/i, /otros\s+documentos/i, /certificados?\s+de\s+trabajo/i, /\bt[ií]tulo\b|bachiller/i, /motivaci/i, /recomendaci|referencia/i];
 
 /** ¿Este ítem del checklist admite varios archivos? Se decide por su nombre. */
 export function permiteVarios(nombreItem) {

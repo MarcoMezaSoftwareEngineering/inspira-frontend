@@ -454,7 +454,18 @@ function MasterPostCard({ post, idSolicitud, onUpdate, onSave }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey, reloadKey }) {
+// Dentro de Postulaciones va sin su propia tarjeta: el paso ya la pone.
+function SinMarco({ children }) {
+  return (
+    <div>
+      <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-2">Seguimiento por máster</p>
+      {children}
+    </div>
+  );
+}
+
+export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey, reloadKey, sinMarco = false }) {
+  const Marco = sinMarco ? SinMarco : SeccionPanel;
   const [posts, setPosts]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
@@ -514,12 +525,12 @@ export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey
       : "Completa tu elección de másteres para activar esta sección.";
 
   return (
-    <SeccionPanel
-      numero="6"
+    <Marco
+      numero="5"
       titulo="Postulaciones · Portales · Seguimiento"
       subtitulo={subtitulo}
       estado={estado}
-      sectionId="6"
+      sectionId="5"
     >
       {loading && (
         <div className="flex items-center gap-2 py-3 text-neutral-400 text-sm">
@@ -555,6 +566,6 @@ export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey
           ))}
         </div>
       )}
-    </SeccionPanel>
+    </Marco>
   );
 }

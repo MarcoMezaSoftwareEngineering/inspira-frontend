@@ -8,6 +8,8 @@ import { listaSolvencia, VIA_ETIQUETA } from "./visaSolvencia";
 import { permiteVarios } from "../../../../../lib/documentos";
 import { guiaParaItem } from "../guiaDocumentosMaster";
 import GuiaDocumento from "./GuiaDocumento";
+import TextoConEnlaces from "../../../../../components/common/TextoConEnlaces";
+import { InstructivosContenido } from "./InstructivosPlantillas";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -199,11 +201,9 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
         {it.numero ? <span className="text-neutral-400">{it.numero}. </span> : null}{it.item?.nombre_item}
       </p>
 
-      {/* Descripción */}
+      {/* Descripción, con el enlace del trámite cuando lo hay (Europass, sede). */}
       {it.item?.descripcion && (
-        <p className="text-xs text-neutral-500 leading-snug -mt-1">
-          {it.item.descripcion}
-        </p>
+        <TextoConEnlaces texto={it.item.descripcion} className="text-xs text-neutral-500 leading-snug -mt-1" />
       )}
 
       {/* Requisitos exactos: formato, vigencia, apostilla. Plegado por defecto
@@ -308,7 +308,7 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
           {!itemAprobado && (
             <p className="text-[10.5px] text-neutral-400 text-center leading-snug">
               {varios
-                ? "Aquí sí puedes subir varios archivos, uno por certificado."
+                ? "Aquí sí puedes subir más de un archivo, cada uno completo."
                 : "Todo el documento junto, en un solo PDF. Si subes otro, reemplaza al anterior."}
             </p>
           )}
@@ -333,6 +333,9 @@ export default function ChecklistDocumentos({
   mensajeBloqueo = "",
   expediente = null,
   guiaMaster = false,
+  // Las guías y plantillas van al pie de los documentos, no en un paso aparte.
+  instructivos = null,
+  onIrAGuia = null,
 }) {
   const [docVisor, setDocVisor] = useState(null);
 
@@ -516,6 +519,16 @@ export default function ChecklistDocumentos({
           <div className="flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-3 mt-4">
             <span className="shrink-0 text-base leading-none mt-0.5">🌐</span>
             <p className="text-[12.5px] text-sky-900 leading-relaxed">{NOTA_APOSTILLA}</p>
+          </div>
+        )}
+
+        {/* Guías y plantillas del servicio, al pie de los documentos: cada
+            guía sirve para un documento, no para un paso aparte. */}
+        {!bloqueado && (instructivos || onIrAGuia) && (
+          <div className="mt-6 pt-5 border-t border-neutral-200">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-1">Guías y plantillas</p>
+            <p className="text-xs text-neutral-500 mb-3">La guía de cada documento, la de apostilla y las plantillas de tu servicio.</p>
+            <InstructivosContenido instructivos={instructivos} onIrAGuia={onIrAGuia} guiaDocumentos={guiaMaster} />
           </div>
         )}
       </SeccionPanel>

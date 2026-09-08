@@ -6,6 +6,7 @@ import CampanaMensajes from "./layout/CampanaMensajes";
 import MobileAppBar from "./layout/MobileAppBar";
 import MobileDrawer from "./layout/MobileDrawer";
 import BottomNav from "./layout/BottomNav";
+import AvisoVersionNueva from "./layout/AvisoVersionNueva";
 import ProtectedRoute from "./layout/ProtectedRoute";
 import ModuleGate from "./layout/ModuleGate";
 import TabView from "./layout/TabView";
@@ -181,6 +182,7 @@ export default function BackofficeApp() {
             </button>
           )}
 
+          <AvisoVersionNueva />
           <main className="ux-con-barra-abajo flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative pt-[60px] md:pt-0">
             {/* Overlay transparente: cierra el sidebar al hacer clic fuera cuando no está fijado */}
             {sidebarOpen && !sidebarPinned && (

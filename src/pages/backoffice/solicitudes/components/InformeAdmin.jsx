@@ -144,6 +144,15 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
               título propio
             </span>
           )}
+          {/* Consta en el registro del Ministerio pero el censo no lo encontró
+              en la web de la universidad: hay que comprobar que se siga
+              ofertando antes de publicarlo. */}
+          {master.estado_ficha === "no_hallado" && (
+            <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md"
+              title="Está en el RUCT pero no aparece en la web de su universidad: confirmar que se sigue ofertando">
+              sin confirmar en su web
+            </span>
+          )}
           {!editMode && (
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(score)}`}>
               {score != null ? `${score}% match` : "Sin score"}

@@ -65,6 +65,12 @@ function MasterPickCard({ r, selected, prioridad, onToggle }) {
               título propio
             </span>
           )}
+          {master.estado_ficha === "no_hallado" && (
+            <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded"
+              title="Está en el RUCT pero no aparece en la web de su universidad: confirmar que se sigue ofertando">
+              sin confirmar en su web
+            </span>
+          )}
           {score  && (
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
               score >= 80 ? "bg-emerald-50 text-emerald-700"

@@ -59,6 +59,11 @@ export function MasterCard({ master, score, prioridad, selected, comentario, onT
                 Título propio
               </span>
             )}
+            {master.estado_ficha === "no_hallado" && (
+              <span className="text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.5 rounded">
+                Ficha por confirmar
+              </span>
+            )}
             {score  && (
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                 score >= 80 ? "bg-emerald-50 text-emerald-700"
@@ -89,6 +94,20 @@ export function MasterCard({ master, score, prioridad, selected, comentario, onT
             oficial: no se homologa ni convalida y no da acceso al doctorado.
             Sirve para estudiar en España; consúltenos si le interesa este
             programa y le explicamos qué implica en su caso.
+          </p>
+        </div>
+      )}
+
+      {/* Registrado oficialmente, pero sin ficha localizada en la web de la
+          universidad. Se le dice en claro, en registro formal, para que sepa
+          que esa información la confirmará su asesor antes de postular. */}
+      {master.estado_ficha === "no_hallado" && (
+        <div className="px-3 pb-2">
+          <p className="text-[10.5px] leading-snug text-sky-900 bg-sky-50/70 border border-sky-200 rounded-lg px-2 py-1.5">
+            Este máster figura en el <strong>registro oficial de títulos</strong>, pero
+            todavía no hemos localizado su ficha en la web de la universidad. Si le
+            interesa, su asesor confirmará con la universidad que se sigue ofertando
+            y le hará llegar la información.
           </p>
         </div>
       )}

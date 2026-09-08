@@ -1,6 +1,6 @@
 // src/pages/backoffice/solicitudes/ProgramacionPostulacionesAdmin.jsx
-import { useEffect, useState } from "react";
-import { boGET, boPATCH } from "../../../services/backofficeApi";
+import { useEffect, useRef, useState } from "react";
+import { boGET, boPATCH, boPOST, boDELETE, boFetch } from "../../../services/backofficeApi";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -41,7 +41,6 @@ const TABS = [
   { id: "seg", label: "📝 Seguimiento" },
 ];
 
-const DOC_SIGUIENTE = { falta: "pendiente", pendiente: "ok", ok: "falta" };
 const DOC_LABEL     = { falta: "Falta", pendiente: "En revisión", ok: "Subido" };
 const DOC_CLS       = {
   falta:    "bg-red-50 text-red-600 border-red-200",
@@ -229,22 +228,9 @@ function TabPortal({ post, onChange, onSave, showPw, togglePw }) {
             </div>
             <div>
               <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-mono mb-1">Contraseña</label>
-              <div className="flex gap-1.5">
-                <input type={showPw ? "text" : "password"} value={post.portal_password}
-                  onChange={(e) => onChange("portal_password", e.target.value)}
-                  onBlur={(e) => onSave("portal_password", e.target.value)}
-                  placeholder="Contraseña del portal"
-                  className="flex-1 min-w-0 text-xs border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#1A3557]"
-                />
-                <button type="button" onClick={togglePw}
-                  className="shrink-0 text-[11px] border border-neutral-200 rounded-lg px-2 py-1.5 hover:bg-neutral-50">
-                  {showPw ? "🙈" : "👁"}
-                </button>
-                {post.portal_password && (
-                  <button type="button" onClick={() => navigator.clipboard?.writeText(post.portal_password)}
-                    className="shrink-0 text-[11px] border border-neutral-200 rounded-lg px-2 py-1.5 hover:bg-neutral-50">📋</button>
-                )}
-              </div>
+              <CampoContrasena valor={post.portal_password} showPw={showPw} togglePw={togglePw}
+                onChange={(v) => onChange("portal_password", v)}
+                onSave={(v) => onSave("portal_password", v)} />
             </div>
             <div>
               <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-mono mb-1">Notas de acceso</label>
@@ -281,58 +267,194 @@ function TabPortal({ post, onChange, onSave, showPw, togglePw }) {
   );
 }
 
-// ── TabDocs ───────────────────────────────────────────────────────────────────
+/* La contraseña con su botón de guardar. Se guardaba al salir del campo, sin
+   decir nada, y la duda de siempre —«¿se guardó?»— acababa en volver a
+   escribirla. El botón guarda y lo confirma; el guardado al salir sigue. */
+function CampoContrasena({ valor, showPw, togglePw, onChange, onSave }) {
+  const [estado, setEstado] = useState("quieto"); // quieto | guardando | ok | error
+  useEffect(() => {
+    if (estado !== "ok") return undefined;
+    const t = setTimeout(() => setEstado("quieto"), 2000);
+    return () => clearTimeout(t);
+  }, [estado]);
 
-function TabDocs({ post, onSave }) {
-  const [nueva, setNueva] = useState("");
-
-  function toggle(idx) {
-    const docs = (post.documentos || []).map((d, i) =>
-      i === idx ? { ...d, estado: DOC_SIGUIENTE[d.estado] ?? "falta" } : d
-    );
-    onSave("documentos", docs);
-  }
-
-  function remove(idx) {
-    onSave("documentos", (post.documentos || []).filter((_, i) => i !== idx));
-  }
-
-  function add() {
-    const nombre = nueva.trim();
-    if (!nombre) return;
-    onSave("documentos", [...(post.documentos || []), { nombre, estado: "falta" }]);
-    setNueva("");
+  async function guardar() {
+    setEstado("guardando");
+    const ok = await onSave(valor || "");
+    setEstado(ok === false ? "error" : "ok");
   }
 
   return (
-    <div className="space-y-2">
-      {(post.documentos || []).length === 0 && (
-        <p className="text-xs text-neutral-400 italic text-center py-2">Sin documentos aún.</p>
-      )}
-      {(post.documentos || []).map((doc, idx) => (
-        <div key={idx} className="flex items-center gap-2 bg-neutral-50 rounded-lg px-3 py-2">
-          <span className="text-sm shrink-0">📄</span>
-          <span className="flex-1 min-w-0 text-xs text-neutral-700 truncate">{doc.nombre}</span>
-          <button type="button" onClick={() => toggle(idx)}
-            className={`shrink-0 text-[10px] font-bold border rounded-full px-2 py-0.5 transition ${DOC_CLS[doc.estado] ?? ""}`}>
-            {DOC_LABEL[doc.estado] ?? doc.estado}
-          </button>
-          <button type="button" onClick={() => remove(idx)}
-            className="shrink-0 text-neutral-300 hover:text-red-400 text-xs leading-none">✕</button>
-        </div>
-      ))}
-      <div className="flex gap-1.5 pt-1">
-        <input type="text" value={nueva}
-          onChange={(e) => setNueva(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && add()}
-          placeholder="Añadir documento…"
-          className="flex-1 text-xs border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#1A3557]"
+    <div className="space-y-1">
+      <div className="flex gap-1.5">
+        <input type={showPw ? "text" : "password"} value={valor || ""}
+          onChange={(e) => { onChange(e.target.value); if (estado !== "quieto") setEstado("quieto"); }}
+          onBlur={(e) => onSave(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); guardar(); } }}
+          placeholder="Contraseña del portal"
+          autoComplete="off"
+          className={`flex-1 min-w-0 text-xs border rounded-lg px-2.5 py-1.5 outline-none focus:border-[#1A3557] ${
+            estado === "error" ? "border-red-300 bg-red-50" : "border-neutral-200"}`}
         />
-        <button type="button" onClick={add}
-          className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#0f2440] transition">
-          + Añadir
+        <button type="button" onClick={togglePw} title={showPw ? "Ocultar" : "Ver"}
+          className="shrink-0 text-[11px] border border-neutral-200 rounded-lg px-2 py-1.5 hover:bg-neutral-50">
+          {showPw ? "🙈" : "👁"}
+        </button>
+        {valor && (
+          <button type="button" onClick={() => navigator.clipboard?.writeText(valor)} title="Copiar"
+            className="shrink-0 text-[11px] border border-neutral-200 rounded-lg px-2 py-1.5 hover:bg-neutral-50">📋</button>
+        )}
+        <button type="button" onClick={guardar} disabled={estado === "guardando"}
+          className={`shrink-0 text-[11px] font-bold rounded-lg px-3 py-1.5 transition-colors ${
+            estado === "ok" ? "bg-[#1D6A4A] text-white"
+            : estado === "error" ? "bg-red-600 text-white"
+            : "bg-[#1A3557] text-white hover:bg-[#0f2440] disabled:opacity-50"}`}>
+          {estado === "guardando" ? "…" : estado === "ok" ? "✓ Guardada" : estado === "error" ? "Reintentar" : "Guardar"}
         </button>
       </div>
+      {estado === "error" && <p className="text-[10.5px] text-red-600">No se pudo guardar la contraseña.</p>}
+    </div>
+  );
+}
+
+// ── TabDocs ───────────────────────────────────────────────────────────────────
+
+/* Justificantes de la postulación: el resguardo o la constancia de que se
+   presentó, y poco más. Aquí vivía un checklist de seis documentos (título
+   apostillado, notas, carta…) que Carina quitó el 08/09/2026: esa
+   documentación se lleva en el bloque 2, y mezclada aquí no se sabía qué
+   había que subir. Los archivos cuelgan del acceso al portal del máster
+   (`justificantes_portales`), el mismo sitio que usa el bloque 7. */
+const TIPOS_RESGUARDO = [
+  { valor: "RESGUARDO_POSTULACION", etiqueta: "Resguardo de postulación" },
+  { valor: "COMPROBANTE_PAGO",      etiqueta: "Comprobante de pago de tasas" },
+  { valor: "OTRO",                  etiqueta: "Otra constancia" },
+];
+const ETIQUETA_TIPO = Object.fromEntries(TIPOS_RESGUARDO.map((t) => [t.valor, t.etiqueta]));
+
+function tamano(bytes) {
+  if (!bytes) return "";
+  return bytes > 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+function TabDocs({ post, onRecargar }) {
+  const [tipo, setTipo] = useState("RESGUARDO_POSTULACION");
+  const [visible, setVisible] = useState(true);
+  const [subiendo, setSubiendo] = useState(false);
+  const [error, setError] = useState("");
+  const [porQuitar, setPorQuitar] = useState(null);
+  const lista = post.justificantes || [];
+  // Lo que el asesorado subió desde su panel al checklist antiguo, si lo hay.
+  const delCliente = (post.documentos || []).filter((d) => d.url_archivo);
+
+  useEffect(() => {
+    if (porQuitar === null) return undefined;
+    const t = setTimeout(() => setPorQuitar(null), 4000);
+    return () => clearTimeout(t);
+  }, [porQuitar]);
+
+  async function subir(file) {
+    if (!file) return;
+    if (!post.id_acceso) {
+      setError("Esta postulación aún no tiene portal creado. Cierra y vuelve a abrir el bloque para que se cree.");
+      return;
+    }
+    setSubiendo(true); setError("");
+    const fd = new FormData();
+    fd.append("archivo", file);
+    fd.append("tipo_justificante", tipo);
+    fd.append("visible_para_cliente", visible ? "true" : "false");
+    const r = await boPOST(`/api/portales/admin/accesos/${post.id_acceso}/justificantes`, fd);
+    setSubiendo(false);
+    if (!r?.ok) { setError(r?.msg || "No se pudo subir el archivo"); return; }
+    onRecargar?.();
+  }
+
+  async function abrir(j) {
+    try {
+      const r = await boFetch(`/api/portales/justificantes/${j.id_justificante}/descargar`);
+      if (!r.ok) throw new Error();
+      const blob = await r.blob();
+      window.open(URL.createObjectURL(blob), "_blank");
+    } catch { setError("No se pudo abrir el archivo"); }
+  }
+
+  async function quitar(j) {
+    const r = await boDELETE(`/api/portales/admin/documentos-proceso/${j.id_justificante}`);
+    if (!r?.ok) { setError(r?.msg || "No se pudo quitar"); return; }
+    setPorQuitar(null);
+    onRecargar?.();
+  }
+
+  return (
+    <div className="space-y-3">
+      {lista.length === 0 ? (
+        <p className="text-xs text-neutral-400 italic text-center py-2">
+          Todavía no hay resguardo de esta postulación.
+        </p>
+      ) : (
+        <div className="space-y-1.5">
+          {lista.map((j) => (
+            <div key={j.id_justificante} className="flex items-center gap-2 bg-neutral-50 rounded-lg px-3 py-2">
+              <span className="text-sm shrink-0">🧾</span>
+              <button type="button" onClick={() => abrir(j)} title="Abrir"
+                className="flex-1 min-w-0 text-left">
+                <span className="block text-xs font-semibold text-[#1A3557] truncate hover:underline">{j.nombre_archivo}</span>
+                <span className="block text-[10px] text-neutral-400 truncate">
+                  {ETIQUETA_TIPO[j.tipo_justificante] || j.tipo_justificante}
+                  {j.fecha_subida && ` · ${new Date(j.fecha_subida).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`}
+                  {j.tamano_bytes ? ` · ${tamano(j.tamano_bytes)}` : ""}
+                  {j.visible_para_cliente === false && " · solo interno"}
+                </span>
+              </button>
+              <button type="button" onClick={() => (porQuitar === j.id_justificante ? quitar(j) : setPorQuitar(j.id_justificante))}
+                className={`shrink-0 text-[10px] font-bold rounded-md px-2 py-1 transition-colors ${
+                  porQuitar === j.id_justificante ? "bg-red-600 text-white" : "text-neutral-300 hover:text-red-500 hover:bg-red-50"}`}>
+                {porQuitar === j.id_justificante ? "¿Seguro?" : "Quitar"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="rounded-xl border border-dashed border-neutral-300 bg-white px-3 py-2.5 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <select value={tipo} onChange={(e) => setTipo(e.target.value)} aria-label="Tipo de justificante"
+            className="text-[11px] font-semibold border border-neutral-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-[#1A3557]">
+            {TIPOS_RESGUARDO.map((t) => <option key={t.valor} value={t.valor}>{t.etiqueta}</option>)}
+          </select>
+          <label className="flex items-center gap-1.5 text-[11px] text-neutral-600">
+            <input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} />
+            Lo ve el asesorado
+          </label>
+          <label className={`ml-auto shrink-0 text-[11px] font-bold rounded-lg px-3 py-1.5 cursor-pointer transition ${
+            subiendo ? "bg-neutral-200 text-neutral-500" : "bg-[#1A3557] text-white hover:bg-[#0f2440]"}`}>
+            {subiendo ? "Subiendo…" : "📎 Subir resguardo"}
+            <input type="file" className="hidden" accept="application/pdf,image/*" disabled={subiendo}
+              onChange={(e) => { subir(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
+        </div>
+        {error && <p className="text-[10.5px] text-red-600">{error}</p>}
+      </div>
+
+      {delCliente.length > 0 && (
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-mono mb-1">
+            Subido por el asesorado
+          </p>
+          <div className="space-y-1">
+            {delCliente.map((d, i) => (
+              <div key={i} className="flex items-center gap-2 text-[11px] text-neutral-600 px-1">
+                <span>📄</span>
+                <span className="flex-1 min-w-0 truncate">{d.nombre}{d.nombre_archivo ? ` — ${d.nombre_archivo}` : ""}</span>
+                <span className={`shrink-0 text-[9.5px] font-bold border rounded-full px-2 py-0.5 ${DOC_CLS[d.estado] ?? ""}`}>
+                  {DOC_LABEL[d.estado] ?? d.estado}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -354,7 +476,7 @@ function TabSeguimiento({ post, onChange, onSave }) {
 
 // ── MasterPostCard ────────────────────────────────────────────────────────────
 
-function MasterPostCard({ post, onUpdate, onSave }) {
+function MasterPostCard({ post, onUpdate, onSave, onRecargar }) {
   const [tab, setTab]       = useState("fec");
   const [showPw, setShowPw] = useState(false);
 
@@ -408,7 +530,7 @@ function MasterPostCard({ post, onUpdate, onSave }) {
       <div className="px-4 py-3">
         {tab === "fec" && <TabFechas      post={post} onChange={onChange} onSave={onSaveF} />}
         {tab === "por" && <TabPortal      post={post} onChange={onChange} onSave={onSaveF} showPw={showPw} togglePw={() => setShowPw((v) => !v)} />}
-        {tab === "doc" && <TabDocs        post={post} onSave={onSaveF} />}
+        {tab === "doc" && <TabDocs        post={post} onRecargar={onRecargar} />}
         {tab === "seg" && <TabSeguimiento post={post} onChange={onChange} onSave={onSaveF} />}
       </div>
     </div>
@@ -432,12 +554,26 @@ export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey
       .finally(() => setLoading(false));
   }, [idSolicitud, refreshKey]);
 
+  // Lo último pintado, para calcular el siguiente estado sin depender de
+  // que el actualizador de setPosts corra en el momento de la llamada.
+  const postsRef = useRef(posts);
+  postsRef.current = posts;
+
+  // Devuelve si fue bien: el botón de guardar contraseña lo enseña.
   async function guardar(nextPosts) {
     setSaving(true);
     try {
-      await boPATCH(`/backoffice/solicitudes/${idSolicitud}/postulaciones`, { postulaciones: nextPosts });
-    } catch { /* silencioso */ }
+      const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/postulaciones`, { postulaciones: nextPosts });
+      return Boolean(r?.ok);
+    } catch { return false; }
     finally { setSaving(false); }
+  }
+
+  // Vuelve a leer sin el spinner: tras subir o quitar un resguardo, la lista
+  // viene del servidor y no hay que desmontar las tarjetas para verla.
+  async function recargar() {
+    const r = await boGET(`/backoffice/solicitudes/${idSolicitud}/postulaciones`);
+    if (r.ok) setPosts(r.postulaciones || []);
   }
 
   function handleUpdate(id_master, field, value) {
@@ -445,12 +581,9 @@ export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey
   }
 
   function handleSave(id_master, field, value) {
-    let next;
-    setPosts((prev) => {
-      next = prev.map((p) => p.id_master === id_master ? { ...p, [field]: value } : p);
-      return next;
-    });
-    if (next) guardar(next);
+    const next = postsRef.current.map((p) => p.id_master === id_master ? { ...p, [field]: value } : p);
+    setPosts(next);
+    return guardar(next);
   }
 
   if (loading) {
@@ -488,6 +621,7 @@ export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey
           post={post}
           onUpdate={handleUpdate}
           onSave={handleSave}
+          onRecargar={recargar}
         />
       ))}
     </div>

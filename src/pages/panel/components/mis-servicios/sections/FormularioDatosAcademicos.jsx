@@ -52,6 +52,28 @@ const SUGERENCIAS_POR_RAMA = {
   ARTES_HUMANIDADES:           ["Gestión cultural", "Patrimonio", "Traducción", "Enseñanza de español"],
 };
 
+// Cuándo quiere empezar. La lista estaba escrita a mano y se quedó en enero
+// de 2027: quien apunta al curso siguiente no tenía casilla. Se generan las
+// cuatro entradas que vienen (septiembre y enero, alternando) y, si el
+// formulario guardado tiene una que ya no está, se conserva para que no
+// desaparezca lo que contestó.
+function opcionesInicio(actual, hoy = new Date()) {
+  const out = [];
+  let y = hoy.getFullYear();
+  let esSep = hoy.getMonth() <= 8; // septiembre de este año vale hasta que acaba
+  if (!esSep) y += 1;
+  for (let i = 0; i < 4; i += 1) {
+    if (esSep) { out.push({ value: `sep_${y}`, label: `Sep ${y}` }); esSep = false; y += 1; }
+    else { out.push({ value: `ene_${y}`, label: `Ene ${y}` }); esSep = true; }
+  }
+  if (actual && actual !== "flexible" && !out.some((o) => o.value === actual)) {
+    const m = /^(sep|ene)_(\d{4})$/.exec(actual);
+    out.unshift({ value: actual, label: m ? `${m[1] === "sep" ? "Sep" : "Ene"} ${m[2]}` : actual });
+  }
+  out.push({ value: "flexible", label: "Flexible / No sé" });
+  return out;
+}
+
 function sugerirTemas(areaCarrera, rama) {
   const lista = [...(SUGERENCIAS_TEMAS[areaCarrera] || []), ...(SUGERENCIAS_POR_RAMA[rama] || [])];
   if (!lista.length) return SUGERENCIAS_TEMAS.Otra;
@@ -1274,13 +1296,7 @@ export default function FormularioDatosAcademicos({
             <div>
               <FLabel>¿Cuándo planeas empezar el máster?</FLabel>
               <div className={`flex flex-wrap gap-2 ${has("inicio_previsto") ? "p-2 rounded-xl bg-red-50 border border-red-200" : ""}`}>
-                {[
-                  { value: "sep_2025", label: "Sep 2025" },
-                  { value: "ene_2026", label: "Ene 2026" },
-                  { value: "sep_2026", label: "Sep 2026" },
-                  { value: "ene_2027", label: "Ene 2027" },
-                  { value: "flexible", label: "Flexible / No sé" },
-                ].map((o) => (
+                {opcionesInicio(formData.inicio_previsto).map((o) => (
                   <Pill key={o.value} active={formData.inicio_previsto === o.value}
                     onClick={() => set("inicio_previsto", formData.inicio_previsto === o.value ? "" : o.value)}>
                     {o.label}

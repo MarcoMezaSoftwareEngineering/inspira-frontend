@@ -39,6 +39,49 @@ const GRUPOS = {
   admitido:  (e) => e === "ADMITIDO",
 };
 
+// Curso académico: de septiembre a agosto. En la hoja conviven quien cierra
+// su postulación para entrar este curso y quien va al siguiente, y sus
+// urgencias no se parecen en nada.
+function cursoActual(d = new Date()) {
+  const y = d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+  return `${y}-${String(y + 1).slice(2)}`;
+}
+function cursoMas(curso, n) {
+  const y = Number(String(curso).slice(0, 4)) + n;
+  return `${y}-${String(y + 1).slice(2)}`;
+}
+// Filtro de curso: "" = todos, "sin" = quien no ha dicho a cuál va.
+function pasaCurso(curso, x) {
+  if (!curso) return true;
+  return curso === "sin" ? !x.curso_objetivo : x.curso_objetivo === curso;
+}
+
+/* A qué curso apunta un cliente. Se deduce del formulario (borde punteado) y
+   el asesor lo fija pulsando: el desplegable nativo va encima, transparente. */
+function Curso({ valor, deducido, opciones, onCambiar }) {
+  const titulo = !valor ? "Sin curso: no ha dicho cuándo quiere empezar. Púlsalo para fijarlo"
+    : deducido ? "Deducido del inicio previsto del formulario. Púlsalo para fijarlo"
+    : "Curso fijado por el asesor";
+  return (
+    <span className="relative inline-block shrink-0 self-center">
+      <span title={titulo}
+        className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg border whitespace-nowrap ${
+          valor ? "bg-[#EEF2F8] text-[#1A3557] border-[#c9d6e6]" : "bg-amber-50 text-amber-700 border-amber-200"
+        } ${deducido ? "border-dashed" : ""}`}>
+        {valor || "sin curso"}
+        <svg className="w-2.5 h-2.5 opacity-60" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </span>
+      <select value={valor || ""} onChange={(e) => onCambiar(e.target.value)} aria-label="Curso al que apunta"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+        <option value="">Sin fijar (se deduce del formulario)</option>
+        {opciones.map((c) => <option key={c} value={c}>{c}</option>)}
+      </select>
+    </span>
+  );
+}
+
 const CLAVE_PLEGADOS = "inspira.tracker-master.plegados";
 
 function leerPlegados() {
@@ -171,7 +214,11 @@ export default function TrackerMaster({ onAbrirProceso }) {
   const [q, setQ] = useState("");
   const [uni, setUni] = useState("");
   const [grupo, setGrupo] = useState("");
+  // "" = todos · "2026-27" · "sin" = no ha dicho a qué curso va
+  const [curso, setCurso] = useState("");
   const [nuevaUni, setNuevaUni] = useState({});
+  const [hoyCurso] = useState(() => cursoActual());
+  const opcionesCurso = [hoyCurso, cursoMas(hoyCurso, 1), cursoMas(hoyCurso, 2)];
   const [plegados, setPlegados] = useState(leerPlegados);
   const sinRef = useRef(null);
 
@@ -242,22 +289,49 @@ export default function TrackerMaster({ onAbrirProceso }) {
     datos.filas.forEach((f) => {
       if (uni && (f.universidad || "").trim() !== uni) return;
       if (pasa && !pasa(f.estado || "")) return;
+      if (!pasaCurso(curso, f)) return;
       if (t && !`${f.cliente} ${f.universidad} ${f.master}`.toLowerCase().includes(t)) return;
       if (!g.has(f.id_solicitud)) {
-        g.set(f.id_solicitud, { cliente: f.cliente, paquete: f.paquete, responsable: f.responsable, filas: [] });
+        g.set(f.id_solicitud, {
+          cliente: f.cliente, paquete: f.paquete, responsable: f.responsable,
+          curso_objetivo: f.curso_objetivo || null, curso_deducido: Boolean(f.curso_deducido), filas: [],
+        });
       }
       g.get(f.id_solicitud).filas.push(f);
     });
     return [...g.entries()];
-  }, [datos.filas, q, uni, grupo]);
+  }, [datos.filas, q, uni, grupo, curso]);
 
   const sinPost = useMemo(() => {
     // Con un filtro puesto —una universidad, un estado— quien no tiene ninguna
     // postulación no pinta nada: se está mirando otra cosa.
     if (uni || grupo) return [];
     const t = q.trim().toLowerCase();
-    return (datos.sin_postulacion || []).filter((s) => !t || s.cliente.toLowerCase().includes(t));
-  }, [datos.sin_postulacion, q, uni, grupo]);
+    return (datos.sin_postulacion || [])
+      .filter((s) => pasaCurso(curso, s))
+      .filter((s) => !t || s.cliente.toLowerCase().includes(t));
+  }, [datos.sin_postulacion, q, uni, grupo, curso]);
+
+  // Cuántos clientes van a cada curso, para las pestañas de arriba.
+  const porCurso = useMemo(() => {
+    const c = new Map();
+    const vistos = new Set();
+    const contar = (x) => {
+      if (vistos.has(x.id_solicitud)) return;
+      vistos.add(x.id_solicitud);
+      const k = x.curso_objetivo || "sin";
+      c.set(k, (c.get(k) || 0) + 1);
+    };
+    datos.filas.forEach(contar);
+    (datos.sin_postulacion || []).forEach(contar);
+    return c;
+  }, [datos.filas, datos.sin_postulacion]);
+
+  async function cambiarCurso(id_solicitud, nuevo) {
+    const r = await boPATCH(`/backoffice/tracker-master/solicitud/${id_solicitud}/curso`, { curso: nuevo });
+    if (!r.ok) { setError(r.msg || "No se pudo guardar el curso"); return; }
+    cargar();
+  }
 
   const r = datos.resumen || {};
   const filtrando = Boolean(q.trim() || uni || grupo);
@@ -315,7 +389,7 @@ export default function TrackerMaster({ onAbrirProceso }) {
                   onClick={() => {
                     // El bloque no se dibuja con un filtro puesto, así que hay
                     // que quitarlos antes de intentar bajar hasta él.
-                    setUni(""); setGrupo(""); setQ("");
+                    setUni(""); setGrupo(""); setQ(""); setCurso("");
                     requestAnimationFrame(() =>
                       sinRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
                   }}
@@ -348,6 +422,30 @@ export default function TrackerMaster({ onAbrirProceso }) {
             <option key={u} value={u}>{u} · {n}</option>
           ))}
         </select>
+      </div>
+
+      {/* Este curso o el siguiente. Quien postula para entrar ahora y quien
+          espera a enero no comparten urgencias, y mezclados en una sola lista
+          los plazos de unos tapan a los otros. */}
+      <div className="ase-tira">
+        <div className="ase-tira-scroll">
+          {[
+            { k: "", t: "Todos" },
+            { k: hoyCurso, t: `Este curso ${hoyCurso}` },
+            { k: cursoMas(hoyCurso, 1), t: `Próximo ${cursoMas(hoyCurso, 1)}` },
+            { k: "sin", t: "Sin curso" },
+          ].map((c) => {
+            const n = c.k === "" ? null : porCurso.get(c.k) || 0;
+            return (
+              <button key={c.k || "todos"} type="button" className="ase-tab"
+                data-on={curso === c.k ? "1" : "0"} aria-pressed={curso === c.k}
+                onClick={() => setCurso(c.k)}>
+                {c.t}
+                {n !== null && <span className="ase-tab-n">{n}</span>}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Lo que está filtrando, siempre a la vista y siempre quitable de un
@@ -458,6 +556,10 @@ export default function TrackerMaster({ onAbrirProceso }) {
                       </span>
                     </span>
                   </button>
+                  <span className="mr-1.5 self-center">
+                    <Curso valor={g.curso_objetivo} deducido={g.curso_deducido} opciones={opcionesCurso}
+                      onCambiar={(v) => cambiarCurso(id_solicitud, v)} />
+                  </span>
                   <button type="button" className="ase-tm-abrir"
                     onClick={() => onAbrirProceso?.(id_solicitud)}
                     title={`Abrir el expediente de ${g.cliente}`}>
@@ -621,12 +723,12 @@ export default function TrackerMaster({ onAbrirProceso }) {
                       title={`Abrir el expediente de ${s.cliente}`}>
                       {s.cliente}
                     </button>
-                    {(s.paquete || s.comunidades?.length > 0) && (
-                      <div className="ase-tm-sin-etq">
-                        {s.paquete && <span>{s.paquete}</span>}
-                        {s.comunidades?.map((c) => <span key={c}>{c}</span>)}
-                      </div>
-                    )}
+                    <div className="ase-tm-sin-etq">
+                      <Curso valor={s.curso_objetivo} deducido={s.curso_deducido} opciones={opcionesCurso}
+                        onCambiar={(v) => cambiarCurso(s.id_solicitud, v)} />
+                      {s.paquete && <span>{s.paquete}</span>}
+                      {s.comunidades?.map((c) => <span key={c}>{c}</span>)}
+                    </div>
                     <div className="flex gap-2">
                       <input
                         list="ase-tm-unis"

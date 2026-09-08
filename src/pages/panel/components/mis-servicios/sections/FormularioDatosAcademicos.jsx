@@ -74,6 +74,31 @@ function opcionesInicio(actual, hoy = new Date()) {
   return out;
 }
 
+// Para qué quiere el máster. Cada respuesta favorece másteres distintos
+// (habilitantes y con prácticas para quedarse; de un año y oficiales para
+// volver; de investigación para el doctorado). Los valores viejos —laboral,
+// investigacion— se leen como sus equivalentes.
+const OBJETIVOS = [
+  { val: "trabajar_espana", label: "Quedarme a trabajar en España" },
+  { val: "volver_pais",     label: "Volver a mi país con el título" },
+  { val: "doctorado",       label: "Seguir con investigación o doctorado" },
+  { val: "cambiar_campo",   label: "Cambiar de campo profesional" },
+  { val: "indiferente",     label: "No lo tengo claro todavía" },
+];
+const OBJETIVO_LEGADO = { laboral: "trabajar_espana", investigacion: "doctorado" };
+const OBJETIVO_LABEL = Object.fromEntries(OBJETIVOS.map((o) => [o.val, o.label]));
+
+const DESCARTES = [
+  { value: "semipresencial",     label: "Nada semipresencial" },
+  { value: "sin_practicas",      label: "Nada sin prácticas" },
+  { value: "investigacion",      label: "Nada de investigación" },
+  { value: "interuniversitario", label: "Nada interuniversitario" },
+  { value: "titulo_propio",      label: "Ningún título propio" },
+  { value: "mas_de_un_anio",     label: "Nada de más de un año" },
+  { value: "en_ingles",          label: "Nada en inglés" },
+];
+const DESCARTE_LABEL = Object.fromEntries(DESCARTES.map((d) => [d.value, d.label]));
+
 function sugerirTemas(areaCarrera, rama) {
   const lista = [...(SUGERENCIAS_TEMAS[areaCarrera] || []), ...(SUGERENCIAS_POR_RAMA[rama] || [])];
   if (!lista.length) return SUGERENCIAS_TEMAS.Otra;
@@ -426,6 +451,9 @@ function ResumenDatos({ formData, onEditar }) {
     { label: "Idioma del máster", value: idiomasMaster },
     { label: "Becas",            value: formData.beca_desea === "si" ? "Sí" : formData.beca_desea === "no" ? "No" : null },
     { label: "Máster que buscas", value: Array.isArray(formData.masteres_deseados) && formData.masteres_deseados.filter(Boolean).length ? formData.masteres_deseados.filter(Boolean).join(" · ") : null },
+    { label: "Máster de referencia", value: Array.isArray(formData.masteres_enlaces) && formData.masteres_enlaces.filter(Boolean).length ? formData.masteres_enlaces.filter(Boolean).join(" · ") : null },
+    { label: "Para qué lo quiere", value: OBJETIVO_LABEL[OBJETIVO_LEGADO[formData.objetivo_master] || formData.objetivo_master] || null },
+    { label: "No quiere",        value: Array.isArray(formData.descartes) && formData.descartes.length ? formData.descartes.map((d) => DESCARTE_LABEL[d] || d).join(" · ") : null },
     { label: "Temas de interés", value: Array.isArray(formData.especializaciones) && formData.especializaciones.filter(Boolean).length ? formData.especializaciones.filter(Boolean).join(" · ") : null },
     { label: "Rama de interés",  value: formData.area_interes_master },
     { label: "Duración",         value: DUR_LABELS[formData.duracion_preferida] },
@@ -473,6 +501,20 @@ export default function FormularioDatosAcademicos({
   const [step, setStep]               = useState(0);
   const [showErrors, setShowErrors]   = useState(false);
   const [ramas, setRamas]             = useState([]);
+  // Sugerencias de carrera desde el catálogo, con un pequeño retardo para no
+  // pedir una por tecla.
+  const [sugCarreras, setSugCarreras] = useState([]);
+  const carrerasTimer = useRef(null);
+  function buscarCarreras(texto) {
+    clearTimeout(carrerasTimer.current);
+    const q = String(texto || "").trim();
+    if (q.length < 3) return;
+    carrerasTimer.current = setTimeout(() => {
+      apiGET(`/api/catalogo/titulaciones?q=${encodeURIComponent(q)}`).then((r) => {
+        if (r?.ok && Array.isArray(r.titulaciones)) setSugCarreras(r.titulaciones.map((t) => t.titulacion));
+      }).catch(() => {});
+    }, 250);
+  }
   const [subareas, setSubareas]       = useState([]);
   const [todasComunidades, setTodasComunidades] = useState(TODAS_COMUNIDADES_FALLBACK);
   const [xWarning, setXWarning]       = useState(false);
@@ -642,9 +684,19 @@ export default function FormularioDatosAcademicos({
           <div>
             <FLabel>Carrera o título universitario</FLabel>
             <FInput value={formData.carrera_titulo || ""}
-              onChange={(e) => set("carrera_titulo", e.target.value)}
+              onChange={(e) => { set("carrera_titulo", e.target.value); buscarCarreras(e.target.value); }}
               placeholder="Ej: Ingeniería Industrial, Derecho, Psicología…"
+              list="carreras-catalogo" autoComplete="off"
               err={has("carrera_titulo")} />
+            {/* Las carreras tal como las nombra el catálogo español. Si elige
+                la suya de la lista, el informe puede comprobar en qué másteres
+                da acceso sin tener que adivinar cómo la escribió. */}
+            <datalist id="carreras-catalogo">
+              {sugCarreras.map((c) => <option key={c} value={c} />)}
+            </datalist>
+            <p className="text-xs text-neutral-400 mt-1.5">
+              Si aparece en la lista al escribir, elígela: así comprobamos en qué másteres da acceso tu carrera.
+            </p>
             <EMsg show={has("carrera_titulo")} msg="Escribe el nombre de tu carrera" />
           </div>
           <div>
@@ -1033,6 +1085,8 @@ export default function FormularioDatosAcademicos({
         // Hasta tres másteres y dos especializaciones, en texto libre.
         const deseados = Array.isArray(formData.masteres_deseados) ? formData.masteres_deseados : [];
         const especialidades = Array.isArray(formData.especializaciones) ? formData.especializaciones : [];
+        const enlaces = Array.isArray(formData.masteres_enlaces) ? formData.masteres_enlaces : [];
+        const objetivoActual = OBJETIVO_LEGADO[formData.objetivo_master] || formData.objetivo_master;
         const ponerLista = (key, lista, largo, i, valor) => {
           const next = [...lista]; while (next.length < largo) next.push("");
           next[i] = valor; set(key, next);
@@ -1067,6 +1121,21 @@ export default function FormularioDatosAcademicos({
                 sugerencias={sugerirTemas(formData.area_carrera, formData.area_interes_master)}
                 campo={campoTexto}
               />
+            </div>
+
+            <div>
+              <FLabel>¿Has visto ya algún máster que te guste? <span className="font-normal text-neutral-400">(opcional)</span></FLabel>
+              <p className="text-xs text-neutral-400 mb-3">
+                Pega el enlace de su página en la web de la universidad. Lo usamos como referencia:
+                buscamos ese y los que se le parecen.
+              </p>
+              <div className="space-y-2">
+                {[0, 1].map((i) => (
+                  <input key={i} type="url" inputMode="url" className={campoTexto} value={enlaces[i] || ""}
+                    placeholder={["https://…", "Otro enlace (opcional)"][i]}
+                    onChange={(e) => ponerLista("masteres_enlaces", enlaces, 2, i, e.target.value)} />
+                ))}
+              </div>
             </div>
 
             <div>
@@ -1136,15 +1205,11 @@ export default function FormularioDatosAcademicos({
             <div>
               <FLabel>¿Cuál es tu principal objetivo con el máster? <span className="font-normal text-neutral-400">(opcional)</span></FLabel>
               <div className="flex flex-col gap-2 mt-1">
-                {[
-                  { val: "laboral",       label: "Mejorar mis opciones laborales y sueldo" },
-                  { val: "investigacion", label: "Acceder a la investigación o doctorado" },
-                  { val: "indiferente",   label: "Indiferente / No lo tengo claro" },
-                ].map(({ val, label }) => (
+                {OBJETIVOS.map(({ val, label }) => (
                   <button key={val} type="button"
-                    onClick={() => set("objetivo_master", formData.objetivo_master === val ? "" : val)}
+                    onClick={() => set("objetivo_master", objetivoActual === val ? "" : val)}
                     className={`text-left px-4 py-3 rounded-xl border text-sm transition-all active:scale-[0.99] ${
-                      formData.objetivo_master === val
+                      objetivoActual === val
                         ? "border-primary bg-primary/10 text-primary font-semibold"
                         : "border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300"
                     }`}>
@@ -1232,6 +1297,29 @@ export default function FormularioDatosAcademicos({
               ))}
             </div>
             <EMsg show={has("modalidad_preferida")} />
+          </div>
+
+          {/* Lo que NO quiere. Hasta ahora solo se preguntaba lo que sí, y
+              los descartes son lo que más rápido limpia una lista. */}
+          <div>
+            <FLabel>¿Hay algo que descartes de entrada? <span className="font-normal text-neutral-400">(opcional)</span></FLabel>
+            <p className="text-xs text-neutral-400 mb-3">Marca lo que no quieres ver en tu informe.</p>
+            <div className="flex flex-wrap gap-2">
+              {DESCARTES.map((o) => {
+                const lista = Array.isArray(formData.descartes) ? formData.descartes : [];
+                const on = lista.includes(o.value);
+                return (
+                  <Pill key={o.value} active={on}
+                    onClick={() => set("descartes", on ? lista.filter((x) => x !== o.value) : [...lista, o.value])}>
+                    {o.label}
+                  </Pill>
+                );
+              })}
+            </div>
+            <input type="text" value={formData.descartes_nota || ""}
+              onChange={(e) => set("descartes_nota", e.target.value)}
+              placeholder="Otra cosa que no quieras (ciudades, universidades, temas…)"
+              className="mt-3 w-full rounded-xl border border-neutral-200 px-3.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" />
           </div>
         </div>
       );

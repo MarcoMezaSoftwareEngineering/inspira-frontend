@@ -139,6 +139,29 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
               lo pidió por su nombre
             </span>
           )}
+          {master.es_ancla && (
+            <span className="text-[10px] font-semibold bg-[#EEF2F8] text-[#1A3557] border border-[#c9d6e6] px-1.5 py-0.5 rounded-md">
+              el enlace que pegó
+            </span>
+          )}
+          {/* Qué dice la lista de titulaciones de acceso del máster sobre su
+              carrera. Sin lista no se dice nada: no saber no es no admitir. */}
+          {master.acceso_titulo === "directo" && (
+            <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-md">
+              admite su carrera
+            </span>
+          )}
+          {master.acceso_titulo === "afin" && (
+            <span className="text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200 px-1.5 py-0.5 rounded-md">
+              carrera afín en su lista
+            </span>
+          )}
+          {master.acceso_titulo === "fuera" && (
+            <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md"
+              title="El máster publica qué carreras admite y la del asesorado no está. Conviene confirmarlo con la universidad.">
+              su carrera no está en la lista de acceso
+            </span>
+          )}
           {master.es_titulo_oficial === false && (
             <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md">
               título propio
@@ -561,6 +584,8 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   const paramRows = [
     ["Máster que busca",   lista(datos.masteres_deseados)],
     ["Temas de interés",   lista(datos.especializaciones)],
+    ["Máster de referencia", (compat?.perfil?.anclas || []).map((a) => `${a.nombre_limpio} (${a.universidad})`).join(" · ") || null],
+    ["Enlaces sin localizar", (compat?.perfil?.enlaces_sin_resolver || []).join(" · ") || null],
     ["Rama del máster",    compat?.perfil?.rama_label    || datos.area_interes_master],
     ["Sub-área",           compat?.perfil?.sub_area_label || null],
     ["Área de carrera",    datos.area_carrera],

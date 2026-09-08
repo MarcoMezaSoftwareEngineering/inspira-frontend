@@ -54,6 +54,16 @@ export function MasterCard({ master, score, prioridad, selected, comentario, onT
                 Coincide con lo que buscas
               </span>
             )}
+            {master.es_ancla && (
+              <span className="text-[10px] font-semibold bg-[#EEF2F8] text-[#1A3557] border border-[#c9d6e6] px-1.5 py-0.5 rounded">
+                El que nos indicó
+              </span>
+            )}
+            {master.acceso_titulo === "directo" && (
+              <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded">
+                Admite su carrera
+              </span>
+            )}
             {master.es_titulo_oficial === false && (
               <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded">
                 Título propio

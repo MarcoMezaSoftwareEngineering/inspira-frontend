@@ -16,6 +16,7 @@ import Tour from "./components/Tour";
 import { accesosDe, esSoloInvitado, pideAcademico, pideCompleto } from "./servicios";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
+import AvisoVersionNueva from "../backoffice/layout/AvisoVersionNueva";
 
 const BecasEspana   = lazy(() => import("./BecasEspana"));
 const GuiaMaster    = lazy(() => import("./GuiaMaster"));
@@ -331,6 +332,10 @@ export default function PanelCliente({ path }) {
         </div>
         </div>
       </main>
+
+      {/* La app instalada se queda abierta días: si hay versión nueva, se
+          recarga sola al volver o avisa si se está usando. */}
+      <AvisoVersionNueva producto="Inspira" />
 
       {tour && <Tour pasos={PASOS_INICIO} onFin={terminarTour} />}
 

@@ -2,6 +2,16 @@
 import { useState } from "react";
 import { formatearFecha } from "./utils";
 import { boPATCH } from "../../../services/backofficeApi";
+import IconoPaso from "../../../components/common/IconoPaso";
+
+// El icono de cada dato de la ficha.
+const ICONO_CAMPO = {
+  "Fecha nacimiento": "calendar", "Pasaporte": "idCard", "Venc. pasaporte": "idCard", "Emisión pasaporte": "idCard",
+  "Título universitario": "cap", "Universidad origen": "cap", "Inicio estudios": "calendar", "Fin estudios": "calendar",
+  "Fecha del título": "calendar", "País de origen": "pin", "Ciudad": "pin", "Inicio previsto": "calendar",
+  "Presupuesto máx.": "coins", "Promedio": "star", "Trabajo actual": "briefcase", "Asesores": "user",
+  "Tipo universidad": "cap", "Tipo título": "cap",
+};
 
 function iniciales(nombre) {
   if (!nombre) return "?";
@@ -14,19 +24,24 @@ function iniciales(nombre) {
 
 function Campo({ label, value, highlight, warn }) {
   const vacio = value === null || value === undefined || value === "";
-  const cls = highlight
-    ? "border-[#1D6A4A]/25 bg-[#E8F5EE]"
-    : warn
-      ? "border-amber-300 bg-amber-50"
-      : "border-neutral-200 bg-neutral-50";
+  const tile = warn
+    ? "bg-amber-100 text-amber-700"
+    : highlight
+      ? "bg-[#E8F5EE] text-[#1D6A4A]"
+      : "bg-neutral-100 text-neutral-400";
   return (
-    <div className={`border rounded-xl px-3 py-2 ${cls}`}>
-      <p className={`text-[9px] font-bold uppercase tracking-widest font-mono mb-1 ${warn ? "text-amber-600" : "text-neutral-400"}`}>
-        {label}{warn && " ⚠"}
-      </p>
-      <p className={`text-[12px] font-semibold truncate ${warn ? "text-amber-700" : vacio ? "text-neutral-300 italic" : "text-neutral-900"}`}>
-        {vacio ? "N/D" : value}
-      </p>
+    <div className="flex items-start gap-2.5 py-2 border-b border-neutral-100 min-w-0">
+      <span className={`shrink-0 w-8 h-8 rounded-lg grid place-items-center ${tile}`}>
+        <IconoPaso nombre={ICONO_CAMPO[label] || "info"} className="w-4 h-4" />
+      </span>
+      <div className="min-w-0">
+        <p className={`text-[9px] font-bold uppercase tracking-widest font-mono ${warn ? "text-amber-600" : "text-neutral-400"}`}>
+          {label}{warn && " ⚠"}
+        </p>
+        <p className={`text-[12.5px] font-semibold leading-snug break-words ${warn ? "text-amber-700" : vacio ? "text-neutral-300 italic" : "text-neutral-900"}`}>
+          {vacio ? "N/D" : value}
+        </p>
+      </div>
     </div>
   );
 }
@@ -249,7 +264,7 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
       )}
 
       {/* Grid de campos (vista) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 px-5 pb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-5 px-5 pb-3">
         <Campo label="Fecha nacimiento"     value={fechaNac ? formatearFecha(fechaNac) : null} highlight={!!fechaNac} />
         <Campo label="Pasaporte"            value={cli.pasaporte}        warn={!!alerta && alerta.nivel === "rojo"} />
         <Campo label="Venc. pasaporte"      value={vencPasaporte ? formatearFecha(vencPasaporte) : null} warn={!!alerta} />

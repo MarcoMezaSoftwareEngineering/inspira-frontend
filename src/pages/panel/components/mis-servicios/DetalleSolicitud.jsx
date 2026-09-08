@@ -16,7 +16,32 @@ import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
 import { EsqueletoExpediente } from "../Esqueleto";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
-import SelectorSeccionMovil from "./SelectorSeccionMovil";
+import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../../components/common/RutaPasos";
+
+// Nombre corto de cada paso para la fila de iconos del móvil.
+const CORTO = { docs: "Documentos", form: "Formulario", informe: "Informe", eleccion: "Elección", post: "Postular", cierre: "Cierre" };
+
+function inicialesDe(nombre) {
+  return String(nombre || "").trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "•";
+}
+
+// Lo primero que le toca hacer al asesorado, dicho una vez y arriba: un
+// documento observado o pedido, el formulario, lo que falta por subir, o
+// marcar el informe. Si nada, se le dice que está al día y quién vigila.
+function calcularLeToca({ checklist, formGuardado, compat, elecciones }) {
+  const items = checklist || [];
+  const estadoDe = (it) => (it.estado_item || "pendiente").toLowerCase();
+  const obs = items.find((it) => ["observado", "rechazado"].includes(estadoDe(it)));
+  if (obs) return { tono: "warn", icono: "upload", etiqueta: "Te toca:", texto: `corregir «${obs.item?.nombre_item}»`, seccion: "docs" };
+  const pedido = items.find((it) => estadoDe(it) === "solicitado" && !(it.documentos || []).length);
+  if (pedido) return { tono: "warn", icono: "upload", etiqueta: "Te toca:", texto: `subir «${pedido.item?.nombre_item}», que te pidió tu asesor`, seccion: "docs" };
+  if (!formGuardado) return { tono: "on", icono: "fileText", etiqueta: "Te toca:", texto: "completar el formulario académico para preparar tu informe", seccion: "form" };
+  const falta = items.find((it) => it.item?.obligatorio !== false && estadoDe(it) === "pendiente" && !(it.documentos || []).length);
+  if (falta) return { tono: "on", icono: "upload", etiqueta: "Te toca:", texto: `subir «${falta.item?.nombre_item}»`, seccion: "docs" };
+  const elegidos = (elecciones || []).filter((e) => e.id_master).length;
+  if (compat?.total && !elegidos) return { tono: "on", icono: "checkCircle", etiqueta: "Te toca:", texto: "marcar en el informe los másteres que te interesan", seccion: "informe" };
+  return { tono: "ok", icono: "check", etiqueta: "Todo al día.", texto: "Tu asesor vigila los portales y te avisará por mensaje.", seccion: null };
+}
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -35,52 +60,6 @@ function formCompleto(datos) {
     if (!datos.experiencia_vinculada) return false;
   }
   return true;
-}
-
-const DOT_COLORS = {
-  completado: "bg-emerald-500",
-  pendiente:  "bg-amber-400",
-  cargando:   "bg-blue-400 animate-pulse",
-  observado:  "bg-red-400",
-};
-
-// ── NavItem — botón de la barra lateral ──────────────────────────────────────
-
-function NavItem({ num, icono, titulo, subtitulo, estado, active, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center gap-2.5 ${
-        active
-          ? "bg-primary shadow-sm"
-          : "hover:bg-neutral-100"
-      }`}
-    >
-      <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-colors ${
-        active
-          ? "bg-white/20 text-white"
-          : "bg-primary-light/10 text-primary-light"
-      }`}>
-        {icono ? <IconoPaso nombre={icono} className="w-4 h-4" /> : num}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className={`text-xs font-semibold leading-tight truncate ${active ? "text-white" : "text-neutral-800"}`}>
-          {titulo}
-        </p>
-        {subtitulo && (
-          <p className={`text-[10px] mt-0.5 truncate ${active ? "text-white/60" : "text-neutral-400"}`}>
-            {subtitulo}
-          </p>
-        )}
-      </div>
-      {estado && (
-        <span className={`shrink-0 w-2 h-2 rounded-full ${
-          active ? "bg-white/40" : (DOT_COLORS[estado] || "bg-neutral-300")
-        }`} />
-      )}
-    </button>
-  );
 }
 
 // ── Mensajes, siempre a mano ─────────────────────────────────────────────────
@@ -253,13 +232,6 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
     }
   }
 
-  const progresoChecklist = useMemo(() => {
-    if (!checklist.length) return 0;
-    const done = checklist.filter((it) =>
-      ["aprobado", "no_aplica"].includes((it.estado_item || "").toLowerCase())
-    ).length;
-    return Math.round((done * 100) / checklist.length);
-  }, [checklist]);
 
   async function handleSubmitFormulario(e) {
     e.preventDefault();
@@ -395,77 +367,69 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
   // tipo de servicio distinto— cae en la primera en vez de en una pantalla vacía.
   const activeSection = navSections.some((x) => x.id === seccion) ? seccion : navSections[0]?.id;
 
+  // La fila de pasos, el título del activo y lo que toca hacer.
+  const pasosRuta = navSections.map((s) => ({
+    id: s.id, num: s.num, icono: s.icono, titulo: s.titulo, corto: CORTO[s.id] || s.titulo,
+    subtitulo: s.subtitulo, estado: tonoDeEstado(s.estado), badge: s.badge || 0,
+  }));
+  const indicePaso = Math.max(0, navSections.findIndex((s) => s.id === activeSection));
+  const pasoActivo = pasosRuta[indicePaso];
+  const pctPasos = navSections.length
+    ? Math.round((navSections.filter((s) => s.estado === "completado").length / navSections.length) * 100)
+    : 0;
+  const lineaExp = detalle?.datos_panel?.curso_objetivo
+    ? `Curso ${detalle.datos_panel.curso_objetivo} · tu expediente, paso a paso`
+    : "Tu expediente, paso a paso";
+  const leToca = calcularLeToca({ checklist, formGuardado, compat, elecciones });
+
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex flex-col h-full min-h-0">
 
-      {/* Fila superior: botón volver + encabezado compacto */}
+      {/* Fila superior: volver y, si lo hay, el error. */}
       <div className="shrink-0 flex items-center gap-3 mb-3">
-        <button
-          onClick={onVolver}
-          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary-light active:scale-95 transition-all shadow-sm group"
-        >
-          <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-          Mis servicios
-        </button>
-
-
+        <BotonVolver onClick={onVolver}>Mis servicios</BotonVolver>
         {error && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
             <span className="text-red-500 text-sm">⚠</span>
             <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
-
-        {!loading && !error && detalle && (
-          <div className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-4 py-2.5 flex items-center gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold text-primary-light uppercase tracking-widest leading-none">
-                Solicitud #{detalle.id_solicitud}
-              </p>
-              <p className="text-sm font-bold text-neutral-900 leading-snug truncate mt-0.5">
-                {detalle.tipo?.nombre || "—"}
-              </p>
-            </div>
-            <div className="shrink-0 hidden sm:block w-32">
-              <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-neutral-500 font-medium">Progreso</span>
-                <span className="font-bold text-neutral-800">{progresoChecklist}%</span>
-              </div>
-              <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-700 bg-accent"
-                  style={{ width: `${progresoChecklist}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Móvil y tablet: la cabecera del expediente y la fila de pasos, arriba.
+          En pantalla grande van en la columna de la izquierda. */}
+      {!loading && !error && detalle && (
+        <div className="lg:hidden shrink-0 mb-3 space-y-3">
+          <ExpedienteCabecera iniciales={inicialesDe(perfil?.nombre)} eyebrow={`Solicitud #${detalle.id_solicitud}`} titulo={detalle.tipo?.nombre || "—"} linea={lineaExp} pct={pctPasos} />
+          <RutaPasos pasos={pasosRuta} activo={activeSection} onIr={setActiveSection} />
+        </div>
+      )}
 
       {loading && <EsqueletoExpediente />}
 
       {/* Panel principal */}
       {!loading && !error && detalle && (
-        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
 
-          {/* ── Desktop: sidebar vertical ── */}
-          <div className="hidden md:flex w-52 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
-            {navSections.map((s) => (
-              <NavItem
-                key={s.id}
-                num={s.num}
-                icono={s.icono}
-                titulo={s.titulo}
-                subtitulo={s.subtitulo}
-                estado={s.estado}
-                active={activeSection === s.id}
-                onClick={() => setActiveSection(s.id)}
-              />
-            ))}
+          {/* ── Pantalla grande: columna con la cabecera y los pasos ── */}
+          <div className="hidden lg:flex w-[290px] shrink-0 flex-col gap-3 overflow-y-auto pr-0.5">
+            <ExpedienteCabecera iniciales={inicialesDe(perfil?.nombre)} eyebrow={`Solicitud #${detalle.id_solicitud}`} titulo={detalle.tipo?.nombre || "—"} linea={lineaExp} pct={pctPasos} />
+            <RutaPasos pasos={pasosRuta} activo={activeSection} onIr={setActiveSection} vertical />
+          </div>
+
+          <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-3">
+          {/* El paso en el que está y lo primero que le toca hacer. */}
+          <div key={`${activeSection}-titulo`} className="shrink-0 space-y-3 rp-entra">
+            <TituloPaso paso={pasoActivo} total={navSections.length} indice={indicePaso + 1} />
+            <LeToca
+              tono={leToca.tono}
+              icono={leToca.icono}
+              etiqueta={leToca.etiqueta}
+              texto={leToca.texto}
+              onIr={leToca.seccion && leToca.seccion !== activeSection ? () => setActiveSection(leToca.seccion) : null}
+            />
           </div>
 
           {/* ── Contenido de la sección activa. La clave por sección hace que
@@ -552,9 +516,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
 
             </SeccionSiempreAbiertoCtx.Provider>
           </div>
-
-          {/* Móvil: el selector de sección, abajo. */}
-          <SelectorSeccionMovil secciones={navSections} activa={activeSection} onCambiar={setActiveSection} />
+          </div>
 
           {/* Los mensajes ya no son un paso: están siempre a mano, en
               cualquier sección, con lo que queda por leer encima. */}

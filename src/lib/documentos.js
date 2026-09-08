@@ -18,6 +18,30 @@ export function permiteVarios(nombreItem) {
   return VARIOS.some((rx) => rx.test(n));
 }
 
+// El icono de cada documento, por su nombre; en el orden en que hay que
+// probarlos (lo más específico primero). Mismo juego que IconoPaso.
+const ICONOS_DOC = [
+  [/pasaporte|\bdni\b|identidad/i, "idCard"],
+  [/\bt[ií]tulo\b|bachiller|diploma/i, "cap"],
+  [/rango|m[eé]rito|promedio|ponderado/i, "award"],
+  [/apostilla|legalizaci/i, "scroll"],
+  [/motivaci|recomendaci|referencia|carta de acceso|acceso al m/i, "mail"],
+  [/europass|\bcv\b|curr[ií]cul|hoja de vida/i, "fileText"],
+  [/nota\s*media|equivalencia/i, "chart"],
+  [/experiencia|trabajo|laboral/i, "briefcase"],
+  [/complementari|diplomad|cursos|formaci/i, "book"],
+  [/investigaci|art[ií]culos/i, "search"],
+  [/idioma|ingl[eé]s|toefl|ielts|cambridge/i, "language"],
+  [/foto/i, "user"],
+];
+
+/** Nombre de icono (IconoPaso) para un ítem del checklist. */
+export function iconoDocumento(nombreItem) {
+  const n = String(nombreItem || "");
+  const par = ICONOS_DOC.find(([rx]) => rx.test(n));
+  return par ? par[1] : "fileText";
+}
+
 function extensionDe(nombre) {
   const m = /\.([a-z0-9]{1,5})$/i.exec(String(nombre || ""));
   return m ? `.${m[1].toLowerCase()}` : "";

@@ -5,7 +5,8 @@ import SeccionPanel from "./SeccionPanel";
 import PedirRevisionMaster from "./PedirRevisionMaster";
 import { requisitosDe, NOTA_APOSTILLA } from "./visaRequisitos";
 import { listaSolvencia, VIA_ETIQUETA } from "./visaSolvencia";
-import { permiteVarios } from "../../../../../lib/documentos";
+import { permiteVarios, iconoDocumento } from "../../../../../lib/documentos";
+import IconoPaso from "../../../../../components/common/IconoPaso";
 import { guiaParaItem } from "../guiaDocumentosMaster";
 import GuiaDocumento from "./GuiaDocumento";
 import TextoConEnlaces from "../../../../../components/common/TextoConEnlaces";
@@ -177,7 +178,7 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
 
   return (
     <div
-      className={`border rounded-xl p-3 relative flex flex-col gap-2 ${
+      className={`border rounded-2xl p-3.5 pl-[62px] relative flex flex-col gap-2 ${
         it.estado_item === "rechazado"
           ? "border-rose-300 bg-rose-50/30"
           : it.estado_item === "observado"
@@ -189,17 +190,28 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
           : "border-neutral-200 bg-white"
       }`}
     >
-      {/* Badge posicionado arriba a la derecha */}
-      <span
-        className={`absolute top-2.5 right-2.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}
-      >
-        {cfg.label}
+      {/* El icono del documento con su número, el mismo que lleva en Drive. */}
+      <span className={`absolute left-3.5 top-3.5 w-9 h-9 rounded-xl grid place-items-center ${
+        itemAprobado ? "bg-emerald-50 text-emerald-700"
+        : ["observado", "rechazado"].includes(it.estado_item) ? "bg-amber-50 text-amber-700"
+        : it.estado_item === "solicitado" ? "bg-violet-50 text-violet-700"
+        : "bg-neutral-100 text-primary-light"
+      }`}>
+        <IconoPaso nombre={iconoDocumento(it.item?.nombre_item)} className="w-[18px] h-[18px]" />
+        {it.numero ? (
+          <i className="absolute -top-1.5 -left-1.5 min-w-[17px] h-[17px] px-1 rounded-md bg-[#10303f] text-white text-[9.5px] font-extrabold not-italic grid place-items-center">
+            {it.numero}
+          </i>
+        ) : null}
       </span>
 
-      {/* Nombre */}
-      <p className="text-[13px] font-semibold text-neutral-900 pr-20 leading-snug">
-        {it.numero ? <span className="text-neutral-400">{it.numero}. </span> : null}{it.item?.nombre_item}
-      </p>
+      {/* Nombre y estado */}
+      <div className="flex items-start gap-2">
+        <p className="flex-1 min-w-0 text-[13px] font-semibold text-neutral-900 leading-snug">{it.item?.nombre_item}</p>
+        <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
+          {cfg.label}
+        </span>
+      </div>
 
       {/* Descripción, con el enlace del trámite cuando lo hay (Europass, sede). */}
       {it.item?.descripcion && (

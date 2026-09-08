@@ -5,8 +5,9 @@ import { dialog } from "../../../../services/dialogService";
 import { API_URL, formatearFecha } from "../utils";
 import DocViewer from "../../documentos/DocViewer";
 import { DriveToast, useDriveToast } from "../../driveToast";
-import { nombreDescarga } from "../../../../lib/documentos";
+import { nombreDescarga, iconoDocumento } from "../../../../lib/documentos";
 import TextoConEnlaces from "../../../../components/common/TextoConEnlaces";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
 const ESTADO_CFG = {
   aprobado:   { label: "Aprobado",  bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
@@ -265,13 +266,28 @@ export default function ChecklistSolicitudAdmin({
               return (
                 <div
                   key={it.id_solicitud_item}
-                  className={`border rounded-xl p-3 transition-all ${borderColor}`}
+                  className={`border rounded-2xl p-3 pl-[58px] relative transition-all ${borderColor}`}
                 >
+                  {/* El icono del documento con su número, el mismo que en Drive. */}
+                  <span className={`absolute left-3 top-3 w-9 h-9 rounded-xl grid place-items-center ${
+                    it.estado_item === "aprobado" ? "bg-emerald-50 text-emerald-700"
+                    : ["observado", "rechazado"].includes(it.estado_item) ? "bg-amber-50 text-amber-700"
+                    : it.estado_item === "solicitado" ? "bg-violet-50 text-violet-700"
+                    : "bg-neutral-100 text-primary-light"
+                  }`}>
+                    <IconoPaso nombre={iconoDocumento(it.item?.nombre_item)} className="w-[18px] h-[18px]" />
+                    {it.numero ? (
+                      <i className="absolute -top-1.5 -left-1.5 min-w-[17px] h-[17px] px-1 rounded-md bg-[#10303f] text-white text-[9.5px] font-extrabold not-italic grid place-items-center">
+                        {it.numero}
+                      </i>
+                    ) : null}
+                  </span>
+
                   {/* Header del item */}
                   <div className="flex justify-between items-start gap-2 mb-1.5">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-neutral-800 leading-snug">
-                        {it.numero ? <span className="text-neutral-400 font-bold">{it.numero}. </span> : null}{it.item?.nombre_item}
+                        {it.item?.nombre_item}
                       </p>
                       {it.item?.descripcion && (
                         <TextoConEnlaces texto={it.item.descripcion} className="text-xs text-neutral-500 mt-0.5" />

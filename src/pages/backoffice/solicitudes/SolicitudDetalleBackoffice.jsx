@@ -28,6 +28,14 @@ import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
 import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
 import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
 import IconoPaso, { ICONO_POR_BLOQUE } from "../../../components/common/IconoPaso";
+import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../components/common/RutaPasos";
+
+// Nombre corto de cada bloque del máster para la fila de iconos del móvil.
+const CORTO_BO = { cliente: "Ficha", checklist: "Documentos", formulario: "Formulario", informe: "Informe", eleccion: "Elección", programacion: "Postular", cierre: "Cierre" };
+
+function inicialesDe(nombre) {
+  return String(nombre || "").trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "•";
+}
 
 const RING_R = 13;
 const RING_C = 2 * Math.PI * RING_R;
@@ -102,7 +110,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
   const {
     detalle, setDetalle,
-    checklistPorEtapa,
+    checklist, checklistPorEtapa,
     loading, error, cargar,
   } = useSolicitudDetalle(idSolicitud);
 
@@ -150,6 +158,9 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     Number(detalle?.id_tipo_solicitud) === 18 ||
     String(detalle?.tipo?.nombre || detalle?.titulo || "").toLowerCase().includes("estancia");
   const estadoDe = (id) => bloquesServidor.find((b) => b.id === id)?.estado ?? "pendiente";
+  // El máster lleva la navegación nueva (cabecera, fila de pasos, «le toca»);
+  // visado, estancia y modificatoria conservan la suya.
+  const esMaster = !isVisado && !isEstancia && !isModificatoria;
 
   // En visado la lista se arma aquí y no en el servidor: los bloques nuevos
   // (declaración jurada, impreso oficial) dependen del expediente, que esta
@@ -278,6 +289,24 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const indiceBloque = Math.max(0, bloques.findIndex((b) => b.id === activeBloque));
   const bloqueActual = bloques[indiceBloque] || bloques[0];
 
+  // Máster: los pasos con su icono, lo pendiente en cada uno y lo primero
+  // que le toca a la asesora.
+  const porRevisar = (checklist || []).filter((it) => (it.estado_item || "").toLowerCase() === "enviado").length;
+  const sinDecidir = (detalle?.eleccion_masters || []).filter((e) => e?.id_master && (e.plan_incluido === null || e.plan_incluido === undefined)).length;
+  const pasosBO = bloques.map((b) => ({
+    id: b.id, num: b.numero, icono: ICONO_POR_BLOQUE[b.id] || "info", titulo: b.label, corto: CORTO_BO[b.id] || b.label,
+    subtitulo: b.id === "checklist" && porRevisar ? `${porRevisar} por revisar` : b.id === "eleccion" && sinDecidir ? `${sinDecidir} sin decidir` : undefined,
+    estado: tonoDeEstado(b.estado),
+    badge: b.id === "checklist" ? porRevisar : b.id === "eleccion" ? sinDecidir : 0,
+  }));
+  const pasoBO = pasosBO[indiceBloque] || pasosBO[0];
+  const nombreCorto = String(detalle?.cliente?.nombre || "el asesorado").split(/\s+/)[0];
+  const leTocaBO = porRevisar
+    ? { tono: "warn", icono: "folder", etiqueta: "Pendiente:", texto: `${porRevisar} documento${porRevisar === 1 ? "" : "s"} de ${nombreCorto} por revisar`, bloque: "checklist" }
+    : sinDecidir
+      ? { tono: "on", icono: "checkCircle", etiqueta: "Pendiente:", texto: `${sinDecidir} elección${sinDecidir === 1 ? "" : "es"} de ${nombreCorto} sin decidir`, bloque: "eleccion" }
+      : { tono: "ok", icono: "check", etiqueta: "Al día.", texto: "Nada pendiente de revisar; las alertas de plazos salen del tracker.", bloque: null };
+
   function irBloqueRelativo(paso) {
     const destino = bloques[indiceBloque + paso];
     if (destino) irABloque(destino.id);
@@ -298,6 +327,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           La barra lateral mide 220 px fijos: en un teléfono se come la
           pantalla y deja el contenido en una columna ilegible. Debajo de
           1024 px se sustituye por una cabecera compacta con desplegable. */}
+      {!esMaster && (
       <div className="lg:hidden shrink-0 border-b border-[#E2E8F0] bg-white px-3 py-2.5 space-y-2">
         <div className="flex items-center gap-2">
           <button
@@ -391,7 +421,10 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
         )}
       </div>
 
+      )}
+
       {/* ── SIDEBAR (sólo escritorio) ── */}
+      {!esMaster && (
       <aside className="hidden lg:block w-[220px] flex-none border-r border-[#E2E8F0] bg-white overflow-y-auto px-[9px] py-3">
 
         {/* Back button */}
@@ -472,10 +505,55 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           );
         })}
       </aside>
+      )}
+
+      {/* ── Máster, pantalla grande: la columna con la ficha resumida y los pasos ── */}
+      {esMaster && (
+        <aside className="hidden lg:flex w-[310px] flex-none flex-col gap-3 overflow-y-auto bg-[#F4F6F9] border-r border-[#E2E8F0] px-4 py-4">
+          <div><BotonVolver onClick={onVolver}>Solicitudes</BotonVolver></div>
+          <ExpedienteCabecera
+            iniciales={inicialesDe(detalle.cliente?.nombre)}
+            eyebrow={`#${detalle.id_solicitud} · ${detalle.tipo?.nombre || "Máster"}`}
+            titulo={detalle.cliente?.nombre || "Sin nombre"}
+            linea={detalle.titulo || etiqueta}
+            pct={pct}
+          />
+          <RutaPasos pasos={pasosBO} activo={activeBloque} onIr={irABloque} vertical />
+        </aside>
+      )}
 
       {/* ── MAIN SCROLL ── */}
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-3 sm:p-[22px] pb-20">
+
+          {/* Máster, móvil y tablet: volver, la ficha resumida y la fila de pasos. */}
+          {esMaster && (
+            <div className="lg:hidden space-y-3 mb-3">
+              <div><BotonVolver onClick={onVolver}>Solicitudes</BotonVolver></div>
+              <ExpedienteCabecera
+                iniciales={inicialesDe(detalle.cliente?.nombre)}
+                eyebrow={`#${detalle.id_solicitud} · ${detalle.tipo?.nombre || "Máster"}`}
+                titulo={detalle.cliente?.nombre || "Sin nombre"}
+                linea={detalle.titulo || etiqueta}
+                pct={pct}
+              />
+              <RutaPasos pasos={pasosBO} activo={activeBloque} onIr={irABloque} />
+            </div>
+          )}
+
+          {/* Máster: el paso en el que está y lo primero que toca. */}
+          {esMaster && (
+            <div key={`${activeBloque}-titulo`} className="space-y-3 mb-4 rp-entra">
+              <TituloPaso paso={pasoBO} total={pasosBO.length - 1} indice={indiceBloque} etiquetaEstado={pasoBO?.subtitulo} />
+              <LeToca
+                tono={leTocaBO.tono}
+                icono={leTocaBO.icono}
+                etiqueta={leTocaBO.etiqueta}
+                texto={leTocaBO.texto}
+                onIr={leTocaBO.bloque && leTocaBO.bloque !== activeBloque ? () => irABloque(leTocaBO.bloque) : null}
+              />
+            </div>
+          )}
 
           {/* El hilo con el asesorado, en cualquier tipo de expediente y arriba
               del todo: si hay un mensaje sin leer, es lo primero. */}

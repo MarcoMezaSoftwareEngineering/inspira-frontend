@@ -4,6 +4,7 @@ import { apiGET, apiPOST } from "../../../../../services/api";
 import { descargarArchivoProtegido } from "../../../../../services/descargas";
 import { dialog } from "../../../../../services/dialogService";
 import SeccionPanel from "./SeccionPanel";
+import IconoPaso from "../../../../../components/common/IconoPaso";
 
 /* Estos documentos van detrás de un endpoint con token: un <a href> relativo
    apuntaba al dominio del frontend y no descargaba nada. Ver
@@ -173,10 +174,10 @@ export default function CierreServicioMasterCliente({ idSolicitud }) {
 
   return (
     <SeccionPanel
-      numero="8"
-      titulo="Cierre de servicio y derivación"
+      numero="6"
+      titulo="Cierre y visado"
       subtitulo={subtitulo}
-      sectionId="8"
+      sectionId="6"
     >
       {loading && (
         <div className="flex items-center gap-2 text-neutral-400 py-2">
@@ -195,14 +196,46 @@ export default function CierreServicioMasterCliente({ idSolicitud }) {
       {!loading && !msg && data && (
         <div className="space-y-5">
 
-          {/* Header banner */}
-          <div className="flex items-center gap-4 bg-[#1D6A4A] rounded-xl px-5 py-4">
-            <span className="text-3xl shrink-0">🏁</span>
-            <div className="min-w-0 flex-1">
-              <p className="text-white font-bold text-base">Cierre del expediente #{idSolicitud}</p>
-              <p className="text-white/65 text-xs mt-0.5">
-                Tu proceso está en curso — aquí verás el resumen final cuando concluya.
-              </p>
+          {masterFinal ? (
+            <div className="ex-final">
+              <span className="ex-final-ico">🎓</span>
+              <div className="min-w-0">
+                <small>Tu máster</small>
+                <b>{masterFinal.master_label || masterFinal.organismo}</b>
+                <span className="l">{masterFinal.master_label ? masterFinal.organismo : "Admisión confirmada"} · tu carta de admisión y tu matrícula quedan en Postulaciones</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 bg-[#1D6A4A] rounded-xl px-5 py-4">
+              <span className="text-3xl shrink-0">🏁</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-white font-bold text-base">Cierre del expediente #{idSolicitud}</p>
+                <p className="text-white/65 text-xs mt-0.5">
+                  Tu proceso está en curso — aquí verás el resumen final cuando concluya.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Los dos caminos: con la carta de admisión ya se puede empezar. */}
+          <div>
+            <p className="ex-sub">El siguiente paso: tu visado</p>
+            <p className="text-[12.5px] text-neutral-500 leading-relaxed mb-1">
+              El camino depende de dónde estés cuando empiece el trámite. Elige uno y tu asesor abre el expediente con tus datos ya cargados.
+            </p>
+            <div className="ex-rutas">
+              <button type="button" className="ex-ruta" aria-pressed={false} onClick={handleCTA}>
+                <span className="ex-h-ico"><IconoPaso nombre="idCard" /></span>
+                <b>Visa de estudios desde Perú</b>
+                <em>Elegir</em>
+                <span className="d">Se pide en el consulado con la carta de admisión, medios económicos de seis meses de origen lícito y seguro. Inspira lleva el expediente.</span>
+              </button>
+              <button type="button" className="ex-ruta" aria-pressed={false} onClick={handleCTA}>
+                <span className="ex-h-ico"><IconoPaso nombre="home" /></span>
+                <b>Estancia por estudios en España</b>
+                <em>Elegir</em>
+                <span className="d">Si ya estás en España con estancia legal. Solo cuenta con fondos propios. Inspira presenta el EX-00.</span>
+              </button>
             </div>
           </div>
 

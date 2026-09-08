@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { apiGET } from "../../../../../services/api";
 import SeccionPanel, { SeccionSiempreAbiertoCtx } from "./SeccionPanel";
+import IconoPaso from "../../../../../components/common/IconoPaso";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -174,6 +175,18 @@ const STEPS = [
 ];
 
 const PRES_MIN = 500, PRES_MAX = 15000;
+
+// Las secciones plegables del panel: cada una agrupa pasos del asistente, con
+// las mismas preguntas y la misma validación. La última es el repaso.
+const SECCIONES = [
+  { t: "Tu formación",                  s: "Carrera, universidad y promedio",        ico: "cap",       pasos: [0, 1] },
+  { t: "Experiencia e investigación",   s: "Lo que puntúa además de las notas",      ico: "briefcase", pasos: [2, 3] },
+  { t: "Idiomas y becas",               s: "Inglés, idioma del máster y ayudas",     ico: "language",  pasos: [4, 5] },
+  { t: "Qué quieres estudiar",          s: "Temas, enlaces y para qué lo quieres",   ico: "sparkles",  pasos: [6] },
+  { t: "Duración, prácticas y presupuesto", s: "Cuánto dura y cuánto puedes pagar",  ico: "coins",     pasos: [7] },
+  { t: "Dónde y cuándo",                s: "Comunidades y fecha de inicio",          ico: "pin",       pasos: [8] },
+  { t: "Revisar y enviar",              s: "Un vistazo antes de enviarlo",           ico: "send",      pasos: [], resumen: true },
+];
 
 // ── Utilidades ────────────────────────────────────────────────────────────────
 
@@ -591,6 +604,7 @@ export default function FormularioDatosAcademicos({
 
   const siempreAbierto = useContext(SeccionSiempreAbiertoCtx);
   const [editando, setEditando]       = useState(false);
+  const [seccAbierta, setSeccAbierta] = useState(0);
 
   useEffect(() => {
     apiGET("/api/catalogo/ramas").then((r) => {
@@ -742,10 +756,10 @@ export default function FormularioDatosAcademicos({
 
   // ── Renderizado de cada paso ──────────────────────────────────────────────
 
-  function renderStep() {
+  function renderStep(s = step) {
     const errBox = (field) => has(field);
 
-    switch (step) {
+    switch (s) {
 
       // ── PASO 1: Tu carrera ──────────────────────────────────────────────
       case 0: return (
@@ -1492,102 +1506,113 @@ export default function FormularioDatosAcademicos({
 
   const estado = hasData ? "completado" : "pendiente";
 
-  // ── Modo inline (panel de dos columnas) ──────────────────────────────────────
+  // ── Modo inline: las secciones del expediente ────────────────────────────────
+  //
+  // El asistente de nueve pasos pasó a ser una lista de secciones plegables
+  // (Carina, 08/09/2026): se ve de un golpe lo que falta, se entra a corregir
+  // una sola cosa sin recorrer el resto, y se guarda solo. Las preguntas y su
+  // validación son exactamente las mismas: cada sección agrupa los pasos que
+  // ya existían, y el motor sigue recibiendo los mismos campos.
   if (siempreAbierto) {
-    const subtitulo = hasData && !editando
-      ? "Datos guardados"
-      : hasData
-        ? `Paso ${step + 1} / ${STEPS.length} — ${STEPS[step].title}`
-        : "Completa este formulario para personalizar tu informe.";
+    const completa = (sec) => sec.pasos.every((i) => validateStep(i, formData, planCCAAs).length === 0);
+    const nOk = SECCIONES.filter(completa).length;
+    const abrirSecc = (i) => {
+      const sec = SECCIONES[i];
+      setSeccAbierta((prev) => (prev === i ? -1 : i));
+      if (sec?.pasos?.length) { setStep(sec.pasos[0]); setShowErrors(false); }
+    };
+    const seguir = (i) => {
+      const sec = SECCIONES[i];
+      const falta = sec.pasos.find((p) => validateStep(p, formData, planCCAAs).length > 0);
+      if (falta !== undefined) { setStep(falta); setShowErrors(true); return; }
+      setShowErrors(false);
+      onGuardarProgreso?.();
+      setSeccAbierta(Math.min(SECCIONES.length - 1, i + 1));
+      const sig = SECCIONES[i + 1];
+      if (sig?.pasos?.length) setStep(sig.pasos[0]);
+    };
 
     return (
-      <SeccionPanel numero="3" titulo="Formulario de datos académicos" subtitulo={subtitulo} estado={estado}>
-        {hasData && !editando ? (
-          <ResumenDatos formData={formData} onEditar={() => { setEditando(true); setStep(0); }} />
-        ) : (
-          <form onSubmit={(e) => e.preventDefault()} className="flex-1 min-h-0 flex flex-col gap-3">
-            {/* Barra de progreso */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-xs font-semibold text-primary">
-                  {STEPS[step].icon} {STEPS[step].title}
-                </span>
-                <span className="text-[10px] text-neutral-400 font-mono">{step + 1} / {STEPS.length}</span>
-              </div>
-              <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-1.5 bg-primary rounded-full transition-all duration-300"
-                  style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
-              </div>
-            </div>
+      <SeccionPanel
+        numero="2"
+        titulo="Formulario académico"
+        subtitulo="Con esto preparamos tu informe. Puedes ir por partes: se guarda solo. Cuanto más concreto seas en qué quieres estudiar, más afinado saldrá."
+        estado={estado}
+      >
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-1">
+          <p className="text-[12.5px] font-bold text-emerald-700 inline-flex items-center gap-1.5">
+            <IconoPaso nombre="check" className="w-4 h-4" strokeWidth={2.6} />
+            {hasData ? "Guardado automáticamente" : "Se guarda solo al escribir"}
+          </p>
+          <span className="ex-est" data-e={nOk === SECCIONES.length ? "ok" : "on"}>
+            {nOk} de {SECCIONES.length} secciones
+          </span>
+        </div>
+        <div className="h-2 bg-neutral-100 rounded-full overflow-hidden mb-3">
+          <div className="h-full rounded-full bg-gradient-to-r from-[#1d7a52] to-[#35b57f] transition-all duration-700"
+            style={{ width: `${Math.round((nOk / SECCIONES.length) * 100)}%` }} />
+        </div>
 
-            {/* Círculos de navegación */}
-            <div className="flex items-center">
-              {STEPS.map((s, i) => (
-                <div key={i} className="flex items-center flex-1 last:flex-none">
-                  <button type="button"
-                    onClick={() => { if (i !== step && (i < step || hasData)) setStep(i); }}
-                    title={s.title}
-                    className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-sm font-bold transition-all active:scale-90 ${
-                      i < step   ? "bg-emerald-500 text-white cursor-pointer hover:bg-emerald-400 shadow-sm"
-                      : i === step ? "bg-primary text-white shadow-md ring-[3px] ring-primary/25"
-                      : hasData    ? "bg-primary-light/15 text-primary-light cursor-pointer hover:bg-primary-light/30"
-                      :              "bg-neutral-100 text-neutral-400 cursor-default"
-                    }`}>
-                    {i < step ? "✓" : i + 1}
-                  </button>
-                  {i < STEPS.length - 1 && (
-                    <div className={`flex-1 h-px mx-1 ${i < step ? "bg-emerald-300" : "bg-neutral-200"}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Navegación — arriba, estática */}
-            <div className="flex items-center justify-between gap-3 border-b border-neutral-100 pb-3">
-              <button
-                type="button"
-                onClick={() => {
-                  if (step === 0 && hasData) { setEditando(false); }
-                  else { setStep((p) => Math.max(0, p - 1)); }
-                }}
-                disabled={step === 0 && !hasData}
-                className="px-4 py-2 text-sm font-medium border border-neutral-200 rounded-xl hover:bg-neutral-50 transition disabled:opacity-30 active:scale-95"
-              >
-                {step === 0 && hasData ? "Cancelar" : "← Anterior"}
-              </button>
-
-              {!isLast ? (
-                <button type="button" onClick={handleNext}
-                  className="px-6 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-light transition active:scale-95">
-                  Continuar →
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-2">
+          {SECCIONES.map((sec, i) => {
+            const open = seccAbierta === i;
+            const ok = completa(sec);
+            return (
+              <section key={sec.t} className="ex-secc" data-abierta={open ? 1 : 0} data-ok={ok ? 1 : 0}>
+                <button type="button" className="ex-secc-h" onClick={() => abrirSecc(i)} aria-expanded={open}>
+                  <span className="ex-secc-ico"><IconoPaso nombre={sec.ico} /></span>
+                  <span className="ex-secc-txt">
+                    <b>{i + 1}. {sec.t}</b>
+                    <span>{sec.s}</span>
+                  </span>
+                  <span className="ex-est" data-e={ok ? "ok" : "info"}>{ok ? "Completa" : "Pendiente"}</span>
+                  <svg className="ex-secc-chev" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+                  </svg>
                 </button>
-              ) : (
-                <button type="button" onClick={handleSaveInline} disabled={savingForm}
-                  className="inline-flex items-center gap-2 px-6 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-light disabled:opacity-50 transition active:scale-95">
-                  {savingForm
-                    ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Guardando…</>
-                    : "✓ Guardar formulario"
-                  }
-                </button>
-              )}
-            </div>
 
-            {showErrors && validateStep(step, formData, planCCAAs).length > 0 && (
-              <ErrBox show>Completa todos los campos requeridos antes de continuar.</ErrBox>
-            )}
-
-            {/* Contenido del paso — scroll interno aquí */}
-            <div className="flex-1 min-h-0 flex flex-col overflow-hidden border border-neutral-100 rounded-xl shadow-sm">
-              <div className="shrink-0 px-4 py-3 border-b border-neutral-100 bg-gradient-to-r from-primary/6 to-transparent flex items-center gap-2">
-                <span className="text-base shrink-0">{STEPS[step].icon}</span>
-                <h3 className="text-sm font-bold text-primary">{STEPS[step].title}</h3>
-              </div>
-              <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-4 py-4">
-                {renderStep()}
-              </div>
-            </div>
-          </form>
-        )}
+                {open && (
+                  <div className="ex-secc-b">
+                    {sec.resumen ? (
+                      <>
+                        <ResumenDatos formData={formData} />
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                          <button type="button" onClick={handleSubmitFormulario} disabled={savingForm} className="ex-btn">
+                            <IconoPaso nombre="send" />
+                            {savingForm ? "Enviando…" : hasData ? "Guardar y recalcular mi informe" : "Enviar a mi asesor"}
+                          </button>
+                          <span className="text-[11px] text-neutral-400">
+                            Al enviar, tu asesor recalcula el informe sin perder lo que ya marcaste.
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {sec.pasos.map((p, k) => (
+                          <div key={p} className={k > 0 ? "mt-5 pt-5 border-t border-neutral-100" : ""}>
+                            {sec.pasos.length > 1 && (
+                              <p className="ex-sub">{STEPS[p].title}</p>
+                            )}
+                            {renderStep(p)}
+                          </div>
+                        ))}
+                        {showErrors && sec.pasos.some((p) => validateStep(p, formData, planCCAAs).length > 0) && (
+                          <ErrBox show>Completa los campos marcados para seguir.</ErrBox>
+                        )}
+                        <div className="flex flex-wrap items-center gap-2 mt-4">
+                          <button type="button" onClick={() => seguir(i)} className="ex-btn">
+                            Guardar y seguir <IconoPaso nombre="arrowRight" />
+                          </button>
+                          <span className="text-[11px] text-neutral-400">Se guarda solo al escribir.</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </form>
       </SeccionPanel>
     );
   }

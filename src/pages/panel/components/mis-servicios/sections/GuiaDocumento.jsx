@@ -25,9 +25,33 @@ function Visor({ modelo, onCerrar }) {
   );
 }
 
-export default function GuiaDocumento({ guia, compacta = false }) {
+// `soloModelos`: la tira de modelos sin el resto de la ficha. Va en la fila
+// del documento, a la vista, porque ver cómo debe quedar es lo que más ayuda
+// y escondido en el desplegable casi nadie lo abría. (Carina, 08/09/2026)
+export default function GuiaDocumento({ guia, compacta = false, soloModelos = false }) {
   const [abierto, setAbierto] = useState(null);
   if (!guia) return null;
+  if (soloModelos) {
+    if (!guia.modelos?.length) return null;
+    return (
+      <div>
+        <p className="ex-sub" style={{ marginBottom: 6 }}>Así debe verse</p>
+        <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1">
+          {guia.modelos.map((m) => (
+            <button key={m.src} type="button" onClick={() => setAbierto(m)}
+              className="ux-tap shrink-0 w-[104px] text-left group" title={m.pie}>
+              <span className="block w-[104px] h-[138px] overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm group-hover:border-primary/40">
+                <img src={m.src} alt={m.pie} loading="lazy" className="w-full h-full object-cover object-top" />
+              </span>
+              <span className="block text-[10px] text-neutral-500 leading-snug mt-1 line-clamp-2">{m.pie}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-[10px] text-neutral-400 mt-1">Modelos reales con los datos tapados. Toca uno para verlo grande.</p>
+        {abierto && <Visor modelo={abierto} onCerrar={() => setAbierto(null)} />}
+      </div>
+    );
+  }
 
   return (
     <div className={compacta ? "space-y-3" : "space-y-4"}>

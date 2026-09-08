@@ -223,6 +223,13 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
         </div>
       )}
 
+      {/* Los modelos, a la vista: ver cómo debe quedar es lo que más ayuda. */}
+      {guia?.modelos?.length > 0 && (
+        <div style={{ gridColumn: 2 }}>
+          <GuiaDocumento guia={guia} soloModelos />
+        </div>
+      )}
+
       {/* Archivos subidos */}
       {hayDocs && (
         <div className="ex-doc-archivos">

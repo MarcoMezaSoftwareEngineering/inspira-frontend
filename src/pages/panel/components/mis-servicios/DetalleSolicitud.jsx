@@ -385,7 +385,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col lg:h-full lg:min-h-0">
 
       {/* Fila superior: volver y, si lo hay, el error. */}
       <div className="shrink-0 flex items-center gap-3 mb-3">
@@ -411,7 +411,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
 
       {/* Panel principal */}
       {!loading && !error && detalle && (
-        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
+        <div className="flex flex-col lg:flex-row gap-3 lg:flex-1 lg:min-h-0">
 
           {/* ── Pantalla grande: columna con la cabecera y los pasos ── */}
           <div className="hidden lg:flex w-[290px] shrink-0 flex-col gap-3 overflow-y-auto pr-0.5">
@@ -419,7 +419,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
             <RutaPasos pasos={pasosRuta} activo={activeSection} onIr={setActiveSection} vertical />
           </div>
 
-          <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-3">
+          <div className="flex-1 min-w-0 flex flex-col gap-3 lg:min-h-0">
           {/* El paso en el que está y lo primero que le toca hacer. */}
           <div key={`${activeSection}-titulo`} className="shrink-0 space-y-3 rp-entra">
             <TituloPaso paso={pasoActivo} total={navSections.length} indice={indicePaso + 1} />
@@ -434,7 +434,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
 
           {/* ── Contenido de la sección activa. La clave por sección hace que
               cada una entre con su transición; el expediente no se remonta. ── */}
-          <div key={activeSection} className="pnl-entra flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div key={activeSection} className="pnl-entra flex flex-col lg:flex-1 lg:min-h-0 lg:overflow-hidden">
             <SeccionSiempreAbiertoCtx.Provider value={true}>
 
               {activeSection === "docs" && (

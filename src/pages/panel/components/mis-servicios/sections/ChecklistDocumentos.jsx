@@ -403,7 +403,10 @@ export default function ChecklistDocumentos({
     if (cargarTodo) cargarTodo();
   }
 
-  const sinDoc = total - aprobados;
+  const est = (it) => (it.estado_item || "pendiente").toLowerCase();
+  const enRevision = checklist.filter((it) => est(it) === "enviado").length;
+  const observados = checklist.filter((it) => ["observado", "rechazado", "solicitado"].includes(est(it))).length;
+  const sinDoc = checklist.filter((it) => !(it.documentos || []).length && !["aprobado", "no_aplica"].includes(est(it))).length;
 
   return (
     <>
@@ -449,14 +452,22 @@ export default function ChecklistDocumentos({
           </div>
         )}
 
+        {/* Cuántos van, de un vistazo: el número grande y la barra. */}
         {!bloqueado && total > 0 && (
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <p className="text-sm text-neutral-500">
-              Sube todos tus documentos para que tu asesor pueda revisarlos.
-            </p>
-            <div className="flex gap-4 text-xs font-semibold">
-              <span className="text-emerald-600">● {aprobados} Listos</span>
-              <span className="text-neutral-400">● {sinDoc} Sin doc.</span>
+          <div className="mb-4">
+            <div className="flex items-end justify-between gap-3 flex-wrap">
+              <p className="text-[26px] font-black text-neutral-900 leading-none tabular-nums">
+                {aprobados} <span className="text-[13px] font-semibold text-neutral-400">de {total} aprobados</span>
+              </p>
+              <div className="flex gap-3 text-[11.5px] font-semibold">
+                {enRevision > 0 && <span className="text-sky-600">● {enRevision} en revisión</span>}
+                {observados > 0 && <span className="text-amber-600">● {observados} por corregir</span>}
+                {sinDoc > 0 && <span className="text-neutral-400">● {sinDoc} sin subir</span>}
+              </div>
+            </div>
+            <div className="h-2 bg-neutral-100 rounded-full overflow-hidden mt-2.5">
+              <div className="h-full rounded-full bg-gradient-to-r from-[#1d7a52] to-[#35b57f] transition-all duration-700"
+                style={{ width: `${Math.round((aprobados / total) * 100)}%` }} />
             </div>
           </div>
         )}

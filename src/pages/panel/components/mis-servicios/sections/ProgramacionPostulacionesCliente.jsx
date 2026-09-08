@@ -2,15 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import { apiGET, apiPOST, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
+import IconoPaso from "../../../../../components/common/IconoPaso";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function diasHasta(str) {
-  if (!str) return null;
-  const d = new Date(str);
-  if (isNaN(d.getTime())) return null;
-  return Math.ceil((d.getTime() - Date.now()) / 86400000);
-}
 
 function fmtFecha(str) {
   if (!str) return "—";
@@ -38,143 +32,12 @@ async function verArchivo(idSolicitud, storagePath) {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const P_COLORS = ["#013446", "#1D6A4A", "#f59e0b", "#9ca3af", "#d1d5db"];
-
-const ESTADOS_OPT = [
-  { val: "pendiente", label: "⏳ Pendiente" },
-  { val: "proceso",   label: "⚡ En proceso" },
-  { val: "postulado", label: "📤 Postulado" },
-  { val: "admitido",  label: "✅ Admitido" },
-  { val: "denegado",  label: "❌ Denegado" },
-  { val: "lista",     label: "⏳ Lista espera" },
-];
-
-const TABS = [
-  { id: "fec", label: "📅 Fechas" },
-  { id: "por", label: "🔗 Portal y claves" },
-  { id: "doc", label: "📁 Justificantes" },
-  { id: "seg", label: "📝 Seguimiento" },
-];
-
 const DOC_LABEL = { falta: "Falta", pendiente: "En revisión", ok: "Subido" };
 const DOC_CLS   = {
   falta:    "bg-red-50 text-red-600 border-red-200",
   pendiente:"bg-amber-50 text-amber-600 border-amber-200",
   ok:       "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
-
-// ── KanbanMini ────────────────────────────────────────────────────────────────
-
-function KanbanMini({ posts }) {
-  const n = (e) => posts.filter((p) => p.estado === e).length;
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      {[
-        { key: "pendiente", label: "Pendiente", cls: "text-neutral-400",  bg: "bg-neutral-50 border-neutral-100" },
-        { key: "proceso",   label: "En proceso", cls: "text-primary",   bg: "bg-primary/5 border-primary/15" },
-        { key: "postulado", label: "Postulado",  cls: "text-amber-500",   bg: "bg-amber-50 border-amber-100" },
-        { key: "admitido",  label: "Admitido",   cls: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100" },
-      ].map(({ key, label, cls, bg }) => (
-        <div key={key} className={`rounded-xl border text-center py-2.5 ${bg}`}>
-          <p className={`text-[9px] font-bold uppercase tracking-widest font-mono ${cls}`}>{label}</p>
-          <p className={`font-serif text-xl font-black mt-0.5 ${cls}`}>{n(key)}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── AlertaBanner ──────────────────────────────────────────────────────────────
-
-function AlertaBanner({ posts }) {
-  const urgentes = posts
-    .map((p) => ({ ...p, dias: diasHasta(p.fecha_cierre) }))
-    .filter((p) => p.dias !== null && p.dias > 0 && p.dias <= 20)
-    .sort((a, b) => a.dias - b.dias);
-  if (!urgentes.length) return null;
-  const u = urgentes[0];
-  return (
-    <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-800">
-      <span className="shrink-0 mt-0.5">🚨</span>
-      <span>
-        <strong>Cierre urgente:</strong> {u.nombre_limpio} cierra el{" "}
-        <strong>{fmtFecha(u.fecha_cierre)} — en {u.dias} día{u.dias !== 1 ? "s" : ""}</strong>.
-        Verificar documentos y portal.
-      </span>
-    </div>
-  );
-}
-
-// ── TabFechas (read-only + toggles alertas) ───────────────────────────────────
-
-function FechaBox({ label, valor, field }) {
-  const dias = field === "fecha_cierre" ? diasHasta(valor) : null;
-  const urgente = dias !== null && dias > 0 && dias <= 7;
-  const pronto  = dias !== null && dias > 7  && dias <= 30;
-  return (
-    <div className={`rounded-xl border p-3 text-center ${
-      urgente ? "border-red-200 bg-red-50"
-      : pronto  ? "border-amber-200 bg-amber-50"
-      : valor   ? "border-emerald-200 bg-emerald-50"
-      : "border-neutral-200 bg-white"
-    }`}>
-      {urgente && <div className="w-2 h-2 rounded-full bg-red-500 mx-auto mb-1 animate-pulse" />}
-      <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-neutral-700">{fmtFecha(valor)}</p>
-      {dias !== null && dias > 0 && (
-        <p className={`text-[10px] mt-1 font-mono font-bold ${urgente ? "text-red-600" : pronto ? "text-amber-600" : "text-neutral-400"}`}>
-          {urgente ? `⚠ ${dias} días` : `~${dias} días`}
-        </p>
-      )}
-      {valor && dias !== null && dias <= 0 && (
-        <p className="text-[10px] mt-1 text-emerald-600 font-semibold">✓ Pasada</p>
-      )}
-    </div>
-  );
-}
-
-function TabFechas({ post, onSave }) {
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2">
-        <FechaBox label="Apertura"   valor={post.fecha_apertura}   field="fecha_apertura" />
-        <FechaBox label="Cierre"     valor={post.fecha_cierre}     field="fecha_cierre" />
-        <FechaBox label="Resultados" valor={post.fecha_resultados} field="fecha_resultados" />
-      </div>
-      {post.fase_nombre && (
-        <p className="text-[10.5px] text-neutral-500 bg-neutral-50 border border-neutral-200 rounded-lg px-2.5 py-1.5">
-          Convocatoria mas cercana: <strong className="text-primary">{post.fase_nombre}</strong>
-          {post.fase_curso ? <> — para empezar el curso <strong className="text-primary">{post.fase_curso}</strong></> : null}.
-          Si el plan es entrar un curso mas tarde, el plazo que le toca es otro.
-          Las fechas las publica la universidad y pueden cambiar.
-        </p>
-      )}
-      <div>
-        <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
-          Alertas automáticas programadas
-        </p>
-        <div className="space-y-1.5">
-          {(post.alertas || []).map((al, idx) => (
-            <div key={al.tipo} className="flex items-center gap-3 bg-neutral-50 rounded-lg px-3 py-2">
-              <span className="text-sm">{idx === 0 ? "🚨" : idx === 1 ? "⚠️" : "🔴"}</span>
-              <p className="flex-1 min-w-0 text-xs font-medium text-neutral-700">{al.label}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  const next = post.alertas.map((a, i) => i === idx ? { ...a, activo: !a.activo } : a);
-                  onSave("alertas", next);
-                }}
-                className={`w-9 h-5 rounded-full relative shrink-0 transition-colors ${al.activo ? "bg-primary" : "bg-neutral-200"}`}
-              >
-                <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${al.activo ? "left-[calc(100%-18px)]" : "left-0.5"}`} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── TabPortal (admin read-only + portales propios del cliente) ────────────────
 
@@ -382,73 +245,149 @@ function TabSeguimiento({ post }) {
   );
 }
 
-// ── MasterPostCard ────────────────────────────────────────────────────────────
+// ── La tarjeta de cada postulación ───────────────────────────────────────────
+//
+// Lo que el asesorado necesita saber y nada más (Carina, 08/09/2026): en qué
+// punto va, cuándo salen los resultados, sus claves y su resguardo, y —solo si
+// lo admiten— la carta y la matrícula. Quien vigila el portal es su asesor, así
+// que aquí no hay checklist ni tareas suyas.
 
-function MasterPostCard({ post, idSolicitud, onUpdate, onSave }) {
-  const [tab, setTab] = useState("fec");
+const ESTADO_INFO = {
+  pendiente: { label: "Pendiente de postular", cls: "bg-neutral-100 text-neutral-500", ico: "clock" },
+  proceso:   { label: "En preparación",        cls: "bg-sky-50 text-sky-700",          ico: "edit" },
+  postulado: { label: "Postulada",             cls: "bg-sky-50 text-sky-700",          ico: "send" },
+  admitido:  { label: "Admitida",              cls: "bg-emerald-50 text-emerald-700",  ico: "check" },
+  lista:     { label: "En lista de espera",    cls: "bg-amber-50 text-amber-700",      ico: "clock" },
+  denegado:  { label: "No admitida",           cls: "bg-red-50 text-red-600",          ico: "x" },
+};
 
-  const idx     = Math.max(0, (post.prioridad || 1) - 1);
-  const color   = P_COLORS[idx] ?? "#9ca3af";
-  const dias    = diasHasta(post.fecha_cierre);
-  const urgente = dias !== null && dias > 0 && dias <= 20;
+function LineaTiempo({ post }) {
+  const presentada   = ["postulado", "admitido", "lista", "denegado"].includes(post.estado);
+  const conResultado = ["admitido", "lista", "denegado"].includes(post.estado);
+  const admitida     = post.estado === "admitido";
+  const plazo = post.fecha_apertura || post.fecha_cierre
+    ? `${post.fecha_apertura ? fmtFecha(post.fecha_apertura) : "—"} → ${post.fecha_cierre ? fmtFecha(post.fecha_cierre) : "—"}`
+    : "por confirmar";
+  const pasos = [
+    { t: "Plazo",      d: plazo,                                              e: presentada ? "ok" : "on" },
+    { t: "Presentada", d: presentada ? "hecho" : "pendiente",                 e: presentada ? "ok" : "" },
+    { t: "Resultados", d: post.fecha_resultados ? fmtFecha(post.fecha_resultados) : "por publicar", e: conResultado ? "ok" : presentada ? "on" : "" },
+    { t: "Matrícula",  d: admitida ? "con tu asesor" : "—",                   e: admitida ? "on" : "" },
+  ];
+  return (
+    <ol className="grid grid-cols-4 gap-1 px-4 pb-3 relative">
+      <span className="absolute left-[calc(1rem+12.5%)] right-[calc(1rem+12.5%)] top-[9px] h-0.5 bg-neutral-100" aria-hidden="true" />
+      {pasos.map((p) => (
+        <li key={p.t} className="relative text-center">
+          <span className={`mx-auto mb-1.5 grid place-items-center w-5 h-5 rounded-full border-2 ${
+            p.e === "ok" ? "bg-emerald-600 border-emerald-600 text-white"
+            : p.e === "on" ? "bg-sky-100 border-sky-400"
+            : "bg-white border-neutral-200"
+          }`}>
+            {p.e === "ok" && <IconoPaso nombre="check" className="w-2.5 h-2.5" strokeWidth={3} />}
+          </span>
+          <span className="block text-[10px] font-bold text-neutral-700 leading-tight">{p.t}</span>
+          <span className="block text-[9.5px] text-neutral-400 leading-tight">{p.d}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
-  const subtitle = [
-    post.ciudad,
-    post.precio ? `${Math.round(post.precio).toLocaleString("es-ES")} €/año` : null,
-    post.fecha_cierre ? `Cierre: ${fmtFecha(post.fecha_cierre)}${urgente ? " 🔴" : ""}` : null,
-  ].filter(Boolean).join(" · ");
+function Plegable({ icono, titulo, children, abierto = false }) {
+  const [open, setOpen] = useState(abierto);
+  return (
+    <div className="border-t border-neutral-100">
+      <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open}
+        className="ux-tap w-full flex items-center gap-2.5 px-4 py-3 text-left">
+        <span className="w-7 h-7 rounded-lg bg-neutral-100 text-primary-light grid place-items-center shrink-0">
+          <IconoPaso nombre={icono} className="w-3.5 h-3.5" />
+        </span>
+        <span className="flex-1 text-[12.5px] font-bold text-neutral-800">{titulo}</span>
+        <svg className={`w-4 h-4 text-neutral-300 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      {open && <div className="px-4 pb-4 pnl-entra">{children}</div>}
+    </div>
+  );
+}
 
+function MasterPostCard({ post, idSolicitud, onSave }) {
+  const info = ESTADO_INFO[post.estado] || ESTADO_INFO.pendiente;
+  const admitida = post.estado === "admitido";
   const onSaveF = (field, value) => onSave(post.id_master, field, value);
+  const sub = [post.universidad, post.ciudad].filter(Boolean).join(" · ");
 
   return (
-    <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
-      {/* Cabecera */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-        <div
-          style={{ background: color }}
-          className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black text-white font-mono"
-        >
-          P{post.prioridad || idx + 1}
-        </div>
+    <article className={`border rounded-2xl overflow-hidden bg-white ${admitida ? "border-emerald-300" : "border-neutral-200"}`}>
+      <div className="flex items-start gap-3 px-4 pt-4 pb-3">
+        <span className={`shrink-0 w-10 h-10 rounded-xl grid place-items-center ${admitida ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-primary-light"}`}>
+          <IconoPaso nombre="cap" className="w-5 h-5" />
+        </span>
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-neutral-900 leading-tight truncate">
-            {post.nombre_limpio || "(Sin nombre)"}
-          </p>
-          {subtitle && <p className="text-[11px] text-neutral-500 truncate mt-0.5">{subtitle}</p>}
+          <p className="text-[13.5px] font-bold text-neutral-900 leading-snug">{post.nombre_limpio || "(Sin nombre)"}</p>
+          {sub && <p className="text-[11.5px] text-neutral-500 leading-snug">{sub}</p>}
         </div>
-        <select
-          value={post.estado}
-          onChange={(e) => onSaveF("estado", e.target.value)}
-          className="shrink-0 text-[11px] font-semibold border border-neutral-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-primary cursor-pointer"
-        >
-          {ESTADOS_OPT.map((o) => (
-            <option key={o.val} value={o.val}>{o.label}</option>
-          ))}
-        </select>
+        <span className={`shrink-0 inline-flex items-center gap-1 text-[10.5px] font-bold px-2.5 py-1 rounded-full ${info.cls}`}>
+          <IconoPaso nombre={info.ico} className="w-3 h-3" strokeWidth={2.4} />
+          {info.label}
+        </span>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-neutral-100 overflow-x-auto">
-        {TABS.map((t) => (
-          <button key={t.id} type="button" onClick={() => setTab(t.id)}
-            className={`shrink-0 px-3.5 py-2 text-[11px] font-semibold border-b-2 transition-colors whitespace-nowrap ${
-              tab === t.id
-                ? "border-primary text-primary"
-                : "border-transparent text-neutral-400 hover:text-neutral-600"
-            }`}>
-            {t.label}
-          </button>
-        ))}
+      <LineaTiempo post={post} />
+
+      <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+        {post.precio ? (
+          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-700">
+            {Math.round(post.precio).toLocaleString("es-ES")} € el curso
+          </span>
+        ) : null}
+        {post.fase_nombre ? (
+          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-700">
+            {post.fase_nombre}{post.fase_curso ? ` · curso ${post.fase_curso}` : ""}
+          </span>
+        ) : null}
+        {post.fecha_resultados ? (
+          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700">
+            Resultados: {fmtFecha(post.fecha_resultados)}
+          </span>
+        ) : null}
       </div>
 
-      {/* Contenido */}
-      <div className="px-4 py-3">
-        {tab === "fec" && <TabFechas      post={post} onSave={onSaveF} />}
-        {tab === "por" && <TabPortal      post={post} onSave={onSaveF} />}
-        {tab === "doc" && <TabDocs        post={post} idSolicitud={idSolicitud} onSave={onSaveF} />}
-        {tab === "seg" && <TabSeguimiento post={post} />}
-      </div>
-    </div>
+      {admitida && (
+        <div className="mx-4 mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3">
+          <p className="text-[12.5px] font-bold text-emerald-800">🎉 Te han admitido</p>
+          <p className="text-[11.5px] text-emerald-900/80 leading-relaxed mt-0.5">
+            Tu carta de admisión y, cuando la hagas, tu matrícula quedan guardadas
+            en <b>Documentos del proceso</b>, más abajo en este mismo paso.
+          </p>
+        </div>
+      )}
+      {post.estado === "lista" && (
+        <div className="mx-4 mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3">
+          <p className="text-[12.5px] font-bold text-amber-800">En lista de espera</p>
+          <p className="text-[11.5px] text-amber-900/80 leading-relaxed mt-0.5">
+            Si alguien renuncia, subes de puesto. Tu asesor revisa cada adjudicación y te avisa.
+          </p>
+        </div>
+      )}
+
+      <Plegable icono="lock" titulo="Acceso al portal y claves">
+        <TabPortal post={post} onSave={onSaveF} />
+      </Plegable>
+
+      <Plegable icono="fileText" titulo="Resguardo y justificantes" abierto={post.estado === "postulado"}>
+        <TabDocs post={post} idSolicitud={idSolicitud} onSave={onSaveF} />
+      </Plegable>
+
+      {post.seguimiento ? (
+        <Plegable icono="message" titulo="Notas de tu asesor">
+          <TabSeguimiento post={post} />
+        </Plegable>
+      ) : null}
+    </article>
   );
 }
 
@@ -501,10 +440,6 @@ export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey
     finally { setSaving(false); }
   }
 
-  function handleUpdate(id_master, field, value) {
-    setPosts((prev) => prev.map((p) => p.id_master === id_master ? { ...p, [field]: value } : p));
-  }
-
   function handleSave(id_master, field, value) {
     let next;
     setPosts((prev) => {
@@ -553,14 +488,20 @@ export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey
           {saving && (
             <p className="text-[10px] text-neutral-400 font-mono text-right">Guardando…</p>
           )}
-          <KanbanMini posts={posts} />
-          <AlertaBanner posts={posts} />
+          <div className="flex items-start gap-2.5 rounded-xl border border-sky-100 bg-sky-50/70 px-3.5 py-2.5">
+            <span className="shrink-0 w-7 h-7 rounded-lg bg-white/80 text-primary-light grid place-items-center">
+              <IconoPaso nombre="search" className="w-3.5 h-3.5" />
+            </span>
+            <p className="text-[12px] text-sky-900 leading-relaxed">
+              <b>Tu asesor vigila los portales</b> y te avisa de cada requerimiento,
+              notificación y resultado. No tienes que entrar a comprobarlo.
+            </p>
+          </div>
           {posts.map((post) => (
             <MasterPostCard
               key={post.id_master}
               post={post}
               idSolicitud={idSolicitud}
-              onUpdate={handleUpdate}
               onSave={handleSave}
             />
           ))}

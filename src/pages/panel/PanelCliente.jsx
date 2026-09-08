@@ -226,7 +226,11 @@ export default function PanelCliente({ path }) {
         onTour={verTour}
       />
 
-      <main className={`flex-1 min-w-0 flex flex-col ${esScrollInterno ? "min-h-0" : "overflow-y-auto"}`}>
+      {/* En el móvil manda el scroll de la página: un expediente dentro de una
+          caja con scroll propio se siente atrapado y cuesta bajar. La columna
+          con scroll interno se queda solo en pantalla grande, donde la barra
+          de pasos tiene que permanecer a la vista. */}
+      <main className={`flex-1 min-w-0 flex flex-col overflow-y-auto ${esScrollInterno ? "lg:min-h-0 lg:overflow-hidden" : ""}`}>
         {/* Barra superior */}
         <div className="pnl-top sticky top-0 z-10 shrink-0">
           <button

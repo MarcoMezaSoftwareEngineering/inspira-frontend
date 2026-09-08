@@ -40,7 +40,7 @@ export default function SeccionPanel({
     : { type: "button", onClick: toggle };
 
   return (
-    <section className={`border border-neutral-200 rounded-2xl bg-white shadow-sm overflow-hidden ${siempreAbierto ? "flex-1 min-h-0 flex flex-col" : ""}`}>
+    <section className={`border border-neutral-200 rounded-2xl bg-white shadow-sm overflow-hidden ${siempreAbierto ? "flex flex-col lg:flex-1 lg:min-h-0" : ""}`}>
       <Header
         {...headerProps}
         className={`shrink-0 w-full text-left px-5 py-4 flex items-center justify-between gap-4 ${
@@ -86,7 +86,7 @@ export default function SeccionPanel({
           siempreAbierto
             ? (contentClassName !== undefined
                 ? contentClassName
-                : "flex-1 min-h-0 overflow-y-auto flex flex-col px-5 py-4")
+                : "flex flex-col px-5 py-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto")
             : (contentClassName !== undefined
                 ? contentClassName
                 : "px-5 py-4 overflow-y-auto max-h-[calc(100vh-200px)]")

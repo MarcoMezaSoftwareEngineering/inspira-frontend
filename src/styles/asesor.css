@@ -722,3 +722,187 @@ button.ase-metrica:hover .ase-metrica-ir { color: #1d6a4a; transform: translateX
   grid-column: 1 / -1; height: 3px; border-radius: 999px; margin-top: 2px;
   background: linear-gradient(90deg, var(--sky-2), var(--primary-2));
 }
+
+/* ══ Tracker de máster ═══════════════════════════════════════════════════
+   La hoja MACRO se mira desde el móvil tanto como desde el escritorio. En el
+   escritorio es una tabla —comparar veinte filas es para lo que sirve—, pero
+   en una pantalla estrecha esa misma tabla obligaba a arrastrar en horizontal
+   y el nombre de la universidad se cortaba a la mitad. Aquí abajo está la otra
+   forma de la misma fila: una ficha con las etiquetas delante del dato. */
+
+/* Tarjeta de cliente ─────────────────────────────────────────────────── */
+.ase-tm-cli {
+  background: #fff; border: 1px solid #e6ebe9; border-radius: 15px; overflow: hidden;
+  transition: border-color .2s, box-shadow .25s var(--ease, cubic-bezier(.22,1,.36,1));
+}
+.ase-tm-cli:hover { border-color: #d3dedb; }
+.ase-tm-cli[data-abierto="1"] { box-shadow: 0 10px 30px -26px rgba(1, 52, 70, .8); }
+
+/* La cabecera entera pliega y despliega: en el móvil un chevron de 12px no es
+   una zona de toque. Abrir el expediente va aparte, con su propio botón. */
+.ase-tm-cab { display: flex; align-items: stretch; gap: 2px; background: #f8fafa; border-bottom: 1px solid #edf1f0; }
+.ase-tm-cli[data-abierto="0"] .ase-tm-cab { border-bottom-color: transparent; }
+.ase-tm-plegar {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px;
+  padding: 10px 4px 10px 11px; text-align: left; font: inherit; color: inherit;
+  background: none; border: 0; cursor: pointer; transition: background .18s;
+}
+.ase-tm-plegar:hover { background: #f1f5f4; }
+.ase-tm-plegar:active { background: #e9efee; }
+.ase-tm-chev {
+  flex: 0 0 auto; width: 20px; height: 20px; display: grid; place-items: center;
+  border-radius: 7px; background: #e6edeb; color: #4c6a72;
+  transition: transform .25s var(--ease, cubic-bezier(.22,1,.36,1)), background .2s;
+}
+.ase-tm-cli[data-abierto="1"] .ase-tm-chev { transform: rotate(90deg); background: #dbe8e3; color: #1d6a4a; }
+.ase-tm-chev svg { width: 11px; height: 11px; }
+.ase-tm-nombre {
+  display: block; font-size: 13px; font-weight: 800; color: #1a3557; line-height: 1.25;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ase-tm-meta {
+  font-size: 10.5px; color: #90a4ae; line-height: 1.35; margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ase-tm-meta b { color: #62808f; font-weight: 700; }
+.ase-tm-meta i { font-style: normal; color: #b9770e; font-weight: 700; }
+.ase-tm-abrir {
+  flex: 0 0 auto; align-self: center; margin-right: 9px;
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  font-size: 11px; font-weight: 700; color: #046c8c;
+  background: #fff; border: 1px solid #d9e6ec; border-radius: 9px;
+  padding: 6px 9px; cursor: pointer; transition: background .18s, border-color .18s, transform .18s;
+}
+.ase-tm-abrir:hover { background: #eef7fa; border-color: #a9d1de; }
+.ase-tm-abrir:active { transform: scale(.95); }
+.ase-tm-abrir svg { width: 11px; height: 11px; }
+
+/* Resumen de estados de la tarjeta plegada: es lo único que se ve, así que
+   tiene que decir en qué punto está esa persona sin abrir nada. */
+.ase-tm-puntos { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 11px 9px 40px; }
+.ase-tm-punto {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9.5px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase;
+  padding: 3px 7px 3px 5px; border-radius: 999px; background: #f1f5f4; color: #5c7280;
+}
+.ase-tm-punto i { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+.ase-tm-punto b { font-variant-numeric: tabular-nums; color: #37474f; }
+
+/* Ficha de una postulación en el móvil ───────────────────────────────── */
+.ase-tm-post { padding: 11px 12px 12px; border-top: 1px solid #f1f4f3; }
+.ase-tm-post:first-child { border-top: 0; }
+.ase-tm-post-cab { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 9px; }
+.ase-tm-campos { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 5px 10px; align-items: start; margin: 0; }
+.ase-tm-campos dt {
+  font-size: 9px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase;
+  color: #a3b4bb; padding-top: 7px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.ase-tm-campos dd { margin: 0; min-width: 0; }
+
+/* Celda editable. La caja se ve siempre —en el móvil, un campo sin borde no
+   parece un campo— y avisa de que ha guardado, porque al salir del campo no
+   pasa nada visible y la duda es si se guardó o no. */
+.ase-tm-celda { position: relative; display: block; }
+.ase-tm-celda > input, .ase-tm-celda > textarea {
+  width: 100%; font: inherit; font-size: 12.5px; color: #0d2c3a; line-height: 1.45;
+  background: #fbfcfc; border: 1px solid #e6ebe9; border-radius: 9px;
+  padding: 6px 26px 6px 9px; outline: none;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+}
+.ase-tm-celda > textarea { resize: vertical; min-height: 54px; }
+.ase-tm-celda > input:hover, .ase-tm-celda > textarea:hover { border-color: #d3dedb; }
+.ase-tm-celda > input:focus, .ase-tm-celda > textarea:focus {
+  background: #fff; border-color: #1d6a4a; box-shadow: 0 0 0 3px rgba(29, 106, 74, .12);
+}
+.ase-tm-celda > input::placeholder, .ase-tm-celda > textarea::placeholder { color: #c3cfd4; }
+.ase-tm-celda[data-estado="error"] > input, .ase-tm-celda[data-estado="error"] > textarea {
+  border-color: #c0392b; background: #fdedec;
+}
+.ase-tm-aviso {
+  position: absolute; top: 7px; right: 8px; width: 13px; height: 13px;
+  display: grid; place-items: center; pointer-events: none;
+}
+.ase-tm-aviso svg { width: 13px; height: 13px; }
+@keyframes aseTmOk { 0% { opacity: 0; transform: scale(.5); } 22% { opacity: 1; transform: scale(1); } 72% { opacity: 1; } 100% { opacity: 0; } }
+.ase-tm-aviso[data-tipo="ok"] { color: #1d6a4a; animation: aseTmOk 1.7s var(--ease, cubic-bezier(.22,1,.36,1)) both; }
+.ase-tm-aviso[data-tipo="error"] { color: #c0392b; }
+@keyframes aseTmGira { to { transform: rotate(360deg); } }
+.ase-tm-aviso[data-tipo="guardando"] {
+  border: 2px solid #dbe3e1; border-top-color: #1d6a4a; border-radius: 50%;
+  animation: aseTmGira .7s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ase-tm-aviso[data-tipo="ok"] { animation: none; opacity: 1; }
+  .ase-tm-aviso[data-tipo="guardando"] { animation: none; }
+  .ase-tm-chev, .ase-tm-abrir, .ase-tm-cli { transition: none; }
+}
+
+/* Aviso de plazo: en rojo sólo cuando queda poco de verdad. */
+.ase-tm-plazo {
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 999px;
+  background: #f1f5f4; color: #7a8f98;
+}
+.ase-tm-plazo[data-urge="1"] { background: #fdedec; color: #c0392b; }
+.ase-tm-plazo[data-urge="2"] { background: #fef3e7; color: #b9770e; }
+
+/* Botón de quitar: pide confirmación en el propio sitio, sin ventana. */
+.ase-tm-quitar {
+  font-size: 10.5px; font-weight: 700; color: #b9c5cb; background: none; border: 0;
+  padding: 4px 6px; border-radius: 7px; cursor: pointer; white-space: nowrap;
+  transition: color .18s, background .18s;
+}
+.ase-tm-quitar:hover { color: #c0392b; background: #fdedec; }
+.ase-tm-quitar[data-confirmar="1"] { color: #fff; background: #c0392b; }
+
+/* Pie de la tarjeta: añadir universidad. */
+.ase-tm-anadir { display: flex; gap: 7px; padding: 10px 12px; border-top: 1px solid #f1f4f3; background: #fbfcfc; }
+.ase-tm-anadir input {
+  flex: 1; min-width: 0; font-size: 12.5px; color: #0d2c3a;
+  border: 1px solid #e0e7e5; border-radius: 9px; padding: 7px 10px; background: #fff; outline: none;
+  transition: border-color .18s, box-shadow .18s;
+}
+.ase-tm-anadir input:focus { border-color: #1d6a4a; box-shadow: 0 0 0 3px rgba(29, 106, 74, .12); }
+.ase-tm-anadir button {
+  flex: 0 0 auto; font-size: 12px; font-weight: 700; color: #fff; background: #1d6a4a;
+  border: 0; border-radius: 9px; padding: 7px 13px; cursor: pointer;
+  transition: background .18s, transform .18s, opacity .18s;
+}
+.ase-tm-anadir button:hover:not(:disabled) { background: #15533a; }
+.ase-tm-anadir button:active:not(:disabled) { transform: scale(.96); }
+.ase-tm-anadir button:disabled { background: #cfdad7; cursor: default; }
+
+/* Bloque de quien no tiene ninguna universidad cargada. Una fila por persona,
+   apilada: con `ml-auto` y ajuste de línea, un nombre largo empujaba el campo
+   a la línea siguiente y el botón a una tercera. */
+.ase-tm-sin { display: flex; flex-direction: column; gap: 0; }
+.ase-tm-sin-fila { padding: 11px 0; border-top: 1px solid #f6ede0; }
+.ase-tm-sin-fila:first-child { border-top: 0; padding-top: 3px; }
+.ase-tm-sin-nom {
+  font-size: 12.5px; font-weight: 800; color: #1a3557; background: none; border: 0; padding: 0;
+  text-align: left; cursor: pointer; line-height: 1.3;
+}
+.ase-tm-sin-nom:hover { text-decoration: underline; }
+.ase-tm-sin-etq { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 7px; }
+.ase-tm-sin-etq span {
+  font-size: 10px; font-weight: 600; color: #7a8f98; background: #f4f6f6;
+  border-radius: 999px; padding: 2px 8px;
+}
+
+.ase-tm-meta { display: block; }
+.ase-tm-plegar:disabled { cursor: default; }
+.ase-tm-plegar:disabled:hover { background: none; }
+
+/* En el escritorio la celda vuelve a ser hoja de cálculo: veinte cajas con
+   borde por fila convierten la tabla en un formulario y se deja de leer. El
+   borde aparece al pasar por encima, que es cuando dice «esto se edita». */
+@media (min-width: 1024px) {
+  .ase-tm-celda > input, .ase-tm-celda > textarea {
+    font-size: 11.5px; background: transparent; border-color: transparent;
+    padding: 4px 22px 4px 6px; border-radius: 6px;
+  }
+  .ase-tm-celda > textarea { min-height: 44px; }
+  .ase-tm-celda > input:hover, .ase-tm-celda > textarea:hover { border-color: #e0e7e5; background: #fff; }
+  .ase-tm-celda > input:focus, .ase-tm-celda > textarea:focus { box-shadow: 0 0 0 2px rgba(29, 106, 74, .14); }
+  .ase-tm-aviso { top: 5px; right: 5px; }
+}

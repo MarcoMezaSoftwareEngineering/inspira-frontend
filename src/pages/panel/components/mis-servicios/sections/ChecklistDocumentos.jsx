@@ -15,13 +15,13 @@ import { InstructivosContenido } from "./InstructivosPlantillas";
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 const ESTADO_CFG = {
-  aprobado:   { label: "Aprobado",  bg: "bg-emerald-50",  text: "text-emerald-700" },
-  enviado:    { label: "Enviado",   bg: "bg-sky-50",      text: "text-sky-700"     },
-  observado:  { label: "Observado", bg: "bg-red-50",      text: "text-red-700"     },
-  solicitado: { label: "Adicional", bg: "bg-violet-50",   text: "text-violet-700"  },
-  rechazado:  { label: "Rechazado", bg: "bg-rose-100",    text: "text-rose-800"    },
-  no_aplica:  { label: "No aplica", bg: "bg-neutral-50",  text: "text-neutral-500" },
-  pendiente:  { label: "Pendiente", bg: "bg-amber-50",    text: "text-amber-700"   },
+  aprobado:   { label: "Aprobado",   tono: "ok" },
+  enviado:    { label: "En revisión", tono: "on" },
+  observado:  { label: "Por corregir", tono: "warn" },
+  solicitado: { label: "Te lo piden", tono: "ped" },
+  rechazado:  { label: "Rechazado",  tono: "no" },
+  no_aplica:  { label: "No aplica",  tono: "info" },
+  pendiente:  { label: "Falta",      tono: "info" },
 };
 
 function getCfg(estado) {
@@ -177,154 +177,100 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
   }
 
   return (
-    <div
-      className={`border rounded-2xl p-3.5 pl-[62px] relative flex flex-col gap-2 ${
-        it.estado_item === "rechazado"
-          ? "border-rose-300 bg-rose-50/30"
-          : it.estado_item === "observado"
-          ? "border-red-200 bg-red-50/20"
-          : it.estado_item === "solicitado"
-          ? "border-violet-200 bg-violet-50/20"
-          : it.estado_item === "aprobado"
-          ? "border-emerald-200 bg-emerald-50/10"
-          : "border-neutral-200 bg-white"
-      }`}
-    >
+    <div className="ex-doc" data-e={(it.estado_item || "pendiente").toLowerCase()}>
       {/* El icono del documento con su número, el mismo que lleva en Drive. */}
-      <span className={`absolute left-3.5 top-3.5 w-9 h-9 rounded-xl grid place-items-center ${
-        itemAprobado ? "bg-emerald-50 text-emerald-700"
-        : ["observado", "rechazado"].includes(it.estado_item) ? "bg-amber-50 text-amber-700"
-        : it.estado_item === "solicitado" ? "bg-violet-50 text-violet-700"
-        : "bg-neutral-100 text-primary-light"
-      }`}>
-        <IconoPaso nombre={iconoDocumento(it.item?.nombre_item)} className="w-[18px] h-[18px]" />
-        {it.numero ? (
-          <i className="absolute -top-1.5 -left-1.5 min-w-[17px] h-[17px] px-1 rounded-md bg-[#10303f] text-white text-[9.5px] font-extrabold not-italic grid place-items-center">
-            {it.numero}
-          </i>
-        ) : null}
+      <span className="ex-doc-ico">
+        <IconoPaso nombre={iconoDocumento(it.item?.nombre_item)} />
+        {it.numero ? <i>{it.numero}</i> : null}
       </span>
 
-      {/* Nombre y estado */}
-      <div className="flex items-start gap-2">
-        <p className="flex-1 min-w-0 text-[13px] font-semibold text-neutral-900 leading-snug">{it.item?.nombre_item}</p>
-        <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
-          {cfg.label}
-        </span>
+      <div className="ex-doc-fila">
+        <span className="n">{it.item?.nombre_item}</span>
+        <span className="ex-est" data-e={cfg.tono}>{cfg.label}</span>
       </div>
 
       {/* Descripción, con el enlace del trámite cuando lo hay (Europass, sede). */}
       {it.item?.descripcion && (
-        <TextoConEnlaces texto={it.item.descripcion} className="text-xs text-neutral-500 leading-snug -mt-1" />
+        <TextoConEnlaces texto={it.item.descripcion} className="ex-doc-desc" />
       )}
 
-      {/* Requisitos exactos: formato, vigencia, apostilla. Plegado por defecto
-          para no enterrar el estado del documento bajo un muro de texto. */}
-      {requisitos && (
-        <details className="group -mt-0.5">
-          <summary className="cursor-pointer select-none text-[11.5px] font-semibold text-primary-light hover:underline list-none">
-            <span className="group-open:hidden">Ver requisitos ▾</span>
-            <span className="hidden group-open:inline">Ocultar requisitos ▴</span>
-          </summary>
-          <ul className="mt-2 space-y-1 border-l-2 border-neutral-200 pl-3">
-            {requisitos.map((r) => (
-              <li key={r} className="text-[11.5px] text-neutral-600 leading-snug">· {r}</li>
-            ))}
-          </ul>
-        </details>
-      )}
-
-      {/* La guía directa: qué es, por qué importa, qué verificar y cómo debe verse. */}
-      {guia && (
-        <details className="group -mt-0.5">
-          <summary className="cursor-pointer select-none text-[11.5px] font-semibold text-primary-light hover:underline list-none">
-            <span className="group-open:hidden">¿Cómo debe verse? · guía y modelo ▾</span>
-            <span className="hidden group-open:inline">Ocultar la guía ▴</span>
-          </summary>
-          <div className="mt-2 border-l-2 border-primary/15 pl-3">
-            <GuiaDocumento guia={guia} compacta />
-          </div>
-        </details>
-      )}
-
-      {/* Comentario del asesor */}
+      {/* Lo que pide tu asesor: corregir algo o un documento adicional. */}
       {it.comentario_asesor && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 text-xs text-amber-800">
-          💬 {it.comentario_asesor}
+        <div className="ex-doc-obs" data-k={(it.estado_item || "").toLowerCase() === "solicitado" ? "ped" : "obs"}>
+          <IconoPaso nombre={(it.estado_item || "").toLowerCase() === "solicitado" ? "plus" : "alert"} className="w-4 h-4 shrink-0 mt-0.5" />
+          <span><b>{(it.estado_item || "").toLowerCase() === "solicitado" ? "Tu asesor te pide:" : "Tu asesor necesita:"}</b> {it.comentario_asesor}</span>
         </div>
       )}
 
-      {/* Archivos y subida */}
-      {it.item?.permite_archivo && (
-        <div className="mt-auto flex flex-col gap-1.5">
-          {/* Lista de archivos subidos */}
-          {hayDocs &&
-            docs.map((doc) => {
-              const isDel = deleting === doc.id_documento;
-              const canDel =
-                !itemAprobado &&
-                (doc.estado_revision || "").toUpperCase() !== "APROBADO";
-              const puedeVer = esVisualizableInline(doc.mime_type);
-
-              return (
-                <div key={doc.id_documento}>
-                  <p
-                    className="text-xs text-neutral-600 font-medium truncate"
-                    title={doc.nombre_original}
-                  >
-                    📎 {doc.nombre_original}
-                  </p>
-                  <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                    {puedeVer && (
-                      <button
-                        onClick={() => onVerDoc(doc)}
-                        className="text-[11px] font-semibold px-2.5 py-1 rounded border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 transition-colors"
-                      >
-                        Ver
-                      </button>
-                    )}
-                    {canDel && (
-                      <button
-                        onClick={() => handleDelete(doc.id_documento)}
-                        disabled={isDel}
-                        className="text-[11px] font-semibold px-2.5 py-1 rounded border border-neutral-200 bg-white text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-                      >
-                        {isDel ? "…" : "Eliminar"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-          {/* Botón subir — estilo dashed */}
-          {!itemAprobado && (
-            <label
-              className={`mt-1 block text-center text-xs font-semibold py-3 rounded-lg border-2 border-dashed cursor-pointer transition-all select-none ${
-                subiendo
-                  ? "border-neutral-200 bg-neutral-50 text-neutral-400 cursor-wait"
-                  : "border-neutral-200 bg-neutral-50 text-neutral-500 hover:border-green-600 hover:bg-green-50 hover:text-green-700"
-              }`}
-            >
-              {subiendo ? "Subiendo…" : varios ? "↑ Subir archivos" : hayDocs ? "↑ Reemplazar el archivo" : "↑ Subir el documento"}
-              <input
-                type="file"
-                className="hidden"
-                onChange={handleUpload}
-                multiple={varios}
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
-                disabled={subiendo}
-              />
-            </label>
+      {/* Requisitos exactos y la guía con modelos: plegados, para no enterrar
+          el estado del documento bajo un muro de texto. */}
+      {(requisitos || guia) && (
+        <div className="ex-doc-pliegues">
+          {requisitos && (
+            <details>
+              <summary>Ver requisitos</summary>
+              <div className="ex-doc-cuerpo">
+                <ul>{requisitos.map((r) => <li key={r}>{r}</li>)}</ul>
+              </div>
+            </details>
           )}
-          {!itemAprobado && (
-            <p className="text-[10.5px] text-neutral-400 text-center leading-snug">
-              {varios
-                ? "Aquí sí puedes subir más de un archivo, cada uno completo."
-                : "Todo el documento junto, en un solo PDF. Si subes otro, reemplaza al anterior."}
-            </p>
+          {guia && (
+            <details>
+              <summary>Cómo debe verse · guía y modelo</summary>
+              <div className="ex-doc-cuerpo"><GuiaDocumento guia={guia} compacta /></div>
+            </details>
           )}
         </div>
+      )}
+
+      {/* Archivos subidos */}
+      {hayDocs && (
+        <div className="ex-doc-archivos">
+          {docs.map((doc) => {
+            const isDel = deleting === doc.id_documento;
+            const canDel = !itemAprobado && (doc.estado_revision || "").toUpperCase() !== "APROBADO";
+            const puedeVer = esVisualizableInline(doc.mime_type);
+            return (
+              <div key={doc.id_documento} className="ex-arch">
+                <IconoPaso nombre="clip" className="w-4 h-4" />
+                <span className="nm" title={doc.nombre_original}>{doc.nombre_original}</span>
+                {puedeVer && (
+                  <button type="button" onClick={() => onVerDoc(doc)}>
+                    <IconoPaso nombre="eye" className="w-3.5 h-3.5" /> Ver
+                  </button>
+                )}
+                {canDel && (
+                  <button type="button" className="rojo" onClick={() => handleDelete(doc.id_documento)} disabled={isDel}>
+                    {isDel ? "…" : "Eliminar"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Subir */}
+      {it.item?.permite_archivo && !itemAprobado && (
+        <>
+          <label className="ex-subir">
+            <IconoPaso nombre="upload" className="w-4 h-4" />
+            {subiendo ? "Subiendo…" : varios ? "Subir archivo" : hayDocs ? "Reemplazar el archivo" : "Subir el documento"}
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleUpload}
+              multiple={varios}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+              disabled={subiendo}
+            />
+          </label>
+          <p className="ex-nota">
+            {varios
+              ? "Aquí sí puedes subir más de un archivo, cada uno completo."
+              : "Todo el documento junto, en un solo PDF. Si subes otro, reemplaza al anterior."}
+          </p>
+        </>
       )}
     </div>
   );
@@ -481,8 +427,10 @@ export default function ChecklistDocumentos({
         {!bloqueado && gruposOrdenados.map(([nombre, items]) => (
           <div key={nombre} className="space-y-3">
             {multiGrupo && (
-              <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 pb-2 border-b border-neutral-100">
+              <p className="ex-grupo">
+                <span className="ex-h-ico"><IconoPaso nombre="folder" /></span>
                 {nombre}
+                <span className="cnt">{items.filter((x) => ["aprobado", "no_aplica"].includes((x.estado_item || "").toLowerCase())).length} de {items.length}</span>
               </p>
             )}
 
@@ -510,10 +458,7 @@ export default function ChecklistDocumentos({
               </div>
             )}
 
-            <div
-              className="grid gap-3"
-              style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
-            >
+            <div className="ex-docs">
               {items.map((it) => (
                 <DocCard
                   key={it.id_solicitud_item}

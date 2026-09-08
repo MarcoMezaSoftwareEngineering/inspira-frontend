@@ -39,8 +39,23 @@ export default function SeccionPanel({
     ? {}
     : { type: "button", onClick: toggle };
 
+  // Dentro de un expediente, la cabecera del paso ya la pone la pantalla
+  // (icono, «Paso 3 de 6», título y estado): repetirla aquí era el marco de
+  // más que hacía que los pasos no se vieran como el proyecto. Queda solo la
+  // tarjeta con su frase guía. (Carina, 08/09/2026)
+  if (siempreAbierto) {
+    return (
+      <section className="ex-sec flex flex-col lg:flex-1 lg:min-h-0">
+        {subtitulo && <p className="ex-lead">{subtitulo}</p>}
+        <div className={contentClassName !== undefined ? contentClassName : "lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:-mx-1 lg:px-1"}>
+          {children}
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className={`border border-neutral-200 rounded-2xl bg-white shadow-sm overflow-hidden ${siempreAbierto ? "flex flex-col lg:flex-1 lg:min-h-0" : ""}`}>
+    <section className={`border border-neutral-200 rounded-2xl bg-white shadow-sm overflow-hidden`}>
       <Header
         {...headerProps}
         className={`shrink-0 w-full text-left px-5 py-4 flex items-center justify-between gap-4 ${

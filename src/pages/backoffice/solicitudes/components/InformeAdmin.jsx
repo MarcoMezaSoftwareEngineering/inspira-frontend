@@ -551,7 +551,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   const lista = (v) => (Array.isArray(v) && v.filter(Boolean).length ? v.filter(Boolean).join(" · ") : null);
   const paramRows = [
     ["Máster que busca",   lista(datos.masteres_deseados)],
-    ["Especialización",    lista(datos.especializaciones)],
+    ["Temas de interés",   lista(datos.especializaciones)],
     ["Rama del máster",    compat?.perfil?.rama_label    || datos.area_interes_master],
     ["Sub-área",           compat?.perfil?.sub_area_label || null],
     ["Área de carrera",    datos.area_carrera],
@@ -652,7 +652,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
             )}
           </div>
         )}
-      </div>
+      </div>
       {nuevosCandidatos && (
         <div className="mx-5 mt-4 rounded-xl border border-[#F5C842]/60 bg-[#FFFBEA] px-4 py-3 text-xs text-neutral-700">
           <p className="font-bold text-[#7a5b00]">Recalculado con el formulario actual</p>

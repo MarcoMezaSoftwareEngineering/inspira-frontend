@@ -17,6 +17,47 @@ const AREAS_CARRERA = [
   { value: "Otra",                      label: "Otra" },
 ];
 
+// Temas que se sugieren según de dónde viene el asesorado. «¿En qué quieres
+// profundizar?» en blanco se quedaba en blanco: la gente no sabe qué escribir
+// hasta que ve un ejemplo de su campo. Se ofrecen como etiquetas para tocar;
+// lo que no esté aquí se escribe a mano igual. La clave es el área de la
+// carrera de origen; la rama del máster, si ya la marcó, añade las suyas.
+const SUGERENCIAS_TEMAS = {
+  "Derecho": ["Cooperación internacional", "Gestión pública", "Derecho digital e IA", "Compliance",
+    "Derechos humanos", "Derecho internacional", "Propiedad intelectual", "Fiscalidad", "Migraciones", "Derecho de empresa"],
+  "Administración y Negocios": ["Finanzas corporativas", "Marketing digital", "Recursos humanos", "Logística y cadena de suministro",
+    "Dirección de proyectos", "Emprendimiento", "Comercio internacional", "Análisis de datos", "Sostenibilidad"],
+  "Ingeniería y Tecnología": ["Inteligencia artificial", "Ciberseguridad", "Ciencia de datos", "Energías renovables",
+    "Industria 4.0", "Desarrollo de software", "Cloud", "Robótica", "BIM"],
+  "Ciencias Sociales": ["Cooperación al desarrollo", "Políticas públicas", "Comunicación", "Relaciones internacionales",
+    "Género e igualdad", "Intervención social", "Investigación social", "Migraciones"],
+  "Educación": ["Educación inclusiva", "Tecnología educativa", "Enseñanza de español", "Psicopedagogía",
+    "Dirección de centros", "Neuroeducación", "Formación del profesorado"],
+  "Salud": ["Salud pública", "Nutrición", "Neurociencia", "Gestión sanitaria", "Psicología clínica",
+    "Investigación biomédica", "Fisioterapia deportiva", "Epidemiología"],
+  "Humanidades": ["Patrimonio", "Gestión cultural", "Traducción", "Estudios de género", "Historia",
+    "Enseñanza de español", "Filosofía", "Comunicación"],
+  "Medio Ambiente": ["Cambio climático", "Economía circular", "Gestión ambiental", "Energías renovables",
+    "Sostenibilidad", "Gestión del agua", "Desarrollo sostenible"],
+  "Arte y Diseño": ["Diseño UX", "Dirección de arte", "Animación", "Arquitectura", "Diseño de producto",
+    "Gestión cultural", "Moda", "Diseño gráfico"],
+  "Otra": ["Inteligencia artificial", "Sostenibilidad", "Gestión de proyectos", "Marketing digital",
+    "Cooperación internacional", "Análisis de datos"],
+};
+const SUGERENCIAS_POR_RAMA = {
+  CIENCIAS_SOCIALES_JURIDICAS: ["Gestión pública", "Cooperación internacional", "Marketing digital", "Recursos humanos"],
+  INGENIERIA_ARQUITECTURA:     ["Inteligencia artificial", "Ciberseguridad", "Energías renovables", "BIM"],
+  CIENCIAS_SALUD:              ["Salud pública", "Nutrición", "Neurociencia", "Gestión sanitaria"],
+  CIENCIAS:                    ["Ciencia de datos", "Biotecnología", "Cambio climático", "Investigación"],
+  ARTES_HUMANIDADES:           ["Gestión cultural", "Patrimonio", "Traducción", "Enseñanza de español"],
+};
+
+function sugerirTemas(areaCarrera, rama) {
+  const lista = [...(SUGERENCIAS_TEMAS[areaCarrera] || []), ...(SUGERENCIAS_POR_RAMA[rama] || [])];
+  if (!lista.length) return SUGERENCIAS_TEMAS.Otra;
+  return [...new Set(lista)];
+}
+
 
 // Fallback estático (nombres exactos del seed) — solo si la API falla
 const TODAS_COMUNIDADES_FALLBACK = [
@@ -203,6 +244,71 @@ function FLabel({ children }) {
   );
 }
 
+/* Lista de temas como etiquetas. Se escribe uno, se añade, y queda como
+   chip que se quita con un toque; las sugerencias van debajo y entran igual.
+   En el móvil nadie pulsa Enter, así que también se añade al salir del campo. */
+function ListaTemas({ valor, onChange, sugerencias = [], campo, max = 6 }) {
+  const [texto, setTexto] = useState("");
+  const temas = (Array.isArray(valor) ? valor : []).map((t) => String(t || "").trim()).filter(Boolean);
+  const yaEsta = (t) => temas.some((x) => x.toLowerCase() === t.toLowerCase());
+  const lleno = temas.length >= max;
+
+  function anadir(t) {
+    const limpio = String(t || "").replace(/[,;]+/g, " ").trim();
+    setTexto("");
+    if (!limpio || yaEsta(limpio) || lleno) return;
+    onChange([...temas, limpio]);
+  }
+  const quitar = (i) => onChange(temas.filter((_, j) => j !== i));
+  const pendientes = sugerencias.filter((s) => !yaEsta(s));
+
+  return (
+    <div className="space-y-3">
+      {temas.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {temas.map((t, i) => (
+            <span key={`${t}-${i}`}
+              className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-full bg-primary text-white text-sm font-medium shadow-sm">
+              {t}
+              <button type="button" onClick={() => quitar(i)} aria-label={`Quitar ${t}`}
+                className="w-5 h-5 rounded-full grid place-items-center bg-white/20 hover:bg-white/35 text-[13px] leading-none">
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <input type="text" value={texto} className={`${campo} min-w-0`}
+          placeholder={lleno ? `Ya tienes ${max} temas` : "Ej.: cooperación internacional"}
+          disabled={lleno}
+          onChange={(e) => setTexto(e.target.value)}
+          onBlur={() => anadir(texto)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); anadir(texto); } }} />
+        <button type="button" onClick={() => anadir(texto)} disabled={lleno || !texto.trim()}
+          className="shrink-0 px-4 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-40 active:scale-95 transition">
+          Añadir
+        </button>
+      </div>
+
+      {pendientes.length > 0 && !lleno && (
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-2">Toca para añadir</p>
+          <div className="flex flex-wrap gap-2">
+            {pendientes.map((s) => (
+              <button key={s} type="button" onClick={() => anadir(s)}
+                className="px-3 py-1.5 rounded-full border border-dashed border-neutral-300 text-sm text-neutral-600 bg-white hover:border-primary hover:text-primary active:scale-95 transition">
+                + {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EMsg({ show, msg = "Selecciona una opción para continuar" }) {
   if (!show) return null;
   return <p className="text-xs text-red-500 mt-2">⚠ {msg}</p>;
@@ -298,7 +404,7 @@ function ResumenDatos({ formData, onEditar }) {
     { label: "Idioma del máster", value: idiomasMaster },
     { label: "Becas",            value: formData.beca_desea === "si" ? "Sí" : formData.beca_desea === "no" ? "No" : null },
     { label: "Máster que buscas", value: Array.isArray(formData.masteres_deseados) && formData.masteres_deseados.filter(Boolean).length ? formData.masteres_deseados.filter(Boolean).join(" · ") : null },
-    { label: "Especialización",  value: Array.isArray(formData.especializaciones) && formData.especializaciones.filter(Boolean).length ? formData.especializaciones.filter(Boolean).join(" · ") : null },
+    { label: "Temas de interés", value: Array.isArray(formData.especializaciones) && formData.especializaciones.filter(Boolean).length ? formData.especializaciones.filter(Boolean).join(" · ") : null },
     { label: "Rama de interés",  value: formData.area_interes_master },
     { label: "Duración",         value: DUR_LABELS[formData.duracion_preferida] },
     { label: "Prácticas",        value: PRAC_LABELS[formData.practicas_preferencia] },
@@ -928,17 +1034,17 @@ export default function FormularioDatosAcademicos({
             </div>
 
             <div>
-              <FLabel>¿Cuál es tu especialización, o en qué quieres profundizar?</FLabel>
+              <FLabel>¿Qué temas te interesan?</FLabel>
               <p className="text-xs text-neutral-400 mb-3">
-                Hasta dos. Ej.: «finanzas corporativas», «educación inclusiva», «ciberseguridad».
+                Cuéntanos con más detalle qué quieres estudiar, aunque no sepas el nombre del
+                máster. Escribe un tema y pulsa «Añadir» (hasta seis), o toca los que te sugerimos.
               </p>
-              <div className="space-y-2">
-                {[0, 1].map((i) => (
-                  <input key={i} type="text" className={campoTexto} value={especialidades[i] || ""}
-                    placeholder={["Especialización principal", "Otra (opcional)"][i]}
-                    onChange={(e) => ponerLista("especializaciones", especialidades, 2, i, e.target.value)} />
-                ))}
-              </div>
+              <ListaTemas
+                valor={especialidades}
+                onChange={(lista) => set("especializaciones", lista)}
+                sugerencias={sugerirTemas(formData.area_carrera, formData.area_interes_master)}
+                campo={campoTexto}
+              />
             </div>
 
             <div>

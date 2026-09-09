@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiGET, apiPOST, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
 import IconoPaso from "../../../../../components/common/IconoPaso";
+import { agruparPorPortal, estadoPortal, fechasPortal, unirCampo } from "../../../../../lib/portales";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -202,10 +203,33 @@ function TabDocs({ post, idSolicitud, onSave }) {
     }
   }
 
+  const resguardos = (post.justificantes || []).filter((j) => j.visible_para_cliente !== false);
+  async function descargarResguardo(j) {
+    try {
+      const token = localStorage.getItem("token");
+      const r = await fetch(`${API_URL}/portales/justificantes/${j.id_justificante}/descargar`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!r.ok) throw new Error();
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = j.nombre_archivo || "resguardo.pdf";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch { /* el botón queda; se puede reintentar */ }
+  }
+
   return (
     <div className="space-y-2">
-      {(post.documentos || []).length === 0 && (
-        <p className="text-xs text-neutral-400 italic text-center py-2">Sin documentos aún.</p>
+      {resguardos.map((j) => (
+        <div key={j.id_justificante} className="ex-arch">
+          <IconoPaso nombre="filetick" className="w-4 h-4" />
+          <span className="nm" title={j.nombre_archivo}>{j.tipo_justificante === "COMPROBANTE_PAGO" ? "Comprobante de pago" : j.tipo_justificante === "OTRO" ? "Constancia" : "Resguardo de la solicitud"} · {j.nombre_archivo}</span>
+          <small>{j.fecha_subida ? fmtFecha(j.fecha_subida) : ""}</small>
+          <button type="button" onClick={() => descargarResguardo(j)}><IconoPaso nombre="download" className="w-3.5 h-3.5" /> Descargar</button>
+        </div>
+      ))}
+      {resguardos.length === 0 && (post.documentos || []).length === 0 && (
+        <p className="text-xs text-neutral-400 italic text-center py-2">Sin resguardo todavía: se guarda al presentar la solicitud.</p>
       )}
       {(post.documentos || []).map((doc, idx) => (
         <div key={idx} className="flex items-center gap-2 bg-neutral-50 rounded-lg px-3 py-2">
@@ -347,79 +371,119 @@ function AvisosPortal({ avisos }) {
   );
 }
 
-function MasterPostCard({ post, idSolicitud, onSave }) {
-  const info = ESTADO_INFO[post.estado] || ESTADO_INFO.pendiente;
-  const admitida = post.estado === "admitido";
-  const onSaveF = (field, value) => onSave(post.id_master, field, value);
-  const sub = [post.universidad, post.ciudad].filter(Boolean).join(" · ");
+const PILL_PORTAL = {
+  admitida:   ["Admitida",              "bg-emerald-50 text-emerald-700", "check"],
+  resultado:  ["Con resultado",         "bg-sky-50 text-sky-700",         "flag"],
+  presentada: ["Postulada",             "bg-sky-50 text-sky-700",         "send"],
+  preparando: ["En preparación",        "bg-sky-50 text-sky-700",         "edit"],
+  pendiente:  ["Pendiente de postular", "bg-neutral-100 text-neutral-500", "clock"],
+};
+const TONO_OPC = { admitido: "ok", lista: "warn", denegado: "no", postulado: "on", proceso: "on", pendiente: "info" };
+
+// Una tarjeta por portal (09/09/2026): en Andalucía se postula una sola vez
+// por el Distrito Único con los másteres en orden, así que el portal es la
+// unidad y los másteres son sus opciones. Las claves, el resguardo y los
+// avisos son del portal, no de cada máster.
+function PortalCard({ grupo, idSolicitud, onSave }) {
+  const { portal, posts, titular } = grupo;
+  const estado = estadoPortal(posts);
+  const fechas = fechasPortal(posts);
+  const admitidas = posts.filter((p) => p.estado === "admitido");
+  const avisos = unirCampo(posts, "avisos").sort((a, b) => String(a.fecha || "").localeCompare(String(b.fecha || "")));
+  const [pillTxt, pillCls, pillIco] = PILL_PORTAL[estado] || PILL_PORTAL.pendiente;
+  // La línea de tiempo habla del portal: si alguna opción se presentó, el
+  // portal está presentado; si alguna tiene resultado, hay resultado.
+  const estadoLinea = estado === "admitida" ? "admitido" : estado === "resultado" ? "lista" : estado === "presentada" ? "postulado" : estado === "preparando" ? "proceso" : "pendiente";
+  const paraLinea = { ...titular, ...fechas, estado: estadoLinea };
+  const paraDocs = {
+    ...titular,
+    justificantes: unirCampo(posts, "justificantes"),
+    documentos: unirCampo(posts, "documentos"),
+    portales_cliente: unirCampo(posts, "portales_cliente"),
+  };
+  const onSaveF = (field, value) => onSave(titular.id_master, field, value);
 
   return (
-    <article className={`border rounded-2xl overflow-hidden bg-white ${admitida ? "border-emerald-300" : "border-neutral-200"}`}>
+    <article className={`border rounded-2xl overflow-hidden bg-white ${estado === "admitida" ? "border-emerald-300" : "border-neutral-200"}`}>
       <div className="flex items-start gap-3 px-4 pt-4 pb-3">
-        <span className={`shrink-0 w-10 h-10 rounded-xl grid place-items-center ${admitida ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-primary-light"}`}>
-          <IconoPaso nombre="cap" className="w-5 h-5" />
+        <span className={`shrink-0 w-10 h-10 rounded-xl grid place-items-center ${estado === "admitida" ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-primary-light"}`}>
+          <IconoPaso nombre={portal.icono} className="w-5 h-5" />
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-[13.5px] font-bold text-neutral-900 leading-snug">{post.nombre_limpio || "(Sin nombre)"}</p>
-          {sub && <p className="text-[11.5px] text-neutral-500 leading-snug">{sub}</p>}
+          <p className="text-[13.5px] font-bold text-neutral-900 leading-snug">{portal.nombre}</p>
+          <p className="text-[11.5px] text-neutral-500 leading-snug">{portal.organismo}</p>
         </div>
-        <span className={`shrink-0 inline-flex items-center gap-1 text-[10.5px] font-bold px-2.5 py-1 rounded-full ${info.cls}`}>
-          <IconoPaso nombre={info.ico} className="w-3 h-3" strokeWidth={2.4} />
-          {info.label}
+        <span className={`shrink-0 inline-flex items-center gap-1 text-[10.5px] font-bold px-2.5 py-1 rounded-full ${pillCls}`}>
+          <IconoPaso nombre={pillIco} className="w-3 h-3" strokeWidth={2.4} />
+          {pillTxt}
         </span>
       </div>
 
-      <LineaTiempo post={post} />
+      <LineaTiempo post={paraLinea} />
 
-      <div className="flex flex-wrap gap-1.5 px-4 pb-3">
-        {post.precio ? (
-          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-700">
-            {Math.round(post.precio).toLocaleString("es-ES")} € el curso
-          </span>
-        ) : null}
-        {post.fase_nombre ? (
-          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-700">
-            {post.fase_nombre}{post.fase_curso ? ` · curso ${post.fase_curso}` : ""}
-          </span>
-        ) : null}
-        {post.fecha_resultados ? (
-          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700">
-            Resultados: {fmtFecha(post.fecha_resultados)}
-          </span>
-        ) : null}
+      {(fechas.fase_nombre || fechas.fecha_resultados) && (
+        <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+          {fechas.fase_nombre ? (
+            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-700">
+              {fechas.fase_nombre}{fechas.fase_curso ? ` · curso ${fechas.fase_curso}` : ""}
+            </span>
+          ) : null}
+          {fechas.fecha_resultados ? (
+            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700">
+              Resultados: {fmtFecha(fechas.fecha_resultados)}
+            </span>
+          ) : null}
+        </div>
+      )}
+
+      {/* Las opciones del portal, en el orden que eligió el asesorado */}
+      <div className="px-4 pb-3">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-1">
+          {posts.length > 1 ? "Tus opciones, en el orden que elegiste" : "Máster"}
+        </p>
+        {posts.map((p, i) => {
+          const info = ESTADO_INFO[p.estado] || ESTADO_INFO.pendiente;
+          return (
+            <div key={p.id_master} className="ex-opc">
+              <i>{i + 1}.º</i>
+              <div className="min-w-0">
+                <div className="n">{p.nombre_limpio}</div>
+                <div className="u">{[p.universidad, p.ciudad, p.precio ? `${Math.round(p.precio).toLocaleString("es-ES")} € el curso` : null].filter(Boolean).join(" · ")}</div>
+              </div>
+              <span className="ex-est" data-e={TONO_OPC[p.estado] || "info"}>
+                <IconoPaso nombre={info.ico} /> {info.label}
+              </span>
+              {p.estado === "lista" && (
+                <div className="sub">Si alguien renuncia, subes de puesto. Tu asesor revisa cada adjudicación y te avisa.</div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      {admitida && (
-        <div className="mx-4 mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3">
-          <p className="text-[12.5px] font-bold text-emerald-800">🎉 Te han admitido</p>
+      {admitidas.map((p) => (
+        <div key={p.id_master} className="mx-4 mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3">
+          <p className="text-[12.5px] font-bold text-emerald-800">🎉 Te han admitido{posts.length > 1 ? ` en ${p.nombre_limpio}` : ""}</p>
           <p className="text-[11.5px] text-emerald-900/80 leading-relaxed mt-0.5">
             Tu carta de admisión y, cuando la hagas, tu matrícula quedan guardadas
             en <b>Documentos del proceso</b>, más abajo en este mismo paso.
           </p>
         </div>
-      )}
-      {post.estado === "lista" && (
-        <div className="mx-4 mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3">
-          <p className="text-[12.5px] font-bold text-amber-800">En lista de espera</p>
-          <p className="text-[11.5px] text-amber-900/80 leading-relaxed mt-0.5">
-            Si alguien renuncia, subes de puesto. Tu asesor revisa cada adjudicación y te avisa.
-          </p>
-        </div>
-      )}
+      ))}
 
-      <AvisosPortal avisos={post.avisos} />
+      <AvisosPortal avisos={avisos} />
 
       <Plegable icono="lock" titulo="Acceso al portal y claves">
-        <TabPortal post={post} onSave={onSaveF} />
+        <TabPortal post={paraDocs} onSave={onSaveF} />
       </Plegable>
 
-      <Plegable icono="fileText" titulo="Resguardo y justificantes" abierto={post.estado === "postulado"}>
-        <TabDocs post={post} idSolicitud={idSolicitud} onSave={onSaveF} />
+      <Plegable icono="fileText" titulo="Resguardo y justificantes" abierto={estado === "presentada"}>
+        <TabDocs post={paraDocs} idSolicitud={idSolicitud} onSave={onSaveF} />
       </Plegable>
 
-      {post.seguimiento ? (
+      {titular.seguimiento ? (
         <Plegable icono="message" titulo="Notas de tu asesor">
-          <TabSeguimiento post={post} />
+          <TabSeguimiento post={titular} />
         </Plegable>
       ) : null}
     </article>
@@ -432,7 +496,7 @@ function MasterPostCard({ post, idSolicitud, onSave }) {
 function SinMarco({ children }) {
   return (
     <div>
-      <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-2">Seguimiento por máster</p>
+      <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-2">Seguimiento por portal</p>
       {children}
     </div>
   );
@@ -513,7 +577,7 @@ export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey
         <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
           <span className="text-lg shrink-0">⚠️</span>
           <p className="text-sm text-amber-800">
-            Esta sección se activa automáticamente cuando seleccionas tus másteres en el paso 5.
+            Esta sección se activa cuando tu asesor aprueba tu elección de másteres (paso 4).
           </p>
         </div>
       )}
@@ -532,10 +596,10 @@ export default function ProgramacionPostulacionesCliente({ idSolicitud, resetKey
               notificación y resultado. No tienes que entrar a comprobarlo.
             </p>
           </div>
-          {posts.map((post) => (
-            <MasterPostCard
-              key={post.id_master}
-              post={post}
+          {agruparPorPortal(posts).map((grupo) => (
+            <PortalCard
+              key={grupo.portal.id}
+              grupo={grupo}
               idSolicitud={idSolicitud}
               onSave={handleSave}
             />

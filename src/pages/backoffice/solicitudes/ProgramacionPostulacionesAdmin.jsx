@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST, boDELETE, boFetch } from "../../../services/backofficeApi";
 import IconoPaso from "../../../components/common/IconoPaso";
+import { agruparPorPortal, estadoPortal, fechasPortal, unirCampo } from "../../../lib/portales";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -427,7 +428,7 @@ function TabSeguimiento({ post, onChange, onSave }) {
   );
 }
 
-// ── MasterPostCard ────────────────────────────────────────────────────────────
+// ── La línea de tiempo del portal ─────────────────────────────────────────────
 
 // La línea de tiempo de una postulación: dónde va y qué falta, de un vistazo.
 // La misma que ve el asesorado en su panel, para hablar de lo mismo.
@@ -589,79 +590,108 @@ function Avisos({ post, onSave, nombreCorto }) {
 }
 
 // ── La tarjeta por portal ─────────────────────────────────────────────────────
-// Todo el trámite de una postulación en un sitio: estado, línea de tiempo,
-// vigilancia, plazos y alertas, requerimientos, claves, resguardo y notas.
-function MasterPostCard({ post, onUpdate, onSave, onRecargar, nombreCorto }) {
+// En Andalucía se postula una sola vez por el Distrito Único con los másteres
+// en orden; en el resto, cada universidad tiene su portal. El portal es la
+// unidad: plazos, claves, vigilancia, avisos y resguardo son suyos; el estado
+// es de cada opción. Lo del portal se guarda en todas sus opciones a la vez;
+// lo que solo existe una vez (avisos, resguardos, notas) vive en la titular.
+const PILL_PORTAL = {
+  admitida:   ["Admitida", "ok", "trophy"],
+  resultado:  ["Con resultado", "on", "flag"],
+  presentada: ["Presentada", "on", "send"],
+  preparando: ["En preparación", "on", "edit"],
+  pendiente:  ["Pendiente", "info", "clock"],
+};
+const LINEA_POR_ESTADO = { admitida: "admitido", resultado: "lista", presentada: "postulado", preparando: "proceso", pendiente: "pendiente" };
+
+function PortalCard({ grupo, onUpdate, onSave, onSaveMap, onRecargar, nombreCorto }) {
+  const { portal, posts, titular, ids } = grupo;
   const [showPw, setShowPw] = useState(false);
-  const idx = Math.max(0, (post.prioridad || 1) - 1);
-  const admitida = post.estado === "admitido";
-  const dias = diasHasta(post.fecha_cierre);
-  const avisos = Array.isArray(post.avisos) ? post.avisos : [];
+  const estado = estadoPortal(posts);
+  const fechas = fechasPortal(posts);
+  const admitidas = posts.filter((p) => p.estado === "admitido");
+  const avisos = unirCampo(posts, "avisos");
+  const dias = diasHasta(fechas.fecha_cierre);
   const alerta = avisos.some((a) => a.tipo !== "RESULTADO" && !a.respondido && a.plazo)
-    || (dias !== null && dias >= 0 && dias <= 7 && !["admitido", "denegado"].includes(post.estado));
+    || (dias !== null && dias >= 0 && dias <= 7 && !["admitida", "resultado"].includes(estado));
+  const [pillTxt, pillTono, pillIco] = PILL_PORTAL[estado] || PILL_PORTAL.pendiente;
 
-  const onChange = (field, value) => onUpdate(post.id_master, field, value);
-  const onSaveF  = (field, value) => onSave(post.id_master, field, value);
+  const enGrupo = (p) => ids.includes(p.id_master);
+  // Lo del portal, a todas sus opciones.
+  const onChangePortal = (field, value) => ids.forEach((id) => onUpdate(id, field, value));
+  const onSavePortal = (field, value) => onSaveMap((p) => (enGrupo(p) ? { ...p, [field]: value } : p));
+  // Lo que vive en la titular.
+  const onSaveTitular = (field, value) => onSave(titular.id_master, field, value);
+  const onSaveAvisos = (_field, lista) => onSaveMap((p) => (enGrupo(p) ? { ...p, avisos: p.id_master === titular.id_master ? lista : [] } : p));
 
-  const sub = [
-    post.universidad, post.ciudad,
-    post.precio ? `${Math.round(post.precio).toLocaleString("es-ES")} € el curso` : null,
-    post.score ? `${post.score} % de ajuste` : null,
-  ].filter(Boolean).join(" · ");
+  const paraLinea = { ...titular, ...fechas, estado: LINEA_POR_ESTADO[estado] || "pendiente" };
+  const paraPortal = { ...titular, ...fechas, portales_cliente: unirCampo(posts, "portales_cliente") };
+  const paraDocs = { ...titular, justificantes: unirCampo(posts, "justificantes"), documentos: unirCampo(posts, "documentos") };
 
   return (
-    <article className="ex-pst" data-alerta={alerta ? 1 : 0} data-adm={admitida ? 1 : 0}>
+    <article className="ex-pst" data-alerta={alerta ? 1 : 0} data-adm={estado === "admitida" ? 1 : 0}>
       <div className="ex-pst-top">
-        <span className="ico"><IconoPaso nombre={admitida ? "trophy" : "cap"} /></span>
+        <span className="ico"><IconoPaso nombre={portal.icono} /></span>
         <div>
-          <h3>{post.nombre_limpio || "(Sin nombre)"}</h3>
-          <div className="u">{idx + 1}.º{sub ? ` · ${sub}` : ""}</div>
+          <h3>{portal.nombre}</h3>
+          <div className="u">{portal.organismo}</div>
         </div>
-        <select className="ex-select" value={post.estado} onChange={(e) => onSaveF("estado", e.target.value)} aria-label="Estado de la postulación">
-          {ESTADOS_OPT.map((o) => <option key={o.val} value={o.val}>{o.label}</option>)}
-        </select>
+        <span className="ex-est" data-e={pillTono}><IconoPaso nombre={pillIco} /> {pillTxt}</span>
       </div>
 
-      <LineaTiempoAdmin post={post} />
+      <LineaTiempoAdmin post={paraLinea} />
 
-      {admitida && (
-        <div className="ex-admitida">
-          <h4>🎉 Admitida</h4>
+      <div className="ex-pst-b">
+        <h4><span className="ico"><IconoPaso nombre="list" /></span>{posts.length > 1 ? "Opciones, en orden de prioridad" : "Máster"}</h4>
+        {posts.map((p, i) => (
+          <div key={p.id_master} className="ex-opc">
+            <i>{i + 1}.º</i>
+            <div className="min-w-0">
+              <div className="n">{p.nombre_limpio || "(Sin nombre)"}</div>
+              <div className="u">
+                {[p.universidad, p.ciudad, p.precio ? `${Math.round(p.precio).toLocaleString("es-ES")} €` : null, p.score ? `${p.score} % de ajuste` : null].filter(Boolean).join(" · ")}
+              </div>
+            </div>
+            <select className="ex-select" value={p.estado} onChange={(e) => onSave(p.id_master, "estado", e.target.value)} aria-label={`Estado de ${p.nombre_limpio}`}>
+              {ESTADOS_OPT.map((o) => <option key={o.val} value={o.val}>{o.label}</option>)}
+            </select>
+            {p.estado === "lista" && <div className="sub">Se revisa en cada adjudicación; si sube de puesto, se cambia el estado y {nombreCorto} lo ve.</div>}
+          </div>
+        ))}
+      </div>
+
+      {admitidas.map((p) => (
+        <div key={p.id_master} className="ex-admitida">
+          <h4>🎉 Admitida{posts.length > 1 ? ` · ${p.nombre_limpio}` : ""}</h4>
           <p>
             La carta de admisión y, cuando la haga, la matrícula se suben en <b>Documentos del proceso</b>,
             más abajo en este mismo paso. {nombreCorto} las ve en su panel.
           </p>
         </div>
-      )}
-      {post.estado === "lista" && (
-        <div className="ex-admitida" style={{ borderColor: "#b8730c", background: "#fff3e0" }}>
-          <h4 style={{ color: "#b8730c" }}>Lista de espera</h4>
-          <p>Se revisa en cada adjudicación; si sube de puesto, se cambia el estado y {nombreCorto} lo ve.</p>
-        </div>
-      )}
+      ))}
 
-      <Vigilancia post={post} onSave={onSaveF} />
+      <Vigilancia post={{ ...titular, ...fechas }} onSave={onSaveTitular} />
 
       <div className="ex-pst-b">
         <h4><span className="ico"><IconoPaso nombre="calendar" /></span>Plazos y alertas</h4>
-        <TabFechas post={post} onChange={onChange} onSave={onSaveF} />
+        <TabFechas post={{ ...titular, ...fechas }} onChange={onChangePortal} onSave={onSavePortal} />
       </div>
 
-      <Avisos post={post} onSave={onSaveF} nombreCorto={nombreCorto} />
+      <Avisos post={{ ...titular, avisos }} onSave={onSaveAvisos} nombreCorto={nombreCorto} />
 
       <div className="ex-pst-b">
         <h4><span className="ico"><IconoPaso nombre="lock" /></span>Portal y claves</h4>
-        <TabPortal post={post} onChange={onChange} onSave={onSaveF} showPw={showPw} togglePw={() => setShowPw((v) => !v)} />
+        <TabPortal post={paraPortal} onChange={onChangePortal} onSave={onSavePortal} showPw={showPw} togglePw={() => setShowPw((v) => !v)} />
       </div>
 
       <div className="ex-pst-b">
         <h4><span className="ico"><IconoPaso nombre="fileText" /></span>Resguardo y pago</h4>
-        <TabDocs post={post} onRecargar={onRecargar} />
+        <TabDocs post={paraDocs} onRecargar={onRecargar} />
       </div>
 
       <div className="ex-pst-b">
         <h4><span className="ico"><IconoPaso nombre="message" /></span>Seguimiento interno</h4>
-        <TabSeguimiento post={post} onChange={onChange} onSave={onSaveF} />
+        <TabSeguimiento post={titular} onChange={(f, v) => onUpdate(titular.id_master, f, v)} onSave={onSaveTitular} />
       </div>
     </article>
   );
@@ -717,6 +747,13 @@ export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey
     return guardar(next);
   }
 
+  // Lo del portal se guarda en todas sus opciones a la vez.
+  function handleSaveMap(fn) {
+    const next = postsRef.current.map(fn);
+    setPosts(next);
+    return guardar(next);
+  }
+
   if (loading) {
     return (
       <div className="flex items-center gap-2 py-3 text-neutral-400 text-sm">
@@ -757,17 +794,18 @@ export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey
       ) : (
         <div className="ex-tranquila">
           <span className="ico"><IconoPaso nombre="info" /></span>
-          <div>Una tarjeta por portal con todo el trámite: <b>vigilancia</b>, estado, plazos, requerimientos, claves, resguardo y notas. Lo que cambie lo ve {nombreCorto} en su panel.</div>
+          <div>Una tarjeta por portal (en Andalucía, el Distrito Único con los másteres en orden): <b>vigilancia</b>, estado de cada opción, plazos, requerimientos, claves, resguardo y notas. Lo que cambie lo ve {nombreCorto} en su panel.</div>
         </div>
       )}
       {saving && <p className="text-[10px] text-neutral-400 font-mono text-right">Guardando…</p>}
       <div className="ex-pst-grid">
-        {posts.map((post) => (
-          <MasterPostCard
-            key={post.id_master}
-            post={post}
+        {agruparPorPortal(posts).map((grupo) => (
+          <PortalCard
+            key={grupo.portal.id}
+            grupo={grupo}
             onUpdate={handleUpdate}
             onSave={handleSave}
+            onSaveMap={handleSaveMap}
             onRecargar={recargar}
             nombreCorto={nombreCorto}
           />

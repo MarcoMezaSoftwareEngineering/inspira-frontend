@@ -426,7 +426,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   // encadenar una búsqueda la necesita ya, porque `listaEdit` todavía no se
   // ha actualizado en este tick.
   function entrarEdicion() {
-    const base = (detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 20) ?? []).map((r) => ({ ...r }));
+    const base = (detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 12) ?? []).map((r) => ({ ...r }));
     setListaEdit(base);
     setEditMode(true);
     setSearchQ("");
@@ -533,7 +533,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     try {
       const listaParaPublicar = listaEdit.length
         ? listaEdit
-        : (detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 20) ?? []);
+        : (detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 12) ?? []);
       if (listaParaPublicar.length) {
         await boPATCH(`/backoffice/solicitudes/${detalle.id_solicitud}/informe-compat`, { lista: listaParaPublicar });
       }
@@ -629,8 +629,14 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
       : null,
   ].filter(Boolean).join(" · ");
 
-  const listaVista  = detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 20) ?? [];
+  // Los mismos doce que manda el backend (`FINALISTAS` en
+  // compatibilidad.service.js). El informe es un entregable: doce es lo que
+  // una persona se lee entera y compara. Lo que va detrás son extras, y va
+  // dicho, no escondido.
+  const FINALISTAS = 12;
+  const listaVista  = detalle.informe_compat_curado ?? compat?.resultados?.slice(0, FINALISTAS) ?? [];
   const isCurado    = !!detalle.informe_compat_curado;
+  const extras      = Math.max(0, listaVista.length - FINALISTAS);
 
   // Lo que el asesorado escribió a mano va primero: es lo que de verdad busca.
   const lista = (v) => (Array.isArray(v) && v.filter(Boolean).length ? v.filter(Boolean).join(" · ") : null);
@@ -683,7 +689,8 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
         {!loadingCompat && compat && (
           <div className="ex-cuenta">
             <div><b>{compat.total ?? "—"}</b><span>compatibles</span></div>
-            <div><b>{listaVista.length}</b><span>en informe</span></div>
+            <div><b>{Math.min(listaVista.length, 12)}</b><span>finalistas</span></div>
+            <div><b>{extras}</b><span>extras</span></div>
             <div><b>{isCurado ? "curada" : "auto"}</b><span>lista</span></div>
             <div><b>{detalle.informe_publicado ? "sí" : "no"}</b><span>publicado</span></div>
           </div>
@@ -921,7 +928,9 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
           <div className="mb-4 flex items-center gap-2.5 bg-[#1A3557]/5 border border-[#1A3557]/15 rounded-xl px-3.5 py-2.5">
             <div className="w-2 h-2 rounded-full bg-[#1D6A4A] animate-pulse shrink-0" />
             <p className="text-[11px] text-[#1A3557] font-medium">
-              Modo edición activo · {listaEdit.length} programa{listaEdit.length !== 1 ? "s" : ""} en la lista
+              Modo edición activo · {Math.min(listaEdit.length, FINALISTAS)} finalista{Math.min(listaEdit.length, FINALISTAS) !== 1 ? "s" : ""}
+              {listaEdit.length > FINALISTAS ? ` y ${listaEdit.length - FINALISTAS} extra${listaEdit.length - FINALISTAS !== 1 ? "s" : ""}` : ""}
+              {" · "}los primeros {FINALISTAS} son los que el asesorado lee como su lista
             </p>
           </div>
         )}
@@ -979,13 +988,25 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
         {!loadingCompat && !editMode && listaVista.length > 0 && (
           <div className="ex-lista-m">
             {listaVista.map((r, i) => (
-              <TarjetaMaster
-                key={r.master.id_master}
-                resultado={r}
-                posicion={i + 1}
-                total={listaVista.length}
-                nota={r.nota_asesor || null}
-              />
+              <div key={r.master.id_master}>
+                {i === FINALISTAS && (
+                  <div className="flex items-center gap-2 my-3 px-1">
+                    <div className="flex-1 h-px bg-[#F5C842]" />
+                    <span className="text-[10px] font-bold text-[#7a5b00] uppercase tracking-wide whitespace-nowrap">
+                      hasta aquí su lista · lo de abajo va como extras
+                    </span>
+                    <div className="flex-1 h-px bg-[#F5C842]" />
+                  </div>
+                )}
+                <div className={i >= FINALISTAS ? "opacity-60" : ""}>
+                  <TarjetaMaster
+                    resultado={r}
+                    posicion={i + 1}
+                    total={listaVista.length}
+                    nota={r.nota_asesor || null}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -1114,18 +1135,33 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
               ) : (
                 <div className="space-y-0.5">
                   {listaEdit.map((r, i) => (
-                    <MasterRowAdmin
-                      key={r.master.id_master}
-                      posicion={i + 1}
-                      resultado={r}
-                      editMode={true}
-                      esFirst={i === 0}
-                      esLast={i === listaEdit.length - 1}
-                      onArriba={() => moverArriba(i)}
-                      onAbajo={() => moverAbajo(i)}
-                      onEliminar={() => eliminarItem(i)}
-                      onScoreChange={(v) => cambiarScore(i, v)}
-                    />
+                    <div key={r.master.id_master}>
+                      {/* Dónde acaba lo que el asesorado lee como su lista. Se
+                          reordena con las flechas, así que el corte es algo
+                          que el asesor decide, no algo que le pasa. */}
+                      {i === FINALISTAS && (
+                        <div className="flex items-center gap-2 my-3 px-1">
+                          <div className="flex-1 h-px bg-[#F5C842]" />
+                          <span className="text-[10px] font-bold text-[#7a5b00] uppercase tracking-wide whitespace-nowrap">
+                            hasta aquí su lista · lo de abajo va como extras
+                          </span>
+                          <div className="flex-1 h-px bg-[#F5C842]" />
+                        </div>
+                      )}
+                      <div className={i >= FINALISTAS ? "opacity-60" : ""}>
+                        <MasterRowAdmin
+                          posicion={i + 1}
+                          resultado={r}
+                          editMode={true}
+                          esFirst={i === 0}
+                          esLast={i === listaEdit.length - 1}
+                          onArriba={() => moverArriba(i)}
+                          onAbajo={() => moverAbajo(i)}
+                          onEliminar={() => eliminarItem(i)}
+                          onScoreChange={(v) => cambiarScore(i, v)}
+                        />
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

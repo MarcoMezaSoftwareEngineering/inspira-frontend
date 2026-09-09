@@ -160,6 +160,9 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
   const perfil        = compat?.perfil;
   const curado        = !!compat?.curado;
   const hayResultados = resultados.length > 0;
+  // Dónde acaba su lista y empiezan los extras. Lo dice el backend
+  // (`FINALISTAS`); si no viniera, no se parte la lista en dos.
+  const finalistas    = compat?.finalistas ?? resultados.length;
 
   const estado = disponible || hayResultados
     ? "completado"
@@ -375,13 +378,25 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
                   ) : (
                     <div className="ex-lista-m mt-3">
                       {resultados.map((r, i) => (
-                        <TarjetaMaster
-                          key={r.master.id_master}
-                          resultado={r}
-                          posicion={i + 1}
-                          total={resultados.length}
-                          nota={r.nota_asesor || null}
-                        />
+                        <div key={r.master.id_master}>
+                          {/* Los primeros son su lista; lo que venga detrás son
+                              opciones de más, y se dice. Una lista de doce se
+                              lee y se compara; una de treinta se hojea. */}
+                          {i === finalistas && (
+                            <div className="mt-5 mb-3">
+                              <p className="text-sm font-bold text-neutral-700">Otras opciones que también encajan</p>
+                              <p className="text-xs text-neutral-500 mt-0.5">
+                                Tu lista son los {finalistas} de arriba. Estos los añadimos por si quieres mirar más.
+                              </p>
+                            </div>
+                          )}
+                          <TarjetaMaster
+                            resultado={r}
+                            posicion={i + 1}
+                            total={resultados.length}
+                            nota={r.nota_asesor || null}
+                          />
+                        </div>
                       ))}
                     </div>
                   )}

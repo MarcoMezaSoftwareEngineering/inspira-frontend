@@ -5,6 +5,7 @@ import { dialog } from "../../../../services/dialogService";
 import { API_URL, formatearFecha } from "../utils";
 import ModalMaster from "../../catalogo/ModalMaster";
 import BaremoMaster from "../../../../components/BaremoMaster";
+import TarjetaMaster from "../../../../components/common/TarjetaMaster";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -944,10 +945,15 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
 
         {/* Vista normal */}
         {!loadingCompat && !editMode && listaVista.length > 0 && (
-          <div className="space-y-0.5">
+          <div className="ex-lista-m">
             {listaVista.map((r, i) => (
-              <MasterRowAdmin key={r.master.id_master} posicion={i + 1} resultado={r}
-                editMode={false} />
+              <TarjetaMaster
+                key={r.master.id_master}
+                resultado={r}
+                posicion={i + 1}
+                total={listaVista.length}
+                nota={r.nota_asesor || null}
+              />
             ))}
           </div>
         )}

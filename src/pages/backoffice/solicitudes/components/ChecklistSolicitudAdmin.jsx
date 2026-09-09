@@ -250,7 +250,7 @@ export default function ChecklistSolicitudAdmin({
               {nombreEtapa}
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 items-start">
+          <div className="ex-docs">
             {items.map((it) => {
               const docs = Array.isArray(it.documentos)
                 ? it.documentos

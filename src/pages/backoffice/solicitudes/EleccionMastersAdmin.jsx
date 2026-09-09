@@ -366,7 +366,7 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
     return (
       <div className="space-y-3">
         {/* Banner */}
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm"
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 rounded-xl text-white text-sm"
           style={{ background: "linear-gradient(135deg, #1A3557, #1D6A4A)" }}
         >
           <span className="text-base shrink-0">🎯</span>
@@ -498,7 +498,7 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
   return (
     <div className="space-y-3">
       {/* Banner */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm"
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 rounded-xl text-white text-sm"
         style={{ background: "linear-gradient(135deg, #1D6A4A, #1A3557)" }}
       >
         <span className="text-base shrink-0">🎯</span>
@@ -508,7 +508,7 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
             El asesorado eligió. Di sí o no a cada uno: los que entran pasan solos al bloque de postulaciones.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap sm:justify-end">
           {guardando && (
             <span className="text-[10px] text-white/60 font-mono">Guardando…</span>
           )}

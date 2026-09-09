@@ -48,6 +48,15 @@ const TRAZOS = {
 /** Icono por nombre de bloque o sección; cae en «info» si no lo conoce. */
 export const ICONO_POR_BLOQUE = {
   // Panel del asesorado
+  alert: "M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01",
+  trash: "M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6",
+  refresh: "M21 12a9 9 0 11-2.64-6.36M21 3v6h-6",
+  copy: "M9 9h11v11H9zM15 9V5H4v11h5",
+  eyeOff: "M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24M1 1l22 22",
+  clock: "M12 22a10 10 0 100-20 10 10 0 000 20zM12 6v6l4 2",
+  filetick: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M9 15l2 2 4-4",
+  euro: "M18.5 6.5A7 7 0 007 8.5H3M18.5 17.5A7 7 0 017 15.5H3M3 12h10",
+  chevron: "M6 9l6 6 6-6",
   docs: "folder", form: "fileText", informe: "chart", eleccion: "checkCircle", post: "cap", cierre: "flag", mensajes: "message",
   // Inspira Core · máster
   cliente: "user", checklist: "folder", formulario: "fileText", programacion: "cap",

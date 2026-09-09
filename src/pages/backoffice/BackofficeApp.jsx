@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../../styles/asesor.css";
 import "../../styles/pasos.css";
+import "../../styles/pasos-core.css";
 import Sidebar from "./layout/Sidebar";
 import CampanaMensajes from "./layout/CampanaMensajes";
 import MobileAppBar from "./layout/MobileAppBar";

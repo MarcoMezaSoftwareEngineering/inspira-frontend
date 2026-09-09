@@ -1,6 +1,7 @@
 // src/pages/backoffice/solicitudes/FormularioDatosAcademicosAdmin.jsx
 import { useEffect, useState } from "react";
 import { FIELD_CONFIG, SECTIONS_ORDER } from "./formularioDatosConfig";
+import LecturaMotor from "./LecturaMotor";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
 
 // ── Configuración visual por sección ─────────────────────────────────────────
@@ -571,7 +572,7 @@ function EditModal({ datos, idSolicitud, onClose, onSaved }) {
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
-export default function FormularioDatosAcademicosAdmin({ datos, idSolicitud, onActualizado }) {
+export default function FormularioDatosAcademicosAdmin({ datos, idSolicitud, onActualizado, onIrAInforme = null }) {
   const [editing, setEditing] = useState(false);
 
   const isEmpty = !datos || Object.keys(datos).length === 0;
@@ -600,21 +601,13 @@ export default function FormularioDatosAcademicosAdmin({ datos, idSolicitud, onA
 
   return (
     <>
-      {/* Botón de edición */}
-      {idSolicitud && (
-        <div className="flex justify-end mb-3">
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[#1D6A4A]/10 text-[#1D6A4A] hover:bg-[#1D6A4A]/20 rounded-lg transition-colors"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-            </svg>
-            Editar formulario
-          </button>
-        </div>
-      )}
+      <LecturaMotor
+        datos={datos}
+        idSolicitud={idSolicitud}
+        onEditar={idSolicitud ? () => setEditing(true) : null}
+        onIrAInforme={onIrAInforme}
+      />
+      {!isEmpty && <p className="ex-sub" style={{ marginTop: 4 }}>Todas las respuestas</p>}
 
       {/* Vista vacía */}
       {isEmpty ? (

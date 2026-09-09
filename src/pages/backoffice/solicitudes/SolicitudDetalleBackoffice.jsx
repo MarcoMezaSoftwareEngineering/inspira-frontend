@@ -294,6 +294,20 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   // que le toca a la asesora.
   const porRevisar = (checklist || []).filter((it) => (it.estado_item || "").toLowerCase() === "enviado").length;
   const sinDecidir = (detalle?.eleccion_masters || []).filter((e) => e?.id_master && (e.plan_incluido === null || e.plan_incluido === undefined)).length;
+  // El resumen de la ficha: lo que hay en cada paso, de un vistazo.
+  const docsTotal = (checklist || []).length;
+  const docsOk = (checklist || []).filter((it) => ["aprobado", "no_aplica"].includes((it.estado_item || "").toLowerCase())).length;
+  const enPlan = (detalle?.eleccion_masters || []).filter((e) => e?.plan_incluido === true);
+  const postData = Array.isArray(detalle?.postulaciones_data) ? detalle.postulaciones_data : [];
+  const admitidas = postData.filter((p) => p?.estado === "admitido" && enPlan.some((e) => String(e.id_master) === String(p.id_master))).length;
+  const nCurados = Array.isArray(detalle?.informe_compat_curado) ? detalle.informe_compat_curado.length : 0;
+  const resumenFicha = {
+    docsOk, docsTotal,
+    informe: detalle?.informe_publicado ? "publicado" : nCurados ? "borrador" : "—",
+    postulaciones: enPlan.length,
+    admitidas,
+    nota: `${porRevisar ? `${porRevisar} documento${porRevisar === 1 ? "" : "s"} por revisar · ` : ""}${sinDecidir ? `${sinDecidir} elección${sinDecidir === 1 ? "" : "es"} sin decidir · ` : ""}el mismo expediente que ve ${(detalle?.cliente?.nombre || "el asesorado").split(" ")[0]} en su panel y el tracker de Procesos.`,
+  };
   const pasosBO = bloques.map((b) => ({
     id: b.id, num: b.numero, icono: ICONO_POR_BLOQUE[b.id] || "info", titulo: b.label, corto: CORTO_BO[b.id] || b.label,
     subtitulo: b.id === "checklist" && porRevisar ? `${porRevisar} por revisar` : b.id === "eleccion" && sinDecidir ? `${sinDecidir} sin decidir` : undefined,
@@ -603,6 +617,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               <CBox>
                 <EncabezadoClienteAdmin
                   detalle={detalle}
+                  resumen={esMaster ? resumenFicha : null}
                   onClienteActualizado={(clienteActualizado) =>
                     setDetalle((prev) => ({ ...prev, cliente: clienteActualizado }))
                   }
@@ -783,6 +798,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                       <FormularioDatosAcademicosAdmin
                         datos={detalle.datos_formulario}
                         idSolicitud={detalle.id_solicitud}
+                        onIrAInforme={esMaster ? () => irABloque("informe") : null}
                         onActualizado={(nuevosDatos) =>
                           setDetalle((prev) => ({ ...prev, datos_formulario: nuevosDatos }))
                         }
@@ -843,7 +859,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                     <div className="p-5 space-y-6">
                       <section>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-2">5.1 · Seguimiento por máster</p>
-                        <ProgramacionPostulacionesAdmin idSolicitud={detalle.id_solicitud} refreshKey={progRefreshKey} />
+                        <ProgramacionPostulacionesAdmin idSolicitud={detalle.id_solicitud} refreshKey={progRefreshKey} nombreCliente={detalle.cliente?.nombre} />
                       </section>
                       <section className="pt-5 border-t border-[#E2E8F0]">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-2">5.2 · Portales, claves y justificantes</p>

@@ -14,7 +14,7 @@ function diasHasta(str) {
 
 function fmtFecha(str) {
   if (!str) return "—";
-  const d = new Date(str);
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(String(str)) ? new Date(str + "T12:00:00") : new Date(str);
   if (!isNaN(d.getTime()) && /\d{4}-\d{2}/.test(str))
     return d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
   return str;
@@ -22,7 +22,6 @@ function fmtFecha(str) {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const P_COLORS = ["#1A3557", "#1D6A4A", "#f59e0b", "#9ca3af", "#d1d5db"];
 
 const ESTADOS_OPT = [
   { val: "pendiente", label: "⏳ Pendiente" },
@@ -35,12 +34,6 @@ const ESTADOS_OPT = [
 
 const PORTAL_ESTADOS = ["abierto", "cerrado", "mantenimiento"];
 
-const TABS = [
-  { id: "fec", label: "📅 Fechas" },
-  { id: "por", label: "🔗 Portal y claves" },
-  { id: "doc", label: "📁 Justificantes" },
-  { id: "seg", label: "📝 Seguimiento" },
-];
 
 const DOC_LABEL     = { falta: "Falta", pendiente: "En revisión", ok: "Subido" };
 const DOC_CLS       = {
@@ -48,47 +41,6 @@ const DOC_CLS       = {
   pendiente:"bg-amber-50 text-amber-600 border-amber-200",
   ok:       "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
-
-// ── KanbanMini ────────────────────────────────────────────────────────────────
-
-function KanbanMini({ posts }) {
-  const n = (e) => posts.filter((p) => p.estado === e).length;
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      {[
-        { key: "pendiente", label: "Pendiente", cls: "text-neutral-400",  bg: "bg-neutral-50 border-neutral-100" },
-        { key: "proceso",   label: "En proceso", cls: "text-[#1A3557]",   bg: "bg-[#EEF2F8] border-[#1A3557]/20" },
-        { key: "postulado", label: "Postulado",  cls: "text-amber-500",   bg: "bg-amber-50 border-amber-100" },
-        { key: "admitido",  label: "Admitido",   cls: "text-[#1D6A4A]",   bg: "bg-[#E8F5EE] border-[#1D6A4A]/20" },
-      ].map(({ key, label, cls, bg }) => (
-        <div key={key} className={`rounded-xl border text-center py-2.5 ${bg}`}>
-          <p className={`text-[9px] font-bold uppercase tracking-widest font-mono ${cls}`}>{label}</p>
-          <p className={`font-serif text-xl font-black mt-0.5 ${cls}`}>{n(key)}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── AlertaBanner ──────────────────────────────────────────────────────────────
-
-function AlertaBanner({ posts }) {
-  const urgentes = posts
-    .map((p) => ({ ...p, dias: diasHasta(p.fecha_cierre) }))
-    .filter((p) => p.dias !== null && p.dias > 0 && p.dias <= 20)
-    .sort((a, b) => a.dias - b.dias);
-  if (!urgentes.length) return null;
-  const u = urgentes[0];
-  return (
-    <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-800">
-      <span className="shrink-0 mt-0.5">🚨</span>
-      <span>
-        <strong>Cierre urgente:</strong> {u.nombre_limpio} cierra el{" "}
-        <strong>{fmtFecha(u.fecha_cierre)} — en {u.dias} día{u.dias !== 1 ? "s" : ""}</strong>.
-      </span>
-    </div>
-  );
-}
 
 // ── TabFechas ─────────────────────────────────────────────────────────────────
 
@@ -512,76 +464,217 @@ function LineaTiempoAdmin({ post }) {
   );
 }
 
-function MasterPostCard({ post, onUpdate, onSave, onRecargar }) {
-  const [tab, setTab]       = useState("fec");
-  const [showPw, setShowPw] = useState(false);
+function hoyISO() { return new Date().toISOString().slice(0, 10); }
 
-  const idx   = Math.max(0, (post.prioridad || 1) - 1);
-  const color = P_COLORS[idx] ?? "#9ca3af";
-  const dias  = diasHasta(post.fecha_cierre);
-  const urgente = dias !== null && dias > 0 && dias <= 20;
-
-  const subtitle = [
-    post.ciudad,
-    post.precio ? `${Math.round(post.precio).toLocaleString("es-ES")} €/año` : null,
-    post.score  ? `${post.score}% match` : null,
-    post.fecha_cierre ? `Cierre: ${fmtFecha(post.fecha_cierre)}${urgente ? " 🔴" : ""}` : null,
-  ].filter(Boolean).join(" · ");
-
-  const onChange = (field, value) => onUpdate(post.id_master, field, value);
-  const onSaveF  = (field, value) => onSave(post.id_master, field, value);
-
+// ── Vigilancia del portal ─────────────────────────────────────────────────────
+// Quien mira el portal es el asesor. Aquí queda cuándo lo miró por última vez
+// y cuándo toca volver; el asesorado no tiene que entrar a comprobarlo.
+function Vigilancia({ post, onSave }) {
+  const dias = diasHasta(post.fecha_cierre);
+  const abierta = !["admitido", "denegado"].includes(post.estado);
+  const proxima = post.fecha_resultados
+    ? `${fmtFecha(post.fecha_resultados)} · publican resultados`
+    : post.fecha_cierre
+      ? `${fmtFecha(post.fecha_cierre)} · cierra el plazo`
+      : "cuando la universidad publique el plazo";
+  const urge = abierta && dias !== null && dias >= 0 && dias <= 7;
   return (
-    <div className={`border rounded-2xl overflow-hidden bg-white ${post.estado === "admitido" ? "border-emerald-300" : "border-neutral-200"}`}>
-      <div className="flex items-start gap-3 px-4 pt-4 pb-2">
-        <span style={{ background: color }}
-          className="shrink-0 w-10 h-10 rounded-xl grid place-items-center text-[11px] font-black text-white font-mono">
-          P{post.prioridad || idx + 1}
+    <div className="ex-pst-b">
+      <h4>
+        <span className="ico"><IconoPaso nombre="search" /></span>Vigilancia del portal
+        <span className="ex-est" data-e={urge ? "warn" : "ok"}>
+          <IconoPaso nombre={urge ? "clock" : "check"} /> {urge ? `Cierra en ${dias} día${dias === 1 ? "" : "s"}` : "Al día"}
         </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-[13.5px] font-bold text-[#1A3557] leading-snug">
-            {post.nombre_limpio || "(Sin nombre)"}
-          </p>
-          {subtitle && <p className="text-[11.5px] text-neutral-500 mt-0.5">{subtitle}</p>}
+      </h4>
+      <div className="ex-vigila">
+        <div>
+          Última revisión: <b>{post.ultima_revision ? fmtFecha(post.ultima_revision) : "ninguna"}</b>
+          <small>Próxima: <b>{proxima}</b></small>
         </div>
-        <select value={post.estado} onChange={(e) => onSaveF("estado", e.target.value)}
-          className="shrink-0 text-[11px] font-semibold border border-neutral-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-[#1A3557] cursor-pointer">
-          {ESTADOS_OPT.map((o) => (
-            <option key={o.val} value={o.val}>{o.label}</option>
-          ))}
-        </select>
-      </div>
-
-      <LineaTiempoAdmin post={post} />
-
-      <div className="flex border-b border-t border-neutral-100 overflow-x-auto">
-        {TABS.map((t) => (
-          <button key={t.id} type="button" onClick={() => setTab(t.id)}
-            className={`shrink-0 px-3.5 py-2 text-[11px] font-semibold border-b-2 transition-colors whitespace-nowrap ${
-              tab === t.id ? "border-[#1A3557] text-[#1A3557]" : "border-transparent text-neutral-400 hover:text-neutral-600"
-            }`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="px-4 py-3">
-        {tab === "fec" && <TabFechas      post={post} onChange={onChange} onSave={onSaveF} />}
-        {tab === "por" && <TabPortal      post={post} onChange={onChange} onSave={onSaveF} showPw={showPw} togglePw={() => setShowPw((v) => !v)} />}
-        {tab === "doc" && <TabDocs        post={post} onRecargar={onRecargar} />}
-        {tab === "seg" && <TabSeguimiento post={post} onChange={onChange} onSave={onSaveF} />}
+        <button type="button" className="ex-btn sec" onClick={() => onSave("ultima_revision", hoyISO())}>
+          <IconoPaso nombre="check" /> Revisado hoy
+        </button>
       </div>
     </div>
   );
 }
 
+// ── Requerimientos y notificaciones ──────────────────────────────────────────
+// Lo que dice el portal: un requerimiento (piden algo, con plazo), una
+// notificación o el resultado. Se guarda en la postulación y el asesorado lo
+// ve en su tarjeta.
+const TIPOS_AVISO = [
+  ["REQUERIMIENTO", "Requerimiento (piden algo, con plazo)"],
+  ["NOTIFICACION", "Notificación"],
+  ["RESULTADO", "Resultado"],
+];
+const ICO_AVISO = { REQUERIMIENTO: "alert", NOTIFICACION: "bell", RESULTADO: "trophy" };
+const TIT_AVISO = { REQUERIMIENTO: "Requerimiento", NOTIFICACION: "Notificación", RESULTADO: "Resultado" };
+
+function Avisos({ post, onSave, nombreCorto }) {
+  const [abierto, setAbierto] = useState(false);
+  const [nuevo, setNuevo] = useState({ tipo: "REQUERIMIENTO", texto: "", plazo: "" });
+  const avisos = Array.isArray(post.avisos) ? post.avisos : [];
+
+  function registrar() {
+    if (!nuevo.texto.trim()) return;
+    const siguienteId = avisos.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) + 1;
+    const a = { id: siguienteId, tipo: nuevo.tipo, texto: nuevo.texto.trim(), plazo: nuevo.plazo || null, fecha: hoyISO(), respondido: null };
+    onSave("avisos", [...avisos, a]);
+    setNuevo({ tipo: "REQUERIMIENTO", texto: "", plazo: "" });
+    setAbierto(false);
+  }
+  const responder = (id) => onSave("avisos", avisos.map((a) => (a.id === id ? { ...a, respondido: hoyISO() } : a)));
+  const quitar = (id) => onSave("avisos", avisos.filter((a) => a.id !== id));
+
+  return (
+    <div className="ex-pst-b">
+      <h4>
+        <span className="ico"><IconoPaso nombre="bell" /></span>Requerimientos y notificaciones
+        <button type="button" className="ex-btn sec" onClick={() => setAbierto((v) => !v)}>
+          <IconoPaso nombre={abierto ? "x" : "plus"} /> {abierto ? "Cerrar" : "Registrar"}
+        </button>
+      </h4>
+      {abierto && (
+        <div className="ex-grid2" style={{ marginBottom: 10 }}>
+          <div>
+            <label className="ex-lab">Tipo</label>
+            <select className="ex-select" style={{ maxWidth: "100%", width: "100%" }} value={nuevo.tipo} onChange={(e) => setNuevo({ ...nuevo, tipo: e.target.value })}>
+              {TIPOS_AVISO.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="ex-lab">Plazo (si lo hay)</label>
+            <input type="date" className="ex-campo" value={nuevo.plazo} onChange={(e) => setNuevo({ ...nuevo, plazo: e.target.value })} />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="ex-lab">Qué dice el portal</label>
+            <textarea rows={2} className="ex-campo" value={nuevo.texto} onChange={(e) => setNuevo({ ...nuevo, texto: e.target.value })}
+              placeholder="Ej.: piden el certificado de notas apostillado antes del 20 de febrero" />
+          </div>
+          <div className="ex-fila" style={{ gridColumn: "1 / -1" }}>
+            <button type="button" className="ex-btn" onClick={registrar} disabled={!nuevo.texto.trim()}>
+              <IconoPaso nombre="send" /> Registrar
+            </button>
+            <span className="ex-sub2">{nombreCorto} lo ve en su tarjeta de Postulaciones, con el plazo.</span>
+          </div>
+        </div>
+      )}
+      {avisos.length === 0 ? (
+        <p className="ex-sub2">Nada registrado. Al registrar uno, {nombreCorto} lo ve en su tarjeta de Postulaciones con el plazo.</p>
+      ) : [...avisos].reverse().map((a) => (
+        <div key={a.id} className="ex-req" data-t={a.tipo}>
+          <span className="ico"><IconoPaso nombre={ICO_AVISO[a.tipo] || "info"} /></span>
+          <div>
+            <b>{TIT_AVISO[a.tipo] || a.tipo}</b> · {fmtFecha(a.fecha)}<br />{a.texto}
+            {a.respondido ? <small>Respondido el {fmtFecha(a.respondido)}</small> : null}
+          </div>
+          {a.tipo !== "RESULTADO" && (
+            a.respondido
+              ? <span className="ex-est" data-e="ok"><IconoPaso nombre="check" /> Respondido</span>
+              : a.plazo
+                ? <span className="ex-est" data-e="warn"><IconoPaso nombre="clock" /> Hasta {fmtFecha(a.plazo)}</span>
+                : <span />
+          )}
+          <div className="ex-req-acc">
+            {a.tipo !== "RESULTADO" && !a.respondido && (
+              <button type="button" className="ex-btn" onClick={() => responder(a.id)}><IconoPaso nombre="check" /> Marcar respondido</button>
+            )}
+            <button type="button" className="ex-btn plano" onClick={() => quitar(a.id)}><IconoPaso nombre="trash" /> Quitar</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── La tarjeta por portal ─────────────────────────────────────────────────────
+// Todo el trámite de una postulación en un sitio: estado, línea de tiempo,
+// vigilancia, plazos y alertas, requerimientos, claves, resguardo y notas.
+function MasterPostCard({ post, onUpdate, onSave, onRecargar, nombreCorto }) {
+  const [showPw, setShowPw] = useState(false);
+  const idx = Math.max(0, (post.prioridad || 1) - 1);
+  const admitida = post.estado === "admitido";
+  const dias = diasHasta(post.fecha_cierre);
+  const avisos = Array.isArray(post.avisos) ? post.avisos : [];
+  const alerta = avisos.some((a) => a.tipo !== "RESULTADO" && !a.respondido && a.plazo)
+    || (dias !== null && dias >= 0 && dias <= 7 && !["admitido", "denegado"].includes(post.estado));
+
+  const onChange = (field, value) => onUpdate(post.id_master, field, value);
+  const onSaveF  = (field, value) => onSave(post.id_master, field, value);
+
+  const sub = [
+    post.universidad, post.ciudad,
+    post.precio ? `${Math.round(post.precio).toLocaleString("es-ES")} € el curso` : null,
+    post.score ? `${post.score} % de ajuste` : null,
+  ].filter(Boolean).join(" · ");
+
+  return (
+    <article className="ex-pst" data-alerta={alerta ? 1 : 0} data-adm={admitida ? 1 : 0}>
+      <div className="ex-pst-top">
+        <span className="ico"><IconoPaso nombre={admitida ? "trophy" : "cap"} /></span>
+        <div>
+          <h3>{post.nombre_limpio || "(Sin nombre)"}</h3>
+          <div className="u">{idx + 1}.º{sub ? ` · ${sub}` : ""}</div>
+        </div>
+        <select className="ex-select" value={post.estado} onChange={(e) => onSaveF("estado", e.target.value)} aria-label="Estado de la postulación">
+          {ESTADOS_OPT.map((o) => <option key={o.val} value={o.val}>{o.label}</option>)}
+        </select>
+      </div>
+
+      <LineaTiempoAdmin post={post} />
+
+      {admitida && (
+        <div className="ex-admitida">
+          <h4>🎉 Admitida</h4>
+          <p>
+            La carta de admisión y, cuando la haga, la matrícula se suben en <b>Documentos del proceso</b>,
+            más abajo en este mismo paso. {nombreCorto} las ve en su panel.
+          </p>
+        </div>
+      )}
+      {post.estado === "lista" && (
+        <div className="ex-admitida" style={{ borderColor: "#b8730c", background: "#fff3e0" }}>
+          <h4 style={{ color: "#b8730c" }}>Lista de espera</h4>
+          <p>Se revisa en cada adjudicación; si sube de puesto, se cambia el estado y {nombreCorto} lo ve.</p>
+        </div>
+      )}
+
+      <Vigilancia post={post} onSave={onSaveF} />
+
+      <div className="ex-pst-b">
+        <h4><span className="ico"><IconoPaso nombre="calendar" /></span>Plazos y alertas</h4>
+        <TabFechas post={post} onChange={onChange} onSave={onSaveF} />
+      </div>
+
+      <Avisos post={post} onSave={onSaveF} nombreCorto={nombreCorto} />
+
+      <div className="ex-pst-b">
+        <h4><span className="ico"><IconoPaso nombre="lock" /></span>Portal y claves</h4>
+        <TabPortal post={post} onChange={onChange} onSave={onSaveF} showPw={showPw} togglePw={() => setShowPw((v) => !v)} />
+      </div>
+
+      <div className="ex-pst-b">
+        <h4><span className="ico"><IconoPaso nombre="fileText" /></span>Resguardo y pago</h4>
+        <TabDocs post={post} onRecargar={onRecargar} />
+      </div>
+
+      <div className="ex-pst-b">
+        <h4><span className="ico"><IconoPaso nombre="message" /></span>Seguimiento interno</h4>
+        <TabSeguimiento post={post} onChange={onChange} onSave={onSaveF} />
+      </div>
+    </article>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey }) {
+export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey, nombreCliente = null }) {
   const [posts, setPosts]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState("");
+  const nombreCorto = (nombreCliente || "el asesorado").split(" ")[0];
 
   useEffect(() => {
     setLoading(true);
@@ -639,29 +732,48 @@ export default function ProgramacionPostulacionesAdmin({ idSolicitud, refreshKey
 
   if (posts.length === 0) {
     return (
-      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-        <span className="text-lg shrink-0">⚠️</span>
-        <p className="text-sm text-amber-800">
-          No hay másteres con plan Sí registrados aún. Marca másteres como Sí en el Bloque 5 para activar esta sección.
-        </p>
+      <div className="ex-vacio">
+        <span className="ico"><IconoPaso nombre="cap" /></span>
+        Sin postulaciones: no hay ningún Sí en la elección (paso 4). En cuanto apruebes un máster, aparece aquí su tarjeta.
       </div>
     );
   }
 
+  const urgentes = posts
+    .map((p) => ({ ...p, dias: diasHasta(p.fecha_cierre) }))
+    .filter((p) => p.dias !== null && p.dias >= 0 && p.dias <= 20 && !["admitido", "denegado"].includes(p.estado))
+    .sort((a, b) => a.dias - b.dias);
+
   return (
     <div className="space-y-3">
+      {urgentes.length > 0 ? (
+        <div className="ex-tranquila" data-k="warn">
+          <span className="ico"><IconoPaso nombre="clock" /></span>
+          <div>
+            <b>Cierre cercano:</b> {urgentes[0].nombre_limpio} cierra el {fmtFecha(urgentes[0].fecha_cierre)}
+            {urgentes[0].dias === 0 ? " (hoy)" : ` (en ${urgentes[0].dias} día${urgentes[0].dias === 1 ? "" : "s"})`}.
+          </div>
+        </div>
+      ) : (
+        <div className="ex-tranquila">
+          <span className="ico"><IconoPaso nombre="info" /></span>
+          <div>Una tarjeta por portal con todo el trámite: <b>vigilancia</b>, estado, plazos, requerimientos, claves, resguardo y notas. Lo que cambie lo ve {nombreCorto} en su panel.</div>
+        </div>
+      )}
       {saving && <p className="text-[10px] text-neutral-400 font-mono text-right">Guardando…</p>}
-      <KanbanMini posts={posts} />
-      <AlertaBanner posts={posts} />
-      {posts.map((post) => (
-        <MasterPostCard
-          key={post.id_master}
-          post={post}
-          onUpdate={handleUpdate}
-          onSave={handleSave}
-          onRecargar={recargar}
-        />
-      ))}
+      <div className="ex-pst-grid">
+        {posts.map((post) => (
+          <MasterPostCard
+            key={post.id_master}
+            post={post}
+            onUpdate={handleUpdate}
+            onSave={handleSave}
+            onRecargar={recargar}
+            nombreCorto={nombreCorto}
+          />
+        ))}
+      </div>
+      <p className="ex-pie">Estas filas son las mismas del tracker de Procesos. Las alertas de 7, 3 y 1 días antes de cada plazo salen de aquí.</p>
     </div>
   );
 }

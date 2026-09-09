@@ -7,6 +7,7 @@
 // ventana. Nada que no se pueda comprobar.
 import IconoPaso from "./IconoPaso";
 import "../../styles/pasos.css";
+import "../../styles/tarjeta-master.css";
 
 const eur = (n) => (n == null || Number.isNaN(Number(n)))
   ? null
@@ -16,7 +17,7 @@ const tono = (v) => (v == null ? "#9db0ba" : v >= 85 ? "#1d7a52" : v >= 75 ? "#3
 
 function fechaCorta(iso) {
   if (!iso) return null;
-  const d = new Date(iso);
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(String(iso)) ? new Date(iso + "T12:00:00") : new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
   return d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { lazyConRecarga } from "../../lib/cargaDiferida";
 import "../../styles/panel.css";
+import "../../styles/pasos-core.css";
 import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";

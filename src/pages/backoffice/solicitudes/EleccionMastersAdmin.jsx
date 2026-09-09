@@ -563,75 +563,29 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
       {/* Filas de másteres */}
       <div className="space-y-2">
         {filas.map((fila, idx) => (
-          <div
-            key={idx}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all
-              ${fila.plan_incluido === true
-                ? "border-[#1D6A4A]/25 bg-[#E8F5EE]"
-                : fila.plan_incluido === false
-                  ? "border-amber-200 bg-amber-50"
-                  : "border-neutral-200 bg-white"}`}
-          >
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0 font-mono ${COLORES_PRIORIDAD[idx] ?? "bg-neutral-400"}`}>
-              P{fila.prioridad ?? idx + 1}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold text-[#1A3557] leading-snug truncate">
+          <div key={idx} className="ex-elec" data-plan={fila.plan_incluido === true ? "si" : fila.plan_incluido === false ? "no" : ""}>
+            <i>P{fila.prioridad ?? idx + 1}</i>
+            <div className="nom">
+              <div className="n">
                 {fila.nombre_limpio || fila.programa || "(Sin título)"}
-                {fila.manual && (
-                  <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500 align-middle">
-                    manual
-                  </span>
-                )}
+                {fila.manual && <span className="ex-est" data-e="info" style={{ marginLeft: 6 }}>manual</span>}
                 {/* El asesor tiene que verlo aquí, antes de publicar el
                     informe, no enterarse cuando el asesorado pregunte. */}
-                {fila.es_titulo_oficial === false && (
-                  <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 align-middle">
-                    título propio
-                  </span>
-                )}
-              </p>
-              {(fila.universidad || fila.ciudad || fila.score || fila.comentario) && (
-                <p className="text-[11px] text-neutral-500 truncate">
-                  {[fila.universidad, fila.ciudad, fila.score ? `${fila.score}% match` : null, fila.comentario]
-                    .filter(Boolean).join(" · ")}
-                </p>
-              )}
+                {fila.es_titulo_oficial === false && <span className="ex-est" data-e="warn" style={{ marginLeft: 6 }}>título propio</span>}
+              </div>
+              <div className="u">
+                {[fila.universidad, fila.ciudad, fila.score ? `${fila.score} % de ajuste` : null].filter(Boolean).join(" · ")}
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-[10px] text-neutral-500 hidden sm:block">Plan:</span>
-              <button
-                type="button"
-                onClick={() => setPlan(idx, true)}
-                disabled={guardando}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-bold border-[1.5px] transition-all
-                  ${fila.plan_incluido === true
-                    ? "bg-[#1D6A4A] border-[#1D6A4A] text-white"
-                    : "bg-white border-neutral-300 text-neutral-400 hover:border-[#1D6A4A] hover:text-[#1D6A4A]"}`}
-              >
-                Sí
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlan(idx, false)}
-                disabled={guardando}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-bold border-[1.5px] transition-all
-                  ${fila.plan_incluido === false
-                    ? "bg-amber-500 border-amber-500 text-white"
-                    : "bg-white border-neutral-300 text-neutral-400 hover:border-amber-500 hover:text-amber-600"}`}
-              >
-                No
-              </button>
+            <div className="ex-sino">
+              <small>Plan</small>
+              <button type="button" className="si" aria-pressed={fila.plan_incluido === true} disabled={guardando} onClick={() => setPlan(idx, true)}>Sí</button>
+              <button type="button" className="no" aria-pressed={fila.plan_incluido === false} disabled={guardando} onClick={() => setPlan(idx, false)}>No</button>
               {fila.manual && (
-                <button
-                  type="button" onClick={() => quitarManual(idx)} disabled={guardando}
-                  aria-label="Quitar máster manual"
-                  className="text-[13px] leading-none text-neutral-300 hover:text-red-600 px-1 transition"
-                >
-                  ×
-                </button>
+                <button type="button" onClick={() => quitarManual(idx)} disabled={guardando} aria-label="Quitar máster manual" style={{ width: 30 }}>×</button>
               )}
             </div>
+            {fila.comentario && <div className="com"><b>Dice el asesorado:</b> {fila.comentario}</div>}
           </div>
         ))}
       </div>

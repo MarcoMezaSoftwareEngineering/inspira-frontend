@@ -8,7 +8,7 @@ import IconoPaso from "../../../../../components/common/IconoPaso";
 
 function fmtFecha(str) {
   if (!str) return "—";
-  const d = new Date(str);
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(String(str)) ? new Date(str + "T12:00:00") : new Date(str);
   if (!isNaN(d.getTime()) && /\d{4}-\d{2}/.test(str))
     return d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
   return str;
@@ -314,6 +314,39 @@ function Plegable({ icono, titulo, children, abierto = false }) {
   );
 }
 
+// Lo que el asesor anota del portal: un requerimiento (piden algo, con
+// plazo), una notificación o el resultado. Quien vigila el portal es el
+// asesor; aquí solo se ve qué pasó y qué hay que hacer.
+const AVISO_ICO = { REQUERIMIENTO: "alert", NOTIFICACION: "bell", RESULTADO: "trophy" };
+const AVISO_TIT = { REQUERIMIENTO: "Requerimiento", NOTIFICACION: "Notificación", RESULTADO: "Resultado" };
+function AvisosPortal({ avisos }) {
+  const lista = Array.isArray(avisos) ? [...avisos].reverse() : [];
+  if (!lista.length) return null;
+  return (
+    <div className="px-4 pb-3">
+      <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-2">Avisos del portal</p>
+      {lista.map((a) => (
+        <div key={a.id} className="ex-req" data-t={a.tipo}>
+          <span className="ico"><IconoPaso nombre={AVISO_ICO[a.tipo] || "info"} /></span>
+          <div>
+            <b>{AVISO_TIT[a.tipo] || a.tipo}</b> · {fmtFecha(a.fecha)}<br />{a.texto}
+            {a.respondido
+              ? <small>Resuelto por tu asesor el {fmtFecha(a.respondido)}. No tienes que hacer nada.</small>
+              : a.tipo === "REQUERIMIENTO"
+                ? <small>Tu asesor lo presenta en el portal; si necesita algo tuyo, te escribe por Mensajes.</small>
+                : null}
+          </div>
+          {a.tipo !== "RESULTADO" && (
+            a.respondido
+              ? <span className="ex-est" data-e="ok">Respondido</span>
+              : a.plazo ? <span className="ex-est" data-e="warn">Hasta {fmtFecha(a.plazo)}</span> : <span />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function MasterPostCard({ post, idSolicitud, onSave }) {
   const info = ESTADO_INFO[post.estado] || ESTADO_INFO.pendiente;
   const admitida = post.estado === "admitido";
@@ -373,6 +406,8 @@ function MasterPostCard({ post, idSolicitud, onSave }) {
           </p>
         </div>
       )}
+
+      <AvisosPortal avisos={post.avisos} />
 
       <Plegable icono="lock" titulo="Acceso al portal y claves">
         <TabPortal post={post} onSave={onSaveF} />

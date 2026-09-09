@@ -4,15 +4,6 @@ import { formatearFecha } from "./utils";
 import { boPATCH } from "../../../services/backofficeApi";
 import IconoPaso from "../../../components/common/IconoPaso";
 
-// El icono de cada dato de la ficha.
-const ICONO_CAMPO = {
-  "Fecha nacimiento": "calendar", "Pasaporte": "idCard", "Venc. pasaporte": "idCard", "Emisión pasaporte": "idCard",
-  "Título universitario": "cap", "Universidad origen": "cap", "Inicio estudios": "calendar", "Fin estudios": "calendar",
-  "Fecha del título": "calendar", "País de origen": "pin", "Ciudad": "pin", "Inicio previsto": "calendar",
-  "Presupuesto máx.": "coins", "Promedio": "star", "Trabajo actual": "briefcase", "Asesores": "user",
-  "Tipo universidad": "cap", "Tipo título": "cap",
-};
-
 function iniciales(nombre) {
   if (!nombre) return "?";
   return nombre
@@ -22,25 +13,20 @@ function iniciales(nombre) {
     .join("");
 }
 
-function Campo({ label, value, highlight, warn }) {
-  const vacio = value === null || value === undefined || value === "";
-  const tile = warn
-    ? "bg-amber-100 text-amber-700"
-    : highlight
-      ? "bg-[#E8F5EE] text-[#1D6A4A]"
-      : "bg-neutral-100 text-neutral-400";
+// Un dato de la ficha: icono, etiqueta y valor. «Copiar» para lo que se
+// pega en un portal o en un correo.
+function Dato({ icono, label, valor, extra = null, copiar = false }) {
+  const vacio = valor === null || valor === undefined || valor === "";
   return (
-    <div className="flex items-start gap-2.5 py-2 border-b border-neutral-100 min-w-0">
-      <span className={`shrink-0 w-8 h-8 rounded-lg grid place-items-center ${tile}`}>
-        <IconoPaso nombre={ICONO_CAMPO[label] || "info"} className="w-4 h-4" />
-      </span>
-      <div className="min-w-0">
-        <p className={`text-[9px] font-bold uppercase tracking-widest font-mono ${warn ? "text-amber-600" : "text-neutral-400"}`}>
-          {label}{warn && " ⚠"}
-        </p>
-        <p className={`text-[12.5px] font-semibold leading-snug break-words ${warn ? "text-amber-700" : vacio ? "text-neutral-300 italic" : "text-neutral-900"}`}>
-          {vacio ? "N/D" : value}
-        </p>
+    <div className="ex-fdat">
+      <span className="ico"><IconoPaso nombre={icono} /></span>
+      <div>
+        <small>{label}</small>
+        {vacio ? <b className="vacio">Sin dato</b> : <b>{valor}</b>}
+        {!vacio && extra}
+        {!vacio && copiar && (
+          <button type="button" className="cp" onClick={() => navigator.clipboard?.writeText(String(valor))}>copiar</button>
+        )}
       </div>
     </div>
   );
@@ -76,7 +62,7 @@ function CampoEdit({ label, name, value, onChange, type = "text", placeholder = 
   );
 }
 
-export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }) {
+export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado, resumen = null }) {
   const cli    = detalle?.cliente || {};
   const extra  = cli.datos_extra || {};
   const datos  = detalle?.datos_formulario || {};
@@ -168,41 +154,33 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
     ? [puesto.cargo, puesto.entidad].filter(Boolean).join(" · ")
     : (EXP[datos.experiencia_anios] || null);
   const asesores = (detalle?.asesores || []).map((a) => a.nombre).filter(Boolean).join(" · ") || null;
+  const nombreCorto = (cli.nombre || "el asesorado").split(" ")[0];
+  const cursoObjetivo = detalle?.curso_objetivo || datos.curso_objetivo || null;
+  // Lo que la ficha necesita sí o sí y todavía no está.
+  const faltan = [
+    [!cli.telefono, "teléfono"],
+    [!cli.email_contacto, "correo"],
+    [!extra.ciudad, "ciudad"],
+    [!cli.pasaporte, "pasaporte"],
+    [!vencPasaporte, "vencimiento del pasaporte"],
+    [!fechaNac, "fecha de nacimiento"],
+    [!tituloUniv, "título"],
+  ].filter(([f]) => f).map(([, n]) => n);
 
   return (
     <div className="space-y-0">
-      {/* Avatar + nombre + contacto + botón editar */}
-      <div className="flex items-start gap-3 px-5 pt-5 pb-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E8F5EE] to-[#EEF2F8] border-2 border-neutral-200 flex items-center justify-center shrink-0">
-          <span className="font-serif text-lg font-bold text-[#1A3557]">{iniciales(cli.nombre)}</span>
+      {/* Avatar, nombre, la línea del expediente y el botón de editar */}
+      <div className="ex-ficha-cab px-5 pt-5">
+        <span className="av">{iniciales(cli.nombre)}</span>
+        <div>
+          <b>{cli.nombre || "—"}</b>
+          <span>
+            {[`#${detalle?.id_solicitud ?? ""}`, detalle?.tipo?.nombre || detalle?.titulo || null, cursoObjetivo ? `curso ${cursoObjetivo}` : null, asesores ? `asesor ${asesores}` : null]
+              .filter(Boolean).join(" · ")}
+          </span>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-serif text-base font-bold text-[#1A3557] leading-snug">{cli.nombre || "—"}</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1">
-            {cli.email_contacto && (
-              <span className="flex items-center gap-1 text-xs text-neutral-500">
-                <span>✉</span>
-                <span className="font-medium text-[#1A3557]">{cli.email_contacto}</span>
-              </span>
-            )}
-            {cli.telefono && (
-              <span className="flex items-center gap-1 text-xs text-neutral-500">
-                <span>📱</span>
-                <span className="font-medium text-[#1A3557]">{cli.telefono}</span>
-              </span>
-            )}
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={editando ? () => setEditando(false) : abrirEditor}
-          className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
-            editando
-              ? "border-neutral-300 bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-              : "border-[#1D6A4A]/30 bg-[#E8F5EE] text-[#1D6A4A] hover:bg-[#d4eddf]"
-          }`}
-        >
-          {editando ? "Cancelar" : "✏ Editar"}
+        <button type="button" className={`ex-btn ${editando ? "" : "sec"}`} onClick={editando ? () => setEditando(false) : abrirEditor}>
+          <IconoPaso nombre={editando ? "x" : "edit"} /> {editando ? "Cancelar" : "Editar"}
         </button>
       </div>
 
@@ -263,71 +241,56 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
         </div>
       )}
 
-      {/* Lo que hay que mirar antes de nada: pasaporte y lo que falta. */}
-      <div className="ex-alertas px-5 pb-2">
-        {vencPasaporte && (
+      {/* Lo que hay que mirar antes de nada: pasaporte, lo que falta, lo bueno. */}
+      <div className="ex-alertas px-5 pb-1">
+        {vencPasaporte ? (
           <span className={alerta ? "warn" : "ok"}>
-            {alerta ? alerta.msg : `Pasaporte vigente hasta ${formatearFecha(vencPasaporte)}`}
+            <IconoPaso nombre="idCard" /> {alerta ? alerta.msg : `Pasaporte vigente hasta ${formatearFecha(vencPasaporte)}`}
           </span>
+        ) : (
+          <span className="warn"><IconoPaso nombre="idCard" /> Sin vencimiento del pasaporte</span>
         )}
-        {tituloUniv && <span>{tituloUniv}</span>}
-        {promedio && <span>Promedio {promedio}</span>}
-        {!cli.telefono && <span className="warn">Sin teléfono</span>}
-        {!extra.ciudad && <span className="warn">Sin ciudad</span>}
+        {faltan.length > 0
+          ? <span className="warn"><IconoPaso nombre="alert" /> Faltan {faltan.length} datos: {faltan.join(", ")}</span>
+          : <span className="ok"><IconoPaso nombre="check" /> Ficha completa</span>}
+        {resumen?.admitidas > 0 && <span className="ok"><IconoPaso nombre="trophy" /> {resumen.admitidas === 1 ? "Una admisión" : `${resumen.admitidas} admisiones`}</span>}
       </div>
 
-      {/* Grid de campos (vista) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-5 px-5 pb-3">
-        <Campo label="Fecha nacimiento"     value={fechaNac ? formatearFecha(fechaNac) : null} highlight={!!fechaNac} />
-        <Campo label="Pasaporte"            value={cli.pasaporte}        warn={!!alerta && alerta.nivel === "rojo"} />
-        <Campo label="Venc. pasaporte"      value={vencPasaporte ? formatearFecha(vencPasaporte) : null} warn={!!alerta} />
-        <Campo label="Emisión pasaporte"    value={emiPasaporte  ? formatearFecha(emiPasaporte) : null}  highlight={!!emiPasaporte} />
-        <Campo label="Título universitario"  value={tituloUniv}      highlight={!!tituloUniv} />
-        <Campo label="Universidad origen"   value={uniOrigen}           highlight={!!uniOrigen} />
-        <Campo label="Inicio estudios"      value={inicioEstudios}      highlight={!!inicioEstudios} />
-        <Campo label="Fin estudios"         value={finEstudios}         highlight={!!finEstudios} />
-        <Campo label="Fecha del título"     value={fechaTitulo ? formatearFecha(fechaTitulo) : null} highlight={!!fechaTitulo} />
-        <Campo label="País de origen"       value={cli.pais_origen}     highlight={!!cli.pais_origen} />
-        <Campo label="Inicio previsto"      value={inicioPrevisto}      highlight={!!inicioPrevisto} />
-        <Campo label="Presupuesto máx."     value={presupuesto}         highlight={!!presupuesto} />
-        <Campo label="Ciudad"               value={extra.ciudad}        highlight={!!extra.ciudad} />
-        <Campo label="Promedio"             value={promedio}            highlight={!!promedio} />
-        <Campo label="Trabajo actual"       value={trabajo}             highlight={!!trabajo} />
-        <Campo label="Asesores"             value={asesores}            highlight={!!asesores} />
-        {tipoUni    && <Campo label="Tipo universidad" value={tipoUni}    highlight />}
-        {tipoTitulo && <Campo label="Tipo título"      value={tipoTitulo} highlight />}
+      <div className="ex-fdatos px-5 pb-2">
+        <Dato icono="phone" label="Teléfono" valor={cli.telefono} copiar />
+        <Dato icono="mail" label="Correo" valor={cli.email_contacto} copiar />
+        <Dato icono="pin" label="País y ciudad" valor={[cli.pais_origen, extra.ciudad].filter(Boolean).join(" · ") || null} />
+        <Dato icono="calendar" label="Nacimiento" valor={fechaNac ? formatearFecha(fechaNac) : null} />
+        <Dato icono="idCard" label="Pasaporte" valor={cli.pasaporte}
+          extra={vencPasaporte ? <span className="ex-est" data-e={alerta ? "warn" : "ok"}>vence {formatearFecha(vencPasaporte)}</span> : null} />
+        <Dato icono="calendar" label="Emisión del pasaporte" valor={emiPasaporte ? formatearFecha(emiPasaporte) : null} />
+        <Dato icono="cap" label="Título" valor={tituloUniv} extra={tipoTitulo ? <span className="ex-est" data-e="info">{tipoTitulo}</span> : null} />
+        <Dato icono="book" label="Universidad" valor={uniOrigen} extra={tipoUni ? <span className="ex-est" data-e="info">{tipoUni}</span> : null} />
+        <Dato icono="calendar" label="Estudios" valor={inicioEstudios || finEstudios ? `${inicioEstudios || "?"} – ${finEstudios || "?"}` : null} />
+        <Dato icono="award" label="Fecha del título" valor={fechaTitulo ? formatearFecha(fechaTitulo) : null} />
+        <Dato icono="star" label="Promedio" valor={promedio} />
+        <Dato icono="briefcase" label="Trabajo" valor={trabajo} />
+        <Dato icono="calendar" label="Inicio previsto" valor={inicioPrevisto} />
+        <Dato icono="coins" label="Presupuesto" valor={presupuesto} />
+        <Dato icono="globe" label="Plan contratado" valor={detalle?.titulo || detalle?.tipo?.nombre || null}
+          extra={comunidades.length > 0 ? <span className="chips">{comunidades.map((c) => <span key={c}>{c}</span>)}</span> : null} />
+        <Dato icono="user" label="Asesores" valor={asesores} />
+        {extra.nacionalidad || cli.nacionalidad ? <Dato icono="flag" label="Nacionalidad" valor={extra.nacionalidad || cli.nacionalidad} /> : null}
       </div>
+      <p className="ex-mini px-5">
+        Los datos vienen del perfil de {nombreCorto} y del formulario académico: se editan aquí y se actualizan en los dos sitios.
+      </p>
 
-      {/* Chip plan contratado */}
-      {(detalle?.titulo || comunidades.length > 0) && (
-        <div className="flex items-center gap-3 mx-5 mb-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#1A3557] to-[#023A4B]">
-          <span className="text-lg shrink-0">📦</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white mb-1">
-              {detalle.titulo || "Plan contratado"}
-            </p>
-            {comunidades.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {comunidades.map((c) => (
-                  <span key={c} className="bg-[#F5C842] text-[#1A3557] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    {c}
-                  </span>
-                ))}
-              </div>
-            )}
+      {resumen && (
+        <div className="px-5 pt-4 pb-5">
+          <p className="ex-sub">Resumen del expediente</p>
+          <div className="ex-cuenta">
+            <div><b>{resumen.docsOk}/{resumen.docsTotal}</b><span>documentos</span></div>
+            <div><b>{resumen.informe}</b><span>informe</span></div>
+            <div><b>{resumen.postulaciones}</b><span>postulaciones</span></div>
+            <div><b>{resumen.admitidas}</b><span>admitidas</span></div>
           </div>
-        </div>
-      )}
-
-      {/* Alerta pasaporte */}
-      {alerta && (
-        <div className={`mx-5 mb-4 flex items-start gap-2 px-3 py-2.5 rounded-xl text-xs leading-relaxed
-          ${alerta.nivel === "rojo"
-            ? "bg-red-50 border border-red-200 text-red-700"
-            : "bg-amber-50 border border-amber-200 text-amber-800"}`}
-        >
-          <span className="shrink-0 text-sm">{alerta.nivel === "rojo" ? "🔴" : "⚠️"}</span>
-          <span>{alerta.msg}</span>
+          <p className="ex-mini" style={{ marginTop: 0 }}>{resumen.nota}</p>
         </div>
       )}
     </div>

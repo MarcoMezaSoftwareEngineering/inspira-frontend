@@ -1,27 +1,38 @@
 // src/pages/backoffice/solicitudes/components/ChecklistSolicitudAdmin.jsx
+//
+// Los documentos del expediente vistos por el asesor: las mismas filas que ve
+// el asesorado en su panel (icono con el número de Drive, estado, descripción,
+// requisitos y modelo), con lo que solo hace el asesor encima: aprobar u
+// observar cada archivo, pedir un adicional, rechazar, subir por él, abrir
+// en Drive y descargar todo uno a uno (08/09/2026).
 import { useState } from "react";
 import { boPATCH } from "../../../../services/backofficeApi";
 import { dialog } from "../../../../services/dialogService";
 import { API_URL, formatearFecha } from "../utils";
 import DocViewer from "../../documentos/DocViewer";
 import { DriveToast, useDriveToast } from "../../driveToast";
-import { nombreDescarga, iconoDocumento } from "../../../../lib/documentos";
+import { nombreDescarga, iconoDocumento, permiteVarios } from "../../../../lib/documentos";
 import TextoConEnlaces from "../../../../components/common/TextoConEnlaces";
 import IconoPaso from "../../../../components/common/IconoPaso";
+import { guiaParaItem } from "../../../panel/components/mis-servicios/guiaDocumentosMaster";
+import { requisitosDe } from "../../../panel/components/mis-servicios/sections/visaRequisitos";
+import GuiaDocumento from "../../../panel/components/mis-servicios/sections/GuiaDocumento";
 
 const ESTADO_CFG = {
-  aprobado:   { label: "Aprobado",  bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
-  enviado:    { label: "Enviado",   bg: "bg-sky-50",     text: "text-sky-700",     border: "border-sky-200",     dot: "bg-sky-500"     },
-  observado:  { label: "Observado", bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200",   dot: "bg-amber-500"   },
-  solicitado: { label: "Adicional", bg: "bg-violet-50",  text: "text-violet-700",  border: "border-violet-200",  dot: "bg-violet-500"  },
-  rechazado:  { label: "Rechazado", bg: "bg-red-50",     text: "text-red-700",     border: "border-red-300",     dot: "bg-red-600"     },
-  no_aplica:  { label: "No aplica", bg: "bg-neutral-50", text: "text-neutral-500", border: "border-neutral-200", dot: "bg-neutral-400" },
-  pendiente:  { label: "Pendiente", bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200",   dot: "bg-amber-400"   },
+  aprobado:   { label: "Aprobado",    tono: "ok",   icono: "check" },
+  enviado:    { label: "Por revisar", tono: "on",   icono: "clock" },
+  observado:  { label: "Observado",   tono: "warn", icono: "alert" },
+  solicitado: { label: "Adicional",   tono: "ped",  icono: "plus" },
+  rechazado:  { label: "Rechazado",   tono: "no",   icono: "x" },
+  no_aplica:  { label: "No aplica",   tono: "info", icono: "info" },
+  pendiente:  { label: "Pendiente",   tono: "info", icono: "clock" },
 };
 
 function getEstadoCfg(estado) {
   return ESTADO_CFG[(estado || "pendiente").toLowerCase()] || ESTADO_CFG.pendiente;
 }
+
+const REV_LABEL = { APROBADO: "aprobado", OBSERVADO: "observado", PENDIENTE: "sin revisar" };
 
 export default function ChecklistSolicitudAdmin({
   detalle,
@@ -207,35 +218,46 @@ export default function ChecklistSolicitudAdmin({
     return <p className="text-sm text-neutral-500 py-2">Esta solicitud no tiene checklist configurado.</p>;
   }
 
-  // Contadores para la barra de resumen
+  // Contadores para la cabecera
   const todosLosItems = Object.values(checklistPorEtapa).flat().filter(visiblePorSolvencia);
-  const totalDocs     = todosLosItems.length;
-  const nEnviados     = todosLosItems.filter((it) => ["enviado","aprobado","no_aplica"].includes((it.estado_item||"").toLowerCase())).length;
-  const nPendientes   = todosLosItems.filter((it) => (it.estado_item||"pendiente").toLowerCase() === "pendiente" && (it.documentos?.length > 0 || it.documento)).length;
-  const nSinDoc       = todosLosItems.filter((it) => (it.estado_item||"pendiente").toLowerCase() === "pendiente" && !(it.documentos?.length > 0 || it.documento)).length;
-  const nObservados   = todosLosItems.filter((it) => (it.estado_item||"").toLowerCase() === "observado").length;
+  const estadoDe = (it) => (it.estado_item || "pendiente").toLowerCase();
+  const totalDocs   = todosLosItems.length;
+  const nAprobados  = todosLosItems.filter((it) => ["aprobado", "no_aplica"].includes(estadoDe(it))).length;
+  const nEnviados   = todosLosItems.filter((it) => estadoDe(it) === "enviado").length;
+  const nObservados = todosLosItems.filter((it) => ["observado", "rechazado"].includes(estadoDe(it))).length;
+  const nFaltan     = todosLosItems.filter((it) => ["pendiente", "solicitado"].includes(estadoDe(it)) && !(it.documentos?.length > 0 || it.documento)).length;
+  const pct = totalDocs ? Math.round((nAprobados / totalDocs) * 100) : 0;
+  const nombreCorto = (detalle?.cliente?.nombre || "el asesorado").split(" ")[0];
+  const revisionPedida = detalle?.datos_panel?.revision_solicitada_at || null;
 
   return (
     <>
     <DriveToast state={driveToastState} />
 
-    {/* Barra de resumen de documentos */}
-    <div className="flex items-center justify-between gap-3 px-4 py-2.5 mb-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs">
-      <span className="text-neutral-600">
-        <strong className="text-neutral-900">{nEnviados}</strong> de {totalDocs} documentos listos
-      </span>
-      <div className="flex gap-3 flex-wrap">
-        {nEnviados  > 0 && <span className="font-semibold text-emerald-600">● {nEnviados} Listos</span>}
-        {nObservados > 0 && <span className="font-semibold text-red-600">● {nObservados} Observados</span>}
-        {nPendientes > 0 && <span className="font-semibold text-amber-600">● {nPendientes} Pendientes</span>}
-        {nSinDoc     > 0 && <span className="font-semibold text-neutral-400">● {nSinDoc} Sin doc.</span>}
-        <button type="button" onClick={() => descargarTodos(todosLosItems)} disabled={descargandoTodo}
-          title="Descarga cada archivo por separado, numerado y con el nombre del documento"
-          className="text-[11px] font-bold px-3 py-1 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50">
-          {descargandoTodo ? "Descargando…" : "⬇ Descargar todos"}
+    {/* Cabecera: cuántos van, la barra y las acciones de todo el expediente */}
+    <div className="ex-doc-top">
+      <div>
+        <div className="num">
+          {nAprobados} <small>de {totalDocs} aprobados{nEnviados ? ` · ${nEnviados} por revisar` : ""}{nObservados ? ` · ${nObservados} observados` : ""}</small>
+        </div>
+        <div className="ex-barra"><i style={{ "--w": `${pct}%` }} /></div>
+      </div>
+      <div className="ex-fila">
+        <button type="button" className="ex-btn sec" onClick={() => descargarTodos(todosLosItems)} disabled={descargandoTodo}
+          title="Descarga cada archivo por separado, numerado y con el nombre del documento">
+          <IconoPaso nombre="download" /> {descargandoTodo ? "Descargando…" : "Descargar todos"}
         </button>
       </div>
     </div>
+    <p className="ex-lead">
+      {revisionPedida
+        ? <>{nombreCorto} pidió revisión el <b>{formatearFecha(revisionPedida)}</b>. </>
+        : null}
+      <b>Aprobar</b> cierra el archivo; <b>Observar</b> pide el motivo y se lo muestra a {nombreCorto} junto a la guía.
+      «Descargar todos» baja los archivos uno a uno, numerados y con el nombre del documento, nunca en ZIP.
+      Todo queda reflejado en su carpeta de Drive.
+      {nFaltan ? <> Faltan <b>{nFaltan}</b> por subir.</> : null}
+    </p>
 
     <div className="space-y-5">
       {Object.entries(checklistPorEtapa)
@@ -246,179 +268,23 @@ export default function ChecklistSolicitudAdmin({
         return (
         <div key={nombreEtapa}>
           {Object.keys(checklistPorEtapa).length > 1 && (
-            <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 pb-2 mb-3 border-b border-neutral-100">
-              {nombreEtapa}
-            </p>
+            <p className="ex-grupo">{nombreEtapa}</p>
           )}
           <div className="ex-docs">
-            {items.map((it) => {
-              const docs = Array.isArray(it.documentos)
-                ? it.documentos
-                : it.documento ? [it.documento] : [];
-              const cfg = getEstadoCfg(it.estado_item);
-              const borderColor =
-                it.estado_item === "rechazado" ? "border-red-300 bg-red-50/40" :
-                it.estado_item === "observado" ? "border-amber-200 bg-amber-50/30" :
-                it.estado_item === "solicitado" ? "border-violet-200 bg-violet-50/30" :
-                it.estado_item === "aprobado"  ? "border-emerald-200 bg-emerald-50/20" :
-                "border-neutral-200 bg-white hover:border-neutral-300";
-
-              return (
-                <div
-                  key={it.id_solicitud_item}
-                  className={`border rounded-2xl p-3 pl-[58px] relative transition-all ${borderColor}`}
-                >
-                  {/* El icono del documento con su número, el mismo que en Drive. */}
-                  <span className={`absolute left-3 top-3 w-9 h-9 rounded-xl grid place-items-center ${
-                    it.estado_item === "aprobado" ? "bg-emerald-50 text-emerald-700"
-                    : ["observado", "rechazado"].includes(it.estado_item) ? "bg-amber-50 text-amber-700"
-                    : it.estado_item === "solicitado" ? "bg-violet-50 text-violet-700"
-                    : "bg-neutral-100 text-primary-light"
-                  }`}>
-                    <IconoPaso nombre={iconoDocumento(it.item?.nombre_item)} className="w-[18px] h-[18px]" />
-                    {it.numero ? (
-                      <i className="absolute -top-1.5 -left-1.5 min-w-[17px] h-[17px] px-1 rounded-md bg-[#10303f] text-white text-[9.5px] font-extrabold not-italic grid place-items-center">
-                        {it.numero}
-                      </i>
-                    ) : null}
-                  </span>
-
-                  {/* Header del item */}
-                  <div className="flex justify-between items-start gap-2 mb-1.5">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-neutral-800 leading-snug">
-                        {it.item?.nombre_item}
-                      </p>
-                      {it.item?.descripcion && (
-                        <TextoConEnlaces texto={it.item.descripcion} className="text-xs text-neutral-500 mt-0.5" />
-                      )}
-                      {it.comentario_asesor && (
-                        <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1 mt-1.5">
-                          Comentario previo: {it.comentario_asesor}
-                        </p>
-                      )}
-                    </div>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border shrink-0 ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                      {cfg.label}
-                    </span>
-                  </div>
-
-                  {/* Acciones a nivel de requisito (ítem). Eran solo del
-                      visado; el máster también pide documentos adicionales. */}
-                  {(
-                    <div className="flex flex-wrap gap-1.5 mb-1.5">
-                      <button
-                        type="button"
-                        onClick={() => cambiarEstadoItem(it, "solicitado")}
-                        className="text-[11px] px-2 py-1 rounded-lg border border-violet-300 text-violet-700 hover:bg-violet-50 transition"
-                      >
-                        ➕ Adicional
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => cambiarEstadoItem(it, "rechazado")}
-                        className="text-[11px] px-2 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 transition"
-                      >
-                        ✕ Rechazar
-                      </button>
-                      {["solicitado", "rechazado"].includes((it.estado_item || "").toLowerCase()) && (
-                        <button
-                          type="button"
-                          onClick={() => cambiarEstadoItem(it, "pendiente")}
-                          className="text-[11px] px-2 py-1 rounded-lg border border-neutral-300 text-neutral-600 hover:bg-neutral-50 transition"
-                        >
-                          ↺ Reiniciar
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Documentos */}
-                  {docs.length === 0 ? (
-                    <p className="text-[11px] text-neutral-400 mt-1">Sin documentos cargados.</p>
-                  ) : (
-                    <div className="border-t border-neutral-100 pt-2 mt-2 space-y-3">
-                      {docs.map((doc) => (
-                        <div key={doc.id_documento} className="space-y-1.5">
-                          <div className="min-w-0">
-                            <p className="text-xs text-neutral-800 truncate font-medium">{doc.nombre_original}</p>
-                            <p className="text-[11px] text-neutral-500 mt-0.5">
-                              Subido: {formatearFecha(doc.fecha_subida)} · Estado:{" "}
-                              <span className="font-medium">{doc.estado_revision}</span>
-                            </p>
-                            {doc.comentario_revision && (
-                              <p className="text-[11px] text-neutral-600 mt-0.5">
-                                Comentario: {doc.comentario_revision}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 flex-wrap">
-                            <button
-                              type="button"
-                              onClick={() => setViewingDoc(doc)}
-                              className="text-[11px] px-2 py-1 rounded-lg border border-neutral-300 hover:bg-neutral-50 transition"
-                            >
-                              Ver
-                            </button>
-                            <button
-                              type="button"
-                              title="Abrir en Google Drive"
-                              onClick={() => abrirEnDrive(doc)}
-                              className="group flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md border border-neutral-200 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 hover:border-blue-200 hover:shadow-md active:scale-95 transition-all duration-150"
-                            >
-                              <svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
-                                <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
-                                <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#00ac47"/>
-                                <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.5l5.85 11.5z" fill="#ea4335"/>
-                                <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
-                                <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
-                                <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
-                              </svg>
-                              <span className="text-neutral-500 group-hover:text-neutral-800 transition-colors font-medium">Drive</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => descargarDocumento(doc, nombreDescarga(it, doc))}
-                              className="text-[11px] px-2 py-1 rounded-lg border border-neutral-300 hover:bg-neutral-50 transition"
-                            >
-                              Descargar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => cambiarRevision(doc, "APROBADO")}
-                              className="text-[11px] px-2 py-1 rounded-lg border border-emerald-400 text-emerald-700 hover:bg-emerald-50 transition"
-                            >
-                              Aprobar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => cambiarRevision(doc, "OBSERVADO")}
-                              className="text-[11px] px-2 py-1 rounded-lg border border-amber-400 text-amber-700 hover:bg-amber-50 transition"
-                            >
-                              Observar
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Subir (interno) */}
-                  {it.item?.permite_archivo && (
-                    <div className="flex justify-end mt-2 pt-2 border-t border-neutral-100">
-                      <button
-                        type="button"
-                        onClick={() => subirDocumentoInterno(it)}
-                        className="text-[11px] px-2.5 py-1 rounded-lg border border-neutral-300 hover:bg-neutral-50 transition"
-                      >
-                        Subir / cambiar documento (interno)
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {items.map((it) => (
+              <FilaDocumento
+                key={it.id_solicitud_item}
+                it={it}
+                guiaMaster={!isVisado}
+                nombreCorto={nombreCorto}
+                onVer={setViewingDoc}
+                onDrive={abrirEnDrive}
+                onDescargar={(doc) => descargarDocumento(doc, nombreDescarga(it, doc))}
+                onRevision={cambiarRevision}
+                onEstadoItem={cambiarEstadoItem}
+                onSubirInterno={subirDocumentoInterno}
+              />
+            ))}
           </div>
         </div>
         );
@@ -433,5 +299,120 @@ export default function ChecklistSolicitudAdmin({
       />
     )}
     </>
+  );
+}
+
+// La fila de un documento: idéntica a la del panel del asesorado, con las
+// acciones del asesor. Los archivos van uno a uno con su revisión.
+function FilaDocumento({ it, guiaMaster, nombreCorto, onVer, onDrive, onDescargar, onRevision, onEstadoItem, onSubirInterno }) {
+  const docs = Array.isArray(it.documentos) ? it.documentos : it.documento ? [it.documento] : [];
+  const estado = (it.estado_item || "pendiente").toLowerCase();
+  const cfg = getEstadoCfg(estado);
+  const varios = permiteVarios(it.item?.nombre_item);
+  const guia = guiaMaster ? guiaParaItem(it.item?.nombre_item) : null;
+  const requisitos = guia ? null : requisitosDe(it.item?.nombre_item);
+
+  return (
+    <div className="ex-doc" data-e={estado}>
+      <span className="ex-doc-ico">
+        <IconoPaso nombre={iconoDocumento(it.item?.nombre_item)} />
+        {it.numero ? <i>{it.numero}</i> : null}
+      </span>
+
+      <div className="ex-doc-fila">
+        <span className="n">{it.item?.nombre_item}</span>
+        <span className="ex-est" data-e={cfg.tono}><IconoPaso nombre={cfg.icono} /> {cfg.label}</span>
+      </div>
+
+      {it.item?.descripcion && (
+        <TextoConEnlaces texto={it.item.descripcion} className="ex-doc-desc" />
+      )}
+
+      {it.comentario_asesor && (
+        <div className="ex-doc-obs" data-k={estado === "solicitado" ? "ped" : "obs"}>
+          <IconoPaso nombre={estado === "solicitado" ? "plus" : "alert"} className="w-4 h-4 shrink-0 mt-0.5" />
+          <span><b>{estado === "solicitado" ? "Adicional pedido:" : "Observación enviada:"}</b> {it.comentario_asesor}</span>
+        </div>
+      )}
+
+      {(requisitos || guia) && (
+        <div className="ex-doc-pliegues">
+          {requisitos && (
+            <details>
+              <summary>Ver requisitos</summary>
+              <div className="ex-doc-cuerpo">
+                <ul>{requisitos.map((r) => <li key={r}>{r}</li>)}</ul>
+              </div>
+            </details>
+          )}
+          {guia && (
+            <details>
+              <summary>Cómo debe verse · guía y modelo</summary>
+              <div className="ex-doc-cuerpo"><GuiaDocumento guia={guia} compacta /></div>
+            </details>
+          )}
+        </div>
+      )}
+
+      {guia?.modelos?.length > 0 && (
+        <div style={{ gridColumn: 2 }}>
+          <GuiaDocumento guia={guia} soloModelos />
+        </div>
+      )}
+
+      {docs.length > 0 ? (
+        <div className="ex-doc-archivos">
+          {docs.map((doc) => {
+            const rev = (doc.estado_revision || "PENDIENTE").toUpperCase();
+            return (
+              <div key={doc.id_documento} className="ex-arch" data-rev={rev}>
+                <IconoPaso nombre="clip" className="w-4 h-4" />
+                <span className="nm" title={doc.nombre_original}>{doc.nombre_original}</span>
+                <small>
+                  {doc.fecha_subida ? formatearFecha(doc.fecha_subida) : ""}
+                  {` · ${REV_LABEL[rev] || rev.toLowerCase()}`}
+                  {doc.comentario_revision ? ` · ${doc.comentario_revision}` : ""}
+                </small>
+                <span className="acciones">
+                  <button type="button" onClick={() => onVer(doc)}><IconoPaso nombre="eye" className="w-3.5 h-3.5" /> Ver</button>
+                  <button type="button" onClick={() => onDrive(doc)} title="Abrir en Google Drive"><IconoPaso nombre="external" className="w-3.5 h-3.5" /> Drive</button>
+                  <button type="button" onClick={() => onDescargar(doc)}><IconoPaso nombre="download" className="w-3.5 h-3.5" /> Descargar</button>
+                </span>
+                <span className="ex-rev">
+                  <button type="button" className="ok" aria-pressed={rev === "APROBADO"} onClick={() => onRevision(doc, "APROBADO")}>
+                    <IconoPaso nombre="check" /> Aprobar
+                  </button>
+                  <button type="button" className="no" aria-pressed={rev === "OBSERVADO"} onClick={() => onRevision(doc, "OBSERVADO")}>
+                    <IconoPaso nombre="alert" /> Observar
+                  </button>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="ex-nota">Sin archivos todavía.{varios ? " Admite varios archivos." : ""}</p>
+      )}
+
+      {/* Lo que solo hace el asesor sobre el requisito entero */}
+      <div className="ex-doc-acc">
+        <button type="button" className="ex-btn sec" onClick={() => onEstadoItem(it, "solicitado")} title="Pedir un documento adicional o una corrección">
+          <IconoPaso nombre="plus" /> Pedir adicional
+        </button>
+        <button type="button" className="ex-btn sec" onClick={() => onEstadoItem(it, "rechazado")}>
+          <IconoPaso nombre="x" /> Rechazar
+        </button>
+        {["solicitado", "rechazado"].includes(estado) && (
+          <button type="button" className="ex-btn plano" onClick={() => onEstadoItem(it, "pendiente")}>
+            <IconoPaso nombre="refresh" /> Reiniciar
+          </button>
+        )}
+        {it.item?.permite_archivo && (
+          <button type="button" className="ex-btn sec" onClick={() => onSubirInterno(it)} style={{ marginLeft: "auto" }}>
+            <IconoPaso nombre="upload" /> Subir por {nombreCorto}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

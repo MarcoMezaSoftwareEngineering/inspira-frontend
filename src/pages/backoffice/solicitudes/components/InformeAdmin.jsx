@@ -136,9 +136,19 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
           {dur && (
             <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded-md">{dur}</span>
           )}
-          {master.afinidad_deseada === "fuerte" && (
-            <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-md">
-              lo pidió por su nombre
+          {/* Con qué de lo que escribió coincide este máster. Decía siempre «lo
+              pidió por su nombre», y desde el 09/09/2026 un tema de interés
+              también cuenta como fuerte: hay que decir cuál, que es lo que le
+              permite al asesor ver si el motor entendió lo que pidió. */}
+          {master.afinidad_deseada && (
+            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${
+              master.afinidad_deseada === "fuerte"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-emerald-50/50 text-emerald-600/90 border-emerald-100"
+            }`}>
+              {master.coincide_con
+                ? `${master.afinidad_deseada === "fuerte" ? "" : "se acerca a "}«${master.coincide_con}»`
+                : "coincide con lo que pidió"}
             </span>
           )}
           {master.es_ancla && (

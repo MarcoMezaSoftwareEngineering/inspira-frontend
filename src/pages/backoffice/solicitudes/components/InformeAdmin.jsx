@@ -629,14 +629,17 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
       : null,
   ].filter(Boolean).join(" · ");
 
-  // Los mismos doce que manda el backend (`FINALISTAS` en
-  // compatibilidad.service.js). El informe es un entregable: doce es lo que
-  // una persona se lee entera y compara. Lo que va detrás son extras, y va
-  // dicho, no escondido.
-  const FINALISTAS = 12;
-  const listaVista  = detalle.informe_compat_curado ?? compat?.resultados?.slice(0, FINALISTAS) ?? [];
+  // Cuántos caben en su informe lo dice su paquete, no un número fijo aquí:
+  // el Full Económico son seis comunidades y el de solo Andalucía necesita
+  // doce para ordenar sus seis preferencias del Distrito Único.
+  const FINALISTAS  = compat?.finalistas ?? 12;
+  const listaVista  = detalle.informe_compat_curado ?? compat?.resultados ?? [];
   const isCurado    = !!detalle.informe_compat_curado;
   const extras      = Math.max(0, listaVista.length - FINALISTAS);
+  // Dentro de su plan pero fuera de cupo, y los de fuera del plan que sólo son
+  // posibles con beca. El asesor sube a la lista los que quiera.
+  const enEspera    = compat?.extras || [];
+  const conBeca     = compat?.solo_con_beca || [];
 
   // Lo que el asesorado escribió a mano va primero: es lo que de verdad busca.
   const lista = (v) => (Array.isArray(v) && v.filter(Boolean).length ? v.filter(Boolean).join(" · ") : null);
@@ -1019,6 +1022,65 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Lo que no cabe en el reparto, en dos montones: el asesor decide cosas
+            distintas con cada uno. Los de espera están dentro de su plan y sólo
+            se quedaron fuera por cupo; los de beca están fuera de su plan y
+            sólo son posibles si la consigue. */}
+        {!loadingCompat && (enEspera.length > 0 || conBeca.length > 0) && (
+          <div className="px-5 pb-4 space-y-3">
+            {enEspera.length > 0 && (
+              <details className="rounded-xl border border-neutral-200 bg-neutral-50/60">
+                <summary className="cursor-pointer px-3.5 py-2.5 text-[11.5px] font-bold text-[#1A3557]">
+                  {enEspera.length} más dentro de su plan, fuera de cupo
+                  <span className="font-normal text-neutral-400"> · súbelos si te parecen mejores</span>
+                </summary>
+                <ul className="px-3.5 pb-3 space-y-1.5">
+                  {enEspera.slice(0, 20).map((r) => (
+                    <li key={r.master.id_master} className="flex items-center gap-2 min-w-0">
+                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(r.score)}`}>{r.score}%</span>
+                      <span className="truncate text-[11.5px] text-neutral-700">
+                        {r.master.nombre_limpio} · {r.master.universidad?.sigla} · {r.master.universidad?.comunidad}
+                      </span>
+                      {editMode && (
+                        <button type="button" onClick={() => añadirItem(r)}
+                          className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#E8F5EE] text-[#1D6A4A] hover:bg-[#d5efe1]">
+                          añadir
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            {conBeca.length > 0 && (
+              <details className="rounded-xl border border-[#F5C842]/60 bg-[#FFFBEA]">
+                <summary className="cursor-pointer px-3.5 py-2.5 text-[11.5px] font-bold text-[#7a5b00]">
+                  🎓 {conBeca.length} fuera de su plan, posibles sólo con beca
+                  <span className="font-normal text-[#7a5b00]/70"> · habla con él antes de incluirlos</span>
+                </summary>
+                <ul className="px-3.5 pb-3 space-y-1.5">
+                  {conBeca.map((r) => (
+                    <li key={r.master.id_master} className="flex items-center gap-2 min-w-0">
+                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(r.score)}`}>{r.score}%</span>
+                      <span className="truncate text-[11.5px] text-neutral-700">
+                        {r.master.nombre_limpio} · {r.master.universidad?.sigla} · {r.master.universidad?.comunidad}
+                        {" · "}
+                        <b className="text-[#7a5b00]">{[...new Set((r.master.becas || []).map((b) => b.entidad))].join(", ")}</b>
+                      </span>
+                      {editMode && (
+                        <button type="button" onClick={() => añadirItem(r)}
+                          className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F5C842]/30 text-[#7a5b00] hover:bg-[#F5C842]/50">
+                          añadir
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </div>
         )}
 

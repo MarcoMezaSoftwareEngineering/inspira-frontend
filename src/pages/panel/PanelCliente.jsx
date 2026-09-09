@@ -1,5 +1,6 @@
 // src/pages/panel/PanelCliente.jsx
-import { useEffect, useMemo, useState, lazy, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
+import { lazyConRecarga } from "../../lib/cargaDiferida";
 import "../../styles/panel.css";
 import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
@@ -18,11 +19,11 @@ import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
 import AvisoVersionNueva from "../backoffice/layout/AvisoVersionNueva";
 
-const BecasEspana   = lazy(() => import("./BecasEspana"));
-const GuiaMaster    = lazy(() => import("./GuiaMaster"));
-const GuiaApostilla = lazy(() => import("./GuiaApostilla"));
-const GuiaEstancia  = lazy(() => import("./GuiaEstancia"));
-const GuiaModificatoria = lazy(() => import("./GuiaModificatoria"));
+const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
+const GuiaMaster    = lazyConRecarga(() => import("./GuiaMaster"));
+const GuiaApostilla = lazyConRecarga(() => import("./GuiaApostilla"));
+const GuiaEstancia  = lazyConRecarga(() => import("./GuiaEstancia"));
+const GuiaModificatoria = lazyConRecarga(() => import("./GuiaModificatoria"));
 
 // Las dos primeras son de todos; el resto solo se abre si algún servicio
 // suyo lo incluye (ver servicios.js).

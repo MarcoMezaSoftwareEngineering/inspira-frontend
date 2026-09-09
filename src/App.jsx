@@ -1,6 +1,7 @@
 // F:\PROGRAMACION\paginaweb_insipira\inspira-frontend\src\App.jsx
 
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { lazyConRecarga } from "./lib/cargaDiferida";
 import { dialog } from "./services/dialogService";
 import { Header } from "./components/layout/Header";
 import Home from "./pages/home/Home";
@@ -19,40 +20,40 @@ import SEOSchema from "./components/SEOSchema";
 // inicial. Cada una de las demás páginas se descarga la primera vez que se
 // visita: así la portada carga con menos JavaScript y publicar un cambio en una
 // página no invalida la caché de las otras.
-const AuthSuccess = lazy(() => import("./pages/auth/AuthSuccess"));
-const PortalServiciosMaster = lazy(() => import("./pages/servicios/master/PortalServiciosMaster"));
-const EstanciaLanding = lazy(() => import("./pages/servicios/estancia/EstanciaLanding"));
-const ServiciosCatalogo = lazy(() => import("./pages/servicios/ServiciosCatalogo"));
-const ServicioDetalle = lazy(() => import("./pages/servicios/ServicioDetalle"));
-const BackofficeApp = lazy(() => import("./pages/backoffice/BackofficeApp"));
+const AuthSuccess = lazyConRecarga(() => import("./pages/auth/AuthSuccess"));
+const PortalServiciosMaster = lazyConRecarga(() => import("./pages/servicios/master/PortalServiciosMaster"));
+const EstanciaLanding = lazyConRecarga(() => import("./pages/servicios/estancia/EstanciaLanding"));
+const ServiciosCatalogo = lazyConRecarga(() => import("./pages/servicios/ServiciosCatalogo"));
+const ServicioDetalle = lazyConRecarga(() => import("./pages/servicios/ServicioDetalle"));
+const BackofficeApp = lazyConRecarga(() => import("./pages/backoffice/BackofficeApp"));
 // Solo en desarrollo: una página con las piezas de interfaz y datos de ejemplo.
-const MuestraUX = import.meta.env.DEV ? lazy(() => import("./pages/dev/MuestraUX")) : null;
-const CalculadoraMaster = lazy(() => import("./pages/calculadora/CalculadoraMaster"));
-const PanelCliente = lazy(() => import("./pages/panel/PanelCliente"));
-const ReservarCita = lazy(() => import("./pages/reservar/ReservarCita"));
-const MasterAdsLanding = lazy(() => import("./pages/landing/MasterAdsLanding"));
-const MetodoInspira = lazy(() => import("./pages/metodo/MetodoInspira"));
-const VisaOEstancia = lazy(() => import("./pages/decidir/VisaOEstancia"));
-const Eventos = lazy(() => import("./pages/eventos/Eventos"));
-const CasosExito = lazy(() => import("./pages/casos/CasosExito"));
-const Asistente = lazy(() => import("./pages/asistente/Asistente"));
-const RutaLanding = lazy(() => import("./pages/rutas/RutaLanding"));
-const Plataforma = lazy(() => import("./pages/plataforma/Plataforma"));
-const Nosotros = lazy(() => import("./pages/nosotros/Nosotros"));
-const Tienda = lazy(() => import("./pages/tienda/Tienda"));
-const BlogIndex = lazy(() => import("./pages/blog/BlogIndex"));
-const BlogPost = lazy(() => import("./pages/blog/BlogPost"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const PagoExitoso = lazy(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoExitoso })));
-const PagoFallido = lazy(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoFallido })));
-const PagoPendiente = lazy(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoPendiente })));
+const MuestraUX = import.meta.env.DEV ? lazyConRecarga(() => import("./pages/dev/MuestraUX")) : null;
+const CalculadoraMaster = lazyConRecarga(() => import("./pages/calculadora/CalculadoraMaster"));
+const PanelCliente = lazyConRecarga(() => import("./pages/panel/PanelCliente"));
+const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"));
+const MasterAdsLanding = lazyConRecarga(() => import("./pages/landing/MasterAdsLanding"));
+const MetodoInspira = lazyConRecarga(() => import("./pages/metodo/MetodoInspira"));
+const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
+const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
+const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
+const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
+const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
+const Plataforma = lazyConRecarga(() => import("./pages/plataforma/Plataforma"));
+const Nosotros = lazyConRecarga(() => import("./pages/nosotros/Nosotros"));
+const Tienda = lazyConRecarga(() => import("./pages/tienda/Tienda"));
+const BlogIndex = lazyConRecarga(() => import("./pages/blog/BlogIndex"));
+const BlogPost = lazyConRecarga(() => import("./pages/blog/BlogPost"));
+const NotFound = lazyConRecarga(() => import("./pages/NotFound"));
+const PagoExitoso = lazyConRecarga(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoExitoso })));
+const PagoFallido = lazyConRecarga(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoFallido })));
+const PagoPendiente = lazyConRecarga(() => import("./pages/pago/PagoResultado").then((m) => ({ default: m.PagoPendiente })));
 
 // ── Legales ───────────────────────────────────────────────
-const PoliticaPrivacidad = lazy(() => import("./pages/legal/PoliticaPrivacidad"));
-const PoliticaCookies = lazy(() => import("./pages/legal/PoliticaCookies"));
-const TerminosCondiciones = lazy(() => import("./pages/legal/TerminosCondiciones"));
-const DerechosArco = lazy(() => import("./pages/legal/DerechosArco"));
-const LibroReclamaciones = lazy(() => import("./pages/legal/LibroReclamaciones"));
+const PoliticaPrivacidad = lazyConRecarga(() => import("./pages/legal/PoliticaPrivacidad"));
+const PoliticaCookies = lazyConRecarga(() => import("./pages/legal/PoliticaCookies"));
+const TerminosCondiciones = lazyConRecarga(() => import("./pages/legal/TerminosCondiciones"));
+const DerechosArco = lazyConRecarga(() => import("./pages/legal/DerechosArco"));
+const LibroReclamaciones = lazyConRecarga(() => import("./pages/legal/LibroReclamaciones"));
 
 // Páginas a las que más se salta desde la portada: se adelantan en tiempo
 // ocioso, ya pintada la pantalla, para que el primer clic no espere descarga.

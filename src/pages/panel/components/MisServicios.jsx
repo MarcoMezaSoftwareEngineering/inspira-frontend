@@ -1,5 +1,6 @@
 // src/pages/panel/components/MisServicios.jsx
-import { lazy, Suspense, useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { lazyConRecarga } from "../../../lib/cargaDiferida";
 import Inicio from "./Inicio";
 import ServiciosList from "./mis-servicios/ServiciosList";
 import { navigate } from "../../../services/navigate";
@@ -10,10 +11,10 @@ import { EsqueletoExpediente } from "./Esqueleto";
 // Cada tipo de expediente se descarga solo cuando se abre. Los cuatro juntos
 // eran 3.000 líneas en el paquete del panel, y un asesorado de máster nunca
 // va a abrir el de modificatoria.
-const DetalleSolicitud = lazy(() => import("./mis-servicios/DetalleSolicitud"));
-const DetalleSolicitudVisado = lazy(() => import("./mis-servicios/DetalleSolicitudVisado"));
-const DetalleSolicitudEstancia = lazy(() => import("./mis-servicios/DetalleSolicitudEstancia"));
-const DetalleSolicitudModificatoria = lazy(() => import("./mis-servicios/DetalleSolicitudModificatoria"));
+const DetalleSolicitud = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitud"));
+const DetalleSolicitudVisado = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudVisado"));
+const DetalleSolicitudEstancia = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudEstancia"));
+const DetalleSolicitudModificatoria = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudModificatoria"));
 
 /**
  * La lista, o el expediente que diga la URL.

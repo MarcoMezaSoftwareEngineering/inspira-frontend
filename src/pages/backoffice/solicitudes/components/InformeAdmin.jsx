@@ -325,6 +325,15 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   // Recalcula con el formulario de hoy sin tocar la lista curada: lo que ya
   // decidió el asesor se queda; lo nuevo se ofrece aparte para que lo revise.
   async function recalcular() {
+    // Con qué se compara: la lista curada si la hay y, si no, la automática
+    // que había en pantalla. Hasta el 09/09/2026 sin lista curada no se
+    // comparaba con nada: el asesor pulsaba «Recalcular», la lista cambiaba
+    // sola y no aparecía ni un aviso de qué había entrado ni qué se había
+    // movido. Los cambios estaban, pero no se veían.
+    const curado = Array.isArray(detalle.informe_compat_curado) && detalle.informe_compat_curado.length
+      ? detalle.informe_compat_curado : null;
+    const anterior = curado || (compat?.resultados || []).slice(0, 20);
+
     setCompat(null);
     setNuevosCandidatos(null);
     setLoading(true);
@@ -332,16 +341,16 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
       const r = await boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/compatibilidad`);
       if (r.ok) {
         setCompat(r);
-        const curado = detalle.informe_compat_curado;
-        if (Array.isArray(curado) && curado.length) {
-          const ids = new Set(curado.map((c) => c.master.id_master));
+        if (anterior.length) {
+          const ids = new Set(anterior.map((c) => c.master.id_master));
           const res = r.resultados || [];
           const nuevos = res.slice(0, 20).filter((x) => !ids.has(x.master.id_master));
-          const cambiados = curado.filter((c) => {
+          const cambiados = anterior.filter((c) => {
             const f = res.find((x) => x.master.id_master === c.master.id_master);
             return f && f.score !== c.score;
           }).length;
-          setNuevosCandidatos({ nuevos, cambiados, resultados: res });
+          const salieron = anterior.filter((c) => !res.slice(0, 20).some((x) => x.master.id_master === c.master.id_master)).length;
+          setNuevosCandidatos({ nuevos, cambiados, salieron, resultados: res, esCurada: Boolean(curado) });
         }
       }
     } catch { /* silencioso */ }
@@ -356,7 +365,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     const res = nuevosCandidatos?.resultados || [];
     const actualizada = curado.map((c) => {
       const f = res.find((x) => x.master.id_master === c.master.id_master);
-      return f ? { ...c, score: f.score, master: { ...c.master, afinidad_deseada: f.master.afinidad_deseada } } : c;
+      return f ? { ...c, score: f.score, master: { ...c.master, afinidad_deseada: f.master.afinidad_deseada, coincide_con: f.master.coincide_con } } : c;
     });
     setListaEdit([...actualizada, ...(nuevosCandidatos?.nuevos || []).map((n) => ({ ...n }))]);
     setEditMode(true);
@@ -377,14 +386,17 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   }
 
   // Todo el catálogo, sin filtros, ordenado por parecido a lo que escribió.
-  async function buscarParecidos() {
+  // `listaBase` para poder encadenarlo con `entrarEdicion()`: si se lee
+  // `listaEdit` en el mismo tick todavía está vacía y no filtra nada.
+  async function buscarParecidos(listaBase) {
+    const yaEstan = Array.isArray(listaBase) ? listaBase : listaEdit;
     setSearchingMasters(true);
     setSearchQ("");
     setModoParecidos(true);
     try {
       const r = await boGET(`/backoffice/solicitudes/${detalle.id_solicitud}/compatibilidad/parecidos`);
       if (r.ok) {
-        const res = (r.resultados || []).filter((x) => !listaEdit.some((e) => e.master.id_master === x.master.id_master));
+        const res = (r.resultados || []).filter((x) => !yaEstan.some((e) => e.master.id_master === x.master.id_master));
         setSearchResults(res);
         if (!res.length) dialog.toast(r.total ? "Todos los parecidos ya están en la lista." : "El asesorado no escribió qué máster busca.", "info");
       }
@@ -392,12 +404,16 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     finally { setSearchingMasters(false); }
   }
 
+  // Devuelve la lista con la que se entra a editar: quien la llame para
+  // encadenar una búsqueda la necesita ya, porque `listaEdit` todavía no se
+  // ha actualizado en este tick.
   function entrarEdicion() {
-    const base = detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 20) ?? [];
-    setListaEdit(base.map((r) => ({ ...r })));
+    const base = (detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 20) ?? []).map((r) => ({ ...r }));
+    setListaEdit(base);
     setEditMode(true);
     setSearchQ("");
     setSearchResults([]);
+    return base;
   }
 
   function moverArriba(idx) {
@@ -576,6 +592,13 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   // ── Derived ──────────────────────────────────────────────────────────────────
 
   const datos     = detalle?.datos_formulario || {};
+  // Lo que el asesorado escribió a mano: nombres de máster y temas de interés.
+  // Es contra lo que se buscan los parecidos, y va a la vista para que el
+  // asesor vea si el motor está ordenando por eso o por otra cosa.
+  const loQuePidio = [
+    ...(Array.isArray(datos.masteres_deseados) ? datos.masteres_deseados : []),
+    ...(Array.isArray(datos.especializaciones) ? datos.especializaciones : []),
+  ].filter(Boolean).join(" · ");
   const planLabel = detalle?.titulo || "Plan contratado";
   const filtros   = [
     datos.comunidades_preferidas
@@ -658,19 +681,37 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
             title="Vuelve a calcular con el formulario de hoy. La lista curada no se toca.">
             <IconoPaso nombre="refresh" /> {loadingCompat ? "Calculando…" : "Recalcular con el formulario actual"}
           </button>
+          {/* Los parecidos vivían sólo dentro del modo edición, así que quien
+              no entraba a editar no llegaba a verlos nunca. Desde aquí se
+              entra a editar y se buscan de una vez. */}
+          {loQuePidio && (
+            <button type="button" disabled={loadingCompat || searchingMasters} className="ex-btn plano"
+              title={`Rastrea todo el catálogo sin filtros buscando: ${loQuePidio}`}
+              onClick={() => { const base = editMode ? listaEdit : entrarEdicion(); buscarParecidos(base); }}>
+              ≈ Buscar parecidos a lo que pidió
+            </button>
+          )}
           {detalle.informe_compat_curado && (
             <button type="button" onClick={volverAlAutomatico} disabled={loadingCompat || guardando} className="ex-btn plano">
               Volver al automático
             </button>
           )}
         </div>
+        {loQuePidio && (
+          <p className="text-[10.5px] text-neutral-400 mt-1.5">Pidió: {loQuePidio}</p>
+        )}
       </div>
       {nuevosCandidatos && (
         <div className="mx-5 mt-4 rounded-xl border border-[#F5C842]/60 bg-[#FFFBEA] px-4 py-3 text-xs text-neutral-700">
           <p className="font-bold text-[#7a5b00]">Recalculado con el formulario actual</p>
+          {/* Con lista curada hay algo que decidir; sin ella la lista de la
+              pantalla ya se ha actualizado sola y esto sólo cuenta qué pasó. */}
           <p className="mt-0.5">
-            {nuevosCandidatos.nuevos.length} candidato{nuevosCandidatos.nuevos.length === 1 ? "" : "s"} nuevo{nuevosCandidatos.nuevos.length === 1 ? "" : "s"} que no están en tu lista ·{" "}
-            {nuevosCandidatos.cambiados} de tu lista cambiaron de puntuación. La lista curada no se ha tocado.
+            {nuevosCandidatos.nuevos.length} máster{nuevosCandidatos.nuevos.length === 1 ? "" : "es"}{" "}
+            {nuevosCandidatos.esCurada ? "que no están en tu lista" : "que antes no salían"} ·{" "}
+            {nuevosCandidatos.cambiados} cambiaron de puntuación
+            {nuevosCandidatos.salieron ? ` · ${nuevosCandidatos.salieron} dejaron de salir` : ""}.{" "}
+            {nuevosCandidatos.esCurada ? "La lista curada no se ha tocado." : "La lista de abajo ya está actualizada."}
           </p>
           {nuevosCandidatos.nuevos.length > 0 && (
             <ul className="mt-2 space-y-1">
@@ -683,13 +724,15 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
             </ul>
           )}
           <div className="flex gap-2 mt-2.5">
-            <button type="button" onClick={aplicarRecalculo}
-              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#1D6A4A] text-white hover:opacity-90">
-              Revisar en la lista curada
-            </button>
+            {nuevosCandidatos.esCurada && (
+              <button type="button" onClick={aplicarRecalculo}
+                className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#1D6A4A] text-white hover:opacity-90">
+                Revisar en la lista curada
+              </button>
+            )}
             <button type="button" onClick={() => setNuevosCandidatos(null)}
               className="text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-neutral-300 text-neutral-600 hover:bg-white">
-              Dejar como está
+              {nuevosCandidatos.esCurada ? "Dejar como está" : "Entendido"}
             </button>
           </div>
         </div>
@@ -935,13 +978,12 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
 
             {/* Parecidos a lo que el asesorado escribió que busca */}
             <div className="flex items-center gap-2 flex-wrap">
-              <button type="button" onClick={buscarParecidos} disabled={searchingMasters}
+              <button type="button" onClick={() => buscarParecidos()} disabled={searchingMasters}
                 className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-[#EEF2F8] text-[#1A3557] border border-[#1A3557]/20 hover:bg-[#e2e8f3] disabled:opacity-50 transition">
                 ≈ Buscar parecidos a lo que pidió
               </button>
               <span className="text-[10.5px] text-neutral-400 truncate">
-                {[...(Array.isArray(datos.masteres_deseados) ? datos.masteres_deseados : []), ...(Array.isArray(datos.especializaciones) ? datos.especializaciones : [])]
-                  .filter(Boolean).join(" · ") || "El asesorado no escribió qué máster busca."}
+                {loQuePidio || "El asesorado no escribió qué máster busca."}
               </span>
             </div>
 

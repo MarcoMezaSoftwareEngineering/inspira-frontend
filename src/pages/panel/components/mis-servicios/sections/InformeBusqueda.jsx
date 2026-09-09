@@ -66,6 +66,15 @@ function MasterRow({ posicion, resultado }) {
               {dur}
             </span>
           )}
+          {/* Quién lo paga, junto al precio. Un máster de 5.044 € que oferta la
+              Fundación Carolina no es un máster de 5.044 €, y eso es lo que el
+              asesorado necesita saber para animarse a pedirla. */}
+          {(master.becas || []).length > 0 && (
+            <span className="text-[11px] bg-[#FFF7E0] text-[#7a5b00] border border-[#F5C842] px-2 py-0.5 rounded-md font-semibold"
+              title={master.becas.map((b) => `${b.nombre} — ${b.curso}${b.cubre ? `: ${b.cubre}` : ""}`).join("\n")}>
+              🎓 lo oferta {[...new Set(master.becas.map((b) => b.entidad))].join(" · ")}
+            </span>
+          )}
           {/* El máster cuyo enlace pegó el asesorado sale siempre, cuadre o no.
               Si no cuadra con lo que él mismo pidió, se le dice: es el único
               que había elegido y callarlo no le sirve de nada. */}

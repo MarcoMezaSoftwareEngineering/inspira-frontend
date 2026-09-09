@@ -156,6 +156,16 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
               el enlace que pegó
             </span>
           )}
+          {/* Quién lo paga. Va junto al precio a propósito: un máster de 5.044 €
+              con Fundación Carolina no es un máster de 5.044 €, y es la mitad
+              de la conversación que la asesora tiene con el asesorado. */}
+          {(master.becas || []).length > 0 && (
+            <span className="text-[10px] font-semibold bg-[#FFF7E0] text-[#7a5b00] border border-[#F5C842] px-1.5 py-0.5 rounded-md"
+              title={master.becas.map((b) => `${b.nombre} (${b.curso})${b.nota_minima ? ` · nota ≥ ${b.nota_minima}` : ""}${b.confianza === "probable" ? " · emparejado por nombre, conviene confirmarlo" : ""}`).join("\n")}>
+              🎓 {[...new Set(master.becas.map((b) => b.entidad))].join(" · ")}
+              {master.becas.some((b) => b.confianza === "probable") ? " (por confirmar)" : ""}
+            </span>
+          )}
           {/* El máster que él eligió sale siempre, aunque no cuadre. Si no
               cuadra hay que decir por qué: es de lo que va a preguntar. */}
           {master.es_ancla && master.motivo_descarte && (

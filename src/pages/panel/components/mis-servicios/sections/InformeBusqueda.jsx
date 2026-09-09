@@ -66,9 +66,23 @@ function MasterRow({ posicion, resultado }) {
               {dur}
             </span>
           )}
-          <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold ${col.tag}`}>
-            {score != null ? `${score}% match` : "Seleccionado por asesor"}
-          </span>
+          {/* El máster cuyo enlace pegó el asesorado sale siempre, cuadre o no.
+              Si no cuadra con lo que él mismo pidió, se le dice: es el único
+              que había elegido y callarlo no le sirve de nada. */}
+          {master.es_ancla && (
+            <span className="text-[11px] bg-[#EEF2F8] text-[#1A3557] px-2 py-0.5 rounded-md font-semibold">
+              el que elegiste
+            </span>
+          )}
+          {master.es_ancla && master.motivo_descarte ? (
+            <span className="text-[11px] px-2 py-0.5 rounded-md font-semibold bg-rose-50 text-rose-700">
+              {master.motivo_descarte}
+            </span>
+          ) : (
+            <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold ${col.tag}`}>
+              {score != null ? `${score}% match` : "Seleccionado por asesor"}
+            </span>
+          )}
         </div>
       </div>
       <div className="shrink-0 text-center w-14">

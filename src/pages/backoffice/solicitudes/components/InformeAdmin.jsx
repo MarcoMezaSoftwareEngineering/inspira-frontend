@@ -156,6 +156,14 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
               el enlace que pegó
             </span>
           )}
+          {/* El máster que él eligió sale siempre, aunque no cuadre. Si no
+              cuadra hay que decir por qué: es de lo que va a preguntar. */}
+          {master.es_ancla && master.motivo_descarte && (
+            <span className="text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 px-1.5 py-0.5 rounded-md"
+              title="El máster que eligió el asesorado no pasa sus propios filtros. Sale igual para que pueda hablarlo con él.">
+              {master.motivo_descarte}
+            </span>
+          )}
           {/* Qué dice la lista de titulaciones de acceso del máster sobre su
               carrera. Sin lista no se dice nada: no saber no es no admitir. */}
           {master.acceso_titulo === "directo" && (

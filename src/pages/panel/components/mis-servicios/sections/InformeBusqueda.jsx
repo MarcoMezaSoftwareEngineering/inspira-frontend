@@ -379,18 +379,6 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
                     <div className="ex-lista-m mt-3">
                       {resultados.map((r, i) => (
                         <div key={r.master.id_master}>
-                          {/* Por comunidad, porque así es como se postula: en
-                              Andalucía una sola solicitud con preferencias, y
-                              fuera una por universidad. El informe se lee como
-                              se va a hacer. */}
-                          {r.master.universidad?.comunidad !== resultados[i - 1]?.master?.universidad?.comunidad && (
-                            <div className="mt-5 mb-2 flex items-baseline gap-2">
-                              <p className="text-sm font-bold text-neutral-700">{r.master.universidad?.comunidad}</p>
-                              <p className="text-xs text-neutral-400">
-                                {resultados.filter((x) => x.master.universidad?.comunidad === r.master.universidad?.comunidad).length} programa(s)
-                              </p>
-                            </div>
-                          )}
                           <TarjetaMaster
                             resultado={r}
                             posicion={i + 1}

@@ -992,17 +992,6 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
           <div className="ex-lista-m">
             {listaVista.map((r, i) => (
               <div key={r.master.id_master}>
-                {/* Por comunidad: en Andalucía una sola solicitud con
-                    preferencias, fuera una por universidad. El informe se lee
-                    con la forma que va a tener la postulación. */}
-                {r.master.universidad?.comunidad !== listaVista[i - 1]?.master?.universidad?.comunidad && (
-                  <div className="flex items-baseline gap-2 mt-4 mb-1.5 px-1">
-                    <p className="text-xs font-bold text-[#1A3557]">{r.master.universidad?.comunidad}</p>
-                    <p className="text-[10.5px] text-neutral-400">
-                      {listaVista.filter((x) => x.master.universidad?.comunidad === r.master.universidad?.comunidad).length} programa(s)
-                    </p>
-                  </div>
-                )}
                 {i === FINALISTAS && (
                   <div className="flex items-center gap-2 my-3 px-1">
                     <div className="flex-1 h-px bg-[#F5C842]" />

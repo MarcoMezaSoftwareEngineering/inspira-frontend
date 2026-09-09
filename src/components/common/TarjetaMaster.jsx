@@ -58,9 +58,9 @@ function razonesDe(m) {
   // Lo que dijo que no quería y este máster sí es. No lo saca de la lista
   // —obligatorio es sólo la geografía contratada y el dinero—, pero se dice.
   for (const a of (m.avisos || [])) out.push(["warn", a]);
-  // Y si está aquí por llenar el cupo de su comunidad y no por parecerse a lo
-  // que pidió, también: callarlo haría creer que tiene que ver con lo suyo.
-  if (m.relleno) out.push(["info", m.relleno]);
+  // Fuera de su plan pero con beca que paga la matrícula: entra en el informe
+  // porque es una opción de verdad, y va dicho porque depende de conseguirla.
+  if (m.solo_con_beca) out.push(["beca", m.solo_con_beca]);
   return out.slice(0, 6);
 }
 

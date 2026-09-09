@@ -799,6 +799,10 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                         datos={detalle.datos_formulario}
                         idSolicitud={detalle.id_solicitud}
                         onIrAInforme={esMaster ? () => irABloque("informe") : null}
+                        nombreCliente={detalle.cliente?.nombre}
+                        planCCAAs={Array.isArray(detalle.tipo?.ccaas) && detalle.tipo.ccaas.length
+                          ? { bloqueado: detalle.tipo?.ccaa_bloqueado ?? false, opciones: detalle.tipo.ccaas.map((c) => c.comunidad?.nombre).filter(Boolean) }
+                          : null}
                         onActualizado={(nuevosDatos) =>
                           setDetalle((prev) => ({ ...prev, datos_formulario: nuevosDatos }))
                         }
@@ -841,6 +845,8 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
                         idSolicitud={detalle.id_solicitud}
                         onEleccionesActualizadas={handleEleccionesActualizadas}
                         resetKey={eleccionResetKey}
+                        nombreCliente={detalle.cliente?.nombre}
+                        onIrAPostulaciones={esMaster ? () => irABloque("programacion") : null}
                       />
                     </div>
                   </CBox>

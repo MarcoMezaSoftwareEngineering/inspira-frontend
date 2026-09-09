@@ -4,6 +4,7 @@
 // MODO B: asesor decide Sí/No para cada master elegido por el cliente
 import { useEffect, useState } from "react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
+import IconoPaso from "../../../components/common/IconoPaso";
 import { dialog } from "../../../services/dialogService";
 
 // El nombre suele delatar al título propio, así que la casilla se propone
@@ -164,7 +165,8 @@ function FormManual({ onAnadir, onCancelar, guardando }) {
   );
 }
 
-export default function EleccionMastersAdmin({ elecciones, idSolicitud, onEleccionesActualizadas, resetKey }) {
+export default function EleccionMastersAdmin({ elecciones, idSolicitud, onEleccionesActualizadas, resetKey, nombreCliente = null, onIrAPostulaciones = null }) {
+  const nombreCorto = (nombreCliente || "el asesorado").split(" ")[0];
   const [filas, setFilas]           = useState(() => normalizar(elecciones));
   const [guardando, setGuardando]   = useState(false);
   const [nota, setNota]             = useState(() => extraerNota(elecciones));
@@ -497,61 +499,24 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
 
   return (
     <div className="space-y-3">
-      {/* Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 rounded-xl text-white text-sm"
-        style={{ background: "linear-gradient(135deg, #1D6A4A, #1A3557)" }}
-      >
-        <span className="text-base shrink-0">🎯</span>
-        <div className="flex-1 min-w-0">
-          <p className="font-serif text-[13px] font-bold">Selección del cliente</p>
-          <p className="text-[11px] text-white/70">
-            El asesorado eligió. Di sí o no a cada uno: los que entran pasan solos al bloque de postulaciones.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0 flex-wrap sm:justify-end">
-          {guardando && (
-            <span className="text-[10px] text-white/60 font-mono">Guardando…</span>
-          )}
-          <button
-            type="button"
-            onClick={aprobarTodos}
-            disabled={guardando || filas.length === 0 || filas.every((f) => f.plan_incluido === true)}
-            className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-white/15 text-white hover:bg-white/25 disabled:opacity-40 transition"
-          >
-            ✓ Aprobar todos
-          </button>
-          <button
-            type="button"
-            onClick={confirmarYAvisar}
-            disabled={guardando || avisando || filas.length === 0}
-            className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-[#FA943A] text-white hover:opacity-90 disabled:opacity-40 transition"
-          >
-            {avisando ? "Avisando…" : "Confirmar y avisar al asesorado"}
-          </button>
-          <button
-            type="button"
-            onClick={() => { setSelAdmin([]); setModoSeleccion(true); }}
-            className="text-[10px] text-white/70 hover:text-white underline transition"
-          >
-            Rehacer
-          </button>
-        </div>
+      {/* Lo que respondió el asesorado, con su motivo */}
+      <div className="ex-h">
+        <span className="ex-h-ico"><IconoPaso nombre="checkCircle" /></span>
+        <h3>Lo que respondió {nombreCorto}</h3>
+        <span className="ex-est" data-e={filas.length ? "on" : "warn"}>
+          {filas.length ? `${filas.length} respuesta${filas.length === 1 ? "" : "s"}` : "sin respuestas"}
+        </span>
       </div>
+      <p className="ex-lead">
+        Cada máster que marcó, con su motivo. Decide con <b>Sí</b> o <b>No</b>: los Sí pasan solos a Postulaciones (paso 5)
+        con su plazo y su trámite previo; los No llevan tu respuesta, que {nombreCorto} ve en su informe.
+        {guardando ? " Guardando…" : ""}
+      </p>
 
-      {/* Contadores */}
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="bg-neutral-50 border border-neutral-200 rounded-xl py-2">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-mono mb-0.5">Elegidos</p>
-          <p className="font-serif text-lg font-bold text-[#1A3557]">{filas.length}</p>
-        </div>
-        <div className="bg-[#E8F5EE] border border-[#1D6A4A]/20 rounded-xl py-2">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] font-mono mb-0.5">En plan</p>
-          <p className="font-serif text-lg font-bold text-[#1D6A4A]">{nSi}</p>
-        </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-xl py-2">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600 font-mono mb-0.5">Coordinar</p>
-          <p className="font-serif text-lg font-bold text-amber-600">{nNo}</p>
-        </div>
+      <div className="ex-cuenta" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div><b>{filas.length}</b><span>elegidos</span></div>
+        <div><b>{nSi}</b><span>en plan</span></div>
+        <div><b>{nNo}</b><span>coordinar</span></div>
       </div>
 
       {(avisadoAt || filas[0]?._confirmado_at) && (
@@ -607,34 +572,55 @@ export default function EleccionMastersAdmin({ elecciones, idSolicitud, onElecci
         </button>
       )}
 
-      {/* Totales */}
-      <div className="flex gap-4 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-xl text-xs">
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#1D6A4A]" />
-          <strong className="font-serif text-base text-[#1D6A4A]">{nSi}</strong>
-          <span className="text-neutral-500">incluidos en plan</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-amber-400" />
-          <strong className="font-serif text-base text-amber-600">{nNo}</strong>
-          <span className="text-neutral-500">fuera del plan — coordinar</span>
-        </span>
-      </div>
-
-      {/* Nota para el cliente */}
-      <div className="bg-white border border-neutral-200 rounded-xl px-4 py-3">
-        <p className="text-[9px] font-bold uppercase tracking-widest text-amber-600 font-mono mb-2">
-          ✎ Nota para enviar al cliente
+      {/* La respuesta para el asesorado y publicarla */}
+      <section className="ex-sec">
+        <div className="ex-h">
+          <span className="ex-h-ico"><IconoPaso nombre="message" /></span>
+          <h3>Respuesta para {nombreCorto}</h3>
+        </div>
+        <p className="ex-lead">
+          Le llega al informe y al hilo de mensajes junto con el Sí o No de cada máster. Se guarda al salir del campo.
         </p>
         <textarea
           rows={3}
+          className="ex-campo"
           value={nota}
           onChange={(e) => setNota(e.target.value)}
           onBlur={(e) => guardarNota(e.target.value)}
-          placeholder="Ej: Claudia, hemos revisado tu selección. Los primeros 3 másteres están dentro de tu Plan Comfort y comenzamos esta semana..."
-          className="w-full text-xs border border-neutral-200 rounded-lg px-3 py-2 text-neutral-800 placeholder:text-neutral-300 outline-none focus:border-amber-400 resize-none transition leading-relaxed"
+          placeholder={`Ej.: ${nombreCorto}, revisamos tu elección. Los tres primeros entran en tu plan y empezamos esta semana…`}
         />
-      </div>
+        <div className="ex-fila" style={{ marginTop: 12 }}>
+          <button
+            type="button"
+            onClick={confirmarYAvisar}
+            disabled={guardando || avisando || filas.length === 0}
+            className="ex-btn"
+          >
+            <IconoPaso nombre="send" /> {avisando ? "Avisando…" : `Publicar respuesta a ${nombreCorto}`}
+          </button>
+          <button
+            type="button"
+            onClick={aprobarTodos}
+            disabled={guardando || filas.length === 0 || filas.every((f) => f.plan_incluido === true)}
+            className="ex-btn sec"
+          >
+            <IconoPaso nombre="check" /> Aprobar todos
+          </button>
+          {onIrAPostulaciones && (
+            <button type="button" className="ex-btn sec" onClick={onIrAPostulaciones}>
+              <IconoPaso nombre="cap" /> Ver postulaciones
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => { setSelAdmin([]); setModoSeleccion(true); }}
+            className="ex-btn plano"
+          >
+            Rehacer
+          </button>
+        </div>
+        <p className="ex-mini">Al publicar, los Sí crean su fila en Postulaciones y en el tracker; {nombreCorto} ve tus respuestas y tu nota.</p>
+      </section>
     </div>
   );
 }

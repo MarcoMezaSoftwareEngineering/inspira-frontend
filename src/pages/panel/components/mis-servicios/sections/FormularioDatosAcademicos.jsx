@@ -578,6 +578,7 @@ function ResumenDatos({ formData, onEditar }) {
 export default function FormularioDatosAcademicos({
   formData, setFormData, handleSubmitFormulario, onGuardarProgreso, savingForm, hasData,
   planCCAAs,  // { bloqueado: bool, opciones: string[] } | null
+  lado = "asesorado", // "asesor" cuando lo rellena Inspira Core: mismo formulario, otros textos
 }) {
   const [modalOpen, setModalOpen]     = useState(false);
   const [step, setStep]               = useState(0);
@@ -1536,7 +1537,9 @@ export default function FormularioDatosAcademicos({
       <SeccionPanel
         numero="2"
         titulo="Formulario académico"
-        subtitulo="Con esto preparamos tu informe. Puedes ir por partes: se guarda solo. Cuanto más concreto seas en qué quieres estudiar, más afinado saldrá."
+        subtitulo={lado === "asesor"
+          ? "Las mismas preguntas que responde el asesorado. Cada cambio queda guardado en la solicitud."
+          : "Con esto preparamos tu informe. Puedes ir por partes: se guarda solo. Cuanto más concreto seas en qué quieres estudiar, más afinado saldrá."}
         estado={estado}
       >
         <div className="flex items-center justify-between gap-3 flex-wrap mb-1">
@@ -1579,10 +1582,10 @@ export default function FormularioDatosAcademicos({
                         <div className="flex flex-wrap items-center gap-2 mt-3">
                           <button type="button" onClick={handleSubmitFormulario} disabled={savingForm} className="ex-btn">
                             <IconoPaso nombre="send" />
-                            {savingForm ? "Enviando…" : hasData ? "Guardar y recalcular mi informe" : "Enviar a mi asesor"}
+                            {savingForm ? "Guardando…" : lado === "asesor" ? "Guardar el formulario" : hasData ? "Guardar y recalcular mi informe" : "Enviar a mi asesor"}
                           </button>
                           <span className="text-[11px] text-neutral-400">
-                            Al enviar, tu asesor recalcula el informe sin perder lo que ya marcaste.
+                            {lado === "asesor" ? "Después, recalcular el informe desde el paso 3: la lista curada no se toca." : "Al enviar, tu asesor recalcula el informe sin perder lo que ya marcaste."}
                           </span>
                         </div>
                       </>

@@ -6,6 +6,7 @@ import { API_URL, formatearFecha } from "../utils";
 import ModalMaster from "../../catalogo/ModalMaster";
 import BaremoMaster from "../../../../components/BaremoMaster";
 import TarjetaMaster from "../../../../components/common/TarjetaMaster";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -611,82 +612,48 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   return (
     <div className="space-y-0 -mx-5 -mt-4 overflow-hidden">
 
-      {/* ── Banner IA ────────────────────────────────────────────── */}
-      <div className="px-5 pt-5 pb-5" style={{ background: "linear-gradient(135deg, #1D6A4A 0%, #1A3557 100%)" }}>
-        <div className="flex items-start gap-3 flex-wrap">
-          <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
-            ✦
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-serif text-sm font-bold text-white mb-0.5">Generador de Informe con IA</p>
-            <p className="text-xs text-white/60">{filtros ? `Filtros: ${filtros}` : planLabel}</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {planLabel && (
-              <span className="bg-[#F5C842] text-[#1A3557] text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0">
-                📦 {planLabel}
-              </span>
-            )}
-            <button onClick={recalcular} disabled={loadingCompat}
-              title="Vuelve a calcular con el formulario de hoy. La lista curada no se toca."
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/12 text-white/80 border border-white/20 hover:bg-white/22 transition-all duration-200 disabled:opacity-50 shrink-0">
-              <svg className={`w-3 h-3 ${loadingCompat ? "animate-spin" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Recalcular con el formulario actual
-            </button>
-            {detalle.informe_compat_curado && (
-              <button onClick={volverAlAutomatico} disabled={loadingCompat || guardando}
-                className="text-[10px] text-white/60 hover:text-white underline transition shrink-0">
-                Volver al automático
-              </button>
-            )}
-          </div>
+      {/* ── Revisar el informe generado ─────────────────────────── */}
+      <div className="px-5 pt-4">
+        <div className="ex-h">
+          <span className="ex-h-ico"><IconoPaso nombre="chart" /></span>
+          <h3>Revisar el informe generado</h3>
+          {detalle.informe_publicado ? (
+            <span className="ex-est" data-e="ok"><IconoPaso nombre="check" /> Publicado</span>
+          ) : revision === "EN_REVISION" ? (
+            <span className="ex-est" data-e="on"><IconoPaso nombre="clock" /> En revisión</span>
+          ) : revision === "APROBADO" ? (
+            <span className="ex-est" data-e="ok"><IconoPaso nombre="check" /> Aprobado · listo para publicar</span>
+          ) : revision === "DEVUELTO" ? (
+            <span className="ex-est" data-e="warn" title={detalle.informe_revision_nota || ""}><IconoPaso nombre="alert" /> Devuelto · corregir</span>
+          ) : (
+            <span className="ex-est" data-e="warn"><IconoPaso nombre="edit" /> Sin publicar</span>
+          )}
         </div>
-
-        {/* Stats rápidas */}
         {!loadingCompat && compat && (
-          <div className="flex gap-2 mt-4 flex-wrap">
-            <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 rounded-lg px-2.5 py-1.5">
-              <span className="text-white/50 text-[10px]">Programas totales</span>
-              <span className="text-white font-bold text-[11px]">{compat.total}</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 rounded-lg px-2.5 py-1.5">
-              <span className="text-white/50 text-[10px]">En informe</span>
-              <span className="text-white font-bold text-[11px]">{listaVista.length}</span>
-            </div>
-            {listaVista.length > 0 && !detalle.informe_publicado && (
-              <div className="flex items-center gap-1.5 bg-[#F5C842]/20 border border-[#F5C842]/30 rounded-lg px-2.5 py-1.5">
-                <span className="text-[#F5C842] text-[10px] font-semibold">✏️ Lista curada · Sin publicar</span>
-              </div>
-            )}
-
-            {!detalle.informe_publicado && revision === "EN_REVISION" && (
-              <span className="text-[#1A3557] bg-[#EEF2F8] border border-[#1A3557]/25
-                px-1.5 py-0.5 rounded text-[10px] font-semibold">
-                ⏳ En revisión
-              </span>
-            )}
-            {!detalle.informe_publicado && revision === "APROBADO" && (
-              <span className="text-[#14532d] bg-[#E8F5EE] border border-[#1D6A4A]/35
-                px-1.5 py-0.5 rounded text-[10px] font-semibold">
-                ✓ Aprobado · listo para publicar
-              </span>
-            )}
-            {!detalle.informe_publicado && revision === "DEVUELTO" && (
-              <span className="text-amber-800 bg-amber-50 border border-amber-300
-                px-1.5 py-0.5 rounded text-[10px] font-semibold"
-                title={detalle.informe_revision_nota || ""}>
-                ↩ Devuelto · hay que corregirlo
-              </span>
-            )}
-            {detalle.informe_publicado && (
-              <div className="flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/30 rounded-lg px-2.5 py-1.5">
-                <span className="text-emerald-300 text-[10px] font-semibold">✓ Publicado al cliente</span>
-              </div>
-            )}
+          <div className="ex-cuenta">
+            <div><b>{compat.total ?? "—"}</b><span>compatibles</span></div>
+            <div><b>{listaVista.length}</b><span>en informe</span></div>
+            <div><b>{isCurado ? "curada" : "auto"}</b><span>lista</span></div>
+            <div><b>{detalle.informe_publicado ? "sí" : "no"}</b><span>publicado</span></div>
           </div>
         )}
+        <p className="ex-lead">
+          El motor propone; usted decide. En cada máster: quitar, añadir, subir o bajar y una nota que el asesorado verá en su informe.
+          Nada de esto se pierde al recalcular.
+          {planLabel ? <> Plan: <b>{planLabel}</b>.</> : null}
+          {filtros ? <> Filtros: {filtros}.</> : null}
+        </p>
+        <div className="ex-fila">
+          <button type="button" onClick={recalcular} disabled={loadingCompat} className="ex-btn sec"
+            title="Vuelve a calcular con el formulario de hoy. La lista curada no se toca.">
+            <IconoPaso nombre="refresh" /> {loadingCompat ? "Calculando…" : "Recalcular con el formulario actual"}
+          </button>
+          {detalle.informe_compat_curado && (
+            <button type="button" onClick={volverAlAutomatico} disabled={loadingCompat || guardando} className="ex-btn plano">
+              Volver al automático
+            </button>
+          )}
+        </div>
       </div>
       {nuevosCandidatos && (
         <div className="mx-5 mt-4 rounded-xl border border-[#F5C842]/60 bg-[#FFFBEA] px-4 py-3 text-xs text-neutral-700">
@@ -785,23 +752,21 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
 
         {/* Header controles */}
         <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
-          <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
-            Compatibilidad automática
-          </p>
+          <p className="ex-sub" style={{ margin: 0 }}>Lista del informe</p>
           <div className="flex gap-1.5 shrink-0">
             {!editMode ? (
               <>
                 {!loadingCompat && (
                   <>
                     <button onClick={abrirModalCrear} disabled={loadingCatalog}
-                      className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg border border-[#1D6A4A] text-[#1D6A4A] hover:bg-[#E8F5EE] transition-all duration-200 font-semibold disabled:opacity-50">
+                      className="ex-btn sec">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
                       {loadingCatalog ? "Cargando…" : "Nuevo máster"}
                     </button>
                     <button onClick={entrarEdicion}
-                      className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#1A3557] text-white hover:bg-[#22456e] transition-all duration-200 font-semibold">
+                      className="ex-btn sec">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
@@ -812,8 +777,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                 {listaVista.length > 0 && !detalle.informe_publicado
                   && ["BORRADOR", "DEVUELTO"].includes(revision) && (
                   <button onClick={mandarARevision} disabled={revisando}
-                    className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg
-                      bg-[#1A3557] text-white hover:opacity-90 disabled:opacity-50 font-semibold">
+                    className="ex-btn sec">
                     {revisando ? "Avisando…" : "Mandar a revisión"}
                   </button>
                 )}
@@ -821,14 +785,11 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                 {listaVista.length > 0 && revision === "EN_REVISION" && (
                   <>
                     <button onClick={() => resolverRevision("APROBADO")} disabled={revisando}
-                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg
-                        bg-[#1D6A4A] text-white hover:opacity-90 disabled:opacity-50 font-semibold">
+                      className="ex-btn">
                       Aprobar
                     </button>
                     <button onClick={() => resolverRevision("DEVUELTO")} disabled={revisando}
-                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg
-                        border border-amber-300 text-amber-800 hover:bg-amber-50
-                        disabled:opacity-50 font-semibold">
+                      className="ex-btn sec">
                       Devolver
                     </button>
                   </>
@@ -836,7 +797,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
 
                 {listaVista.length > 0 && (
                   <button onClick={publicarInforme} disabled={publicando}
-                    className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-all duration-200 disabled:opacity-50 font-semibold">
+                    className="ex-btn">
                     {publicando ? (
                       <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

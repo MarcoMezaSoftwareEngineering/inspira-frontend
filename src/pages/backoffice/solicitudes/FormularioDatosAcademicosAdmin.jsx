@@ -1,8 +1,12 @@
 // src/pages/backoffice/solicitudes/FormularioDatosAcademicosAdmin.jsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FIELD_CONFIG, SECTIONS_ORDER } from "./formularioDatosConfig";
 import LecturaMotor from "./LecturaMotor";
-import { boGET, boPATCH } from "../../../services/backofficeApi";
+import { boPATCH } from "../../../services/backofficeApi";
+import { dialog } from "../../../services/dialogService";
+import IconoPaso from "../../../components/common/IconoPaso";
+import FormularioDatosAcademicos from "../../panel/components/mis-servicios/sections/FormularioDatosAcademicos";
+import { SeccionSiempreAbiertoCtx } from "../../panel/components/mis-servicios/sections/SeccionPanel";
 
 // ── Configuración visual por sección ─────────────────────────────────────────
 const SECTION_CFG = {
@@ -120,460 +124,35 @@ function SectionCard({ nombre, fields, extra }) {
   );
 }
 
-// ── Edit Modal ────────────────────────────────────────────────────────────────
-
-const BOOL_FIELDS = [
-  "investigacion_experiencia","formacion_diplomados","formacion_encuentros",
-  "formacion_otros","formacion_ninguna","otra_maestria_tiene",
-  "beca_desea","beca_completa","beca_parcial","beca_ayuda_uni","beca_auip",
-  "idioma_master_es","idioma_master_bilingue","idioma_master_ingles",
-];
-
-const TODAS_CCAA = [
-  "Andalucía","Aragón","Asturias","Cantabria","Castilla-La Mancha",
-  "Castilla y León","Cataluña","Comunidad de Madrid","Comunidad Valenciana",
-  "Extremadura","Galicia","La Rioja","Murcia","Navarra","País Vasco",
-  "Me da igual / No tengo preferencia",
-];
-
-function normalizeDraft(datos) {
-  const d = { ...(datos || {}) };
-  for (const key of BOOL_FIELDS) {
-    const v = d[key];
-    if (typeof v === "boolean") continue;
-    if (typeof v === "string") {
-      d[key] = ["si","sí","yes","true"].includes(v.toLowerCase());
-    } else {
-      d[key] = false;
-    }
-  }
-  if (!Array.isArray(d.comunidades_preferidas)) d.comunidades_preferidas = [];
-  return d;
-}
-
-const inputCls = "border border-neutral-200 rounded-lg px-2 py-1.5 text-[12px] text-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D6A4A]/40 focus:border-[#1D6A4A]/60 bg-white w-full";
-const selectCls = inputCls + " cursor-pointer";
-const textareaCls = "border border-neutral-200 rounded-lg px-2 py-1.5 text-[12px] text-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D6A4A]/40 focus:border-[#1D6A4A]/60 bg-white w-full resize-none";
-
-function FLabel({ children }) {
-  return <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wide">{children}</label>;
-}
-
-function FField({ label, children }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <FLabel>{label}</FLabel>
-      {children}
-    </div>
-  );
-}
-
-function BoolToggle({ value, onChange }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!value)}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
-        value
-          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-          : "bg-neutral-100 text-neutral-400 border-neutral-200"
-      }`}
-    >
-      <span className={`w-2 h-2 rounded-full transition-colors ${value ? "bg-emerald-500" : "bg-neutral-300"}`} />
-      {value ? "Sí" : "No"}
-    </button>
-  );
-}
-
-function EditSection({ title, icon, color, children }) {
-  const clr = CLR[color] || CLR.neutral;
-  return (
-    <div className="rounded-xl border border-neutral-200 overflow-hidden">
-      <div className={`flex items-center gap-2 px-3 py-2 border-b ${clr.h}`}>
-        <span className={`w-0.5 h-3.5 rounded-full ${clr.bar} shrink-0`} />
-        <span className="text-sm leading-none shrink-0">{icon}</span>
-        <span className={`text-[10px] font-extrabold uppercase tracking-widest ${clr.t}`}>{title}</span>
-      </div>
-      <div className="p-4 space-y-3 bg-white">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function EditModal({ datos, idSolicitud, onClose, onSaved }) {
-  const [draft, setDraft] = useState(() => normalizeDraft(datos));
-  const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [ramas, setRamas] = useState([]);
-  const [subramas, setSubramas] = useState([]);
-
-  useEffect(() => {
-    boGET("/backoffice/catalogo/ramas").then(r => { if (r.ok) setRamas(r.ramas.filter(x => x.activo)); });
-  }, []);
-
-  useEffect(() => {
-    if (!draft.area_interes_master) { setSubramas([]); return; }
-    boGET(`/backoffice/catalogo/subareas?rama=${draft.area_interes_master}`)
-      .then(r => { if (r.ok) setSubramas(r.subareas.filter(s => s.activo)); });
-  }, [draft.area_interes_master]);
-
-  function set(key, val) {
-    setDraft(prev => ({ ...prev, [key]: val }));
-  }
-
-  function handleRamaChange(val) {
-    setDraft(prev => ({ ...prev, area_interes_master: val, sub_area_interes: "" }));
-  }
-
-  function toggleCCaa(c) {
-    const prev = Array.isArray(draft.comunidades_preferidas) ? draft.comunidades_preferidas : [];
-    set("comunidades_preferidas", prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
-  }
-
-  async function handleSave() {
-    setSaving(true);
-    setErrorMsg(null);
-    try {
-      const res = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/formulario`, {
-        datos_formulario: draft,
-      });
-      if (res.ok) {
-        onSaved(res.datos_formulario ?? draft);
-        onClose();
-      } else {
-        setErrorMsg(res.msg || "Error al guardar");
-      }
-    } catch {
-      setErrorMsg("Error de conexión");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const ccaaSeleccionadas = draft.comunidades_preferidas || [];
-
-  return (
-    <div className="fixed inset-0 z-50 flex">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
-
-      {/* Panel lateral derecho */}
-      <div className="relative ml-auto w-full max-w-xl bg-[#F4F6F9] flex flex-col shadow-2xl h-full">
-
-        {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-neutral-200 bg-white shrink-0">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-[14px] font-bold text-[#1A3557]">Editar formulario académico</h2>
-            <p className="text-[10px] text-neutral-400 mt-0.5">Cambios guardados directamente en la solicitud</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 transition-colors shrink-0"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Cuerpo scrolleable */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-
-          {/* ── Perfil académico ── */}
-          <EditSection title="Perfil académico" icon="🎓" color="blue">
-            <FField label="Carrera / título">
-              <input className={inputCls} value={draft.carrera_titulo || ""} onChange={e => set("carrera_titulo", e.target.value)} />
-            </FField>
-            <FField label="Área de la carrera">
-              <input className={inputCls} value={draft.area_carrera || ""} onChange={e => set("area_carrera", e.target.value)} />
-            </FField>
-            <FField label="Universidad de origen">
-              <input className={inputCls} value={draft.universidad_origen || ""} onChange={e => set("universidad_origen", e.target.value)} />
-            </FField>
-            <FField label="Afiliada a AUIP">
-              <select className={selectCls} value={draft.es_auip || ""} onChange={e => set("es_auip", e.target.value)}>
-                <option value="">—</option>
-                <option value="si">Sí</option>
-                <option value="no">No</option>
-              </select>
-            </FField>
-            <div className="grid grid-cols-2 gap-3">
-              <FField label="Promedio">
-                <input className={inputCls} type="number" step="0.01" min="0" value={draft.promedio_peru ?? ""} onChange={e => set("promedio_peru", e.target.value)} />
-              </FField>
-              <FField label="Escala">
-                <select className={selectCls} value={draft.promedio_escala || "20"} onChange={e => set("promedio_escala", e.target.value)}>
-                  <option value="20">Sobre 20</option>
-                  <option value="10">Sobre 10</option>
-                  <option value="5">Sobre 5</option>
-                  <option value="4">Sobre 4</option>
-                  <option value="100">Sobre 100</option>
-                </select>
-              </FField>
-            </div>
-            <FField label="Posición académica">
-              <select className={selectCls} value={draft.ubicacion_grupo || ""} onChange={e => set("ubicacion_grupo", e.target.value)}>
-                <option value="">—</option>
-                <option value="tercio">Tercio superior</option>
-                <option value="quinto">Quinto superior</option>
-                <option value="decimo">Décimo superior</option>
-                <option value="ninguno">No estuvo en ninguno</option>
-              </select>
-            </FField>
-            <div className="flex items-center gap-3">
-              <FLabel>Tiene otra maestría</FLabel>
-              <BoolToggle value={!!draft.otra_maestria_tiene} onChange={v => set("otra_maestria_tiene", v)} />
-            </div>
-            {draft.otra_maestria_tiene && (
-              <FField label="Detalle maestría">
-                <textarea className={textareaCls} rows={3} value={draft.otra_maestria_detalle || ""} onChange={e => set("otra_maestria_detalle", e.target.value)} />
-              </FField>
-            )}
-          </EditSection>
-
-          {/* ── Experiencia profesional ── */}
-          <EditSection title="Experiencia profesional" icon="💼" color="violet">
-            <FField label="Años de experiencia">
-              <select className={selectCls} value={draft.experiencia_anios || ""} onChange={e => set("experiencia_anios", e.target.value)}>
-                <option value="">—</option>
-                <option value="sin">Sin experiencia</option>
-                <option value="1-2">1–2 años</option>
-                <option value="2-3">2–3 años</option>
-                <option value="3-5">3–5 años</option>
-                <option value="5-10">5–10 años</option>
-                <option value="10+">Más de 10 años</option>
-              </select>
-            </FField>
-            <FField label="Vinculada al área del máster">
-              <select className={selectCls} value={draft.experiencia_vinculada || ""} onChange={e => set("experiencia_vinculada", e.target.value)}>
-                <option value="">—</option>
-                <option value="si">Sí, directamente</option>
-                <option value="parcial">Parcialmente</option>
-                <option value="no">No directamente</option>
-              </select>
-            </FField>
-            <FField label="Descripción de la experiencia">
-              <textarea className={textareaCls} rows={4} value={draft.experiencia_vinculada_detalle || ""} onChange={e => set("experiencia_vinculada_detalle", e.target.value)} />
-            </FField>
-          </EditSection>
-
-          {/* ── Investigación y formación ── */}
-          <EditSection title="Investigación y formación" icon="🔬" color="cyan">
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {[
-                { key: "investigacion_experiencia", label: "Tiene investigación" },
-                { key: "formacion_diplomados",      label: "Diplomados / cursos" },
-                { key: "formacion_encuentros",      label: "Encuentros / congresos" },
-                { key: "formacion_otros",           label: "Otras certificaciones" },
-                { key: "formacion_ninguna",         label: "Sin formación complementaria" },
-              ].map(({ key, label }) => (
-                <div key={key} className="flex items-center gap-2">
-                  <BoolToggle value={!!draft[key]} onChange={v => set(key, v)} />
-                  <span className="text-[11px] text-neutral-600">{label}</span>
-                </div>
-              ))}
-            </div>
-            {draft.investigacion_experiencia && (
-              <FField label="Publicaciones / grupos">
-                <textarea className={textareaCls} rows={2} value={draft.investigacion_detalle || ""} onChange={e => set("investigacion_detalle", e.target.value)} />
-              </FField>
-            )}
-            {draft.formacion_otros && (
-              <FField label="Detalle otras formaciones">
-                <textarea className={textareaCls} rows={2} value={draft.formacion_otros_detalle || ""} onChange={e => set("formacion_otros_detalle", e.target.value)} />
-              </FField>
-            )}
-          </EditSection>
-
-          {/* ── Idiomas ── */}
-          <EditSection title="Idiomas" icon="🗣️" color="emerald">
-            <FField label="Situación inglés">
-              <select className={selectCls} value={draft.ingles_situacion || ""} onChange={e => set("ingles_situacion", e.target.value)}>
-                <option value="">—</option>
-                <option value="intl">Cert. internacional (IELTS/TOEFL…)</option>
-                <option value="uni">Cert. universitaria</option>
-                <option value="instituto">Instituto (sin cert.)</option>
-                <option value="sabe_sin_cert">Inglés sin certificar</option>
-                <option value="no">Sin inglés</option>
-              </select>
-            </FField>
-            {draft.ingles_situacion === "uni" && (
-              <FField label="Nivel cert. universitaria">
-                <input className={inputCls} value={draft.ingles_uni_nivel || ""} onChange={e => set("ingles_uni_nivel", e.target.value)} />
-              </FField>
-            )}
-            {draft.ingles_situacion === "intl" && (
-              <>
-                <FField label="Tipo cert. internacional">
-                  <input className={inputCls} value={draft.ingles_intl_tipo || ""} onChange={e => set("ingles_intl_tipo", e.target.value)} />
-                </FField>
-                <FField label="Puntaje / nivel">
-                  <input className={inputCls} value={draft.ingles_intl_puntaje || ""} onChange={e => set("ingles_intl_puntaje", e.target.value)} />
-                </FField>
-              </>
-            )}
-            <div className="flex flex-wrap gap-x-4 gap-y-2 pt-1">
-              {[
-                { key: "idioma_master_es",       label: "Acepta en español" },
-                { key: "idioma_master_bilingue",  label: "Acepta bilingüe" },
-                { key: "idioma_master_ingles",    label: "Acepta en inglés" },
-              ].map(({ key, label }) => (
-                <div key={key} className="flex items-center gap-2">
-                  <BoolToggle value={!!draft[key]} onChange={v => set(key, v)} />
-                  <span className="text-[11px] text-neutral-600">{label}</span>
-                </div>
-              ))}
-            </div>
-          </EditSection>
-
-          {/* ── Becas ── */}
-          <EditSection title="Becas" icon="💸" color="amber">
-            <div className="flex items-center gap-2">
-              <BoolToggle value={!!draft.beca_desea} onChange={v => set("beca_desea", v)} />
-              <span className="text-[11px] text-neutral-600">Desea beca / ayuda</span>
-            </div>
-            {draft.beca_desea && (
-              <div className="flex flex-wrap gap-x-4 gap-y-2">
-                {[
-                  { key: "beca_completa",   label: "Becas completas" },
-                  { key: "beca_parcial",    label: "Becas parciales / descuentos" },
-                  { key: "beca_ayuda_uni",  label: "Ayudas de la universidad" },
-                  { key: "beca_auip",       label: "Becas AUIP" },
-                ].map(({ key, label }) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <BoolToggle value={!!draft[key]} onChange={v => set(key, v)} />
-                    <span className="text-[11px] text-neutral-600">{label}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </EditSection>
-
-          {/* ── Preferencias del máster ── */}
-          <EditSection title="Preferencias del máster" icon="🎯" color="orange">
-            <FField label="Rama del máster">
-              <select className={selectCls} value={draft.area_interes_master || ""} onChange={e => handleRamaChange(e.target.value)}>
-                <option value="">—</option>
-                {ramas.map(r => <option key={r.valor} value={r.valor}>{r.etiqueta}</option>)}
-              </select>
-            </FField>
-            {draft.area_interes_master && (
-              <FField label="Sub-área de interés">
-                <select className={selectCls} value={draft.sub_area_interes || ""} onChange={e => set("sub_area_interes", e.target.value)}>
-                  <option value="">— Sin especificar —</option>
-                  {subramas.map(s => <option key={s.valor} value={s.valor}>{s.etiqueta}</option>)}
-                </select>
-              </FField>
-            )}
-            <div className="grid grid-cols-2 gap-3">
-              <FField label="Duración">
-                <select className={selectCls} value={draft.duracion_preferida || ""} onChange={e => set("duracion_preferida", e.target.value)}>
-                  <option value="">—</option>
-                  <option value="indiferente">Me da igual</option>
-                  <option value="1">Máx. 1 año</option>
-                  <option value="1.5">Máx. 1,5 años</option>
-                  <option value="2">Máx. 2 años</option>
-                </select>
-              </FField>
-              <FField label="Prácticas">
-                <select className={selectCls} value={draft.practicas_preferencia || ""} onChange={e => set("practicas_preferencia", e.target.value)}>
-                  <option value="">—</option>
-                  <option value="imprescindible">Imprescindible</option>
-                  <option value="deseable">Deseable</option>
-                  <option value="no_importante">No es criterio</option>
-                </select>
-              </FField>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <FField label="Modalidad">
-                <select className={selectCls} value={draft.modalidad_preferida || ""} onChange={e => set("modalidad_preferida", e.target.value)}>
-                  <option value="">—</option>
-                  <option value="presencial">Presencial</option>
-                  <option value="semipresencial">Semipresencial</option>
-                  <option value="online">Online</option>
-                  <option value="indiferente">Me da igual</option>
-                </select>
-              </FField>
-              <FField label="Inicio previsto">
-                <select className={selectCls} value={draft.inicio_previsto || ""} onChange={e => set("inicio_previsto", e.target.value)}>
-                  <option value="">—</option>
-                  <option value="sep_2025">Sep 2025</option>
-                  <option value="ene_2026">Ene 2026</option>
-                  <option value="sep_2026">Sep 2026</option>
-                  <option value="ene_2027">Ene 2027</option>
-                  <option value="flexible">Flexible / No sé</option>
-                </select>
-              </FField>
-            </div>
-            <FField label="Presupuesto hasta (€/año)">
-              <input
-                className={inputCls}
-                type="number"
-                min="0"
-                step="100"
-                value={draft.presupuesto_hasta ?? ""}
-                onChange={e => set("presupuesto_hasta", e.target.value === "" ? "" : Number(e.target.value))}
-              />
-            </FField>
-            <FField label="Comunidades autónomas preferidas">
-              <div className="flex flex-wrap gap-1.5 pt-0.5">
-                {TODAS_CCAA.map(c => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => toggleCCaa(c)}
-                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full border transition-all ${
-                      ccaaSeleccionadas.includes(c)
-                        ? "bg-[#1D6A4A] text-white border-[#1D6A4A]"
-                        : "bg-white text-neutral-500 border-neutral-200 hover:border-neutral-300"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </FField>
-          </EditSection>
-
-          {/* ── Comentario especial ── */}
-          <EditSection title="Comentario especial" icon="💬" color="pink">
-            <FField label="Comentario para IA / asesores">
-              <textarea className={textareaCls} rows={4} value={draft.comentario_especial || ""} onChange={e => set("comentario_especial", e.target.value)} />
-            </FField>
-          </EditSection>
-
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-neutral-200 bg-white px-5 py-3 flex items-center gap-3 shrink-0">
-          {errorMsg && <p className="text-[11px] text-red-500 flex-1">{errorMsg}</p>}
-          {!errorMsg && <div className="flex-1" />}
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 text-[12px] font-semibold text-neutral-500 hover:text-neutral-800 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-1.5 text-[12px] font-semibold bg-[#1D6A4A] text-white rounded-lg hover:bg-[#155a3d] disabled:opacity-50 transition-colors"
-          >
-            {saving ? "Guardando…" : "Guardar cambios"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Componente principal ──────────────────────────────────────────────────────
-export default function FormularioDatosAcademicosAdmin({ datos, idSolicitud, onActualizado, onIrAInforme = null }) {
+export default function FormularioDatosAcademicosAdmin({ datos, idSolicitud, onActualizado, onIrAInforme = null, nombreCliente = null, planCCAAs = null }) {
   const [editing, setEditing] = useState(false);
+  // El borrador del asesor: el mismo formulario por secciones que ve el
+  // asesorado, guardado en la solicitud con cada «Guardar y seguir».
+  const [borrador, setBorrador] = useState({});
+  const [guardando, setGuardando] = useState(false);
+  const nombreCorto = (nombreCliente || "el asesorado").split(" ")[0];
+
+  function abrirEditor() {
+    setBorrador({ ...(datos || {}) });
+    setEditing(true);
+  }
+
+  async function guardarBorrador({ cerrar = false, avisar = true } = {}) {
+    setGuardando(true);
+    try {
+      const res = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/formulario`, { datos_formulario: borrador });
+      if (!res?.ok) { dialog.toast(res?.msg || "No se pudo guardar el formulario", "error"); return false; }
+      onActualizado?.(res.datos_formulario ?? borrador);
+      if (avisar) dialog.toast("Formulario guardado", "success");
+      if (cerrar) setEditing(false);
+      return true;
+    } catch {
+      dialog.toast("Error de conexión", "error");
+      return false;
+    } finally {
+      setGuardando(false);
+    }
+  }
 
   const isEmpty = !datos || Object.keys(datos).length === 0;
   const extra = { escala: datos?.promedio_escala };
@@ -604,7 +183,7 @@ export default function FormularioDatosAcademicosAdmin({ datos, idSolicitud, onA
       <LecturaMotor
         datos={datos}
         idSolicitud={idSolicitud}
-        onEditar={idSolicitud ? () => setEditing(true) : null}
+        onEditar={idSolicitud && !editing ? abrirEditor : null}
         onIrAInforme={onIrAInforme}
       />
       {!isEmpty && <p className="ex-sub" style={{ marginTop: 4 }}>Todas las respuestas</p>}
@@ -628,17 +207,29 @@ export default function FormularioDatosAcademicosAdmin({ datos, idSolicitud, onA
         </div>
       )}
 
-      {/* Modal de edición */}
+      {/* El mismo formulario que el asesorado, rellenado por el asesor */}
       {editing && (
-        <EditModal
-          datos={datos || {}}
-          idSolicitud={idSolicitud}
-          onClose={() => setEditing(false)}
-          onSaved={(nuevosDatos) => {
-            onActualizado?.(nuevosDatos);
-            setEditing(false);
-          }}
-        />
+        <div style={{ marginTop: 14 }}>
+          <div className="ex-tranquila" style={{ marginBottom: 10 }}>
+            <span className="ico"><IconoPaso nombre="edit" /></span>
+            <div><b>Editando el formulario de {nombreCorto}.</b> Cada cambio queda guardado en la solicitud.</div>
+            <button type="button" className="ex-btn sec" style={{ marginLeft: "auto" }} onClick={() => setEditing(false)}>
+              <IconoPaso nombre="x" /> Cerrar
+            </button>
+          </div>
+          <SeccionSiempreAbiertoCtx.Provider value={true}>
+            <FormularioDatosAcademicos
+              lado="asesor"
+              formData={borrador}
+              setFormData={setBorrador}
+              handleSubmitFormulario={(e) => { e?.preventDefault?.(); return guardarBorrador({ cerrar: true }); }}
+              onGuardarProgreso={() => guardarBorrador({ avisar: false })}
+              savingForm={guardando}
+              hasData={!isEmpty}
+              planCCAAs={planCCAAs}
+            />
+          </SeccionSiempreAbiertoCtx.Provider>
+        </div>
       )}
     </>
   );

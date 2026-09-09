@@ -160,9 +160,9 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
   const perfil        = compat?.perfil;
   const curado        = !!compat?.curado;
   const hayResultados = resultados.length > 0;
-  // Dónde acaba su lista y empiezan los extras. Lo dice el backend
-  // (`FINALISTAS`); si no viniera, no se parte la lista en dos.
-  const finalistas    = compat?.finalistas ?? resultados.length;
+  // Los que quedan fuera de su plan pero tienen beca que paga la matrícula:
+  // son opciones condicionadas a conseguirla, no parte de lo que contrató.
+  const soloConBeca   = compat?.solo_con_beca || [];
 
   const estado = disponible || hayResultados
     ? "completado"
@@ -379,14 +379,15 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
                     <div className="ex-lista-m mt-3">
                       {resultados.map((r, i) => (
                         <div key={r.master.id_master}>
-                          {/* Los primeros son su lista; lo que venga detrás son
-                              opciones de más, y se dice. Una lista de doce se
-                              lee y se compara; una de treinta se hojea. */}
-                          {i === finalistas && (
-                            <div className="mt-5 mb-3">
-                              <p className="text-sm font-bold text-neutral-700">Otras opciones que también encajan</p>
-                              <p className="text-xs text-neutral-500 mt-0.5">
-                                Tu lista son los {finalistas} de arriba. Estos los añadimos por si quieres mirar más.
+                          {/* Por comunidad, porque así es como se postula: en
+                              Andalucía una sola solicitud con preferencias, y
+                              fuera una por universidad. El informe se lee como
+                              se va a hacer. */}
+                          {r.master.universidad?.comunidad !== resultados[i - 1]?.master?.universidad?.comunidad && (
+                            <div className="mt-5 mb-2 flex items-baseline gap-2">
+                              <p className="text-sm font-bold text-neutral-700">{r.master.universidad?.comunidad}</p>
+                              <p className="text-xs text-neutral-400">
+                                {resultados.filter((x) => x.master.universidad?.comunidad === r.master.universidad?.comunidad).length} programa(s)
                               </p>
                             </div>
                           )}
@@ -398,6 +399,20 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
                           />
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {soloConBeca.length > 0 && (
+                    <div className="mt-6 pt-5 border-t border-[#F5C842]/50">
+                      <p className="text-sm font-bold text-[#7a5b00]">Fuera de tu plan, pero con beca</p>
+                      <p className="text-xs text-neutral-500 mt-0.5 mb-3">
+                        Estos están en comunidades que tu paquete no cubre. Sólo son posibles si consigues la beca que los oferta —habla con tu asesora antes de contar con ellos.
+                      </p>
+                      <div className="ex-lista-m">
+                        {soloConBeca.map((r) => (
+                          <TarjetaMaster key={r.master.id_master} resultado={r} nota={r.nota_asesor || null} />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

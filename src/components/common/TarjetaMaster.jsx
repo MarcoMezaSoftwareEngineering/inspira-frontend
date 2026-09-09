@@ -55,7 +55,13 @@ function razonesDe(m) {
   if (m.estado_ficha === "no_hallado") out.push(["warn", "Sin ficha localizada: tu asesor lo confirma con la universidad"]);
   // El que él eligió sale siempre, cuadre o no; si no cuadra, se dice por qué.
   if (m.es_ancla && m.motivo_descarte) out.push(["warn", `Ojo: ${m.motivo_descarte}`]);
-  return out.slice(0, 5);
+  // Lo que dijo que no quería y este máster sí es. No lo saca de la lista
+  // —obligatorio es sólo la geografía contratada y el dinero—, pero se dice.
+  for (const a of (m.avisos || [])) out.push(["warn", a]);
+  // Y si está aquí por llenar el cupo de su comunidad y no por parecerse a lo
+  // que pidió, también: callarlo haría creer que tiene que ver con lo suyo.
+  if (m.relleno) out.push(["info", m.relleno]);
+  return out.slice(0, 6);
 }
 
 export default function TarjetaMaster({

@@ -35,15 +35,27 @@ function texto(v) {
 function razonesDe(m) {
   const out = [];
   if (m.es_ancla) out.push(["ancla", "El enlace que nos pasaste"]);
+  // Quién paga. Es la primera razón, por delante del acceso y de la sub-área:
+  // un máster de 5.044 € que oferta la Fundación Carolina no es un máster de
+  // 5.044 €, y era lo que faltaba por decir en la tarjeta.
+  const becas = [...new Set((m.becas || []).map((b) => b.entidad))];
+  if (becas.length) out.push(["beca", `Lo oferta ${becas.join(" · ")}`]);
   if (m.acceso_titulo === "directo") out.push(["ok", "Admite tu carrera"]);
   else if (m.acceso_titulo === "afin") out.push(["ok", "Admite carreras afines a la tuya"]);
   else if (m.acceso_titulo === "sin_lista") out.push(["info", "No publica lista de acceso: se puntúa por rama"]);
-  if (m.afinidad_deseada === "nombre") out.push(["tema", "Coincide con lo que buscas"]);
-  else if (m.afinidad_deseada === "tema") out.push(["tema", "Coincide con tus temas"]);
+  // El motor dice "fuerte" y "parcial" desde el 08/09/2026; aquí se seguían
+  // buscando "nombre" y "tema", así que esta etiqueta no salía nunca.
+  if (m.afinidad_deseada === "fuerte") {
+    out.push(["tema", m.coincide_con ? `Coincide con «${m.coincide_con}»` : "Coincide con lo que buscas"]);
+  } else if (m.afinidad_deseada === "parcial") {
+    out.push(["tema", m.coincide_con ? `Se acerca a «${m.coincide_con}»` : "Se acerca a lo que buscas"]);
+  }
   if (texto(m.sub_area)) out.push(["info", texto(m.sub_area)]);
   if (m.es_titulo_oficial === false) out.push(["warn", "Título propio: no se homologa ni da acceso al doctorado"]);
   if (m.estado_ficha === "no_hallado") out.push(["warn", "Sin ficha localizada: tu asesor lo confirma con la universidad"]);
-  return out.slice(0, 4);
+  // El que él eligió sale siempre, cuadre o no; si no cuadra, se dice por qué.
+  if (m.es_ancla && m.motivo_descarte) out.push(["warn", `Ojo: ${m.motivo_descarte}`]);
+  return out.slice(0, 5);
 }
 
 export default function TarjetaMaster({

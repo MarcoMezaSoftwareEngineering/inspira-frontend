@@ -37,6 +37,9 @@
 .ex-rz[data-k="ancla"] { background: #fff3e0; color: #b8730c; }
 .ex-rz[data-k="warn"] { background: #fff3e0; color: #b8730c; }
 .ex-rz[data-k="info"] { background: #eef3f7; color: #5f7a89; }
+/* La beca. Se distingue del resto a propósito: es lo que cambia si un máster
+   está al alcance o no, y en el informe tiene que saltar a la vista. */
+.ex-rz[data-k="beca"] { background: #fff7e0; color: #7a5b00; border: 1px solid #f5c842; }
 .ex-m-nota { margin: 0 14px 10px; font-size: 11.5px; line-height: 1.45; padding: 8px 10px; border-radius: 10px; background: #fff8e6; color: #10303f; border-left: 3px solid #f5c842; }
 .ex-m-nota b { font-weight: 700; }
 

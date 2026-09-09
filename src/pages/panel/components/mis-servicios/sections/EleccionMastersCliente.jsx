@@ -1,11 +1,39 @@
 // src/pages/panel/components/mis-servicios/sections/EleccionMastersCliente.jsx
 import { useEffect, useRef, useState } from "react";
 import SeccionPanel from "./SeccionPanel";
+import TarjetaMaster from "../../../../../components/common/TarjetaMaster";
+import IconoPaso from "../../../../../components/common/IconoPaso";
 import BaremoMaster from "../../../../../components/BaremoMaster";
 
 // ── Tarjeta compacta de máster ────────────────────────────────────────────────
 
 export function MasterCard({ master, score, prioridad, selected, comentario, onToggle, onComentario }) {
+  return (
+    <TarjetaMaster
+      resultado={{ master, score }}
+      cabecera={selected && prioridad ? (
+        <p className="ex-m-rank"><b>{prioridad}.ª</b> opción · elegido</p>
+      ) : null}
+    >
+      <div className="ex-m-elegir">
+        <button type="button" onClick={onToggle} aria-pressed={selected} className="ex-btn" data-sel={selected ? 1 : 0}>
+          <IconoPaso nombre={selected ? "check" : "plus"} />
+          {selected ? "Elegido" : "Me interesa este máster"}
+        </button>
+        {selected && (
+          <input
+            className="ex-m-com"
+            value={comentario || ""}
+            onChange={(e) => onComentario?.(e.target.value)}
+            placeholder="¿Por qué te interesa? Lo lee tu asesor"
+          />
+        )}
+      </div>
+    </TarjetaMaster>
+  );
+}
+
+function MasterCardVieja({ master, score, prioridad, selected, comentario, onToggle, onComentario }) {
   const dur =
     master.duracion_anios === 1    ? "1 año"
     : master.duracion_anios === 1.5 ? "18 meses"

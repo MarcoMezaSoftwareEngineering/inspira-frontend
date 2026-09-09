@@ -3,6 +3,7 @@ import { useState } from "react";
 import { formatearFecha } from "../utils";
 import { dialog } from "../../../../../services/dialogService";
 import SeccionPanel from "./SeccionPanel";
+import TarjetaMaster from "../../../../../components/common/TarjetaMaster";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -349,21 +350,16 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
                       No se encontraron programas compatibles con tu perfil actual.
                     </p>
                   ) : (
-                    <div className="divide-y divide-neutral-100">
-                      {resultados.slice(0, 5).map((r, i) => (
-                        <MasterRow key={r.master.id_master} posicion={i + 1} resultado={r} />
+                    <div className="ex-lista-m mt-3">
+                      {resultados.map((r, i) => (
+                        <TarjetaMaster
+                          key={r.master.id_master}
+                          resultado={r}
+                          posicion={i + 1}
+                          total={resultados.length}
+                          nota={r.nota_asesor || null}
+                        />
                       ))}
-                    </div>
-                  )}
-
-                  {compat.total > 5 && (
-                    <div className="text-center mt-4">
-                      <button
-                        onClick={() => setModal(true)}
-                        className="px-5 py-2 rounded-xl border-2 border-primary text-primary text-sm font-semibold hover:bg-primary hover:text-white transition-all active:scale-95"
-                      >
-                        Ver los {compat.total} programas →
-                      </button>
                     </div>
                   )}
                 </div>

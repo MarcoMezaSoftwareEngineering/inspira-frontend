@@ -221,3 +221,8 @@
 .ex-ruta span.d { grid-column: 2; font-size: 11.5px; color: #5f7a89; line-height: 1.4; }
 .ex-ruta em { grid-row: 1 / span 2; font-style: normal; font-size: 11px; font-weight: 800; color: #1d7a52; }
 .ex-ruta[aria-pressed="true"] { border-color: #1d7a52; background: #e6f6ee; }
+.ex-m-elegir { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px 13px; margin-top: auto; border-top: 1px solid #eef3f7; }
+.ex-m-elegir .ex-btn[data-sel="0"] { background: #f6f9fb; color: #10303f; border: 1px solid #e3ebf2; }
+.ex-m-elegir .ex-btn[data-sel="1"] { background: #1d7a52; color: #fff; }
+.ex-m-com { flex: 1 1 200px; min-width: 0; border: 1px solid #e3ebf2; border-radius: 11px; padding: 9px 11px; font: inherit; font-size: 12.5px; color: #10303f; background: #fff; }
+.ex-m-com:focus { outline: 0; border-color: #3d8fe0; box-shadow: 0 0 0 3px #e8f2fd; }

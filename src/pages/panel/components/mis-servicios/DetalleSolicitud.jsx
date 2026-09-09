@@ -15,6 +15,7 @@ import PortalesYJustificantesCliente from "./sections/PortalesYJustificantesClie
 import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
 import { EsqueletoExpediente } from "../Esqueleto";
+import CercoErrores from "../../../../components/common/CercoErrores";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../../components/common/RutaPasos";
 
@@ -435,6 +436,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
           {/* ── Contenido de la sección activa. La clave por sección hace que
               cada una entre con su transición; el expediente no se remonta. ── */}
           <div key={activeSection} className="pnl-entra flex flex-col lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+            <CercoErrores clave={activeSection} donde={`panel/${activeSection}`} onVolver={() => setActiveSection("docs")}>
             <SeccionSiempreAbiertoCtx.Provider value={true}>
 
               {activeSection === "docs" && (
@@ -515,6 +517,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
               )}
 
             </SeccionSiempreAbiertoCtx.Provider>
+            </CercoErrores>
           </div>
           </div>
 

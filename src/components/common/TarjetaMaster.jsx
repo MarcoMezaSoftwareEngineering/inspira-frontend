@@ -21,6 +21,15 @@ function fechaCorta(iso) {
   return d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }
 
+// El motor manda algunos campos del catálogo como {valor, etiqueta} (la
+// subárea, por ejemplo). Aquí solo interesa el texto; un objeto como hijo de
+// React tumba la pantalla entera.
+function texto(v) {
+  if (v == null) return null;
+  if (typeof v === "object") return v.etiqueta || v.nombre || v.valor || null;
+  return String(v);
+}
+
 /** Por qué este máster está en la lista, en etiquetas cortas. */
 function razonesDe(m) {
   const out = [];
@@ -30,7 +39,7 @@ function razonesDe(m) {
   else if (m.acceso_titulo === "sin_lista") out.push(["info", "No publica lista de acceso: se puntúa por rama"]);
   if (m.afinidad_deseada === "nombre") out.push(["tema", "Coincide con lo que buscas"]);
   else if (m.afinidad_deseada === "tema") out.push(["tema", "Coincide con tus temas"]);
-  if (m.sub_area) out.push(["info", m.sub_area]);
+  if (texto(m.sub_area)) out.push(["info", texto(m.sub_area)]);
   if (m.es_titulo_oficial === false) out.push(["warn", "Título propio: no se homologa ni da acceso al doctorado"]);
   if (m.estado_ficha === "no_hallado") out.push(["warn", "Sin ficha localizada: tu asesor lo confirma con la universidad"]);
   return out.slice(0, 4);
@@ -62,8 +71,8 @@ export default function TarjetaMaster({
             <p className="ex-m-rank"><b>{posicion}</b>{total ? ` de ${total}` : ""}</p>
           )}
           {cabecera}
-          <h3>{m.nombre_limpio}</h3>
-          <p className="ex-m-uni"><b>{uni.nombre_completo || uni.sigla}</b>{uni.ciudad ? ` · ${uni.ciudad}` : ""}</p>
+          <h3>{texto(m.nombre_limpio)}</h3>
+          <p className="ex-m-uni"><b>{texto(uni.nombre_completo) || texto(uni.sigla)}</b>{uni.ciudad ? ` · ${texto(uni.ciudad)}` : ""}</p>
         </div>
         {score != null && (
           <div className="ex-anillo" style={{ "--v": Math.max(0, Math.min(100, score)), "--tono": tono(score) }}>
@@ -79,7 +88,7 @@ export default function TarjetaMaster({
       )}
 
       {nota && (
-        <div className="ex-m-nota"><b>Nota de tu asesor:</b> {nota}</div>
+        <div className="ex-m-nota"><b>Nota de tu asesor:</b> {texto(nota)}</div>
       )}
 
       <div className="ex-m-datos">
@@ -91,7 +100,7 @@ export default function TarjetaMaster({
         <div>
           <small>Duración</small>
           <b>{dur}</b>
-          <span>{m.modalidad || "—"}</span>
+          <span>{texto(m.modalidad) || "—"}</span>
         </div>
         <div data-hay={hayTramite ? 1 : 0}>
           <small>Trámite previo</small>
@@ -110,11 +119,11 @@ export default function TarjetaMaster({
           <summary>Qué valora la universidad para admitir</summary>
           <div>
             {m.proceso_previo && (
-              <p className="ex-m-previo"><b>Antes de postular:</b> {m.proceso_previo}</p>
+              <p className="ex-m-previo"><b>Antes de postular:</b> {texto(m.proceso_previo)}</p>
             )}
             {baremo.length > 0 ? baremo.map((b) => (
               <div key={(b.criterio || b.categoria) + b.peso} className="ex-m-bar">
-                <span>{b.criterio || b.categoria}</span>
+                <span>{texto(b.criterio) || texto(b.categoria)}</span>
                 <b>{b.peso} {b.escala === "puntos" ? "pts" : "%"}</b>
                 <i style={{ "--w": `${Math.min(100, b.peso)}%` }} />
               </div>

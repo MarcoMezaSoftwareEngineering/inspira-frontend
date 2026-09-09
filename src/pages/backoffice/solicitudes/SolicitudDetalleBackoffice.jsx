@@ -29,6 +29,7 @@ import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
 import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
 import IconoPaso, { ICONO_POR_BLOQUE } from "../../../components/common/IconoPaso";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../components/common/RutaPasos";
+import CercoErrores from "../../../components/common/CercoErrores";
 
 // Nombre corto de cada bloque del máster para la fila de iconos del móvil.
 const CORTO_BO = { cliente: "Ficha", checklist: "Documentos", formulario: "Formulario", informe: "Informe", eleccion: "Elección", programacion: "Postular", cierre: "Cierre" };
@@ -525,6 +526,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       {/* ── MAIN SCROLL ── */}
       <main ref={mainRef} className="flex-1 overflow-y-auto bg-[#F4F6F9]">
         <div className="p-3 sm:p-[22px] pb-20">
+        <CercoErrores clave={activeBloque} donde={`core/${activeBloque || "expediente"}`}>
 
           {/* Máster, móvil y tablet: volver, la ficha resumida y la fila de pasos. */}
           {esMaster && (
@@ -873,6 +875,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
           </>
           )}
+        </CercoErrores>
         </div>
       </main>
 

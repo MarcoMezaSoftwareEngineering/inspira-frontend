@@ -1,6 +1,7 @@
 // src/pages/backoffice/solicitudes/ProgramacionPostulacionesAdmin.jsx
 import { useEffect, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST, boDELETE, boFetch } from "../../../services/backofficeApi";
+import IconoPaso from "../../../components/common/IconoPaso";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -476,6 +477,41 @@ function TabSeguimiento({ post, onChange, onSave }) {
 
 // ── MasterPostCard ────────────────────────────────────────────────────────────
 
+// La línea de tiempo de una postulación: dónde va y qué falta, de un vistazo.
+// La misma que ve el asesorado en su panel, para hablar de lo mismo.
+function LineaTiempoAdmin({ post }) {
+  const presentada   = ["postulado", "admitido", "lista", "denegado"].includes(post.estado);
+  const conResultado = ["admitido", "lista", "denegado"].includes(post.estado);
+  const admitida     = post.estado === "admitido";
+  const plazo = post.fecha_apertura || post.fecha_cierre
+    ? `${post.fecha_apertura ? fmtFecha(post.fecha_apertura) : "\u2014"} \u2192 ${post.fecha_cierre ? fmtFecha(post.fecha_cierre) : "\u2014"}`
+    : "por confirmar";
+  const pasos = [
+    { t: "Plazo",      d: plazo,                                                            e: presentada ? "ok" : "on" },
+    { t: "Presentada", d: presentada ? "hecho" : "pendiente",                               e: presentada ? "ok" : "" },
+    { t: "Resultados", d: post.fecha_resultados ? fmtFecha(post.fecha_resultados) : "por publicar", e: conResultado ? "ok" : presentada ? "on" : "" },
+    { t: "Matrícula",  d: admitida ? "con el asesorado" : "\u2014",                          e: admitida ? "on" : "" },
+  ];
+  return (
+    <ol className="grid grid-cols-4 gap-1 px-4 pb-3 pt-1 relative">
+      <span className="absolute left-[calc(1rem+12.5%)] right-[calc(1rem+12.5%)] top-[13px] h-0.5 bg-neutral-100" aria-hidden="true" />
+      {pasos.map((x) => (
+        <li key={x.t} className="relative text-center">
+          <span className={`mx-auto mb-1.5 grid place-items-center w-5 h-5 rounded-full border-2 ${
+            x.e === "ok" ? "bg-emerald-600 border-emerald-600 text-white"
+            : x.e === "on" ? "bg-sky-100 border-sky-400"
+            : "bg-white border-neutral-200"
+          }`}>
+            {x.e === "ok" && <IconoPaso nombre="check" className="w-2.5 h-2.5" strokeWidth={3} />}
+          </span>
+          <span className="block text-[10px] font-bold text-neutral-700 leading-tight">{x.t}</span>
+          <span className="block text-[9.5px] text-neutral-400 leading-tight">{x.d}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function MasterPostCard({ post, onUpdate, onSave, onRecargar }) {
   const [tab, setTab]       = useState("fec");
   const [showPw, setShowPw] = useState(false);
@@ -496,17 +532,17 @@ function MasterPostCard({ post, onUpdate, onSave, onRecargar }) {
   const onSaveF  = (field, value) => onSave(post.id_master, field, value);
 
   return (
-    <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
-      <div className="flex items-center gap-3 px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-        <div style={{ background: color }}
-          className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black text-white font-mono">
+    <div className={`border rounded-2xl overflow-hidden bg-white ${post.estado === "admitido" ? "border-emerald-300" : "border-neutral-200"}`}>
+      <div className="flex items-start gap-3 px-4 pt-4 pb-2">
+        <span style={{ background: color }}
+          className="shrink-0 w-10 h-10 rounded-xl grid place-items-center text-[11px] font-black text-white font-mono">
           P{post.prioridad || idx + 1}
-        </div>
+        </span>
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-[#1A3557] leading-tight truncate">
+          <p className="text-[13.5px] font-bold text-[#1A3557] leading-snug">
             {post.nombre_limpio || "(Sin nombre)"}
           </p>
-          {subtitle && <p className="text-[11px] text-neutral-500 truncate mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-[11.5px] text-neutral-500 mt-0.5">{subtitle}</p>}
         </div>
         <select value={post.estado} onChange={(e) => onSaveF("estado", e.target.value)}
           className="shrink-0 text-[11px] font-semibold border border-neutral-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-[#1A3557] cursor-pointer">
@@ -516,7 +552,9 @@ function MasterPostCard({ post, onUpdate, onSave, onRecargar }) {
         </select>
       </div>
 
-      <div className="flex border-b border-neutral-100 overflow-x-auto">
+      <LineaTiempoAdmin post={post} />
+
+      <div className="flex border-b border-t border-neutral-100 overflow-x-auto">
         {TABS.map((t) => (
           <button key={t.id} type="button" onClick={() => setTab(t.id)}
             className={`shrink-0 px-3.5 py-2 text-[11px] font-semibold border-b-2 transition-colors whitespace-nowrap ${

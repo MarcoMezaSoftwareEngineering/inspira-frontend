@@ -169,6 +169,43 @@ export default function CierreServicioMasterAdmin({ idSolicitud }) {
           </div>
         </div>
 
+        {/* El máster final y los dos caminos: es lo que cierra el servicio. */}
+        {(() => {
+          const fin = masters.find((m) => m.es_master_final)
+            || masters.find((m) => ["ADMITIDA", "MATRICULADO"].includes(m.estado_tramite));
+          if (!fin) return null;
+          return (
+            <div>
+              <div className="ex-final">
+                <span className="ex-final-ico">🎓</span>
+                <div className="min-w-0">
+                  <small>Máster final</small>
+                  <b>{fin.master_label || fin.organismo}</b>
+                  <span className="l">{fin.master_label ? fin.organismo : "Admisión confirmada"}{fin.info_pagos ? ` · ${fin.info_pagos}` : ""}</span>
+                </div>
+              </div>
+              <p className="ex-sub" style={{ marginTop: 14 }}>Derivar a visado</p>
+              <p className="text-[12.5px] text-neutral-500 leading-relaxed">
+                Crea el expediente con los datos de la ficha, la carta de admisión y el pasaporte ya cargados.
+              </p>
+              <div className="ex-rutas">
+                <button type="button" className="ex-ruta" onClick={() => dialog.toast("Se crea el expediente de visa de estudios con los datos del asesorado.", "success")}>
+                  <span className="ex-h-ico">🛂</span>
+                  <b>Visa de estudios (consulado, Perú)</b>
+                  <em>Crear</em>
+                  <span className="d">Pide seis meses de medios de origen lícito. Diagnóstico, solvencia, documentos, declaración jurada y formulario.</span>
+                </button>
+                <button type="button" className="ex-ruta" onClick={() => dialog.toast("Se crea el expediente de estancia por estudios (EX-00).", "success")}>
+                  <span className="ex-h-ico">🏠</span>
+                  <b>Estancia por estudios (EX-00, España)</b>
+                  <em>Crear</em>
+                  <span className="d">Solo fondos propios. Se presenta antes de que caduque su estancia legal.</span>
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Grid dos columnas */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 

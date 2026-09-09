@@ -263,6 +263,19 @@ export default function EncabezadoClienteAdmin({ detalle, onClienteActualizado }
         </div>
       )}
 
+      {/* Lo que hay que mirar antes de nada: pasaporte y lo que falta. */}
+      <div className="ex-alertas px-5 pb-2">
+        {vencPasaporte && (
+          <span className={alerta ? "warn" : "ok"}>
+            {alerta ? alerta.msg : `Pasaporte vigente hasta ${formatearFecha(vencPasaporte)}`}
+          </span>
+        )}
+        {tituloUniv && <span>{tituloUniv}</span>}
+        {promedio && <span>Promedio {promedio}</span>}
+        {!cli.telefono && <span className="warn">Sin teléfono</span>}
+        {!extra.ciudad && <span className="warn">Sin ciudad</span>}
+      </div>
+
       {/* Grid de campos (vista) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-5 px-5 pb-3">
         <Campo label="Fecha nacimiento"     value={fechaNac ? formatearFecha(fechaNac) : null} highlight={!!fechaNac} />

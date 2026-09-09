@@ -226,3 +226,9 @@
 .ex-m-elegir .ex-btn[data-sel="1"] { background: #1d7a52; color: #fff; }
 .ex-m-com { flex: 1 1 200px; min-width: 0; border: 1px solid #e3ebf2; border-radius: 11px; padding: 9px 11px; font: inherit; font-size: 12.5px; color: #10303f; background: #fff; }
 .ex-m-com:focus { outline: 0; border-color: #3d8fe0; box-shadow: 0 0 0 3px #e8f2fd; }
+
+/* Avisos de la ficha del cliente: pasaporte, lo que falta, lo que importa. */
+.ex-alertas { display: flex; flex-wrap: wrap; gap: 5px; }
+.ex-alertas span { font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: #eef3f7; color: #10303f; display: inline-flex; align-items: center; gap: 4px; }
+.ex-alertas span.warn { background: #fff3e0; color: #b8730c; }
+.ex-alertas span.ok { background: #e6f6ee; color: #1d7a52; }

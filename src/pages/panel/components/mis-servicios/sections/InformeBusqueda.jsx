@@ -192,7 +192,7 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
       sectionId="4"
     >
       {/* ── Formulario incompleto ─────────────────────────────────────────── */}
-      {!hasFormData && !loadingCompat && (
+      {!hasFormData && !loadingCompat && !hayResultados && !disponible && (
         <div className="flex items-start gap-3 bg-neutral-50 border border-neutral-200 rounded-xl p-4">
           <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0 text-xl">
             🔍

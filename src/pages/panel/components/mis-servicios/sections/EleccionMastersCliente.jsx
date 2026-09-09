@@ -295,7 +295,7 @@ export default function EleccionMastersCliente({
         <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-1.5">
 
           {/* Sin formulario guardado */}
-          {!hasFormData && !loadingCompat && (
+          {!hasFormData && !loadingCompat && !compat?.resultados?.length && (
             <div className="bg-neutral-50 rounded-xl p-4 text-sm text-neutral-500">
               Completa el formulario académico para ver los másteres recomendados aquí.
             </div>
@@ -315,7 +315,7 @@ export default function EleccionMastersCliente({
           )}
 
           {/* Informe disponible */}
-          {hasFormData && !loadingCompat && compat && (
+          {!loadingCompat && compat && (
             <>
               <div className="flex items-start gap-2 bg-primary/5 rounded-xl px-3 py-2.5 mb-2 text-xs text-neutral-600">
                 <span className="shrink-0 mt-0.5">ℹ️</span>

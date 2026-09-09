@@ -11,7 +11,6 @@ import IconoPaso from "../../../../components/common/IconoPaso";
 import InformeBusqueda from "./sections/InformeBusqueda";
 import EleccionMastersCliente from "./sections/EleccionMastersCliente";
 import ProgramacionPostulacionesCliente from "./sections/ProgramacionPostulacionesCliente";
-import PortalesYJustificantesCliente from "./sections/PortalesYJustificantesCliente";
 import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
 import { EsqueletoExpediente } from "../Esqueleto";
@@ -204,10 +203,11 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
       };
       setFormData(merged);
 
-      if (formCompleto(merged)) {
-        setFormGuardado(true);
-        cargarCompatibilidad();
-      }
+      if (formCompleto(merged)) setFormGuardado(true);
+      // El informe se pide siempre: si el asesor lo publicó con un formulario
+      // a medias (o lo rellenó él desde Core), el asesorado tiene que verlo.
+      const tipoN = String(rDetalle.ok ? rDetalle.solicitud?.tipo?.nombre || "" : "").toLowerCase().trim();
+      if (tipoN !== "visado") cargarCompatibilidad();
 
       if (rInst.ok) {
         const base = (API_URL || "").replace(/\/+$/, "");
@@ -506,7 +506,6 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
                       reloadKey={postulacionesKey}
                       sinMarco
                     />
-                    <PortalesYJustificantesCliente idSolicitud={idSolicitud} sinMarco />
                     <DocumentosProceso idSolicitud={idSolicitud} modo="cliente" />
                   </div>
                 </SeccionPanel>

@@ -67,7 +67,7 @@ function ScoreRing({ score }) {
 
 // ── Master row ─────────────────────────────────────────────────────────────────
 
-export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEliminar, onScoreChange, esFirst, esLast }) {
+export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbajo, onEliminar, onScoreChange, onPosicion, esFirst, esLast }) {
   const { master, score } = resultado;
   const dur = durLabel(master.duracion_anios);
   const precioFinal = master.precio_final != null
@@ -94,7 +94,7 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
 
       {/* Reorder arrows */}
       {editMode && (
-        <div className="flex flex-col gap-0.5 shrink-0 transition-opacity opacity-40 group-hover:opacity-100">
+        <div className="flex flex-col gap-0.5 shrink-0">
           <button onClick={onArriba} disabled={esFirst}
             className="w-6 h-6 rounded-md flex items-center justify-center text-neutral-400 hover:text-[#1D6A4A] hover:bg-[#E8F5EE] disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-all duration-150">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -110,10 +110,30 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
         </div>
       )}
 
-      {/* Número posición */}
-      <div className={`shrink-0 w-6 h-6 mt-0.5 rounded-full text-[11px] font-bold flex items-center justify-center ${numBg}`}>
-        {posicion}
-      </div>
+      {/* Número de posición. En edición se escribe encima: el asesor ordena
+          sus seis preferencias del Distrito Único poniendo 1, 2, 3… en vez de
+          subir un máster doce veces con la flecha. */}
+      {editMode && onPosicion ? (
+        <input
+          type="number"
+          min="1"
+          defaultValue={posicion}
+          key={posicion}
+          title="Escribe en qué puesto lo quieres y pulsa Enter"
+          onFocus={(e) => e.target.select()}
+          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+          onBlur={(e) => {
+            const v = Number(e.target.value);
+            if (!v || v === posicion) { e.target.value = posicion; return; }
+            onPosicion(v);
+          }}
+          className={`shrink-0 w-7 h-7 mt-0.5 rounded-full text-[11px] font-bold text-center outline-none border-0 focus:ring-2 focus:ring-[#1D6A4A]/40 ${numBg}`}
+        />
+      ) : (
+        <div className={`shrink-0 w-6 h-6 mt-0.5 rounded-full text-[11px] font-bold flex items-center justify-center ${numBg}`}>
+          {posicion}
+        </div>
+      )}
 
       {/* Datos máster */}
       <div className="flex-1 min-w-0">
@@ -254,15 +274,153 @@ export function MasterRowAdmin({ posicion, resultado, editMode, onArriba, onAbaj
         <ScoreRing score={score} />
       )}
 
-      {/* Eliminar */}
+      {/* Quitar de la lista.
+          Estaba en `opacity-0 group-hover:opacity-100`: en el ratón aparecía al
+          pasar por encima y en una tableta no aparecía nunca, así que el asesor
+          entraba a editar y no encontraba cómo quitar nada. Ahora se ve
+          siempre, con su rótulo, que es la acción que más usa. */}
       {editMode && (
-        <button onClick={onEliminar}
-          className="shrink-0 w-7 h-7 rounded-lg bg-red-50 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 ml-0.5">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        <button onClick={onEliminar} title="Quitar de la lista" aria-label="Quitar de la lista"
+          className="ux-tap shrink-0 flex items-center gap-1 h-8 px-2 rounded-lg bg-red-50 text-red-500 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-200 ml-0.5">
+          <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
+          <span className="hidden sm:inline text-[10.5px] font-bold">quitar</span>
         </button>
       )}
+    </div>
+  );
+}
+
+// ── Los que no entraron al informe ────────────────────────────────────────────
+//
+// Tres montones, porque con cada uno el asesor hace algo distinto: los de su
+// plan se suben y ya está; los de beca dependen de conseguirla; los de fuera
+// del plan hay que venderle antes esa comunidad.
+//
+// Iban en dos `details` que sólo mostraban veinte y sin buscador: el asesor
+// decía «estoy ignorando» lo que hay debajo, y tenía razón, porque no había
+// forma de mirarlo. Ahora se filtran, se ven enteros y se añaden y se quitan
+// desde aquí.
+
+function FilaRelacionada({ r, yaEsta, editMode, onAñadir, onQuitar }) {
+  const m = r.master || {};
+  const becas = [...new Set((m.becas || []).map((b) => b.entidad))];
+  return (
+    <li className="flex items-center gap-2 min-w-0 py-1.5 border-b border-neutral-100 last:border-0">
+      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(r.score)}`}>
+        {r.score != null ? `${r.score}%` : "—"}
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11.5px] text-neutral-700 leading-snug truncate">{m.nombre_limpio}</p>
+        <p className="text-[10.5px] text-neutral-400 leading-snug truncate">
+          {m.universidad?.sigla || m.universidad?.nombre_completo}
+          {m.universidad?.comunidad ? ` · ${m.universidad.comunidad?.nombre ?? m.universidad.comunidad}` : ""}
+          {m.precio_total_estimado != null ? ` · ${Math.round(Number(m.precio_total_estimado)).toLocaleString("es-ES")} €` : ""}
+          {m.coincide_con ? ` · ≈ «${m.coincide_con}»` : ""}
+          {becas.length ? ` · 🎓 ${becas.join(" · ")}` : ""}
+        </p>
+      </div>
+      {m.url_ficha && (
+        <a href={m.url_ficha} target="_blank" rel="noopener noreferrer"
+          className="shrink-0 text-[10px] text-neutral-400 hover:text-[#1D6A4A] px-1" title="Ver la ficha">↗</a>
+      )}
+      {!editMode ? null : yaEsta ? (
+        <button type="button" onClick={onQuitar}
+          className="ux-tap shrink-0 text-[10px] font-bold px-2 py-1 rounded-md bg-red-50 text-red-500 border border-red-200 hover:bg-red-500 hover:text-white transition">
+          quitar
+        </button>
+      ) : (
+        <button type="button" onClick={onAñadir}
+          className="ux-tap shrink-0 text-[10px] font-bold px-2 py-1 rounded-md bg-[#E8F5EE] text-[#1D6A4A] border border-[#1D6A4A]/25 hover:bg-[#1D6A4A] hover:text-white transition">
+          + añadir
+        </button>
+      )}
+    </li>
+  );
+}
+
+const sinAcentos = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+function PanelRelacionados({ grupos, editMode, idsEnLista, onAñadir, onQuitar, onEntrarEdicion }) {
+  const [q, setQ] = useState("");
+  const [abierto, setAbierto] = useState(grupos.find((g) => g.items.length)?.clave || null);
+
+  const filtrar = (items) => {
+    const t = sinAcentos(q).trim();
+    if (!t) return items;
+    return items.filter((r) => sinAcentos([
+      r.master?.nombre_limpio,
+      r.master?.universidad?.sigla,
+      r.master?.universidad?.nombre_completo,
+      r.master?.universidad?.comunidad?.nombre ?? r.master?.universidad?.comunidad,
+      r.master?.coincide_con,
+    ].join(" ")).includes(t));
+  };
+
+  const total = grupos.reduce((n, g) => n + g.items.length, 0);
+  if (!total) return null;
+  const grupo = grupos.find((g) => g.clave === abierto) || grupos[0];
+  const visibles = filtrar(grupo.items);
+
+  return (
+    <div className="px-5 pb-4">
+      <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
+        <div className="px-3.5 py-2.5 bg-neutral-50/70 border-b border-neutral-100">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <p className="text-[11.5px] font-bold text-[#1A3557]">
+              Otros {total} máster{total === 1 ? "" : "es"} que el motor encontró
+              <span className="font-normal text-neutral-400"> · no entraron en el informe</span>
+            </p>
+            {!editMode && (
+              <button type="button" onClick={onEntrarEdicion}
+                className="text-[10.5px] font-bold px-2.5 py-1 rounded-lg bg-[#1D6A4A] text-white hover:bg-[#175a3d] transition">
+                Editar para añadirlos
+              </button>
+            )}
+          </div>
+          <div className="flex gap-1.5 mt-2 flex-wrap">
+            {grupos.map((g) => (
+              <button key={g.clave} type="button" onClick={() => setAbierto(g.clave)}
+                disabled={!g.items.length}
+                className={`text-[10.5px] font-semibold px-2.5 py-1 rounded-lg border transition disabled:opacity-35 ${
+                  g.clave === grupo.clave
+                    ? "bg-[#1A3557] text-white border-[#1A3557]"
+                    : "bg-white text-neutral-500 border-neutral-200 hover:border-neutral-300"
+                }`}>
+                {g.titulo} <b>{g.items.length}</b>
+              </button>
+            ))}
+          </div>
+          <p className="text-[10.5px] text-neutral-400 mt-1.5">{grupo.sub}</p>
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Filtrar por nombre, universidad o comunidad…"
+            className="w-full mt-2 text-[11.5px] px-2.5 py-1.5 border border-neutral-200 rounded-lg outline-none focus:border-[#1D6A4A] focus:ring-2 focus:ring-[#1D6A4A]/10 bg-white"
+          />
+        </div>
+        <ul className="px-3.5 max-h-[420px] overflow-y-auto">
+          {visibles.length === 0 ? (
+            <li className="py-4 text-center text-[11px] text-neutral-400">Ninguno coincide con «{q}».</li>
+          ) : visibles.map((r) => (
+            <FilaRelacionada
+              key={r.master.id_master}
+              r={r}
+              yaEsta={idsEnLista.has(r.master.id_master)}
+              editMode={editMode}
+              onAñadir={() => onAñadir(r)}
+              onQuitar={() => onQuitar(r.master.id_master)}
+            />
+          ))}
+        </ul>
+        {visibles.length > 0 && q && (
+          <p className="px-3.5 py-2 text-[10.5px] text-neutral-400 border-t border-neutral-100">
+            {visibles.length} de {grupo.items.length}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -426,7 +584,10 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   // encadenar una búsqueda la necesita ya, porque `listaEdit` todavía no se
   // ha actualizado en este tick.
   function entrarEdicion() {
-    const base = (detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 12) ?? []).map((r) => ({ ...r }));
+    // Todo lo que el motor aprobó, no doce. Su paquete decide cuántos caben
+    // —el Full Económico dio dieciséis— y recortar aquí a un número fijo hacía
+    // desaparecer los cuatro últimos sin decírselo a nadie.
+    const base = (detalle.informe_compat_curado ?? compat?.resultados ?? []).map((r) => ({ ...r }));
     setListaEdit(base);
     setEditMode(true);
     setSearchQ("");
@@ -448,13 +609,35 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     setListaEdit(l);
   }
 
+  // Llevar un máster al puesto que diga el asesor. Con dieciséis en la lista,
+  // subir el último a primero eran quince clics en la flecha.
+  function moverAPosicion(idx, destino) {
+    setListaEdit((prev) => {
+      const d = Math.max(0, Math.min(prev.length - 1, Number(destino) - 1));
+      if (Number.isNaN(d) || d === idx) return prev;
+      const l = [...prev];
+      const [m] = l.splice(idx, 1);
+      l.splice(d, 0, m);
+      return l;
+    });
+  }
+
   function eliminarItem(idx) {
     setListaEdit((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  function añadirItem(r) {
+  // Quitar por id: los montones de adicionales no saben en qué puesto está.
+  function quitarPorId(id) {
+    setListaEdit((prev) => prev.filter((e) => e.master.id_master !== id));
+  }
+
+  // `foco` es para el buscador: al añadir desde ahí conviene volver al campo
+  // para seguir escribiendo, pero al añadir desde el panel de relacionados el
+  // salto de foco arrastra la pantalla y hace perder el sitio de la lista.
+  function añadirItem(r, { foco = true } = {}) {
     if (listaEdit.some((e) => e.master.id_master === r.master.id_master)) return;
     setListaEdit((prev) => [...prev, r]);
+    if (!foco) return;
     setSearchQ("");
     setSearchResults((prev) => modoParecidos ? prev.filter((x) => x.master.id_master !== r.master.id_master) : []);
     searchRef.current?.focus();
@@ -533,7 +716,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
     try {
       const listaParaPublicar = listaEdit.length
         ? listaEdit
-        : (detalle.informe_compat_curado ?? compat?.resultados?.slice(0, 12) ?? []);
+        : (detalle.informe_compat_curado ?? compat?.resultados ?? []);
       if (listaParaPublicar.length) {
         await boPATCH(`/backoffice/solicitudes/${detalle.id_solicitud}/informe-compat`, { lista: listaParaPublicar });
       }
@@ -640,6 +823,17 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
   // posibles con beca. El asesor sube a la lista los que quiera.
   const enEspera    = compat?.extras || [];
   const conBeca     = compat?.solo_con_beca || [];
+  const fueraPlan   = compat?.fuera_del_plan || [];
+  const relacionados = [
+    { clave: "plan",  titulo: "En su plan",      items: enEspera,
+      sub: "Están en las comunidades que contrató. Se quedaron fuera por cupo o porque el motor los vio menos claros: súbelos si te parecen mejores." },
+    { clave: "beca",  titulo: "Sólo con beca",   items: conBeca,
+      sub: "Fuera de su plan, pero los oferta una beca que paga la matrícula. Habla con él antes de incluirlos." },
+    { clave: "fuera", titulo: "Fuera de su plan", items: fueraPlan,
+      sub: "Encajan con lo que busca pero están en comunidades que no contrató: sólo si le vendes esa comunidad aparte." },
+  ];
+  // Lo que ya está en la lista, para no ofrecer un añadir que no hace nada.
+  const idsEnLista = new Set((editMode ? listaEdit : listaVista).map((r) => r.master.id_master));
 
   // Lo que el asesorado escribió a mano va primero: es lo que de verdad busca.
   const lista = (v) => (Array.isArray(v) && v.filter(Boolean).length ? v.filter(Boolean).join(" · ") : null);
@@ -692,7 +886,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
         {!loadingCompat && compat && (
           <div className="ex-cuenta">
             <div><b>{compat.total ?? "—"}</b><span>compatibles</span></div>
-            <div><b>{Math.min(listaVista.length, 12)}</b><span>finalistas</span></div>
+            <div><b>{Math.min(listaVista.length, FINALISTAS)}</b><span>finalistas</span></div>
             <div><b>{extras}</b><span>extras</span></div>
             <div><b>{isCurado ? "curada" : "auto"}</b><span>lista</span></div>
             <div><b>{detalle.informe_publicado ? "sí" : "no"}</b><span>publicado</span></div>
@@ -1014,63 +1208,15 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
           </div>
         )}
 
-        {/* Lo que no cabe en el reparto, en dos montones: el asesor decide cosas
-            distintas con cada uno. Los de espera están dentro de su plan y sólo
-            se quedaron fuera por cupo; los de beca están fuera de su plan y
-            sólo son posibles si la consigue. */}
-        {!loadingCompat && (enEspera.length > 0 || conBeca.length > 0) && (
-          <div className="px-5 pb-4 space-y-3">
-            {enEspera.length > 0 && (
-              <details className="rounded-xl border border-neutral-200 bg-neutral-50/60">
-                <summary className="cursor-pointer px-3.5 py-2.5 text-[11.5px] font-bold text-[#1A3557]">
-                  {enEspera.length} más dentro de su plan, fuera de cupo
-                  <span className="font-normal text-neutral-400"> · súbelos si te parecen mejores</span>
-                </summary>
-                <ul className="px-3.5 pb-3 space-y-1.5">
-                  {enEspera.slice(0, 20).map((r) => (
-                    <li key={r.master.id_master} className="flex items-center gap-2 min-w-0">
-                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(r.score)}`}>{r.score}%</span>
-                      <span className="truncate text-[11.5px] text-neutral-700">
-                        {r.master.nombre_limpio} · {r.master.universidad?.sigla} · {r.master.universidad?.comunidad}
-                      </span>
-                      {editMode && (
-                        <button type="button" onClick={() => añadirItem(r)}
-                          className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#E8F5EE] text-[#1D6A4A] hover:bg-[#d5efe1]">
-                          añadir
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-            {conBeca.length > 0 && (
-              <details className="rounded-xl border border-[#F5C842]/60 bg-[#FFFBEA]">
-                <summary className="cursor-pointer px-3.5 py-2.5 text-[11.5px] font-bold text-[#7a5b00]">
-                  🎓 {conBeca.length} fuera de su plan, posibles sólo con beca
-                  <span className="font-normal text-[#7a5b00]/70"> · habla con él antes de incluirlos</span>
-                </summary>
-                <ul className="px-3.5 pb-3 space-y-1.5">
-                  {conBeca.map((r) => (
-                    <li key={r.master.id_master} className="flex items-center gap-2 min-w-0">
-                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${scoreChip(r.score)}`}>{r.score}%</span>
-                      <span className="truncate text-[11.5px] text-neutral-700">
-                        {r.master.nombre_limpio} · {r.master.universidad?.sigla} · {r.master.universidad?.comunidad}
-                        {" · "}
-                        <b className="text-[#7a5b00]">{[...new Set((r.master.becas || []).map((b) => b.entidad))].join(", ")}</b>
-                      </span>
-                      {editMode && (
-                        <button type="button" onClick={() => añadirItem(r)}
-                          className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F5C842]/30 text-[#7a5b00] hover:bg-[#F5C842]/50">
-                          añadir
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-          </div>
+        {!loadingCompat && (
+          <PanelRelacionados
+            grupos={relacionados}
+            editMode={editMode}
+            idsEnLista={idsEnLista}
+            onAñadir={(r) => añadirItem(r, { foco: false })}
+            onQuitar={quitarPorId}
+            onEntrarEdicion={entrarEdicion}
+          />
         )}
 
         {/* Modo edición */}
@@ -1220,6 +1366,7 @@ export default function InformeAdmin({ detalle, recargar, onRegenerado }) {
                           onArriba={() => moverArriba(i)}
                           onAbajo={() => moverAbajo(i)}
                           onEliminar={() => eliminarItem(i)}
+                          onPosicion={(v) => moverAPosicion(i, v)}
                           onScoreChange={(v) => cambiarScore(i, v)}
                         />
                       </div>

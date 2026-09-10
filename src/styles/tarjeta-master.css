@@ -69,3 +69,11 @@
 .ex-m-ficha { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 11.5px; font-weight: 700; color: #0a5a78; text-decoration: none; }
 .ex-m-ficha:hover { text-decoration: underline; text-underline-offset: 2px; }
 .ex-m-ficha svg { width: 13px; height: 13px; }
+
+/* De qué va el máster según su ficha, no según su título. Va en gris y en
+   pequeño: es la comprobación de que el motor entendió el máster, no un
+   argumento de venta. */
+.ex-m-devaque{
+  margin:.5rem 0 0; font-size:11px; line-height:1.5; color:#7b8a93;
+}
+.ex-m-devaque span{ font-weight:700; color:#5d6d76; }

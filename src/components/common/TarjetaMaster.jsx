@@ -106,6 +106,13 @@ export default function TarjetaMaster({
         </div>
       )}
 
+      {/* De qué va, según su propia ficha. El motor ya no compara sólo el
+          nombre del título: esto es lo que ha leído de la web de la
+          universidad, y va a la vista para que se pueda comprobar. */}
+      {m.de_que_va && (
+        <p className="ex-m-devaque"><span>De qué va:</span> {texto(m.de_que_va).replace(/ · /g, ", ")}</p>
+      )}
+
       {nota && (
         <div className="ex-m-nota"><b>Nota de tu asesor:</b> {texto(nota)}</div>
       )}

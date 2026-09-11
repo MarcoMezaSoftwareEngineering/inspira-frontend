@@ -13,7 +13,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SALIDA = path.join(RAIZ, "public", "sitemap.xml");
-const BASE = "https://inspira-legal.cloud";
+const BASE = "https://www.inspira-legal.cloud";
 
 const importa = (rel) => import(pathToFileURL(path.join(RAIZ, "src", rel)).href);
 
@@ -27,7 +27,6 @@ const hoy = new Date().toISOString().slice(0, 10);
 // más a menudo que un aviso legal.
 const paginas = [
   { loc: "/", freq: "weekly", prio: "1.0" },
-  { loc: "/metodo-inspira", freq: "monthly", prio: "0.9" },
   { loc: "/visa-o-estancia", freq: "monthly", prio: "0.9" },
   { loc: "/servicios", freq: "weekly", prio: "0.9" },
   { loc: "/servicios/master", freq: "weekly", prio: "0.9" },

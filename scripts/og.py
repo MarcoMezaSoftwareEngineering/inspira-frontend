@@ -103,7 +103,7 @@ def crear(nombre, etiqueta, titulo, sub):
 
 PAGINAS = [
     ("default", "Abogados especialistas en extranjería",
-     "Una asesoría de distancia para vivir en España",
+     "Asesoría a distancia para vivir en España",
      "Visa de estudios, máster, residencias y nacionalidad"),
     ("servicios", "Todos nuestros servicios",
      "Tu camino a España, trámite por trámite",

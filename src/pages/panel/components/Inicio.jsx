@@ -7,7 +7,7 @@
 // lista, ordenada por urgencia, y cada línea lleva a donde se resuelve.
 import { useState } from "react";
 import Icono from "../../../components/common/Icono";
-import { LINEAS, whatsappLinea } from "../../../config/contacto";
+import { lineaDe, whatsappLinea } from "../../../config/contacto";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
 import { pendientesDe, plural } from "../pendientes";
@@ -16,7 +16,7 @@ import ServiciosList from "./mis-servicios/ServiciosList";
 function TuAsesor({ servicios }) {
   const propio = (servicios || []).find((s) => !s.invitado && s.asesor);
   const a = propio?.asesor || null;
-  const linea = LINEAS.find((l) => l.id === "clientes") || LINEAS[0];
+  const linea = lineaDe("inspira");
   return (
     <div className="pnl-asesor" data-tour="asesor">
       <div className="pnl-asesor-avatar"><Icono nombre="usuarios" size={20} /></div>
@@ -34,7 +34,7 @@ function TuAsesor({ servicios }) {
           <Icono nombre="chat" size={15} />
           Escribir por WhatsApp
         </a>
-        <small>Línea de clientes · {linea.numero}</small>
+        <small>{linea.para} · {linea.numero}</small>
       </div>
     </div>
   );

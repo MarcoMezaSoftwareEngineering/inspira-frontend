@@ -3,6 +3,11 @@ import { useEffect, useMemo, useState, Suspense } from "react";
 import { lazyConRecarga } from "../../lib/cargaDiferida";
 import "../../styles/panel.css";
 import "../../styles/pasos-core.css";
+// pasos.css define las clases ex-* de las tarjetas de documentos y las
+// secciones (ChecklistDocumentos, SeccionPanel), que usan también el visado y
+// la estancia. Antes solo lo importaban RutaPasos y TarjetaMaster, del máster:
+// quien solo tenía visado y entraba directo veía los documentos sin estilos.
+import "../../styles/pasos.css";
 import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";

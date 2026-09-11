@@ -1,6 +1,8 @@
 // src/pages/panel/components/mis-servicios/ServiciosList.jsx
 import Icono from "../../../../components/common/Icono";
-import { LINEAS, whatsappLinea } from "../../../../config/contacto";
+import { lineaDe, whatsappLinea } from "../../../../config/contacto";
+
+const LINEA = lineaDe("inspira");
 import { formatearFecha, badgeEstadoSolicitud, refCorta } from "./utils";
 import { EsqueletoTarjetas } from "../Esqueleto";
 
@@ -113,25 +115,21 @@ function SinAcceso() {
         El acceso se activa cuando tienes un servicio contratado con nosotros.
         Completa tus datos en «Mi perfil» y escríbenos para que te lo demos.
       </p>
-      {/* Las dos líneas, con el número escrito y para qué es cada una: se lee
-          también desde un ordenador sin WhatsApp, y evita que quien pregunta
-          por una cita escriba a la línea de clientes. */}
+      {/* La única línea de Inspira, con el número escrito: se lee también
+          desde un ordenador sin WhatsApp. */}
       <div className="pnl-lineas">
-        {LINEAS.map((l) => (
-          <a
-            key={l.id}
-            href={whatsappLinea(l, "Hola Inspira, acabo de crear mi cuenta y quiero acceso a mi panel.")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pnl-linea"
-          >
-            <Icono nombre="chat" size={16} />
-            <span className="pnl-linea-datos">
-              <strong>{l.numero}</strong>
-              <small>{l.nombre} · {l.para}</small>
-            </span>
-          </a>
-        ))}
+        <a
+          href={whatsappLinea(LINEA, "Hola Inspira, acabo de crear mi cuenta y quiero acceso a mi panel.")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pnl-linea"
+        >
+          <Icono nombre="chat" size={16} />
+          <span className="pnl-linea-datos">
+            <strong>{LINEA.numero}</strong>
+            <small>{LINEA.para}</small>
+          </span>
+        </a>
       </div>
       <div className="pnl-vacio-acciones">
         <a href="/servicios" className="pnl-vacio-fantasma">

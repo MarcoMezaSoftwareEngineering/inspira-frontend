@@ -12,7 +12,7 @@ import logo from "../../../assets/images/logo.png";
 import Icono from "../../../components/common/Icono";
 import { loginGoogle } from "../../../components/layout/Header/LoginButton";
 import { navigate } from "../../../services/navigate";
-import { LINEAS, whatsappLinea } from "../../../config/contacto";
+import { lineaDe, whatsappLinea } from "../../../config/contacto";
 
 const QUE_HAY = [
   { icono: "documento", titulo: "Tus documentos", texto: "Súbelos desde el móvil y ve cuáles ya están revisados." },
@@ -21,7 +21,7 @@ const QUE_HAY = [
 ];
 
 export default function Bienvenida() {
-  const citas = LINEAS.find((l) => l.id === "citas") || LINEAS[0];
+  const citas = lineaDe("inspira");
   return (
     <div className="pnl min-h-dvh flex items-center justify-center p-4 sm:p-6">
       <div className="pnl-vacio w-full max-w-md pnl-entra">

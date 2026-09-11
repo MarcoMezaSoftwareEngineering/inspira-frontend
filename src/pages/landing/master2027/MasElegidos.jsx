@@ -82,7 +82,6 @@ export default function MasElegidos({ onAbrirLista }) {
           })}
         </div>
 
-        <p className="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-neutral-700">{MAS_ELEGIDOS.nota}</p>
 
         <CierreCta contexto={MAS_ELEGIDOS.contexto} ubicacion="mas_elegidos" />
       </div>

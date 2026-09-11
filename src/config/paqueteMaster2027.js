@@ -184,7 +184,7 @@ const LISTAS_BASE = [
     nombreLargo: "Comunidades económicas",
     comunidades: ["andalucia", "cantabria", "asturias", "castilla-la-mancha", "galicia", "castilla-y-leon", "navarra"],
     comunidadesTexto: "Andalucía, Cantabria, Asturias, Castilla-La Mancha, Galicia, Castilla y León y Navarra",
-    frase: "Las matrículas públicas más asequibles de España. Navarra entra este año en la lista.",
+    frase: "Las matrículas públicas más asequibles de España.",
     queCompraDesde: "Andalucía, hasta 6 másteres",
     planes: [
       plan("l1-a", {
@@ -226,7 +226,7 @@ const LISTAS_BASE = [
     nombreLargo: "Comunidades intermedias",
     comunidades: ["la-rioja", "pais-vasco", "murcia", "extremadura", "aragon"],
     comunidadesTexto: "La Rioja, País Vasco, Murcia, Extremadura y Aragón",
-    frase: "Universidades con buena demanda internacional y matrículas intermedias. La Comunidad Valenciana pasa este año a la Lista 3.",
+    frase: "Universidades con buena demanda internacional y matrículas intermedias.",
     queCompraDesde: "una comunidad entera",
     planes: [
       plan("l2-a", {
@@ -322,7 +322,7 @@ export const AVANZADOS = {
       puntos: [
         "Las siete económicas y las cinco intermedias: 12 comunidades",
         "27 universidades públicas, sin límite de másteres",
-        "No incluye la Comunidad Valenciana, que está en la Lista 3",
+        "No incluye la Comunidad Valenciana (Lista 3)",
       ],
       frase: "Las matrículas públicas más asequibles, con el doble de universidades de respaldo.",
       ideal: [
@@ -761,7 +761,6 @@ export const MAS_ELEGIDOS = {
     { orden: "5.º", plan: "premium-700", titulo: "Paquete Premium", texto: "Hasta 6 comunidades a elegir, sin límite de listas, públicas y privadas." },
     { orden: "6.º", plan: "l2-full", titulo: "Plan Full Intermedias", texto: "Las cinco comunidades intermedias, todas sus universidades públicas, sin límite de másteres." },
   ],
-  nota: `Este año cambian dos cosas: Navarra entra en las Económicas y la Comunidad Valenciana, que en 2026/2027 se contrataba dentro de las Intermedias, está en la Lista 3, con los precios de este año: comunidad completa ${eur(P["l3-comfort"])} o una universidad ${eur(P["l3-a"])}.`,
   contexto: "¿No sabes cuál te conviene? Lo vemos en la sesión.",
   imagenAlt: "Ilustración de birretes lanzados al aire",
 };
@@ -1060,7 +1059,7 @@ export const FAQ = {
       id: "combinar",
       q: "¿Puedo combinar listas o postular solo a una ciudad?",
       a: [
-        `Sí. Económicas + Intermedias es un paquete estándar: ${eur(P["econ-intermedias-650"])} por 12 comunidades y 27 universidades públicas, sin la Comunidad Valenciana, que está en la Lista 3. También están el Paquete Premium (${eur(P["premium-700"])}) y el Paquete Infinity (${eur(P["infinity-1100"])}). Para una sola comunidad o ciudad (por ejemplo, solo Galicia), otras combinaciones o necesidades especiales, te hacemos un `,
+        `Sí. Económicas + Intermedias es un paquete estándar: ${eur(P["econ-intermedias-650"])} por 12 comunidades y 27 universidades públicas; no incluye la Comunidad Valenciana (Lista 3). También están el Paquete Premium (${eur(P["premium-700"])}) y el Paquete Infinity (${eur(P["infinity-1100"])}). Para una sola comunidad o ciudad (por ejemplo, solo Galicia), otras combinaciones o necesidades especiales, te hacemos un `,
         { enlace: "presupuesto personalizado", destino: "personalizado" },
         " en la sesión diagnóstico.",
       ],

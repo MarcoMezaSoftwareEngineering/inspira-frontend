@@ -694,6 +694,21 @@
   .v4-home .vias-card { max-width: 760px; }
 }
 
+/* Entre 961 y 1279 px la barra no cabe entera: se compacta (sin etiquetas
+   «gratis» ni icono en el CTA, menos aire) para que el botón de entrar no
+   tape «Agenda tu asesoría». */
+/* Por debajo de 1024 px la barra completa no cabe ni compactada: menú. */
+@media (max-width: 1023px) {
+  .v4-navlinks { display: none; }
+  .v4-menu-btn { display: grid; }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .v4-navlinks a, .v4-navlinks button.v4-mega-trigger { padding: 10px 7px; font-size: 13px; }
+  .v4-navlinks .v4-tag-gratis { display: none; }
+  .v4-nav-cta { margin-left: 2px; padding: 0 12px !important; }
+  .v4-nav-cta svg { display: none; }
+}
+
 @media (max-width: 960px) {
   .v4-navlinks { display: none; }
   .v4-menu-btn { display: grid; }

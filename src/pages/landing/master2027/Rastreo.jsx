@@ -1,5 +1,5 @@
 // src/pages/landing/master2027/Rastreo.jsx
-// A8: el sistema propio, con las funciones que existen y en su redacción
+// A8: el Portal Inspira, con las funciones que existen y en su redacción
 // verificada. El mock es HTML con textos genéricos (sin fechas ni nombres).
 import Icono from "../../../components/common/Icono";
 import { RASTREO } from "../../../config/paqueteMaster2027";

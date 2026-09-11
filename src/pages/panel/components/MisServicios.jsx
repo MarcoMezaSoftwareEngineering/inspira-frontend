@@ -23,7 +23,7 @@ const DetalleSolicitudModificatoria = lazyConRecarga(() => import("./mis-servici
  * (`/panel/servicios/155/post`). Recargar conserva el sitio, «atrás» vuelve a
  * la lista, y un correo puede enlazar a una sección concreta.
  */
-export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia }) {
+export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia, avisoAppBloqueado = false, faltanPerfil = 0 }) {
   const { idServicio, seccion, tab } = ruta;
   const seleccionada = idServicio
     ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
@@ -49,7 +49,7 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
   if (seleccionada) {
     const tipo = servicioDe(seleccionada);
     // El perfil ya lo tiene el panel: el expediente lo recibe en vez de volver a pedirlo.
-    const comunes = { solicitudBase: seleccionada, onVolver: volver, onIrAGuia, perfil };
+    const comunes = { solicitudBase: seleccionada, onVolver: volver, onIrAGuia, perfil, faltanPerfil };
     return (
       <div className="flex-1 min-h-0 flex flex-col">
         <Suspense fallback={<EsqueletoExpediente />}>
@@ -92,6 +92,7 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
       error={error}
       onRecargar={onRecargar}
       onVerDetalle={abrir}
+      avisoAppBloqueado={avisoAppBloqueado}
     />
   );
 }

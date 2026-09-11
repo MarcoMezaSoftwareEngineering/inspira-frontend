@@ -12,6 +12,8 @@
 // cambia AQUÍ: la landing /metodo-inspira y el simulador leen de este archivo.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { NOMBRE_PORTAL, NOMBRE_CORTO } from "./portalMarca";
+
 // ── Las cuatro etapas del método ────────────────────────────────────────────
 // El titular de marca: "Tu proceso, por etapas."
 export const ETAPAS_METODO = [
@@ -458,9 +460,9 @@ export const RAZONES_METODO = [
   },
   {
     icono: "laptop",
-    titulo: "Sistema propio, no un chat",
+    titulo: `${NOMBRE_CORTO} y app propios, no un chat`,
     texto:
-      "Tu expediente vive en nuestra plataforma: panel privado, checklist validado por tu asesor y avisos en cada hito.",
+      `Tu expediente vive en el ${NOMBRE_PORTAL}: checklist de documentos revisado por tu asesor, tus plazos a la vista y mensajes con constancia de lectura.`,
   },
   {
     icono: "destello",

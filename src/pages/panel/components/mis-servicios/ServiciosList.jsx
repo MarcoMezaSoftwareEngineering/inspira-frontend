@@ -110,7 +110,7 @@ function SinAcceso() {
       <div className="pnl-vacio-icono">
         <Icono nombre="escudo" size={28} />
       </div>
-      <h3>Tu panel todavía no tiene acceso</h3>
+      <h3>Tu expediente todavía no está activo</h3>
       <p>
         El acceso se activa cuando tienes un servicio contratado con nosotros.
         Completa tus datos en «Mi perfil» y escríbenos para que te lo demos.

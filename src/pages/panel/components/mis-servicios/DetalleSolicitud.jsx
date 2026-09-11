@@ -17,6 +17,10 @@ import { EsqueletoExpediente } from "../Esqueleto";
 import CercoErrores from "../../../../components/common/CercoErrores";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../../components/common/RutaPasos";
+import QueMeFalta from "../QueMeFalta";
+import { queMeFaltaMaster } from "../../queMeFalta";
+import { navigate } from "../../../../services/navigate";
+import { rutaDe } from "../../ruta";
 
 // Nombre corto de cada paso para la fila de iconos del móvil.
 const CORTO = { docs: "Documentos", form: "Formulario", informe: "Informe", eleccion: "Elección", post: "Postular", cierre: "Cierre" };
@@ -134,7 +138,7 @@ function MensajesFlotante({ abierto, onAbrir, onCerrar, sinLeer, idSolicitud }) 
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, seccion, onSeccion, perfil }) {
+export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, seccion, onSeccion, perfil, faltanPerfil = 0 }) {
   const [detalle,           setDetalle]           = useState(null);
   const [checklist,         setChecklist]         = useState([]);
   const [formData,          setFormData]          = useState({});
@@ -382,6 +386,10 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
     ? `Curso ${detalle.datos_panel.curso_objetivo} · tu expediente, paso a paso`
     : "Tu expediente, paso a paso";
   const leToca = calcularLeToca({ checklist, formGuardado, compat, elecciones });
+  const falta = queMeFaltaMaster({
+    checklist, formGuardado, compat, elecciones, resumen: solicitudBase?.resumen, faltanPerfil,
+    ir: { seccion: (s) => setActiveSection(s), perfil: () => navigate(rutaDe({ tab: "perfil" })) },
+  });
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
@@ -431,6 +439,7 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
               texto={leToca.texto}
               onIr={leToca.seccion && leToca.seccion !== activeSection ? () => setActiveSection(leToca.seccion) : null}
             />
+            <QueMeFalta resumen={falta.resumen} filas={falta.filas} />
           </div>
 
           {/* ── Contenido de la sección activa. La clave por sección hace que

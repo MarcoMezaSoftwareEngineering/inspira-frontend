@@ -163,6 +163,10 @@ export default function Hero() {
                 <Icono nombre="laptop" size={15} />
                 Atención 100 % a distancia
               </li>
+              <li>
+                <Icono nombre="panel" size={15} />
+                Expediente digital y app propios
+              </li>
             </ul>
           </Reveal>
 

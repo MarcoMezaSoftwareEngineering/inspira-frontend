@@ -12,6 +12,9 @@ import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
 import { pendientesDe, plural } from "../pendientes";
 import ServiciosList from "./mis-servicios/ServiciosList";
+import AvisoInstalarApp from "./AvisoInstalarApp";
+import { ProximoPaso, ResumenExpediente } from "./ProximoPaso";
+import { MiRutaResumen } from "./MiRuta";
 
 function TuAsesor({ servicios }) {
   const propio = (servicios || []).find((s) => !s.invitado && s.asesor);
@@ -85,7 +88,7 @@ function Pendientes({ items }) {
   );
 }
 
-export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle }) {
+export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle, avisoAppBloqueado = false }) {
   const lista = servicios || [];
   const items = loading ? [] : pendientesDe(lista, perfil, conAcademico, conCompleto);
   const hayServicios = lista.length > 0;
@@ -93,6 +96,15 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
   return (
     <div className="space-y-6">
       {hayServicios && <TuAsesor servicios={lista} />}
+
+      {/* Lo primero de «Hoy», en grande, y cómo va cada servicio. */}
+      {hayServicios && !loading && <ProximoPaso items={items} servicios={lista} />}
+      {hayServicios && !loading && <ResumenExpediente servicios={lista} />}
+
+      {/* Solo en el teléfono, fuera de la app instalada, y nunca a la vez que
+          el recorrido guiado o el asistente de perfil. Va después del
+          próximo paso: no compite con él. */}
+      {hayServicios && <AvisoInstalarApp bloqueado={avisoAppBloqueado} />}
 
       {hayServicios && (
         <section data-tour="hoy">
@@ -116,6 +128,8 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
             : <Pendientes items={items} />}
         </section>
       )}
+
+      {hayServicios && !loading && <MiRutaResumen servicios={lista} />}
 
       <div data-tour="servicios">
         <ServiciosList

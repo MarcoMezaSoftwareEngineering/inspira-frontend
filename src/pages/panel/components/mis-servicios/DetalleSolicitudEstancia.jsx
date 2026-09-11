@@ -11,12 +11,16 @@
 // por WhatsApp.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiGET, apiPUT, apiPOST } from "../../../../services/api";
+import QueMeFalta from "../QueMeFalta";
+import { queMeFaltaEstancia } from "../../queMeFalta";
+import { navigate } from "../../../../services/navigate";
+import { rutaDe } from "../../ruta";
 import { Campo, Selector, Guardado } from "./campos";
 import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
 import AcompanantesCliente from "./AcompanantesCliente";
 import { abrirArchivo } from "../../../../services/archivos";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
-
+
 import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
@@ -244,7 +248,7 @@ function PedirRevision({ id, docs, exp, onHecho }) {
 
 /* ── Principal ───────────────────────────────────────────────────────────── */
 
-export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIrAGuia }) {
+export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIrAGuia, faltanPerfil = 0 }) {
   const id = solicitudBase?.id_solicitud;
   const [exp, setExp] = useState(null);
   const [docs, setDocs] = useState(null);
@@ -379,6 +383,13 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
         </div>
 
         <EstadoProceso revision={rev} />
+
+        <QueMeFalta
+          {...queMeFaltaEstancia({
+            revision: rev, docs, extranjeria: ext, faltanPerfil,
+            ir: { bloque: (n) => setBloque(n), perfil: () => navigate(rutaDe({ tab: "perfil" })) },
+          })}
+        />
 
 <ComoInvitado solicitud={solicitudBase} />
         <OtraPersona invitados={exp.invitados} />

@@ -9,6 +9,7 @@ import MegaMenu from "./MegaMenu";
 import Icono from "../../common/Icono";
 import UserMenu from "./UserMenu";
 import { loginGoogle } from "./LoginButton";
+import { BOTON_ENTRAR, BOTON_ENTRAR_CORTO } from "../../../config/portalMarca";
 
 // Flecha de los desplegables. Gira cuando el menú está abierto (ver .caret).
 const Caret = () => (
@@ -213,8 +214,9 @@ export default function Header() {
             ) : user ? (
               <UserMenu user={user} />
             ) : (
-              <button className="v4-login-btn" type="button" onClick={() => loginGoogle()} title="Iniciar sesión con Google">
-                Iniciar
+              <button className="v4-login-btn" type="button" onClick={() => loginGoogle()} title="Entrar a tu expediente con tu correo de Google">
+                <span className="lg:hidden">{BOTON_ENTRAR}</span>
+                <span className="hidden lg:inline">{BOTON_ENTRAR_CORTO}</span>
               </button>
             )}
             <button

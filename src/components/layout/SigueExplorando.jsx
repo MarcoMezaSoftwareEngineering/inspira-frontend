@@ -3,6 +3,7 @@
 // Se le pasan los destinos relevantes para esa página.
 import Icono from "../common/Icono";
 import { navigate } from "../../services/navigate";
+import { MENU_ETIQUETA } from "../../config/portalMarca";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -24,7 +25,7 @@ export const DESTINOS = {
   tienda: { icono: "libro", titulo: "Tiendita", texto: "Ebooks, guías y recursos descargables.", href: "/tienda" },
   blog: { icono: "documento", titulo: "Blog", texto: "Guías de extranjería y estudios en España.", href: "/blog" },
   servicios: { icono: "brujula", titulo: "Todos los servicios", texto: "El catálogo completo, trámite por trámite.", href: "/servicios" },
-  plataforma: { icono: "laptop", titulo: "Nuestro sistema", texto: "Panel privado, checklist y avisos automáticos.", href: "/plataforma" },
+  plataforma: { icono: "panel", titulo: MENU_ETIQUETA, texto: "Tu caso en un portal propio y en tu teléfono, como una app.", href: "/plataforma" },
   nosotros: { icono: "usuarios", titulo: "Conoce al equipo", texto: "Los abogados que llevan tu expediente.", href: "/nosotros" },
 };
 

@@ -11,6 +11,7 @@ import { recorta } from "../pendientes";
 // Cada recurso, con la etiqueta y el icono con los que aparece en el menú.
 // El orden es el de la lista; se enseñan los que estén en `accesos`.
 const RECURSOS = [
+  { clave: "portal", icono: "mapa", label: "Guía del portal" },
   { clave: "becas", icono: "birrete", label: "Becas España" },
   { clave: "guia", icono: "libro", label: "Guía Máster" },
   { clave: "apostilla", icono: "documento", label: "Guía Apostilla" },
@@ -20,7 +21,7 @@ const RECURSOS = [
 
 export default function PanelSidebar({
   user, activeTab, onChangeTab, isOpen, onClose, accesos,
-  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour,
+  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour, guiasPortal = [],
 }) {
   // Los expedientes, por nombre, como accesos directos. Cuatro como mucho:
   // el menú es para llegar rápido, no para listar.
@@ -72,11 +73,19 @@ export default function PanelSidebar({
         <p className="pnl-side-grupo">Mi cuenta</p>
         <SidebarItem
           icono="panel"
-          label="Inicio"
+          label="Mi expediente"
           badge={pendientes}
           active={activeTab === "inicio"}
           onClick={() => onChangeTab("inicio")}
         />
+        {servicios.length > 0 && (
+          <SidebarItem
+            icono="avion"
+            label="Mi ruta"
+            active={activeTab === "ruta"}
+            onClick={() => onChangeTab("ruta")}
+          />
+        )}
         <SidebarItem
           icono="maletin"
           label="Mis servicios"
@@ -124,6 +133,20 @@ export default function PanelSidebar({
           <button type="button" onClick={onTour} className="pnl-item">
             <Icono nombre="brujula" size={16} />
             ¿Cómo funciona?
+          </button>
+        )}
+        {/* Junto al recorrido, el manual en PDF. Con una sola guía se abre
+            directamente; con varias, la página que las reúne. */}
+        {guiasPortal.length === 1 && (
+          <a href={guiasPortal[0].href} target="_blank" rel="noopener noreferrer" className="pnl-item">
+            <Icono nombre="mapa" size={16} />
+            Guía del portal (PDF)
+          </a>
+        )}
+        {guiasPortal.length > 1 && (
+          <button type="button" onClick={() => onChangeTab("portal")} className="pnl-item">
+            <Icono nombre="mapa" size={16} />
+            Guías del portal
           </button>
         )}
         <button type="button" onClick={() => navigate("/")} className="pnl-item">

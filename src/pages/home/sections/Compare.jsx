@@ -36,7 +36,7 @@ const ETAPAS = [
       dolor: "Reprocesos y gastos dobles",
     },
     con: {
-      titulo: "Checklist con plazos y alertas",
+      titulo: "Checklist con tus plazos a la vista",
       texto:
         "Sabes desde el día uno qué documento necesitas, en qué orden y cuánto tarda cada uno. Revisamos cada archivo antes de presentar.",
       gana: "Cero sorpresas",

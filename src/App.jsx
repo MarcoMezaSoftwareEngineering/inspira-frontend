@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { lazyConRecarga } from "./lib/cargaDiferida";
 import { dialog } from "./services/dialogService";
+import { NOMBRE_PORTAL } from "./config/portalMarca";
 import { Header } from "./components/layout/Header";
 import Home from "./pages/home/Home";
 import Footer from "./components/layout/footer";
@@ -164,9 +165,9 @@ const SEO_PAGES = {
     path: "/ruta/tramites",
   },
   "/plataforma": {
-    title: "Nuestro sistema – Panel privado y expediente digital | Inspira Legal",
+    title: `${NOMBRE_PORTAL}: tu caso en un portal y en tu app | Inspira Legal`,
     description:
-      "Somos una firma con plataforma propia: accedes con credenciales a un panel donde vive tu expediente, subes documentos, tu asesor los valida y el sistema te avisa en cada hito.",
+      "Tu expediente en un portal propio que se instala como app: entras con tu correo de Google, ves quién te atiende y qué te toca hoy, tus documentos revisados, tus plazos y los mensajes con tu asesor por escrito.",
     path: "/plataforma",
   },
   "/asistente": {

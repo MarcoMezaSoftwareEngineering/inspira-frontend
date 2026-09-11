@@ -14,7 +14,7 @@
 // la única verdad; todo lo demás se deriva de ella.
 
 export const PESTANAS = [
-  "inicio", "servicios", "perfil", "becas", "guia", "apostilla", "estancia", "modificatoria",
+  "inicio", "servicios", "ruta", "perfil", "portal", "becas", "guia", "apostilla", "estancia", "modificatoria",
 ];
 
 /** @returns {{tab: string|null, idServicio: number|null, seccion: string|null}} */

@@ -9,6 +9,8 @@
 // la web: la primera asesoría — los paquetes se cotizan caso por caso.
 // ─────────────────────────────────────────────────────────────────────────────
 
+
+import { NOMBRE_PORTAL, NOMBRE_CORTO } from "./portalMarca";
 export const PRECIO_ASESORIA = {
   eur: "25 €",
   usd: "28 US$",
@@ -38,9 +40,9 @@ export const DIFERENCIALES = [
     icono: "destello",
   },
   {
-    titulo: "Sistema propio, no un chat",
+    titulo: `${NOMBRE_CORTO} y app propios, no un chat`,
     texto:
-      "Tu expediente vive en nuestra plataforma: panel privado, documentos revisados por tu asesor con sus observaciones, tus plazos a la vista y mensajes con constancia de lectura.",
+      `Tu expediente vive en el ${NOMBRE_PORTAL}, que también se instala como app: documentos revisados por tu asesor con sus observaciones, tus plazos a la vista y mensajes con constancia de lectura.`,
     icono: "laptop",
   },
   {

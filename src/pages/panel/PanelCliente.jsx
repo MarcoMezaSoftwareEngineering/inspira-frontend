@@ -20,7 +20,9 @@ import AvisoPerfil from "./components/AvisoPerfil";
 import Bienvenida from "./components/Bienvenida";
 import { pendientesDe } from "./pendientes";
 import Tour from "./components/Tour";
-import { accesosDe, esSoloInvitado, pideAcademico, pideCompleto } from "./servicios";
+import { accesosDe, esSoloInvitado, guiasPortalDe, pideAcademico, pideCompleto } from "./servicios";
+import GuiaPortal from "./components/GuiaPortal";
+import MiRuta from "./components/MiRuta";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
 import AvisoVersionNueva from "../backoffice/layout/AvisoVersionNueva";
@@ -33,7 +35,7 @@ const GuiaModificatoria = lazyConRecarga(() => import("./GuiaModificatoria"));
 
 // Las dos primeras son de todos; el resto solo se abre si algún servicio
 // suyo lo incluye (ver servicios.js).
-const TABS_RECURSO = ["becas", "guia", "apostilla", "estancia", "modificatoria"];
+const TABS_RECURSO = ["portal", "becas", "guia", "apostilla", "estancia", "modificatoria"];
 
 /** Los pasos de la portada. El orden es el de la pantalla, de arriba abajo. */
 const PASOS_INICIO = [
@@ -55,7 +57,7 @@ const PASOS_INICIO = [
   {
     clave: "menu",
     titulo: "El menú",
-    texto: "Desde aquí vuelves a Inicio, abres tus servicios, tu perfil y las guías de tu trámite. Y si quieres ver este recorrido otra vez, está en «¿Cómo funciona?».",
+    texto: "Desde aquí vuelves a Mi expediente, ves tu ruta, abres tus servicios, tu perfil y las guías de tu trámite. Y si quieres ver este recorrido otra vez, está en «¿Cómo funciona?».",
   },
 ];
 
@@ -96,6 +98,8 @@ export default function PanelCliente({ path }) {
   const soloInvitado = esSoloInvitado(lista);
   // Qué guías y recursos abre lo que tiene contratado.
   const accesos = useMemo(() => accesosDe(lista), [lista]);
+  // Las guías en PDF del portal que le corresponden (máster, visado, estancia).
+  const guiasPortal = useMemo(() => guiasPortalDe(lista), [lista]);
 
   // A quien no tiene ningún servicio se le piden los datos completos —es el
   // paso previo para que un asesor pueda darle acceso—. Al invitado, solo sus
@@ -110,6 +114,8 @@ export default function PanelCliente({ path }) {
   const mostrarWizard = user !== null && cargado && perfilIncompleto && sinServicios;
   const avisarPerfil = user !== null && cargado && perfilIncompleto && !sinServicios && tab !== "perfil";
   const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico, conCompleto) : 0;
+  // Lo mismo, para «¿Qué me falta?» dentro de cada expediente.
+  const faltanPerfil = user !== null && cargado ? datosQueFaltan(user, conAcademico, conCompleto) : 0;
   // Cuántas cosas esperan: sale en el menú junto a «Inicio» y como punto sobre
   // el botón del menú, para saberlo sin abrir nada.
   const nPendientes = useMemo(
@@ -201,7 +207,7 @@ export default function PanelCliente({ path }) {
 
   // Tab titles
   const titles = {
-    inicio: "Inicio", servicios: "Mis servicios", perfil: "Mi Perfil", becas: "Becas España",
+    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", perfil: "Mi Perfil", portal: "Guía del portal", becas: "Becas España",
     guia: "Guía Máster", apostilla: "Guía Apostilla Digital",
     estancia: "Guía Estancia por Estudios",
     modificatoria: "Guía Residencia y Trabajo",
@@ -231,6 +237,7 @@ export default function PanelCliente({ path }) {
         idServicioActivo={ruta.idServicio}
         onAbrirServicio={(id) => { navigate(rutaDe({ idServicio: id })); setSidebarOpen(false); }}
         onTour={verTour}
+        guiasPortal={guiasPortal}
       />
 
       {/* En el móvil manda el scroll de la página: un expediente dentro de una
@@ -256,7 +263,7 @@ export default function PanelCliente({ path }) {
           <div className="min-w-0">
             <p className="pnl-top-eyebrow">
               <span className="punto" />
-              Panel de cliente
+              Expediente Digital<span className="hidden sm:inline">&nbsp;Inspira</span>
             </p>
             <h1>{titles[tab] || "Mi panel"}</h1>
           </div>
@@ -297,6 +304,8 @@ export default function PanelCliente({ path }) {
                 error={errorServicios}
                 onRecargar={cargarServicios}
                 onIrAGuia={handleChangeTab}
+                avisoAppBloqueado={tour || tourPendiente || mostrarWizard}
+                faltanPerfil={faltanPerfil}
               />
             </div>
           )}
@@ -306,6 +315,14 @@ export default function PanelCliente({ path }) {
             <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-5">
               <PerfilCliente user={user} onUserUpdated={(nuevo) => setUser(nuevo)} />
             </div>
+          )}
+
+          {/* Mi ruta: las etapas entre servicios */}
+          {tab === "ruta" && <MiRuta servicios={lista} />}
+
+          {/* Guía del portal: los PDF de sus servicios */}
+          {tab === "portal" && accesos.has("portal") && guiasPortal.length > 0 && (
+            <GuiaPortal guias={guiasPortal} />
           )}
 
           {/* Becas España */}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { BOTON_ENTRAR } from "../../../config/portalMarca";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 import Icono from "../../common/Icono";
@@ -78,7 +79,7 @@ export default function UserMenu({ user }) {
             className="v4-user-item"
           >
             <Icono nombre="panel" size={17} />
-            Mi panel
+            {BOTON_ENTRAR}
           </a>
 
           <a

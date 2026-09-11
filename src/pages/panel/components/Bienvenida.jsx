@@ -28,7 +28,8 @@ export default function Bienvenida() {
         <div className="pnl-side-logo" style={{ margin: "0 auto 22px" }}>
           <img src={logo} alt="Inspira Legal" />
         </div>
-        <h3>Bienvenido a tu panel</h3>
+        <h3>Expediente Digital Inspira</h3>
+        <p className="ex-lema">No tienes una carpeta. Tienes un expediente.</p>
         <p>
           Aquí vive tu expediente con Inspira: lo que has entregado, lo que falta
           y lo que viene después. Entra con el correo de Google con el que te dimos

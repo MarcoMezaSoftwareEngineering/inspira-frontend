@@ -2,6 +2,7 @@
 import { navigate } from "../../../services/navigate";
 import Avatar from "../../common/Avatar";
 import { datosUsuario } from "../../common/usuario";
+import { BOTON_ENTRAR } from "../../../config/portalMarca";
 
 export default function MobileMenuUserSection({ user, onLogin, onLogout }) {
   const { nombre, iniciales, correo, foto } = datosUsuario(user);
@@ -14,7 +15,7 @@ export default function MobileMenuUserSection({ user, onLogin, onLogout }) {
           onClick={onLogin}
           className="w-full text-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-light transition"
         >
-          Iniciar con Google
+          {BOTON_ENTRAR}
         </button>
       )}
 
@@ -42,7 +43,7 @@ export default function MobileMenuUserSection({ user, onLogin, onLogout }) {
             onClick={(e) => { e.preventDefault(); navigate("/panel"); }}
             className="w-full text-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-light transition"
           >
-            Mi Panel
+            {BOTON_ENTRAR}
           </a>
 
           <button

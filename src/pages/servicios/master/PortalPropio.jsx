@@ -4,6 +4,7 @@
 // comercial). Textos solo con funciones verificadas (config: PORTAL_PROPIO).
 import { PORTAL_PROPIO } from "../../../config/paqueteMaster2027";
 import { CierreCta, TituloSeccion } from "../../landing/master2027/comunes";
+import { MarcoTelefono } from "../../../components/common/MarcoDispositivo";
 import capInicio from "../../../assets/images/servicios/master/portal-inicio.webp";
 import capExpediente from "../../../assets/images/servicios/master/portal-expediente.webp";
 import capInforme from "../../../assets/images/servicios/master/portal-informe.webp";
@@ -27,17 +28,7 @@ export default function PortalPropio() {
             const c = CAPTURAS[it.id];
             return (
               <li key={it.id} className="flex flex-col">
-                <div className="overflow-hidden rounded-[1.4rem] border-[5px] border-primary bg-secondary-light shadow-[0_18px_40px_-24px_rgba(1,52,70,0.55)]">
-                  <img
-                    src={c.src}
-                    alt={it.alt}
-                    width={c.ancho}
-                    height={c.alto}
-                    loading="lazy"
-                    decoding="async"
-                    className="aspect-[9/13] w-full object-cover object-top"
-                  />
-                </div>
+                <MarcoTelefono captura={{ ...c, alt: it.alt }} aspecto="aspect-[9/13]" foco="top" />
                 <h3 className="mt-4 font-fraunces text-base font-bold leading-snug text-primary sm:text-lg">{it.titulo}</h3>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-700 sm:text-sm">{it.texto}</p>
               </li>

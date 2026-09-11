@@ -12,12 +12,15 @@
 //
 // Las imágenes se generan con `python scripts/og-compartir.py`.
 
+import { NOMBRE_PORTAL } from "../src/config/portalMarca.js";
+
 export const SITIO = "https://www.inspira-legal.cloud";
 export const MARCA = "Inspira Legal";
 
 export const IMG_GENERAL = "/og/inspira-general.jpg";
 export const IMG_MASTER = "/og/master-2027-2028.jpg";
 export const IMG_CALCULADORA = "/og/calculadora-master.jpg";
+export const IMG_PORTAL = "/og/expediente-digital.jpg";
 
 const MASTER = {
   title: "Paquete Máster 2027/2028 | Inspira Legal",
@@ -68,9 +71,11 @@ export const RUTAS_COMPARTIR = {
       "Cinco preguntas para saber si calificas para el visado de estudios o para la estancia por estudios en España, qué paquete te conviene y cuánto dinero debes acreditar.",
   },
   "/plataforma": {
-    title: "Nuestra plataforma: panel privado y expediente digital | Inspira Legal",
+    title: `${NOMBRE_PORTAL}: tu caso en un portal y en tu app | Inspira Legal`,
     description:
-      "Accedes con tus credenciales a un panel donde vive tu expediente: subes documentos, tu asesor los valida y el sistema te avisa en cada hito.",
+      "Tu expediente en un portal propio que se instala como app: entras con tu correo de Google, ves qué te toca hoy, tus documentos, tus plazos y los mensajes con tu asesor por escrito.",
+    image: IMG_PORTAL,
+    imageAlt: `${NOMBRE_PORTAL}: tu caso en un portal propio y en tu app`,
   },
   "/casos-de-exito": {
     title: "Casos de éxito: visas, admisiones y recursos ganados | Inspira Legal",

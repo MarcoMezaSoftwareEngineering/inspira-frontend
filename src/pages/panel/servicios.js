@@ -65,13 +65,30 @@ export function servicioDe(s) {
  * excepción común: casi todos los expedientes piden documentos apostillados.
  */
 const ACCESOS = {
-  [SERVICIO.MASTER]: ["guia", "becas", "apostilla"],
-  [SERVICIO.VISADO]: ["apostilla"],
-  [SERVICIO.ESTANCIA]: ["estancia", "apostilla"],
+  [SERVICIO.MASTER]: ["portal", "guia", "becas", "apostilla"],
+  [SERVICIO.VISADO]: ["portal", "apostilla"],
+  [SERVICIO.ESTANCIA]: ["portal", "estancia", "apostilla"],
   [SERVICIO.MODIFICATORIA]: ["modificatoria"],
   [SERVICIO.FP]: ["becas", "apostilla"],
   [SERVICIO.OTRO]: ["apostilla"],
 };
+
+/**
+ * Las guías en PDF de cómo usar el portal (public/guias/). Solo hay de estos
+ * tres servicios; el peso es aproximado y se enseña junto al botón, porque en
+ * el teléfono se descargan con datos móviles.
+ */
+const GUIAS_PORTAL = [
+  { servicio: SERVICIO.MASTER, titulo: "Guía del portal: Máster", descripcion: "Perfil, formulario académico, informe, elección de másteres, documentos y postulaciones.", href: "/guias/guia-portal-master.pdf", peso: "2,6 MB" },
+  { servicio: SERVICIO.VISADO, titulo: "Guía del portal: Visado de estudios", descripcion: "Tus datos, medios económicos, documentos, cita y seguimiento del visado.", href: "/guias/guia-portal-visado.pdf", peso: "2,3 MB" },
+  { servicio: SERVICIO.ESTANCIA, titulo: "Guía del portal: Estancia por estudios", descripcion: "Datos, plazos, documentos, acompañantes y seguimiento en Extranjería.", href: "/guias/guia-portal-estancia.pdf", peso: "2,2 MB" },
+];
+
+/** Las guías del portal que le tocan por sus servicios propios, en orden fijo. */
+export function guiasPortalDe(solicitudes = []) {
+  const suyos = new Set(solicitudes.filter((s) => !s?.invitado).map(servicioDe));
+  return GUIAS_PORTAL.filter((g) => suyos.has(g.servicio));
+}
 
 /** Servicios en los que el perfil académico del asesorado significa algo. */
 const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.ESTANCIA, SERVICIO.FP];

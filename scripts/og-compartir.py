@@ -3,6 +3,7 @@
 #   public/og/inspira-general.jpg     portada y todas las demás rutas
 #   public/og/master-2027-2028.jpg    /master-2027-2028 y /servicios/master
 #   public/og/calculadora-master.jpg  /calculadora-master
+#   public/og/expediente-digital.jpg  /plataforma (Expediente Digital Inspira)
 #
 # Nombres nuevos a propósito: WhatsApp y Facebook cachean la imagen por URL,
 # así que reutilizar default.jpg dejaría la errata antigua a la vista.
@@ -12,6 +13,7 @@
 # petróleo #013446, celeste #88C4FC, naranja #FA943A, amarillo #F9C846.
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import os
+import sys
 
 RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SALIDA = os.path.join(RAIZ, "public", "og")
@@ -180,7 +182,51 @@ def calculadora():
     return guardar(img, "calculadora-master.jpg")
 
 
+# (d) Portal --------------------------------------------------------------
+# Nombre provisional: debe coincidir con NOMBRE_PORTAL de src/config/portalMarca.js.
+NOMBRE_OG = ["Expediente", "Digital Inspira"]
+CAPTURA_PORTAL = os.path.join(RAIZ, "src", "assets", "images", "portal", "inicio-movil.webp")
+
+
+def portal():
+    img = fondo_marca()
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, 12, H], fill=NARANJA)
+
+    # Teléfono a la derecha, con la captura desenfocada horneada (se sale por abajo).
+    tel_w, tel_h, borde, radio = 300, 640, 14, 46
+    tx, ty = W - 96 - tel_w, 64
+    captura = Image.open(CAPTURA_PORTAL).convert("RGB")
+    cw, ch = tel_w - 2 * borde, tel_h - 2 * borde
+    captura = captura.resize((cw, int(captura.height * cw / captura.width)), Image.LANCZOS).crop((0, 0, cw, ch))
+    captura = captura.filter(ImageFilter.GaussianBlur(3))
+    sombra = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(sombra).rounded_rectangle([tx + 18, ty + 26, tx + tel_w + 18, ty + tel_h + 26], radius=radio, fill=(0, 0, 0, 90))
+    img.alpha_composite(sombra.filter(ImageFilter.GaussianBlur(18)))
+    marco = Image.new("RGBA", (tel_w, tel_h), (0, 0, 0, 0))
+    ImageDraw.Draw(marco).rounded_rectangle([0, 0, tel_w - 1, tel_h - 1], radius=radio, fill=(1, 34, 46, 255))
+    mascara = Image.new("L", (cw, ch), 0)
+    ImageDraw.Draw(mascara).rounded_rectangle([0, 0, cw - 1, ch - 1], radius=radio - borde, fill=255)
+    marco.paste(captura, (borde, borde), mascara)
+    img.alpha_composite(marco, (tx, ty))
+
+    x = 72
+    d = ImageDraw.Draw(img)
+    d.text((x, 76), "INSPIRA LEGAL", font=fuente(26, "SemiBold"), fill=NARANJA)
+    ft = fuente(80, "Bold")
+    for i, palabra in enumerate(NOMBRE_OG):
+        d.text((x, 118 + 104 * i), palabra, font=ft, fill=AMARILLO if i == len(NOMBRE_OG) - 1 else BLANCO)
+    fs = fuente(38, "Regular")
+    y = 118 + 104 * len(NOMBRE_OG) + 26
+    for ln in ["Tu caso en un portal propio", "y en tu app"]:
+        d.text((x, y), ln, font=fs, fill=CELESTE)
+        y += 50
+    pegar_logo(img, x, H - 60 - 92, alto=64)
+    return guardar(img, "expediente-digital.jpg")
+
+
 if __name__ == "__main__":
-    general()
-    master()
-    calculadora()
+    # Sin argumentos genera todas; con nombres, solo esas (p. ej. «portal»).
+    FUNCIONES = {"general": general, "master": master, "calculadora": calculadora, "portal": portal}
+    for nombre in sys.argv[1:] or FUNCIONES:
+        FUNCIONES[nombre]()

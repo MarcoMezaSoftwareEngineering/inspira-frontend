@@ -1,10 +1,11 @@
 import Reveal from "../../../components/common/Reveal";
 import Icono from "../../../components/common/Icono";
 import { navigate } from "../../../services/navigate";
-// Capturas reales del portal, recortadas y desenfocadas (las mismas que
-// «Portal propio» de /servicios/master).
-import capInicio from "../../../assets/images/servicios/master/portal-inicio.webp";
-import capExpediente from "../../../assets/images/servicios/master/portal-expediente.webp";
+import { NOMBRE_PORTAL, FRASE_APOYO } from "../../../config/portalMarca";
+// Capturas del Expediente Digital con el desenfoque horneado (las mismas de
+// /plataforma), en el marco de teléfono compartido.
+import { CAPTURAS_PORTAL } from "../../../components/common/capturasPortal";
+import { MarcoTelefono } from "../../../components/common/MarcoDispositivo";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -12,21 +13,18 @@ const go = (e, href) => {
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
-// El mayor diferenciador de la firma: sistema propio en vez de WhatsApp.
+// El mayor diferenciador de la firma: el Portal Inspira en vez de WhatsApp.
 // Solo funciones que existen (ver hechos verificados del portal): acceso con
 // Google, panel instalable, documentos con observaciones del asesor, plazos y
 // requerimientos a la vista y mensajes con constancia de lectura.
 const PUNTOS = [
-  { i: "laptop", t: "Panel privado que se instala como app en tu teléfono" },
+  { i: "laptop", t: "Portal propio que se instala como app en tu teléfono" },
   { i: "documento", t: "Documentos revisados por tu asesor, con sus observaciones" },
   { i: "calendario", t: "Tus plazos y requerimientos, a la vista" },
   { i: "chat", t: "Mensajes dentro del expediente, con constancia de lectura" },
 ];
 
-const CAPTURAS = [
-  { src: capInicio, alt: "Inicio del portal del asesorado, con los datos desenfocados" },
-  { src: capExpediente, alt: "Avance de un expediente en el portal, con los datos desenfocados" },
-];
+const CAPTURAS = [CAPTURAS_PORTAL.inicio, CAPTURAS_PORTAL.masterPostulaciones];
 
 export default function Sistema() {
   return (
@@ -36,12 +34,12 @@ export default function Sistema() {
           <Reveal>
             <span className="eyebrow"><span className="dot" />Somos una firma distinta</span>
             <h2>
-              Tu caso no vive en un chat.
+              {FRASE_APOYO[0]}
               <br />
-              <span>Vive en nuestro sistema.</span>
+              <span>{FRASE_APOYO[1]}</span>
             </h2>
             <p>
-              Al contratar abres tu panel privado, con tu correo de Google. Ahí
+              Al contratar se abre tu {NOMBRE_PORTAL}, al que entras con tu correo de Google. Ahí
               vive tu expediente: subes tus documentos, tu asesor los revisa y te
               deja sus observaciones, y cada plazo queda a la vista.
             </p>
@@ -60,7 +58,7 @@ export default function Sistema() {
               href="/plataforma"
               onClick={(e) => go(e, "/plataforma")}
             >
-              Conoce nuestro sistema <span className="arr">→</span>
+              Conoce el {NOMBRE_PORTAL} <span className="arr">→</span>
             </a>
           </Reveal>
 
@@ -68,24 +66,11 @@ export default function Sistema() {
           <Reveal delay={140}>
             <div className="mx-auto grid max-w-[420px] grid-cols-2 items-start gap-4">
               {CAPTURAS.map((c, i) => (
-                <div
-                  key={c.src}
-                  className={`overflow-hidden rounded-[1.4rem] border-[5px] border-[#013446] bg-white shadow-[0_24px_50px_-28px_rgba(1,52,70,0.6)] ${i === 1 ? "mt-10" : ""}`}
-                >
-                  <img
-                    src={c.src}
-                    alt={c.alt}
-                    width={420}
-                    height={909}
-                    loading="lazy"
-                    decoding="async"
-                    className="block aspect-[9/15] w-full object-cover object-top"
-                  />
-                </div>
+                <MarcoTelefono key={c.src} captura={c} aspecto="aspect-[9/15]" className={i === 1 ? "mt-10" : ""} />
               ))}
             </div>
             <p className="mt-3 text-center text-xs text-neutral-500">
-              Capturas del portal con datos de ejemplo desenfocados.
+              Capturas del {NOMBRE_PORTAL} con datos de ejemplo desenfocados.
             </p>
           </Reveal>
         </div>

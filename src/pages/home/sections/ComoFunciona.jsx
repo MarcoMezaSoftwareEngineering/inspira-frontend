@@ -71,14 +71,14 @@ const steps = [
   {
     n: "06",
     title: "Documentos y checklist",
-    desc: "Plazos y alertas automáticas",
+    desc: "Tus plazos, a la vista",
     stageTitle: "Cada plazo y documento, bajo control.",
     stageText:
-      "Accedes a tu panel con los documentos requeridos, plazos por universidad y alertas automáticas para no perder ninguna fecha.",
+      "Accedes a tu panel con los documentos requeridos, tus plazos a la vista y la lista «Hoy» con lo que te toca, para no perder ninguna fecha.",
     checklist: [
       ["Documentos", "Listados"],
       ["Plazos", "Configurados"],
-      ["Alertas", "Activas"],
+      ["Hoy", "Al día"],
     ],
   },
   {
@@ -87,7 +87,7 @@ const steps = [
     desc: "Gestionamos cada subsanación",
     stageTitle: "Nosotros postulamos, tú avanzas.",
     stageText:
-      "Tu asesor gestiona cada postulación y te acompaña en subsanaciones, mientras haces seguimiento en tiempo real desde tu panel.",
+      "Tu asesor gestiona cada postulación y te acompaña en subsanaciones, mientras sigues cada paso desde tu portal.",
     checklist: [
       ["UAM", "Lista para enviar"],
       ["UPF", "En revisión"],

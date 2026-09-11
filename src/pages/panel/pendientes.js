@@ -51,6 +51,9 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
     const ir = (seccion) => rutaDe({ idServicio: s.id_solicitud, seccion: conSecciones ? seccion : null });
     const de = recorta(s.invitado ? `Expediente de ${s.titular}` : s.titulo);
     const id = s.id_solicitud;
+    // Desde dónde empiezan los de este servicio: al final se les apunta su id
+    // para que «Tu próximo paso» sepa a qué expediente pertenecen.
+    const desde = items.length;
 
     // Un mensaje del asesor sin leer va antes que casi todo: si escribió, es
     // porque hace falta algo o hay una novedad.
@@ -65,7 +68,7 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
       items.push({
         clave: `req-${id}-${q.titulo}`, peso: 0, tono: "alto", icono: "escudo",
         texto: `Requerimiento de Extranjería: ${q.titulo}`,
-        detalle: q.plazo ? `Plazo: ${q.plazo}` : null, servicio: de,
+        detalle: q.plazo ? `Plazo: ${q.plazo}` : null, servicio: de, fecha: q.plazo || null,
         accion: "Ver", href: ir(null),
       });
     }
@@ -83,7 +86,7 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
         clave: `plazo-${id}-${p.id_master}`, peso: d <= 3 ? 0 : 2, tono: d <= 3 ? "alto" : "aviso",
         icono: "reloj",
         texto: `${p.universidad || "Postulación"}: cierra ${cuando(d)}`,
-        detalle: p.nombre, servicio: de,
+        detalle: p.nombre, servicio: de, fecha: p.cierra,
         accion: "Ver plazos", href: ir("post"),
       });
     }
@@ -118,6 +121,7 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
         accion: "Elegir", href: ir("eleccion"),
       });
     }
+    for (let k = desde; k < items.length; k++) items[k].idServicio = id;
   }
 
   return items.sort((a, b) => a.peso - b.peso);

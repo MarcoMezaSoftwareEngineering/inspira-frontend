@@ -11,6 +11,10 @@ import { estadoVisado, TONOS } from "../../../../lib/visaFlujoInterno";
 import { EsqueletoExpediente } from "../Esqueleto";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 import SelectorSeccionMovil from "./SelectorSeccionMovil";
+import QueMeFalta from "../QueMeFalta";
+import { queMeFaltaVisado } from "../../queMeFalta";
+import { navigate } from "../../../../services/navigate";
+import { rutaDe } from "../../ruta";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -163,7 +167,7 @@ function DescargaDoc({ slot, doc, idSolicitud }) {
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
-export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion }) {
+export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion, faltanPerfil = 0 }) {
   const [detalle, setDetalle] = useState(null);
   const [checklist, setChecklist] = useState([]);
   const [visaExp, setVisaExp] = useState(null);
@@ -300,12 +304,17 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
     { id: "docs",        num: 4, titulo: "Mis documentos",          subtitulo: total ? `${docsListas} de ${total} listos` : "Sube tus documentos" },
     { id: "entregables", num: 5, titulo: "Preparado por Inspira",   subtitulo: (visaDocs?.dj || visaDocs?.formulario) ? "Ya tienes documentos" : "Lo preparamos nosotros" },
     { id: "estado",      num: 6, titulo: "Estado de mi visa",       subtitulo: estadoVisado(visaExp || {}).texto },
-    { id: "mensajes",    num: 7, titulo: "Mensajes",                subtitulo: sinLeer > 0 ? `${sinLeer} sin leer` : "Con tu asesor, por escrito" },
+    { id: "mensajes",    num: 7, titulo: "Mensajes con tu asesor",  subtitulo: sinLeer > 0 ? `${sinLeer} sin leer` : "Con tu asesor, por escrito" },
   ].map((x) => ({ ...x, estado: x.id === "mensajes" ? (sinLeer > 0 ? "pendiente" : "completado") : estadoBloque(x.id) }));
 
   // Una sección que no existe para este expediente —un enlace viejo, un
   // tipo de servicio distinto— cae en la primera en vez de en una pantalla vacía.
   const activeSection = navSections.some((x) => x.id === seccion) ? seccion : navSections[0]?.id;
+
+  const falta = queMeFaltaVisado({
+    checklist, datosCompletos, viaElegida, djCompleta, resumen: solicitudBase?.resumen, faltanPerfil,
+    ir: { seccion: (s) => setActiveSection(s), perfil: () => navigate(rutaDe({ tab: "perfil" })) },
+  });
 
   const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
   const pct = Math.round((bloquesDone / navSections.length) * 100);
@@ -565,6 +574,10 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
       </div>
 
       {loading && <EsqueletoExpediente />}
+
+      {!loading && !error && detalle && (
+        <QueMeFalta className="shrink-0 mb-3" resumen={falta.resumen} filas={falta.filas} />
+      )}
 
       {/* Panel principal */}
       {!loading && !error && detalle && (

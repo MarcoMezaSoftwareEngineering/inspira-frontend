@@ -238,7 +238,7 @@ export default function GuiaApostilla() {
         <div className="rounded-2xl px-5 py-6 mt-1"
           style={{ background: "linear-gradient(135deg, #1A1410 0%, #3D2F22 100%)" }}>
           <p className="font-serif text-base font-bold mb-1 flex items-center gap-2" style={{ color: GOLD_LIGHT }}>
-            🎓 Carga en Portal Inspira
+            🎓 Carga en tu Expediente Digital Inspira
           </p>
           <p className="text-xs leading-relaxed mb-4" style={{ color: "rgba(255,255,255,.6)" }}>
             Una vez tengas la apostilla, sube los documentos al portal.{" "}

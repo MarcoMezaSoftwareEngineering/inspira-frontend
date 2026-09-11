@@ -31,6 +31,13 @@ window.addEventListener("pageshow", (e) => {
   if (e.persisted) window.location.reload();
 });
 
+// Chrome puede lanzar `beforeinstallprompt` antes de que cargue el trozo del
+// panel: se guarda aquí y AvisoInstalarApp lo recoge al cargarse.
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  window.__inspiraEventoInstalar = e;
+});
+
 // La aplicación instalable: el service worker sirve la cáscara al instante y
 // los trozos con hash desde caché. Solo en producción: en desarrollo
 // cachearía código que cambia cada minuto.

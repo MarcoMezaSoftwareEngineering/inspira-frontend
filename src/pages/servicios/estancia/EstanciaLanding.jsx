@@ -1,4 +1,7 @@
 import { navigate } from "../../../services/navigate";
+import SelloPortal from "../../../components/common/SelloPortal";
+import { SELLO_ESTANCIA } from "../../../config/plataforma";
+import { NOMBRE_PORTAL } from "../../../config/portalMarca";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -11,9 +14,9 @@ const incluye = [
   "Exposición de motivos generada por IA",
   "Formulario EX-00 asistido",
   "Pasos según país y consulado",
-  "Alertas de plazos importantes",
+  "Tus plazos calculados con tus fechas, a la vista",
   "Asesorías de seguimiento ilimitadas",
-  "Panel interno con estado del proceso",
+  `Tu ${NOMBRE_PORTAL}, con el estado de tu expediente`,
 ];
 
 export default function EstanciaLanding() {
@@ -93,6 +96,13 @@ export default function EstanciaLanding() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Qué verás en tu Portal Inspira */}
+      <section className="bg-white px-6 pb-16">
+        <div className="mx-auto max-w-4xl">
+          <SelloPortal sello={SELLO_ESTANCIA} />
         </div>
       </section>
 

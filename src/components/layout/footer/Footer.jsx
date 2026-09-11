@@ -1,6 +1,9 @@
 // src/components/layout/footer/Footer.jsx
 import { RUTAS_LEGALES, TITULAR, pendiente } from "../../../config/legal";
 import { navigate } from "../../../services/navigate";
+import { NOMBRE_PORTAL, NOMBRE_CORTO, MENU_ETIQUETA } from "../../../config/portalMarca";
+import { MarcoTelefono } from "../../common/MarcoDispositivo";
+import { CAPTURAS_PORTAL } from "../../common/capturasPortal";
 
 const ir = (e, href) => {
   e.preventDefault();
@@ -13,7 +16,7 @@ const enlacesExplora = [
   { label: "Paquete Máster 2027/2028", href: "/servicios/master" },
   { label: "Visa y estancia por estudios", href: "/servicios/estancia" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
-  { label: "Nuestro sistema", href: "/plataforma" },
+  { label: MENU_ETIQUETA, href: "/plataforma" },
   { label: "Eventos gratuitos", href: "/eventos" },
   { label: "Tiendita", href: "/tienda" },
   { label: "Blog", href: "/blog" },
@@ -165,7 +168,38 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-neutral-200 pt-6 text-xs leading-relaxed text-neutral-500">
+        {/* Portal Inspira: acceso al portal y a la app desde cualquier página */}
+        <div className="mt-10 flex flex-col gap-4 rounded-2xl bg-primary px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="flex items-center gap-4">
+            <MarcoTelefono captura={CAPTURAS_PORTAL.inicio} mini decorativa aspecto="aspect-[9/14]" className="w-12 shrink-0" />
+            <div>
+            <p className="text-[11px] font-extrabold uppercase tracking-widest text-sky">
+              {NOMBRE_PORTAL} · Instala la app
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-white/80">
+              Tus documentos, tus plazos y los mensajes con tu asesor en un portal propio que llevas como app en tu teléfono.
+            </p>
+            </div>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <a
+              href="/plataforma"
+              onClick={(e) => ir(e, "/plataforma")}
+              className="inline-flex items-center rounded-xl border-2 border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              Conoce el {NOMBRE_CORTO}
+            </a>
+            <a
+              href="/panel"
+              onClick={(e) => ir(e, "/panel")}
+              className="inline-flex items-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-dark"
+            >
+              Entrar a mi {NOMBRE_CORTO}
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-neutral-200 pt-6 text-xs leading-relaxed text-neutral-500">
           <p>
             © {new Date().getFullYear()} {TITULAR.razonSocial}. Todos los
             derechos reservados.

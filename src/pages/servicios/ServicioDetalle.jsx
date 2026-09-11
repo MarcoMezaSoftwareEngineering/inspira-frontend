@@ -12,6 +12,7 @@ import { ASESORIA } from "../../config/contacto";
 import { procesoDe } from "../../config/serviciosProceso";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import Icono from "../../components/common/Icono";
+import SelloPortal from "../../components/common/SelloPortal";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
 import { navigate } from "../../services/navigate";
@@ -86,6 +87,9 @@ export default function ServicioDetalle({ id }) {
             <span className="shrink-0 text-sm font-bold text-primary">Hacer el test →</span>
           </a>
         )}
+
+        {/* Qué verás de este servicio en tu Portal Inspira */}
+        <SelloPortal servicioId={servicio.id} className="mb-10" />
 
         {/* Bloques de contenido */}
         {d.bloques?.map((bloque) => (

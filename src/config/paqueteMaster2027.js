@@ -25,6 +25,8 @@ import { SESION_DIAGNOSTICO, PLANES_VISADO, ESTANCIA_ESTUDIOS, CITAS_ESPANA } fr
 import { TITULAR } from "./legal";
 import { lineaDe, whatsappLinea } from "./contacto";
 
+import { NOMBRE_PORTAL } from "./portalMarca";
+
 // ── Formato y precios ───────────────────────────────────────────────────────
 // Viven en paqueteMaster2027Resumen.js, que usan también la portada, el menú y
 // App.jsx sin cargar todo este archivo. Aquí se reexportan: una sola fuente.
@@ -561,8 +563,8 @@ export const PROMESA = {
     {
       id: "portal",
       icono: "panel",
-      titulo: "Portal propio, no un chat",
-      texto: "Tu expediente vive en nuestro sistema: calendario de plazos por universidad, una tarjeta por portal con su línea de tiempo, cada requerimiento anotado con su plazo y mensajes con constancia de lectura. Se instala como app en tu teléfono.",
+      titulo: `${NOMBRE_PORTAL}, no un chat`,
+      texto: `Tu expediente vive en el ${NOMBRE_PORTAL}: calendario de plazos por universidad, una tarjeta por portal con su línea de tiempo, cada requerimiento anotado con su plazo y mensajes con constancia de lectura. Se instala como app en tu teléfono.`,
       enlace: { texto: "Ver cómo funciona", destino: "rastreo" },
     },
     {
@@ -691,7 +693,7 @@ export const ADEMAS = [
   "Informe personalizado de másteres: finalistas y alternativas, precio de matrícula según la norma de cada comunidad, beca posible y plazos.",
   "Becas mapeadas según tu perfil: cruzamos las convocatorias cargadas con cada máster de tu informe. Lo que no está confirmado, tu asesor lo verifica contigo antes de postular.",
   "Seguimiento de becas por tu asesor, incluido en cualquier paquete.",
-  "Tu expediente en un sistema propio: calendario de plazos, una tarjeta por portal y mensajes con constancia de lectura.",
+  `Tu expediente en el ${NOMBRE_PORTAL}: calendario de plazos, una tarjeta por portal y mensajes con constancia de lectura.`,
 ];
 
 // ── Descargos (visibles, no en letra diminuta) ──────────────────────────────
@@ -812,8 +814,8 @@ export const SIMULADOR = {
 
 // ── A8 · Rastreo y seguimiento (solo funciones verificadas) ────────────────
 export const RASTREO = {
-  eyebrow: "Tu expediente no va por WhatsApp: sistema propio",
-  titulo: "Un sistema propio con cada plazo a la vista",
+  eyebrow: `Tu expediente no va por WhatsApp: ${NOMBRE_PORTAL}`,
+  titulo: `El ${NOMBRE_PORTAL}, con cada plazo a la vista`,
   // El asesorado entra a su panel con su correo de Google, no con usuario y
   // contraseña (pages/panel/components/Bienvenida.jsx): de ahí «acceso privado».
   intro: "Tu expediente vive en tu panel, con tu acceso privado. Del otro lado, tu asesor trabaja sobre el mismo expediente.",
@@ -967,7 +969,7 @@ export function importeMatricula(f) {
 
 // ── /servicios/master · Portal propio (solo funciones verificadas) ────────
 export const PORTAL_PROPIO = {
-  eyebrow: "Portal propio",
+  eyebrow: `${NOMBRE_PORTAL}`,
   titulo: "Tu máster vive en tu portal, no en un chat",
   intro: "Cada asesorado tiene su panel privado. Tú ves en qué punto está tu máster; tu asesor trabaja sobre el mismo expediente.",
   items: [
@@ -1003,20 +1005,22 @@ export const PORTAL_PROPIO = {
 // ── /servicios/master · textos propios de la página del sitio ──────────────
 export const PAGINA_MASTER = {
   // Hero: títulos oficiales y dos botones secundarios a secciones de la página.
-  heroOficial: "Solo másteres universitarios oficiales: títulos reconocidos en España y la UE y aptos para el visado de estudios",
+  // «de postulación»: los paquetes individuales (Pack Explorador, Pack Todo en
+  // Uno) pueden incluir títulos propios si el cliente lo pide.
+  heroOficial: "Paquetes para másteres universitarios oficiales: títulos reconocidos en España y la UE y aptos para el visado de estudios",
   heroSecundarios: [
     // La calculadora muestra equivalencia de nota, costos y universidades compatibles con el perfil.
     { id: "calculadora", icono: "euro", texto: "Calcula a qué másteres puedes postular" },
-    { id: "portal", icono: "panel", texto: "Portal Inspira: mira nuestro portal único" },
+    { id: "portal", icono: "panel", texto: `${NOMBRE_PORTAL}: mira nuestro portal único` },
   ],
   // Formulado como alcance de los paquetes: hay unos pocos títulos propios
   // marcados en el catálogo que un asesor puede añadir si se piden expresamente.
-  planesOficial: "Todos los paquetes son para másteres universitarios oficiales",
+  planesOficial: "Todos los paquetes de postulación son para másteres universitarios oficiales",
   faqOficial: {
     id: "titulos-oficiales",
     q: "¿Son títulos oficiales?",
     a: [
-      "Sí. Nuestros paquetes son para másteres universitarios oficiales: títulos inscritos en el Registro de Universidades, Centros y Títulos (RUCT) del Ministerio, con validez en toda España y reconocidos en el Espacio Europeo de Educación Superior. Importa por dos motivos: el visado de estudios pide estar admitido en estudios aptos, y es el título oficial el que después puedes hacer valer o homologar en tu país. Los títulos propios de una universidad no son oficiales ni se pueden homologar, y para el visado exigen revisar cada caso; por eso trabajamos con másteres oficiales. Que el título sea oficial no asegura la plaza: la admisión la decide cada universidad.",
+      "Sí. Nuestros paquetes de postulación son para másteres universitarios oficiales: títulos inscritos en el Registro de Universidades, Centros y Títulos (RUCT) del Ministerio, con validez en toda España y reconocidos en el Espacio Europeo de Educación Superior. Importa por dos motivos: el visado de estudios pide estar admitido en estudios aptos, y es el título oficial el que después puedes hacer valer o homologar en tu país. Los títulos propios de una universidad no son oficiales ni se pueden homologar, y para el visado exigen revisar cada caso; por eso trabajamos con másteres oficiales. Que el título sea oficial no asegura la plaza: la admisión la decide cada universidad.",
     ],
   },
   opinionesEyebrow: "Opiniones reales",
@@ -1058,7 +1062,7 @@ export const FECHAS = {
 export const EQUIPO = {
   eyebrow: "Quién te acompaña",
   titulo: "Abogados especialistas en extranjería y asesores educativos",
-  intro: "Combinamos derecho migratorio español con asesoría educativa y un sistema propio. Detrás de tu expediente hay personas, no un chatbot.",
+  intro: "Combinamos derecho migratorio español con asesoría educativa y un portal propio. Detrás de tu expediente hay personas, no un chatbot.",
   personas: [
     { id: "carina", nombre: "Carina Meza", cargo: "CEO y consultora legal", alt: "Carina Meza, CEO y consultora legal de Inspira Legal" },
     // Su cargo real es gestión contable y financiera (config/equipo.js): no
@@ -1068,7 +1072,7 @@ export const EQUIPO = {
   razones: [
     { icono: "brujula", titulo: "Solo asumimos casos viables", texto: "Si tu vía no es la correcta te lo decimos en la sesión diagnóstico, antes de que pagues un paquete." },
     { icono: "balanza", titulo: "Abogados colegiados, no gestores", texto: "Tu expediente migratorio lo prepara y firma un abogado especializado en extranjería española." },
-    { icono: "laptop", titulo: "Sistema propio, no un chat", texto: "Tu expediente vive en nuestra plataforma: panel privado, una tarjeta por portal y mensajes con constancia de lectura." },
+    { icono: "laptop", titulo: `${NOMBRE_PORTAL}, no un chat`, texto: `Tu expediente vive en el ${NOMBRE_PORTAL}: una tarjeta por portal y mensajes con constancia de lectura.` },
   ],
 };
 
@@ -1168,7 +1172,7 @@ export const CTA_FINAL = {
   texto: `${SESION.duracion} online con un abogado especialista. Revisamos tu perfil, tus plazos y tu presupuesto, y sales con un plan escrito: qué lista te conviene, qué mirar en becas y por dónde empezar.`,
   incluye: "Diagnóstico jurídico con un abogado especialista · Requisitos, plazos y medios económicos de tu consulado · Tu vía: visado, estancia por estudios u otra · Plan de acción escrito",
   pilares: [
-    { icono: "panel", texto: "Portal propio, no un chat" },
+    { icono: "panel", texto: `${NOMBRE_PORTAL}, no un chat` },
     { icono: "euro", texto: `Desde ${eur(PRECIO_DESDE)}, por etapas y ampliable` },
     { icono: "estrella", texto: "No te vendemos humo, sino resultados" },
   ],

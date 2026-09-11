@@ -34,7 +34,7 @@ export default function PorQue() {
             <span className="eyebrow"><span className="dot" />Becas logradas</span>
             <h3>
               Nuestros asesorados han obtenido becas de Generación Bicentenario,
-              Universidad de Jaén y Fundación Carolina.
+              la Universidad de Jaén, Fundación Carolina y la AUIP.
             </h3>
             <p>
               Trabajamos las convocatorias desde antes de la postulación al máster,

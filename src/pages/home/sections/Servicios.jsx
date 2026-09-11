@@ -1,5 +1,6 @@
 import { navigate } from "../../../services/navigate";
 import Reveal from "../../../components/common/Reveal";
+import { HREF_PAQUETE, MASTER_EN_PORTADA } from "../../../config/paqueteMaster2027Resumen";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -11,7 +12,7 @@ const checklist = [
   "Universidades y becas",
   "Postulaciones",
   "Seguimiento",
-  "Panel de avance",
+  "Portal propio",
   "Matrícula",
 ];
 
@@ -35,23 +36,19 @@ export default function Servicios() {
           <Reveal
             as="a"
             className="service-card main"
-            href="/servicios/master"
-            onClick={(e) => go(e, "/servicios/master")}
+            href={HREF_PAQUETE}
+            onClick={(e) => go(e, HREF_PAQUETE)}
           >
-            <span className="tag">Más elegido</span>
-            <h3>Programa Máster 360°</h3>
-            <p>
-              Desde la búsqueda personalizada hasta la matrícula: construimos tu
-              shortlist, gestionamos postulaciones, revisamos requisitos y seguimos
-              cada hito.
-            </p>
+            <span className="tag">Servicio estrella</span>
+            <h3>{MASTER_EN_PORTADA.tarjeta.titulo}</h3>
+            <p>{MASTER_EN_PORTADA.tarjeta.texto}</p>
             <div className="checklist">
               {checklist.map((c) => (
                 <div className="checkline" key={c}>{c}</div>
               ))}
             </div>
             <span className="btn btn-primary">
-              Explorar programa <span className="arr">→</span>
+              {MASTER_EN_PORTADA.tarjeta.boton} <span className="arr">→</span>
             </span>
             <div className="mini-dashboard">
               <small>Avance del proceso</small>

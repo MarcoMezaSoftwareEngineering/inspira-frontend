@@ -13,8 +13,12 @@ import ilusPortatil from "../../../assets/images/landing/master-2027/ilus-person
 
 const ALTO_MINIMO = 320;
 
-export default function Calculadora({ onEnPantalla }) {
-  const [abierta, setAbierta] = useState(false);
+// `abiertaInicial`: en /servicios/master la calculadora se ve incrustada desde
+// el principio; en la landing se abre con el botón.
+// `margenScroll`: en /servicios/master la cabecera fija del sitio tapa el
+// principio de la sección al bajar hasta ella; la landing no tiene cabecera.
+export default function Calculadora({ onEnPantalla, abiertaInicial = false, margenScroll = "scroll-mt-4" }) {
+  const [abierta, setAbierta] = useState(abiertaInicial);
   const [alto, setAlto] = useState(null);
   const marcoRef = useRef(null);
   const iframeRef = useRef(null);
@@ -36,7 +40,7 @@ export default function Calculadora({ onEnPantalla }) {
       const visible = r.top < window.innerHeight && r.bottom > 0;
       if (visible !== ultimo) {
         ultimo = visible;
-        onEnPantalla(visible);
+        onEnPantalla?.(visible);
       }
     };
     // Por si la calculadora pide «subir» con postMessage al cambiar de paso.
@@ -54,7 +58,7 @@ export default function Calculadora({ onEnPantalla }) {
       window.removeEventListener("message", alMensaje);
       observadorRef.current?.disconnect();
       observadorRef.current = null;
-      onEnPantalla(false);
+      onEnPantalla?.(false);
     };
   }, [abierta, onEnPantalla, subirAlMarco]);
 
@@ -91,7 +95,7 @@ export default function Calculadora({ onEnPantalla }) {
   }
 
   return (
-    <section id="calculadora" className="scroll-mt-4 bg-secondary-light px-4 py-16 min-[380px]:px-5 sm:px-6 sm:py-20">
+    <section id="calculadora" className={`${margenScroll} bg-secondary-light px-4 py-16 min-[380px]:px-5 sm:px-6 sm:py-20`}>
       <div className="mx-auto max-w-[1100px]">
         <div className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_200px] md:gap-10">
           <TituloSeccion

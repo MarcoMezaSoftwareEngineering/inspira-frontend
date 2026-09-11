@@ -81,7 +81,8 @@ function EtiquetaComunidad({ c, atenuada }) {
   );
 }
 
-export default function MapaListas({ seleccion, onSeleccion }) {
+// `nota`: línea destacada bajo el título (solo la usa /servicios/master).
+export default function MapaListas({ seleccion, onSeleccion, nota = null }) {
   const svgRef = useRef(null);
   const panelRef = useRef(null);
   const temporizador = useRef(null);
@@ -197,6 +198,14 @@ export default function MapaListas({ seleccion, onSeleccion }) {
     >
       <div className="mx-auto max-w-[1100px]">
         <TituloSeccion id="planes-titulo" eyebrow={MAPA.eyebrow} titulo={MAPA.titulo} />
+        {nota && (
+          <p className="mx-auto mt-3 flex w-fit max-w-3xl items-start justify-center gap-2 rounded-full bg-secondary-light px-4 py-1.5 text-center text-sm font-bold text-primary">
+            <span className="mt-0.5 shrink-0 text-accent-dark">
+              <Icono nombre="escudo" size={16} />
+            </span>
+            {nota}
+          </p>
+        )}
         <p className="mx-auto mt-2 max-w-3xl text-center text-sm font-semibold text-primary-light">
           {MAPA.microcopy}
         </p>

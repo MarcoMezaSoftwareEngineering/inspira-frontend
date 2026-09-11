@@ -1,4 +1,5 @@
 import Hero from "./sections/Hero";
+import FranjaMaster from "./sections/FranjaMaster";
 import QuickCalc from "./sections/QuickCalc";
 import Asesorias from "./sections/Asesorias";
 import RutasMigrar from "./sections/RutasMigrar";
@@ -19,6 +20,7 @@ export default function Home() {
   return (
     <main className="v4-home">
       <Hero />
+      <FranjaMaster />
       <QuickCalc />
       <Asesorias />
       <RutasMigrar />

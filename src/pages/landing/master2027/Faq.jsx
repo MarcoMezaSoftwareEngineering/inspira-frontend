@@ -20,11 +20,12 @@ function Respuesta({ partes, onAbrirOtros }) {
       <a
         key={i}
         href={`#${parte.destino}`}
-        aria-haspopup={parte.destino === "otros-servicios" ? "dialog" : undefined}
+        aria-haspopup={parte.destino === "otros-servicios" && onAbrirOtros ? "dialog" : undefined}
         onClick={(e) => {
           e.preventDefault();
-          // Parciales, individuales y asesorías viven en una ventana.
-          if (parte.destino === "otros-servicios") onAbrirOtros(e.currentTarget, "faq");
+          // En la landing, parciales, individuales y asesorías viven en una
+          // ventana; en /servicios/master, en su sección (se baja hasta ella).
+          if (parte.destino === "otros-servicios" && onAbrirOtros) onAbrirOtros(e.currentTarget, "faq");
           else abrirDesplegable(parte.destino);
         }}
         className="font-semibold text-primary-light underline underline-offset-4 hover:text-primary"
@@ -35,7 +36,9 @@ function Respuesta({ partes, onAbrirOtros }) {
   );
 }
 
-export default function Faq({ onAbrirOtros }) {
+// `preguntasExtra`: se insertan tras la primera (solo /servicios/master).
+export default function Faq({ onAbrirOtros, preguntasExtra = [] }) {
+  const preguntas = [FAQ.preguntas[0], ...preguntasExtra, ...FAQ.preguntas.slice(1)];
   const [abierta, setAbierta] = useState(FAQ.preguntas[0].id);
 
   function alternar(p) {
@@ -61,7 +64,7 @@ export default function Faq({ onAbrirOtros }) {
         </div>
 
         <div className="mt-8 space-y-3">
-          {FAQ.preguntas.map((p) => {
+          {preguntas.map((p) => {
             const abiertaEsta = abierta === p.id;
             return (
               <div key={p.id} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">

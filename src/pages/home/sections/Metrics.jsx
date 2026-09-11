@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 
 // ⚠️ SUSTANCIACIÓN. Cada cifra debe poder acreditarse con evidencia que ya
-// exista al publicarla. Verificado contra la base de datos de producción el
-// 21/08/2026: catálogo con 1.108 másteres y 47 universidades públicas, y
-// registros internos de expedientes y becas. Si una cifra cambia, actualizar
-// también el expediente de sustanciación (docs/legal/09 del backend).
+// exista al publicarla. Catálogo: más de 3.000 másteres oficiales activos y 45
+// universidades públicas en el censo (04/09/2026); 98 % de admitidos según los
+// registros internos de expedientes (agosto de 2026). Las becas logradas se
+// citan por entidad, sin número. Si una cifra cambia, actualizar también el
+// expediente de sustanciación (docs/legal/09 del backend).
 const metrics = [
-  { count: 98, suffix: "%", label: "Tasa de admisión", width: 98 },
-  { count: 1100, prefix: "+", label: "Másteres analizados", width: 92 },
-  { count: 100, prefix: "+", label: "Becas logradas", width: 75 },
-  { fixed: "360°", label: "Servicio de principio a fin", width: 100 },
+  { count: 98, suffix: "%", label: "Admitidos a másteres oficiales", width: 98 },
+  { count: 3000, prefix: "+", label: "Másteres oficiales en nuestro catálogo", width: 92 },
+  { count: 45, prefix: "+", label: "Universidades públicas españolas", width: 75 },
+  { count: 30, suffix: " h", label: "Semanales de trabajo con permiso de estudiante", width: 60 },
 ];
+
+// Punto de miles también en cuatro cifras («3.000»).
+const miles = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
 // Base de cálculo que se muestra junto a las cifras.
 const PERIODO_METRICAS =
-  "según los registros internos de expedientes y el catálogo académico de la empresa, actualizados a agosto de 2026";
+  "según los registros internos de expedientes (agosto de 2026) y el catálogo académico de la empresa (septiembre de 2026)";
 
 /* Réplica del contador del mockup: ease-out cúbico sobre 1.6s al entrar en viewport */
 function useInView(threshold = 0.35) {
@@ -62,7 +66,7 @@ function Metric({ m }) {
   return (
     <article className={`metric${seen ? " in" : ""}`} ref={ref} data-reveal="">
       <strong>
-        {m.fixed ?? `${m.prefix ?? ""}${value}${m.suffix ?? ""}`}
+        {m.fixed ?? `${m.prefix ?? ""}${miles(value)}${m.suffix ?? ""}`}
       </strong>
       <span>{m.label}</span>
       <div className="bar">

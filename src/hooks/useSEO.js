@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
-const BASE_URL = "https://inspira-legal.cloud";
+// Con www: nginx redirige el dominio sin www, y un canonical que redirige confunde a Google.
+const BASE_URL = "https://www.inspira-legal.cloud";
 
 // Imagen de compartir por sección. Las genera scripts/og.py en public/og/.
 // Sin esto, al pegar un enlace en WhatsApp o Instagram no aparece imagen.

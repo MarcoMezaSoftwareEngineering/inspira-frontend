@@ -1,6 +1,7 @@
 import Reveal from "../../../components/common/Reveal";
 import BotonAsesoria from "../../../components/common/BotonAsesoria";
 import SEOSchema from "../../../components/SEOSchema";
+import { NOMBRE_PAQUETE, PRECIO_DESDE, eur } from "../../../config/paqueteMaster2027Resumen";
 
 const preguntas = [
   {
@@ -12,8 +13,8 @@ const preguntas = [
     a: "Porque no es una llamada de ventas: es un diagnóstico jurídico real con un abogado. Sales de ella con una estrategia clara, aunque decidas no contratar ningún paquete después.",
   },
   {
-    q: "¿Cuánto cuestan los paquetes completos?",
-    a: "Depende de tu caso: no vendemos paquetes genéricos. Tras la asesoría te enviamos una propuesta con exactamente los servicios que necesitas y su costo, sin sorpresas ni cobros ocultos.",
+    q: "¿Cuánto cuestan los paquetes?",
+    a: `Depende del servicio. El ${NOMBRE_PAQUETE} tiene precios publicados, desde ${eur(PRECIO_DESDE)} y con pago por etapas. Para visados, estancias, arraigos, nacionalidad y el resto de trámites, tras la asesoría te enviamos una propuesta con los servicios que necesitas y su costo, sin sorpresas ni cobros ocultos.`,
   },
   {
     q: "¿Puedo trabajar mientras estudio en España?",

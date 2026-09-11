@@ -76,13 +76,13 @@ export default function BlogPost({ slug }) {
       "@type": "Article",
       headline: post.titulo,
       description: post.extracto,
-      image: `https://inspira-legal.cloud${portadaDe(post)}`,
+      image: `https://www.inspira-legal.cloud${portadaDe(post)}`,
       datePublished: post.fecha,
       dateModified: post.fecha,
       inLanguage: "es",
       author: { "@type": "Person", name: autorPost.nombre, jobTitle: autorPost.cargo },
       publisher: { "@type": "Organization", name: "Inspira Legal" },
-      mainEntityOfPage: `https://inspira-legal.cloud/blog/${post.slug}`,
+      mainEntityOfPage: `https://www.inspira-legal.cloud/blog/${post.slug}`,
     };
   }, [post]);
 

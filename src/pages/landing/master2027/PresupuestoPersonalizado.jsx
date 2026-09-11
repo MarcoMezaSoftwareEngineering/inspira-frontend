@@ -56,7 +56,8 @@ export default function PresupuestoPersonalizado({ onAbrirOtros }) {
           </div>
         </div>
       </div>
-      <TarjetaOtrosServicios onAbrir={onAbrirOtros} />
+      {/* En /servicios/master las otras opciones van en su propia sección. */}
+      {onAbrirOtros && <TarjetaOtrosServicios onAbrir={onAbrirOtros} />}
     </section>
   );
 }

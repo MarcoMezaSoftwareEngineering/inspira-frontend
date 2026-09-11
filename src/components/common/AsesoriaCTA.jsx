@@ -104,7 +104,7 @@ export default function AsesoriaCTA() {
                 Reserva tu asesoría
               </span>
               <h2 className="mt-4 font-fraunces text-2xl font-bold leading-tight">
-                Una asesoría de distancia para vivir en España 🇪🇸
+                Una asesoría a distancia para vivir en España 🇪🇸
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-white/70">
                 Reunión online con un especialista en extranjería. Sales con un

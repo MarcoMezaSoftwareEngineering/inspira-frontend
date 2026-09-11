@@ -10,7 +10,7 @@ const ir = (e, href) => {
 
 const enlacesExplora = [
   { label: "Todos los servicios", href: "/servicios" },
-  { label: "Máster en España (360°)", href: "/servicios/master" },
+  { label: "Paquete Máster 2027/2028", href: "/servicios/master" },
   { label: "Visa y estancia por estudios", href: "/servicios/estancia" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
   { label: "Nuestro sistema", href: "/plataforma" },

@@ -7,7 +7,11 @@ import { BotonReserva, CifraAnimada, Entrada } from "./comunes";
 import { evento, irA } from "./medicion";
 import fotoHero from "../../../assets/images/landing/master-2027/foto-hero-aeropuerto-pasaporte.webp";
 
-export function Hero() {
+/**
+ * `secundarios` y `oficial` solo los pasa /servicios/master: la landing no los
+ * usa y se ve igual que siempre.
+ */
+export function Hero({ secundarios = null, oficial = null }) {
   return (
     <section className="relative overflow-hidden px-4 pb-14 pt-4 min-[380px]:px-5 sm:px-6 lg:pb-20 lg:pt-10">
       <div
@@ -28,22 +32,56 @@ export function Hero() {
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-neutral-700 sm:text-lg">{HERO.subtitulo}</p>
 
-          {/* Entre lg y xl la columna es estrecha: el enlace baja bajo el botón
-              en vez de partirse en dos líneas. */}
-          <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-5 lg:flex-col lg:items-start lg:gap-3 xl:flex-row xl:items-center xl:gap-5">
-            <BotonReserva ubicacion="hero" pulso ancho />
-            <a
-              href="#planes"
-              onClick={(e) => {
-                e.preventDefault();
-                evento("ads2027_ver_planes");
-                irA("planes");
-              }}
-              className="whitespace-nowrap text-center text-sm font-bold text-primary-light underline underline-offset-4 hover:text-primary"
-            >
-              {HERO.secundario}
-            </a>
-          </div>
+          {oficial && (
+            <p className="mt-4 flex items-start gap-2 rounded-xl border border-primary/15 bg-secondary-light px-3 py-2 text-[13px] font-semibold leading-snug text-primary">
+              <span className="mt-0.5 shrink-0 text-accent-dark">
+                <Icono nombre="escudo" size={16} />
+              </span>
+              {oficial}
+            </p>
+          )}
+
+          {secundarios ? (
+            // CTA principal arriba; debajo, dos botones secundarios (apilados y a
+            // todo el ancho en móvil).
+            <div className="mt-6 flex flex-col items-stretch gap-3 sm:items-start">
+              <BotonReserva ubicacion="hero" pulso ancho />
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+                {secundarios.map((b) => (
+                  <a
+                    key={b.id}
+                    href={`#${b.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      evento("ads2027_hero_secundario", { destino: b.id });
+                      irA(b.id);
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-white px-4 py-2.5 text-sm font-bold text-primary no-underline transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky"
+                  >
+                    <Icono nombre={b.icono} size={17} />
+                    {b.texto}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Entre lg y xl la columna es estrecha: el enlace baja bajo el botón
+            // en vez de partirse en dos líneas.
+            <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-5 lg:flex-col lg:items-start lg:gap-3 xl:flex-row xl:items-center xl:gap-5">
+              <BotonReserva ubicacion="hero" pulso ancho />
+              <a
+                href="#planes"
+                onClick={(e) => {
+                  e.preventDefault();
+                  evento("ads2027_ver_planes");
+                  irA("planes");
+                }}
+                className="whitespace-nowrap text-center text-sm font-bold text-primary-light underline underline-offset-4 hover:text-primary"
+              >
+                {HERO.secundario}
+              </a>
+            </div>
+          )}
 
           <a
             href="#fechas"

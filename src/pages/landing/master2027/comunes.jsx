@@ -5,6 +5,15 @@ import Icono from "../../../components/common/Icono";
 import { CTA, WHATSAPP } from "../../../config/paqueteMaster2027";
 import { URL_CALENDLY, evento, registrarCta, prefiereMenosMovimiento } from "./medicion";
 
+// Entradas solo con transform: el contenido nunca depende de la animación.
+// Las comparten la landing /master-2027-2028 y /servicios/master.
+export const ESTILOS_M27 = `
+@keyframes m27-sube { from { transform: translateY(18px); } to { transform: translateY(0); } }
+@keyframes m27-emerge { from { transform: translateY(16px) scale(0.96); } to { transform: translateY(0) scale(1); } }
+@keyframes m27-hoja { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes m27-pulso { 0% { transform: scale(1); opacity: 0.45; } 70%, 100% { transform: scale(1.05, 1.28); opacity: 0; } }
+`;
+
 /**
  * Botón a Calendly. Etiqueta única de 37 caracteres: en 390 px cabe en una
  * línea a 15 px con este relleno (medido con Montserrat 700: 292 px), y por

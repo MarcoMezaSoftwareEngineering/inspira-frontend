@@ -21,7 +21,7 @@ import SEOSchema from "./components/SEOSchema";
 // visita: así la portada carga con menos JavaScript y publicar un cambio en una
 // página no invalida la caché de las otras.
 const AuthSuccess = lazyConRecarga(() => import("./pages/auth/AuthSuccess"));
-const PortalServiciosMaster = lazyConRecarga(() => import("./pages/servicios/master/PortalServiciosMaster"));
+const ServicioMaster2027 = lazyConRecarga(() => import("./pages/servicios/master/ServicioMaster2027"));
 const EstanciaLanding = lazyConRecarga(() => import("./pages/servicios/estancia/EstanciaLanding"));
 const ServiciosCatalogo = lazyConRecarga(() => import("./pages/servicios/ServiciosCatalogo"));
 const ServicioDetalle = lazyConRecarga(() => import("./pages/servicios/ServicioDetalle"));
@@ -31,9 +31,7 @@ const MuestraUX = import.meta.env.DEV ? lazyConRecarga(() => import("./pages/dev
 const CalculadoraMaster = lazyConRecarga(() => import("./pages/calculadora/CalculadoraMaster"));
 const PanelCliente = lazyConRecarga(() => import("./pages/panel/PanelCliente"));
 const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"));
-const MasterAdsLanding = lazyConRecarga(() => import("./pages/landing/MasterAdsLanding"));
 const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/MasterAds2027"));
-const MetodoInspira = lazyConRecarga(() => import("./pages/metodo/MetodoInspira"));
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
@@ -56,6 +54,9 @@ const TerminosCondiciones = lazyConRecarga(() => import("./pages/legal/TerminosC
 const DerechosArco = lazyConRecarga(() => import("./pages/legal/DerechosArco"));
 const LibroReclamaciones = lazyConRecarga(() => import("./pages/legal/LibroReclamaciones"));
 
+// Resumen ligero del Paquete Máster (el config completo solo lo carga su página).
+import { PRECIOS, PRECIO_DESDE, NOMBRE_PAQUETE, eur } from "./config/paqueteMaster2027Resumen";
+
 // Páginas a las que más se salta desde la portada: se adelantan en tiempo
 // ocioso, ya pintada la pantalla, para que el primer clic no espere descarga.
 const PRECARGA = [
@@ -65,23 +66,29 @@ const PRECARGA = [
 ];
 
 // ── Configuración SEO por ruta ─────────────────────────────────────────────
+// useSEO añade « | Inspira Legal» al título. Textos alineados con
+// scripts/rutas-compartir.mjs (vista previa al compartir).
 const SEO_PAGES = {
   "/": {
-    title: "Visa Estudiante y Máster en España para Latinoamericanos 2026",
+    title: "Visas, máster, residencia y nacionalidad en España",
     description:
-      "Tramita tu visa de estudiante y encuentra el mejor máster en España. Apostilla, extranjería y acompañamiento 360° para latinoamericanos. ¡Empieza hoy!",
+      "Despacho de abogados especialistas en extranjería española: visado y estancia por estudios, máster en universidades públicas, residencias y nacionalidad, con asesoría a distancia.",
     path: "/",
   },
   "/servicios/master": {
-    title: "Estudia un Máster en España – Programa 360° para Latinoamericanos",
-    description:
-      "Elegimos el máster ideal para ti y gestionamos todo: visa de estudiante, apostilla y matrícula en universidades españolas. Acompañamiento completo 2026/2027.",
+    title: NOMBRE_PAQUETE,
+    description: `Postula a másteres oficiales en universidades públicas de España para 2027/2028. Planes desde ${eur(PRECIO_DESDE)}, pago por etapas y sesión diagnóstico con abogado especialista.`,
     path: "/servicios/master",
   },
+  // Landing de Ads: noindex; solo se usa el título.
+  "/master-2027-2028": {
+    title: NOMBRE_PAQUETE,
+    path: "/master-2027-2028",
+  },
   "/servicios/estancia": {
-    title: "Visa de Estancia en España para Latinoamericanos 2026",
+    title: "Estancia por estudios en España",
     description:
-      "Gestiona tu visa de estancia, renovación o permiso de residencia en España. Expertos en extranjería para latinoamericanos. Sin sorpresas.",
+      "Gestionamos tu estancia por estudios, su prórroga y el paso a residencia en España, con abogados especialistas en extranjería.",
     path: "/servicios/estancia",
   },
   "/servicios": {
@@ -108,14 +115,8 @@ const SEO_PAGES = {
       "Guías claras de extranjería, visados, nacionalidad y vida académica en España, escritas por el equipo legal de Inspira.",
     path: "/blog",
   },
-  "/metodo-inspira": {
-    title: "Método Inspira — Tu proceso por etapas, tu inversión distribuida",
-    description:
-      "Admisión, carta, visado y llegada: las cuatro etapas del Método Inspira, qué incluye cada una y cuándo se paga. Paquetes de máster desde 219 € y asesoría de visado desde 109 €.",
-    path: "/metodo-inspira",
-  },
   "/visa-o-estancia": {
-    title: "¿Visa o estancia por estudios? Test rápido — Inspira Legal",
+    title: "¿Visa o estancia por estudios? Test rápido",
     description:
       "Cinco preguntas para saber si calificas para el visado de estudios o para la estancia por estudios en España, con el paquete que te conviene y cuánto dinero tienes que acreditar.",
     path: "/visa-o-estancia",
@@ -175,9 +176,9 @@ const SEO_PAGES = {
     path: "/asistente",
   },
   "/calculadora-master": {
-    title: "¿Cuánto cuesta un Máster en España? Calculadora Gratis",
+    title: "¿Cuánto cuesta estudiar un máster en España? Calculadora gratis",
     description:
-      "Calcula el costo real de estudiar un máster en España desde Latinoamérica: matrícula, visa, apostilla, alojamiento y gastos de vida. Gratis e instantáneo.",
+      "Calcula el costo real de estudiar un máster en España desde Latinoamérica: matrícula, visado, apostillas, alojamiento y gastos de vida. Gratis y al instante.",
     path: "/calculadora-master",
   },
   "/reservar": {
@@ -227,7 +228,7 @@ const SCHEMA_ORG = {
   taxID: "20610501941",
   telephone: "+51992009397",
   email: "administracion@inspira-legal.cloud",
-  url: "https://inspira-legal.cloud",
+  url: "https://www.inspira-legal.cloud",
   description:
     "Consultoría especializada en másteres y postgrados en España, visas de estudiante y trámites de extranjería para latinoamericanos.",
   areaServed: ["PE", "CO", "MX", "AR", "CL", "EC", "BO", "VE", "ES"],
@@ -248,12 +249,18 @@ const SCHEMA_ORG = {
 const SCHEMA_MASTER = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Programa Máster 360° en España",
+  name: `${NOMBRE_PAQUETE} en España`,
   provider: { "@type": "Organization", name: "Inspira Legal" },
   serviceType: "Asesoría académica para másteres en España",
-  areaServed: "PE",
+  areaServed: ["PE", "CO", "MX", "AR", "CL", "EC", "BO", "VE"],
   description:
-    "Acompañamiento integral para estudiar un máster en España: selección de universidad, visado de estudiante, trámites de extranjería y más.",
+    "Selección de másteres oficiales, preparación de la candidatura y postulación en universidades españolas, con pago por etapas y seguimiento en un portal propio.",
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "EUR",
+    lowPrice: String(PRECIO_DESDE),
+    highPrice: String(Math.max(...Object.values(PRECIOS))),
+  },
 };
 
 const SCHEMA_ESTANCIA = {
@@ -272,7 +279,23 @@ const PRIVATE_PATHS = ["/panel", "/auth/success"];
 
 // Landings standalone para campañas de ads: sin Header/Footer del sitio, y
 // sin indexar (tráfico pagado, no orgánico).
-const LANDING_ADS_PATHS = ["/master-espana", "/master-2027-2028"];
+const LANDING_ADS_PATHS = ["/master-2027-2028"];
+
+// Rutas retiradas: se sustituyen en el historial (replace) antes de pintar
+// nada, conservando los utm_* de la URL. La página vieja no se monta nunca.
+const REDIRECCIONES = {
+  "/metodo-inspira": "/servicios/master#pago-por-etapas",
+  "/master-espana": "/master-2027-2028",
+};
+
+function rutaActual() {
+  const { pathname, search } = window.location;
+  const destino = REDIRECCIONES[pathname.replace(/\/+$/, "") || "/"];
+  if (!destino) return pathname;
+  const [ruta, hash] = destino.split("#");
+  window.history.replaceState(window.history.state, "", `${ruta}${search}${hash ? `#${hash}` : ""}`);
+  return ruta;
+}
 
 function RouteSEO({ path }) {
   const isPrivate =
@@ -284,7 +307,7 @@ function RouteSEO({ path }) {
     const s = getServicio(path.slice("/servicios/".length));
     if (s?.detalle) {
       config = {
-        title: `${s.detalle.titulo} – Inspira Legal`,
+        title: s.detalle.titulo,
         description: `${s.detalle.gancho} ${s.resumen}`.slice(0, 300),
         path,
       };
@@ -298,7 +321,7 @@ function RouteSEO({ path }) {
     esEntradaBlog
       ? { omitir: true }
       : isPrivate
-        ? { noIndex: true }
+        ? { noIndex: true, title: config?.title }
         : config || { noIndex: true }
   );
   return null;
@@ -324,9 +347,7 @@ const PUBLIC_PATHS = [
   "/ruta/denegado",
   "/ruta/tramites",
   "/calculadora-master",
-  "/master-espana",
   "/master-2027-2028",
-  "/metodo-inspira",
   "/visa-o-estancia",
   "/panel",
   "/pago-exitoso",
@@ -340,10 +361,10 @@ const PUBLIC_PATHS = [
 ];
 
 export default function App() {
-  const [path, setPath] = useState(window.location.pathname);
+  const [path, setPath] = useState(rutaActual);
 
   useEffect(() => {
-    const onPop = () => setPath(window.location.pathname);
+    const onPop = () => setPath(rutaActual());
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
@@ -428,7 +449,7 @@ export default function App() {
       {path === "/" && <Home />}
       {path === "/auth/success" && <AuthSuccess />}
       {path === "/servicios" && <ServiciosCatalogo />}
-      {path === "/servicios/master" && <PortalServiciosMaster />}
+      {path === "/servicios/master" && <ServicioMaster2027 />}
       {path === "/servicios/estancia" && <EstanciaLanding />}
       {isServicioDetalle && <ServicioDetalle id={servicioId} />}
       {isRuta && <RutaLanding id={rutaId} />}
@@ -443,9 +464,7 @@ export default function App() {
       {path === "/calculadora-master" && <CalculadoraMaster />}
       {isPanel && <PanelCliente path={path} />}
       {path === "/reservar" && <ReservarCita />}
-      {path === "/master-espana" && <MasterAdsLanding />}
       {path === "/master-2027-2028" && <MasterAds2027 />}
-      {path === "/metodo-inspira" && <MetodoInspira />}
       {path === "/visa-o-estancia" && <VisaOEstancia />}
       {path === "/pago-exitoso" && <PagoExitoso />}
       {path === "/pago-fallido" && <PagoFallido />}

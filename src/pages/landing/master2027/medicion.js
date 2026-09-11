@@ -30,8 +30,16 @@ function construirCalendly() {
 
 export const URL_CALENDLY = construirCalendly();
 
+// Página que emite los eventos: la landing de Ads o /servicios/master, que
+// reutiliza sus secciones (ServicioMaster2027 la fija al montar y la devuelve
+// al desmontar).
+let pagina = "landing_2027";
+export function fijarPagina(nombre) {
+  pagina = nombre;
+}
+
 export function evento(nombre, datos = {}) {
-  registrarEvento(nombre, datos);
+  registrarEvento(nombre, { pagina, ...datos });
 }
 
 // ── Marcas de sesión ────────────────────────────────────────────────────────

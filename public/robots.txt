@@ -6,5 +6,6 @@ Disallow: /panel/
 Disallow: /backoffice
 Disallow: /backoffice/
 Disallow: /auth/
+Disallow: /interno/
 
-Sitemap: https://inspira-legal.cloud/sitemap.xml
+Sitemap: https://www.inspira-legal.cloud/sitemap.xml

@@ -35,15 +35,9 @@ import Equipo from "./Equipo";
 import Faq from "./Faq";
 import { CtaFinal, Pie } from "./CtaFinal";
 import { BarraReserva, VentanaModal } from "./BarraYModales";
+import { ESTILOS_M27 } from "./comunes";
 import logo from "../../../assets/images/logo.png";
 
-// Entradas solo con transform: el contenido nunca depende de la animación.
-const ESTILOS = `
-@keyframes m27-sube { from { transform: translateY(18px); } to { transform: translateY(0); } }
-@keyframes m27-emerge { from { transform: translateY(16px) scale(0.96); } to { transform: translateY(0) scale(1); } }
-@keyframes m27-hoja { from { transform: translateY(100%); } to { transform: translateY(0); } }
-@keyframes m27-pulso { 0% { transform: scale(1); opacity: 0.45; } 70%, 100% { transform: scale(1.05, 1.28); opacity: 0; } }
-`;
 
 // Una sola ventana emergente (cliente, 11/09/2026, tarde): la de la sesión
 // diagnóstico, a los 40 s en la página y una vez por sesión.
@@ -149,7 +143,7 @@ export default function MasterAds2027() {
 
   return (
     <div className="w-full overflow-x-hidden bg-white font-sans text-neutral-900" style={{ "--m27-barra": "4.5rem" }}>
-      <style>{ESTILOS}</style>
+      <style>{ESTILOS_M27}</style>
 
       <header className="px-4 pt-4 min-[380px]:px-5 sm:px-6 sm:pt-6">
         <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-3">

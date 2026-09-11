@@ -25,44 +25,14 @@ import { SESION_DIAGNOSTICO, PLANES_VISADO, ESTANCIA_ESTUDIOS, CITAS_ESPANA } fr
 import { TITULAR } from "./legal";
 import { lineaDe, whatsappLinea } from "./contacto";
 
-// ── Formato ─────────────────────────────────────────────────────────────────
-// Espacio duro antes de «€» para que el símbolo no salte solo de línea, y
-// punto de miles también en cuatro cifras («1.100 €»), que toLocaleString
-//("es-ES") no pone.
-const NBSP = "\u00A0";
-const miles = (entero) => String(entero).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+// ── Formato y precios ───────────────────────────────────────────────────────
+// Viven en paqueteMaster2027Resumen.js, que usan también la portada, el menú y
+// App.jsx sin cargar todo este archivo. Aquí se reexportan: una sola fuente.
+import { NBSP, numero, eur, rangoEur, PRECIOS, PRECIO_DESDE } from "./paqueteMaster2027Resumen";
 
-export function numero(n) {
-  const v = Number(n);
-  if (Number.isInteger(v)) return miles(v);
-  const [entero, decimales] = v.toFixed(2).split(".");
-  return `${miles(entero)},${decimales}`;
-}
-
-export const eur = (n) => `${numero(n)}${NBSP}€`;
-export const rangoEur = (a, b) => `${numero(a)}–${numero(b)}${NBSP}€`;
-
-// ── Precios del Paquete Máster 2027/2028 (cliente, 10/09/2026) ─────────────
-export const PRECIOS = {
-  "l1-a": 219,
-  "l1-basico": 249,
-  "l1-comfort": 279,
-  "l1-full": 359,
-  "l2-a": 219,
-  "l2-basico-full": 249,
-  "l2-full": 349,
-  "l3-a": 219,
-  "l3-comfort": 350,
-  "l3-full": 450,
-  "l3-total": 600,
-  // Paquete estándar publicado por el cliente el 11/09/2026.
-  "econ-intermedias-650": 650,
-  "premium-700": 700,
-  "infinity-1100": 1100,
-};
+export { numero, eur, rangoEur, PRECIOS, PRECIO_DESDE };
 
 const P = PRECIOS;
-export const PRECIO_DESDE = Math.min(...Object.values(PRECIOS));
 
 // Cifras externas que citan los textos (hechos verificados).
 const MATRICULA_DESDE = 730;
@@ -946,6 +916,113 @@ export const CALCULADORA = {
 };
 
 // ── A11 · Fechas 2027-28 (estimadas) ────────────────────────────────────────
+// ── Matrícula orientativa por comunidad (curso 2026-27) ────────────────────
+// Mismos datos que la lámina 10 del PDF, contrastados con
+// BE/prisma/seeds/data/precios.json; Navarra, con la OF 63E/2026 de la UPNA.
+// `ast`: la universidad puede fijar un precio distinto para no residentes
+// extracomunitarios. `marca`: número del mapa para las comunidades pequeñas.
+// Orden: de menor a mayor dentro de cada lista.
+const matricula = (id, lista, datos) => ({ id, lista, ...datos });
+
+export const MATRICULA = {
+  eyebrow: "Matrícula orientativa",
+  titulo: "¿Cuánto cuesta un máster al año en cada comunidad?",
+  intro: "Matrícula orientativa de un máster de 60 créditos para estudiante extracomunitario, según la norma de precios de cada comunidad (curso 2026-27). Los de 2027-28 se publican en primavera y verano de 2027.",
+  tablaTitulo: "De menor a mayor, por lista",
+  columnas: ["Comunidad", "Al año"],
+  segunRama: "según rama",
+  cadaUniversidad: "Lo fija cada universidad",
+  desde: "desde",
+  asterisco: "* Importe de la norma; la universidad puede fijar un precio distinto para no residentes extracomunitarios.",
+  nota: `Orientativo, 60 ECTS, curso 2026-27. En varias comunidades el precio varía por rama y la universidad puede fijar un precio distinto para no residentes; en algunas hay además una tasa previa de estudio del título (entre ${numero(TASA_PREVIA[0])} y ${eur(TASA_PREVIA[1])}). La matrícula la pagas directamente a la universidad.`,
+  calculadora: "Calcula tu caso con la calculadora →",
+  calculadoraHref: "/calculadora-master",
+  ariaMapa: "Mapa de España con la matrícula orientativa de un máster por comunidad",
+  filas: [
+    matricula("galicia", "economicas", { min: 591, max: 836, ast: true, rama: true }),
+    matricula("castilla-la-mancha", "economicas", { min: 728, max: 1132, ast: true, rama: true }),
+    matricula("andalucia", "economicas", { min: 821 }),
+    matricula("cantabria", "economicas", { min: 894, max: 1578, rama: true, marca: 1 }),
+    matricula("asturias", "economicas", { min: 1310, ast: true }),
+    matricula("castilla-y-leon", "economicas", { min: 1572 }),
+    matricula("navarra", "economicas", { min: 1701, ast: true, marca: 2 }),
+    matricula("extremadura", "intermedias", { min: 1375, max: 2468, rama: true }),
+    matricula("pais-vasco", "intermedias", { min: 1538, max: 2143, rama: true, marca: 3 }),
+    matricula("murcia", "intermedias", { min: 2227, desde: true, ast: true }),
+    matricula("la-rioja", "intermedias", { min: 2876, marca: 4 }),
+    matricula("aragon", "intermedias", { min: 3648 }),
+    matricula("comunidad-valenciana", "premium", { min: 4241 }),
+    matricula("madrid", "premium", { min: 5044, marca: 5 }),
+    matricula("cataluna", "premium", { cadaUniversidad: true }),
+  ],
+};
+
+// Importe de una fila tal como se lee en la tabla y en el mapa.
+export function importeMatricula(f) {
+  if (f.cadaUniversidad) return MATRICULA.cadaUniversidad;
+  const asterisco = f.ast ? "*" : "";
+  if (f.max) return `${rangoEur(f.min, f.max)}${asterisco}`;
+  return `${f.desde ? `${MATRICULA.desde} ` : ""}${eur(f.min)}${asterisco}`;
+}
+
+// ── /servicios/master · Portal propio (solo funciones verificadas) ────────
+export const PORTAL_PROPIO = {
+  eyebrow: "Portal propio",
+  titulo: "Tu máster vive en tu portal, no en un chat",
+  intro: "Cada asesorado tiene su panel privado. Tú ves en qué punto está tu máster; tu asesor trabaja sobre el mismo expediente.",
+  items: [
+    {
+      id: "inicio",
+      titulo: "Todo en un lugar",
+      texto: "Al entrar sabes en qué punto está tu máster, qué te toca hoy y quién es tu asesor. Entras con tu correo de Google y el panel se instala como app en tu teléfono.",
+      alt: "Inicio del portal del asesorado, con los datos desenfocados",
+    },
+    {
+      id: "expediente",
+      titulo: "Tu máster, paso a paso",
+      texto: "Documentos, perfil académico, informe, elección, postulaciones y cierre, con tu avance a la vista. Si un documento necesita cambios, tu asesor te lo explica en el propio documento.",
+      alt: "Avance del expediente de máster, con los datos desenfocados",
+    },
+    {
+      id: "informe",
+      titulo: "Informe y elección con tu asesor",
+      texto: "Un informe de másteres personalizado, con precio, plazos y beca posible de cada uno. Tú eliges tus favoritos y tu asesor te responde uno por uno.",
+      alt: "Un máster del informe personalizado, con los datos desenfocados",
+    },
+    {
+      id: "plazos",
+      titulo: "Cada plazo y cada portal a la vista",
+      texto: "Una línea de tiempo por postulación. Tu asesor revisa los portales y anota cada requerimiento o notificación con su plazo.",
+      alt: "Línea de tiempo de una postulación, con los datos desenfocados",
+    },
+  ],
+  nota: "Capturas del portal con datos de ejemplo desenfocados.",
+  contexto: "Tu expediente se abre después de la sesión.",
+};
+
+// ── /servicios/master · textos propios de la página del sitio ──────────────
+export const PAGINA_MASTER = {
+  // Hero: títulos oficiales y dos botones secundarios a secciones de la página.
+  heroOficial: "Solo másteres universitarios oficiales: títulos reconocidos en España y la UE y aptos para el visado de estudios",
+  heroSecundarios: [
+    // La calculadora muestra equivalencia de nota, costos y universidades compatibles con el perfil.
+    { id: "calculadora", icono: "euro", texto: "Calcula a qué másteres puedes postular" },
+    { id: "portal", icono: "panel", texto: "Portal Inspira: mira nuestro portal único" },
+  ],
+  // Formulado como alcance de los paquetes: hay unos pocos títulos propios
+  // marcados en el catálogo que un asesor puede añadir si se piden expresamente.
+  planesOficial: "Todos los paquetes son para másteres universitarios oficiales",
+  faqOficial: {
+    id: "titulos-oficiales",
+    q: "¿Son títulos oficiales?",
+    a: [
+      "Sí. Nuestros paquetes son para másteres universitarios oficiales: títulos inscritos en el Registro de Universidades, Centros y Títulos (RUCT) del Ministerio, con validez en toda España y reconocidos en el Espacio Europeo de Educación Superior. Importa por dos motivos: el visado de estudios pide estar admitido en estudios aptos, y es el título oficial el que después puedes hacer valer o homologar en tu país. Los títulos propios de una universidad no son oficiales ni se pueden homologar, y para el visado exigen revisar cada caso; por eso trabajamos con másteres oficiales. Que el título sea oficial no asegura la plaza: la admisión la decide cada universidad.",
+    ],
+  },
+  opinionesEyebrow: "Opiniones reales",
+  opinionesTitulo: "Lo que dicen quienes ya trabajaron con nosotros",
+};
+
 export const FECHAS = {
   eyebrow: "Calendario 2027-28 · estimado",
   titulo: "Cuándo se postula para empezar en septiembre de 2027",
@@ -995,29 +1072,8 @@ export const EQUIPO = {
   ],
 };
 
-// ── Opiniones reales en Google (leídas el 11/09/2026; citas literales) ─────
-export const OPINIONES = {
-  cabecera: "5,0 de 5 en Google · 6 reseñas (septiembre de 2026)",
-  subtitulo: "Opiniones publicadas por clientes de nuestro servicio de visado.",
-  enlace: "Ver todas las opiniones en Google",
-  url: "https://maps.app.goo.gl/f3oL2qQdmheT4Dnr6",
-  estrellas: 5,
-  ariaCarrusel: "Opiniones de clientes",
-  anterior: "Opinión anterior",
-  siguiente: "Opinión siguiente",
-  // Fuente única: SP/work/opiniones.md (11/09/2026), en su orden sugerido.
-  // Texto literal (solo se omiten emojis finales); la de Facebook, copiada de
-  // config/testimonios.js. Sin enlace a Facebook: no hay URL verificada.
-  citas: [
-    { autor: "Maria Belen A.", servicio: "Visado de estudios", fuente: "Google", fecha: "septiembre de 2026", texto: "Carina me asesoró para mi trámite de visa de estudios a España y me dieron el visado sin necesidad de subsanar! Fue muy personalizado, siempre me brindaba soluciones y guiaba en el proceso de recolectar los documentos necesarios para la presentación de la solicitud y asegurarnos de que cada documento esté siendo considerado de manera correcta. También nos facilitó proveedores certificados de traductores, seguro de salud, certificado médico, etc y se encargó de agendar la cita en BLS. A mi llegada a España, continuó compartiéndome información sobre los trámites que debía hacer. La recomiendo!" },
-    { autor: "Lili P.", servicio: "Visado", fuente: "Google", fecha: "septiembre de 2026", texto: "Carina me ayudó muchísimo en el trámite de mi visado todo salió perfecto , sin subsanacion ni nada, me ayudó hasta un día antes de mi cita en bls! Es la mejor" },
-    { autor: "María Eugenia A.", servicio: "Visado", fuente: "Google", fecha: "septiembre de 2026", texto: "¡Gracias Carina por toda la asesoría! Me dieron la visa a España gracias a tu buena estrategia. La recomiendo al 100% a ella y a todo su equipo, ya que conocen los procedimientos del consulado y trabaja acorde a cada caso que es diferente y personalizado. ¡Me siento muy feliz por el resultado!" },
-    { autor: "Brian S.", servicio: "Visado", fuente: "Google", fecha: "septiembre de 2026", texto: "Gran asesoría, y apoyo en el trámite, salió todo en menos de un mes." },
-    { autor: "Rosa A.", servicio: "Visado", fuente: "Google", fecha: "septiembre de 2026", texto: "Me ayudó con todo el trámite para el proceso de visado, la recomiendo 100%, mucha paciencia y siempre respondia a mis consultas oportunamente." },
-    { autor: "Annie M.", servicio: "Visado", fuente: "Google", fecha: "abril de 2026", texto: "Carina me ayudo con el visado de españa! Realmente una capa, conoce todos los procedimientos del consulado y la atención con ella fue 10/10! Agradecida y feliz por el resultado" },
-    { autor: "Cristina D.", servicio: "Visa aprobada", fuente: "Facebook", fecha: "octubre de 2024", texto: "Llegué con el equipo de Inspira gracias a una recomendación de Facebook. Me dieron la confianza desde el primer momento que empezamos a revisar mi caso. Gracias a ellos mi visa fue aprobada, los súper recomiendo." },
-  ],
-};
+// Opiniones reales: fuente única en config/testimonios.js (TESTIMONIOS y
+// RESENAS_GOOGLE); las pinta pages/landing/master2027/Opiniones.jsx.
 
 // ── A13 · Preguntas frecuentes ──────────────────────────────────────────────
 // Las respuestas son listas de trozos: texto o { enlace, destino } (un enlace

@@ -16,7 +16,7 @@ const rutas = [
     emoji: "🎓",
     titulo: "Quiero estudiar en España",
     texto:
-      "Máster, grado o carrera técnica, con el permiso que te deja trabajar 30 h semanales. Matrículas desde 700 €.",
+      "Máster, grado o carrera técnica, con el permiso que te deja trabajar 30 h semanales. Matrículas desde 730 €.",
     items: ["Visa de Estudios", "Estancia por Estudios", "Máster · Grado · FP"],
     href: "/ruta/estudios",
     destacado: true,

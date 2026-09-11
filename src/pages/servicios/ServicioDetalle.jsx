@@ -17,6 +17,9 @@ import SigueExplorando from "../../components/layout/SigueExplorando";
 import { navigate } from "../../services/navigate";
 import NotFound from "../NotFound";
 
+// Servicios cuya página enlaza el test «¿Visa o estancia?».
+const VIAS_CON_TEST = ["visa-estudios", "estancia-estudios"];
+
 const go = (e, href) => {
   e.preventDefault();
   navigate(href);
@@ -62,6 +65,28 @@ export default function ServicioDetalle({ id }) {
       </div>
 
       <div className="mx-auto max-w-4xl px-6 py-14">
+        {/* Visado o estancia: el test ayuda a elegir entre las dos vías */}
+        {VIAS_CON_TEST.includes(servicio.id) && (
+          <a
+            href="/visa-o-estancia"
+            onClick={(e) => go(e, "/visa-o-estancia")}
+            className="mb-10 flex flex-col gap-3 rounded-2xl border border-primary/15 bg-secondary-light p-5 transition hover:border-primary/40 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
+                <Icono nombre="brujula" size={20} />
+              </span>
+              <span>
+                <span className="block font-bold text-primary">¿Visado o estancia por estudios?</span>
+                <span className="mt-0.5 block text-sm text-neutral-700">
+                  Cinco preguntas y te decimos cuál te corresponde y cuánto dinero tienes que acreditar.
+                </span>
+              </span>
+            </span>
+            <span className="shrink-0 text-sm font-bold text-primary">Hacer el test →</span>
+          </a>
+        )}
+
         {/* Bloques de contenido */}
         {d.bloques?.map((bloque) => (
           <section key={bloque.titulo} className="mb-10">

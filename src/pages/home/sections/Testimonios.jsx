@@ -1,6 +1,9 @@
+// src/pages/home/sections/Testimonios.jsx
+// Las 7 opiniones reales de la portada, con el mismo carrusel que
+// /servicios/master y la landing (fuente única: config/testimonios.js).
 import Reveal from "../../../components/common/Reveal";
-import { TESTIMONIOS } from "../../../config/testimonios";
 import { navigate } from "../../../services/navigate";
+import Opiniones from "../../landing/master2027/Opiniones";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -18,47 +21,21 @@ export default function Testimonios() {
             <h2>Lo que dicen quienes ya lo lograron.</h2>
           </div>
           <p>
-            Reseñas publicadas por nuestros propios clientes en Facebook y
-            Google. Cada proceso es distinto, pero el objetivo es el mismo.
+            Reseñas publicadas por nuestros propios clientes en Google y
+            Facebook. Cada proceso es distinto, pero el objetivo es el mismo.
           </p>
         </Reveal>
 
-        <div className="testimonial-grid dos">
-          {TESTIMONIOS.map((t, i) => (
-            <Reveal className="testimonial-card" key={t.nombre} delay={i * 120}>
-              <div className="t-head">
-                <div className="stars" aria-label={`${t.estrellas} de 5 estrellas`}>
-                  {"★".repeat(t.estrellas)}
-                </div>
-                <span className="fuente">{t.fuente}</span>
-              </div>
-              <p className="quote">“{t.texto}”</p>
-              <div className="who">
-                <div className="avatar">{t.nombre[0]}</div>
-                <div>
-                  <b>{t.nombre}</b>
-                  <span>
-                    {t.servicio} · {t.fecha}
-                  </span>
-                </div>
-              </div>
-            </Reveal>
-          ))}
+        <Opiniones ubicacion="portada" className="mt-8" />
 
-          <Reveal className="testimonial-card cta-card" delay={240}>
-            <h3>Tu caso puede ser el siguiente.</h3>
-            <p>
-              Mira los expedientes que hemos resuelto: admisiones, visas,
-              apelaciones ganadas y estancias aprobadas.
-            </p>
-            <a
-              href="/casos-de-exito"
-              onClick={(e) => go(e, "/casos-de-exito")}
-              className="btn btn-primary"
-            >
-              Ver casos de éxito <span className="arr">→</span>
-            </a>
-          </Reveal>
+        <div className="mt-8 text-center">
+          <a
+            href="/casos-de-exito"
+            onClick={(e) => go(e, "/casos-de-exito")}
+            className="btn btn-primary"
+          >
+            Ver casos de éxito <span className="arr">→</span>
+          </a>
         </div>
       </div>
     </section>

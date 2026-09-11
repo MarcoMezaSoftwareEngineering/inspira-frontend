@@ -3,6 +3,7 @@ import { navigate } from "../../../services/navigate";
 import Reveal from "../../../components/common/Reveal";
 import Icono from "../../../components/common/Icono";
 import { CALENDLY_URL } from "../../../config/contacto";
+import { HREF_PAQUETE, NOMBRE_PAQUETE } from "../../../config/paqueteMaster2027Resumen";
 
 const go = (e, href) => {
   e.preventDefault();
@@ -36,10 +37,10 @@ const VIAS = [
     cta: "Ver la ruta de estudios",
     color: "sky",
     stats: [
-      { i: "birrete", n: "+1.100", t: "másteres analizados" },
-      { i: "estrella", n: "+100", t: "becas logradas" },
+      { i: "birrete", n: "+3.000", t: "másteres oficiales en catálogo" },
+      { i: "estrella", n: "+45", t: "universidades públicas" },
       { i: "reloj", n: "30 h", t: "de trabajo semanal" },
-      { i: "euro", n: "700 €", t: "matrícula pública, desde" },
+      { i: "euro", n: "730 €", t: "matrícula pública, desde" },
     ],
   },
   {
@@ -88,7 +89,7 @@ const VIAS = [
 ];
 
 const ACCESOS = [
-  { i: "birrete", label: "Máster en España", href: "/servicios/master" },
+  { i: "birrete", label: NOMBRE_PAQUETE, href: HREF_PAQUETE },
   { i: "pasaporte", label: "Visa de Estudios", href: "/servicios/visa-estudios" },
   { i: "bandera", label: "Estancia por Estudios", href: "/servicios/estancia-estudios" },
   { i: "brujula", label: "Todos los servicios", href: "/servicios" },
@@ -122,7 +123,7 @@ export default function Hero() {
               <span className="hero-eyebrow-largo">Migra a España · </span>Rumbo a septiembre 2027
             </div>
             <h1>
-              Una asesoría de distancia para{" "}
+              Una asesoría a distancia para{" "}
               <em>migrar y vivir en España</em> legalmente.
             </h1>
             <p className="lead">
@@ -156,7 +157,7 @@ export default function Hero() {
               </li>
               <li>
                 <Icono nombre="birrete" size={15} />
-                +1.100 másteres analizados
+                Más de 3.000 másteres oficiales
               </li>
               <li>
                 <Icono nombre="laptop" size={15} />

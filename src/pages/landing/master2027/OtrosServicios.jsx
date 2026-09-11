@@ -1,14 +1,15 @@
 // src/pages/landing/master2027/OtrosServicios.jsx
 // A6c: paquetes parciales, servicios individuales y asesorías puntuales, con
-// los datos del portal /servicios/master. En la página solo va una tarjeta
-// compacta; las pestañas viven en una ventana que abre el usuario (modal
-// centrado en escritorio, hoja desde abajo en móvil). Se abre también con
-// #otros-servicios en la URL (lo enlaza el PDF). No es una ventana emergente.
+// los datos del portal /servicios/master antiguo (config/paqueteMaster2027.js).
+// - Landing: una tarjeta compacta y una ventana que abre el usuario (modal
+//   centrado en escritorio, hoja desde abajo en móvil). Se abre también con
+//   #otros-servicios en la URL (lo enlaza el PDF). No es una ventana emergente.
+// - /servicios/master: la misma botonera de pestañas, visible como sección.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icono from "../../../components/common/Icono";
 import { OTROS_SERVICIOS, eur } from "../../../config/paqueteMaster2027";
-import { BotonReserva, Contexto } from "./comunes";
+import { BotonReserva, Contexto, TituloSeccion } from "./comunes";
 import { evento } from "./medicion";
 
 const PESTANAS = OTROS_SERVICIOS.pestanas;
@@ -41,7 +42,108 @@ function TarjetaServicio({ s }) {
   );
 }
 
-/** Tarjeta de una fila que abre la ventana. */
+/** Pestañas, tarjetas, condiciones y botón. `prefijo` hace únicos los ids. */
+function ContenidoOtrosServicios({ prefijo, centrado = false }) {
+  const [activa, setActiva] = useState(PESTANAS[0].id);
+  const botones = useRef({});
+
+  function elegir(id, foco = false) {
+    setActiva(id);
+    evento("ads2027_servicios_pestana", { pestana: id });
+    if (foco) botones.current[id]?.focus();
+  }
+
+  function alTeclearPestana(e, indice) {
+    const ultimo = PESTANAS.length - 1;
+    const destino = {
+      ArrowRight: indice === ultimo ? 0 : indice + 1,
+      ArrowLeft: indice === 0 ? ultimo : indice - 1,
+      Home: 0,
+      End: ultimo,
+    }[e.key];
+    if (destino === undefined) return;
+    e.preventDefault();
+    elegir(PESTANAS[destino].id, true);
+  }
+
+  const pestana = PESTANAS.find((p) => p.id === activa);
+
+  return (
+    <>
+      <div
+        role="tablist"
+        aria-label={OTROS_SERVICIOS.ariaPestanas}
+        className={`grid max-w-xl grid-cols-4 gap-1 rounded-2xl border border-primary/10 bg-white p-1 ${centrado ? "mx-auto" : ""}`}
+      >
+        {PESTANAS.map((p, i) => {
+          const sel = p.id === activa;
+          return (
+            <button
+              key={p.id}
+              ref={(el) => {
+                botones.current[p.id] = el;
+              }}
+              type="button"
+              role="tab"
+              id={`${prefijo}-tab-${p.id}`}
+              aria-selected={sel}
+              aria-controls={`${prefijo}-panel-${p.id}`}
+              tabIndex={sel ? 0 : -1}
+              onClick={() => elegir(p.id)}
+              onKeyDown={(e) => alTeclearPestana(e, i)}
+              className={`rounded-xl px-1 py-2.5 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky sm:text-sm ${
+                sel ? "bg-primary text-white" : "text-primary hover:bg-secondary-light"
+              }`}
+            >
+              {p.etiqueta}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        role="tabpanel"
+        id={`${prefijo}-panel-${pestana.id}`}
+        aria-labelledby={`${prefijo}-tab-${pestana.id}`}
+        tabIndex={0}
+        className="mt-5 rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky"
+      >
+        <p className={`flex items-start gap-2 text-sm font-semibold text-primary ${centrado ? "sm:justify-center sm:text-center" : ""}`}>
+          <span className="mt-0.5 shrink-0 text-accent-dark">
+            <Icono nombre="brujula" size={16} />
+          </span>
+          {pestana.aviso}
+        </p>
+        <div className="-mx-5 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-3 pt-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3 [&::-webkit-scrollbar]:hidden">
+          {pestana.servicios.map((s) => (
+            <div key={s.id} className="w-[84%] shrink-0 snap-start sm:w-auto">
+              <TarjetaServicio s={s} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={`mt-5 rounded-2xl border border-primary/10 bg-white p-5 ${centrado ? "mx-auto max-w-3xl" : ""}`}>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary-light">{OTROS_SERVICIOS.condicionesTitulo}</p>
+        <ul className="mt-2 space-y-1.5">
+          {OTROS_SERVICIOS.condiciones.map((c) => (
+            <li key={c} className="flex items-start gap-2 text-sm leading-snug text-neutral-700">
+              <span aria-hidden="true" className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+              {c}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-6 text-center">
+        <Contexto>{OTROS_SERVICIOS.contexto}</Contexto>
+        <BotonReserva ubicacion="otros_servicios" ancho />
+      </div>
+    </>
+  );
+}
+
+/** Tarjeta de una fila que abre la ventana (landing). */
 export function TarjetaOtrosServicios({ onAbrir }) {
   return (
     <div className="mx-auto mt-6 flex max-w-[1100px] flex-col gap-4 rounded-2xl border border-primary/15 bg-secondary-light px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
@@ -67,10 +169,8 @@ export function TarjetaOtrosServicios({ onAbrir }) {
   );
 }
 
-/** Ventana con las pestañas: foco retenido, Esc, cerrar y foco devuelto (lo hace la página). */
+/** Ventana con las pestañas (landing): foco retenido, Esc, cerrar; la página devuelve el foco. */
 export function VentanaOtrosServicios({ onCerrar }) {
-  const [activa, setActiva] = useState(PESTANAS[0].id);
-  const botones = useRef({});
   const dialogoRef = useRef(null);
   const cerrarRef = useRef(null);
 
@@ -107,27 +207,6 @@ export function VentanaOtrosServicios({ onCerrar }) {
     };
   }, [onCerrar]);
 
-  function elegir(id, foco = false) {
-    setActiva(id);
-    evento("ads2027_servicios_pestana", { pestana: id });
-    if (foco) botones.current[id]?.focus();
-  }
-
-  function alTeclearPestana(e, indice) {
-    const ultimo = PESTANAS.length - 1;
-    const destino = {
-      ArrowRight: indice === ultimo ? 0 : indice + 1,
-      ArrowLeft: indice === 0 ? ultimo : indice - 1,
-      Home: 0,
-      End: ultimo,
-    }[e.key];
-    if (destino === undefined) return;
-    e.preventDefault();
-    elegir(PESTANAS[destino].id, true);
-  }
-
-  const pestana = PESTANAS.find((p) => p.id === activa);
-
   return createPortal(
     <div
       className="fixed inset-0 z-[10000] flex items-end justify-center bg-primary/70 font-sans backdrop-blur-sm sm:items-center sm:p-6"
@@ -163,80 +242,28 @@ export function VentanaOtrosServicios({ onCerrar }) {
         </div>
 
         <div className="overflow-y-auto overscroll-contain bg-secondary-light px-5 pb-8 pt-5 sm:px-8">
-          <p className="text-sm text-neutral-700">{OTROS_SERVICIOS.intro}</p>
-
-          <div
-            role="tablist"
-            aria-label={OTROS_SERVICIOS.ariaPestanas}
-            className="mt-4 grid max-w-xl grid-cols-4 gap-1 rounded-2xl border border-primary/10 bg-white p-1"
-          >
-            {PESTANAS.map((p, i) => {
-              const sel = p.id === activa;
-              return (
-                <button
-                  key={p.id}
-                  ref={(el) => {
-                    botones.current[p.id] = el;
-                  }}
-                  type="button"
-                  role="tab"
-                  id={`servicios-tab-${p.id}`}
-                  aria-selected={sel}
-                  aria-controls={`servicios-panel-${p.id}`}
-                  tabIndex={sel ? 0 : -1}
-                  onClick={() => elegir(p.id)}
-                  onKeyDown={(e) => alTeclearPestana(e, i)}
-                  className={`rounded-xl px-1 py-2.5 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky sm:text-sm ${
-                    sel ? "bg-primary text-white" : "text-primary hover:bg-secondary-light"
-                  }`}
-                >
-                  {p.etiqueta}
-                </button>
-              );
-            })}
-          </div>
-
-          <div
-            role="tabpanel"
-            id={`servicios-panel-${pestana.id}`}
-            aria-labelledby={`servicios-tab-${pestana.id}`}
-            tabIndex={0}
-            className="mt-5 rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky"
-          >
-            <p className="flex items-start gap-2 text-sm font-semibold text-primary">
-              <span className="mt-0.5 shrink-0 text-accent-dark">
-                <Icono nombre="brujula" size={16} />
-              </span>
-              {pestana.aviso}
-            </p>
-            <div className="-mx-5 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-3 pt-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3 [&::-webkit-scrollbar]:hidden">
-              {pestana.servicios.map((s) => (
-                <div key={s.id} className="w-[84%] shrink-0 snap-start sm:w-auto">
-                  <TarjetaServicio s={s} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-primary/10 bg-white p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary-light">{OTROS_SERVICIOS.condicionesTitulo}</p>
-            <ul className="mt-2 space-y-1.5">
-              {OTROS_SERVICIOS.condiciones.map((c) => (
-                <li key={c} className="flex items-start gap-2 text-sm leading-snug text-neutral-700">
-                  <span aria-hidden="true" className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  {c}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mt-6 text-center">
-            <Contexto>{OTROS_SERVICIOS.contexto}</Contexto>
-            <BotonReserva ubicacion="otros_servicios" ancho />
-          </div>
+          <p className="mb-4 text-sm text-neutral-700">{OTROS_SERVICIOS.intro}</p>
+          <ContenidoOtrosServicios prefijo="ventana" />
         </div>
       </div>
     </div>,
     document.body
+  );
+}
+
+/** Sección visible con las pestañas (/servicios/master). */
+export function SeccionOtrosServicios() {
+  return (
+    <section
+      id="otros-servicios"
+      className="scroll-mt-24 bg-secondary-light px-4 py-16 min-[380px]:px-5 sm:px-6 sm:py-20"
+    >
+      <div className="mx-auto max-w-[1100px]">
+        <TituloSeccion eyebrow={OTROS_SERVICIOS.eyebrow} titulo={OTROS_SERVICIOS.titulo} intro={OTROS_SERVICIOS.intro} />
+        <div className="mt-8">
+          <ContenidoOtrosServicios prefijo="seccion" centrado />
+        </div>
+      </div>
+    </section>
   );
 }

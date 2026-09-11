@@ -439,7 +439,7 @@ export const PAQUETES = {
       "Seguimiento hasta obtener la vacante",
       "Asesoría para la matrícula y la carta de admisión",
     ],
-    href: "/metodo-inspira",
+    href: "/servicios/master#pago-por-etapas",
   },
   diagnostico: {
     id: "diagnostico",
@@ -447,7 +447,7 @@ export const PAQUETES = {
     subtitulo: "Tu caso necesita mirarse con calma",
     precio: SESION_DIAGNOSTICO.precio,
     incluye: SESION_DIAGNOSTICO.incluye,
-    href: "/metodo-inspira",
+    href: "/servicios/master#pago-por-etapas",
   },
 };
 

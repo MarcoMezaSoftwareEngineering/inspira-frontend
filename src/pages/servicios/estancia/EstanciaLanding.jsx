@@ -56,14 +56,7 @@ export default function EstanciaLanding() {
               className="inline-flex items-center justify-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl transition-all hover:scale-105 hover:shadow-xl"
               style={{ background: "#FA943A" }}
             >
-              Ver Programa Máster 360°
-            </a>
-            <a
-              href="/servicios/master"
-              onClick={(e) => go(e, "/servicios/master")}
-              className="inline-flex items-center justify-center gap-2 border-2 border-white/25 hover:border-white/50 text-white font-semibold px-7 py-3.5 rounded-xl transition-all hover:bg-white/10"
-            >
-              Ver Paquete Máster
+              Ver Paquete Máster 2027/2028
             </a>
           </div>
         </div>
@@ -128,7 +121,7 @@ export default function EstanciaLanding() {
             </h3>
             <p className="text-neutral-500 mb-7 max-w-md mx-auto">
               Estamos preparando la página completa con planes y precios.
-              Mientras tanto, conoce nuestro Programa Máster 360°.
+              Mientras tanto, conoce nuestro Paquete Máster 2027/2028.
             </p>
             <a
               href="/servicios/master"
@@ -136,7 +129,7 @@ export default function EstanciaLanding() {
               className="inline-flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl transition-all hover:scale-105"
               style={{ background: "#013446" }}
             >
-              Ver Programa Máster 360° →
+              Ver Paquete Máster 2027/2028 →
             </a>
           </div>
         </div>

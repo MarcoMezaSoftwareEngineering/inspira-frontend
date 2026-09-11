@@ -40,7 +40,7 @@ export const DIFERENCIALES = [
   {
     titulo: "Sistema propio, no un chat",
     texto:
-      "Tu expediente vive en nuestra plataforma: panel privado con credenciales, checklist de documentos validado por tu asesor y avisos automáticos en cada hito.",
+      "Tu expediente vive en nuestra plataforma: panel privado, documentos revisados por tu asesor con sus observaciones, tus plazos a la vista y mensajes con constancia de lectura.",
     icono: "laptop",
   },
   {
@@ -757,14 +757,14 @@ export const CATEGORIAS = [
       {
         id: "master",
         titulo: "Máster en Europa",
-        nota: "España con acompañamiento 360°. En Países Bajos, Italia y Francia: asesoría de postulación.",
+        nota: "España con el Paquete Máster 2027/2028. En Países Bajos, Italia y Francia: asesoría de postulación.",
         destacado: true,
         servicios: [
           {
             id: "master-espana",
             nombre: "Máster en España",
             resumen:
-              "Programa 360°: búsqueda, postulación, matrícula y visado con seguimiento completo.",
+              "Paquete Máster 2027/2028: seleccionamos tus opciones, postulamos por ti y te acompañamos hasta la matrícula, con pago por etapas.",
             href: "/servicios/master",
             etiqueta: "Principal",
           },

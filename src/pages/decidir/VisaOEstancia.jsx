@@ -513,15 +513,15 @@ function Resultado({ resp, onReiniciar }) {
           ← Volver a hacer el test
         </button>
         <a
-          href="/metodo-inspira"
+          href="/servicios/master#pago-por-etapas"
           onClick={(e) => {
             e.preventDefault();
-            navigate("/metodo-inspira");
+            navigate("/servicios/master#pago-por-etapas");
             window.scrollTo({ top: 0, behavior: "instant" });
           }}
           className="text-sm font-bold text-primary underline underline-offset-4 hover:text-accent"
         >
-          Ver el Método Inspira y todos los precios →
+          Ver el pago por etapas y los precios →
         </a>
       </div>
     </div>
@@ -544,7 +544,7 @@ export default function VisaOEstancia() {
         destacado="Averígualo en un minuto."
         descripcion="Cinco preguntas y te decimos si calificas para el visado de estudios, para la estancia por estudios, y qué paquete te conviene contratar. Sin registrarte."
         accesos={[
-          { icono: "birrete", label: "Método Inspira", href: "/metodo-inspira" },
+          { icono: "birrete", label: "Pago por etapas", href: "/servicios/master#pago-por-etapas" },
           { icono: "euro", label: "Calculadora de máster", href: "/calculadora-master" },
           { icono: "robot", label: "Asistente completo", href: "/asistente" },
         ]}
@@ -627,10 +627,10 @@ export default function VisaOEstancia() {
             Reservar sesión diagnóstico · {SESION_DIAGNOSTICO.precioTexto}
           </BotonCalendly>
           <a
-            href="/metodo-inspira"
+            href="/servicios/master#pago-por-etapas"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/metodo-inspira");
+              navigate("/servicios/master#pago-por-etapas");
               window.scrollTo({ top: 0, behavior: "instant" });
             }}
             className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-primary px-6 py-3.5 font-extrabold text-primary transition hover:bg-secondary"

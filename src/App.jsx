@@ -32,6 +32,7 @@ const CalculadoraMaster = lazyConRecarga(() => import("./pages/calculadora/Calcu
 const PanelCliente = lazyConRecarga(() => import("./pages/panel/PanelCliente"));
 const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"));
 const MasterAdsLanding = lazyConRecarga(() => import("./pages/landing/MasterAdsLanding"));
+const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/MasterAds2027"));
 const MetodoInspira = lazyConRecarga(() => import("./pages/metodo/MetodoInspira"));
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
@@ -271,7 +272,7 @@ const PRIVATE_PATHS = ["/panel", "/auth/success"];
 
 // Landings standalone para campañas de ads: sin Header/Footer del sitio, y
 // sin indexar (tráfico pagado, no orgánico).
-const LANDING_ADS_PATHS = ["/master-espana"];
+const LANDING_ADS_PATHS = ["/master-espana", "/master-2027-2028"];
 
 function RouteSEO({ path }) {
   const isPrivate =
@@ -324,6 +325,7 @@ const PUBLIC_PATHS = [
   "/ruta/tramites",
   "/calculadora-master",
   "/master-espana",
+  "/master-2027-2028",
   "/metodo-inspira",
   "/visa-o-estancia",
   "/panel",
@@ -442,6 +444,7 @@ export default function App() {
       {isPanel && <PanelCliente path={path} />}
       {path === "/reservar" && <ReservarCita />}
       {path === "/master-espana" && <MasterAdsLanding />}
+      {path === "/master-2027-2028" && <MasterAds2027 />}
       {path === "/metodo-inspira" && <MetodoInspira />}
       {path === "/visa-o-estancia" && <VisaOEstancia />}
       {path === "/pago-exitoso" && <PagoExitoso />}

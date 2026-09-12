@@ -3,3 +3,6 @@ dist/
 .env
 .env.local
 .env.production
+
+# Kit de marca: vive en el servidor (/var/www/inspira-interno), no en git
+public/interno/marca-inspira-t4w9c2hx/

@@ -98,7 +98,7 @@ export default function PanelCliente({ path }) {
   const soloInvitado = esSoloInvitado(lista);
   // Qué guías y recursos abre lo que tiene contratado.
   const accesos = useMemo(() => accesosDe(lista), [lista]);
-  // Las guías en PDF del portal que le corresponden (máster, visado, estancia).
+  // Las guías en PDF de sus servicios: la del trámite y la del portal.
   const guiasPortal = useMemo(() => guiasPortalDe(lista), [lista]);
 
   // A quien no tiene ningún servicio se le piden los datos completos —es el
@@ -207,7 +207,7 @@ export default function PanelCliente({ path }) {
 
   // Tab titles
   const titles = {
-    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", perfil: "Mi Perfil", portal: "Guía del portal", becas: "Becas España",
+    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", perfil: "Mi Perfil", portal: "Mis guías", becas: "Becas España",
     guia: "Guía Máster", apostilla: "Guía Apostilla Digital",
     estancia: "Guía Estancia por Estudios",
     modificatoria: "Guía Residencia y Trabajo",
@@ -320,7 +320,7 @@ export default function PanelCliente({ path }) {
           {/* Mi ruta: las etapas entre servicios */}
           {tab === "ruta" && <MiRuta servicios={lista} />}
 
-          {/* Guía del portal: los PDF de sus servicios */}
+          {/* Mis guías: los PDF de sus servicios (trámite y portal) */}
           {tab === "portal" && accesos.has("portal") && guiasPortal.length > 0 && (
             <GuiaPortal guias={guiasPortal} />
           )}

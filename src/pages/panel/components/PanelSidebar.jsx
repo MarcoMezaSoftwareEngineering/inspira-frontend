@@ -11,7 +11,7 @@ import { recorta } from "../pendientes";
 // Cada recurso, con la etiqueta y el icono con los que aparece en el menú.
 // El orden es el de la lista; se enseñan los que estén en `accesos`.
 const RECURSOS = [
-  { clave: "portal", icono: "mapa", label: "Guía del portal" },
+  { clave: "portal", icono: "mapa", label: "Mis guías" },
   { clave: "becas", icono: "birrete", label: "Becas España" },
   { clave: "guia", icono: "libro", label: "Guía Máster" },
   { clave: "apostilla", icono: "documento", label: "Guía Apostilla" },
@@ -140,13 +140,13 @@ export default function PanelSidebar({
         {guiasPortal.length === 1 && (
           <a href={guiasPortal[0].href} target="_blank" rel="noopener noreferrer" className="pnl-item">
             <Icono nombre="mapa" size={16} />
-            Guía del portal (PDF)
+            Guía (PDF)
           </a>
         )}
         {guiasPortal.length > 1 && (
           <button type="button" onClick={() => onChangeTab("portal")} className="pnl-item">
             <Icono nombre="mapa" size={16} />
-            Guías del portal
+            Mis guías
           </button>
         )}
         <button type="button" onClick={() => navigate("/")} className="pnl-item">

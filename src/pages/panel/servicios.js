@@ -69,22 +69,28 @@ const ACCESOS = {
   [SERVICIO.VISADO]: ["portal", "apostilla"],
   [SERVICIO.ESTANCIA]: ["portal", "estancia", "apostilla"],
   [SERVICIO.MODIFICATORIA]: ["modificatoria"],
-  [SERVICIO.FP]: ["becas", "apostilla"],
+  [SERVICIO.FP]: ["portal", "becas", "apostilla"],
   [SERVICIO.OTRO]: ["apostilla"],
 };
 
 /**
- * Las guías en PDF de cómo usar el portal (public/guias/). Solo hay de estos
- * tres servicios; el peso es aproximado y se enseña junto al botón, porque en
- * el teléfono se descargan con datos móviles.
+ * Las guías en PDF de cada servicio (public/guias/): la de su TRÁMITE y la de
+ * USO DEL PORTAL. Son las mismas dos que recibe por correo al darle de alta
+ * (backend: core/email/guiasServicio.js). FP no tiene recorrido propio en el
+ * panel, así que su guía de servicio ya cuenta el uso común del portal. El
+ * peso se enseña junto al botón porque en el teléfono van con datos móviles.
  */
 const GUIAS_PORTAL = [
-  { servicio: SERVICIO.MASTER, titulo: "Guía del portal: Máster", descripcion: "Perfil, formulario académico, informe, elección de másteres, documentos y postulaciones.", href: "/guias/guia-portal-master.pdf", peso: "2,6 MB" },
-  { servicio: SERVICIO.VISADO, titulo: "Guía del portal: Visado de estudios", descripcion: "Tus datos, medios económicos, documentos, cita y seguimiento del visado.", href: "/guias/guia-portal-visado.pdf", peso: "2,3 MB" },
-  { servicio: SERVICIO.ESTANCIA, titulo: "Guía del portal: Estancia por estudios", descripcion: "Datos, plazos, documentos, acompañantes y seguimiento en Extranjería.", href: "/guias/guia-portal-estancia.pdf", peso: "2,2 MB" },
+  { servicio: SERVICIO.MASTER, tipo: "servicio", titulo: "Guía del servicio Máster en España", descripcion: "Los seis pasos, calendario de postulación, documentos, becas y pagos.", href: "/guias/guia-servicio-master.pdf", peso: null },
+  { servicio: SERVICIO.MASTER, tipo: "portal", titulo: "Guía del Expediente Digital · Máster", descripcion: "Perfil, formulario académico, informe, elección de másteres, documentos y postulaciones.", href: "/guias/guia-portal-master.pdf", peso: "2,6 MB" },
+  { servicio: SERVICIO.VISADO, tipo: "servicio", titulo: "Guía del Visado de estudios", descripcion: "Cada documento del consulado, medios económicos, tasas y plazos.", href: "/guias/guia-servicio-visado.pdf", peso: null },
+  { servicio: SERVICIO.VISADO, tipo: "portal", titulo: "Guía del Expediente Digital · Visado", descripcion: "Tus datos, medios económicos, documentos, cita y seguimiento del visado.", href: "/guias/guia-portal-visado.pdf", peso: "2,3 MB" },
+  { servicio: SERVICIO.ESTANCIA, tipo: "servicio", titulo: "Guía de la Estancia por estudios", descripcion: "EX-00, tasa, empadronamiento, documentos y plazos ante Extranjería.", href: "/guias/guia-servicio-estancia.pdf", peso: null },
+  { servicio: SERVICIO.ESTANCIA, tipo: "portal", titulo: "Guía del Expediente Digital · Estancia", descripcion: "Datos, plazos, documentos, acompañantes y seguimiento en Extranjería.", href: "/guias/guia-portal-estancia.pdf", peso: "2,2 MB" },
+  { servicio: SERVICIO.FP, tipo: "servicio", titulo: "Guía del servicio de Formación Profesional", descripcion: "Homologación, centros, postulación, matrícula y cómo usar tu portal.", href: "/guias/guia-servicio-fp.pdf", peso: null },
 ];
 
-/** Las guías del portal que le tocan por sus servicios propios, en orden fijo. */
+/** Las guías que le tocan por sus servicios propios: trámite y portal, en orden fijo. */
 export function guiasPortalDe(solicitudes = []) {
   const suyos = new Set(solicitudes.filter((s) => !s?.invitado).map(servicioDe));
   return GUIAS_PORTAL.filter((g) => suyos.has(g.servicio));

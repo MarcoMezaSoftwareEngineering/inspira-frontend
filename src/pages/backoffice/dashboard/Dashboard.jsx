@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
+import BarraHoy from "./BarraHoy";
 import {
   TrendingUp, Users, FileText, FileWarning, RefreshCw,
 } from "lucide-react";
@@ -42,6 +43,8 @@ export default function Dashboard() {
   if (error) return (
     <div className="p-4 sm:p-6">
       <h1 className="text-xl font-bold text-primary mb-4">Dashboard</h1>
+      {/* La barra de hoy tiene su propio endpoint: sigue útil aunque fallen las estadísticas. */}
+      <div className="mb-4"><BarraHoy /></div>
       <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
         Error al cargar estadísticas: {error}
       </div>
@@ -84,6 +87,9 @@ export default function Dashboard() {
           </button>
         </div>
       </header>
+
+      {/* Hoy: lo que hay que atender en el día */}
+      <BarraHoy />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

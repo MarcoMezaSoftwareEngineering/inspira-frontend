@@ -60,8 +60,19 @@ export const NAV_SECTIONS = [
       },
       { label: "Sistematizador", href: "/backoffice/sistematizador", icon: Upload },
       { label: "Agenda",   href: "/backoffice/agenda", icon: Calendar },
-      { label: "Leads",    href: "/backoffice/calculadora", icon: TrendingUp },
-      { label: "Finanzas", href: "/backoffice/presupuestos", icon: Calculator },
+      // Leads es la bandeja única (asistente, calculadora, presupuesto web,
+      // reservas, WhatsApp, alta manual). La pantalla vieja de la calculadora
+      // sigue en /backoffice/calculadora, sin entrada propia.
+      {
+        label: "Leads",
+        href: "/backoffice/leads",
+        alsoActive: ["/backoffice/calculadora"],
+        perm: "leads.ver",
+        icon: TrendingUp,
+      },
+      // Antes se llamaba «Finanzas», pero es el embudo de solicitudes que
+      // llegan del portal de presupuestos. La ruta no cambia.
+      { label: "Solicitudes web", href: "/backoffice/presupuestos", icon: Calculator },
       {
         label: "Configuración",
         href: "/backoffice/configuracion",

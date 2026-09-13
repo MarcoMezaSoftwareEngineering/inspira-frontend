@@ -78,6 +78,66 @@ function reanudarGA() {
 /** Nombre corto de la página actual para los eventos (la ruta sin query). */
 const paginaActual = () => (typeof window === "undefined" ? "" : window.location.pathname);
 
+/* ── UTM de la visita ─────────────────────────────────────────────────────
+ * Los utm_* del anuncio solo están en la URL de entrada: en cuanto se navega
+ * por la SPA desaparecen. Se guardan en sessionStorage (dura lo que la
+ * pestaña, no rastrea entre visitas) para adjuntarlos a los eventos y a los
+ * formularios de captación. Es almacenamiento técnico de la sesión y no sale
+ * del navegador salvo en un evento con consentimiento de analítica o en un
+ * formulario que la persona envía.
+ */
+const CLAVE_UTM = "inspira_utm";
+const CAMPOS_UTM = ["utm_source", "utm_medium", "utm_campaign"];
+
+function capturarUtm() {
+  if (typeof window === "undefined") return;
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const nuevos = {};
+    CAMPOS_UTM.forEach((k) => {
+      const v = q.get(k);
+      if (v) nuevos[k] = v.slice(0, 150);
+    });
+    if (Object.keys(nuevos).length) sessionStorage.setItem(CLAVE_UTM, JSON.stringify(nuevos));
+  } catch {
+    /* sessionStorage bloqueado: sin UTM */
+  }
+}
+
+/** Los utm_* guardados de esta visita ({} si no hay). */
+export function utmGuardados() {
+  try {
+    return JSON.parse(sessionStorage.getItem(CLAVE_UTM) || "{}") || {};
+  } catch {
+    return {};
+  }
+}
+
+const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
+
+/**
+ * Evento del embudo para Inspira Core (POST /api/leads/evento). Solo con
+ * consentimiento de analítica. Va como text/plain por sendBeacon: así no hay
+ * preflight CORS y sale aunque la página se esté yendo a WhatsApp.
+ * Sin correo ni teléfono el backend solo lo suma a un contador diario.
+ */
+export function enviarEventoEmbudo(tipo, datos = {}) {
+  if (!tieneConsentimiento("analitica")) return;
+  if (typeof navigator === "undefined") return;
+  const cuerpo = JSON.stringify({ tipo, pagina: paginaActual(), ...utmGuardados(), ...datos });
+  const url = `${API_URL}/api/leads/evento`;
+  try {
+    if (typeof navigator.sendBeacon === "function") {
+      navigator.sendBeacon(url, new Blob([cuerpo], { type: "text/plain;charset=UTF-8" }));
+    } else {
+      fetch(url, { method: "POST", body: cuerpo, keepalive: true, headers: { "Content-Type": "text/plain" } })
+        .catch(() => {});
+    }
+  } catch {
+    /* la medición nunca rompe el clic */
+  }
+}
+
 let clicsMedidos = false;
 
 /**
@@ -109,6 +169,8 @@ function medirClicsSalientes() {
           origen: origen.slice(0, 90),
           transport_type: "beacon",
         });
+        // Y a Core, que no depende de GA (enviarEventoEmbudo mira el consentimiento).
+        enviarEventoEmbudo("WHATSAPP", { origen_detalle: origen.slice(0, 90) });
       } else if (host.endsWith("calendly.com")) {
         registrarEvento("calendly_clic", {
           pagina: paginaActual(),
@@ -152,8 +214,11 @@ export function registrarLead(formulario, datos = {}) {
 
 /** Registra la carga diferida. Llamar una vez al arrancar la app. */
 export function inicializarAnalytics() {
-  if (!GA_ID) return;
+  // Los UTM y el oyente de clics van aunque no haya GA: el embudo de Core
+  // (enviarEventoEmbudo) no depende de Google, solo del consentimiento.
+  capturarUtm();
   medirClicsSalientes();
+  if (!GA_ID) return;
   alConsentir("analitica", cargarGA, "ga4");
 
   // Retirar el consentimiento tiene que surtir efecto en el acto, y volver a

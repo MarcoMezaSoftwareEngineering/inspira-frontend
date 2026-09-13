@@ -1,0 +1,105 @@
+/* Leads en Inspira Core. Todo con prefijo ase-ld- (las clases cortas chocan
+   con otras hojas: ver la nota del cerco de errores). Tokens de asesor.css. */
+
+/* ── Embudo arriba ─────────────────────────────────────────────────────── */
+.ase-ld-embudo { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 640px) { .ase-ld-embudo { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .ase-ld-embudo { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+.ase-ld-etapa {
+  text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 13px;
+  padding: 10px 12px 9px; box-shadow: var(--sombra); cursor: pointer; color: var(--ink);
+  border-top: 3px solid var(--ld-color, var(--sky-2));
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.ase-ld-etapa:hover { transform: translateY(-2px); box-shadow: var(--sombra-alta); }
+.ase-ld-etapa[data-on="1"] { background: var(--sky-soft); border-color: var(--primary); border-top-color: var(--ld-color); }
+.ase-ld-etapa-n { display: block; font-size: 20px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.ase-ld-etapa-l { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ase-ld-etapa-bar { display: block; height: 4px; border-radius: 4px; background: #e4ecf3; margin-top: 7px; overflow: hidden; }
+.ase-ld-etapa-bar > i { display: block; height: 100%; background: var(--ld-color, var(--sky-2)); border-radius: 4px; }
+
+.ase-ld-origenes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+
+/* ── Barra de filtros ──────────────────────────────────────────────────── */
+.ase-ld-filtros { display: grid; gap: 8px; grid-template-columns: 1fr; align-items: center; margin: 14px 0; }
+@media (min-width: 720px) { .ase-ld-filtros { grid-template-columns: minmax(12rem, 2fr) repeat(2, minmax(9rem, 1fr)) auto auto; } }
+
+/* ── Tablero ───────────────────────────────────────────────────────────── */
+.ase-ld-tablero {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(84vw, 1fr); gap: 10px;
+  overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 640px) { .ase-ld-tablero { grid-auto-columns: minmax(250px, 1fr); scroll-snap-type: none; } }
+.ase-ld-col {
+  background: #eef3f8; border: 1px solid var(--line); border-radius: 14px; padding: 8px;
+  min-height: 180px; display: flex; flex-direction: column; gap: 7px; scroll-snap-align: start;
+  transition: background .2s, border-color .2s;
+}
+.ase-ld-col[data-sobre="1"] { background: var(--sky-soft); border-color: var(--sky-2); }
+.ase-ld-col-cab { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 2px 4px 4px; }
+.ase-ld-col-t { font-size: 12px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+.ase-ld-col-t:before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ld-color, var(--sky-2)); }
+.ase-ld-col-n { font-size: 11px; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ase-ld-col-vacia { font-size: 11.5px; color: #9fb3c0; text-align: center; padding: 18px 6px; border: 1px dashed var(--line); border-radius: 10px; }
+
+.ase-ld-card {
+  text-align: left; width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 11px;
+  padding: 9px 10px; box-shadow: 0 1px 2px rgba(1, 52, 70, .05); cursor: pointer; color: var(--ink);
+  transition: box-shadow .2s var(--ease), border-color .2s, transform .2s var(--ease);
+}
+.ase-ld-card:hover, .ase-ld-card:focus-visible { border-color: var(--sky-2); box-shadow: var(--sombra-alta); outline: none; }
+.ase-ld-card[data-arrastrando="1"] { opacity: .45; }
+.ase-ld-card[data-alerta="1"] { border-left: 3px solid var(--accent); }
+.ase-ld-card-n { font-size: 13px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.ase-ld-card-s { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ase-ld-card-pie { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+.ase-ld-card-f { font-size: 10.5px; font-weight: 700; color: #8aa0ad; white-space: nowrap; }
+.ase-ld-card-accion { font-size: 11px; color: var(--amber); font-weight: 600; margin-top: 5px; overflow-wrap: anywhere; }
+.ase-ld-card-accion[data-vencida="1"] { color: var(--red); }
+
+/* ── Tabla ─────────────────────────────────────────────────────────────── */
+.ase-ld-tabla { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.ase-ld-tabla th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: #f4f8fb; padding: 9px 10px; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.ase-ld-tabla td { padding: 9px 10px; border-bottom: 1px solid #eef3f7; vertical-align: top; }
+.ase-ld-tabla tr:last-child td { border-bottom: 0; }
+.ase-ld-tabla tbody tr { cursor: pointer; }
+.ase-ld-tabla tbody tr:hover td { background: #fbfdff; }
+
+/* ── Panel lateral ─────────────────────────────────────────────────────── */
+.ase-ld-fondo { position: fixed; inset: 0; background: rgba(1, 41, 56, .38); z-index: 80; animation: ase-ld-aparece .2s ease; }
+.ase-ld-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 520px; z-index: 81;
+  background: var(--ground); box-shadow: -18px 0 40px rgba(1, 52, 70, .18);
+  display: flex; flex-direction: column; animation: ase-ld-entra .28s var(--ease);
+  color: var(--ink);
+}
+@keyframes ase-ld-entra { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ase-ld-aparece { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ase-ld-panel, .ase-ld-fondo { animation: none; } }
+.ase-ld-panel-cab { background: var(--primary); color: #fff; padding: 16px 18px 14px; flex: 0 0 auto; }
+.ase-ld-panel-cab h2 { margin: 6px 0 0; font-size: 19px; line-height: 1.25; font-weight: 700; overflow-wrap: anywhere; }
+.ase-ld-panel-cab p { margin: 4px 0 0; font-size: 12px; color: rgba(255, 255, 255, .72); overflow-wrap: anywhere; }
+.ase-ld-panel-cab a { color: #bfe0ff; }
+.ase-ld-panel-x { background: rgba(255, 255, 255, .12); border: 0; color: #fff; width: 32px; height: 32px; border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ase-ld-panel-x:hover { background: rgba(255, 255, 255, .22); }
+.ase-ld-panel-cuerpo { flex: 1 1 auto; overflow-y: auto; padding: 14px 16px 90px; display: flex; flex-direction: column; gap: 12px; }
+.ase-ld-bloque { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.ase-ld-bloque-t { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.ase-ld-dos { display: grid; gap: 8px; grid-template-columns: 1fr; }
+@media (min-width: 440px) { .ase-ld-dos { grid-template-columns: 1fr 1fr; } }
+.ase-ld-contacto { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ase-ld-contacto a { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #fff; background: rgba(255, 255, 255, .14); border-radius: 999px; padding: 5px 10px; text-decoration: none; }
+.ase-ld-contacto a:hover { background: rgba(255, 255, 255, .24); }
+
+.ase-ld-linea { list-style: none; margin: 0; padding: 0; }
+.ase-ld-linea li { position: relative; padding: 0 0 12px 18px; }
+.ase-ld-linea li:before { content: ""; position: absolute; left: 4px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--ld-color, var(--sky-2)); }
+.ase-ld-linea li:after { content: ""; position: absolute; left: 7.5px; top: 15px; bottom: 0; width: 1px; background: var(--line); }
+.ase-ld-linea li:last-child:after { display: none; }
+.ase-ld-linea-t { font-size: 12.5px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ase-ld-linea-m { font-size: 10.5px; color: #8aa0ad; font-weight: 600; margin-top: 2px; }
+
+.ase-ld-datos { font-size: 12px; margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 5px 12px; }
+.ase-ld-datos dt { color: var(--muted); font-weight: 600; }
+.ase-ld-datos dd { margin: 0; overflow-wrap: anywhere; }
+.ase-ld-pie { position: sticky; bottom: 0; }

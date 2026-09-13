@@ -22,6 +22,7 @@ import SolicitudDetalleBackoffice from "./solicitudes/SolicitudDetalleBackoffice
 import InstructivosServicios from "./instructivos/InstructivosServicios";
 import DocumentosBackoffice from "./documentos/DocumentosBackoffice";
 import LeadsCalculadora from "./calculadora/LeadsCalculadora";
+import Leads from "./leads/Leads";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
 import Procesos from "./procesos/Procesos";
@@ -257,6 +258,9 @@ export default function BackofficeApp() {
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
 
             {path === "/backoffice/calculadora" && <LeadsCalculadora />}
+
+            {/* LEADS — bandeja única y embudo. ?lead=ID abre la ficha. */}
+            {path === "/backoffice/leads" && <ModuleGate perm="leads.ver"><Leads /></ModuleGate>}
 
             {path === "/backoffice/tracker-universidades" && <ModuleGate perm="tracker.ver"><TrackerUniversidades /></ModuleGate>}
 

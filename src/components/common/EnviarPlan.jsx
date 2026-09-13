@@ -3,7 +3,7 @@
 // plan y nosotros nos quedamos el contacto de alguien interesado.
 import { useState } from "react";
 import Icono from "./Icono";
-import { registrarEvento, registrarLead } from "../../lib/analytics";
+import { registrarEvento, registrarLead, utmGuardados } from "../../lib/analytics";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -40,6 +40,9 @@ export default function EnviarPlan({ resultado, respuestas }) {
           empezar: resultado.empezar,
           documentos: resultado.documentos,
           respuestas: respuestas.map((h) => ({ p: h.pregunta, r: h.resp })),
+          // Para saber de qué anuncio llega el lead en Inspira Core.
+          pagina: window.location.pathname,
+          ...utmGuardados(),
         }),
       });
       const d = await r.json();

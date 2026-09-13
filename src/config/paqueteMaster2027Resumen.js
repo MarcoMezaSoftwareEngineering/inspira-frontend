@@ -21,24 +21,24 @@ export function numero(n) {
 export const eur = (n) => `${numero(n)}${NBSP}€`;
 export const rangoEur = (a, b) => `${numero(a)}–${numero(b)}${NBSP}€`;
 
-// ── Precios del Paquete Máster 2027/2028 (cliente, 10 y 11/09/2026) ────────
-export const PRECIOS = {
-  "l1-a": 219,
-  "l1-basico": 249,
-  "l1-comfort": 279,
-  "l1-full": 359,
-  "l2-a": 219,
-  "l2-basico-full": 249,
-  "l2-full": 349,
-  "l3-a": 219,
-  "l3-comfort": 350,
-  "l3-full": 450,
-  "l3-total": 600,
-  // Paquete estándar publicado por el cliente el 11/09/2026.
-  "econ-intermedias-650": 650,
-  "premium-700": 700,
-  "infinity-1100": 1100,
-};
+// ── Precios del Paquete Máster 2027/2028 ────────────────────────────────────
+// FUENTE ÚNICA: precios-inspira.json, copia generada desde
+// inspira-backend/src/modules/precios/precios-inspira.json con
+// `node scripts/sincronizar-precios.js` (en el backend). No editar a mano:
+// el test de precios del backend falla si las dos copias difieren.
+import PRECIOS_INSPIRA from "./precios-inspira.json";
+
+export { PRECIOS_INSPIRA };
+
+/** id de plan → euros, para los planes estándar y los avanzados. */
+export const PRECIOS = Object.fromEntries([
+  ...PRECIOS_INSPIRA.master.listas.flatMap((l) => l.planes.map((p) => [p.id, p.eur])),
+  ...PRECIOS_INSPIRA.master.avanzados.map((p) => [p.id, p.eur]),
+]);
+
+export const SESION_PRECIOS = PRECIOS_INSPIRA.sesionDiagnostico;
+export const AMPLIADA_PRECIOS = PRECIOS_INSPIRA.asesoriaAmpliada;
+export const REGLA_PAGO = PRECIOS_INSPIRA.reglaPago;
 
 export const PRECIO_DESDE = Math.min(...Object.values(PRECIOS));
 

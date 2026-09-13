@@ -12,7 +12,17 @@
 //
 // Las imágenes se generan con `python scripts/og-compartir.py`.
 
+import { readFileSync } from "node:fs";
 import { NOMBRE_PORTAL } from "../src/config/portalMarca.js";
+
+// Importes de la fuente única (copia del backend, ver sincronizar-precios.js).
+const PRECIOS = JSON.parse(readFileSync(new URL("../src/config/precios-inspira.json", import.meta.url), "utf8"));
+const DESDE_MASTER = Math.min(
+  ...PRECIOS.master.listas.flatMap((l) => l.planes.map((p) => p.eur)),
+  ...PRECIOS.master.avanzados.map((p) => p.eur)
+);
+const DESDE_VISADO = Math.min(...PRECIOS.visado.map((v) => v.eur));
+const SESION_EUR = PRECIOS.sesionDiagnostico.eur;
 
 export const SITIO = "https://www.inspira-legal.cloud";
 export const MARCA = "Inspira Legal";
@@ -25,9 +35,9 @@ export const IMG_PORTAL = "/og/expediente-digital.jpg";
 const MASTER = {
   title: "Paquete Máster 2027/2028 | Inspira Legal",
   description:
-    "Postula a másteres oficiales en universidades públicas de España para 2027/2028. Planes desde 219 €, pago por etapas y sesión diagnóstico con abogado especialista.",
+    `Postula a másteres oficiales en universidades públicas de España para 2027/2028. Planes desde ${DESDE_MASTER} €, pago por etapas y sesión diagnóstico con abogado especialista.`,
   image: IMG_MASTER,
-  imageAlt: "Paquete Máster 2027/2028 de Inspira Legal, desde 219 €",
+  imageAlt: `Paquete Máster 2027/2028 de Inspira Legal, desde ${DESDE_MASTER} €`,
   // "product" obligaría a declarar product:price:*; "website" es lo seguro.
   type: "website",
 };
@@ -53,7 +63,7 @@ export const RUTAS_COMPARTIR = {
   "/servicios": {
     title: "Servicios de extranjería y estudios en España | Inspira Legal",
     description:
-      "Visado de estudios, nómada digital, visado PAC, nacionalidad, homologaciones, máster y más. Todos los servicios para migrar a España, con primera asesoría desde 25 €.",
+      `Visado de estudios, nómada digital, visado PAC, nacionalidad, homologaciones, máster y más. Todos los servicios para migrar a España, con primera asesoría desde ${SESION_EUR} €.`,
   },
   "/servicios/estancia": {
     title: "Estancia por estudios en España | Inspira Legal",
@@ -63,7 +73,7 @@ export const RUTAS_COMPARTIR = {
   "/metodo-inspira": {
     title: "Método Inspira: tu proceso por etapas | Inspira Legal",
     description:
-      "Admisión, carta, visado y llegada: las cuatro etapas del Método Inspira, qué incluye cada una y cuándo se paga. Paquetes de máster desde 219 € y asesoría de visado desde 109 €.",
+      `Admisión, carta, visado y llegada: las cuatro etapas del Método Inspira, qué incluye cada una y cuándo se paga. Paquetes de máster desde ${DESDE_MASTER} € y asesoría de visado desde ${DESDE_VISADO} €.`,
   },
   "/visa-o-estancia": {
     title: "¿Visa o estancia por estudios? Test rápido | Inspira Legal",

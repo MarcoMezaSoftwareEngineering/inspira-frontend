@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 import PageHero from "../../components/layout/PageHero";
 import Icono from "../../components/common/Icono";
 import EnviarPlan from "../../components/common/EnviarPlan";
-import { CALENDLY_URL, whatsappLinea, lineaDe } from "../../config/contacto";
+import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { SESION_DIAGNOSTICO, eur } from "../../config/metodo";
 import { navigate } from "../../services/navigate";
 import { registrarEvento } from "../../lib/analytics";
@@ -384,7 +384,6 @@ function Monto() {
 
 function Resultado({ resp, onReiniciar }) {
   const res = useMemo(() => evaluar(resp), [resp]);
-  const linea = lineaDe("citas");
 
   // Lo que viaja al correo del visitante y al aviso del equipo.
   const plan = {
@@ -411,7 +410,6 @@ function Resultado({ resp, onReiniciar }) {
   });
 
   const mensajeWhatsapp =
-    `Hola Inspira, hice el test de visa o estancia en la web. ` +
     `Mi resultado fue: "${res.titular}". Quiero agendar mi sesión diagnóstico.`;
 
   return (
@@ -476,7 +474,7 @@ function Resultado({ resp, onReiniciar }) {
               Reservar mi sesión
             </BotonCalendly>
             <a
-              href={whatsappLinea(linea, mensajeWhatsapp)}
+              href={whatsappDesde("visa-o-estancia", mensajeWhatsapp)}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-primary px-5 py-3 text-sm font-extrabold text-primary transition hover:bg-secondary"

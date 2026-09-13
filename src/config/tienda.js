@@ -7,6 +7,10 @@
 //    inspira-backend/src/modules/pagos/productos.catalogo.js (campo
 //    `entrega.url`, hoy vacío en todos).
 // Nunca cobrar por algo que no se pueda entregar.
+import { PRECIOS_INSPIRA } from "./paqueteMaster2027Resumen";
+
+// Importes de la fuente única (precios-inspira.json).
+const T = (id) => PRECIOS_INSPIRA.tienda.find((p) => p.id === id);
 
 export const PRODUCTOS = [
   {
@@ -22,11 +26,11 @@ export const PRODUCTOS = [
   {
     id: "becas-actualizadas",
     disponible: false,
-    precioPen: 59,
+    precioPen: T("becas-actualizadas").pen,
     nombre: "Becas en España actualizadas",
     descripcion:
       "Acceso al listado curado y actualizado de becas activas en España, con requisitos, montos y fechas de cierre.",
-    precio: "15 US$",
+    precio: `${T("becas-actualizadas").usd} US$`,
     tipo: "Acceso digital",
     emoji: "🎓",
     href: null,
@@ -34,11 +38,11 @@ export const PRODUCTOS = [
   {
     id: "ebook-master",
     disponible: false,
-    precioPen: 99,
+    precioPen: T("ebook-master").pen,
     nombre: "Ebook + video: pasos para estudiar un Máster en España",
     descripcion:
       "Guía completa en ebook y video grabado con todos los pasos: elección del máster, postulación, visa y llegada a España.",
-    precio: "25 US$",
+    precio: `${T("ebook-master").usd} US$`,
     tipo: "Ebook + video",
     emoji: "📘",
     href: null,
@@ -46,11 +50,11 @@ export const PRODUCTOS = [
   {
     id: "ebook-fp",
     disponible: false,
-    precioPen: 39,
+    precioPen: T("ebook-fp").pen,
     nombre: "Ebook: estudia una Formación Profesional gratis en España",
     descripcion:
       "Cómo encontrar tu centro para estudiar una carrera técnica (FP) gratuita en España: requisitos, plazos y estrategia.",
-    precio: "10 US$",
+    precio: `${T("ebook-fp").usd} US$`,
     tipo: "Ebook",
     emoji: "📗",
     href: null,
@@ -58,11 +62,11 @@ export const PRODUCTOS = [
   {
     id: "videos-cv",
     disponible: false,
-    precioPen: 99,
+    precioPen: T("videos-cv").pen,
     nombre: "Serie de videos: mejora tu CV y tu perfil",
     descripcion:
       "Serie de videos prácticos para pulir tu CV y tu perfil académico-profesional antes de postular a universidades y becas.",
-    precio: "25 US$",
+    precio: `${T("videos-cv").usd} US$`,
     tipo: "Serie de videos",
     emoji: "🎬",
     href: null,

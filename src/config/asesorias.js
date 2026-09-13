@@ -3,6 +3,8 @@
 // La promoción gratuita tiene fecha de caducidad: al pasar `hasta` deja de
 // mostrarse sola, sin necesidad de tocar el resto de la web.
 import { CALENDLY_URL } from "./contacto";
+// Importes de la fuente única (precios-inspira.json).
+import { SESION_PRECIOS as S30, AMPLIADA_PRECIOS as S50 } from "./paqueteMaster2027Resumen";
 
 export const PROMO_GRATIS = {
   activa: true,
@@ -23,11 +25,11 @@ export const OPCIONES_ASESORIA = [
   {
     id: "personalizada-30",
     idPago: "asesoria-30",
-    precioPen: 100,
+    precioPen: S30.pen,
     nombre: "Asesoría personalizada 1:1",
     duracion: "30 minutos",
-    precio: "25 €",
-    precioAlt: "S/ 100 · 28 US$",
+    precio: `${S30.eur} €`,
+    precioAlt: `S/ ${S30.pen} · ${S30.usd} US$`,
     destacada: true,
     icono: "balanza",
     descripcion:
@@ -43,11 +45,11 @@ export const OPCIONES_ASESORIA = [
   {
     id: "personalizada-50",
     idPago: "asesoria-50",
-    precioPen: 180,
+    precioPen: S50.pen,
     nombre: "Asesoría ampliada",
     duracion: "50 minutos",
-    precio: "45 €",
-    precioAlt: "S/ 180",
+    precio: `${S50.eur} €`,
+    precioAlt: `S/ ${S50.pen}`,
     icono: "documento",
     descripcion:
       "Para casos con varias variables: denegatorias previas, familia, doble vía o expedientes ya iniciados.",

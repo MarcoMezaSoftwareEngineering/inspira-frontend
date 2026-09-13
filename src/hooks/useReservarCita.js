@@ -4,6 +4,7 @@ import { apiPOST } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { loginGoogle } from "../components/layout/Header/LoginButton";
 import { dialog } from "../services/dialogService";
+import { registrarInicioPago } from "../lib/analytics";
 
 function isMercadoPagoUrl(url) {
   try {
@@ -30,6 +31,7 @@ export function useReservarCita() {
       const res = await apiPOST("/mercadopago/reserva/preferencia", { id_slot });
 
       if (res?.ok && res.preferencia?.init_point && isMercadoPagoUrl(res.preferencia.init_point)) {
+        registrarInicioPago("reserva_cita", { id_slot });
         window.location.href = res.preferencia.init_point;
         return;
       }

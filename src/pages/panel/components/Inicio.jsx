@@ -7,7 +7,7 @@
 // lista, ordenada por urgencia, y cada línea lleva a donde se resuelve.
 import { useState } from "react";
 import Icono from "../../../components/common/Icono";
-import { lineaDe, whatsappLinea } from "../../../config/contacto";
+import { lineaDe, whatsappDesde } from "../../../config/contacto";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
 import { pendientesDe, plural } from "../pendientes";
@@ -31,7 +31,7 @@ function TuAsesor({ servicios }) {
       <div className="pnl-asesor-contacto">
         <a
           className="pnl-btn-cta ux-tap"
-          href={whatsappLinea(linea, "Hola, soy cliente de Inspira y tengo una consulta sobre mi expediente.")}
+          href={whatsappDesde("panel-inicio", "Soy cliente y tengo una consulta sobre mi expediente.")}
           target="_blank" rel="noopener noreferrer"
         >
           <Icono nombre="chat" size={15} />

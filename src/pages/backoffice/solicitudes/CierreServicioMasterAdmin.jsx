@@ -1,9 +1,13 @@
 // src/pages/backoffice/solicitudes/CierreServicioMasterAdmin.jsx
 //
-// El cierre del servicio de máster visto por el asesor, como en el proyecto
-// (09/09/2026): se activa con la primera admisión. Máster final, los dos
-// caminos del visado, el resumen financiero y las notas de cierre. Las
-// decisiones por máster (principal, en espera, rechaza, final) siguen aquí.
+// El cierre del servicio de máster visto por el asesor. Se activa con la
+// primera admisión. Máster final, la vía migratoria que eligió el asesorado
+// (y el alta del servicio que pida), los resultados, el resumen financiero,
+// las notas, el cierre con correo de encuesta y la encuesta respondida.
+//
+// 12/09/2026: los botones «Crear» de las rutas solo enseñaban un aviso y
+// «Cerrar con acta / Exportar» estaban deshabilitados; ahora todo lo visible
+// hace algo. El acta en PDF y la exportación siguen pendientes y no se enseñan.
 import { useEffect, useState } from "react";
 import { boGET, boPOST, boPATCH } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
@@ -21,14 +25,30 @@ function estadoDe(estado) {
 }
 
 const RESUMEN_VACIO = { inversion_total: "", plan_contratado: "", matricula_minima: "" };
+const ETIQUETA_VIA = { visa: "Visado de estudios", ee: "Estancia por estudios" };
+
+const fechaCorta = (iso) => {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
+  } catch {
+    return "";
+  }
+};
 
 export default function CierreServicioMasterAdmin({ idSolicitud }) {
-  const [masters,   setMasters]   = useState([]);
-  const [detalle,   setDetalle]   = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [resumen,   setResumen]   = useState(RESUMEN_VACIO);
-  const [notas,     setNotas]     = useState("");
-  const [guardando, setGuardando] = useState(false);
+  const [masters,    setMasters]    = useState([]);
+  const [detalle,    setDetalle]    = useState(null);
+  const [loading,    setLoading]    = useState(true);
+  const [resumen,    setResumen]    = useState(RESUMEN_VACIO);
+  const [notas,      setNotas]      = useState("");
+  const [guardando,  setGuardando]  = useState(false);
+  const [derivacion, setDerivacion] = useState(null);
+  const [opciones,   setOpciones]   = useState({});
+  const [encuesta,   setEncuesta]   = useState(null);
+  const [cierre,     setCierre]     = useState({ archivado: false });
+  const [alta,       setAlta]       = useState({ via: "", plan: "" });
+  const [ocupado,    setOcupado]    = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,12 +60,20 @@ export default function CierreServicioMasterAdmin({ idSolicitud }) {
           boGET(`/backoffice/solicitudes/${idSolicitud}`),
         ]);
         if (cancelled) return;
-        if (r.ok && r.masters) setMasters(r.masters);
-        const dp = rd?.datos_panel || {};
-        const rf = dp.resumen_financiero;
-        if (rf) setResumen({ inversion_total: rf.inversion_total ?? "", plan_contratado: rf.plan_contratado ?? "", matricula_minima: rf.matricula_minima ?? "" });
-        if (dp.notas_cierre) setNotas(dp.notas_cierre);
-        setDetalle(rd);
+        if (r.ok) {
+          setMasters(r.masters || []);
+          setDerivacion(r.derivacion || null);
+          setOpciones(r.opciones_derivacion || {});
+          setEncuesta(r.encuesta || null);
+          setCierre(r.cierre || { archivado: false });
+          const rf = r.resumen_financiero;
+          if (rf) setResumen({ inversion_total: rf.inversion_total ?? "", plan_contratado: rf.plan_contratado ?? "", matricula_minima: rf.matricula_minima ?? "" });
+          setNotas(r.notas_cierre || "");
+          const via = r.derivacion?.via || "";
+          setAlta({ via, plan: r.derivacion?.contratacion?.plan || (via ? (r.opciones_derivacion?.[via]?.planes || []).find((p) => p.recomendado)?.id || "" : "") });
+        }
+        // GET /backoffice/solicitudes/:id devuelve { ok, solicitud }.
+        setDetalle(rd?.solicitud || rd);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -57,7 +85,8 @@ export default function CierreServicioMasterAdmin({ idSolicitud }) {
   async function guardarPanel(patch) {
     setGuardando(true);
     try {
-      await boPATCH(`/backoffice/solicitudes/${idSolicitud}/datos-panel`, patch);
+      const r = await boPATCH(`/backoffice/solicitudes/${idSolicitud}/datos-panel`, { datos_panel: patch });
+      if (r && r.ok === false) dialog.toast(r.msg || "No se pudo guardar", "error");
     } finally {
       setGuardando(false);
     }
@@ -82,12 +111,63 @@ export default function CierreServicioMasterAdmin({ idSolicitud }) {
     dialog.toast("Máster final marcado", "success");
   }
 
+  async function darDeAlta() {
+    const plan = (opciones[alta.via]?.planes || []).find((p) => p.id === alta.plan);
+    if (!alta.via || !plan) return dialog.toast("Elige la vía y el plan", "error");
+    const ok = await dialog.confirm(
+      `Se crea el expediente de ${ETIQUETA_VIA[alta.via]} (${plan.nombre}, ${plan.precio} €) para ${nombreCorto} y se le manda el correo de servicio confirmado. El cobro se registra aparte, como siempre.`,
+      "Dar de alta el servicio"
+    );
+    if (!ok) return;
+    setOcupado(true);
+    const r = await boPOST(`/api/cierre-master/admin/solicitudes/${idSolicitud}/bloque8/derivacion/confirmar`, { via: alta.via, plan: alta.plan });
+    setOcupado(false);
+    if (!r.ok) return dialog.toast(r.msg || "No se pudo dar de alta", "error");
+    setDerivacion(r.derivacion);
+    dialog.toast(`Expediente #${r.id_solicitud_nueva} creado`, "success");
+  }
+
+  async function descartar() {
+    if (!(await dialog.confirm("La petición queda descartada y el asesorado lo verá en su cierre. ¿Continuar?", "Descartar petición"))) return;
+    setOcupado(true);
+    const r = await boPOST(`/api/cierre-master/admin/solicitudes/${idSolicitud}/bloque8/derivacion/descartar`, {});
+    setOcupado(false);
+    if (!r.ok) return dialog.toast(r.msg || "No se pudo descartar", "error");
+    setDerivacion(r.derivacion);
+  }
+
+  async function cerrar(reenviar = false) {
+    const texto = reenviar
+      ? `Se vuelve a mandar a ${nombreCorto} el correo de cierre con el enlace a la encuesta.`
+      : `Se cierra el servicio y se manda a ${nombreCorto} un correo formal de conclusión con el enlace a la encuesta (con copia a administración). Las notas de cierre van en el correo.`;
+    if (!(await dialog.confirm(texto, reenviar ? "Reenviar correo de cierre" : "Cerrar el servicio"))) return;
+    await guardarPanel({ notas_cierre: notas });
+    setOcupado(true);
+    const r = await boPOST(`/api/cierre-master/admin/solicitudes/${idSolicitud}/bloque8/cerrar`, { reenviar });
+    setOcupado(false);
+    if (!r.ok) return dialog.toast(r.msg || "No se pudo cerrar", "error");
+    setCierre(r.cierre);
+    const aviso = { enviado: "Correo enviado", ya_enviado: "Cerrado (el correo ya se había enviado)", fallo: "Cerrado, pero el correo no salió" }[r.correo] || "Cerrado";
+    dialog.toast(aviso, r.correo === "fallo" ? "error" : "success");
+  }
+
+  async function reabrir() {
+    if (!(await dialog.confirm(`El servicio vuelve a estar abierto y ${nombreCorto} deja de ver la encuesta (sus respuestas se conservan).`, "Reabrir"))) return;
+    setOcupado(true);
+    const r = await boPOST(`/api/cierre-master/admin/solicitudes/${idSolicitud}/bloque8/reabrir`, {});
+    setOcupado(false);
+    if (!r.ok) return dialog.toast(r.msg || "No se pudo reabrir", "error");
+    setCierre(r.cierre);
+  }
+
   const cambiar = (idx, campo, valor) => setMasters((prev) => prev.map((x, i) => (i === idx ? { ...x, [campo]: valor } : x)));
 
   const nombreCorto = (detalle?.cliente?.nombre || "el asesorado").split(" ")[0];
   const admitidos = masters.filter((m) => ADMITIDA.includes((m.estado_tramite || "").toUpperCase()));
   const fin = masters.find((m) => m.es_master_final) || admitidos[0] || null;
   const nombreDe = (m) => m.master_label || m.organismo;
+  const contratacion = derivacion?.contratacion || null;
+  const confirmada = contratacion?.estado === "CONFIRMADA";
 
   if (loading) {
     return (
@@ -137,36 +217,75 @@ export default function CierreServicioMasterAdmin({ idSolicitud }) {
       ) : (
         <div className="ex-vacio">
           <span className="ico"><IconoPaso nombre="flag" /></span>
-          Se activa con la primera admisión: máster final, carta y matrícula, expediente de visado y acta de cierre.
+          Se activa con la primera admisión: máster final, vía migratoria, cierre y encuesta.
           {masters.length > 0 ? " Mientras tanto, abajo van los másteres en proceso." : ""}
         </div>
       )}
 
-      {/* ── Derivar a visado ────────────────────────────────────────── */}
+      {/* ── Vía migratoria y alta del servicio ──────────────────────── */}
       {fin && (
         <section className="ex-sec">
           <div className="ex-h">
             <span className="ex-h-ico"><IconoPaso nombre="globe" /></span>
-            <h3>Derivar a visado</h3>
+            <h3>Visado o estancia</h3>
+            {confirmada
+              ? <span className="ex-est" data-e="ok"><IconoPaso nombre="check" /> Dado de alta</span>
+              : contratacion?.estado === "PENDIENTE_CONFIRMACION"
+                ? <span className="ex-est" data-e="warn"><IconoPaso nombre="clock" /> Pide contratar</span>
+                : derivacion?.via
+                  ? <span className="ex-est" data-e="on">Vía elegida</span>
+                  : <span className="ex-est" data-e="info">Sin elegir</span>}
           </div>
+
           <p className="ex-lead">
-            Crea el expediente con los datos de la ficha, la carta de admisión y el pasaporte ya cargados.
-            El camino depende de dónde esté {nombreCorto} cuando empiece el trámite.
+            {derivacion?.via
+              ? <>{nombreCorto} eligió <b>{ETIQUETA_VIA[derivacion.via]}</b> el {fechaCorta(derivacion.elegido_at)}.</>
+              : <>{nombreCorto} aún no ha elegido vía en su panel. Se le pidió en el correo de admisión.</>}
+            {contratacion?.estado === "PENDIENTE_CONFIRMACION" && (
+              <> Pidió contratar <b>{contratacion.nombre} ({contratacion.precio} €)</b> el {fechaCorta(contratacion.solicitada_at)}.</>
+            )}
+            {contratacion?.estado === "DESCARTADA" && <> La petición de {contratacion.nombre} se descartó el {fechaCorta(contratacion.descartada_at)}.</>}
           </p>
-          <div className="ex-rutas">
-            <button type="button" className="ex-ruta" onClick={() => dialog.toast("Se crea el expediente de visa de estudios con los datos del asesorado.", "success")}>
-              <span className="ex-h-ico"><IconoPaso nombre="idCard" /></span>
-              <b>Visa de estudios (consulado, Perú)</b>
-              <em>Crear</em>
-              <span className="d">Pide seis meses de medios de origen lícito. Diagnóstico, solvencia, documentos, declaración jurada y formulario.</span>
-            </button>
-            <button type="button" className="ex-ruta" onClick={() => dialog.toast("Se crea el expediente de estancia por estudios (EX-00).", "success")}>
-              <span className="ex-h-ico"><IconoPaso nombre="home" /></span>
-              <b>Estancia por estudios (EX-00, España)</b>
-              <em>Crear</em>
-              <span className="d">Solo fondos propios. Se presenta antes de que caduque su estancia legal.</span>
-            </button>
-          </div>
+
+          {confirmada ? (
+            <p className="ex-lead" style={{ marginBottom: 0 }}>
+              Alta de <b>{contratacion.nombre}</b> ({contratacion.precio} €) el {fechaCorta(contratacion.confirmada_at)}
+              {contratacion.id_solicitud_nueva ? <> · <a className="font-semibold underline" href={`/backoffice/solicitudes/${contratacion.id_solicitud_nueva}`}>expediente #{contratacion.id_solicitud_nueva}</a></> : null}.
+              El cobro se registra en ese expediente.
+            </p>
+          ) : (
+            <div className="ex-grid2">
+              <div>
+                <label className="ex-lab">Vía</label>
+                <select className="ex-select" style={{ maxWidth: "100%", width: "100%" }} value={alta.via}
+                  onChange={(e) => {
+                    const via = e.target.value;
+                    setAlta({ via, plan: (opciones[via]?.planes || []).find((p) => p.recomendado)?.id || "" });
+                  }}>
+                  <option value="">Elegir…</option>
+                  {Object.entries(opciones).map(([k, v]) => <option key={k} value={k}>{v.etiqueta}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="ex-lab">Plan</label>
+                <select className="ex-select" style={{ maxWidth: "100%", width: "100%" }} value={alta.plan} disabled={!alta.via}
+                  onChange={(e) => setAlta({ ...alta, plan: e.target.value })}>
+                  <option value="">Elegir…</option>
+                  {(opciones[alta.via]?.planes || []).map((p) => <option key={p.id} value={p.id}>{p.nombre} · {p.precio} €{p.recomendado && (opciones[alta.via]?.planes || []).length > 1 ? " (recomendado)" : ""}</option>)}
+                </select>
+              </div>
+              <div className="ex-fila" style={{ gridColumn: "1 / -1" }}>
+                <button type="button" className="ex-btn" disabled={ocupado || !alta.via || !alta.plan} onClick={darDeAlta}>
+                  <IconoPaso nombre="check" /> Dar de alta el servicio
+                </button>
+                {contratacion?.estado === "PENDIENTE_CONFIRMACION" && (
+                  <button type="button" className="ex-btn sec" disabled={ocupado} onClick={descartar}>
+                    <IconoPaso nombre="x" /> Descartar petición
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </section>
       )}
 
@@ -263,26 +382,66 @@ export default function CierreServicioMasterAdmin({ idSolicitud }) {
         <div className="ex-h">
           <span className="ex-h-ico"><IconoPaso nombre="flag" /></span>
           <h3>Cerrar el servicio</h3>
+          {cierre?.archivado && <span className="ex-est" data-e="ok"><IconoPaso nombre="check" /> Cerrado el {fechaCorta(cierre.at)}</span>}
         </div>
         <p className="ex-lead">
-          Genera el acta con el informe, la elección, los resguardos, la carta y la matrícula; se la envía a {nombreCorto} en PDF y le pide la valoración.
-          {fin ? "" : " Se habilita con la primera admisión."}
+          {cierre?.archivado
+            ? <>El correo de conclusión con la encuesta {cierre.correo_at ? `salió el ${fechaCorta(cierre.correo_at)}` : "no llegó a salir"}. {nombreCorto} ve la encuesta en su paso 6.</>
+            : <>Al cerrar, {nombreCorto} recibe un correo formal de conclusión (con las notas de abajo y copia a administración) con el enlace a la encuesta, que se le abre en su paso 6.</>}
         </p>
-        <label className="ex-lab">Notas de cierre</label>
+        <label className="ex-lab">Notas de cierre (las ve {nombreCorto})</label>
         <textarea rows={4} className="ex-campo" value={notas}
           onChange={(e) => setNotas(e.target.value)}
           onBlur={() => guardarPanel({ notas_cierre: notas })}
           placeholder="Observaciones del caso, instrucciones especiales, próximos pasos…" />
         <div className="ex-fila" style={{ marginTop: 12 }}>
-          <button type="button" className="ex-btn" disabled title="El acta de cierre se genera en la siguiente entrega">
-            <IconoPaso nombre="check" /> Cerrar con acta
-          </button>
-          <button type="button" className="ex-btn sec" disabled title="La exportación del expediente se genera en la siguiente entrega">
-            <IconoPaso nombre="download" /> Exportar expediente
-          </button>
-          <span className="ex-sub2" style={{ fontSize: 11.5, color: "#5f7a89" }}>Acta y exportación: en la siguiente entrega.</span>
+          {!cierre?.archivado ? (
+            <button type="button" className="ex-btn" disabled={ocupado} onClick={() => cerrar(false)}>
+              <IconoPaso nombre="check" /> Cerrar y pedir valoración
+            </button>
+          ) : (
+            <>
+              <button type="button" className="ex-btn sec" disabled={ocupado} onClick={() => cerrar(true)}>
+                <IconoPaso nombre="send" /> Reenviar correo de cierre
+              </button>
+              <button type="button" className="ex-btn plano" disabled={ocupado} onClick={reabrir}>
+                Reabrir
+              </button>
+            </>
+          )}
         </div>
       </section>
+
+      {/* ── La encuesta respondida ──────────────────────────────────── */}
+      {(cierre?.archivado || encuesta) && (
+        <section className="ex-sec">
+          <div className="ex-h">
+            <span className="ex-h-ico"><IconoPaso nombre="star" /></span>
+            <h3>Encuesta de cierre</h3>
+            {encuesta
+              ? <span className="ex-est" data-e={encuesta.general >= 4 ? "ok" : encuesta.general <= 2 ? "no" : "warn"}>{encuesta.general}/5</span>
+              : <span className="ex-est" data-e="info">Sin responder</span>}
+          </div>
+          {encuesta ? (
+            <>
+              <div className="ex-grid3">
+                <div><label className="ex-lab">General</label><b>{encuesta.general}/5</b></div>
+                <div><label className="ex-lab">Asesor</label><b>{encuesta.asesor}/5</b></div>
+                <div><label className="ex-lab">Recomendaría</label><b>{encuesta.nps}/10</b></div>
+              </div>
+              {encuesta.comentario && (
+                <p className="ex-lead" style={{ marginTop: 10, whiteSpace: "pre-line" }}>«{encuesta.comentario}»</p>
+              )}
+              <p className="ex-lead" style={{ marginTop: 8, marginBottom: 0 }}>
+                {encuesta.autoriza_publicar ? "Autoriza publicar su opinión de forma anonimizada." : "No autoriza publicar su opinión."}
+                {" "}Enviada el {fechaCorta(encuesta.enviada_at)}{encuesta.editada_at ? `, editada el ${fechaCorta(encuesta.editada_at)}` : ""}.
+              </p>
+            </>
+          ) : (
+            <p className="ex-lead" style={{ marginBottom: 0 }}>{nombreCorto} todavía no ha respondido.</p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

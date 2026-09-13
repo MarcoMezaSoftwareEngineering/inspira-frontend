@@ -313,7 +313,7 @@ export default function PanelCliente({ path }) {
           {/* Perfil: scroll externo */}
           {tab === "perfil" && (
             <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-5">
-              <PerfilCliente user={user} onUserUpdated={(nuevo) => setUser(nuevo)} />
+              <PerfilCliente user={user} conAcademico={conAcademico} onUserUpdated={(nuevo) => setUser(nuevo)} />
             </div>
           )}
 

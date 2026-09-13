@@ -113,7 +113,7 @@ PAGINAS = [
      "+2.000 admitidos · +500 visas aprobadas"),
     ("eventos", "Evento gratuito",
      "Estudia en España en 5 pasos",
-     "Charla virtual · sábado 19 de septiembre"),
+     "Charla virtual · octubre de 2026"),
     ("blog", "Blog",
      "Guías claras para migrar y estudiar en España",
      "Extranjería, visados y vida académica"),

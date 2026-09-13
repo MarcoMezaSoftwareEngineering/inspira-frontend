@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { whatsappDesde } from "../../config/contacto";
 
 // ─── Checklist data ────────────────────────────────────────────────────────
 const CHECKLIST_SECTIONS = [
@@ -755,7 +756,7 @@ export default function GuiaMaster() {
                   Consultar ahora
                 </a>
                 <a
-                  href="https://wa.me/message/inspira"
+                  href={whatsappDesde("panel-guia-master", "Tengo una consulta sobre mi máster.")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block bg-white/15 border border-white/30 text-white font-semibold text-sm px-7 py-3 rounded-xl hover:bg-white/20 transition-colors"

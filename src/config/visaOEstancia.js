@@ -23,9 +23,9 @@
 import {
   PLANES_VISADO,
   ESTANCIA_ESTUDIOS,
-  LISTAS_MASTER,
   SESION_DIAGNOSTICO,
 } from "./metodo";
+import { PRECIO_DESDE } from "./paqueteMaster2027Resumen";
 
 // ── Preguntas ───────────────────────────────────────────────────────────────
 // Cinco, y ninguna de relleno. Es un test para mandar por WhatsApp: si pide
@@ -405,9 +405,8 @@ function evaluarEstancia(r, dias) {
 // ── Qué paquete recomendar ──────────────────────────────────────────────────
 
 const integral = PLANES_VISADO.find((p) => p.id === "visado-integral");
-const masterDesde = Math.min(
-  ...LISTAS_MASTER.flatMap((l) => l.planes.map((p) => p.precio))
-);
+// Desde: el plan más barato del Paquete Máster 2027/2028 (fuente única).
+const masterDesde = PRECIO_DESDE;
 
 export const PAQUETES = {
   visado: {

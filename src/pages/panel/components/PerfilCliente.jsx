@@ -39,21 +39,29 @@ function SecLabel({ children }) {
 }
 
 // ── Validación ─────────────────────────────────────────────────────────────────
+// Lo que se exige a todos: quién es y con qué documento viaja.
 const REQUIRED = [
   ["nombre",               "El nombre es obligatorio"],
   ["pais_origen",          "Selecciona tu país de origen"],
   ["fecha_nacimiento",     "La fecha de nacimiento es obligatoria"],
   ["pasaporte",            "El número de pasaporte es obligatorio"],
   ["pasaporte_vencimiento","La fecha de vencimiento del pasaporte es obligatoria"],
+];
+
+// Lo académico solo se exige a quien tiene un servicio que busca programa
+// (máster o FP, ver servicios.js#pideAcademico). A un asesorado de visado o de
+// modificatoria se le dejaba sin poder guardar su perfil por no poner su
+// universidad de origen. Si lo rellena igualmente, se valida el formato.
+const REQUIRED_ACADEMICO = [
   ["carrera_titulo",       "El título universitario es obligatorio"],
   ["universidad_origen",   "La universidad de origen es obligatoria"],
   ["inicio_estudios",      "El año de inicio de estudios es obligatorio"],
   ["fin_estudios",         "El año de fin de estudios es obligatorio"],
 ];
 
-function validar(form) {
+function validar(form, conAcademico) {
   const errs = {};
-  for (const [key, msg] of REQUIRED) {
+  for (const [key, msg] of [...REQUIRED, ...(conAcademico ? REQUIRED_ACADEMICO : [])]) {
     if (!form[key] || !String(form[key]).trim()) errs[key] = msg;
   }
   const anioRe = /^\d{4}$/;
@@ -61,13 +69,15 @@ function validar(form) {
     errs.inicio_estudios = "Ingresa un año válido (ej. 2018)";
   if (form.fin_estudios && !anioRe.test(String(form.fin_estudios).trim()))
     errs.fin_estudios = "Ingresa un año válido (ej. 2023)";
-  if (!form.mes_inicio || !form.anio_inicio) errs.inicio_previsto = "Selecciona mes y año de inicio previsto";
-  if (!form.presupuesto_hasta) errs.presupuesto_hasta = "Define tu presupuesto máximo";
+  if (conAcademico) {
+    if (!form.mes_inicio || !form.anio_inicio) errs.inicio_previsto = "Selecciona mes y año de inicio previsto";
+    if (!form.presupuesto_hasta) errs.presupuesto_hasta = "Define tu presupuesto máximo";
+  }
   return errs;
 }
 
 // ── Componente principal ───────────────────────────────────────────────────────
-export default function PerfilCliente({ user, onUserUpdated }) {
+export default function PerfilCliente({ user, onUserUpdated, conAcademico = true }) {
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState("");
@@ -134,7 +144,7 @@ export default function PerfilCliente({ user, onUserUpdated }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const errores = validar(form);
+    const errores = validar(form, conAcademico);
     if (Object.keys(errores).length > 0) { setErrs(errores); return; }
 
     setSaving(true); setError(""); setOkMsg("");

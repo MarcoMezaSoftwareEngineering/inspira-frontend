@@ -123,7 +123,20 @@ export default function ServiciosList({ servicios, loading, onEditar, onChecklis
                 )}
 
                 <div className="mt-2 flex items-baseline gap-2">
-                  {s.precio_actual ? (
+                  {s.precio_catalogo ? (
+                    <>
+                      <span className="font-['Fraunces',serif] text-lg font-semibold text-primary">
+                        {s.precio_catalogo.eur != null ? `${s.precio_catalogo.eur} €` : ""}
+                        {s.precio_catalogo.pen != null ? ` · S/ ${s.precio_catalogo.pen}` : ""}
+                      </span>
+                      <span
+                        className="text-[11px] text-neutral-400"
+                        title="Precio de la fuente única (precios-inspira.json). No se edita desde aquí."
+                      >
+                        catálogo {s.precio_catalogo.version}
+                      </span>
+                    </>
+                  ) : s.precio_actual ? (
                     <>
                       <span className="font-['Fraunces',serif] text-lg font-semibold text-primary">
                         {symbol} {s.precio_actual.monto.toFixed(2)}

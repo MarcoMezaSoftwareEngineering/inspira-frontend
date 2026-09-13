@@ -1,0 +1,103 @@
+{
+  "_nota": "FUENTE ÚNICA de precios de Inspira. Se edita SOLO aquí (inspira-backend/src/modules/precios/precios-inspira.json) y se copia al frontend con `node scripts/sincronizar-precios.js`. `npm test` falla si la copia difiere.",
+  "version": "2027-2028",
+  "actualizado": "2026-09-12",
+  "fuente": "Paquete Máster 2027/2028, decisiones del cliente del 10 y 11/09/2026",
+  "moneda": "EUR",
+  "reglaPago": {
+    "cuotas": 2,
+    "porcentajes": [50, 50],
+    "segundaCuotaMeses": 2,
+    "mesesMinimosParaCuotas": 2,
+    "resumen": "Dos cuotas (50 % al iniciar y 50 % a los dos meses) solo si faltan más de dos meses para postular; si no, al contado. El plan queda pagado antes de la primera postulación.",
+    "sesionDescontable": false
+  },
+  "sesionDiagnostico": {
+    "id": "sesion-diagnostico",
+    "nombre": "Sesión diagnóstico",
+    "duracionMin": 30,
+    "eur": 25,
+    "usd": 28,
+    "pen": 100
+  },
+  "asesoriaAmpliada": {
+    "id": "asesoria-ampliada",
+    "nombre": "Asesoría ampliada",
+    "duracionMin": 50,
+    "eur": 45,
+    "usd": null,
+    "pen": 180
+  },
+  "master": {
+    "listas": [
+      {
+        "id": "economicas",
+        "numero": 1,
+        "nombre": "Económicas",
+        "planes": [
+          { "id": "l1-a", "nombre": "Plan A · Andalucía", "alcance": "Hasta 6 másteres en las 10 universidades públicas andaluzas", "eur": 219 },
+          { "id": "l1-basico", "nombre": "Plan Básico", "alcance": "Una comunidad: Cantabria, Asturias, Castilla-La Mancha o Navarra, sin límite de másteres", "eur": 249 },
+          { "id": "l1-comfort", "nombre": "Plan Comfort", "alcance": "Galicia y/o Castilla y León, sin límite de másteres ni universidades", "eur": 279 },
+          { "id": "l1-full", "nombre": "Plan Full Económico", "alcance": "Las siete comunidades económicas: 21 universidades públicas", "eur": 359 }
+        ]
+      },
+      {
+        "id": "intermedias",
+        "numero": 2,
+        "nombre": "Intermedias",
+        "planes": [
+          { "id": "l2-a", "nombre": "Plan A", "alcance": "Una comunidad intermedia, sin límite de másteres ni universidades", "eur": 219 },
+          { "id": "l2-basico-full", "nombre": "Plan Básico Full", "alcance": "Tres comunidades intermedias a elegir", "eur": 249 },
+          { "id": "l2-full", "nombre": "Plan Full", "alcance": "Las cinco comunidades intermedias", "eur": 349 }
+        ]
+      },
+      {
+        "id": "premium",
+        "numero": 3,
+        "nombre": "Premium",
+        "planes": [
+          { "id": "l3-a", "nombre": "Plan A", "alcance": "Una universidad de la Comunidad Valenciana, Cataluña o Madrid", "eur": 219 },
+          { "id": "l3-comfort", "nombre": "Plan Comfort", "alcance": "Una comunidad premium completa: Madrid, Cataluña o Comunidad Valenciana", "eur": 350 },
+          { "id": "l3-full", "nombre": "Plan Full", "alcance": "Dos de las tres comunidades premium", "eur": 450 },
+          { "id": "l3-total", "nombre": "Plan Total", "alcance": "Madrid, Cataluña y Comunidad Valenciana", "eur": 600 }
+        ]
+      }
+    ],
+    "avanzados": [
+      { "id": "econ-intermedias-650", "nombre": "Paquete Económicas + Intermedias", "alcance": "Las 12 comunidades de las Listas 1 y 2 (sin Comunidad Valenciana)", "eur": 650 },
+      { "id": "premium-700", "nombre": "Paquete Premium", "alcance": "Hasta 6 comunidades autónomas a elegir, públicas y privadas", "eur": 700 },
+      { "id": "infinity-1100", "nombre": "Paquete Infinity", "alcance": "Toda España: las 17 comunidades, sin límite de universidades", "eur": 1100 }
+    ]
+  },
+  "individuales": [
+    { "id": "check-in", "grupo": "parciales", "nombre": "Pack Check-In Master", "eur": 109 },
+    { "id": "smart", "grupo": "parciales", "nombre": "Pack Smart Master", "eur": 149 },
+    { "id": "explorador", "grupo": "combos", "nombre": "Pack Explorador", "eur": 79, "aCuentaDelPaquete": true },
+    { "id": "listo", "grupo": "combos", "nombre": "Pack Listo", "eur": 149 },
+    { "id": "seguro", "grupo": "combos", "nombre": "Pack Seguro", "eur": 189 },
+    { "id": "completo", "grupo": "combos", "nombre": "Pack Completo", "eur": 229 },
+    { "id": "todo-en-uno", "grupo": "combos", "nombre": "Pack Todo en Uno", "eur": 289 },
+    { "id": "revision", "grupo": "sueltos", "nombre": "Solo Revisión Documentaria", "eur": 79 },
+    { "id": "postulacion", "grupo": "sueltos", "nombre": "Solo Postulación", "eur": 89 },
+    { "id": "soporte-admision", "grupo": "sueltos", "nombre": "Soporte en Proceso de Admisión", "eur": 45, "desde": true },
+    { "id": "post-admision", "grupo": "sueltos", "nombre": "Soporte Post-Admisión", "eur": 45 },
+    { "id": "consulta-puntual", "grupo": "asesorias", "nombre": "Consulta Puntual Acompañada", "eur": 29 },
+    { "id": "sesion-acompanada", "grupo": "asesorias", "nombre": "Sesión Acompañada", "eur": 45 }
+  ],
+  "visado": [
+    { "id": "visado-base", "nombre": "Asesoría Base", "eur": 109 },
+    { "id": "visado-parcial", "nombre": "Asesoría Parcial", "eur": 180 },
+    { "id": "visado-integral", "nombre": "Asesoría Integral", "eur": 250, "recomendado": true }
+  ],
+  "estancia": { "id": "estancia", "nombre": "Estancia por Estudios", "eur": 350 },
+  "citasEspana": [
+    { "id": "empadronamiento", "nombre": "Cita de empadronamiento", "eur": 25 },
+    { "id": "tie", "nombre": "Cita de huellas / TIE", "eur": 50 }
+  ],
+  "tienda": [
+    { "id": "becas-actualizadas", "nombre": "Becas en España actualizadas", "pen": 59, "usd": 15 },
+    { "id": "ebook-master", "nombre": "Ebook + video: pasos para estudiar un Máster en España", "pen": 99, "usd": 25 },
+    { "id": "ebook-fp", "nombre": "Ebook: Formación Profesional gratis en España", "pen": 39, "usd": 10 },
+    { "id": "videos-cv", "nombre": "Serie de videos: mejora tu CV y tu perfil", "pen": 99, "usd": 25 }
+  ]
+}

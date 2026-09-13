@@ -15,8 +15,9 @@ export const EVENTOS = [
     formato: "Charla virtual y gratuita",
     precio: "Gratis",
     cupo: "Cupos limitados",
-    fecha: "2026-09-19",
-    fechaTexto: "Sábado 19 de septiembre · virtual",
+    // Reprogramada (cliente, 12/09/2026): pasa a octubre; día y hora por confirmar.
+    fecha: "2026-10",
+    fechaTexto: "Octubre de 2026 · virtual · fecha por anunciar",
     // Beneficio principal: quien asiste entra a la presencial de noviembre.
     accesoPresencial:
       "Los asistentes obtienen acceso a nuestra charla presencial de noviembre.",

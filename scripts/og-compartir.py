@@ -12,6 +12,7 @@
 # Tipografía: Outfit (OFL) en scripts/fuentes/. Colores de marca:
 # petróleo #013446, celeste #88C4FC, naranja #FA943A, amarillo #F9C846.
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import json
 import os
 import sys
 
@@ -21,6 +22,11 @@ LOGO = os.path.join(RAIZ, "src", "assets", "images", "logo.png")
 FOTO_MASTER = os.path.join(RAIZ, "src", "assets", "images", "landing", "master-2027", "foto-hero-aeropuerto-pasaporte.webp")
 OUTFIT = os.path.join(RAIZ, "scripts", "fuentes", "Outfit-Variable.ttf")
 os.makedirs(SALIDA, exist_ok=True)
+
+# Importes de la fuente única (copia del backend: src/config/precios-inspira.json).
+with open(os.path.join(RAIZ, "src", "config", "precios-inspira.json"), encoding="utf-8") as _f:
+    PRECIOS = json.load(_f)
+DESDE_MASTER = min([p["eur"] for l in PRECIOS["master"]["listas"] for p in l["planes"]] + [p["eur"] for p in PRECIOS["master"]["avanzados"]])
 
 W, H = 1200, 630
 PETROLEO = (1, 52, 70)
@@ -158,7 +164,7 @@ def master():
     d.text((x, 196), "Máster", font=ft, fill=BLANCO)
     d.text((x, 292), "2027/2028", font=ft, fill=AMARILLO)
     y = 420
-    ancho, alto = pastilla(d, x, y, "Desde 219 €", fuente(40, "Bold"), NARANJA, PETROLEO)
+    ancho, alto = pastilla(d, x, y, f"Desde {DESDE_MASTER} €", fuente(40, "Bold"), NARANJA, PETROLEO)
     d.text((x, y + alto + 18), "Primera ventana: noviembre 2026", font=fuente(32, "Medium"), fill=BLANCO)
     pegar_logo(img, W - 48 - 250, 40, alto=48)
     return guardar(img, "master-2027-2028.jpg")

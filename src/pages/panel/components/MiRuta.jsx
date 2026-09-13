@@ -3,7 +3,7 @@
 // hablando con el asesor, nunca con precio ni botón de compra.
 import IconoPaso from "../../../components/common/IconoPaso";
 import Icono from "../../../components/common/Icono";
-import { lineaDe, whatsappLinea } from "../../../config/contacto";
+import { whatsappDesde } from "../../../config/contacto";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
 import { ESTADO_ETAPA, rutaDelCliente, puntoDeRuta } from "../rutaCliente";
@@ -25,11 +25,10 @@ const ICONO = {
 };
 
 function BotonAsesor({ etapa }) {
-  const linea = lineaDe();
   return (
     <a
       className="pnl-btn ux-tap"
-      href={whatsappLinea(linea, `Hola, soy cliente de Inspira y quiero hablar de mi siguiente etapa: ${etapa.titulo.toLowerCase()}.`)}
+      href={whatsappDesde("panel-mi-ruta", `Soy cliente y quiero hablar de mi siguiente etapa: ${etapa.titulo.toLowerCase()}.`)}
       target="_blank" rel="noopener noreferrer"
     >
       <Icono nombre="chat" size={15} />

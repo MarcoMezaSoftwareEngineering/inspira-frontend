@@ -9,8 +9,8 @@
 // Reglas de este archivo:
 // - Ningún importe se escribe a mano en el JSX: todo sale de aquí.
 // - Cada precio de plan se escribe UNA vez (PRECIOS) y los textos que lo citan
-//   se construyen con él. La sesión, la vía migratoria y las citas salen de
-//   metodo.js, que no se toca.
+//   se construyen con él. Todos los importes salen de la fuente única
+//   precios-inspira.json (vía paqueteMaster2027Resumen.js y metodo.js).
 // - Fechas del curso 2027-28: siempre estimadas («~» o «estimada»).
 // - Respuestas del cliente del 10/09/2026 (tarde): el evento de Calendly se
 //   llama «Sesión diagnóstico», se paga por transferencia, Plin o Mercado Pago
@@ -18,8 +18,6 @@
 //   moneda de cobro ni política de devolución.
 // - Cliente, 11/09/2026 (tarde): la sesión diagnóstico es un pago aparte y no
 //   se descuenta del paquete. Una sola ventana emergente (la de la sesión).
-// - No reutilizar aquí listas ni cifras de metodo.js o masterPlans.data.js:
-//   siguen siendo las de 2026/2027.
 // ─────────────────────────────────────────────────────────────────────────────
 import { SESION_DIAGNOSTICO, PLANES_VISADO, ESTANCIA_ESTUDIOS, CITAS_ESPANA } from "./metodo";
 import { TITULAR } from "./legal";
@@ -30,7 +28,7 @@ import { NOMBRE_PORTAL } from "./portalMarca";
 // ── Formato y precios ───────────────────────────────────────────────────────
 // Viven en paqueteMaster2027Resumen.js, que usan también la portada, el menú y
 // App.jsx sin cargar todo este archivo. Aquí se reexportan: una sola fuente.
-import { NBSP, numero, eur, rangoEur, PRECIOS, PRECIO_DESDE } from "./paqueteMaster2027Resumen";
+import { NBSP, numero, eur, rangoEur, PRECIOS, PRECIO_DESDE, PRECIOS_INSPIRA } from "./paqueteMaster2027Resumen";
 
 export { numero, eur, rangoEur, PRECIOS, PRECIO_DESDE };
 
@@ -356,10 +354,14 @@ export const PERSONALIZADO = {
 };
 
 // ── A6c · Paquetes parciales, servicios individuales y asesorías puntuales ─
-// Fuente única: public/portal-servicios-master.html (PARCIALES, COMBOS, SOLOS
-// y las dos asesorías puntuales). No se usan los COMPLETOS del portal.
-const servicio = (id, precio, datos) => ({ id, precio, ...datos });
-const PRECIO_EXPLORADOR = 79;
+// Textos aquí; importes en la fuente única precios-inspira.json («individuales»).
+const precioIndividual = (id) => {
+  const i = PRECIOS_INSPIRA.individuales.find((x) => x.id === id);
+  if (!i) throw new Error(`precios-inspira.json no tiene el servicio «${id}»`);
+  return i.eur;
+};
+const servicio = (id, datos) => ({ id, precio: precioIndividual(id), ...datos });
+const PRECIO_EXPLORADOR = precioIndividual("explorador");
 
 export const OTROS_SERVICIOS = {
   eyebrow: "Solo una parte del proceso",
@@ -385,7 +387,7 @@ export const OTROS_SERVICIOS = {
       etiqueta: "Parciales",
       aviso: "Solo Andalucía. No incluyen búsqueda de másteres y cubren una sola fase de convocatoria.",
       servicios: [
-        servicio("check-in", 109, {
+        servicio("check-in", {
           nombre: "Pack Check-In Master",
           lema: "Revisión final + postulación correcta",
           para: "Ya tienes el máster definido y los documentos listos.",
@@ -396,7 +398,7 @@ export const OTROS_SERVICIOS = {
             "Confirmación de envío y subsanaciones durante la fase",
           ],
         }),
-        servicio("smart", 149, {
+        servicio("smart", {
           nombre: "Pack Smart Master",
           lema: "Estrategia + documentos + postulación",
           para: "Ya tienes idea del máster y quieres validar tu elección.",
@@ -414,7 +416,7 @@ export const OTROS_SERVICIOS = {
       etiqueta: "Combos",
       aviso: "Agrupan varios servicios a mejor precio. Aplican a 1 universidad (2 según complejidad).",
       servicios: [
-        servicio("explorador", PRECIO_EXPLORADOR, {
+        servicio("explorador", {
           nombre: "Pack Explorador",
           lema: "Solo búsqueda · informe personalizado",
           para: "No sabes qué másteres se ajustan a ti y quieres opciones reales antes de decidir.",
@@ -425,7 +427,7 @@ export const OTROS_SERVICIOS = {
           ],
           nota: `Si escalas a un paquete completo, los ${eur(PRECIO_EXPLORADOR)} se aplican a cuenta.`,
         }),
-        servicio("listo", 149, {
+        servicio("listo", {
           nombre: "Pack Listo",
           lema: "Revisión + postulación",
           para: "Ya elegiste el máster.",
@@ -435,7 +437,7 @@ export const OTROS_SERVICIOS = {
             "Postulación oficial, con confirmación de envío",
           ],
         }),
-        servicio("seguro", 189, {
+        servicio("seguro", {
           nombre: "Pack Seguro",
           lema: "Revisión + postulación + subsanaciones",
           para: "Quieres que gestionemos todo hasta los resultados de admisión.",
@@ -445,7 +447,7 @@ export const OTROS_SERVICIOS = {
             "Subsanaciones, apelaciones y acompañamiento hasta la resolución",
           ],
         }),
-        servicio("completo", 229, {
+        servicio("completo", {
           nombre: "Pack Completo",
           lema: "Documentación + postulación + matrícula",
           para: "Ya tienes 1 o 2 másteres escogidos y quieres llegar a la carta de admisión.",
@@ -456,7 +458,7 @@ export const OTROS_SERVICIOS = {
           ],
           nota: "No incluye búsqueda.",
         }),
-        servicio("todo-en-uno", 289, {
+        servicio("todo-en-uno", {
           nombre: "Pack Todo en Uno",
           lema: "Búsqueda + documentación + postulación + matrícula",
           para: "Quieres empezar desde cero, para un máster.",
@@ -474,7 +476,7 @@ export const OTROS_SERVICIOS = {
       etiqueta: "Sueltos",
       aviso: "Servicios a la carta. Aplican a 1 universidad (2 según complejidad).",
       servicios: [
-        servicio("revision", 79, {
+        servicio("revision", {
           nombre: "Solo Revisión Documentaria",
           lema: "CV europeo + cartas + equivalencia",
           para: "Ya sabes qué universidad y máster quieres.",
@@ -485,7 +487,7 @@ export const OTROS_SERVICIOS = {
           ],
           nota: "No incluye postulación.",
         }),
-        servicio("postulacion", 89, {
+        servicio("postulacion", {
           nombre: "Solo Postulación",
           lema: "Tú tienes los documentos; nosotros postulamos",
           para: "Ya tienes todos tus documentos listos.",
@@ -495,7 +497,7 @@ export const OTROS_SERVICIOS = {
             "Documentos adicionales si la universidad los pide",
           ],
         }),
-        servicio("soporte-admision", 45, {
+        servicio("soporte-admision", {
           nombre: "Soporte en Proceso de Admisión",
           lema: "Subsanaciones y alegaciones",
           para: "La universidad te pide documentos, tienes baja puntuación o quieres apelar.",
@@ -507,7 +509,7 @@ export const OTROS_SERVICIOS = {
           desde: true,
           nota: "El precio depende de la complejidad del caso.",
         }),
-        servicio("post-admision", 45, {
+        servicio("post-admision", {
           nombre: "Soporte Post-Admisión",
           lema: "Matrícula y confirmación de plaza",
           para: "Ya te admitieron y no sabes cómo confirmar plaza o matricularte.",
@@ -525,7 +527,7 @@ export const OTROS_SERVICIOS = {
       etiqueta: "Asesorías",
       aviso: "Sesiones de 30 minutos para quien ya está en proceso.",
       servicios: [
-        servicio("consulta-puntual", 29, {
+        servicio("consulta-puntual", {
           nombre: "Consulta Puntual Acompañada",
           lema: "Orientación estratégica · 30 minutos",
           para: "Ya estás en proceso y quieres confirmar tus próximos pasos.",
@@ -536,7 +538,7 @@ export const OTROS_SERVICIOS = {
           ],
           nota: "No incluye revisión documentaria ni postulación.",
         }),
-        servicio("sesion-acompanada", 45, {
+        servicio("sesion-acompanada", {
           nombre: "Sesión Acompañada",
           lema: "En vivo, con pantalla compartida · 30 minutos",
           para: "Quieres revisar algo urgente o postular en ese momento con guía.",

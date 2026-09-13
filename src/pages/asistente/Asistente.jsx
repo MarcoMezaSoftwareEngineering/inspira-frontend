@@ -11,7 +11,7 @@ import EnviarPlan from "../../components/common/EnviarPlan";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
 import { navigate } from "../../services/navigate";
-import { CALENDLY_URL, whatsappUrl } from "../../config/contacto";
+import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 
 const go = (e, href) => {
@@ -67,7 +67,7 @@ export default function Asistente() {
   };
 
   const resumenWhatsApp = resultado
-    ? `Hola Inspira. Hice el diagnóstico en la web y me salió: ${resultado.via}.\n\n` +
+    ? `Me salió: ${resultado.via}.\n\n` +
       historial.map((h) => `· ${h.pregunta} ${h.resp}`).join("\n") +
       `\n\nQuiero agendar mi asesoría.`
     : "";
@@ -333,7 +333,7 @@ export default function Asistente() {
               <div className="mt-5 flex flex-wrap justify-center gap-3">
                 <BotonAsesoria>Agenda tu asesoría 1:1</BotonAsesoria>
                 <a
-                  href={whatsappUrl(resumenWhatsApp)}
+                  href={whatsappDesde("asistente", resumenWhatsApp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-xl border-2 border-primary px-6 py-3.5 font-extrabold text-primary transition hover:bg-white"

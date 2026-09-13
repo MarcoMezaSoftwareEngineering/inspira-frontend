@@ -3,7 +3,7 @@
 // plan y nosotros nos quedamos el contacto de alguien interesado.
 import { useState } from "react";
 import Icono from "./Icono";
-import { registrarEvento } from "../../lib/analytics";
+import { registrarEvento, registrarLead } from "../../lib/analytics";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -46,6 +46,7 @@ export default function EnviarPlan({ resultado, respuestas }) {
       if (!d.ok) throw new Error(d.msg || "No pudimos enviarlo.");
       setEstado("ok");
       registrarEvento("plan_enviado", { via: resultado.via });
+      registrarLead("plan_diagnostico", { via: resultado.via });
     } catch (err) {
       setEstado("error");
       setError(err.message || "No pudimos enviarlo. Inténtalo de nuevo.");

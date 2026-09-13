@@ -11,10 +11,12 @@
 
 
 import { NOMBRE_PORTAL, NOMBRE_CORTO } from "./portalMarca";
+import { SESION_PRECIOS } from "./paqueteMaster2027Resumen";
+// Importes de la fuente única (precios-inspira.json).
 export const PRECIO_ASESORIA = {
-  eur: "25 €",
-  usd: "28 US$",
-  pen: "S/ 100",
+  eur: `${SESION_PRECIOS.eur} €`,
+  usd: `${SESION_PRECIOS.usd} US$`,
+  pen: `S/ ${SESION_PRECIOS.pen}`,
   descripcion:
     "Primera asesoría personalizada de 30 minutos. Después de conocer tu caso armamos un paquete a tu medida — sin precios genéricos.",
 };

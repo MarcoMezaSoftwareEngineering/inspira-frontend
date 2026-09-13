@@ -4,7 +4,7 @@
 // El panel vuelve a aparecer en cada visita (solo se silencia dentro de la
 // misma sesión de navegación, para no molestar mientras se lee).
 import { useEffect, useState } from "react";
-import { CALENDLY_URL, whatsappUrl } from "../../config/contacto";
+import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { OPCIONES_ASESORIA, promoVigente } from "../../config/asesorias";
 import ReservaLateral from "./ReservaLateral";
 
@@ -164,8 +164,9 @@ export default function AsesoriaCTA() {
                 📅 Ver disponibilidad
               </a>
               <a
-                href={whatsappUrl(
-                  "Hola Inspira, quiero agendar una asesoría para migrar a España."
+                href={whatsappDesde(
+                  window.location.pathname,
+                  "Quiero agendar una asesoría para migrar a España."
                 )}
                 target="_blank"
                 rel="noopener noreferrer"

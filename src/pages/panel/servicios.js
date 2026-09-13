@@ -49,7 +49,9 @@ export function servicioDe(s) {
   const txt = textoDe(s);
   if (/modificatoria|modificaci/.test(txt)) return SERVICIO.MODIFICATORIA;
   if (txt.includes("estancia")) return SERVICIO.ESTANCIA;
-  if (txt.includes("visado") || String(s?.codigo_servicio || "") === "017") return SERVICIO.VISADO;
+  // «Visa de estudios» también es visado: sin el \bvisa\b caía al máster por
+  // defecto y al asesorado de visado se le exigía el perfil académico entero.
+  if (txt.includes("visado") || /\bvisa\b/.test(txt) || String(s?.codigo_servicio || "") === "017") return SERVICIO.VISADO;
   if (/formaci[oó]n profesional|\bfp\b|grado/.test(txt)) return SERVICIO.FP;
   if (/m[aá]ster|maestr[ií]a|postgrado|posgrado/.test(txt)) return SERVICIO.MASTER;
   // El paquete de máster es el servicio por defecto del recorrido genérico.
@@ -96,8 +98,13 @@ export function guiasPortalDe(solicitudes = []) {
   return GUIAS_PORTAL.filter((g) => suyos.has(g.servicio));
 }
 
-/** Servicios en los que el perfil académico del asesorado significa algo. */
-const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.ESTANCIA, SERVICIO.FP];
+/**
+ * Servicios en los que se le EXIGE el perfil académico (carrera, universidad,
+ * años de estudio, inicio previsto, presupuesto): los que buscan programa por
+ * él. Visado, estancia y modificatoria no lo piden (12/09/2026): la estancia
+ * ya pregunta sus estudios en España dentro de su propio expediente.
+ */
+const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.FP];
 
 /**
  * Recursos que abren los servicios PROPIOS de la lista. Los expedientes a los

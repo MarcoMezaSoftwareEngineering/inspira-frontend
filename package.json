@@ -9,6 +9,7 @@
     "og": "python scripts/og-compartir.py",
     "lint": "eslint .",
     "sitemap": "node scripts/sitemap.mjs",
+    "precios:verificar": "node scripts/verificar-precios.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

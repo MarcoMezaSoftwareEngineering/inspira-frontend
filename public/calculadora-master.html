@@ -427,7 +427,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
       <div class="cta-final">
         <div class="cta-msg" id="res-cta"></div>
         <div class="cta-btns">
-          <a class="btn-cta" id="btn-calendly" href="#" target="_blank">📅 Separar mi asesoría diagnóstico — 25 €</a>
+          <a class="btn-cta" id="btn-calendly" href="#" target="_blank">📅 Separar mi asesoría diagnóstico<span id="precio-sesion"></span></a>
           <div class="cta-sep">¿No encuentras un horario disponible?</div>
           <a class="btn-cta-wpp" id="btn-wpp-asesoria" href="#" target="_blank">💬 Contáctanos por WhatsApp</a>
           <div style="margin-top:10px;width:100%;border-top:1px dashed #ccc;padding-top:10px"></div>
@@ -457,6 +457,11 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
     de beca ni de visado: esas decisiones corresponden exclusivamente a las universidades y autoridades competentes.
   </p>
 </footer>
+<!-- Fuente única de precios: Vite genera /precios-inspira.js desde src/config/precios-inspira.json -->
+<script src="/precios-inspira.js"></script>
+<script>
+(function(){var P=window.PRECIOS_INSPIRA,e=document.getElementById('precio-sesion');if(P&&e)e.textContent=' — '+P.sesionDiagnostico.eur+' €';})();
+</script>
 <script>
 const WPP_NUMERO = "51992009397";
 const CALENDLY_URL = "https://calendly.com/administracion-inspira-legal/30min";
@@ -573,8 +578,8 @@ const UNIS={
 
 function enviarAMake(datos){ fetch(API_BASE+'/api/calculadora/make-webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)}).catch(()=>{}); }
 
-function generarMensajeAsesoria(d){ return encodeURIComponent('Hola! Completé la calculadora de Inspira y quiero separar mi asesoría diagnóstico.\n\n📋 Mi perfil:\n• Nombre: '+d.nombre+'\n• País: '+d.pais+'\n• Carrera: '+d.carrera+'\n• Área: '+d.area+'\n• Interés de Máster: '+d.masterInteres+'\n• Promedio: '+d.promedioES+'/10\n• Presupuesto: '+d.presupuesto+' €/año\n• Perfil de vida: '+d.vida+'\n\n¿Tienen disponibilidad? 🙏'); }
-function generarMensajePaquete(d,paquete){ return encodeURIComponent('Hola! Completé la calculadora de Inspira y quiero contratar el siguiente paquete:\n\n📦 *'+paquete.n+'* — '+paquete.p+'\n\n📋 Mi perfil:\n• Nombre: '+d.nombre+' ('+d.pais+')\n• Carrera: '+d.carrera+'\n• Área: '+d.area+'\n• Interés de Máster: '+d.masterInteres+'\n• Promedio: '+d.promedioES+'/10\n• Presupuesto: '+d.presupuesto+' €/año\n• Perfil: '+d.vida+'\n• AUIP: '+d.auip+'\n\n¿Cómo procedo? 🙏'); }
+function generarMensajeAsesoria(d){ return encodeURIComponent('Hola Inspira, vengo de la calculadora de máster (botón de asesoría). Quiero separar mi asesoría diagnóstico.\n\n📋 Mi perfil:\n• Nombre: '+d.nombre+'\n• País: '+d.pais+'\n• Carrera: '+d.carrera+'\n• Área: '+d.area+'\n• Interés de Máster: '+d.masterInteres+'\n• Promedio: '+d.promedioES+'/10\n• Presupuesto: '+d.presupuesto+' €/año\n• Perfil de vida: '+d.vida+'\n\n¿Tienen disponibilidad? 🙏'); }
+function generarMensajePaquete(d,paquete){ return encodeURIComponent('Hola Inspira, vengo de la calculadora de máster (botón de paquete). Quiero contratar el siguiente paquete:\n\n📦 *'+paquete.n+'* — '+paquete.p+'\n\n📋 Mi perfil:\n• Nombre: '+d.nombre+' ('+d.pais+')\n• Carrera: '+d.carrera+'\n• Área: '+d.area+'\n• Interés de Máster: '+d.masterInteres+'\n• Promedio: '+d.promedioES+'/10\n• Presupuesto: '+d.presupuesto+' €/año\n• Perfil: '+d.vida+'\n• AUIP: '+d.auip+'\n\n¿Cómo procedo? 🙏'); }
 
 function calcular(){
   if(!validar4()) return;
@@ -639,10 +644,16 @@ function calcular(){
   const top5=unisOrdenadas.slice(0,5);
 
   const paquetes=[];
-  if(vida==='ambicioso'&&pres>=8000){ paquetes.push({n:"Paquete Infinity",p:"1.100 €",d:"Para tu perfil ambicioso con presupuesto amplio: 17 comunidades, +80 universidades públicas y privadas.",c:["Madrid","Cataluña","Valencia","País Vasco","Galicia","+ 12 más"],t:"recomendado"}); paquetes.push({n:"Paquete Premium",p:"700 €",d:"Hasta 6 comunidades a elegir. +45 universidades.",c:["Madrid","+ 5 comunidades a elegir"],t:"alternativo"}); }
-  else if(vida==='ambicioso'&&pres>=4500){ paquetes.push({n:"Paquete Premium",p:"700 €",d:"Hasta 6 comunidades sin límite de listas. +45 universidades.",c:["Madrid","Cataluña","+ 4 más a elegir"],t:"recomendado"}); paquetes.push({n:"Plan Full Económico — Lista 3",p:"450 €",d:"Todas las universidades de Madrid y Cataluña.",c:["Madrid (todas)","Cataluña (todas)"],t:"alternativo"}); paquetes.push({n:"Plan Full Económico — Lista 1",p:"359 €",d:"Plan B: Andalucía, Galicia, CyL y más.",c:["Andalucía","Galicia","Castilla y León","Cantabria","Asturias"],t:"alternativo"}); }
-  else if(vida==='equilibrado'){ if(pres>=3000){ paquetes.push({n:"Plan Full Económico — Lista 2 (Intermedias)",p:"349 €",d:"País Vasco, Valencia, Aragón, Murcia, La Rioja, Extremadura.",c:["País Vasco","Valencia","Aragón","Murcia","La Rioja","Extremadura"],t:"recomendado"}); paquetes.push({n:"Plan Comfort — Solo Valencia",p:"279 €",d:"Todas las universidades de Valencia.",c:["Valencia (todas las universidades)"],t:"alternativo"}); paquetes.push({n:"Plan Full Económico — Lista 1",p:"359 €",d:"Plan B: Andalucía, Galicia, CyL y más.",c:["Andalucía","Galicia","Castilla y León","Cantabria","Asturias"],t:"alternativo"}); } else { paquetes.push({n:"Plan Full Económico — Lista 1",p:"359 €",d:"Andalucía, Galicia, CyL, Cantabria, Asturias. +20 universidades.",c:["Andalucía","Galicia","Castilla y León","Cantabria","Asturias","Castilla-La Mancha"],t:"recomendado"}); paquetes.push({n:"Plan Comfort — Galicia y Castilla y León",p:"279 €",d:"2 comunidades históricas con muy buen nivel universitario.",c:["Galicia","Castilla y León"],t:"alternativo"}); } }
-  else { paquetes.push({n:"Plan Full Económico — Lista 1 (Todas las Económicas)",p:"359 €",d:"Andalucía, Galicia, CyL, Cantabria, Asturias, Castilla-La Mancha. +20 universidades.",c:["Andalucía","Galicia","Castilla y León","Cantabria","Asturias","Castilla-La Mancha"],t:"recomendado"}); paquetes.push({n:"Plan A — Solo Andalucía",p:"219 €",d:"10 universidades públicas andaluzas. Precios más bajos + más becas AUIP.",c:["Almería","Cádiz","Córdoba","Granada","Huelva","Jaén","Málaga","Sevilla","Pablo Olavide","Int. Andalucía"],t:"alternativo"}); paquetes.push({n:"Plan Comfort — Galicia y Castilla y León",p:"279 €",d:"Ciudades históricas con coste de vida bajo.",c:["Santiago de Compostela","Vigo","A Coruña","Salamanca","Valladolid","León","Burgos"],t:"alternativo"}); }
+  // Importes: fuente única precios-inspira.json (window.PRECIOS_INSPIRA). Listas 2027/2028.
+  const PI=window.PRECIOS_INSPIRA;
+  const PLANES=PI?Object.fromEntries([...PI.master.listas.flatMap(l=>l.planes),...PI.master.avanzados].map(p=>[p.id,p])):{};
+  const precioPlan=id=>PLANES[id]?String(PLANES[id].eur).replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' €':'Consultar';
+  const paq=(id,n,d,c,t)=>({n,p:precioPlan(id),d,c,t});
+  const ECON=["Andalucía","Galicia","Castilla y León","Cantabria","Asturias","Castilla-La Mancha","Navarra"];
+  if(vida==='ambicioso'&&pres>=8000){ paquetes.push(paq('infinity-1100',"Paquete Infinity","Para tu perfil ambicioso con presupuesto amplio: las 17 comunidades, sin límite de universidades, públicas y privadas.",["Madrid","Cataluña","Comunidad Valenciana","País Vasco","Galicia","+ 12 más"],"recomendado")); paquetes.push(paq('premium-700',"Paquete Premium","Hasta 6 comunidades a elegir, sin límite de listas.",["Madrid","+ 5 comunidades a elegir"],"alternativo")); }
+  else if(vida==='ambicioso'&&pres>=4500){ paquetes.push(paq('premium-700',"Paquete Premium","Hasta 6 comunidades sin límite de listas, públicas y privadas.",["Madrid","Cataluña","+ 4 más a elegir"],"recomendado")); paquetes.push(paq('l3-full',"Plan Full — Lista 3 (Premium)","Dos comunidades premium completas, a elegir entre Madrid, Cataluña y Comunidad Valenciana.",["Madrid","Cataluña","Comunidad Valenciana"],"alternativo")); paquetes.push(paq('l1-full',"Plan Full Económico — Lista 1","Plan B: las siete comunidades económicas.",ECON,"alternativo")); }
+  else if(vida==='equilibrado'){ if(pres>=3000){ paquetes.push(paq('l2-full',"Plan Full — Lista 2 (Intermedias)","País Vasco, Aragón, Murcia, La Rioja y Extremadura.",["País Vasco","Aragón","Murcia","La Rioja","Extremadura"],"recomendado")); paquetes.push(paq('l3-comfort',"Plan Comfort — una comunidad premium","Todas las universidades de una comunidad: Comunidad Valenciana, Madrid o Cataluña.",["Comunidad Valenciana, Madrid o Cataluña"],"alternativo")); paquetes.push(paq('l1-full',"Plan Full Económico — Lista 1","Plan B: Andalucía, Galicia, Castilla y León y más.",ECON,"alternativo")); } else { paquetes.push(paq('l1-full',"Plan Full Económico — Lista 1","Las siete comunidades económicas: 21 universidades públicas.",ECON,"recomendado")); paquetes.push(paq('l1-comfort',"Plan Comfort — Galicia y Castilla y León","2 comunidades históricas con muy buen nivel universitario.",["Galicia","Castilla y León"],"alternativo")); } }
+  else { paquetes.push(paq('l1-full',"Plan Full Económico — Lista 1 (Todas las Económicas)","Andalucía, Galicia, Castilla y León, Cantabria, Asturias, Castilla-La Mancha y Navarra: 21 universidades públicas.",ECON,"recomendado")); paquetes.push(paq('l1-a',"Plan A — Solo Andalucía","10 universidades públicas andaluzas. Precios más bajos + más becas AUIP.",["Almería","Cádiz","Córdoba","Granada","Huelva","Jaén","Málaga","Sevilla","Pablo Olavide","Int. Andalucía"],"alternativo")); paquetes.push(paq('l1-comfort',"Plan Comfort — Galicia y Castilla y León","Ciudades históricas con coste de vida bajo.",["Santiago de Compostela","Vigo","A Coruña","Salamanca","Valladolid","León","Burgos"],"alternativo")); }
 
   const becasCalifica=becas.filter(b=>b.e==='si').map(b=>b.n).join(' | ')||'Ninguna confirmada';
   const becasPosibles=becas.filter(b=>b.e==='posible').map(b=>b.n).join(' | ')||'Ninguna';

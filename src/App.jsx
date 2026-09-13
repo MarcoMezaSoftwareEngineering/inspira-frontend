@@ -56,7 +56,7 @@ const DerechosArco = lazyConRecarga(() => import("./pages/legal/DerechosArco"));
 const LibroReclamaciones = lazyConRecarga(() => import("./pages/legal/LibroReclamaciones"));
 
 // Resumen ligero del Paquete Máster (el config completo solo lo carga su página).
-import { PRECIOS, PRECIO_DESDE, NOMBRE_PAQUETE, eur } from "./config/paqueteMaster2027Resumen";
+import { PRECIOS, PRECIO_DESDE, NOMBRE_PAQUETE, SESION_PRECIOS, eur } from "./config/paqueteMaster2027Resumen";
 
 // Páginas a las que más se salta desde la portada: se adelantan en tiempo
 // ocioso, ya pintada la pantalla, para que el primer clic no espere descarga.
@@ -95,7 +95,7 @@ const SEO_PAGES = {
   "/servicios": {
     title: "Servicios de Extranjería y Estudios en España – Inspira Legal",
     description:
-      "Visa de estudios, nómada digital, visado PAC, nacionalidad, homologaciones, máster y más. Todos nuestros servicios para migrar a España, con primera asesoría desde 25 €.",
+      `Visa de estudios, nómada digital, visado PAC, nacionalidad, homologaciones, máster y más. Todos nuestros servicios para migrar a España, con primera asesoría desde ${eur(SESION_PRECIOS.eur)}.`,
     path: "/servicios",
   },
   "/nosotros": {

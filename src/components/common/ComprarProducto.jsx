@@ -3,6 +3,7 @@
 // entregar el acceso) y redirige al checkout. No requiere iniciar sesión.
 import { useState } from "react";
 import Icono from "./Icono";
+import { registrarInicioPago } from "../../lib/analytics";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -48,6 +49,7 @@ export default function ComprarProducto({
       if (!r.ok || !data.ok || !data.preferencia?.init_point) {
         throw new Error(data.msg || "No pudimos iniciar el pago.");
       }
+      registrarInicioPago("producto", { id_producto: idProducto });
       window.location.href = data.preferencia.init_point;
     } catch (err) {
       setError(err.message || "No pudimos iniciar el pago. Inténtalo de nuevo.");

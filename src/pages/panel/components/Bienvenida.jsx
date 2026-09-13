@@ -12,7 +12,7 @@ import logo from "../../../assets/images/logo.png";
 import Icono from "../../../components/common/Icono";
 import { loginGoogle } from "../../../components/layout/Header/LoginButton";
 import { navigate } from "../../../services/navigate";
-import { lineaDe, whatsappLinea } from "../../../config/contacto";
+import { whatsappDesde } from "../../../config/contacto";
 
 const QUE_HAY = [
   { icono: "documento", titulo: "Tus documentos", texto: "Súbelos desde el móvil y ve cuáles ya están revisados." },
@@ -21,7 +21,6 @@ const QUE_HAY = [
 ];
 
 export default function Bienvenida() {
-  const citas = lineaDe("inspira");
   return (
     <div className="pnl min-h-dvh flex items-center justify-center p-4 sm:p-6">
       <div className="pnl-vacio w-full max-w-md pnl-entra">
@@ -61,7 +60,7 @@ export default function Bienvenida() {
         <p style={{ marginTop: 22, marginBottom: 0, fontSize: 12 }}>
           ¿Todavía no tienes acceso?{" "}
           <a
-            href={whatsappLinea(citas, "Hola Inspira, quiero información para acceder a mi panel.")}
+            href={whatsappDesde("panel-bienvenida", "Quiero información para acceder a mi panel.")}
             target="_blank" rel="noopener noreferrer"
             style={{ color: "#fff", fontWeight: 700, textDecoration: "underline" }}
           >

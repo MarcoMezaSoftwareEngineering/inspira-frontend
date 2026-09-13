@@ -75,9 +75,85 @@ function reanudarGA() {
   cargarGA(); // no hace nada si el script ya estaba cargado
 }
 
+/** Nombre corto de la página actual para los eventos (la ruta sin query). */
+const paginaActual = () => (typeof window === "undefined" ? "" : window.location.pathname);
+
+let clicsMedidos = false;
+
+/**
+ * Medición de clics salientes sin tocar cada botón: un solo oyente en el
+ * documento reconoce los enlaces a WhatsApp y a Calendly, estén donde estén.
+ * `registrarEvento` ya comprueba el consentimiento, así que sin «analítica»
+ * aceptada no sale nada.
+ */
+function medirClicsSalientes() {
+  if (clicsMedidos || typeof document === "undefined") return;
+  clicsMedidos = true;
+
+  document.addEventListener(
+    "click",
+    (e) => {
+      const a = e.target instanceof Element ? e.target.closest("a[href]") : null;
+      if (!a) return;
+      let url;
+      try { url = new URL(a.href, window.location.href); } catch { return; }
+      const host = url.hostname.replace(/^www\./, "");
+
+      if (host === "wa.me" || host.endsWith("whatsapp.com")) {
+        // El saludo de origen («vengo de …») viaja en el texto: se manda su
+        // arranque para cruzarlo con lo que llega al WhatsApp.
+        const texto = url.searchParams.get("text") || "";
+        const origen = (texto.match(/vengo del? ([^.]+)\./i) || [])[1] || "";
+        registrarEvento("whatsapp_clic", {
+          pagina: paginaActual(),
+          origen: origen.slice(0, 90),
+          transport_type: "beacon",
+        });
+      } else if (host.endsWith("calendly.com")) {
+        registrarEvento("calendly_clic", {
+          pagina: paginaActual(),
+          evento_calendly: url.pathname.slice(0, 60),
+          transport_type: "beacon",
+        });
+      }
+    },
+    true
+  );
+
+  // Reserva confirmada: Calendly la avisa por postMessage cuando el
+  // calendario va incrustado (widget o ventana emergente). Con enlace directo
+  // la reserva ocurre en calendly.com y solo se ve el clic de arriba.
+  window.addEventListener("message", (e) => {
+    if (!/calendly\.com$/.test(String(e.origin).replace(/^https?:\/\//, ""))) return;
+    if (e.data?.event === "calendly.event_scheduled") {
+      registrarEvento("calendly_reserva", { pagina: paginaActual() });
+    }
+  });
+}
+
+/**
+ * Inicio de pago: se llama justo antes de mandar al visitante a Mercado Pago.
+ * Usa el nombre estándar de GA4 (`begin_checkout`) para que salga en los
+ * informes de comercio sin configurar nada.
+ */
+export function registrarInicioPago(tipo, datos = {}) {
+  registrarEvento("begin_checkout", {
+    tipo_pago: tipo,
+    pagina: paginaActual(),
+    transport_type: "beacon", // la página se va a Mercado Pago en el acto
+    ...datos,
+  });
+}
+
+/** Formulario de captación enviado con éxito (nombre estándar de GA4). */
+export function registrarLead(formulario, datos = {}) {
+  registrarEvento("generate_lead", { formulario, pagina: paginaActual(), ...datos });
+}
+
 /** Registra la carga diferida. Llamar una vez al arrancar la app. */
 export function inicializarAnalytics() {
   if (!GA_ID) return;
+  medirClicsSalientes();
   alConsentir("analitica", cargarGA, "ga4");
 
   // Retirar el consentimiento tiene que surtir efecto en el acto, y volver a

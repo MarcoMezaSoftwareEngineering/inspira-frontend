@@ -1,6 +1,6 @@
 // src/pages/panel/components/mis-servicios/ServiciosList.jsx
 import Icono from "../../../../components/common/Icono";
-import { lineaDe, whatsappLinea } from "../../../../config/contacto";
+import { lineaDe, whatsappDesde } from "../../../../config/contacto";
 
 const LINEA = lineaDe("inspira");
 import { formatearFecha, badgeEstadoSolicitud, refCorta } from "./utils";
@@ -119,7 +119,7 @@ function SinAcceso() {
           desde un ordenador sin WhatsApp. */}
       <div className="pnl-lineas">
         <a
-          href={whatsappLinea(LINEA, "Hola Inspira, acabo de crear mi cuenta y quiero acceso a mi panel.")}
+          href={whatsappDesde("panel-sin-acceso", "Acabo de crear mi cuenta y quiero acceso a mi panel.")}
           target="_blank"
           rel="noopener noreferrer"
           className="pnl-linea"

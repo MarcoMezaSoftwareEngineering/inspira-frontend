@@ -1,0 +1,80 @@
+/* src/pages/bicentenario/bicentenario.css
+   Movimiento y detalles de la página de la Beca Generación del Bicentenario.
+   Todas las clases llevan el prefijo bic- (regla del proyecto: nada de clases
+   cortas sueltas). Con prefers-reduced-motion todo queda quieto y visible. */
+
+/* Aparición al hacer scroll (la clase bic-in la pone useEnPantalla) */
+.bic-rev {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .65s cubic-bezier(.22, 1, .36, 1), transform .65s cubic-bezier(.22, 1, .36, 1);
+  transition-delay: var(--bic-d, 0ms);
+}
+.bic-rev.bic-izq { transform: translateX(-28px); }
+.bic-rev.bic-der { transform: translateX(28px); }
+.bic-rev.bic-zoom { transform: scale(.94); }
+.bic-rev.bic-in { opacity: 1; transform: none; }
+
+/* Microinteracciones */
+.bic-lift { transition: transform .28s cubic-bezier(.22, 1, .36, 1), box-shadow .28s ease, border-color .28s ease, background-color .28s ease; }
+.bic-lift:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(1, 52, 70, .13); }
+.bic-press { transition: transform .15s ease; }
+.bic-press:active { transform: scale(.97); }
+.bic-emoji-hover { display: inline-block; transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+.bic-lift:hover .bic-emoji-hover { transform: scale(1.18) rotate(-6deg); }
+
+/* Ilustraciones */
+@keyframes bic-flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.bic-flotar { animation: bic-flotar 5s ease-in-out infinite; }
+@keyframes bic-trazo { to { stroke-dashoffset: -56; } }
+.bic-ruta { animation: bic-trazo 2.4s linear infinite; }
+@keyframes bic-brillo { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+.bic-brillo { animation: bic-brillo 2.8s ease-in-out infinite; }
+@keyframes bic-pulso { 0% { box-shadow: 0 0 0 0 rgba(250, 148, 58, .55); } 100% { box-shadow: 0 0 0 14px rgba(250, 148, 58, 0); } }
+.bic-pulso { animation: bic-pulso 1.8s ease-out infinite; }
+@keyframes bic-pop { 0% { transform: scale(.4); } 70% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.bic-pop { animation: bic-pop .38s cubic-bezier(.22, 1, .36, 1); }
+@keyframes bic-entra { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+.bic-entra { animation: bic-entra .45s cubic-bezier(.22, 1, .36, 1) both; animation-delay: var(--bic-d, 0ms); }
+
+/* Confeti suave (solo con puntaje alto) */
+.bic-confeti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 5; }
+.bic-confeti i {
+  position: absolute; top: -16px; left: var(--x); width: 8px; height: 13px; border-radius: 2px;
+  background: var(--c); opacity: 0;
+  animation: bic-caer 2.9s cubic-bezier(.2, .6, .4, 1) forwards; animation-delay: var(--d);
+}
+@keyframes bic-caer {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(460px) rotate(var(--r)); }
+}
+
+/* Desplegables con altura animada */
+.bic-expand { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s cubic-bezier(.22, 1, .36, 1); }
+.bic-expand.bic-abierto { grid-template-rows: 1fr; }
+.bic-expand > div { overflow: hidden; min-height: 0; visibility: visible; }
+.bic-expand:not(.bic-abierto) > div { visibility: hidden; transition: visibility 0s linear .35s; }
+.bic-flecha { transition: transform .3s ease; }
+.bic-girada { transform: rotate(180deg); }
+.bic-acordeon > summary { list-style: none; }
+.bic-acordeon > summary::-webkit-details-marker { display: none; }
+.bic-acordeon[open] .bic-flecha { transform: rotate(180deg); }
+
+/* Índice: chips horizontales sin barra de scroll */
+.bic-chips { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.bic-chips::-webkit-scrollbar { display: none; }
+.bic-indice { position: sticky; top: var(--bic-top, 74px); z-index: 30; }
+@media (min-width: 621px) { .bic-indice { top: 82px; } }
+
+/* Línea de tiempo con scroll horizontal en móvil */
+.bic-tl { scroll-snap-type: x mandatory; scrollbar-width: thin; }
+.bic-tl > * { scroll-snap-align: start; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bic-rev, .bic-rev.bic-izq, .bic-rev.bic-der, .bic-rev.bic-zoom { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .bic-flotar, .bic-ruta, .bic-brillo, .bic-pulso, .bic-pop, .bic-entra { animation: none !important; }
+  .bic-confeti { display: none; }
+  .bic-lift, .bic-lift:hover, .bic-press:active, .bic-lift:hover .bic-emoji-hover { transform: none; transition: none; }
+  .bic-expand, .bic-flecha { transition: none; }
+}

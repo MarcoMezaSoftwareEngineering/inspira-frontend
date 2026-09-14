@@ -544,6 +544,26 @@ export const FAQ = [
 
 export const PIE_LEGAL = `Información resumida de la ${FUENTE.norma}. Inspira no forma parte de PRONABEC; la beca la otorga PRONABEC. Consulta siempre las bases oficiales en gob.pe/pronabec.`;
 
+// ── Emojis de la página (solo presentación: los datos de arriba no cambian) ─
+// Van por id o en el mismo orden que su lista.
+export const EMOJI_CLAVES = ["🎯", "🌍", "📅", "💶", "💼", "🚫"]; // orden de LO_NUEVO
+export const EMOJIS = {
+  nacionalidad: "🪪", grado: "🎓", rendimiento: "🏅", carta: "📨", inicio: "📅", perfil: "📚",
+  experiencia: "💼", ingresos: "🏠", percapita: "🏠", sbs: "🏦", salud: "🩺", declaraciones: "📝",
+  previa: "🚫", impedimentos: "⛔",
+};
+export const EMOJI_INCLUYE = ["🎓", "📜", "🔬", "✈️", "🏠", "🚌", "🩺", "🗂️"]; // orden de BENEFICIOS.incluye
+export const EMOJI_NO_INCLUYE = ["🛋️", "👪", "🗣️", "📑"]; // orden de BENEFICIOS.noIncluye
+export const EMOJI_FASE = { postulacion: "📝", subsanacion: "🛠️", revision: "🔍", puntajes: "🧮", resultados: "🏆", aceptacion: "✍️", becarios: "🎉" };
+export const EMOJI_FAQ = ["📨", "🌍", "📅", "🚫", "🧮", "🔒", "🤝"]; // orden de FAQ
+export const BANDERA_UE = { "erasmus-mundus": "ue", daad: "de", eiffel: "fr", iyt: "it", "nl-scholarship": "nl" };
+
+// Doctorado: lo que cambia en la lista de requisitos [art. 11, Tabla 2, n.º 2 b) y n.º 5].
+export const REQUISITOS_DOCTORADO = {
+  grado: { corto: "Grado o diploma de maestría" },
+  perfil: { corto: "Artículo indexado, libro con ISBN o registro en RENACYT" },
+};
+
 // ── Utilidades ──────────────────────────────────────────────────────────────
 /** 7910 → «7 910» (espacio duro, como en las bases). */
 export function numeroPe(n) {

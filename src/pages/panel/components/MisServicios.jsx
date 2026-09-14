@@ -23,7 +23,7 @@ const DetalleSolicitudModificatoria = lazyConRecarga(() => import("./mis-servici
  * (`/panel/servicios/155/post`). Recargar conserva el sitio, «atrás» vuelve a
  * la lista, y un correo puede enlazar a una sección concreta.
  */
-export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia, avisoAppBloqueado = false, faltanPerfil = 0 }) {
+export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia, avisoAppBloqueado = false, faltanPerfil = 0, pagos = null }) {
   const { idServicio, seccion, tab } = ruta;
   const seleccionada = idServicio
     ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
@@ -93,6 +93,7 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
       onRecargar={onRecargar}
       onVerDetalle={abrir}
       avisoAppBloqueado={avisoAppBloqueado}
+      pagos={pagos}
     />
   );
 }

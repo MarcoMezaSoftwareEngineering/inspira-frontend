@@ -26,9 +26,12 @@ import MiRuta from "./components/MiRuta";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
 import AvisoVersionNueva from "../backoffice/layout/AvisoVersionNueva";
+import CercoErrores from "../../components/common/CercoErrores";
 
 // Las guías (GuiaMaster, GuiaApostilla…) las descarga MisGuias al abrirlas.
 const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
+// «Mis pagos» se descarga al abrirlo; sus estilos van en panel.css (ex-pg-*).
+const MisPagos      = lazyConRecarga(() => import("./components/MisPagos"));
 
 // Recursos que solo se abren si algún servicio suyo los incluye (servicios.js):
 // Becas España y las pestañas de «Mis guías».
@@ -87,6 +90,11 @@ export default function PanelCliente({ path }) {
   const [servicios, setServicios] = useState(null); // null = todavía cargando
   const [cargandoServicios, setCargandoServicios] = useState(true);
   const [errorServicios, setErrorServicios] = useState("");
+  // Sus planes de pago (GET /cliente/pagos). null = todavía cargando. La
+  // pestaña «Mis pagos» solo existe si tiene alguno.
+  const [pagos, setPagos] = useState(null);
+  const planesPago = useMemo(() => pagos?.planes || [], [pagos]);
+  const conPagos = planesPago.length > 0;
 
   const lista = useMemo(() => servicios || [], [servicios]);
   const cargado = servicios !== null;
@@ -118,8 +126,8 @@ export default function PanelCliente({ path }) {
   // Cuántas cosas esperan: sale en el menú junto a «Inicio» y como punto sobre
   // el botón del menú, para saberlo sin abrir nada.
   const nPendientes = useMemo(
-    () => (user && cargado ? pendientesDe(lista, user, conAcademico, conCompleto).length : 0),
-    [user, cargado, lista, conAcademico, conCompleto],
+    () => (user && cargado ? pendientesDe(lista, user, conAcademico, conCompleto, planesPago).length : 0),
+    [user, cargado, lista, conAcademico, conCompleto, planesPago],
   );
 
   // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
@@ -141,6 +149,7 @@ export default function PanelCliente({ path }) {
       setUser(r.cliente || r.user || r);
     } catch { window.location.href = "/"; }
     cargarServicios();
+    cargarPagos();
   }
 
   async function cargarServicios() {
@@ -158,6 +167,18 @@ export default function PanelCliente({ path }) {
     }
   }
 
+  // Si falla, no se esconde nada que ya se viera: se guarda el error y la
+  // pestaña (si se llegó por enlace) lo enseña con «Reintentar».
+  async function cargarPagos() {
+    try {
+      const r = await apiGET("/cliente/pagos");
+      if (!r?.ok) throw new Error(r?.msg || "No se pudieron cargar tus pagos");
+      setPagos(r);
+    } catch (e) {
+      setPagos((antes) => ({ ...(antes || {}), planes: antes?.planes || [], error: e.message || "No se pudieron cargar tus pagos" }));
+    }
+  }
+
   // El panel recuerda la última pestaña abierta. Si era una guía que ya no le
   // corresponde —porque cerró ese servicio, o porque nunca fue suya— se vuelve
   // a sus servicios en vez de dejarle mirando algo que no ha contratado.
@@ -166,6 +187,12 @@ export default function PanelCliente({ path }) {
     if (!cargado) return;
     if (TABS_RECURSO.includes(tab) && !accesos.has(tab)) navigate("/panel", { replace: true });
   }, [cargado, accesos, tab, ruta.tab]);
+
+  // «Mis pagos» sin ningún plan no es una página: se vuelve a Inicio. Con
+  // error de carga se queda, para poder reintentar.
+  useEffect(() => {
+    if (tab === "pagos" && pagos !== null && !pagos.error && !conPagos) navigate("/panel", { replace: true });
+  }, [tab, pagos, conPagos]);
 
   function handleChangeTab(newTab) {
     navigate(rutaDe({ tab: newTab }));
@@ -207,7 +234,7 @@ export default function PanelCliente({ path }) {
   // Tab titles
   // Todas las guías comparten título: la pestaña de dentro dice cuál es.
   const titles = {
-    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", perfil: "Mi Perfil", becas: "Becas España",
+    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", pagos: "Mis pagos", perfil: "Mi Perfil", becas: "Becas España",
     ...Object.fromEntries(CLAVES_GUIAS.map((clave) => [clave, "Mis guías"])),
   };
 
@@ -236,6 +263,7 @@ export default function PanelCliente({ path }) {
         onAbrirServicio={(id) => { navigate(rutaDe({ idServicio: id })); setSidebarOpen(false); }}
         onTour={verTour}
         guias={pestanasGuia}
+        conPagos={conPagos}
       />
 
       {/* En el móvil manda el scroll de la página: un expediente dentro de una
@@ -304,6 +332,7 @@ export default function PanelCliente({ path }) {
                 onIrAGuia={handleChangeTab}
                 avisoAppBloqueado={tour || tourPendiente || mostrarWizard}
                 faltanPerfil={faltanPerfil}
+                pagos={planesPago}
               />
             </div>
           )}
@@ -317,6 +346,15 @@ export default function PanelCliente({ path }) {
 
           {/* Mi ruta: las etapas entre servicios */}
           {tab === "ruta" && <MiRuta servicios={lista} />}
+
+          {/* Mis pagos: sus planes, cuotas y cómo pagar. */}
+          {tab === "pagos" && (
+            <CercoErrores donde="panel-pagos" clave="pagos" titulo="Tus pagos no se pudieron mostrar">
+              <Suspense fallback={<LoadingPage />}>
+                <MisPagos datos={pagos} onRecargar={cargarPagos} />
+              </Suspense>
+            </CercoErrores>
+          )}
 
           {/* Mis guías: una sola entrada y una pestaña por guía. Cada pestaña
               conserva su URL (/panel/portal, /panel/guia, /panel/apostilla…). */}

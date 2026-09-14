@@ -328,6 +328,15 @@ select.ase-campo { appearance: none; padding-right: 32px; background: #fff url("
   padding: 0;
   font-family: Montserrat, system-ui, sans-serif; color: #0d2c3a;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* La ventana se pinta en un portal, fuera de .ase: sin estos tokens los
+     campos, chips y botones de dentro se quedaban sin borde ni color. */
+  --ink: #0d2c3a; --muted: #62808f; --primary: #013446; --primary-2: #02506b;
+  --accent: #fa943a; --accent-2: #e07a1c; --sky: #88c4fc; --sky-2: #4e9ee8; --sky-soft: #e3f0fe;
+  --green: #1d6a4a; --green-soft: #e8f5ee; --amber: #b9770e; --amber-soft: #fef3e7;
+  --red: #c0392b; --red-soft: #fdedec; --purple: #7d3c98; --purple-soft: #f5eef8;
+  --ground: #f4f8fb; --line: #d8e4ef;
+  --sombra: 0 1px 2px rgba(1, 52, 70, .05), 0 6px 18px -8px rgba(1, 52, 70, .10);
+  --sombra-alta: 0 18px 40px rgba(1, 52, 70, .14);
 }
 .ase-ventana-fondo {
   position: absolute; inset: 0;

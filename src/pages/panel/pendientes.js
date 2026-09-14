@@ -3,6 +3,7 @@
 import { rutaDe } from "./ruta";
 import { SERVICIO, servicioDe } from "./servicios";
 import { datosQueFaltan } from "./hooks/usePerfilIncompletoBool";
+import { cuotasPorAtender, importe, nombreCuota } from "./pagosCliente";
 
 function diasHasta(iso) {
   const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
@@ -27,9 +28,34 @@ export const recorta = (t, n = 44) => (t && t.length > n ? t.slice(0, n - 1).tri
  * Lo pendiente, con su peso: 0 es lo que no puede esperar. Solo entra lo que
  * depende del asesorado; lo que está en manos de Inspira —un informe en
  * preparación— no es una tarea suya y no se le pone en la lista.
+ *
+ * `planesPago` son los planes de GET /cliente/pagos: entra la cuota vencida,
+ * la que vence en siete días o menos y la del comprobante rechazado.
  */
-export function pendientesDe(servicios, perfil, conAcademico, conCompleto = false) {
+export function pendientesDe(servicios, perfil, conAcademico, conCompleto = false, planesPago = null) {
   const items = [];
+
+  for (const { cuota: c, plan } of cuotasPorAtender(planesPago)) {
+    const d = c.dias_para_vencer;
+    const rechazada = Boolean(c.motivo_rechazo);
+    const urge = c.vencido || rechazada || d <= 3;
+    items.push({
+      clave: `pago-${c.id_pago}`,
+      peso: c.vencido || rechazada ? 0 : d <= 3 ? 1 : 2,
+      tono: urge ? "alto" : "aviso",
+      icono: "euro",
+      texto: rechazada
+        ? `${nombreCuota(c)}: tu comprobante no se aceptó`
+        : c.vencido
+          ? `${nombreCuota(c)} vencida: ${importe(c.monto, c.moneda)}`
+          : `${nombreCuota(c)} de ${importe(c.monto, c.moneda)}: vence ${cuando(d)}`,
+      detalle: rechazada ? c.motivo_rechazo : plan.concepto,
+      servicio: rechazada ? plan.concepto : null,
+      fecha: c.fecha_vencimiento,
+      accion: rechazada ? "Volver a subir" : "Pagar",
+      href: `${rutaDe({ tab: "pagos" })}?cuota=${c.id_pago}`,
+    });
+  }
 
   // Con paquete de máster el perfil entero es condición del servicio: va
   // arriba y en rojo hasta que esté, y dice para qué hace falta.

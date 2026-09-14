@@ -88,9 +88,10 @@ function Pendientes({ items }) {
   );
 }
 
-export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle, avisoAppBloqueado = false }) {
+export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle, avisoAppBloqueado = false, pagos = null }) {
   const lista = servicios || [];
-  const items = loading ? [] : pendientesDe(lista, perfil, conAcademico, conCompleto);
+  // `pagos`: sus planes de pago; las cuotas que vencen pronto entran en «Hoy».
+  const items = loading ? [] : pendientesDe(lista, perfil, conAcademico, conCompleto, pagos);
   const hayServicios = lista.length > 0;
 
   return (

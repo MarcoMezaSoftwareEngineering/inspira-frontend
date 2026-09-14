@@ -1,0 +1,233 @@
+/* Pagos en Inspira Core. Todo con prefijo ase-pg- (las clases cortas chocan
+   con otras hojas: ver la nota del cerco de errores). Tokens de asesor.css;
+   .ase-ventana lleva los mismos, porque las ventanas van en un portal. */
+
+/* ── Texto común ──────────────────────────────────────────────────────── */
+.ase-pg-cobro-n {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: 13.5px; font-weight: 700; line-height: 1.3; color: var(--ink); overflow-wrap: anywhere;
+}
+.ase-pg-cobro-s { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.4; overflow-wrap: anywhere; }
+.ase-pg-chip-titulo { font-size: 9px; padding: 1px 6px; }
+.ase-pg-importe { font-size: 20px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; letter-spacing: -.02em; white-space: nowrap; }
+.ase-pg-acciones { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ase-pg-enlace { background: none; border: 0; padding: 0; font: inherit; font-size: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.ase-pg-nro {
+  width: 24px; height: 24px; border-radius: 8px; flex: 0 0 auto; display: grid; place-items: center;
+  font-size: 11px; font-weight: 800; background: var(--sky-soft); color: var(--primary-2);
+}
+.ase-pg-dos { display: grid; gap: 8px; grid-template-columns: 1fr; }
+@media (min-width: 440px) { .ase-pg-dos { grid-template-columns: 1fr 1fr; } }
+
+.ase-pg-error {
+  font-size: 12.5px; color: var(--red); background: var(--red-soft);
+  border: 1px solid rgba(192, 57, 43, .25); border-radius: 12px; padding: 9px 12px; margin: 0;
+}
+.ase-pg-nota {
+  font-size: 12px; line-height: 1.5; margin: 0; padding: 8px 11px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--ground); color: var(--ink);
+}
+.ase-pg-nota[data-tono="rojo"] { background: var(--red-soft); border-color: rgba(192, 57, 43, .28); color: #8f2a20; }
+.ase-pg-nota[data-tono="ambar"] { background: var(--amber-soft); border-color: rgba(185, 119, 14, .3); color: #7a5200; }
+.ase-pg-nota[data-tono="cielo"] { background: var(--sky-soft); border-color: rgba(78, 158, 232, .35); color: #17608f; }
+
+.ase-pg-toggle-verde input:checked + i { background: var(--green); }
+
+/* ── Cabecera: mes, pestañas y filtros ────────────────────────────────── */
+.ase-pg-mes {
+  display: inline-flex; align-items: center; gap: 2px; height: 38px; padding: 0 4px;
+  border-radius: 11px; border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .12);
+  color: #fff; font-size: 12.5px; font-weight: 700;
+}
+.ase-pg-mes span { padding: 0 6px; text-transform: capitalize; white-space: nowrap; min-width: 9.5em; text-align: center; }
+.ase-pg-mes button {
+  width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #fff;
+  display: grid; place-items: center; cursor: pointer;
+}
+.ase-pg-mes button:hover:not(:disabled) { background: rgba(255, 255, 255, .18); }
+.ase-pg-mes button:disabled { opacity: .35; cursor: default; }
+
+.ase-pg-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+.ase-pg-tabs::-webkit-scrollbar { display: none; }
+.ase-pg-tabs .ase-tab { background: #fff; border-color: var(--line); color: var(--muted); }
+.ase-pg-tabs .ase-tab[data-on="1"] { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 8px 18px -10px rgba(1, 52, 70, .9); }
+
+.ase-pg-filtros { display: grid; gap: 8px; grid-template-columns: 1fr; align-items: center; }
+@media (min-width: 560px) {
+  .ase-pg-filtros { grid-template-columns: 1fr 1fr; }
+  .ase-pg-filtros .ase-buscar, .ase-pg-filtros .ase-pg-toggles { grid-column: 1 / -1; }
+}
+@media (min-width: 1000px) {
+  .ase-pg-filtros { grid-template-columns: minmax(14rem, 2fr) minmax(9rem, 1fr) minmax(9rem, 1fr) auto; }
+  .ase-pg-filtros .ase-buscar, .ase-pg-filtros .ase-pg-toggles { grid-column: auto; }
+}
+.ase-pg-toggles { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.ase-pg-filtro-cliente { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ── Lista de cobros y de planes ──────────────────────────────────────── */
+.ase-pg-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ase-pg-fila {
+  background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--line);
+  border-radius: 14px; box-shadow: var(--sombra); overflow: hidden;
+}
+.ase-pg-fila[data-tono="rojo"] { border-left-color: var(--red); }
+.ase-pg-fila[data-tono="ambar"] { border-left-color: var(--accent); }
+.ase-pg-fila[data-tono="cielo"] { border-left-color: var(--sky-2); }
+.ase-pg-fila[data-tono="verde"] { border-left-color: var(--green); }
+
+.ase-pg-fila-main {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: center;
+  width: 100%; text-align: left; font: inherit; color: var(--ink);
+  background: none; border: 0; padding: 11px 14px 8px; cursor: pointer; transition: background .2s;
+}
+.ase-pg-fila-main:hover, .ase-pg-fila-main:focus-visible { background: #fbfdff; outline: none; }
+.ase-pg-fila-quien { display: flex; flex-direction: column; gap: 2px; min-width: 0; grid-column: 1; grid-row: 1; }
+.ase-pg-fila-cuando { display: flex; flex-direction: column; gap: 1px; min-width: 0; grid-column: 1; grid-row: 2; font-size: 12px; font-weight: 600; }
+.ase-pg-fila-cuando small { font-size: 11px; font-weight: 500; color: var(--muted); }
+.ase-pg-fila-cuando [data-rojo="1"] { color: var(--red); }
+.ase-pg-fila-importe { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.ase-pg-fila-importe b { font-size: 16px; font-weight: 800; color: var(--primary); white-space: nowrap; }
+@media (min-width: 760px) {
+  .ase-pg-fila-main { grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr) auto; }
+  .ase-pg-fila-cuando { grid-column: 2; grid-row: 1; }
+  .ase-pg-fila-importe { grid-column: 3; grid-row: 1; }
+}
+.ase-pg-fila-pie { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 0 14px 10px; }
+.ase-pg-fila-plan { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--sombra); padding-bottom: 11px; }
+.ase-pg-fila-plan:hover { border-color: var(--sky-2); }
+
+/* ── Ventanas de un cobro ─────────────────────────────────────────────── */
+.ase-pg-resumen-cobro {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  padding: 10px 12px; border-radius: 13px; background: var(--ground); border: 1px solid var(--line);
+}
+.ase-pg-resumen-cobro .ase-pg-importe { font-size: 18px; margin-bottom: 4px; }
+.ase-pg-validar { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .ase-pg-validar { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); } }
+.ase-pg-visor-marco {
+  border: 1px solid var(--line); border-radius: 14px; background: #e9eff5; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.ase-pg-visor-marco iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+.ase-pg-visor-marco img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.ase-pg-visor-vacio {
+  font-size: 12.5px; color: var(--muted); text-align: center; margin: 0; padding: 28px 16px;
+  border: 1px dashed #c5d5e2; border-radius: 14px; background: #fbfdff;
+}
+@media (max-width: 759px) { .ase-pg-validar-visor .ase-pg-visor-marco { height: 44vh !important; } }
+
+/* ── Nuevo plan ───────────────────────────────────────────────────────── */
+.ase-pg-form { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 760px) {
+  .ase-pg-form { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+  .ase-pg-previa { position: sticky; top: 0; }
+}
+.ase-pg-form .ase-pill:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.ase-pg-buscador { position: relative; }
+.ase-pg-sugerencias {
+  list-style: none; margin: 6px 0 0; padding: 4px; max-height: 240px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 12px; background: #fff; box-shadow: var(--sombra-alta);
+}
+.ase-pg-sugerencias button {
+  width: 100%; text-align: left; display: flex; flex-direction: column; gap: 1px;
+  padding: 8px 10px; border: 0; border-radius: 9px; background: none; font: inherit; color: var(--ink); cursor: pointer;
+}
+.ase-pg-sugerencias button:hover, .ase-pg-sugerencias button:focus-visible { background: var(--sky-soft); outline: none; }
+.ase-pg-sugerencias b { font-size: 13px; }
+.ase-pg-sugerencias span { font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+.ase-pg-sug-vacia { font-size: 12px; color: var(--muted); padding: 8px 10px; }
+.ase-pg-elegido {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 8px 10px 8px 12px; border-radius: 11px; border: 1px solid rgba(29, 106, 74, .35); background: var(--green-soft);
+}
+.ase-pg-elegido b { display: block; font-size: 13px; }
+.ase-pg-elegido span { display: block; font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+.ase-pg-elegido button {
+  width: 28px; height: 28px; flex: 0 0 auto; border: 0; border-radius: 8px; background: #fff; color: var(--muted);
+  display: grid; place-items: center; cursor: pointer;
+}
+.ase-pg-cuotas-edit { display: grid; gap: 6px; margin-bottom: 6px; }
+.ase-pg-cuota-edit { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.15fr) auto; gap: 6px; align-items: center; }
+.ase-pg-quitar {
+  width: 30px; height: 30px; border-radius: 9px; border: 1px solid var(--line); background: #fff; color: var(--muted);
+  display: grid; place-items: center; cursor: pointer;
+}
+.ase-pg-quitar:hover:not(:disabled) { color: var(--red); border-color: rgba(192, 57, 43, .35); }
+.ase-pg-quitar:disabled { opacity: .35; cursor: default; }
+
+.ase-pg-previa { border: 1px solid var(--line); border-radius: 15px; background: var(--ground); padding: 12px 14px; }
+.ase-pg-previa .ase-pg-nota { margin-top: 8px; }
+.ase-pg-previa-vacia { font-size: 12px; color: var(--muted); margin: 0; line-height: 1.5; }
+.ase-pg-previa-total { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.ase-pg-previa-total span { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ase-pg-previa-total b { font-size: 22px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+.ase-pg-previa-cuotas { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.ase-pg-previa-cuotas li {
+  display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-size: 12.5px;
+  background: #fff; border: 1px solid var(--line); border-radius: 11px;
+}
+.ase-pg-previa-cuotas li > span:nth-child(2) { flex: 1; color: var(--muted); }
+.ase-pg-previa-cuotas li b { font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+
+/* ── Detalle del plan ─────────────────────────────────────────────────── */
+.ase-pg-plan-cab { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ase-pg-cifras { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 560px) { .ase-pg-cifras { grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); } }
+.ase-pg-cifras > div { min-width: 0; padding: 8px 10px; border-radius: 12px; background: var(--ground); border: 1px solid var(--line); }
+.ase-pg-cifras b {
+  display: block; font-size: 15px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ase-pg-cifras span { display: block; margin-top: 2px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ase-pg-bloque { display: grid; gap: 10px; padding: 12px; border-radius: 14px; background: var(--ground); border: 1px solid var(--line); }
+
+.ase-pg-linea { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ase-pg-linea > li {
+  display: grid; gap: 8px; padding: 9px 11px; background: #fff;
+  border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 13px;
+}
+.ase-pg-linea > li[data-tono="rojo"] { border-left-color: var(--red); }
+.ase-pg-linea > li[data-tono="ambar"] { border-left-color: var(--accent); }
+.ase-pg-linea > li[data-tono="cielo"] { border-left-color: var(--sky-2); }
+.ase-pg-linea > li[data-tono="verde"] { border-left-color: var(--green); }
+.ase-pg-linea > li[data-anulada="1"] { background: var(--red-soft); opacity: .7; }
+.ase-pg-linea-fila { display: flex; align-items: center; gap: 10px; }
+.ase-pg-reprogramar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; padding: 8px 10px; border-radius: 10px; background: var(--ground); }
+.ase-pg-reprogramar label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.ase-pg-reprogramar .ase-campo { width: auto; padding: 6px 10px; font-size: 12.5px; }
+.ase-pg-reprogramar .ase-pg-check { flex-direction: row; align-items: center; gap: 6px; font-size: 12px; color: var(--ink); cursor: pointer; }
+
+/* ── Bloque «Planes de pago» (ficha del cliente y ?cliente=) ──────────── */
+.ase.ase-pg-ficha {
+  min-height: 0; display: grid; gap: 12px; padding: 14px;
+  background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--sombra);
+}
+.ase-pg-ficha-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.ase-pg-ficha-cab .ase-seccion-t { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ase-pg-totales { display: grid; gap: 8px; }
+.ase-pg-plan { border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+.ase-pg-plan[data-estado="ANULADO"] { opacity: .6; }
+.ase-pg-plan-boton {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left; font: inherit; color: var(--ink);
+  padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line); background: #fbfdff; cursor: pointer; transition: background .2s;
+}
+.ase-pg-plan[data-estado="ANULADO"] .ase-pg-plan-boton { border-bottom: 0; }
+.ase-pg-plan-boton:hover, .ase-pg-plan-boton:focus-visible { background: var(--sky-soft); outline: none; }
+.ase-pg-plan-der { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: 0 0 auto; }
+.ase-pg-plan-der b { font-size: 15px; font-weight: 800; color: var(--primary); white-space: nowrap; }
+.ase-pg-plan-progreso { display: flex; align-items: center; gap: 10px; padding: 8px 12px 0; }
+.ase-pg-plan-progreso .ase-progreso { flex: 1; }
+.ase-pg-plan-progreso span { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.ase-pg-mini { list-style: none; margin: 0; padding: 6px 12px 10px; display: grid; gap: 2px; }
+.ase-pg-mini > li { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding: 6px 0; border-top: 1px solid #eef3f7; }
+.ase-pg-mini > li:first-child { border-top: 0; }
+.ase-pg-mini-datos { display: flex; flex-direction: column; flex: 1 1 10rem; min-width: 8rem; }
+.ase-pg-mini-datos b { font-size: 13px; color: var(--ink); }
+.ase-pg-mini-datos span { font-size: 11px; color: var(--muted); }
+.ase-pg-sueltos { border: 1px dashed #c5d5e2; border-radius: 12px; padding: 8px 12px; }
+.ase-pg-sueltos summary { cursor: pointer; font-size: 12px; font-weight: 700; color: var(--muted); }
+.ase-pg-sueltos .ase-pg-mini { padding: 6px 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ase-pg-fila-main, .ase-pg-plan-boton { transition: none; }
+}

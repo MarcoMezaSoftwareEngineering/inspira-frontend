@@ -83,6 +83,7 @@ export const ORIGENES_WHATSAPP = {
   "panel-bienvenida": "la pantalla de acceso al panel",
   "panel-inicio": "mi panel de asesorado",
   "panel-mi-ruta": "«Mi ruta» en mi panel",
+  "panel-pagos": "«Mis pagos» en mi panel",
   "panel-sin-acceso": "mi panel, recién creada la cuenta",
   "panel-guia-master": "la guía del máster en mi panel",
   web: "la web",

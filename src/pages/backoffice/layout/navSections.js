@@ -1,14 +1,15 @@
 import {
-  LayoutDashboard, Calendar, FileText, TrendingUp, Users, Settings, Wrench,
+  LayoutDashboard, Calendar, FileText, TrendingUp, Users, Settings, Wrench, Wallet,
 } from "lucide-react";
 
 // El menú de Inspira Core. Lo leen la barra lateral (Sidebar), el cajón del
 // móvil (MobileDrawer) y la barra de abajo (BottomNav): un solo sitio para los
 // tres, para que nunca enseñen cosas distintas.
 //
-// Siete destinos (reducción aprobada por el cliente, 14/09/2026):
+// Ocho destinos: los siete de la reducción aprobada por el cliente
+// (14/09/2026) más Pagos, que es trabajo de cada día y tiene pantalla propia:
 //
-//   Inicio · Procesos · Clientes · Agenda · Leads · Herramientas · Configuración
+//   Inicio · Procesos · Clientes · Agenda · Leads · Pagos · Herramientas · Configuración
 //
 // Antes eran trece: Presupuesto, Buscador de másteres, Universidades, Tracker y
 // Sistematizador estaban sueltos en el menú y otra vez como tarjetas de
@@ -57,17 +58,22 @@ export const NAV_SECTIONS = [
         alsoActive: ["/backoffice/presupuestos", "/backoffice/calculadora"],
         icon: TrendingUp,
       },
-      // ── Hueco reservado: «Tareas» y «Pagos» ──────────────────────────────
-      // Todavía no tienen pantalla: NO se añaden hasta que exista. Van aquí,
-      // entre Leads y Herramientas, porque son trabajo de cada día, no
-      // herramientas ni configuración. Quedarían así:
+      // Pagos: cobros, comprobantes por validar y planes de pago. Entrada
+      // propia y no dentro de Clientes: se abre a diario y la barra «Hoy» y
+      // los correos internos enlazan aquí (?cliente=, ?pago=). No entra en la
+      // barra de abajo del móvil: está en el cajón («Más»).
+      {
+        id: "pagos", label: "Pagos", href: "/backoffice/pagos",
+        perm: "pagos.ver", icon: Wallet,
+      },
+      // ── Hueco reservado: «Tareas» ────────────────────────────────────────
+      // Todavía no tiene pantalla: NO se añade hasta que exista. Iría aquí,
+      // junto a Pagos, porque es trabajo de cada día:
       //
       //   { id: "tareas", label: "Tareas", href: "/backoffice/tareas", perm: "<clave>", icon: ListChecks },
-      //   { id: "pagos",  label: "Pagos",  href: "/backoffice/pagos",  perm: "<clave>", icon: Wallet },
       //
-      // Al activarlos: la ruta en BackofficeApp.jsx, la clave de permiso en el
-      // backend (backoffice/permisos.catalog.js), los iconos en el import de
-      // arriba y decidir si alguno entra en BottomNav (caben cuatro más «Más»).
+      // Al activarlo: la ruta en BackofficeApp.jsx, la clave de permiso en el
+      // backend (backoffice/permisos.catalog.js) y el icono en el import de arriba.
       {
         id: "herramientas", label: "Herramientas", href: "/backoffice/herramientas",
         alsoActive: [

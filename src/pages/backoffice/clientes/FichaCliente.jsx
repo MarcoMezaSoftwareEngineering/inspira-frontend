@@ -6,6 +6,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boPOST, boPATCH, boDELETE, boFetch } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
+// Se oculta sola a quien no tiene pagos.ver.
+import PlanesCliente from "../pagos/PlanesCliente";
 
 /* El voucher está detrás de autenticación, así que un enlace normal daría 401:
    el token va en cabecera, no en la URL. Se pide, se convierte en blob y se
@@ -309,6 +311,9 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
               </div>
             )}
           </Bloque>
+
+          {/* Planes de pago: cuotas, vencimientos y comprobantes (portal de Pagos). */}
+          <PlanesCliente idCliente={idCliente} onCambio={cargar} />
 
           <Bloque titulo={`Notas · ${notas.length}`}>
             <div className="rounded-lg border border-neutral-200 bg-white p-2.5 mb-3">

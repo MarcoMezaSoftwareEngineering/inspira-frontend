@@ -19,6 +19,7 @@ import SolicitudesList from "./solicitudes/SolicitudesList";
 import SolicitudDetalleBackoffice from "./solicitudes/SolicitudDetalleBackoffice";
 import LeadsCalculadora from "./calculadora/LeadsCalculadora";
 import Leads from "./leads/Leads";
+import Pagos from "./pagos/Pagos";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
 import Procesos from "./procesos/Procesos";
@@ -152,7 +153,7 @@ export default function BackofficeApp() {
         />
 
         {/* En móvil, los cuatro destinos de uso diario al alcance del pulgar.
-            El cajón tiene los siete: esto es el atajo, no el menú. */}
+            El cajón tiene los ocho: esto es el atajo, no el menú. */}
         <BottomNav
           path={path}
           drawerAbierto={mobileDrawerOpen}
@@ -250,6 +251,9 @@ export default function BackofficeApp() {
 
             {/* LEADS — bandeja única y embudo. ?lead=ID abre la ficha. */}
             {path === "/backoffice/leads" && <ModuleGate perm="leads.ver"><Leads /></ModuleGate>}
+
+            {/* PAGOS — caja del mes, comprobantes y planes. ?cliente=, ?pago= y ?plan= abren lo suyo. */}
+            {path === "/backoffice/pagos" && <ModuleGate perm="pagos.ver"><Pagos /></ModuleGate>}
 
             {path === "/backoffice/tracker-universidades" && <ModuleGate perm="tracker.ver"><TrackerUniversidades /></ModuleGate>}
 

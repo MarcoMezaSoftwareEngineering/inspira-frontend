@@ -83,13 +83,24 @@ function TabFechas({ post, onChange, onSave }) {
         <FechaBox label="Cierre"     valor={post.fecha_cierre}     field="fecha_cierre"     onChange={onChange} onSave={onSave} />
         <FechaBox label="Resultados" valor={post.fecha_resultados} field="fecha_resultados" onChange={onChange} onSave={onSave} />
       </div>
-      {post.fase_nombre && (
-        <p className="text-[10.5px] text-neutral-500 bg-neutral-50 border border-neutral-200 rounded-lg px-2.5 py-1.5">
-          Convocatoria mas cercana: <strong className="text-[#1A3557]">{post.fase_nombre}</strong>
-          {post.fase_curso ? <> — para empezar el curso <strong className="text-[#1A3557]">{post.fase_curso}</strong></> : null}.
-          Si el plan es entrar un curso mas tarde, el plazo que le toca es otro.
-          Las fechas las publica la universidad y pueden cambiar.
-        </p>
+      {(post.fase_nombre || (post.fases_curso || []).length > 0) && (
+        <div className="text-[10.5px] text-neutral-500 bg-neutral-50 border border-neutral-200 rounded-lg px-2.5 py-1.5 space-y-1">
+          <p>
+            Plazo en uso: <strong className="text-[#1A3557]">{post.fase_nombre || "—"}</strong>
+            {post.fase_curso ? <> · curso <strong className="text-[#1A3557]">{post.fase_curso}</strong></> : null}.
+            Sale del curso al que apunta el cliente (chip del tracker o «inicio previsto» del formulario).
+          </p>
+          {(post.fases_curso || []).length > 0 && (
+            <ul className="font-mono space-y-0.5">
+              {post.fases_curso.map((f) => (
+                <li key={`${f.nombre}-${f.inicio}`} className={f.nombre === post.fase_nombre ? "text-[#1A3557] font-bold" : ""}>
+                  {f.nombre}: {f.inicio || "?"} → {f.fin || "?"}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p>Las fechas las publica la universidad y pueden cambiar.</p>
+        </div>
       )}
       <div>
         <p className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">

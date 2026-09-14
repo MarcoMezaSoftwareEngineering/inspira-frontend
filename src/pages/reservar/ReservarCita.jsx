@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { apiGET } from "../../services/api";
 import { useReservarCita } from "../../hooks/useReservarCita";
 import AceptarTerminos from "../../components/legal/AceptarTerminos";
+import { CALENDLY_URL } from "../../config/contacto";
 
 // "YYYY-MM-DD" -> "Lunes 21 de julio de 2026" (hora de Perú)
 function fechaLarga(fechaISO) {
@@ -87,15 +88,21 @@ export default function ReservarCita() {
             <p className="text-center text-neutral-500">Cargando disponibilidad…</p>
           )}
 
-          {!cargando && error && (
-            <p className="text-center text-red-600">{error}</p>
-          )}
-
-          {!cargando && !error && !hayDisponibilidad && (
+          {/* Sin horarios (o sin conexión) nadie se queda sin reservar: la
+              reserva oficial de la web es Calendly (config/contacto.js). */}
+          {!cargando && (error || !hayDisponibilidad) && (
             <div className="text-center bg-white rounded-2xl border border-neutral-200 p-8">
-              <p className="text-neutral-700">
-                Ahora mismo no hay horarios disponibles. Vuelve a intentarlo más tarde.
+              <p className={error ? "text-red-600" : "text-neutral-700"}>
+                {error || "Ahora mismo no hay horarios disponibles en esta agenda."}
               </p>
+              <a
+                href={CALENDLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-dark"
+              >
+                Reserva tu sesión en Calendly
+              </a>
             </div>
           )}
 

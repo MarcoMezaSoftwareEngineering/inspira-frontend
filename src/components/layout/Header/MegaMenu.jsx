@@ -1,8 +1,11 @@
 // src/components/layout/Header/MegaMenu.jsx
 // Mega-menú de servicios (escritorio). Muestra el catálogo COMPLETO agrupado
-// por categoría y subgrupo — nada queda escondido tras un "ver más".
+// por categoría y subgrupo — nada queda escondido tras un "ver más". Al pie,
+// las herramientas gratis y el botón de reservar (el mismo Calendly de toda
+// la web).
 import { CATEGORIAS, PRECIO_ASESORIA, hrefServicio } from "../../../config/servicios";
 import { CALENDLY_URL } from "../../../config/contacto";
+import { HERRAMIENTAS_GRATIS, RESERVAR_ETIQUETA } from "./header.data";
 import { navigate } from "../../../services/navigate";
 import Icono from "../../common/Icono";
 
@@ -71,29 +74,27 @@ export default function MegaMenu({ onNavigate }) {
         ))}
       </div>
 
+      {/* Herramientas gratis: salieron de la cabecera el 14/09/2026. «Casos
+          de éxito» ya no se repite aquí: tiene su entrada en la cabecera. */}
       <div className="v4-mega-foot">
-        <a
-          className="v4-mega-foot-item"
-          href="/asistente"
-          onClick={(e) => go(e, "/asistente")}
-        >
-          <Icono nombre="robot" size={18} />
-          <span>
-            <b>¿No sabes cuál es tu trámite?</b>
-            <small>Responde 3 preguntas y te lo decimos</small>
-          </span>
-        </a>
-        <a
-          className="v4-mega-foot-item"
-          href="/casos-de-exito"
-          onClick={(e) => go(e, "/casos-de-exito")}
-        >
-          <Icono nombre="estrella" size={18} />
-          <span>
-            <b>Casos de éxito</b>
-            <small>Visas, admisiones y apelaciones ganadas</small>
-          </span>
-        </a>
+        <p className="v4-mega-foot-titulo">
+          <Icono nombre="destello" size={13} />
+          Herramientas gratis
+        </p>
+        {HERRAMIENTAS_GRATIS.map((h) => (
+          <a
+            key={h.href}
+            className="v4-mega-foot-item"
+            href={h.href}
+            onClick={(e) => go(e, h.href)}
+          >
+            <Icono nombre={h.icono} size={18} />
+            <span>
+              <b>{h.titulo}</b>
+              <small>{h.texto}</small>
+            </span>
+          </a>
+        ))}
         <a
           className="v4-mega-foot-cta"
           href={CALENDLY_URL}
@@ -101,7 +102,7 @@ export default function MegaMenu({ onNavigate }) {
           rel="noopener noreferrer"
         >
           <Icono nombre="calendario" size={17} />
-          Asesoría 1:1 · {PRECIO_ASESORIA.eur}
+          {RESERVAR_ETIQUETA} · {PRECIO_ASESORIA.eur}
         </a>
       </div>
     </div>

@@ -23,11 +23,14 @@ export const FRASE_APOYO = ["Tu caso no vive en un chat.", "Vive en tu expedient
 export const SUBTITULO = "La nueva generación de asesoría educativa y migratoria";
 
 /**
- * Etiquetas de la cabecera. «Expediente digital» empuja «Agenda tu asesoría»
- * fuera de la barra a 1100 px; «Tu expediente» cabe (medido el 11/09/2026).
- * Entre 1024 y 1060 px la barra ya desbordaba antes, con «Nuestro sistema».
+ * Etiquetas de la navegación hacia el portal. Menú aprobado por el cliente el
+ * 14/09/2026: «Tu portal» en la cabecera (y en los demás accesos a
+ * /plataforma) y «Mi portal» en la barra inferior del móvil. Antes era «Tu
+ * expediente» (11/09/2026); «Expediente digital» no cabía en la cabecera
+ * junto al botón de reservar.
  */
-export const MENU_ETIQUETA = "Tu expediente";
+export const MENU_ETIQUETA = "Tu portal";
+export const BARRA_ETIQUETA = "Mi portal";
 
 /**
  * Botón de entrar. «Mi expediente» tapa «Agenda tu asesoría» en todos los

@@ -1,19 +1,23 @@
 // src/components/common/ReservaLateral.jsx
-// Tarjeta fija al costado derecho: recuerda la asesoría 1:1 de 30 min. Entra
-// deslizándose tras el primer scroll para no tapar el hero (que ya lleva su
-// propio botón). En móvil se colapsa a una pestaña estrecha.
+// Tarjeta fija al costado derecho: recuerda la sesión diagnóstico de 30 min.
+// Entra deslizándose tras el primer scroll para no tapar el hero (que ya lleva
+// su propio botón). En pantallas más estrechas se colapsa a una pestaña.
+// Abre Calendly directamente: es el único destino de reserva de la web
+// (config/contacto.js).
 import Icono from "./Icono";
 import { ASESORIA_PRINCIPAL } from "../../config/asesorias";
+import { CALENDLY_URL } from "../../config/contacto";
 
-export default function ReservaLateral({ onAbrir, visible = true }) {
+export default function ReservaLateral({ visible = true }) {
   return (
     <div className={"reserva-lateral" + (visible ? " visible" : "")}>
       {/* Escritorio: tarjeta con el precio a la vista */}
-      <button
-        type="button"
-        onClick={onAbrir}
-        className="reserva-lateral-card"
-        aria-label="Reservar asesoría de 30 minutos"
+      <a
+        href={CALENDLY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="reserva-lateral-card no-underline"
+        aria-label="Reservar la sesión diagnóstico de 30 minutos"
       >
         <span className="rl-icon">
           <Icono nombre="calendario" size={20} />
@@ -23,17 +27,18 @@ export default function ReservaLateral({ onAbrir, visible = true }) {
           <b>Reserva ahora</b>
           <em>{ASESORIA_PRINCIPAL.precio}</em>
         </span>
-      </button>
+      </a>
 
-      {/* Móvil: pestaña estrecha */}
-      <button
-        type="button"
-        onClick={onAbrir}
+      {/* Pestaña estrecha */}
+      <a
+        href={CALENDLY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
         className="reserva-lateral-tab"
-        aria-label="Reservar asesoría"
+        aria-label="Reservar la sesión diagnóstico"
       >
         <Icono nombre="calendario" size={17} />
-      </button>
+      </a>
     </div>
   );
 }

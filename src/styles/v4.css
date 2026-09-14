@@ -398,6 +398,8 @@
 .v4-mega-foot-item span { display: flex; flex-direction: column; line-height: 1.3; }
 .v4-mega-foot-item b { font-size: 12.5px; font-weight: 800; }
 .v4-mega-foot-item small { font-size: 11px; color: var(--muted); }
+.v4-mega-foot-titulo { grid-column: 1 / -1; display: flex; align-items: center; gap: 7px; margin: 0 0 -4px; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.v4-mega-foot-titulo svg { color: var(--sky-2); }
 .v4-mega-foot-cta { display: inline-flex !important; align-items: center; gap: 8px; background: var(--accent); color: #fff !important; font-size: 12.5px !important; font-weight: 850 !important; padding: 12px 18px !important; border-radius: 13px !important; white-space: nowrap; }
 .v4-mega-foot-cta:hover { background: #e07a1c !important; color: #fff !important; transform: translateY(-1px); }
 

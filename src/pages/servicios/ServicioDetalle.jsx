@@ -10,6 +10,7 @@ import {
 } from "../../config/servicios";
 import { ASESORIA } from "../../config/contacto";
 import { procesoDe } from "../../config/serviciosProceso";
+import { eur, SESION_DIAGNOSTICO } from "../../config/metodo";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import Icono from "../../components/common/Icono";
 import SelloPortal from "../../components/common/SelloPortal";
@@ -27,7 +28,56 @@ const go = (e, href) => {
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
-export default function ServicioDetalle({ id }) {
+/**
+ * El paquete del servicio con su precio (fuente única, metodo.js). Solo lo
+ * enseña quien lo pasa: hoy, /servicios/estancia.
+ */
+function PaqueteServicio({ paquete }) {
+  return (
+    <section className="mb-10 overflow-hidden rounded-3xl border-2 border-accent bg-white">
+      <div className="bg-accent px-6 py-2.5">
+        <p className="text-xs font-black uppercase tracking-widest text-white">
+          El paquete
+        </p>
+      </div>
+      <div className="grid gap-6 p-6 sm:p-7 lg:grid-cols-[1fr_minmax(0,16rem)]">
+        <div>
+          <h2 className="font-fraunces text-2xl font-bold text-primary">
+            {paquete.nombre}
+          </h2>
+          {paquete.subtitulo && (
+            <p className="mt-0.5 text-sm font-semibold text-neutral-500">
+              {paquete.subtitulo}
+            </p>
+          )}
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+            {paquete.incluye.map((i) => (
+              <li key={i} className="flex gap-2.5 text-sm text-neutral-700">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                <span className="leading-snug">{i}</span>
+              </li>
+            ))}
+          </ul>
+          {paquete.permiso && (
+            <p className="mt-4 text-sm font-semibold text-primary">{paquete.permiso}</p>
+          )}
+        </div>
+        <div className="rounded-2xl bg-secondary-light p-5 text-center">
+          <p className="font-fraunces text-4xl font-bold text-primary">
+            {eur(paquete.precio)}
+          </p>
+          <BotonAsesoria className="mt-4 w-full">Reservar mi sesión</BotonAsesoria>
+          <p className="mt-3 text-xs leading-snug text-neutral-500">
+            La sesión diagnóstico cuesta {SESION_DIAGNOSTICO.precioTexto} y de
+            ahí sale tu propuesta por escrito.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function ServicioDetalle({ id, paquete = null }) {
   const servicio = getServicio(id);
   if (!servicio?.detalle) return <NotFound />;
 
@@ -87,6 +137,9 @@ export default function ServicioDetalle({ id }) {
             <span className="shrink-0 text-sm font-bold text-primary">Hacer el test →</span>
           </a>
         )}
+
+        {/* El paquete y su precio, si la página lo trae */}
+        {paquete && <PaqueteServicio paquete={paquete} />}
 
         {/* Qué verás de este servicio en tu Portal Inspira */}
         <SelloPortal servicioId={servicio.id} className="mb-10" />

@@ -1,14 +1,23 @@
 // src/pages/backoffice/configuracion/ConfiguracionPanel.jsx
 //
-// Fusiona los antiguos módulos de configuración (Planes, Precios/Servicios,
-// Correos, Media, Cumplimiento legal y Settings) en un solo panel con
-// pestañas. Cada pestaña conserva su regla de acceso original: `perm`
-// (checklist de Roles y Permisos) o solo-admin; el usuario solo ve las
-// pestañas a las que tiene acceso.
+// «Configuración»: lo que se ajusta de vez en cuando, en un solo panel con
+// pestañas. Cada pestaña es un enlace a su ruta de siempre (/backoffice/planes,
+// /backoffice/documentos…): recargar, «atrás» o mandar el enlace abre la misma
+// pestaña, y la ruta vieja sigue funcionando.
+//
+// Desde el 14/09/2026 también cuelgan de aquí Documentos, Checklist de
+// servicios e Instructivos, que antes solo se abrían escribiendo la URL.
+//
+// Cada pestaña conserva su regla de acceso: `perm` (checklist de Roles y
+// Permisos), `adminOnly`, o ninguna (cualquier rol interno, como Documentos,
+// que nunca la tuvo). El usuario solo ve las pestañas a las que tiene acceso.
 import { useAuth } from "../context/AuthContext";
-import TabView from "../layout/TabView";
+import PestanasEnlace from "../layout/PestanasEnlace";
 import PlanesAdmin from "../planes/PlanesAdmin";
 import PreciosServicios from "../precios/PreciosServicios";
+import DocumentosBackoffice from "../documentos/DocumentosBackoffice";
+import ChecklistServicios from "../checklist/ChecklistServicios";
+import InstructivosServicios from "../instructivos/InstructivosServicios";
 import EmailTemplates from "../correos/EmailTemplates";
 import MediaPanel from "../media/MediaPanel";
 import CumplimientoLegal from "../legal/CumplimientoLegal";
@@ -16,21 +25,23 @@ import UsuariosSettings from "../settings/UsuariosSettings";
 import Auditoria from "../auditoria/Auditoria";
 
 const TABS = [
-  { id: "planes",   label: "Planes",             perm: "planes.ver",  Component: PlanesAdmin },
-  { id: "precios",  label: "Precios/Servicios",  perm: "precios.ver", Component: PreciosServicios },
-  { id: "correos",  label: "Correos",            adminOnly: true,     Component: EmailTemplates },
-  { id: "media",    label: "Media",              adminOnly: true,     Component: MediaPanel },
-  { id: "legal",    label: "Cumplimiento legal", adminOnly: true,     Component: CumplimientoLegal },
-  { id: "settings", label: "Settings",           adminOnly: true,     Component: UsuariosSettings },
-  // Aquí y no en el menú principal: son ocho destinos y añadir un noveno por
-  // algo que se consulta de vez en cuando dispersaría la navegación otra vez.
-  { id: "auditoria", label: "Registro de cambios", adminOnly: true,    Component: Auditoria },
+  { id: "planes",       label: "Planes",              href: "/backoffice/planes",              perm: "planes.ver",       Component: PlanesAdmin },
+  { id: "precios",      label: "Precios/Servicios",   href: "/backoffice/precios",             perm: "precios.ver",      Component: PreciosServicios },
+  { id: "documentos",   label: "Documentos",          href: "/backoffice/documentos",                                    Component: DocumentosBackoffice },
+  { id: "checklist",    label: "Checklist servicios", href: "/backoffice/checklist-servicios", perm: "checklist.ver",    Component: ChecklistServicios },
+  { id: "instructivos", label: "Instructivos",        href: "/backoffice/instructivos",        perm: "instructivos.ver", Component: InstructivosServicios },
+  { id: "correos",      label: "Correos",             href: "/backoffice/correos",             adminOnly: true,          Component: EmailTemplates },
+  { id: "media",        label: "Media",               href: "/backoffice/media",               adminOnly: true,          Component: MediaPanel },
+  { id: "legal",        label: "Cumplimiento legal",  href: "/backoffice/legal",               adminOnly: true,          Component: CumplimientoLegal },
+  { id: "settings",     label: "Settings",            href: "/backoffice/settings",            adminOnly: true,          Component: UsuariosSettings },
+  // Aquí y no en el menú principal: se consulta de vez en cuando.
+  { id: "auditoria",    label: "Registro de cambios", href: "/backoffice/auditoria",           adminOnly: true,          Component: Auditoria },
 ];
 
-export default function ConfiguracionPanel({ initialTabId = "planes" }) {
+export default function ConfiguracionPanel({ tabId = "planes" }) {
   const { isAdmin, hasPermission } = useAuth();
 
-  const visibles = TABS.filter((t) => (t.adminOnly ? isAdmin : hasPermission(t.perm)));
+  const visibles = TABS.filter((t) => (t.adminOnly ? isAdmin : !t.perm || hasPermission(t.perm)));
 
   if (visibles.length === 0) {
     return (
@@ -45,13 +56,16 @@ export default function ConfiguracionPanel({ initialTabId = "planes" }) {
     );
   }
 
-  const idx = Math.max(0, visibles.findIndex((t) => t.id === initialTabId));
+  // Una ruta a la que no tiene acceso abre la primera pestaña que sí ve.
+  const activa = visibles.find((t) => t.id === tabId) || visibles[0];
+  const { Component } = activa;
 
   return (
-    <TabView
-      key={initialTabId}
-      initialTab={idx}
-      tabs={visibles.map(({ label, Component }) => ({ label, content: <Component /> }))}
-    />
+    <div className="flex flex-col h-full">
+      <PestanasEnlace pestanas={visibles} activa={activa.id} etiqueta="Secciones de configuración" />
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <Component />
+      </div>
+    </div>
   );
 }

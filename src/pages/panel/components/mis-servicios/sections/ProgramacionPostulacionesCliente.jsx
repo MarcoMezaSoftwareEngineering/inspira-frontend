@@ -436,6 +436,28 @@ function PortalCard({ grupo, idSolicitud, onSave }) {
         </div>
       )}
 
+      {/* Todos los plazos del curso al que apunta, no solo el más cercano */}
+      {fechas.fases_curso.length > 1 && (
+        <div className="px-4 pb-3">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-1">
+            Plazos del curso {fechas.fase_curso}
+          </p>
+          <ul className="space-y-1">
+            {fechas.fases_curso.map((f) => {
+              const actual = f.nombre === fechas.fase_nombre;
+              const pasada = Boolean(f.fin) && f.fin < new Date().toISOString().slice(0, 10);
+              return (
+                <li key={`${f.nombre}-${f.inicio}`}
+                  className={`flex items-center justify-between gap-2 text-[12px] rounded-lg px-2.5 py-1.5 ${actual ? "bg-sky/20 text-primary font-semibold" : pasada ? "text-neutral-400" : "bg-neutral-50 text-neutral-700"}`}>
+                  <span className="min-w-0">{f.nombre}{actual ? " · la próxima" : pasada ? " · cerrada" : ""}</span>
+                  <span className="shrink-0 tabular-nums">{fmtFecha(f.inicio)} – {fmtFecha(f.fin)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
       {/* Las opciones del portal, en el orden que eligió el asesorado */}
       <div className="px-4 pb-3">
         <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-1">

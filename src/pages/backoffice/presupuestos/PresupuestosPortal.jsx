@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { boGET, boPUT, boDELETE, boPATCH } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import { useAuth } from "../context/AuthContext";
+import LeadsPestanas from "../leads/LeadsPestanas";
 
 const STATUS_LABEL = {
   new:      "Nueva",
@@ -290,6 +291,8 @@ export default function PresupuestosPortal() {
 
   return (
     <div className="p-4 sm:p-6 space-y-5">
+      {/* Es una pestaña de Leads desde el 14/09/2026; la ruta no cambia. */}
+      <LeadsPestanas activa="solicitudes-web" className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6" />
 
       {modal && (
         <Modal

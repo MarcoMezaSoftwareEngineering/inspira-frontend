@@ -20,22 +20,19 @@ import AvisoPerfil from "./components/AvisoPerfil";
 import Bienvenida from "./components/Bienvenida";
 import { pendientesDe } from "./pendientes";
 import Tour from "./components/Tour";
-import { accesosDe, esSoloInvitado, guiasPortalDe, pideAcademico, pideCompleto } from "./servicios";
-import GuiaPortal from "./components/GuiaPortal";
+import { accesosDe, esSoloInvitado, guiasPortalDe, pestanasGuiasDe, pideAcademico, pideCompleto, CLAVES_GUIAS } from "./servicios";
+import MisGuias from "./components/MisGuias";
 import MiRuta from "./components/MiRuta";
 import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
 import AvisoVersionNueva from "../backoffice/layout/AvisoVersionNueva";
 
+// Las guías (GuiaMaster, GuiaApostilla…) las descarga MisGuias al abrirlas.
 const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
-const GuiaMaster    = lazyConRecarga(() => import("./GuiaMaster"));
-const GuiaApostilla = lazyConRecarga(() => import("./GuiaApostilla"));
-const GuiaEstancia  = lazyConRecarga(() => import("./GuiaEstancia"));
-const GuiaModificatoria = lazyConRecarga(() => import("./GuiaModificatoria"));
 
-// Las dos primeras son de todos; el resto solo se abre si algún servicio
-// suyo lo incluye (ver servicios.js).
-const TABS_RECURSO = ["portal", "becas", "guia", "apostilla", "estancia", "modificatoria"];
+// Recursos que solo se abren si algún servicio suyo los incluye (servicios.js):
+// Becas España y las pestañas de «Mis guías».
+const TABS_RECURSO = ["becas", ...CLAVES_GUIAS];
 
 /** Los pasos de la portada. El orden es el de la pantalla, de arriba abajo. */
 const PASOS_INICIO = [
@@ -57,7 +54,7 @@ const PASOS_INICIO = [
   {
     clave: "menu",
     titulo: "El menú",
-    texto: "Desde aquí vuelves a Mi expediente, ves tu ruta, abres tus servicios, tu perfil y las guías de tu trámite. Y si quieres ver este recorrido otra vez, está en «¿Cómo funciona?».",
+    texto: "Desde aquí vuelves a Mi expediente, ves tu ruta, abres tus servicios, tu perfil y «Mis guías», con todas las guías de tu trámite. Y si quieres ver este recorrido otra vez, está en «¿Cómo funciona?».",
   },
 ];
 
@@ -100,6 +97,8 @@ export default function PanelCliente({ path }) {
   const accesos = useMemo(() => accesosDe(lista), [lista]);
   // Las guías en PDF de sus servicios: la del trámite y la del portal.
   const guiasPortal = useMemo(() => guiasPortalDe(lista), [lista]);
+  // Las pestañas de «Mis guías» que le tocan (PDF, Máster, Estancia…).
+  const pestanasGuia = useMemo(() => pestanasGuiasDe(accesos, guiasPortal), [accesos, guiasPortal]);
 
   // A quien no tiene ningún servicio se le piden los datos completos —es el
   // paso previo para que un asesor pueda darle acceso—. Al invitado, solo sus
@@ -206,11 +205,10 @@ export default function PanelCliente({ path }) {
   }
 
   // Tab titles
+  // Todas las guías comparten título: la pestaña de dentro dice cuál es.
   const titles = {
-    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", perfil: "Mi Perfil", portal: "Mis guías", becas: "Becas España",
-    guia: "Guía Máster", apostilla: "Guía Apostilla Digital",
-    estancia: "Guía Estancia por Estudios",
-    modificatoria: "Guía Residencia y Trabajo",
+    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", perfil: "Mi Perfil", becas: "Becas España",
+    ...Object.fromEntries(CLAVES_GUIAS.map((clave) => [clave, "Mis guías"])),
   };
 
   const { nombre, corto, iniciales, foto } = datosUsuario(user);
@@ -237,7 +235,7 @@ export default function PanelCliente({ path }) {
         idServicioActivo={ruta.idServicio}
         onAbrirServicio={(id) => { navigate(rutaDe({ idServicio: id })); setSidebarOpen(false); }}
         onTour={verTour}
-        guiasPortal={guiasPortal}
+        guias={pestanasGuia}
       />
 
       {/* En el móvil manda el scroll de la página: un expediente dentro de una
@@ -320,41 +318,16 @@ export default function PanelCliente({ path }) {
           {/* Mi ruta: las etapas entre servicios */}
           {tab === "ruta" && <MiRuta servicios={lista} />}
 
-          {/* Mis guías: los PDF de sus servicios (trámite y portal) */}
-          {tab === "portal" && accesos.has("portal") && guiasPortal.length > 0 && (
-            <GuiaPortal guias={guiasPortal} />
+          {/* Mis guías: una sola entrada y una pestaña por guía. Cada pestaña
+              conserva su URL (/panel/portal, /panel/guia, /panel/apostilla…). */}
+          {CLAVES_GUIAS.includes(tab) && accesos.has(tab) && (tab !== "portal" || guiasPortal.length > 0) && (
+            <MisGuias tab={tab} pestanas={pestanasGuia} guiasPortal={guiasPortal} onCambiar={handleChangeTab} />
           )}
 
           {/* Becas España */}
           {tab === "becas" && accesos.has("becas") && (
             <Suspense fallback={<LoadingPage />}>
               <BecasEspana />
-            </Suspense>
-          )}
-
-          {/* Guía Máster */}
-          {tab === "guia" && accesos.has("guia") && (
-            <Suspense fallback={<LoadingPage />}>
-              <GuiaMaster />
-            </Suspense>
-          )}
-
-          {/* Guía Apostilla Digital */}
-          {tab === "estancia" && accesos.has("estancia") && (
-            <Suspense fallback={<LoadingPage />}>
-              <GuiaEstancia />
-            </Suspense>
-          )}
-
-          {tab === "modificatoria" && accesos.has("modificatoria") && (
-            <Suspense fallback={<LoadingPage />}>
-              <GuiaModificatoria />
-            </Suspense>
-          )}
-
-          {tab === "apostilla" && accesos.has("apostilla") && (
-            <Suspense fallback={<LoadingPage />}>
-              <GuiaApostilla />
             </Suspense>
           )}
         </div>

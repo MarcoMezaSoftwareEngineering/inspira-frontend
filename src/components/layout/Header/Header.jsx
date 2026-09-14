@@ -87,9 +87,12 @@ export default function Header() {
 
           <nav className="v4-navlinks">
             {navItems.map((item) => {
-              // Como en el mockup: el estado activo solo se marca en las rutas
-              // internas (servicios / calculadora), nunca en "Inicio".
-              const active = item.href !== "/" && path === item.href;
+              // El estado activo solo se marca en las rutas internas, nunca en
+              // «Inicio». «Servicios» se enciende en el catálogo y en cada
+              // servicio, salvo el máster, que tiene su propia entrada.
+              const active = item.mega
+                ? path === item.href || (path.startsWith(`${item.href}/`) && path !== "/servicios/master")
+                : item.href !== "/" && path === item.href;
               if (item.mega) {
                 const open = abierto === item.label;
                 return (
@@ -162,34 +165,8 @@ export default function Header() {
                   </a>
                 );
               }
-              if (item.ia) {
-                return (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    onClick={(e) => go(e, item.href)}
-                    className={`v4-pill-ia${active ? " route-active" : ""}`}
-                  >
-                    <Icono nombre="robot" size={16} />
-                    {item.corto || item.label}
-                    <span className="v4-tag-gratis">gratis</span>
-                  </a>
-                );
-              }
-              if (item.badge) {
-                return (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    onClick={(e) => go(e, item.href)}
-                    className={`v4-pill-free${active ? " route-active" : ""}`}
-                  >
-                    <span className="v4-pulse" />
-                    {item.corto || item.label}
-                    <span className="v4-tag-gratis">gratis</span>
-                  </a>
-                );
-              }
+              // Asistente y calculadora ya no van aquí: están en el mega-menú,
+              // en «Herramientas gratis» (14/09/2026).
               return (
                 <a
                   key={item.label}

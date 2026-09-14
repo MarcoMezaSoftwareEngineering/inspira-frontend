@@ -1,4 +1,13 @@
 // src/pages/panel/components/PanelSidebar.jsx
+//
+// El menú del asesorado: ocho entradas como mucho (14/09/2026). Mi expediente,
+// Mi ruta, Mis servicios (con sus expedientes colgando), Perfil y, según lo
+// contratado, Mis guías y Becas España.
+//
+// Las guías eran cinco entradas sueltas (Mis guías, Guía Máster, Guía
+// Apostilla, Guía Estancia, Guía Residencia y Trabajo) más un segundo «Mis
+// guías» en el pie. Ahora son una sola entrada y, dentro, una pestaña por guía
+// (MisGuias.jsx); cada guía conserva su URL.
 import SidebarItem from "./SidebarItem";
 import Avatar from "../../../components/common/Avatar";
 import Icono from "../../../components/common/Icono";
@@ -7,28 +16,26 @@ import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 import logo from "../../../assets/images/logo.png";
 import { recorta } from "../pendientes";
+import { CLAVES_GUIAS } from "../servicios";
 
-// Cada recurso, con la etiqueta y el icono con los que aparece en el menú.
-// El orden es el de la lista; se enseñan los que estén en `accesos`.
-const RECURSOS = [
-  { clave: "portal", icono: "mapa", label: "Mis guías" },
-  { clave: "becas", icono: "birrete", label: "Becas España" },
-  { clave: "guia", icono: "libro", label: "Guía Máster" },
-  { clave: "apostilla", icono: "documento", label: "Guía Apostilla" },
-  { clave: "estancia", icono: "bandera", label: "Guía Estancia" },
-  { clave: "modificatoria", icono: "laptop", label: "Guía Residencia y Trabajo" },
-];
+// Tope de entradas del menú, contando los expedientes que cuelgan de «Mis servicios».
+const MAX_ENTRADAS = 8;
 
 export default function PanelSidebar({
   user, activeTab, onChangeTab, isOpen, onClose, accesos,
-  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour, guiasPortal = [],
+  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour, guias = [],
 }) {
-  // Los expedientes, por nombre, como accesos directos. Cuatro como mucho:
-  // el menú es para llegar rápido, no para listar.
-  const directos = (servicios || []).slice(0, 4);
-  // Qué recursos le corresponden por sus servicios. Lo decide servicios.js:
-  // aquí solo se pintan. A quien no tiene nada contratado no le sale ninguno.
-  const visibles = RECURSOS.filter((r) => accesos?.has(r.clave));
+  // Qué recursos le corresponden lo decide servicios.js; aquí solo se pintan.
+  // A quien no tiene nada contratado no le sale ninguno, y a quien entra
+  // invitado a un expediente ajeno tampoco: las guías son del titular.
+  const conRuta = servicios.length > 0;
+  const conGuias = guias.length > 0;
+  const conBecas = Boolean(accesos?.has("becas"));
+  const fijas = 3 + Number(conRuta) + Number(conGuias) + Number(conBecas);
+  // Los expedientes, por nombre, como accesos directos: los que quepan sin
+  // pasar de ocho entradas, y cuatro como mucho. Todos están en «Mis servicios».
+  const directos = servicios.slice(0, Math.max(0, Math.min(4, MAX_ENTRADAS - fijas)));
+  const enGuias = CLAVES_GUIAS.includes(activeTab);
   const { logout } = useAuth();
   const { nombre, iniciales, correo, foto } = datosUsuario(user);
 
@@ -78,7 +85,7 @@ export default function PanelSidebar({
           active={activeTab === "inicio"}
           onClick={() => onChangeTab("inicio")}
         />
-        {servicios.length > 0 && (
+        {conRuta && (
           <SidebarItem
             icono="avion"
             label="Mi ruta"
@@ -109,21 +116,27 @@ export default function PanelSidebar({
           onClick={() => onChangeTab("perfil")}
         />
 
-        {/* Recursos: los que abre cada servicio contratado, y ninguno más.
-            Quien entra invitado a un expediente ajeno no ve ninguno: las guías
-            son del titular, él viene a ayudar con un trámite concreto. */}
-        {visibles.length > 0 && (
+        {(conGuias || conBecas) && (
           <>
             <p className="pnl-side-grupo">Recursos Inspira</p>
-            {visibles.map((r) => (
+            {/* Una sola entrada para todas las guías: abre la primera que le
+                toca y, si ya está en una, se queda en ella. */}
+            {conGuias && (
               <SidebarItem
-                key={r.clave}
-                icono={r.icono}
-                label={r.label}
-                active={activeTab === r.clave}
-                onClick={() => onChangeTab(r.clave)}
+                icono="mapa"
+                label="Mis guías"
+                active={enGuias}
+                onClick={() => onChangeTab(enGuias ? activeTab : guias[0].clave)}
               />
-            ))}
+            )}
+            {conBecas && (
+              <SidebarItem
+                icono="birrete"
+                label="Becas España"
+                active={activeTab === "becas"}
+                onClick={() => onChangeTab("becas")}
+              />
+            )}
           </>
         )}
       </nav>
@@ -133,20 +146,6 @@ export default function PanelSidebar({
           <button type="button" onClick={onTour} className="pnl-item">
             <Icono nombre="brujula" size={16} />
             ¿Cómo funciona?
-          </button>
-        )}
-        {/* Junto al recorrido, el manual en PDF. Con una sola guía se abre
-            directamente; con varias, la página que las reúne. */}
-        {guiasPortal.length === 1 && (
-          <a href={guiasPortal[0].href} target="_blank" rel="noopener noreferrer" className="pnl-item">
-            <Icono nombre="mapa" size={16} />
-            Guía (PDF)
-          </a>
-        )}
-        {guiasPortal.length > 1 && (
-          <button type="button" onClick={() => onChangeTab("portal")} className="pnl-item">
-            <Icono nombre="mapa" size={16} />
-            Mis guías
           </button>
         )}
         <button type="button" onClick={() => navigate("/")} className="pnl-item">

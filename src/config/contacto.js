@@ -1,6 +1,20 @@
 // src/config/contacto.js
-// Canales de captación. El CTA de toda la web apunta a Calendly, igual que
-// el Linktree de la marca: la primera asesoría se agenda directamente ahí.
+// Canales de captación.
+//
+// UNA sola forma de reservar la sesión diagnóstico en toda la web: el enlace de
+// Calendly de abajo (decisión del 14/09/2026, al recortar los menús). Cabecera,
+// mega-menú, barra inferior, botón flotante, pestaña lateral, ventana emergente,
+// páginas de servicio y landings del máster abren esta URL, sin pasos
+// intermedios. No vuelvas a meter una ventana propia ni /reservar entre medias.
+//
+// Por qué Calendly y no la agenda propia (/reservar, con Mercado Pago): el
+// 14/09/2026 GET /api/reservas/disponibilidad en producción devolvía
+// `dias: []` —ni un horario libre cargado en Core → Agenda—, así que nadie
+// podía completar una reserva por ahí; el evento «Sesión diagnóstico» de
+// Calendly (30 min, Google Meet) tenía 14 horarios libres del 15 al 21/09.
+// Si algún día la agenda propia tiene horarios y se prueba de punta a punta
+// (horario → pago → confirmación en Agenda), el cambio se hace aquí y en los
+// botones que abren esta URL en pestaña nueva.
 import { TITULAR } from "./legal";
 import { SESION_PRECIOS } from "./paqueteMaster2027Resumen";
 
@@ -62,6 +76,7 @@ export const ORIGENES_WHATSAPP = {
   nosotros: "la página Nosotros",
   plataforma: "la página del Portal Inspira",
   calculadora: "la calculadora de máster",
+  mapa: "el mapa para estudiar en España",
   asistente: "el diagnóstico gratuito de la web",
   "visa-o-estancia": "el test «¿Visa o estancia?»",
   "asesoria-cta": "el botón «Agenda tu asesoría»",
@@ -88,6 +103,7 @@ export function origenDeRuta(path = "") {
   if (p.startsWith("/nosotros")) return "nosotros";
   if (p.startsWith("/plataforma")) return "plataforma";
   if (p.startsWith("/calculadora")) return "calculadora";
+  if (p.startsWith("/mapa-estudiar-en-espana")) return "mapa";
   if (p.startsWith("/asistente")) return "asistente";
   if (p.startsWith("/visa-o-estancia")) return "visa-o-estancia";
   return "web";

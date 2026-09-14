@@ -32,6 +32,7 @@ const paginas = [
   { loc: "/servicios/master", freq: "weekly", prio: "0.9" },
   { loc: "/servicios/estancia", freq: "weekly", prio: "0.9" },
   { loc: "/calculadora-master", freq: "monthly", prio: "0.8" },
+  { loc: "/mapa-estudiar-en-espana", freq: "monthly", prio: "0.8" },
   { loc: "/asistente", freq: "monthly", prio: "0.8" },
   { loc: "/casos-de-exito", freq: "monthly", prio: "0.8" },
   { loc: "/eventos", freq: "weekly", prio: "0.8" },

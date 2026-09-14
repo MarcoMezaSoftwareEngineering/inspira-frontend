@@ -2,8 +2,12 @@
 // Navegación del menú móvil. El bloque de servicios despliega el catálogo
 // COMPLETO por categoría y subgrupo (igual que el mega-menú de escritorio),
 // con acordeones para que quepa sin comprimir nada.
+//
+// «Explora» no repite lo que ya está en la barra inferior (Inicio, Servicios,
+// Máster, Mi portal y Reservar): quedan Casos de éxito, las herramientas
+// gratis, Eventos, Tienda, Blog y Nosotros (14/09/2026).
 import { useState } from "react";
-import { navItemsMovil } from "./header.data";
+import { navItemsMovil, HERRAMIENTAS_GRATIS } from "./header.data";
 import { CATEGORIAS, hrefServicio } from "../../../config/servicios";
 import { navigate } from "../../../services/navigate";
 import Icono from "../../common/Icono";
@@ -33,13 +37,11 @@ export default function MobileMenuNavLinks({ onClose }) {
     onClose?.();
   };
 
-  const resto = navItemsMovil;
-
   return (
     <div className="flex flex-col gap-1 overflow-y-auto">
       {/* Catálogo completo de servicios */}
       <span className="px-1 pb-1 pt-2 text-[11px] font-extrabold uppercase tracking-widest text-accent">
-        Migra a España
+        Servicios
       </span>
 
       <a
@@ -114,22 +116,26 @@ export default function MobileMenuNavLinks({ onClose }) {
         Explora
       </span>
       <ul className="flex flex-col">
-        {resto.map((item) =>
-          item.externo ? (
-            <li key={item.label}>
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={onClose}
-                className={
-                  item.cta
-                    ? "mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-accent px-4 py-3 text-sm font-extrabold text-white"
-                    : "block py-2 text-sm font-semibold text-primary"
-                }
-              >
-                {item.cta && "📅"} {item.label}
-              </a>
+        {navItemsMovil.map((item) =>
+          item.herramientas ? (
+            <li key={item.label} className="my-1 rounded-xl bg-secondary px-3 py-2">
+              <p className="pb-1 text-[10px] font-extrabold uppercase tracking-wide text-neutral-500">
+                {item.label}
+              </p>
+              <ul>
+                {HERRAMIENTAS_GRATIS.map((h) => (
+                  <li key={h.href}>
+                    <a
+                      href={h.href}
+                      onClick={(e) => go(e, h.href)}
+                      className="flex items-center gap-2 py-1.5 text-sm font-semibold text-primary"
+                    >
+                      <Icono nombre={h.icono} size={16} />
+                      {h.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </li>
           ) : (
             <li key={item.label}>
@@ -138,7 +144,6 @@ export default function MobileMenuNavLinks({ onClose }) {
                 onClick={(e) => go(e, item.href)}
                 className="flex items-center gap-2 py-2 text-sm font-semibold text-primary"
               >
-                {item.ia && <Icono nombre="robot" size={16} />}
                 {item.label}
               </a>
             </li>

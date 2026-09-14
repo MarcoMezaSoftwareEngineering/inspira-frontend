@@ -11,16 +11,12 @@ import BottomNav from "./layout/BottomNav";
 import AvisoVersionNueva from "./layout/AvisoVersionNueva";
 import ProtectedRoute from "./layout/ProtectedRoute";
 import ModuleGate from "./layout/ModuleGate";
-import TabView from "./layout/TabView";
 import { AuthProvider } from "./context/AuthContext";
 import BackofficeLogin from "./login/BackofficeLogin";
 import Dashboard from "./dashboard/Dashboard";
 import Clientes from "./clientes/Clientes";
-import ChecklistServicios from "./checklist/ChecklistServicios";
 import SolicitudesList from "./solicitudes/SolicitudesList";
 import SolicitudDetalleBackoffice from "./solicitudes/SolicitudDetalleBackoffice";
-import InstructivosServicios from "./instructivos/InstructivosServicios";
-import DocumentosBackoffice from "./documentos/DocumentosBackoffice";
 import LeadsCalculadora from "./calculadora/LeadsCalculadora";
 import Leads from "./leads/Leads";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
@@ -37,13 +33,17 @@ import SistematizadorMasteres from "./sistematizador/SistematizadorMasteres";
 import BuscadorMasteres from "./catalogo-masteres/BuscadorMasteres";
 import ConfiguracionPanel from "./configuracion/ConfiguracionPanel";
 
-// Módulo unificado de Configuración: las rutas antiguas siguen funcionando y
-// abren el panel en la pestaña correspondiente.
+// Módulo unificado de Configuración: cada ruta abre el panel en su pestaña y
+// cada pestaña enlaza a su ruta. Documentos, Checklist e Instructivos cuelgan
+// de aquí desde el 14/09/2026 (antes solo se llegaba escribiendo la URL).
 const CONFIG_TAB_BY_PATH = {
   "/backoffice/configuracion": "planes",
   "/backoffice/auditoria": "auditoria",
   "/backoffice/planes": "planes",
   "/backoffice/precios": "precios",
+  "/backoffice/documentos": "documentos",
+  "/backoffice/checklist-servicios": "checklist",
+  "/backoffice/instructivos": "instructivos",
   "/backoffice/correos": "correos",
   "/backoffice/media": "media",
   "/backoffice/legal": "legal",
@@ -152,7 +152,7 @@ export default function BackofficeApp() {
         />
 
         {/* En móvil, los cuatro destinos de uso diario al alcance del pulgar.
-            El cajón sigue teniendo los trece: esto es el atajo, no el menú. */}
+            El cajón tiene los siete: esto es el atajo, no el menú. */}
         <BottomNav
           path={path}
           drawerAbierto={mobileDrawerOpen}
@@ -227,18 +227,7 @@ export default function BackofficeApp() {
               />
             )}
 
-            {(path === "/backoffice/checklist-servicios" || path === "/backoffice/instructivos") && (
-              <TabView
-                key="checklist-instructivos"
-                initialTab={path === "/backoffice/instructivos" ? 1 : 0}
-                tabs={[
-                  { label: "Checklist Servicios", content: <ModuleGate perm="checklist.ver"><ChecklistServicios /></ModuleGate> },
-                  { label: "Instructivos",         content: <ModuleGate perm="instructivos.ver"><InstructivosServicios /></ModuleGate> },
-                ]}
-              />
-            )}
-
-            {path === "/backoffice/documentos" && <DocumentosBackoffice />}
+            {/* Documentos, Checklist e Instructivos: pestañas de Configuración (abajo). */}
 
             {path === "/backoffice/clientes" && <Clientes />}
 
@@ -269,7 +258,7 @@ export default function BackofficeApp() {
             {path === "/backoffice/panel-asesoras" && <ModuleGate perm="panel_asesoras.ver"><PanelAsesoras /></ModuleGate>}
 
             {CONFIG_TAB_BY_PATH[path] && (
-              <ConfiguracionPanel initialTabId={CONFIG_TAB_BY_PATH[path]} />
+              <ConfiguracionPanel tabId={CONFIG_TAB_BY_PATH[path]} />
             )}
             </div>
           </main>

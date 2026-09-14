@@ -3,7 +3,9 @@
 //   /panel                        → inicio: lo pendiente y quién le atiende
 //   /panel/servicios              → la lista de sus servicios
 //   /panel/perfil                 → su perfil
-//   /panel/guia, /panel/becas…    → un recurso (guía, becas, apostilla)
+//   /panel/becas                  → Becas España
+//   /panel/portal, /panel/guia…   → una pestaña de «Mis guías» (PDF, máster,
+//                                   estancia, residencia y trabajo, apostilla)
 //   /panel/servicios/155          → un expediente
 //   /panel/servicios/155/post     → una sección de ese expediente
 //

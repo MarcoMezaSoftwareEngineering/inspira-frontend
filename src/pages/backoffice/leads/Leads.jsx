@@ -13,6 +13,7 @@ import { dialog } from "../../../services/dialogService";
 import { useAuth } from "../context/AuthContext";
 import { Pagina, Cabecera, Cuerpo, Boton, Chip, Vacio, Esqueleto } from "../ui";
 import LeadDetalle from "./LeadDetalle";
+import LeadsPestanas from "./LeadsPestanas";
 import LeadAlta from "./LeadAlta";
 import { ETAPAS, ETAPA, ORIGENES, haceCuanto, fechaHora, nombreDe } from "./leadsComun";
 import "../../../styles/leads-core.css";
@@ -206,6 +207,8 @@ export default function Leads() {
 
   return (
     <Pagina>
+      {/* «Solicitudes web» es una pestaña de Leads desde el 14/09/2026. */}
+      <LeadsPestanas activa="leads" />
       <Cabecera
         eyebrow="Leads"
         titulo={nombre ? `Quién quiere empezar, ${nombre}` : "Quién quiere empezar"}

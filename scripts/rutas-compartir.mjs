@@ -142,6 +142,13 @@ export const RUTAS_COMPARTIR = {
     description:
       "Si aún no migras pero quieres avanzar: homologa tu bachillerato o tu título universitario y prepárate para postular a tiempo a la universidad española.",
   },
+  // Sus textos viven en la propia página (pages/mapa/mapaTextos.js, SEO), no en
+  // SEO_PAGES de App.jsx: si cambias uno, cambia el otro.
+  "/mapa-estudiar-en-espana": {
+    title: "Mapa para estudiar en España: comunidades, ciudades y universidades | Inspira Legal",
+    description:
+      "Mapa interactivo de las comunidades, ciudades y universidades españolas con másteres oficiales: matrícula orientativa, cómo se postula en cada una y el plan de Inspira que las cubre.",
+  },
 };
 
 /** "/servicios/master" → "servicios-master"; "/" → "index". */

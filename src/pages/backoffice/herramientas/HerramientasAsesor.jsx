@@ -1,5 +1,11 @@
 // La mesa del asesor.
 //
+// Desde el 14/09/2026 es la única entrada del menú para las herramientas:
+// Cotizador, Guías, Buscador de másteres, Universidades, Sistematizador,
+// Tracker Universidades y Mantenimiento del catálogo ya no tienen entrada
+// propia. Por eso cada tarjeta respeta el permiso de su pantalla (tracker.ver,
+// catalogo.ver): nadie ve aquí una puerta que luego dice «acceso restringido».
+//
 // Las piezas estaban repartidas —el presupuesto en un módulo, las guías en el
 // portal del asesorado, el catálogo en otro sitio— y quien atiende tenía que
 // saberse dónde vive cada cosa.
@@ -100,7 +106,9 @@ function PresupuestoReciente({ p }) {
 }
 
 export default function HerramientasAsesor() {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
+  const puedeTracker = hasPermission("tracker.ver");
+  const puedeCatalogo = hasPermission("catalogo.ver");
   const [r, setR] = useState(null);
   const [plazos, setPlazos] = useState(null);
   const [presu, setPresu] = useState(null);
@@ -123,23 +131,29 @@ export default function HerramientasAsesor() {
         });
       })
       .catch(() => {});
-    boGET("/backoffice/tracker/proximos?dias=14")
-      .then((res) => setPlazos(res?.ok ? (res.eventos || []).slice(0, 6) : []))
-      .catch(() => setPlazos([]));
     boGET("/backoffice/presupuesto")
       .then((res) => setPresu(res?.ok ? res : { presupuestos: [], mes: {} }))
       .catch(() => setPresu({ presupuestos: [], mes: {} }));
   }, []);
 
+  // Los plazos salen del tracker: solo se piden si puede abrirlo. Va aparte
+  // porque los permisos llegan después del primer pintado.
+  useEffect(() => {
+    if (!puedeTracker) return;
+    boGET("/backoffice/tracker/proximos?dias=14")
+      .then((res) => setPlazos(res?.ok ? (res.eventos || []).slice(0, 6) : []))
+      .catch(() => setPlazos([]));
+  }, [puedeTracker]);
+
   const faltan = r ? Math.max(0, r.ofertan - r.cargados) : 0;
   const nombre = (user?.nombre || "").split(" ")[0];
 
   const stats = [
-    { n: plazos ? plazos.length : 0, l: "plazos en 14 días", tono: "cielo", onClick: () => navigate("/backoffice/tracker-universidades") },
+    puedeTracker && { n: plazos ? plazos.length : 0, l: "plazos en 14 días", tono: "cielo", onClick: () => navigate("/backoffice/tracker-universidades") },
     { n: r ? r.abiertas : 0, l: "con plazo abierto", tono: "ok", onClick: () => navigate("/backoffice/universidades") },
     { n: presu?.mes?.cuantos || 0, l: "presupuestos este mes", onClick: () => navigate("/backoffice/presupuesto") },
     { n: r ? r.cargados : 0, l: "másteres en catálogo", onClick: () => navigate("/backoffice/masteres") },
-  ];
+  ].filter(Boolean);
 
   return (
     <Pagina>
@@ -163,7 +177,7 @@ export default function HerramientasAsesor() {
       <Cuerpo>
         {/* Lo que reclama atención va arriba y con cifra grande: si esto queda
             escondido, nadie se entera de que el catálogo está a medias. */}
-        {r && (r.rotas > 0 || faltan > 0 || r.sinFechas > 0) && (
+        {r && (r.rotas > 0 || faltan > 0 || (puedeTracker && r.sinFechas > 0)) && (
           <div className="ase-rejilla-3 ase-anim">
             {faltan > 0 && (
               <Aviso tono="ambar" href="/backoffice/sistematizador"
@@ -174,7 +188,7 @@ export default function HerramientasAsesor() {
               <Aviso tono="rojo" href="/backoffice/universidades" n={r.rotas}
                 texto="vigilan el enlace equivocado. Nadie se enteraría si abren plazo." />
             )}
-            {r.sinFechas > 0 && (
+            {puedeTracker && r.sinFechas > 0 && (
               <Aviso tono="petrol" href="/backoffice/tracker-universidades" n={r.sinFechas}
                 texto="sin fechas de postulación cargadas para este curso." />
             )}
@@ -182,6 +196,7 @@ export default function HerramientasAsesor() {
         )}
 
         <div className="ase-rejilla" style={{ alignItems: "start" }}>
+          {puedeTracker && (
           <Seccion
             titulo="Próximos plazos"
             subtitulo="Lo que abre, cierra o publica en los próximos catorce días"
@@ -201,6 +216,7 @@ export default function HerramientasAsesor() {
               </div>
             )}
           </Seccion>
+          )}
 
           <Seccion
             titulo="Últimos presupuestos"
@@ -226,9 +242,9 @@ export default function HerramientasAsesor() {
         <Seccion titulo="Atender a un asesorado" subtitulo="Lo que se usa con una persona delante">
           <div className="ase-rejilla ase-anim">
             <TarjetaEnlace
-              icono={<Receipt />} tono="verde" titulo="Presupuesto" href="/backoffice/presupuesto"
+              icono={<Receipt />} tono="verde" titulo="Cotizador" href="/backoffice/presupuesto"
               chip={<Chip tono="verde">listo</Chip>}
-              descripcion="Se rellena, se ve al lado y sale en PDF de dos páginas con las condiciones. Queda guardado y se manda al correo."
+              descripcion="El presupuesto de cada asesorado: se rellena, se ve al lado y sale en PDF de dos páginas con las condiciones. Queda guardado y se manda al correo."
             />
             <TarjetaEnlace
               icono={<BookOpen />} tono="petrol" titulo="Guías" href="/backoffice/guias"
@@ -254,14 +270,18 @@ export default function HerramientasAsesor() {
               icono={<Upload />} tono="ambar" titulo="Sistematizador de másteres" href="/backoffice/sistematizador"
               descripcion="La puerta de carga: pegas la oferta de una universidad, se revisa y entra al catálogo."
             />
-            <TarjetaEnlace
-              icono={<CalendarClock />} tono="rojo" titulo="Tracker de postulaciones" href="/backoffice/tracker-universidades"
-              descripcion="Cuándo abre cada universidad. Se cargan por comunidad y se duplica el curso entero."
-            />
-            <TarjetaEnlace
-              icono={<Settings2 />} tono="petrol" titulo="Mantenimiento del catálogo" href="/backoffice/catalogo-masters"
-              descripcion="Ramas, subramas, comunidades y criterios de admisión, uno a uno."
-            />
+            {puedeTracker && (
+              <TarjetaEnlace
+                icono={<CalendarClock />} tono="rojo" titulo="Tracker Universidades" href="/backoffice/tracker-universidades"
+                descripcion="Cuándo abre cada universidad. Se cargan por comunidad y se duplica el curso entero."
+              />
+            )}
+            {puedeCatalogo && (
+              <TarjetaEnlace
+                icono={<Settings2 />} tono="petrol" titulo="Mantenimiento del catálogo" href="/backoffice/catalogo-masters"
+                descripcion="Ramas, subramas, comunidades y criterios de admisión, uno a uno."
+              />
+            )}
           </div>
         </Seccion>
       </Cuerpo>

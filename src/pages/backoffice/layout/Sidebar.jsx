@@ -1,21 +1,16 @@
 import { useRef, useState } from "react";
 import { navigate } from "../../../services/navigate";
 import { useAuth } from "../context/AuthContext";
-import { NAV_SECTIONS, initials } from "./navSections";
+import { itemsVisibles, itemActivo, initials } from "./navSections";
 
 const MIN_W = 150;
 const MAX_W = 380;
 const DEFAULT_W = 210;
 
 export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user, onLogout }) {
-  const { isAdmin, hasPermission } = useAuth();
-
-  function itemVisible(item) {
-    if (item.adminOnly) return isAdmin;
-    if (item.anyPerm) return isAdmin || item.anyPerm.some((p) => hasPermission(p));
-    if (item.perm) return hasPermission(item.perm);
-    return true;
-  }
+  const auth = useAuth();
+  // Lo que este usuario puede ver, con el destino ya resuelto (navSections.js).
+  const secciones = itemsVisibles(auth);
 
   const [width, setWidth] = useState(() => {
     const s = localStorage.getItem("bo_sidebar_w");
@@ -113,24 +108,20 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
 
         {/* Navegación */}
         <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-4">
-          {NAV_SECTIONS.map((section) => {
-            const visibleItems = section.items.filter(itemVisible);
-            if (visibleItems.length === 0) return null;
-            return (
-            <div key={section.label}>
-              <p className="px-3 mb-1 text-[10.5px] font-bold uppercase tracking-[0.18em] text-[#88C4FC]/70 select-none">
-                {section.label}
-              </p>
+          {secciones.map((section, i) => (
+            <div key={section.label || i}>
+              {section.label && (
+                <p className="px-3 mb-1 text-[10.5px] font-bold uppercase tracking-[0.18em] text-[#88C4FC]/70 select-none">
+                  {section.label}
+                </p>
+              )}
               <div className="space-y-0.5">
-                {visibleItems.map((it) => {
-                  const active =
-                    path === it.href ||
-                    path.startsWith(it.href + "/") ||
-                    (it.alsoActive || []).some((p) => path === p || path.startsWith(p + "/"));
+                {section.items.map((it) => {
+                  const active = itemActivo(it, path);
                   const Icon = it.icon;
                   return (
                     <a
-                      key={it.href}
+                      key={it.id}
                       href={it.href}
                       onClick={(e) => handleNavClick(it.href, e)}
                       data-on={active ? "1" : "0"}
@@ -148,8 +139,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
                 })}
               </div>
             </div>
-            );
-          })}
+          ))}
         </nav>
 
         {/* Footer: usuario + logout */}

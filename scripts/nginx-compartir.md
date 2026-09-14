@@ -43,6 +43,7 @@ map $uri $html_compartir {
     /ruta/en-espana         /compartir/ruta-en-espana.html;
     /ruta/denegado          /compartir/ruta-denegado.html;
     /ruta/tramites          /compartir/ruta-tramites.html;
+    /mapa-estudiar-en-espana /compartir/mapa-estudiar-en-espana.html;
 }
 ```
 

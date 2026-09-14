@@ -350,6 +350,9 @@ const PUBLIC_PATHS = [
   "/calculadora-master",
   "/master-2027-2028",
   "/visa-o-estancia",
+  // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
+  // cabecera. Solo se llega por URL: la reserva de la web va por Calendly.
+  "/reservar",
   "/panel",
   "/pago-exitoso",
   "/pago-fallido",
@@ -494,14 +497,8 @@ export default function App() {
       {/* Invitación permanente a la primera asesoría (no en el panel privado) */}
       {!isPanel && !isLandingAds && <AsesoriaCTA />}
 
-      {/* Navegación inferior tipo app (móvil y tablet) */}
-      {!isPanel && !isLandingAds && (
-        <BarraInferior
-          onReservar={() =>
-            window.dispatchEvent(new CustomEvent("inspira:abrir-asesoria"))
-          }
-        />
-      )}
+      {/* Navegación inferior tipo app (móvil y tablet). «Reservar» abre Calendly. */}
+      {!isPanel && !isLandingAds && <BarraInferior />}
 
       {/* Banner de cookies: siempre montado, decide él si se muestra */}
       <CookieConsent />

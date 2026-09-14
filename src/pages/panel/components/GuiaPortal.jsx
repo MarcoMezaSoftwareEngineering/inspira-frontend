@@ -1,5 +1,6 @@
-// «Mis guías»: los PDF de cada servicio contratado, la de su trámite y la de
-// uso del portal (las mismas dos que recibe por correo al darle de alta).
+// La pestaña «Guías en PDF» de «Mis guías» (/panel/portal): de cada servicio
+// contratado, la guía de su trámite y la de uso del portal (las mismas dos que
+// recibe por correo al darle de alta).
 //
 // Cada asesorado ve solo las de lo que tiene contratado (servicios.js,
 // `guiasPortalDe`). Los PDF viven en public/guias/ y se abren en otra pestaña:
@@ -11,7 +12,7 @@ export default function GuiaPortal({ guias = [] }) {
     <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4">
       <div className="pnl-head">
         <div>
-          <h2>Mis guías</h2>
+          <h2>Guías en PDF</h2>
           <p>La guía de tu trámite, con cada documento y cada plazo, y la del portal, paso a paso con capturas.</p>
         </div>
       </div>

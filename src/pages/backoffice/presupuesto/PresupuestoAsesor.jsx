@@ -374,7 +374,7 @@ export default function PresupuestoAsesor() {
   return (
     <Pagina>
       <Cabecera
-        eyebrow="Presupuesto"
+        eyebrow="Cotizador"
         titulo={d.cliente?.trim() ? d.cliente : "Presupuesto nuevo"}
         subtitulo={
           <>

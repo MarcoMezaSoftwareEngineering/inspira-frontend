@@ -1,7 +1,10 @@
 // src/components/common/AsesoriaCTA.jsx
-// Invitación permanente a la asesoría: botón flotante, pestaña lateral y
-// panel con las modalidades disponibles, que abre Calendly.
-// El panel vuelve a aparecer en cada visita (solo se silencia dentro de la
+// Invitación permanente a la sesión diagnóstico: botón flotante y pestaña
+// lateral, que abren Calendly directamente —el único destino de reserva de la
+// web (config/contacto.js)—, y una ventana con las modalidades que sale sola
+// una vez por sesión tras leer un poco. Hasta el 14/09/2026 el botón, la
+// pestaña y la barra inferior abrían esa ventana como paso intermedio.
+// La ventana vuelve a aparecer en cada visita (solo se silencia dentro de la
 // misma sesión de navegación, para no molestar mientras se lee).
 import { useEffect, useState } from "react";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
@@ -39,15 +42,8 @@ export default function AsesoriaCTA() {
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && setAbierto(false);
-    // Cualquier parte de la web puede abrir el panel con este evento
-    // (lo usa la barra de navegación inferior).
-    const onAbrir = () => setAbierto(true);
     window.addEventListener("keydown", onKey);
-    window.addEventListener("inspira:abrir-asesoria", onAbrir);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("inspira:abrir-asesoria", onAbrir);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   const cerrar = () => {
@@ -57,14 +53,15 @@ export default function AsesoriaCTA() {
 
   return (
     <>
-      {/* Pestaña lateral fija (escritorio) */}
-      <ReservaLateral onAbrir={() => setAbierto(true)} visible={visible} />
+      {/* Pestaña lateral fija (escritorio): directa a Calendly */}
+      <ReservaLateral visible={visible} />
 
-      {/* Botón flotante */}
-      <button
-        type="button"
-        onClick={() => setAbierto(true)}
-        aria-label="Agendar asesoría"
+      {/* Botón flotante: directo a Calendly, como la cabecera */}
+      <a
+        href={CALENDLY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Reserva tu sesión diagnóstico"
         className={`fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full px-5 py-3.5 text-sm font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 ${
           visible
             ? "translate-y-0 opacity-100"
@@ -76,8 +73,8 @@ export default function AsesoriaCTA() {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
         </span>
-        {promo ? "Asesoría gratis" : "Agenda tu asesoría"}
-      </button>
+        {promo ? "Asesoría gratis" : "Reserva tu sesión"}
+      </a>
 
       {/* Panel */}
       {abierto && (

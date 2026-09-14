@@ -24,6 +24,14 @@ const POR_TIPO = {
   20: SERVICIO.MODIFICATORIA,
 };
 
+// Los tipos de máster son los paquetes (Full Económico, Andalucía, Premium…),
+// cuyo nombre casi nunca dice «máster». Es la misma lista con la que el
+// backend arma el checklist del máster (prisma/sql/checklist_master_2026_09_08.sql);
+// la 19 es homologación. Se miran después del texto de visado, estancia y
+// modificatoria, igual que en el backend (esVisado, propioDe).
+const TIPOS_MASTER = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17];
+const TIPO_HOMOLOGACION = 19;
+
 // `resumen.servicio_propio` lo pone el servidor para los que tienen expediente
 // propio (estancia, modificatoria).
 const POR_CLAVE_PROPIA = {
@@ -52,10 +60,18 @@ export function servicioDe(s) {
   // «Visa de estudios» también es visado: sin el \bvisa\b caía al máster por
   // defecto y al asesorado de visado se le exigía el perfil académico entero.
   if (txt.includes("visado") || /\bvisa\b/.test(txt) || String(s?.codigo_servicio || "") === "017") return SERVICIO.VISADO;
-  if (/formaci[oó]n profesional|\bfp\b|grado/.test(txt)) return SERVICIO.FP;
+  const idTipo = Number(s?.id_tipo_solicitud);
+  if (TIPOS_MASTER.includes(idTipo)) return SERVICIO.MASTER;
+  if (idTipo === TIPO_HOMOLOGACION || /homologa/.test(txt)) return SERVICIO.OTRO;
+  // El máster antes que la FP: «posgrado» contiene «grado» y caía en FP.
   if (/m[aá]ster|maestr[ií]a|postgrado|posgrado/.test(txt)) return SERVICIO.MASTER;
-  // El paquete de máster es el servicio por defecto del recorrido genérico.
-  return SERVICIO.MASTER;
+  if (/formaci[oó]n profesional|\bfp\b|grado/.test(txt)) return SERVICIO.FP;
+  // Lo que no se reconoce NO se hace pasar por máster (14/09/2026). Antes caía
+  // ahí por defecto: a un cliente de nacionalidad o de arraigo se le abrían la
+  // guía del máster y las becas y se le exigía el perfil completo. Sigue
+  // viendo su expediente con el recorrido genérico (MisServicios) y la guía de
+  // apostilla (ACCESOS).
+  return SERVICIO.OTRO;
 }
 
 /**
@@ -70,7 +86,7 @@ const ACCESOS = {
   [SERVICIO.MASTER]: ["portal", "guia", "becas", "apostilla"],
   [SERVICIO.VISADO]: ["portal", "apostilla"],
   [SERVICIO.ESTANCIA]: ["portal", "estancia", "apostilla"],
-  [SERVICIO.MODIFICATORIA]: ["modificatoria"],
+  [SERVICIO.MODIFICATORIA]: ["modificatoria", "apostilla"],
   [SERVICIO.FP]: ["portal", "becas", "apostilla"],
   [SERVICIO.OTRO]: ["apostilla"],
 };
@@ -96,6 +112,29 @@ const GUIAS_PORTAL = [
 export function guiasPortalDe(solicitudes = []) {
   const suyos = new Set(solicitudes.filter((s) => !s?.invitado).map(servicioDe));
   return GUIAS_PORTAL.filter((g) => suyos.has(g.servicio));
+}
+
+/**
+ * Las pestañas de «Mis guías», en orden: primero los PDF (trámite y portal),
+ * luego la guía interactiva de cada servicio y al final la apostilla, que es
+ * la común. Cada pestaña es su ruta de siempre (/panel/portal, /panel/guia…):
+ * la entrada del menú es una sola (14/09/2026) y dentro se cambia de guía.
+ */
+export const PESTANAS_GUIAS = [
+  { clave: "portal", label: "Guías en PDF", icono: "mapa" },
+  { clave: "guia", label: "Máster", icono: "libro" },
+  { clave: "estancia", label: "Estancia", icono: "bandera" },
+  { clave: "modificatoria", label: "Residencia y Trabajo", icono: "laptop" },
+  { clave: "apostilla", label: "Apostilla", icono: "documento" },
+];
+
+export const CLAVES_GUIAS = PESTANAS_GUIAS.map((p) => p.clave);
+
+/** Las pestañas de «Mis guías» que abren sus servicios (los PDF, solo si hay alguno). */
+export function pestanasGuiasDe(accesos, guiasPortal = []) {
+  return PESTANAS_GUIAS.filter(
+    (p) => accesos?.has(p.clave) && (p.clave !== "portal" || guiasPortal.length > 0)
+  );
 }
 
 /**

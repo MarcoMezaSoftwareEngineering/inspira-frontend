@@ -80,5 +80,8 @@ export function fechasPortal(posts) {
     fecha_resultados: t.fecha_resultados || con("fecha_resultados"),
     fase_nombre: t.fase_nombre || con("fase_nombre"),
     fase_curso: t.fase_curso || con("fase_curso"),
+    // Todas las fases del curso al que apunta el asesorado (no solo la más cercana).
+    fases_curso: (Array.isArray(t.fases_curso) && t.fases_curso.length ? t.fases_curso
+      : (posts || []).map((p) => p?.fases_curso).find((a) => Array.isArray(a) && a.length)) || [],
   };
 }

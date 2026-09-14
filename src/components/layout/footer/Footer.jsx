@@ -1,7 +1,7 @@
 // src/components/layout/footer/Footer.jsx
 import { RUTAS_LEGALES, TITULAR, pendiente } from "../../../config/legal";
 import { navigate } from "../../../services/navigate";
-import { NOMBRE_PORTAL, NOMBRE_CORTO, MENU_ETIQUETA } from "../../../config/portalMarca";
+import { NOMBRE_PORTAL, NOMBRE_CORTO } from "../../../config/portalMarca";
 import { MarcoTelefono } from "../../common/MarcoDispositivo";
 import { CAPTURAS_PORTAL } from "../../common/capturasPortal";
 
@@ -11,14 +11,15 @@ const ir = (e, href) => {
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
+// Sin /plataforma: ya la enlaza la banda del portal de abajo («Conoce el…»),
+// y salía dos veces en el mismo pie. «Nosotros» solo vive aquí (14/09/2026).
 const enlacesExplora = [
   { label: "Todos los servicios", href: "/servicios" },
   { label: "Paquete Máster 2027/2028", href: "/servicios/master" },
-  { label: "Visa y estancia por estudios", href: "/servicios/estancia" },
+  { label: "Estancia por estudios", href: "/servicios/estancia" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
-  { label: MENU_ETIQUETA, href: "/plataforma" },
   { label: "Eventos gratuitos", href: "/eventos" },
-  { label: "Tiendita", href: "/tienda" },
+  { label: "Tienda", href: "/tienda" },
   { label: "Blog", href: "/blog" },
   { label: "Nosotros", href: "/nosotros" },
 ];

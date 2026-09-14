@@ -527,6 +527,26 @@
 .ex-guia-portal-peso { font-size: 11px; font-weight: 600; opacity: .8; }
 @media (max-width: 520px) { .ex-guia-portal .pnl-btn-cta { width: 100%; justify-content: center; } }
 
+/* ── Mis guías: una pestaña por guía (MisGuias.jsx, 14/09/2026) ──────── */
+.ex-guias-pestanas {
+  display: flex; gap: 6px; overflow-x: auto; flex: 0 0 auto;
+  padding: 14px 16px 12px; background: #fff; border-bottom: 1px solid var(--line);
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.ex-guias-pestanas::-webkit-scrollbar { display: none; }
+.ex-guias-pestana {
+  display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto;
+  height: 36px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--primary);
+  font: inherit; font-size: 13px; font-weight: 650; white-space: nowrap;
+  cursor: pointer; transition: .2s var(--ease);
+}
+.ex-guias-pestana svg { color: var(--sky-2); }
+.ex-guias-pestana:hover { border-color: var(--sky-2); background: var(--sky-soft); }
+.ex-guias-pestana[data-on="1"] { background: var(--primary); border-color: var(--primary); color: #fff; cursor: default; }
+.ex-guias-pestana[data-on="1"] svg { color: var(--sky); }
+@media (min-width: 640px) { .ex-guias-pestanas { padding: 16px 24px 12px; } }
+
 /* ── Expediente Digital: lema de la bienvenida ─────────────────────── */
 .ex-lema { font-family: Merriweather, Georgia, serif; font-style: italic; font-weight: 700; color: var(--accent-2); margin-top: -4px; }
 

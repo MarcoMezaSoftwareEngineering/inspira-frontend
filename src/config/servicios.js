@@ -977,14 +977,14 @@ export const CATEGORIAS = [
               titulo: "Grado universitario en España",
               gancho: "Cuatro años, título europeo y permiso para trabajar 30 h semanales.",
               intro:
-                "El Grado es la carrera universitaria española, equivalente a la antigua licenciatura. Para acceder necesitas homologar tu bachillerato y rendir las pruebas de acceso PCE/EBAU de la UNED.",
+                "El Grado es la carrera universitaria española, equivalente a la antigua licenciatura. Para acceder necesitas homologar tu bachillerato y elegir una vía: sin examen, con el bachillerato homologado, o con las pruebas PCE de la UNED.",
               bloques: [
                 {
                   titulo: "Cuatro servicios en uno",
                   items: [
                     "Búsqueda personalizada de universidades públicas y privadas, evaluando precios, notas de corte, calidad y ubicación.",
-                    "Homologación de tus estudios secundarios al Bachillerato español.",
-                    "Inscripción a las pruebas de acceso (PCE / EBAU — UNED) y preparación de requisitos.",
+                    "Homologación de tus estudios secundarios al Bachillerato español (la tasa oficial, 50 €, se paga aparte).",
+                    "Trámites y vía de acceso: sin examen o con las pruebas PCE de la UNED, que gestionamos (la preparación no está incluida).",
                     "Preinscripción, gestión de admisión y formalización de matrícula.",
                   ],
                 },
@@ -992,8 +992,8 @@ export const CATEGORIAS = [
                   titulo: "Calendario recomendado",
                   items: [
                     "Homologación del bachillerato: cuanto antes, es lo que más tarda.",
-                    "Inscripción a pruebas de acceso: entre febrero y mayo.",
-                    "Pruebas de admisión: junio.",
+                    "Inscripción a las pruebas PCE, si vas con examen: entre febrero y mayo.",
+                    "Pruebas PCE: junio.",
                     "Preinscripción en la universidad: julio.",
                     "Trámite del visado de estudios: tras la admisión.",
                     "Inicio de clases: septiembre.",

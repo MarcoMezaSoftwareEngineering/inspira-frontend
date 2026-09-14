@@ -79,6 +79,8 @@ export const ORIGENES_WHATSAPP = {
   mapa: "el mapa para estudiar en España",
   asistente: "el diagnóstico gratuito de la web",
   "visa-o-estancia": "el test «¿Visa o estancia?»",
+  "grado-espana": "la guía «Grado en España» para familias",
+  "bicentenario-2026": "la página de la Beca Generación del Bicentenario 2026",
   "asesoria-cta": "el botón «Agenda tu asesoría»",
   "panel-bienvenida": "la pantalla de acceso al panel",
   "panel-inicio": "mi panel de asesorado",
@@ -105,8 +107,10 @@ export function origenDeRuta(path = "") {
   if (p.startsWith("/plataforma")) return "plataforma";
   if (p.startsWith("/calculadora")) return "calculadora";
   if (p.startsWith("/mapa-estudiar-en-espana")) return "mapa";
+  if (p.startsWith("/beca-generacion-bicentenario")) return "bicentenario-2026";
   if (p.startsWith("/asistente")) return "asistente";
   if (p.startsWith("/visa-o-estancia")) return "visa-o-estancia";
+  if (p.startsWith("/grado-en-espana")) return "grado-espana";
   return "web";
 }
 

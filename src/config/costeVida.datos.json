@@ -1,0 +1,795 @@
+{
+ "_nota": "Copia de entregables/investigacion/coste-vida-2026.json (elaborado el 14/09/2026). Se regenera con extraer_vida.py; no editar a mano. verificado:false se muestra como «aprox.».",
+ "meta": {
+  "titulo": "Coste de vida para estudiantes en España — 2026",
+  "fecha": "2026-09-14",
+  "metodo": "Gasto bajo: habitación en piso compartido (la más barata de Fotocasa e idealista), comida 180 €, transporte joven y móvil y ocio 50 €. Gasto medio: la habitación más cara, comida 250 €, transporte, suministros 40 € y móvil y ocio 120 €. Estimación de Inspira, redondeada a la decena.",
+  "noIncluye": "Matrícula, seguro médico, fianza y comisión de agencia, material, viajes.",
+  "habitacion": "Precio medio de oferta de una habitación en piso compartido: Fotocasa (julio 2026) y, si lo publica, idealista (2.º trimestre 2026)."
+ },
+ "iprem": {
+  "mensual": 600,
+  "anual": 7200,
+  "texto": "Extranjería exige como mínimo el 100 % del IPREM al mes (600 €) para acreditar medios económicos en la estancia por estudios.",
+  "fuente": {
+   "titulo": "IPREM 2026: 600 €/mes y 7.200 €/año en 12 pagas (LPGE 2023 prorrogada)",
+   "url": "https://www.ocu.org/dinero/trabajo-paro/noticias/smi-iprem"
+  }
+ },
+ "ciudades": [
+  {
+   "id": "sevilla",
+   "nombre": "Sevilla",
+   "comunidadId": "andalucia",
+   "comunidad": "Andalucía",
+   "mensual": {
+    "min": 670,
+    "max": 850
+   },
+   "habitacion": 431,
+   "transporte": 8.8,
+   "verificado": true,
+   "nota": "El Bonobús Joven del Ayuntamiento es para vecinos de Sevilla: conviene empadronarse.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_sevilla"
+   ]
+  },
+  {
+   "id": "granada",
+   "nombre": "Granada",
+   "comunidadId": "andalucia",
+   "comunidad": "Andalucía",
+   "mensual": {
+    "min": 590,
+    "max": 770
+   },
+   "habitacion": 343,
+   "transporte": 13.2,
+   "verificado": true,
+   "nota": "Transporte estimado con 40 viajes al mes.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_granada",
+    "guia_ugr"
+   ]
+  },
+  {
+   "id": "malaga",
+   "nombre": "Málaga",
+   "comunidadId": "andalucia",
+   "comunidad": "Andalucía",
+   "mensual": {
+    "min": 690,
+    "max": 940
+   },
+   "habitacion": 513,
+   "transporte": 13.5,
+   "verificado": true,
+   "nota": "Precio tomado de prensa (El Español, 23/12/2025) que cita las tarifas municipales.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "idealista_m2",
+    "t_malaga"
+   ]
+  },
+  {
+   "id": "zaragoza",
+   "nombre": "Zaragoza",
+   "comunidadId": "aragon",
+   "comunidad": "Aragón",
+   "mensual": {
+    "min": 660,
+    "max": 840
+   },
+   "habitacion": 403,
+   "transporte": 23.25,
+   "verificado": false,
+   "nota": "El precio joven sale de prensa (Aragón Digital) y no se ha podido confirmar en Avanza ni en el Ayuntamiento para 2026.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_zaragoza"
+   ]
+  },
+  {
+   "id": "san-cristobal-de-la-laguna",
+   "nombre": "San Cristóbal de La Laguna",
+   "comunidadId": "canarias",
+   "comunidad": "Canarias",
+   "mensual": {
+    "min": 670,
+    "max": 850
+   },
+   "habitacion": 436,
+   "transporte": 0,
+   "verificado": true,
+   "nota": "Requiere acreditar residencia en Canarias.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_tenerife"
+   ]
+  },
+  {
+   "id": "las-palmas-de-gran-canaria",
+   "nombre": "Las Palmas de Gran Canaria",
+   "comunidadId": "canarias",
+   "comunidad": "Canarias",
+   "mensual": {
+    "min": 610,
+    "max": 820
+   },
+   "habitacion": 376,
+   "transporte": 0,
+   "verificado": false,
+   "nota": "La gratuidad de 2026 está confirmada para Canarias, pero no las condiciones exactas del bono joven de Guaguas Municipales.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "t_gran_canaria"
+   ]
+  },
+  {
+   "id": "santander",
+   "nombre": "Santander",
+   "comunidadId": "cantabria",
+   "comunidad": "Cantabria",
+   "mensual": {
+    "min": 650,
+    "max": 830
+   },
+   "habitacion": 400,
+   "transporte": 17,
+   "verificado": false,
+   "nota": "El Ayuntamiento publica 51 € sin fecha; la prensa de 2025 la situaba en 25,50 € con el descuento del 50 %. Requiere empadronamiento en Santander.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_santander"
+   ]
+  },
+  {
+   "id": "salamanca",
+   "nombre": "Salamanca",
+   "comunidadId": "castilla_y_leon",
+   "comunidad": "Castilla y León",
+   "mensual": {
+    "min": 560,
+    "max": 740
+   },
+   "habitacion": 321,
+   "transporte": 7.34,
+   "verificado": true,
+   "nota": "Desde 2025 exige estar empadronado en Salamanca.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_salamanca",
+    "guia_salamanca"
+   ]
+  },
+  {
+   "id": "valladolid",
+   "nombre": "Valladolid",
+   "comunidadId": "castilla_y_leon",
+   "comunidad": "Castilla y León",
+   "mensual": {
+    "min": 600,
+    "max": 780
+   },
+   "habitacion": 357,
+   "transporte": 11,
+   "verificado": true,
+   "nota": "Exige estar empadronado en Valladolid.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_valladolid"
+   ]
+  },
+  {
+   "id": "leon",
+   "nombre": "León",
+   "comunidadId": "castilla_y_leon",
+   "comunidad": "Castilla y León",
+   "mensual": {
+    "min": 550,
+    "max": 730
+   },
+   "habitacion": 308,
+   "transporte": 13.2,
+   "verificado": true,
+   "nota": "Transporte estimado con 40 viajes al mes.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_leon"
+   ]
+  },
+  {
+   "id": "ciudad-real",
+   "nombre": "Ciudad Real",
+   "comunidadId": "castilla_la_mancha",
+   "comunidad": "Castilla-La Mancha",
+   "mensual": {
+    "min": 510,
+    "max": 720
+   },
+   "habitacion": 309,
+   "transporte": 5.5,
+   "verificado": false,
+   "nota": "Tarifa aprobada por el Ayuntamiento en mayo de 2025; no se ha confirmado otra distinta para 2026.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "t_ciudad_real"
+   ]
+  },
+  {
+   "id": "barcelona",
+   "nombre": "Barcelona",
+   "comunidadId": "cataluna",
+   "comunidad": "Cataluña",
+   "mensual": {
+    "min": 850,
+    "max": 1060
+   },
+   "habitacion": 632,
+   "transporte": 15.17,
+   "verificado": true,
+   "nota": null,
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "idealista_m2",
+    "t_barcelona"
+   ]
+  },
+  {
+   "id": "girona",
+   "nombre": "Girona",
+   "comunidadId": "cataluna",
+   "comunidad": "Cataluña",
+   "mensual": {
+    "min": 650,
+    "max": 830
+   },
+   "habitacion": 407,
+   "transporte": 15.67,
+   "verificado": false,
+   "nota": "Fotocasa no publica la habitación en Girona: se usa idealista. El precio de la T-jove sale de la nota del Govern; la tabla de tarifas de la ATM no se pudo leer con claridad.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "t_girona_tarragona"
+   ]
+  },
+  {
+   "id": "tarragona",
+   "nombre": "Tarragona",
+   "comunidadId": "cataluna",
+   "comunidad": "Cataluña",
+   "mensual": {
+    "min": 620,
+    "max": 800
+   },
+   "habitacion": 371,
+   "transporte": 15.53,
+   "verificado": false,
+   "nota": "Precio de la nota del Govern; la tabla de tarifas de la ATM muestra otras cifras que no se han podido contrastar.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_girona_tarragona"
+   ]
+  },
+  {
+   "id": "madrid",
+   "nombre": "Madrid",
+   "comunidadId": "madrid",
+   "comunidad": "Madrid",
+   "mensual": {
+    "min": 790,
+    "max": 1050
+   },
+   "habitacion": 629,
+   "transporte": 10,
+   "verificado": true,
+   "nota": null,
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "idealista_m2",
+    "t_madrid",
+    "guia_ucm"
+   ]
+  },
+  {
+   "id": "alcala-de-henares",
+   "nombre": "Alcalá de Henares",
+   "comunidadId": "madrid",
+   "comunidad": "Madrid",
+   "mensual": {
+    "min": 640,
+    "max": 820
+   },
+   "habitacion": 403,
+   "transporte": 10,
+   "verificado": true,
+   "nota": null,
+   "fuentes": [
+    "fotocasa_hab",
+    "t_madrid"
+   ]
+  },
+  {
+   "id": "getafe",
+   "nombre": "Getafe",
+   "comunidadId": "madrid",
+   "comunidad": "Madrid",
+   "mensual": {
+    "min": 760,
+    "max": 940
+   },
+   "habitacion": 523,
+   "transporte": 10,
+   "verificado": true,
+   "nota": null,
+   "fuentes": [
+    "fotocasa_hab",
+    "t_madrid"
+   ]
+  },
+  {
+   "id": "valencia",
+   "nombre": "Valencia",
+   "comunidadId": "comunitat_valenciana",
+   "comunidad": "C. Valenciana",
+   "mensual": {
+    "min": 710,
+    "max": 890
+   },
+   "habitacion": 467,
+   "transporte": 12.5,
+   "verificado": false,
+   "nota": "No está confirmado el precio de los títulos jóvenes desde el 1 de julio de 2026.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_m2",
+    "t_valencia",
+    "guia_valencia"
+   ]
+  },
+  {
+   "id": "alicante",
+   "nombre": "Alicante",
+   "comunidadId": "comunitat_valenciana",
+   "comunidad": "C. Valenciana",
+   "mensual": {
+    "min": 670,
+    "max": 850
+   },
+   "habitacion": 427,
+   "transporte": 10.6,
+   "verificado": true,
+   "nota": "Son 30 viajes, no viajes ilimitados. Precio tomado de prensa local que cita al Ayuntamiento.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_alicante"
+   ]
+  },
+  {
+   "id": "castellon-de-la-plana",
+   "nombre": "Castellón de la Plana",
+   "comunidadId": "comunitat_valenciana",
+   "comunidad": "C. Valenciana",
+   "mensual": {
+    "min": 550,
+    "max": 730
+   },
+   "habitacion": 312,
+   "transporte": 12.75,
+   "verificado": false,
+   "nota": "Precio de la ficha de la Generalitat citada en buscador; no se ha podido leer la ficha completa.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_castellon"
+   ]
+  },
+  {
+   "id": "caceres",
+   "nombre": "Cáceres",
+   "comunidadId": "extremadura",
+   "comunidad": "Extremadura",
+   "mensual": {
+    "min": 500,
+    "max": 710
+   },
+   "habitacion": 283,
+   "transporte": 14.5,
+   "verificado": true,
+   "nota": "No se ha localizado una tarifa joven específica para mayores de 16 años.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "idealista_m2",
+    "t_caceres"
+   ]
+  },
+  {
+   "id": "santiago-de-compostela",
+   "nombre": "Santiago de Compostela",
+   "comunidadId": "galicia",
+   "comunidad": "Galicia",
+   "mensual": {
+    "min": 600,
+    "max": 780
+   },
+   "habitacion": 353,
+   "transporte": 15.6,
+   "verificado": true,
+   "nota": null,
+   "fuentes": [
+    "fotocasa_hab",
+    "t_santiago",
+    "guia_usc"
+   ]
+  },
+  {
+   "id": "a-coruna",
+   "nombre": "A Coruña",
+   "comunidadId": "galicia",
+   "comunidad": "Galicia",
+   "mensual": {
+    "min": 590,
+    "max": 770
+   },
+   "habitacion": 355,
+   "transporte": 6,
+   "verificado": true,
+   "nota": "Transporte estimado con 40 viajes al mes.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_coruna"
+   ]
+  },
+  {
+   "id": "vigo",
+   "nombre": "Vigo",
+   "comunidadId": "galicia",
+   "comunidad": "Galicia",
+   "mensual": {
+    "min": 620,
+    "max": 800
+   },
+   "habitacion": 374,
+   "transporte": 17.2,
+   "verificado": false,
+   "nota": "Precio por viaje tomado de buscador; no confirmado en la web de Vitrasa para 2026.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_vigo"
+   ]
+  },
+  {
+   "id": "palma",
+   "nombre": "Palma",
+   "comunidadId": "baleares",
+   "comunidad": "Illes Balears",
+   "mensual": {
+    "min": 780,
+    "max": 1060
+   },
+   "habitacion": 653,
+   "transporte": 0,
+   "verificado": true,
+   "nota": "Para obtener la tarjeta hay que acreditar residencia en Baleares (certificado de empadronamiento de menos de seis meses).",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "idealista_m2",
+    "t_palma"
+   ]
+  },
+  {
+   "id": "logrono",
+   "nombre": "Logroño",
+   "comunidadId": "la_rioja",
+   "comunidad": "La Rioja",
+   "mensual": {
+    "min": 590,
+    "max": 770
+   },
+   "habitacion": 339,
+   "transporte": null,
+   "verificado": false,
+   "nota": "Sin tarifa confirmada para 2026: el gasto usa un supuesto de 20 € al mes de transporte.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_logrono"
+   ]
+  },
+  {
+   "id": "pamplona",
+   "nombre": "Pamplona",
+   "comunidadId": "navarra",
+   "comunidad": "Navarra",
+   "mensual": {
+    "min": 700,
+    "max": 930
+   },
+   "habitacion": 494,
+   "transporte": 29.06,
+   "verificado": false,
+   "nota": "No se ha confirmado si los 29,06 € ya incluyen el descuento del 50 %.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "t_pamplona"
+   ]
+  },
+  {
+   "id": "bilbao",
+   "nombre": "Bilbao",
+   "comunidadId": "pais_vasco",
+   "comunidad": "País Vasco",
+   "mensual": {
+    "min": 700,
+    "max": 1050
+   },
+   "habitacion": 617,
+   "transporte": 21.4,
+   "verificado": true,
+   "nota": "Exige estar empadronado en un municipio de Bizkaia.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "idealista_m2",
+    "t_bilbao"
+   ]
+  },
+  {
+   "id": "donostia-san-sebastian",
+   "nombre": "Donostia / San Sebastián",
+   "comunidadId": "pais_vasco",
+   "comunidad": "País Vasco",
+   "mensual": {
+    "min": 750,
+    "max": 1020
+   },
+   "habitacion": 584,
+   "transporte": 21.4,
+   "verificado": true,
+   "nota": "Transporte estimado con 40 viajes al mes.",
+   "fuentes": [
+    "fotocasa_hab",
+    "idealista_hab",
+    "idealista_m2",
+    "t_donostia"
+   ]
+  },
+  {
+   "id": "oviedo",
+   "nombre": "Oviedo",
+   "comunidadId": "asturias",
+   "comunidad": "Asturias",
+   "mensual": {
+    "min": 600,
+    "max": 780
+   },
+   "habitacion": 337,
+   "transporte": 30,
+   "verificado": false,
+   "nota": "Se usa el tope general de 30 €. El descuento joven del 50 % y su tope propio no se han confirmado en la web del Consorcio.",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_oviedo"
+   ]
+  },
+  {
+   "id": "murcia",
+   "nombre": "Murcia",
+   "comunidadId": "murcia",
+   "comunidad": "Murcia",
+   "mensual": {
+    "min": 590,
+    "max": 770
+   },
+   "habitacion": 344,
+   "transporte": 12,
+   "verificado": true,
+   "nota": "Es del tranvía; para el autobús urbano hay otros bonos (Bono Estudiante hasta 25 años).",
+   "fuentes": [
+    "fotocasa_hab",
+    "t_murcia"
+   ]
+  }
+ ],
+ "fuentes": [
+  {
+   "id": "fotocasa_hab",
+   "titulo": "Fotocasa, «Viviendas compartidas en España en 2026» (nota de prensa del 03/09/2026, precios de julio 2026)",
+   "url": "https://prensa.fotocasa.es/el-precio-de-una-habitacion-en-espana-cae-un-11-en-un-ano/"
+  },
+  {
+   "id": "idealista_hab",
+   "titulo": "idealista, informe de habitaciones del 2.º trimestre de 2026 (24/08/2026)",
+   "url": "https://www.idealista.com/news/inmobiliario/vivienda/2026/08/24/910850-la-oferta-de-habitaciones-sigue-creciendo-entre-abril-y-junio-12-su-precio-apenas"
+  },
+  {
+   "id": "idealista_m2",
+   "titulo": "idealista, informe de precios de alquiler de agosto de 2026 (01/09/2026)",
+   "url": "https://www.idealista.com/news/inmobiliario/vivienda/2026/09/01/911881-el-precio-del-alquiler-sube-un-5-8-en-agosto-y-sigue-por-encima-de-los-15-euros-m2"
+  },
+  {
+   "id": "bonificaciones_estado",
+   "titulo": "Ministerio de Transportes: prórroga de las bonificaciones en 2026 (RDL 17/2025; 50 % para jóvenes en transporte autonómico y local) y Abono Único",
+   "url": "https://www.transportes.gob.es/transporte-terrestre/bonificaciones-transporte-publico"
+  },
+  {
+   "id": "ine_epf",
+   "titulo": "INE, Encuesta de Presupuestos Familiares 2025 (25/06/2026): alimentos y bebidas no alcohólicas, 5.626 € por hogar al año",
+   "url": "https://www.ine.es/dyngs/Prensa/EPF2025.htm"
+  },
+  {
+   "id": "guia_usc",
+   "titulo": "Universidade de Santiago de Compostela, precios y coste de vida (750–900 €/mes; actualizado 22/07/2022)",
+   "url": "https://www.usc.gal/en/prezos-custe-vida"
+  },
+  {
+   "id": "guia_ucm",
+   "titulo": "Universidad Complutense de Madrid, Cost of living (900–1.300 €/mes)",
+   "url": "https://www.ucm.es/english/cost-of-living"
+  },
+  {
+   "id": "guia_ugr",
+   "titulo": "Universidad de Granada, Living in Granada (habitación compartida 200–300 €/mes)",
+   "url": "https://www.ugr.es/en/study/living-in-granada"
+  },
+  {
+   "id": "guia_salamanca",
+   "titulo": "Residencia La Clerecía, coste de vida en Salamanca 2026 (comida 150–200 €/mes; guía comercial)",
+   "url": "https://www.residenciauniversitarialaclerecia.es/blog/coste-vida-estudiantes-salamanca/"
+  },
+  {
+   "id": "guia_valencia",
+   "titulo": "Uniplaces, coste de vida en Valencia 2026 (comida 150–250 €/mes; guía comercial)",
+   "url": "https://www.uniplaces.com/city-explorer/cost-of-living-in-valencia-2026/"
+  },
+  {
+   "id": "t_sevilla",
+   "titulo": "TUSSAM, Tarjeta Joven (17,65 €; 8,80 € bonificada, mes natural) y Ayuntamiento de Sevilla, Bonobús Joven",
+   "url": "https://www.tussam.es/en/node/112"
+  },
+  {
+   "id": "t_granada",
+   "titulo": "Ayuntamiento de Granada, tarifas del bus urbano (Bono Universitario 0,33 €/viaje con descuento; Bono Mensual 24,60 €)",
+   "url": "http://www.movilidadgranada.com/bus_tarifas.php"
+  },
+  {
+   "id": "t_malaga",
+   "titulo": "El Español (23/12/2025): tarjeta joven mensual de la EMT y el metro de Málaga, 13,50 € en 2026",
+   "url": "https://www.elespanol.com/malaga/malaga-ciudad/20251223/viajar-metro-emt-malaga-seguira-barato-gratis-menores-anos/1003744067765_0.html"
+  },
+  {
+   "id": "t_zaragoza",
+   "titulo": "Aragón Digital: abono de 30 días en Zaragoza, 29,05 € general y 23,25 € con descuento joven",
+   "url": "https://www.aragondigital.es/articulo/zaragoza/abono-transporte-zaragoza-2026-tarifas-descuentos/20250222100000908454.html"
+  },
+  {
+   "id": "t_tenerife",
+   "titulo": "El Digital Sur: Tenerife mantiene en 2026 la gratuidad del 100 % en guaguas y tranvía para residentes (30 viajes al trimestre)",
+   "url": "https://eldigitalsur.com/economia/empresas/gratuidad-transporte-tenerife-2026/"
+  },
+  {
+   "id": "t_gran_canaria",
+   "titulo": "RTVC (23/12/2025): el Gobierno mantiene en 2026 la gratuidad del transporte en Canarias; Guaguas Municipales, Bono Residente Canario",
+   "url": "https://rtvc.es/gobierno-central-2026-gratuidad-transporte-canarias-23-diciembre-2025/"
+  },
+  {
+   "id": "t_santander",
+   "titulo": "Espacio Joven del Ayuntamiento de Santander: Tarjeta Trimestral Joven del TUS (51 €/trimestre, empadronados)",
+   "url": "https://www.juventudsantander.es/entrada-guia/tarjeta-trimestral-joven-del-tus"
+  },
+  {
+   "id": "t_salamanca",
+   "titulo": "Ayuntamiento de Salamanca: se mantienen en 2026 los descuentos del bus urbano (abono mensual joven 7,34 €, empadronados)",
+   "url": "https://www.aytosalamanca.es/en/w/el-ayuntamiento-de-salamanca-mantendr%C3%A1-en-2026-los-mismos-descuentos-en-las-tarifas-del-autob%C3%BAs-urbano-que-en-el-segundo-semestre-de-2025"
+  },
+  {
+   "id": "t_valladolid",
+   "titulo": "AUVASA, tarifas: Bono30 Joven 11 € (15–25 años, empadronados)",
+   "url": "https://www.auvasa.es/tarifas-y-medios-de-pago/"
+  },
+  {
+   "id": "t_leon",
+   "titulo": "Diario de León (29/12/2025): León prorroga en 2026 el 50 % en el bus urbano; bono joven 0,33 €/viaje",
+   "url": "https://www.diariodeleon.es/leon/251229/2070881/leon-prorroga-descuento-50-precios-autobus-urbano-ano-2026.html"
+  },
+  {
+   "id": "t_ciudad_real",
+   "titulo": "La Comarca de Puertollano (08/05/2025): nuevas tarifas del bus urbano de Ciudad Real, abono mensual de estudiantes 5,50 €",
+   "url": "https://www.lacomarcadepuertollano.com/articulo/ciudad-real-provincia/ciudad-real-aprueba-modificacion-tarifas-transporte-urbano/20250508131308591519.html"
+  },
+  {
+   "id": "t_barcelona",
+   "titulo": "T-mobilitat (ATM Barcelona): T-jove, 45,50 € por 90 días, 1–7 zonas, menores de 30",
+   "url": "https://t-mobilitat.cat/es/web/t-mobilitat/tarifas/t-jove"
+  },
+  {
+   "id": "t_girona_tarragona",
+   "titulo": "Govern.cat: las ATM de Girona, Lleida y Camp de Tarragona mantienen el 50 % (T-jove 47 € en Girona y 46,60 € en Camp de Tarragona, 90 días)",
+   "url": "https://govern.cat/gov/notes-premsa/778776/les-atm-de-girona-lleida-i-camp-de-tarragona-mantenen-els-descomptes-del-50-percent-al-transport-public"
+  },
+  {
+   "id": "t_madrid",
+   "titulo": "Consorcio Regional de Transportes de Madrid: Abono Joven 10 € (hasta 26 años, todas las zonas; bonificación hasta el 31/12/2026)",
+   "url": "https://www.crtm.es/billetes-y-tarifas/buscador/abono-joven/"
+  },
+  {
+   "id": "t_valencia",
+   "titulo": "Valencia Bonita (23/12/2025): EMT Jove 12,50 €/mes; Valencia Extra: SUMA Mensual Jove 14,90 € hasta el 30/06/2026",
+   "url": "https://www.valenciabonita.es/2025/12/23/precios-emt-valencia-2026/"
+  },
+  {
+   "id": "t_alicante",
+   "titulo": "TodoAlicante (11/06/2026): rebajas en bonos hasta final de 2026, Bono Móbilis Jove de 30 viajes 10,60 €",
+   "url": "https://www.todoalicante.es/alicante-ciudad/alicante-extiende-ayudas-transporte-viajes-gratis-anos-20260611145446-nt.html"
+  },
+  {
+   "id": "t_castellon",
+   "titulo": "Generalitat Valenciana, sede electrónica: títulos jóvenes con reducción temporal (Castellón, bono jove 30 viajes 12,75 €)",
+   "url": "https://sede.gva.es/en/detall-tramit?id_proc=22936"
+  },
+  {
+   "id": "t_caceres",
+   "titulo": "Digital Extremadura: el bus urbano de Cáceres mantiene en 2026 las tarifas bonificadas (abono mensual 14,50 €)",
+   "url": "https://digitalextremadura.com/los-usuarios-del-autobus-urbano-de-caceres-mantendran-en-2026-las-mismas-tarifas-bonificadas-de-las-que-disfrutan-actualmente/"
+  },
+  {
+   "id": "t_santiago",
+   "titulo": "Concello de Santiago: bus urbano 0,36 €/viaje con tarjeta y bono mensual 15,60 € desde el 01/01/2026",
+   "url": "https://santiago.es/transporte"
+  },
+  {
+   "id": "t_coruna",
+   "titulo": "ACoruñaXa: A Coruña congela las tarifas del bus en 2026; perfil universitario 0,15 €/viaje con tarjeta Millennium",
+   "url": "https://acorunaxa.com/es/news/a-coruna-congela-las-tarifas-del-bus-y-mantiene-las-bonificaciones-en-2026-con-una-tarifa-joven-mas-barata/112809/"
+  },
+  {
+   "id": "t_vigo",
+   "titulo": "Vitrasa, tarifas y títulos (PassVigo universitario, 0,43 €/viaje según buscador)",
+   "url": "https://www.vitrasa.es/en-US/tarifas-y-titulos"
+  },
+  {
+   "id": "t_palma",
+   "titulo": "TIB (14/12/2025): el transporte público mantiene la gratuidad en 2026 con Tarjeta Única o Intermodal, también en la EMT de Palma",
+   "url": "https://www.tib.org/es/w/el-transport-p%C3%BAblic-interurb%C3%A0-mant%C3%A9-la-gratu%C3%AFtat-l-any-2026"
+  },
+  {
+   "id": "t_logrono",
+   "titulo": "Ayuntamiento de Logroño (07/01/2021): tarjeta estudiante de 20 viajes 5,38 € (tarifa antigua, sin dato 2026)",
+   "url": "https://logrono.es/-/el-transporte-urbano-aumentara-su-flota-y-mejorara-sus-servicios-el-bonobus-mantendra-su-precio-y-el-bono-mensual-reducira-su-tarifa"
+  },
+  {
+   "id": "t_pamplona",
+   "titulo": "Noticias de Navarra (30/12/2025): precios de la villavesa en 2026 con la prórroga de la bonificación",
+   "url": "https://www.noticiasdenavarra.com/pamplona/2025/12/30/seguiran-bonificaciones-viajes-villavesa-31-10523641.html"
+  },
+  {
+   "id": "t_bilbao",
+   "titulo": "Consorcio de Transportes de Bizkaia: tarifas Barik del 21/02 al 31/12/2026 (Gazte Oro zona 1, 21,40 €)",
+   "url": "https://www.ctb.eus/en/fares-barik-14-july-31-december-2023"
+  },
+  {
+   "id": "t_donostia",
+   "titulo": "Dbus, tarifas: joven con Mugi 0,59 € (1–20 viajes), 0,48 € (21–50) y 0 € desde 51",
+   "url": "https://dbus.eus/en/travelling-by-dbus/fares-and-prices/"
+  },
+  {
+   "id": "t_oviedo",
+   "titulo": "Tarjeta CONECTA del Consorcio de Transportes de Asturias: 0,45 €/viaje en una zona y tope de 30 €/mes (Tus Ayudas, 29/07/2026)",
+   "url": "https://tus-ayudas.es/movilidad/tarjeta-conecta-asturias"
+  },
+  {
+   "id": "t_murcia",
+   "titulo": "Tranvía de Murcia: Unibono Universitario ilimitado 12 € con promoción hasta el 31/12/2026 (UMU y UCAM)",
+   "url": "https://tranviademurcia.es/unibono-universitario/"
+  }
+ ]
+}

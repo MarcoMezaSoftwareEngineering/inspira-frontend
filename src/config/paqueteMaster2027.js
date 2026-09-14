@@ -750,7 +750,7 @@ const CITAS_TEXTO = `Empadronamiento ${eur(CITA.empadronamiento)} · Huellas / T
 export const METODO = {
   eyebrow: "Método Inspira",
   titulo: "Nadie paga un proceso migratorio de golpe",
-  intro: "Pagas por etapas: primero la sesión diagnóstico, como pago aparte; después el paquete, en dos cuotas si faltan más de dos meses para tu postulación; la vía migratoria solo con carta de admisión; y las citas en España solo con la visa aprobada.",
+  intro: "Pagas por etapas: primero la sesión diagnóstico, como pago aparte; después el paquete, en dos cuotas si faltan más de dos meses para tu postulación; la vía migratoria solo con carta de admisión; y las citas en España, al llegar, igual con visado que con estancia.",
   hitos: [
     { n: "0", icono: "balanza", etapa: "Sesión diagnóstico", importe: `${eur(SESION.precio)} (${SESION.precioAlt})`, cuando: `Hoy. ${SESION.duracion} online con un abogado especialista. Es un pago aparte del paquete.` },
     { n: "1", icono: "birrete", etapa: "Paquete máster", importe: `desde ${eur(PRECIO_DESDE)}`, cuando: `Si faltan más de dos meses para tu postulación, pagas el plan en dos cuotas: ${PCT(50)} al iniciar y ${PCT(50)} a los dos meses. Si falta menos, al contado. En todos los casos, el plan queda pagado antes de tu primera postulación.` },
@@ -803,7 +803,7 @@ export const SIMULADOR = {
     dosMeses: `A los 2 meses · ${PCT(50)}`,
     contado: "Al iniciar · plan al contado",
     carta: "Al recibir la carta · vía migratoria",
-    visa: "Con la visa aprobada · citas",
+    visa: "Ya en España · citas",
   },
   // La sesión es un pago aparte y suma al total (cliente, 11/09/2026, tarde).
   notaHoy: "Pago aparte del plan",
@@ -895,7 +895,8 @@ export const BECAS = {
   ],
   paisTitulo: "Programas de tu país",
   paises: [
-    { pais: "Perú", texto: "PRONABEC, Beca Generación del Bicentenario: nuestros asesorados la han logrado en convocatorias anteriores. Sin convocatoria en 2026; si se reabre para 2027, te avisamos." },
+    // Actualizado el 14/09/2026: PRONABEC aprobó la Convocatoria 2026 (RDE N.º 149-2026-MINEDU/VMGI-PRONABEC).
+    { pais: "Perú", texto: "PRONABEC, Beca Generación del Bicentenario: Convocatoria 2026 con solo 20 becas (17 de maestría); postulación del 30 de octubre al 13 de noviembre de 2026. Nuestros asesorados la han logrado en convocatorias anteriores." },
     { pais: "México", texto: "Secihti, becas de posgrado en el extranjero: mensualidad, seguro y ayuda de formación para maestrías presenciales en áreas prioritarias. Convocatoria estimada entre marzo y mayo de 2027." },
     { pais: "Colombia", texto: `Colfuturo, Crédito Beca: crédito de hasta ${numero(50000)}${NBSP}US$; el ${PCT(25)} se condona si te gradúas, vuelves a Colombia y te quedas allí tres años. Convocatoria estimada entre febrero y marzo de 2027.` },
   ],
@@ -1109,7 +1110,7 @@ export const FAQ = {
       id: "cuanto-pago",
       q: "¿Cuánto pago y cuándo?",
       a: [
-        `La sesión diagnóstico, ${eur(SESION.precio)}, hoy, como pago aparte del paquete. El plan: si faltan más de dos meses para tu postulación, en dos cuotas, ${PCT(50)} al iniciar y ${PCT(50)} a los dos meses; si falta menos, al contado. En todos los casos, el plan queda pagado antes de tu primera postulación. La asesoría de visado (${VISADOS_TEXTO}) o la estancia por estudios (${eur(ESTANCIA_ESTUDIOS.precio)}) se paga al recibir la carta de admisión. Las citas de empadronamiento (${eur(CITA.empadronamiento)}) y de huellas (${eur(CITA.tie)}), solo con la visa aprobada. Si más adelante quieres más cobertura, amplías al plan superior pagando solo la diferencia.`,
+        `La sesión diagnóstico, ${eur(SESION.precio)}, hoy, como pago aparte del paquete. El plan: si faltan más de dos meses para tu postulación, en dos cuotas, ${PCT(50)} al iniciar y ${PCT(50)} a los dos meses; si falta menos, al contado. En todos los casos, el plan queda pagado antes de tu primera postulación. La asesoría de visado (${VISADOS_TEXTO}) o la estancia por estudios (${eur(ESTANCIA_ESTUDIOS.precio)}) se paga al recibir la carta de admisión. Las citas de empadronamiento (${eur(CITA.empadronamiento)}) y de huellas (${eur(CITA.tie)}), una vez en España, igual con visado que con estancia. Si más adelante quieres más cobertura, amplías al plan superior pagando solo la diferencia.`,
       ],
     },
     {

@@ -34,6 +34,7 @@ const PanelCliente = lazyConRecarga(() => import("./pages/panel/PanelCliente"));
 const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"));
 const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/MasterAds2027"));
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
+const GradoEspana = lazyConRecarga(() => import("./pages/grado/GradoEspana"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
@@ -116,6 +117,14 @@ const SEO_PAGES = {
     description:
       "Guías claras de extranjería, visados, nacionalidad y vida académica en España, escritas por el equipo legal de Inspira.",
     path: "/blog",
+  },
+  // Guía para familias (sin enlace en menús: lo decide el cliente).
+  "/grado-en-espana": {
+    title: "¿Cuánto cuesta estudiar un grado en España? Guía para familias",
+    description:
+      "Matrícula en universidades públicas y privadas, acceso, visado o estancia y becas: simula la inversión de tu hijo o hija año a año y conoce el Paquete Grado de Inspira.",
+    path: "/grado-en-espana",
+    imagen: "/og/grado-en-espana.jpg",
   },
   "/visa-o-estancia": {
     title: "¿Visa o estancia por estudios? Test rápido",
@@ -352,6 +361,7 @@ const PUBLIC_PATHS = [
   "/mapa-estudiar-en-espana",
   "/master-2027-2028",
   "/visa-o-estancia",
+  "/grado-en-espana",
   // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
   // cabecera. Solo se llega por URL: la reserva de la web va por Calendly.
   "/reservar",
@@ -473,6 +483,7 @@ export default function App() {
       {path === "/reservar" && <ReservarCita />}
       {path === "/master-2027-2028" && <MasterAds2027 />}
       {path === "/visa-o-estancia" && <VisaOEstancia />}
+      {path === "/grado-en-espana" && <GradoEspana />}
       {path === "/pago-exitoso" && <PagoExitoso />}
       {path === "/pago-fallido" && <PagoFallido />}
       {path === "/pago-pendiente" && <PagoPendiente />}

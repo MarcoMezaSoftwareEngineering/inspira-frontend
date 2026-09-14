@@ -31,6 +31,8 @@ export const IMG_GENERAL = "/og/inspira-general.jpg";
 export const IMG_MASTER = "/og/master-2027-2028.jpg";
 export const IMG_CALCULADORA = "/og/calculadora-master.jpg";
 export const IMG_PORTAL = "/og/expediente-digital.jpg";
+export const IMG_GRADO = "/og/grado-en-espana.jpg";
+export const IMG_MAPA = "/og/mapa-estudiar-en-espana.jpg";
 
 const MASTER = {
   title: "Paquete Máster 2027/2028 | Inspira Legal",
@@ -142,12 +144,22 @@ export const RUTAS_COMPARTIR = {
     description:
       "Si aún no migras pero quieres avanzar: homologa tu bachillerato o tu título universitario y prepárate para postular a tiempo a la universidad española.",
   },
+  // Guía para familias. Textos alineados con SEO_PAGES de src/App.jsx.
+  "/grado-en-espana": {
+    title: "¿Cuánto cuesta estudiar un grado en España? Guía para familias | Inspira Legal",
+    description:
+      "Matrícula en universidades públicas y privadas, acceso, visado o estancia y becas: simula la inversión de tu hijo o hija año a año y conoce el Paquete Grado de Inspira.",
+    image: IMG_GRADO,
+    imageAlt: "Guía para familias: cuánto cuesta estudiar un grado en España",
+  },
   // Sus textos viven en la propia página (pages/mapa/mapaTextos.js, SEO), no en
   // SEO_PAGES de App.jsx: si cambias uno, cambia el otro.
   "/mapa-estudiar-en-espana": {
-    title: "Mapa para estudiar en España: comunidades, ciudades y universidades | Inspira Legal",
+    title: "¿Cuánto cuesta un máster en España? Mapa por comunidad y universidad | Inspira Legal",
     description:
-      "Mapa interactivo de las comunidades, ciudades y universidades españolas con másteres oficiales: matrícula orientativa, cómo se postula en cada una y el plan de Inspira que las cubre.",
+      "Descubre en el mapa cuánto cuesta un máster oficial al año en cada comunidad, ciudad y universidad de España, con su ranking QS y cómo se postula. Los precios de Inspira son paquetes de postulación: la matrícula se paga aparte.",
+    image: IMG_MAPA,
+    imageAlt: "¿Cuánto cuesta un máster en España? Descúbrelo en el mapa de Inspira Legal",
   },
 };
 

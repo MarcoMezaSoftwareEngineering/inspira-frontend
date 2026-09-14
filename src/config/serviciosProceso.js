@@ -102,7 +102,7 @@ export const PROCESOS = {
   "grado-espana": [
     { titulo: "Homologación del bachillerato", texto: "Requisito obligatorio y el trámite más lento: se inicia lo antes posible.", icono: "documento" },
     { titulo: "Búsqueda de universidades", texto: "Evaluamos precios, notas de corte, calidad y ubicación para armar tu shortlist.", icono: "mapa" },
-    { titulo: "Pruebas PCE / EBAU (UNED)", texto: "Te inscribimos en las pruebas de acceso y te orientamos en la preparación.", icono: "libro" },
+    { titulo: "Vía de acceso", texto: "Sin examen, con tu bachillerato homologado, o con las pruebas PCE de la UNED, cuya inscripción gestionamos.", icono: "libro" },
     { titulo: "Preinscripción", texto: "Gestionamos tu preinscripción en las universidades seleccionadas.", icono: "birrete" },
     { titulo: "Matrícula y visado", texto: "Formalizamos tu matrícula y comenzamos el trámite de visa de estudios.", icono: "pasaporte" },
   ],

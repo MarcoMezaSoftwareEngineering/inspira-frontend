@@ -138,6 +138,28 @@ export default function ServicioDetalle({ id, paquete = null }) {
           </a>
         )}
 
+        {/* Grado: la guía de inversión para familias */}
+        {servicio.id === "grado-espana" && (
+          <a
+            href="/grado-en-espana"
+            onClick={(e) => go(e, "/grado-en-espana")}
+            className="mb-10 flex flex-col gap-3 rounded-2xl border border-primary/15 bg-secondary-light p-5 transition hover:border-primary/40 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
+                <Icono nombre="euro" size={20} />
+              </span>
+              <span>
+                <span className="block font-bold text-primary">¿Cuánto cuesta el grado? Guía para familias</span>
+                <span className="mt-0.5 block text-sm text-neutral-700">
+                  Simula la inversión año a año: matrícula, acceso, vida y el Paquete Grado de Inspira.
+                </span>
+              </span>
+            </span>
+            <span className="shrink-0 text-sm font-bold text-primary">Calcular la inversión →</span>
+          </a>
+        )}
+
         {/* El paquete y su precio, si la página lo trae */}
         {paquete && <PaqueteServicio paquete={paquete} />}
 

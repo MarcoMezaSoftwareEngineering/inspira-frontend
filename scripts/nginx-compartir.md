@@ -44,6 +44,8 @@ map $uri $html_compartir {
     /ruta/denegado          /compartir/ruta-denegado.html;
     /ruta/tramites          /compartir/ruta-tramites.html;
     /mapa-estudiar-en-espana /compartir/mapa-estudiar-en-espana.html;
+    /grado-en-espana        /compartir/grado-en-espana.html;
+    /beca-generacion-bicentenario-2026 /compartir/beca-generacion-bicentenario-2026.html;
 }
 ```
 

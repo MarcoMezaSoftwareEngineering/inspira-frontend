@@ -36,6 +36,7 @@ const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/Ma
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
+const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
 const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
 const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
 const Plataforma = lazyConRecarga(() => import("./pages/plataforma/Plataforma"));
@@ -348,6 +349,7 @@ const PUBLIC_PATHS = [
   "/ruta/denegado",
   "/ruta/tramites",
   "/calculadora-master",
+  "/mapa-estudiar-en-espana",
   "/master-2027-2028",
   "/visa-o-estancia",
   // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
@@ -466,6 +468,7 @@ export default function App() {
       {path === "/blog" && <BlogIndex />}
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}
+      {path === "/mapa-estudiar-en-espana" && <MapaEspana />}
       {isPanel && <PanelCliente path={path} />}
       {path === "/reservar" && <ReservarCita />}
       {path === "/master-2027-2028" && <MasterAds2027 />}

@@ -1,0 +1,138 @@
+/* src/pages/mapa/mapa.css
+   Identidad visual del «Mapa para estudiar en España»: titulares en Quicksand
+   (kit de marca), relieve del mapa y microanimaciones.
+
+   Todas las clases llevan el prefijo mapa- para no chocar con otras hojas
+   (una clase corta ya descuadró el panel del asesorado). Con
+   prefers-reduced-motion no se anima nada. */
+
+.mapa-titular {
+  font-family: "Quicksand", "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+/* Mar: degradado del cielo de la marca, bajo el patrón de puntos del SVG. */
+.mapa-mar {
+  background: radial-gradient(120% 90% at 18% 8%, #f6fbff 0%, #e6f2fe 45%, #d2e8fd 100%);
+}
+
+/* Comunidades: suben un poco al pasar por encima; el canto del relieve queda debajo. */
+.mapa-comunidad {
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), fill-opacity 0.25s ease;
+}
+.mapa-comunidad:not([aria-pressed="true"]):hover {
+  transform: translateY(var(--mapa-alza, -2px));
+}
+.mapa-comunidad:focus-visible {
+  stroke: #f09c48;
+  stroke-width: var(--mapa-trazo-foco, 3px);
+}
+
+@keyframes mapa-crece {
+  from {
+    transform: scale(0.15);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.mapa-burbuja {
+  outline: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mapa-crece 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.mapa-burbuja:focus-visible .mapa-burbuja-borde {
+  stroke: #f09c48;
+}
+
+@keyframes mapa-pulso {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.mapa-pulso {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mapa-pulso 1.8s ease-out infinite;
+}
+
+@keyframes mapa-entra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.mapa-ficha-entra {
+  animation: mapa-entra 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mapa-barra {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.mapa-barra {
+  transform-origin: left center;
+  animation: mapa-barra 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mapa-boton {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+.mapa-boton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -16px rgba(0, 54, 72, 0.6);
+}
+.mapa-boton:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Cifras y nombres del mapa: aparecen cuando las burbujas ya han crecido. */
+@keyframes mapa-aparece {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.mapa-etiquetas {
+  animation: mapa-aparece 0.45s ease 0.35s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-comunidad,
+  .mapa-boton {
+    transition: none;
+  }
+  .mapa-comunidad:not([aria-pressed="true"]):hover,
+  .mapa-boton:hover,
+  .mapa-boton:active {
+    transform: none;
+  }
+  .mapa-burbuja,
+  .mapa-pulso,
+  .mapa-ficha-entra,
+  .mapa-barra,
+  .mapa-etiquetas {
+    animation: none;
+  }
+  .mapa-pulso {
+    opacity: 0;
+  }
+}

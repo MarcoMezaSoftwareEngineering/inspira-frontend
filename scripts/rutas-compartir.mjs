@@ -32,6 +32,7 @@ export const IMG_MASTER = "/og/master-2027-2028.jpg";
 export const IMG_CALCULADORA = "/og/calculadora-master.jpg";
 export const IMG_PORTAL = "/og/expediente-digital.jpg";
 export const IMG_GRADO = "/og/grado-en-espana.jpg";
+export const IMG_BICENTENARIO = "/og/beca-generacion-bicentenario-2026.jpg";
 export const IMG_MAPA = "/og/mapa-estudiar-en-espana.jpg";
 
 const MASTER = {
@@ -154,6 +155,14 @@ export const RUTAS_COMPARTIR = {
   },
   // Sus textos viven en la propia página (pages/mapa/mapaTextos.js, SEO), no en
   // SEO_PAGES de App.jsx: si cambias uno, cambia el otro.
+  // Sus textos viven en la propia página (pages/bicentenario/BecaBicentenario2026.jsx, SEO).
+  "/beca-generacion-bicentenario-2026": {
+    title: "Beca Generación del Bicentenario 2026: nuevas bases y simulador | Inspira Legal",
+    description:
+      "Solo 20 becas. Las nuevas bases de PRONABEC explicadas en claro, un simulador para saber si calificas y cuánto puntaje tendrías, la comparación con 2025 y otras becas para España y la Unión Europea.",
+    image: IMG_BICENTENARIO,
+    imageAlt: "Beca Generación del Bicentenario 2026: solo 20 becas. ¿Calificas? Calcula tu puntaje",
+  },
   "/mapa-estudiar-en-espana": {
     title: "¿Cuánto cuesta un máster en España? Mapa por comunidad y universidad | Inspira Legal",
     description:

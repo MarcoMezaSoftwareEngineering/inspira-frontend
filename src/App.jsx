@@ -35,6 +35,7 @@ const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"
 const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/MasterAds2027"));
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const GradoEspana = lazyConRecarga(() => import("./pages/grado/GradoEspana"));
+const BecaBicentenario2026 = lazyConRecarga(() => import("./pages/bicentenario/BecaBicentenario2026"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
@@ -362,6 +363,8 @@ const PUBLIC_PATHS = [
   "/master-2027-2028",
   "/visa-o-estancia",
   "/grado-en-espana",
+  // Sin enlace en menús; su SEO lo declara la propia página.
+  "/beca-generacion-bicentenario-2026",
   // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
   // cabecera. Solo se llega por URL: la reserva de la web va por Calendly.
   "/reservar",
@@ -484,6 +487,7 @@ export default function App() {
       {path === "/master-2027-2028" && <MasterAds2027 />}
       {path === "/visa-o-estancia" && <VisaOEstancia />}
       {path === "/grado-en-espana" && <GradoEspana />}
+      {path === "/beca-generacion-bicentenario-2026" && <BecaBicentenario2026 />}
       {path === "/pago-exitoso" && <PagoExitoso />}
       {path === "/pago-fallido" && <PagoFallido />}
       {path === "/pago-pendiente" && <PagoPendiente />}

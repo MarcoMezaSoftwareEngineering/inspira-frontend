@@ -440,7 +440,7 @@ def bicentenario():
     d.text((x, y + 24), "Solo", font=fsolo, fill=CELESTE)
     ancho_solo = d.textlength("Solo ", font=fsolo)
     d.text((x + ancho_solo, y - 30), "20", font=fnum, fill=AMARILLO)
-    ancho_num = d.textlength("20 ", font=fnum)
+    ancho_num = d.textlength("20", font=fnum) + 22
     d.text((x + ancho_solo + ancho_num, y + 24), "becas", font=fsolo, fill=CELESTE)
     d.text((x, y + 150), "¿Calificas? Calcula tu puntaje", font=fuente(34, "Medium"), fill=BLANCO)
     pegar_logo(img, W - 72 - 250, H - 60 - 76, alto=48)

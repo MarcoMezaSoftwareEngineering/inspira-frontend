@@ -21,10 +21,14 @@ import { useSEO } from "../../hooks/useSEO";
 import { CASOS } from "../../config/casos";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
-import { aplicarFiltros, casosEnMapa, crearIndice, hayTitularidad, prefiereMenosMovimiento } from "./indice";
+import { ABRE_MESES, RANKING_TOPES, aplicarFiltros, casosEnMapa, crearIndice, hayRanking, hayTitularidad, prefiereMenosMovimiento } from "./indice";
 import { useEstadoMapa } from "./useEstadoMapa";
 import { useEsEscritorio } from "./useEsEscritorio";
-import { CTA, HERO, PIE, SEO, SESION, T, etiquetaLista } from "./mapaTextos";
+import { CTA, HERO, PAQUETE, PIE, RANKING, RECOMENDAR, SEO, SESION, T, etiquetaLista } from "./mapaTextos";
+import ResultadosUniversidades from "./ResultadosUniversidades";
+import Recomendador from "./Recomendador";
+import GuardarComparativa from "./GuardarComparativa";
+import { eventoMapa } from "./eventosMapa";
 import { NOCHE, SOL, tonoDe } from "./tonosMapa";
 import MapaInteractivo from "./MapaInteractivo";
 import Filtros from "./Filtros";
@@ -119,14 +123,23 @@ function ErrorCarga({ onReintentar }) {
 
 /* ── Piezas del explorador ───────────────────────────────────────────── */
 
-function Cabecera({ totales }) {
+function Cabecera({ totales, onRecomendar }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
       <div>
         <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">Explora · listas 2027/2028</p>
         <h2 className="mapa-titular mt-1 text-[28px] font-bold leading-tight text-[#003648] sm:text-[34px]">
-          Elige comunidad, ciudad o universidad
+          ¿Cuánto cuesta un máster aquí? Tócalo en el mapa
         </h2>
+        <p className="mt-1 text-sm text-neutral-700">Matrícula de un máster al año en cada comunidad, ciudad y universidad, con su ranking QS.</p>
+        <button
+          type="button"
+          onClick={onRecomendar}
+          className="mapa-boton mt-3 inline-flex items-center gap-2 rounded-full bg-[#F09C48] px-4 py-2 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648]"
+        >
+          <Icono nombre="brujula" size={16} />
+          {RECOMENDAR.boton}
+        </button>
       </div>
       <dl className="flex flex-wrap gap-2">
         {[
@@ -146,9 +159,18 @@ function Cabecera({ totales }) {
   );
 }
 
-function Leyenda({ indice }) {
+function Leyenda({ indice, ranking }) {
   return (
     <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 px-1 text-xs text-neutral-700">
+      {ranking && (
+        <span className="inline-flex items-center gap-1.5 font-bold text-[#003648]">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <circle cx="9" cy="9" r="7.2" fill="none" stroke={SOL} strokeWidth="2.6" />
+            <circle cx="9" cy="9" r="4" fill="#fff" stroke={NOCHE} strokeWidth="1.4" />
+          </svg>
+          {RANKING.anillo}
+        </span>
+      )}
       {indice.datos.listas.map((l) => (
         <span key={l.id} className="inline-flex items-center gap-1.5">
           <span aria-hidden="true" className={`h-3 w-3 rounded ${tonoDe(l.id).muestra}`} />
@@ -191,8 +213,9 @@ function PieFuentes({ fuentes = {} }) {
       </p>
       <p className="mt-1">
         Másteres oficiales: {f(fuentes.masteres)}.{fuentes.titularidad ? ` Titularidad: ${f(fuentes.titularidad)}.` : ""}
-        {fuentes.ranking ? ` Ranking: ${f(fuentes.ranking)}.` : ""} Planes de Inspira: {f(fuentes.planes)}. {PIE.geografia}
+        {fuentes.ranking ? ` Ranking: ${f(fuentes.ranking)}.` : ""} Paquetes de postulación de Inspira: {f(fuentes.planes)}. {PIE.geografia}
       </p>
+      <p className="mt-1">{PAQUETE.leyenda}</p>
       <p className="mt-1">{PIE.admision}</p>
     </footer>
   );
@@ -253,6 +276,10 @@ function Explorador({ datos, geo }) {
   const [estado, actualizar] = useEstadoMapa();
   const [capas, setCapas] = useState({ ciudades: true, casos: true });
   const [aviso, setAviso] = useState("");
+  // Formulario «Guárdala y te la enviamos»: { tipo, ids } o null.
+  const [guardar, setGuardar] = useState(null);
+  // Recomendador: abierto y las comunidades que resalta en el mapa.
+  const [recomendador, setRecomendador] = useState({ abierto: false, ids: [] });
   const esEscritorio = useEsEscritorio();
   const mapaRef = useRef(null);
 
@@ -263,10 +290,27 @@ function Explorador({ datos, geo }) {
       rama: indice.ramas.some((r) => r.id === estado.rama) ? estado.rama : null,
       max: estado.max,
       titularidad: ["publica", "privada"].includes(estado.titularidad) && hayTitularidad(indice) ? estado.titularidad : null,
+      ranking: Object.hasOwn(RANKING_TOPES, estado.ranking || "") && hayRanking(indice) ? estado.ranking : null,
+      orden: estado.orden === "ranking" && hayRanking(indice) ? "ranking" : "masteres",
+      abre: Object.hasOwn(ABRE_MESES, estado.abre || "") && indice.hayPlazos ? estado.abre : null,
+      becas: !!estado.becas && indice.hayBecas,
+      presupuesto: estado.presupuesto != null && indice.limitesPresupuesto ? estado.presupuesto : null,
     }),
-    [estado.listas, estado.rama, estado.max, estado.titularidad, indice]
+    [
+      estado.listas,
+      estado.rama,
+      estado.max,
+      estado.titularidad,
+      estado.ranking,
+      estado.orden,
+      estado.abre,
+      estado.becas,
+      estado.presupuesto,
+      indice,
+    ]
   );
   const filtros = useMemo(() => aplicarFiltros(indice, entrada), [indice, entrada]);
+  const cambiarOrden = useCallback((orden) => actualizar({ orden: orden === "ranking" ? "ranking" : null }), [actualizar]);
 
   // Qué está enfocado, del nivel más profundo al más general.
   const foco = useMemo(() => {
@@ -313,6 +357,7 @@ function Explorador({ datos, geo }) {
         actualizar({ comunidad: k.comunidadId, ciudad: k.ciudadId, universidad: null, caso: id });
       }
       registrarEvento("mapa_foco", { tipo, id });
+      if (tipo === "comunidad" || tipo === "universidad") eventoMapa(`ver_${tipo}`, id);
     },
     [actualizar, indice, casos]
   );
@@ -367,12 +412,36 @@ function Explorador({ datos, geo }) {
     actualizar({ comparar: [...comparar.ids, id] });
     setAviso("");
     registrarEvento("mapa_comparar", { tipo, id });
+    eventoMapa("comparar", id);
+  }
+
+  // Desde una ficha se guarda la ficha abierta más lo que ya hay en el comparador
+  // (si es del mismo tipo), hasta 3: es el tope que acepta POST /api/mapa/comparativa.
+  function abrirGuardar(tipo, id) {
+    const otros = comparar.tipo === tipo ? comparar.ids.filter((x) => x !== id) : [];
+    setGuardar({ tipo, ids: [id, ...otros].slice(0, MAX_COMPARAR) });
+  }
+
+  function abrirRecomendador() {
+    setRecomendador((r) => ({ ...r, abierto: true }));
+    requestAnimationFrame(() => irSuave(document.getElementById("mapa-recomendador")));
   }
 
   const comparador = { tipo: comparar.tipo, ids: comparar.ids, maximo: MAX_COMPARAR, alternar: alternarComparar };
-  const comunes = { indice, foco, geoPorId, rama: filtros.rama, casos, comparador, onElegir: elegir };
+  const comunes = {
+    indice,
+    foco,
+    geoPorId,
+    rama: filtros.rama,
+    orden: entrada.orden,
+    onOrden: cambiarOrden,
+    casos,
+    comparador,
+    onElegir: elegir,
+    onGuardar: abrirGuardar,
+  };
 
-  let ficha = <FichaInicio indice={indice} casos={casos} onElegir={elegir} />;
+  let ficha = <FichaInicio indice={indice} casos={casos} onElegir={elegir} onRecomendar={abrirRecomendador} />;
   let titulo = "";
   let clave = "inicio";
   if (foco.tipo === "universidad") {
@@ -399,7 +468,7 @@ function Explorador({ datos, geo }) {
 
   return (
     <>
-      <Cabecera totales={indice.datos.totales} />
+      <Cabecera totales={indice.datos.totales} onRecomendar={abrirRecomendador} />
 
       <Filtros
         indice={indice}
@@ -411,7 +480,26 @@ function Explorador({ datos, geo }) {
         onBuscar={verEnMapa}
         comparados={comparar.ids.length}
         onVerComparador={() => irSuave(document.getElementById("mapa-comparador"))}
+        onVerResultados={() => irSuave(document.getElementById("mapa-resultados"))}
       />
+
+      {recomendador.abierto && (
+        <Recomendador
+          indice={indice}
+          onCerrar={() => setRecomendador({ abierto: false, ids: [] })}
+          onResultado={(ids) => {
+            setRecomendador({ abierto: true, ids });
+            if (ids.length) eventoMapa("recomendar", ids.join(","));
+          }}
+          onElegir={verEnMapa}
+          onGuardar={(tipo, ids) => setGuardar({ tipo, ids })}
+          onComparar={(ids) => {
+            actualizar({ comparar: ids.slice(0, MAX_COMPARAR) });
+            setAviso("");
+            requestAnimationFrame(() => irSuave(document.getElementById("mapa-comparador")));
+          }}
+        />
+      )}
 
       <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
         <div ref={mapaRef} className="scroll-mt-24">
@@ -428,9 +516,10 @@ function Explorador({ datos, geo }) {
               casos={casos}
               onElegir={elegir}
               onToda={() => elegir(null)}
+              recomendadas={recomendador.abierto ? recomendador.ids : []}
             />
           </div>
-          <Leyenda indice={indice} />
+          <Leyenda indice={indice} ranking={filtros.ranking} />
         </div>
 
         <HojaDetalle esEscritorio={esEscritorio} abierta={!!foco.tipo} clave={clave} titulo={titulo} onCerrar={() => elegir(null)}>
@@ -442,9 +531,11 @@ function Explorador({ datos, geo }) {
 
       {!esEscritorio && !foco.tipo && (
         <div className="mt-6 rounded-3xl border border-[#E1EFFD] bg-white p-5">
-          <FichaInicio indice={indice} casos={casos} onElegir={verEnMapa} />
+          <FichaInicio indice={indice} casos={casos} onElegir={verEnMapa} onRecomendar={abrirRecomendador} />
         </div>
       )}
+
+      <ResultadosUniversidades indice={indice} filtros={filtros} orden={entrada.orden} onOrden={cambiarOrden} onElegir={verEnMapa} />
 
       <Comparador
         indice={indice}
@@ -457,15 +548,18 @@ function Explorador({ datos, geo }) {
           setAviso("");
         }}
         onVer={verEnMapa}
+        onGuardar={() => setGuardar({ tipo: comparar.tipo, ids: comparar.ids })}
         onProbar={() => {
           actualizar({ comparar: EJEMPLO_COMPARAR.filter((id) => indice.comunidades.has(id)) });
           setAviso("");
         }}
       />
 
-      <ListaComunidades indice={indice} geoPorId={geoPorId} filtros={filtros} foco={foco} onElegir={verEnMapa} />
+      <ListaComunidades indice={indice} geoPorId={geoPorId} filtros={filtros} foco={foco} orden={entrada.orden} onElegir={verEnMapa} />
 
       <PieFuentes fuentes={datos.fuentes} />
+
+      <GuardarComparativa seleccion={guardar} indice={indice} filtros={entrada} onCerrar={() => setGuardar(null)} />
 
       {/* En móvil la hoja tapa la mitad inferior: hueco para poder leer el final. */}
       {!esEscritorio && foco.tipo && <div aria-hidden="true" className="h-[50vh]" />}

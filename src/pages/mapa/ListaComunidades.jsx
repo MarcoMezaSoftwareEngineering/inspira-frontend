@@ -2,16 +2,26 @@
 // La misma información del mapa, en texto: todas las comunidades agrupadas
 // por lista, con su matrícula y sus recuentos. Es la vía para lectores de
 // pantalla y para quien prefiere leer a tocar un mapa; cada una abre su ficha.
+//
+// Con «Mejor ranking primero», dentro de cada lista van primero las comunidades
+// cuya mejor universidad tiene mejor puesto en QS, y se dice cuál es.
+import { mejorRanking } from "./indice";
 import { tonoDe } from "./tonosMapa";
-import { eur, etiquetaLista, importeMatricula, mayus, plural } from "./mapaTextos";
+import { PAQUETE, eur, etiquetaLista, importeMatricula, mayus, plural } from "./mapaTextos";
 
-export default function ListaComunidades({ indice, geoPorId, filtros, foco, onElegir }) {
+export default function ListaComunidades({ indice, geoPorId, filtros, foco, orden = "masteres", onElegir }) {
+  const porRanking = orden === "ranking";
+  const mejorDe = (c) => mejorRanking(indice, c.universidadesIds);
   const grupos = indice.datos.listas.map((l) => ({
     lista: l,
     comunidades: l.comunidades
       .map((id) => indice.comunidades.get(id))
       .filter(Boolean)
-      .sort((a, b) => (a.matricula?.min ?? Infinity) - (b.matricula?.min ?? Infinity)),
+      .sort((a, b) =>
+        porRanking
+          ? (mejorDe(a)?.posicion ?? Infinity) - (mejorDe(b)?.posicion ?? Infinity)
+          : (a.matricula?.min ?? Infinity) - (b.matricula?.min ?? Infinity)
+      ),
   }));
   const fuera = indice.datos.fueraDeListas.comunidades.map((id) => ({ id, nombre: geoPorId.get(id)?.nombre || id }));
 
@@ -19,9 +29,15 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, onEl
     <section aria-labelledby="mapa-lista-titulo" className="mt-14">
       <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">En texto</p>
       <h2 id="mapa-lista-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
-        Todas las comunidades, de un vistazo
+        Cuánto cuesta un máster en cada comunidad
       </h2>
-      <p className="mt-1 text-sm text-neutral-700">Ordenadas por matrícula orientativa dentro de cada lista. Toca una para abrir su ficha en el mapa.</p>
+      <p className="mt-1 text-sm text-neutral-700">
+        {porRanking ? "Ordenadas por su universidad mejor situada en el ranking QS" : "Ordenadas por matrícula orientativa"} dentro de cada lista. Toca
+        una para abrir su ficha en el mapa.
+      </p>
+      <p className="mt-1 text-xs text-neutral-700">
+        La cifra de la derecha es la matrícula de un máster al año. {PAQUETE.leyenda}
+      </p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {grupos.map(({ lista, comunidades }) => (
@@ -29,12 +45,13 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, onEl
             <h3 className="flex flex-wrap items-center gap-2 text-sm font-extrabold text-[#003648]">
               <span aria-hidden="true" className={`h-3.5 w-3.5 rounded ${tonoDe(lista.id).muestra}`} />
               <span className="mapa-titular text-base">{etiquetaLista(lista)}</span>
-              <span className="font-semibold text-neutral-700">· planes desde {eur(lista.desde)}</span>
+              <span className="font-semibold text-neutral-700">· {PAQUETE.desdeCorto(lista.desde)}</span>
             </h3>
             <ul className="mt-3 space-y-2">
               {comunidades.map((c) => {
                 const activa = foco.comunidad === c.id;
                 const noCumple = filtros.activos && !filtros.comunidades.has(c.id);
+                const mejor = porRanking ? mejorDe(c) : null;
                 return (
                   <li key={c.id}>
                     <button
@@ -51,11 +68,16 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, onEl
                           {plural(c.universidades, "universidad", "universidades")} · {plural(c.masteres, "máster", "másteres")}
                           {noCumple ? " · no cumple los filtros" : ""}
                         </span>
+                        {porRanking && (
+                          <span className="block text-[11px] font-semibold text-[#0A5873]">
+                            {mejor ? `Mejor en QS: ${mejor.u.sigla}, puesto ${String(mejor.u.ranking.posicion).replace(/^=/, "").replace("-", "–")}` : "Sin universidades en QS"}
+                          </span>
+                        )}
                       </span>
                       <span className="shrink-0 text-right text-xs font-extrabold text-[#003648]">
-                        {c.precioAnual ? `≈ ${eur(Math.round(c.precioAnual.tipico))}` : mayus(importeMatricula(c.matricula))}
+                        {c.precioAnual ? `Máster ≈ ${eur(Math.round(c.precioAnual.tipico))}` : mayus(importeMatricula(c.matricula))}
                         {(c.precioAnual || !c.matricula?.cadaUniversidad) && (
-                          <span className="block font-semibold text-neutral-700">al año</span>
+                          <span className="block font-semibold text-neutral-700">matrícula al año</span>
                         )}
                       </span>
                     </button>

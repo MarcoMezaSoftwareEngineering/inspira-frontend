@@ -3,14 +3,30 @@
 // el mapa ya enfocado y filtrado.
 //
 //   /mapa-estudiar-en-espana?comunidad=andalucia&universidad=ugr&lista=economicas,intermedias
-//     &rama=CIENCIAS_SALUD&max=2000&titularidad=publica&comparar=madrid,cataluna
+//     &rama=CIENCIAS_SALUD&max=2000&titularidad=publica&ranking=top500&orden=ranking
+//     &comparar=madrid,cataluna
 //
 // Se escribe con replaceState (no llena el historial al tocar el mapa) y se
 // conservan los demás parámetros, como los utm_* de una campaña. Los ids que
 // no existan se ignoran al pintar: un enlace viejo no rompe nada.
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const CLAVES = ["comunidad", "ciudad", "universidad", "caso", "lista", "rama", "max", "titularidad", "comparar"];
+const CLAVES = [
+  "comunidad",
+  "ciudad",
+  "universidad",
+  "caso",
+  "lista",
+  "rama",
+  "max",
+  "titularidad",
+  "ranking",
+  "orden",
+  "abre",
+  "becas",
+  "presupuesto",
+  "comparar",
+];
 
 const lista = (valor) =>
   String(valor || "")
@@ -21,6 +37,7 @@ const lista = (valor) =>
 export function leerUrl() {
   const p = new URLSearchParams(typeof window === "undefined" ? "" : window.location.search);
   const max = Number(p.get("max"));
+  const presupuesto = Number(p.get("presupuesto"));
   return {
     comunidad: p.get("comunidad") || null,
     ciudad: p.get("ciudad") || null,
@@ -30,6 +47,11 @@ export function leerUrl() {
     rama: p.get("rama") || null,
     max: Number.isFinite(max) && max > 0 ? max : null,
     titularidad: p.get("titularidad") || null,
+    ranking: p.get("ranking") || null,
+    orden: p.get("orden") || null,
+    abre: p.get("abre") || null,
+    becas: p.get("becas") === "1",
+    presupuesto: Number.isFinite(presupuesto) && presupuesto > 0 ? presupuesto : null,
     comparar: lista(p.get("comparar")).slice(0, 3),
   };
 }
@@ -51,6 +73,11 @@ function escribirUrl(e) {
   poner("rama", e.rama);
   poner("max", e.max);
   poner("titularidad", e.titularidad);
+  poner("ranking", e.ranking);
+  poner("orden", e.orden);
+  poner("abre", e.abre);
+  poner("becas", e.becas ? "1" : null);
+  poner("presupuesto", e.presupuesto);
   poner("comparar", e.comparar);
   const query = [otros.toString(), partes.join("&")].filter(Boolean).join("&");
   const url = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;

@@ -22,6 +22,7 @@ export const ORIGENES = {
   CALCULADORA: "Calculadora",
   PRESUPUESTO_WEB: "Presupuesto web",
   MANUAL: "Manual",
+  MAPA: "Mapa",
 };
 
 export const TIPO_EVENTO = {

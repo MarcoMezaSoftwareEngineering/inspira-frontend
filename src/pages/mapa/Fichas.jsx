@@ -10,11 +10,29 @@ import Icono from "../../components/common/Icono";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { navigate } from "../../services/navigate";
-import { SIN_RAMA, ejemplosDeComunidad, masteresDe, nombreRama, precioDeUniversidad, ramasOrdenadas } from "./indice";
+import {
+  SIN_RAMA,
+  ejemplosDeComunidad,
+  masteresDe,
+  nombreRama,
+  leerBecas,
+  ordenarUniversidades,
+  precioDeUniversidad,
+  ramasOrdenadas,
+} from "./indice";
+import { cursoCorto, leerPlazos, plazoMasTemprano, rangoFechas } from "./plazos";
 import TarjetaPrecio from "./TarjetaPrecio";
+import VivirAqui from "./VivirAqui";
+import { SelectorOrden } from "./ResultadosUniversidades";
+import { BotonGuardar } from "./GuardarComparativa";
 import { tonoDe } from "./tonosMapa";
 import { useContador } from "./useContador";
 import {
+  BECAS,
+  INICIO,
+  PAQUETE,
+  PLAZOS,
+  RECOMENDAR,
   SESION,
   T,
   eur,
@@ -91,10 +109,13 @@ function Dato({ etiqueta, valor, nota, ancho = false }) {
   );
 }
 
-function Bloque({ titulo, children }) {
+function Bloque({ titulo, accion = null, children }) {
   return (
     <section className="mt-6">
-      <h3 className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{titulo}</h3>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{titulo}</h3>
+        {accion}
+      </div>
       <div className="mt-2">{children}</div>
     </section>
   );
@@ -207,9 +228,10 @@ function PlanInspira({ plan, lista }) {
       <span aria-hidden="true" className="pointer-events-none absolute -right-3 -top-3 text-[#F09C48]/25">
         <Icono nombre="avion" size={72} />
       </span>
-      <p className="relative text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#B8661F]">Plan de Inspira</p>
-      <p className="mapa-titular relative mt-1 text-[28px] font-bold leading-none text-[#003648]">
-        Desde <Cifra n={plan.eur} />
+      <p className="relative text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#B8661F]">{PAQUETE.rotulo}</p>
+      <p className="mapa-titular relative mt-1 text-[15px] font-bold leading-tight text-[#003648]">Paquete de postulación desde</p>
+      <p className="mapa-titular relative text-[28px] font-bold leading-none text-[#003648]">
+        <Cifra n={plan.eur} />
         {" "}€
       </p>
       <p className="relative mt-1 text-sm font-bold text-[#003648]">
@@ -221,12 +243,12 @@ function PlanInspira({ plan, lista }) {
         <ul className="relative mt-2 space-y-1 text-xs text-neutral-900">
           {plan.comunidadCompleta && (
             <li>
-              Toda la comunidad: <strong>{plan.comunidadCompleta.nombre}</strong> · {eur(plan.comunidadCompleta.eur)}
+              Paquete de postulación de toda la comunidad: <strong>{plan.comunidadCompleta.nombre}</strong> · {eur(plan.comunidadCompleta.eur)}
             </li>
           )}
           {plan.listaCompleta && (
             <li>
-              Toda la lista: <strong>{plan.listaCompleta.nombre}</strong> · {eur(plan.listaCompleta.eur)}
+              Paquete de postulación de toda la lista: <strong>{plan.listaCompleta.nombre}</strong> · {eur(plan.listaCompleta.eur)}
             </li>
           )}
         </ul>
@@ -251,6 +273,7 @@ function ListaUniversidades({ unis, campus = [], indice, rama, onElegir }) {
       {filas.map(([u, esCampus]) => {
         const ciudad = indice.ciudades.get(u.ciudad)?.nombre || u.sedes[0];
         const detalle = [esCampus ? `Campus · sede principal en ${ciudad}` : ciudad, u.titularidad].filter(Boolean).join(" · ");
+        const ranking = textoRanking(u.ranking);
         return (
           <li key={`${u.id}-${esCampus ? "c" : "s"}`}>
             <button
@@ -264,6 +287,12 @@ function ListaUniversidades({ unis, campus = [], indice, rama, onElegir }) {
               <span className="min-w-0 flex-1">
                 <span className="block text-[13px] font-bold leading-snug text-[#003648]">{u.nombre}</span>
                 <span className="block text-xs text-neutral-700">{detalle}</span>
+                {ranking && <span className="mt-0.5 block text-[11px] font-semibold leading-snug text-[#0A5873]">{ranking}</span>}
+                {leerBecas(u).length > 0 && (
+                  <span className="mt-1 inline-block rounded-full bg-[#FFF6EC] px-2 py-0.5 text-[10px] font-extrabold text-[#B8661F] ring-1 ring-[#F09C48]/40">
+                    {BECAS.etiqueta}
+                  </span>
+                )}
               </span>
               <span className="shrink-0 text-right text-xs font-extrabold tabular-nums text-[#003648]">
                 {numero(masteresDe(u, rama))}
@@ -299,7 +328,7 @@ function BotonComparar({ tipo, id, comparador }) {
   );
 }
 
-function Acciones({ whatsapp, children }) {
+function Acciones({ whatsapp, guardar = null, children }) {
   return (
     <div className="mt-6 grid gap-2">
       <a
@@ -323,30 +352,119 @@ function Acciones({ whatsapp, children }) {
         </a>
         {children}
       </div>
+      {guardar && <BotonGuardar onClick={guardar} />}
     </div>
   );
 }
 
 const Descargo = () => <p className="mt-4 text-[11px] leading-snug text-neutral-700">{T.descargo}</p>;
 
+/** «Próximo plazo de postulación: 13–29 ene 2027 (Fase 1 — extranjeros)», con sus fases. Siempre estimadas. */
+function Plazo({ rotulo, fase, curso, detalle = null, fases = [] }) {
+  return (
+    <section className="mt-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-[#96CCFC]">
+      <p className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">
+        <Icono nombre="calendario" size={13} className="text-[#F09C48]" />
+        {rotulo}
+      </p>
+      {fase ? (
+        <p className="mapa-titular mt-1 text-[15px] font-bold leading-snug text-[#003648]">
+          {rangoFechas(fase.inicio, fase.fin)}{" "}
+          <span className="text-[13px] font-semibold text-neutral-700">({[detalle, fase.nombre].filter(Boolean).join(" · ")})</span>
+        </p>
+      ) : (
+        <p className="mt-1 text-sm text-neutral-700">{PLAZOS.sinProximo}</p>
+      )}
+      {fases.length > 0 && (
+        <ul className="mt-2 space-y-1 border-t border-[#E1EFFD] pt-2" aria-label={PLAZOS.fases}>
+          {fases.map((f, i) => {
+            const esProxima = !!fase && f.inicio === fase.inicio && f.nombre === fase.nombre;
+            return (
+              <li
+                key={`${f.nombre}-${i}`}
+                className={`flex items-baseline justify-between gap-3 text-xs ${esProxima ? "font-bold text-[#003648]" : "text-neutral-800"}`}
+              >
+                <span className="min-w-0">{f.nombre}</span>
+                <span className="shrink-0 tabular-nums">{rangoFechas(f.inicio, f.fin)}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <p className="mt-1.5 text-[11px] text-neutral-700">{PLAZOS.estimadas(cursoCorto(curso) || "2027/28")}</p>
+    </section>
+  );
+}
+
+function BecasUniversidad({ becas }) {
+  if (!becas.length) return null;
+  return (
+    <Bloque titulo={BECAS.titulo}>
+      <ul className="flex flex-wrap gap-2">
+        {becas.map((b, i) => (
+          <li key={`${b.nombre}-${i}`} className="inline-flex flex-col rounded-2xl bg-[#FFF6EC] px-3 py-1.5 ring-1 ring-[#F09C48]/50">
+            <span className="text-xs font-bold text-[#003648]">{b.nombre}</span>
+            {(b.entidad || b.masteres || b.curso) && (
+              <span className="text-[10.5px] text-neutral-700">
+                {[
+                  b.entidad && !b.nombre.startsWith(b.entidad) ? b.entidad : null,
+                  b.curso ? `convocatoria ${b.curso}` : null,
+                  b.masteres ? plural(b.masteres, "máster vinculado", "másteres vinculados") : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-[11px] leading-snug text-neutral-700">{BECAS.aclaracion}</p>
+    </Bloque>
+  );
+}
+
 /* ── Fichas ──────────────────────────────────────────────────────────── */
 
-export function FichaInicio({ indice, casos, onElegir }) {
+export function FichaInicio({ indice, casos, onElegir, onRecomendar = null }) {
   const { totales, listas } = indice.datos;
   const top = [...indice.datos.ciudades].sort((a, b) => b.masteres - a.masteres).slice(0, 6);
+  const sinPublicar = indice.datos.precios?.sinPublicar || [];
+  const conPrecio = indice.datos.comunidades
+    .filter((c) => c.precioAnual && !sinPublicar.includes(c.id))
+    .sort((a, b) => a.precioAnual.tipico - b.precioAnual.tipico);
+  const desdePaquete = Math.min(...listas.map((l) => l.desde).filter(Number.isFinite));
   return (
     <article>
-      <Rotulo>Empieza aquí</Rotulo>
-      <Titulo>España, comunidad a comunidad</Titulo>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-700">
-        Toca una comunidad para ver cuánto cuesta la matrícula, cómo se postula y qué universidades tiene. Cada burbuja es una ciudad: cuanto
-        más grande, más másteres oficiales.
-      </p>
+      <Rotulo>{INICIO.rotulo}</Rotulo>
+      <Titulo>{INICIO.titulo}</Titulo>
+      <p className="mt-2 text-sm leading-relaxed text-neutral-700">{INICIO.texto}</p>
+      {onRecomendar && (
+        <button
+          type="button"
+          onClick={onRecomendar}
+          className={`mapa-boton mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] ${FOCO}`}
+        >
+          <Icono nombre="brujula" size={17} />
+          {RECOMENDAR.boton}: {RECOMENDAR.titulo.charAt(0).toLowerCase() + RECOMENDAR.titulo.slice(1)}
+        </button>
+      )}
       <dl className="mt-4 grid grid-cols-3 gap-2">
         <Dato etiqueta="Comunidades" valor={<Cifra n={totales.comunidades} />} />
         <Dato etiqueta="Universidades" valor={<Cifra n={totales.universidades} />} />
         <Dato etiqueta="Másteres" valor={<Cifra n={totales.masteres} />} />
       </dl>
+      {conPrecio.length > 0 && (
+        <Bloque titulo={INICIO.precios}>
+          <div className="flex flex-wrap gap-2">
+            {conPrecio.map((c) => (
+              <BotonChip key={c.id} onClick={() => onElegir("comunidad", c.id)}>
+                {c.nombre} · ≈ {eur(Math.round(c.precioAnual.tipico))}
+              </BotonChip>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] leading-snug text-neutral-700">{INICIO.preciosNota}</p>
+        </Bloque>
+      )}
       <Bloque titulo="Las tres listas">
         <ul className="space-y-2.5">
           {listas.map((l) => (
@@ -359,12 +477,13 @@ export function FichaInicio({ indice, casos, onElegir }) {
                     .map((id) => indice.comunidades.get(id)?.nombre)
                     .filter(Boolean)
                     .join(", ")}{" "}
-                  · planes desde {eur(l.desde)}
+                  · {PAQUETE.desdeCorto(l.desde)}
                 </span>
               </span>
             </li>
           ))}
         </ul>
+        {Number.isFinite(desdePaquete) && <p className="mt-2 text-[11px] leading-snug text-neutral-700">{PAQUETE.leyenda}</p>}
       </Bloque>
       <Bloque titulo="Ciudades con más másteres">
         <div className="flex flex-wrap gap-2">
@@ -390,17 +509,19 @@ export function FichaInicio({ indice, casos, onElegir }) {
   );
 }
 
-export function FichaComunidad({ c, indice, foco, geoPorId, rama, comparador, onElegir }) {
+export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden, comparador, onElegir, onGuardar }) {
   const lista = indice.listas.get(c.lista) || null;
   const m = c.matricula;
   const ciudades = c.ciudades
     .map((id) => indice.ciudades.get(id))
     .filter(Boolean)
     .sort((a, b) => b.masteres - a.masteres);
-  const unis = c.universidadesIds
-    .map((id) => indice.universidades.get(id))
-    .filter(Boolean)
-    .sort((a, b) => masteresDe(b, rama) - masteresDe(a, rama));
+  const unis = ordenarUniversidades(
+    c.universidadesIds.map((id) => indice.universidades.get(id)).filter(Boolean),
+    orden,
+    rama
+  );
+  const temprano = plazoMasTemprano(unis);
 
   return (
     <article>
@@ -430,13 +551,17 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, comparador, on
       </dl>
       <NotasMatricula m={m} />
 
+      {temprano && <Plazo rotulo={PLAZOS.temprano} fase={temprano.fase} curso={temprano.curso} detalle={temprano.u.sigla} />}
+
+      <VivirAqui comunidad={c} presupuesto={indice.presupuestos?.get(c.id) || null} />
+
       <Bloque titulo="Cómo se postula">
         <p className="text-sm leading-relaxed text-neutral-900">{c.postulacion.texto}</p>
       </Bloque>
 
       <PlanInspira plan={c.plan} lista={lista} />
 
-      <Bloque titulo={`Universidades (${unis.length})`}>
+      <Bloque titulo={`Universidades (${unis.length})`} accion={<SelectorOrden compacto orden={orden} onOrden={onOrden} />}>
         <ListaUniversidades unis={unis} indice={indice} rama={rama} onElegir={onElegir} />
       </Bloque>
 
@@ -457,6 +582,7 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, comparador, on
       )}
 
       <Acciones
+        guardar={onGuardar ? () => onGuardar("comunidad", c.id) : null}
         whatsapp={{
           texto: `Quiero postular en ${c.nombre}`,
           href: whatsappDesde("mapa", `Quiero postular a másteres en ${c.nombre}.`),
@@ -486,9 +612,9 @@ export function FichaFuera({ id, foco, indice, geoPorId, planFuera, onElegir }) 
       <div className="mt-4 rounded-3xl bg-[#F6FBFF] p-4 ring-1 ring-[#E1EFFD]">
         <p className="text-sm leading-relaxed text-neutral-900">
           {islas
-            ? `Fuera de las tres listas: no tiene universidades en nuestras listas de comunidades. Entra en el ${planFuera.nombre} (${eur(
+            ? `Fuera de las tres listas: no tiene universidades en nuestras listas de comunidades. Entra en el ${planFuera.nombre}, paquete de postulación de ${eur(
                 planFuera.eur
-              )}, toda España); por separado, te hacemos un presupuesto personalizado en la sesión diagnóstico.`
+              )} para toda España (la matrícula de la universidad se paga aparte); por separado, te hacemos un presupuesto personalizado en la sesión diagnóstico.`
             : "Sin universidad propia en nuestro catálogo."}
         </p>
       </div>
@@ -516,11 +642,11 @@ export function FichaFuera({ id, foco, indice, geoPorId, planFuera, onElegir }) 
   );
 }
 
-export function FichaCiudad({ c, indice, foco, geoPorId, rama, casos, onElegir }) {
+export function FichaCiudad({ c, indice, foco, geoPorId, rama, orden, onOrden, casos, onElegir }) {
   const com = indice.comunidades.get(c.comunidad);
   const lista = com ? indice.listas.get(com.lista) : null;
-  const unis = c.universidades.map((id) => indice.universidades.get(id)).filter(Boolean);
-  const campus = c.campus.map((id) => indice.universidades.get(id)).filter(Boolean);
+  const unis = ordenarUniversidades(c.universidades.map((id) => indice.universidades.get(id)).filter(Boolean), orden, rama);
+  const campus = ordenarUniversidades(c.campus.map((id) => indice.universidades.get(id)).filter(Boolean), orden, rama);
   const casosAqui = casos.filter((k) => k.ciudadId === c.id);
 
   return (
@@ -556,9 +682,11 @@ export function FichaCiudad({ c, indice, foco, geoPorId, rama, casos, onElegir }
         </p>
       )}
 
-      <Bloque titulo="Universidades">
+      <Bloque titulo="Universidades" accion={unis.length + campus.length > 1 ? <SelectorOrden compacto orden={orden} onOrden={onOrden} /> : null}>
         <ListaUniversidades unis={unis} campus={campus} indice={indice} rama={rama} onElegir={onElegir} />
       </Bloque>
+
+      {com && <VivirAqui comunidad={com} soloCiudad={c.nombre} />}
 
       {c.masteres > 0 && (
         <Bloque titulo="Másteres oficiales por rama">
@@ -601,11 +729,12 @@ export function FichaCiudad({ c, indice, foco, geoPorId, rama, casos, onElegir }
   );
 }
 
-export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, onElegir }) {
+export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, onElegir, onGuardar }) {
   const com = indice.comunidades.get(u.comunidad);
   const lista = indice.listas.get(u.lista) || null;
   const ciudad = indice.ciudades.get(u.ciudad);
   const ranking = textoRanking(u.ranking);
+  const plazos = leerPlazos(u);
 
   return (
     <article>
@@ -651,21 +780,15 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
           </span>
           <span className="min-w-0">
             <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#96CCFC]">Ranking mundial</span>
+            {/* Siempre «QS World University Rankings 2027 · puesto X» y sin enlace (cliente, 14/09/2026). */}
             <span className="mapa-titular block text-sm font-bold leading-snug">{ranking}</span>
-            {/* Sin enlace (el cliente no quiere enlaces externos): la ficha de QS se cita como texto de fuente. */}
-            <span className="mt-0.5 block text-[11px] text-[#96CCFC]">
-              Fuente: {[u.ranking?.fuente, u.ranking?.edicion].filter(Boolean).join(" ")}
-              {(() => {
-                try {
-                  return u.ranking?.url ? ` · ${new URL(u.ranking.url).hostname.replace(/^www\./, "")}` : "";
-                } catch {
-                  return "";
-                }
-              })()}
-            </span>
           </span>
         </div>
       )}
+
+      {plazos && <Plazo rotulo={PLAZOS.proximo} fase={plazos.proxima} curso={plazos.curso} fases={plazos.fases} />}
+
+      <BecasUniversidad becas={leerBecas(u)} />
 
       <Bloque titulo="Másteres oficiales por rama">
         <BarrasRamas conteo={u.ramas} ramas={indice.ramas} resaltada={rama} />
@@ -680,6 +803,7 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
       {com && <PlanInspira plan={com.plan} lista={lista} />}
 
       <Acciones
+        guardar={onGuardar ? () => onGuardar("universidad", u.id) : null}
         whatsapp={{
           texto: "Quiero postular aquí",
           href: whatsappDesde("mapa", `Quiero postular a la ${u.nombre} (${u.sigla}), en ${ciudad?.nombre || u.sedes[0]}.`),

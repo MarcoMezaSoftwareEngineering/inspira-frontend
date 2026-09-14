@@ -8,7 +8,26 @@
 // máster por año y sus ejemplos. Si un dato no viene, queda en null y la
 // página no lo pinta.
 
+import { leerPlazos, topeAbre } from "./plazos";
+import { presupuestoAnual } from "./vida";
+
 export const SIN_RAMA = "SIN_CLASIFICAR";
+
+// Filtro «Abre antes de…»: mes (del primer año del curso) de cada opción.
+export const ABRE_MESES = { feb: 2, abr: 4 };
+
+/** Becas vinculadas a sus másteres: [{ nombre, entidad, curso, masteres }]. */
+export function leerBecas(u) {
+  if (!Array.isArray(u?.becas)) return [];
+  return u.becas
+    .map((b) => ({
+      nombre: String(b?.nombre || "").trim(),
+      entidad: b?.entidad ? String(b.entidad).trim() : null,
+      curso: b?.curso ? String(b.curso).trim() : null,
+      masteres: Number.isFinite(Number(b?.masteres)) && Number(b.masteres) > 0 ? Number(b.masteres) : null,
+    }))
+    .filter((b) => b.nombre);
+}
 
 // Deslizador de matrícula máxima (euros al año) cuando no hay datos para
 // calcular sus límites. En el tope, «sin límite».
@@ -157,6 +176,18 @@ export function crearIndice(datosApi) {
   const indice = { datos, comunidades, ciudades, universidades, listas, ramas: datos.ramas, busqueda };
   indice.limitesPrecio = limitesPrecio(indice);
   indice.hayPrecios = datos.comunidades.some((c) => c.precioAnual) || datos.universidades.some((u) => u.precioAnual);
+
+  // Campos que la API va sumando: cada filtro solo se ofrece si llega su dato.
+  indice.hayPlazos = datos.universidades.some((u) => leerPlazos(u));
+  indice.cursoPlazos = datos.universidades.map((u) => leerPlazos(u)?.curso).find(Boolean) || null;
+  indice.hayBecas = datos.universidades.some((u) => leerBecas(u).length > 0);
+  indice.presupuestos = new Map(
+    datos.comunidades.map((c) => [c.id, presupuestoAnual(c, datos.precios.sinPublicar.includes(c.id))]).filter(([, p]) => p)
+  );
+  const totales = [...indice.presupuestos.values()].map((p) => p.total);
+  indice.limitesPresupuesto = totales.length
+    ? { min: Math.floor(Math.min(...totales) / 500) * 500, max: Math.ceil(Math.max(...totales) / 500) * 500 + 500, paso: 500 }
+    : null;
   return indice;
 }
 
@@ -186,6 +217,55 @@ export function buscar(indice, consulta, max = 8) {
 
 export const masteresDe = (entidad, rama) => (rama ? entidad?.ramas?.[rama] || 0 : entidad?.masteres || 0);
 
+/* ── Ranking QS ─────────────────────────────────────────────────────── */
+
+// Filtro «Ranking QS»: tope de puesto de cada opción («con» = cualquier puesto).
+export const RANKING_TOPES = { top200: 200, top500: 500, top1000: 1000, con: Infinity };
+
+/**
+ * Puesto numérico con el que se filtra y se ordena. QS publica «=165»
+ * (empate), «851-900» (banda) o «1401+»: se toma el límite inferior.
+ * Sin ranking, null.
+ */
+export function posicionRanking(u) {
+  const pos = u?.ranking?.posicion;
+  if (pos == null || !u?.ranking?.fuente) return null;
+  const m = String(pos).replace(/\./g, "").match(/\d+/);
+  return m ? Number(m[0]) : null;
+}
+
+/** El filtro de ranking solo se ofrece si alguna universidad lo trae. */
+export const hayRanking = (indice) => indice.datos.universidades.some((u) => posicionRanking(u) != null);
+
+/**
+ * Orden de una lista de universidades: «ranking» pone primero las que tienen
+ * mejor puesto (las que no aparecen en QS, al final); si no, más másteres
+ * primero. En empate, más másteres.
+ */
+export function ordenarUniversidades(unis, orden, rama) {
+  const porMasteres = (a, b) => masteresDe(b, rama) - masteresDe(a, rama) || a.nombre.localeCompare(b.nombre, "es");
+  if (orden !== "ranking") return [...unis].sort(porMasteres);
+  return [...unis].sort((a, b) => {
+    const pa = posicionRanking(a);
+    const pb = posicionRanking(b);
+    if (pa == null && pb == null) return porMasteres(a, b);
+    if (pa == null) return 1;
+    if (pb == null) return -1;
+    return pa - pb || porMasteres(a, b);
+  });
+}
+
+/** La universidad con mejor puesto entre unos ids (o null). */
+export function mejorRanking(indice, ids = []) {
+  let mejor = null;
+  for (const id of ids) {
+    const u = indice.universidades.get(id);
+    const p = posicionRanking(u);
+    if (p != null && (!mejor || p < mejor.posicion)) mejor = { u, posicion: p };
+  }
+  return mejor;
+}
+
 /** «Pública» / «Privada» → «publica» / «privada»; sin dato, null. */
 export function claveTitularidad(u) {
   const t = normalizar(u?.titularidad);
@@ -198,12 +278,17 @@ export const hayTitularidad = (indice) => indice.datos.universidades.some((u) =>
 /**
  * Qué cumple los filtros. Una universidad cumple si su comunidad está en las
  * listas elegidas, si es de la titularidad pedida, si tiene al menos un máster
- * oficial de la rama y si su precio aproximado por año (o, sin él, la
- * matrícula orientativa de su comunidad) no pasa del máximo. Una comunidad o
- * una ciudad cumplen si alguna de sus universidades cumple.
+ * oficial de la rama, si su puesto en QS entra en el tope pedido y si su
+ * precio aproximado por año (o, sin él, la matrícula orientativa de su
+ * comunidad) no pasa del máximo. Una comunidad o una ciudad cumplen si alguna
+ * de sus universidades cumple.
  */
-export function aplicarFiltros(indice, { listas = [], rama = null, max = null, titularidad = null } = {}) {
-  const activos = listas.length > 0 || !!rama || max != null || !!titularidad;
+export function aplicarFiltros(
+  indice,
+  { listas = [], rama = null, max = null, titularidad = null, ranking = null, abre = null, becas = false, presupuesto = null } = {}
+) {
+  const activos = listas.length > 0 || !!rama || max != null || !!titularidad || !!ranking || !!abre || !!becas || presupuesto != null;
+  const tope = abre ? topeAbre(ABRE_MESES[abre], indice.cursoPlazos) : null;
   const universidades = new Set();
   let masteres = 0;
 
@@ -211,6 +296,20 @@ export function aplicarFiltros(indice, { listas = [], rama = null, max = null, t
     if (listas.length && !listas.includes(u.lista)) continue;
     if (titularidad && claveTitularidad(u) !== titularidad) continue;
     if (rama && !(masteresDe(u, rama) > 0)) continue;
+    if (ranking) {
+      const p = posicionRanking(u);
+      if (p == null || p > (RANKING_TOPES[ranking] ?? Infinity)) continue;
+    }
+    if (tope) {
+      // Las fechas son «AAAA-MM-DD»: se comparan como texto.
+      const inicio = leerPlazos(u)?.proxima?.inicio;
+      if (!inicio || inicio >= tope) continue;
+    }
+    if (becas && !leerBecas(u).length) continue;
+    if (presupuesto != null) {
+      const p = indice.presupuestos?.get(u.comunidad);
+      if (!p || p.total > presupuesto) continue;
+    }
     if (max != null) {
       const precio = precioParaFiltro(indice, u);
       if (precio == null || precio > max) continue;
@@ -237,7 +336,15 @@ export function aplicarFiltros(indice, { listas = [], rama = null, max = null, t
           )
           .map((c) => c.nombre);
 
-  return { activos, rama, universidades, comunidades, ciudades, masteres, sinCifra };
+  // Comunidades sin presupuesto con el que sumar: el filtro de presupuesto las deja fuera.
+  const sinPresupuesto =
+    presupuesto == null
+      ? []
+      : indice.datos.comunidades
+          .filter((c) => (!listas.length || listas.includes(c.lista)) && !indice.presupuestos?.has(c.id))
+          .map((c) => c.nombre);
+
+  return { activos, rama, ranking, abre, becas, presupuesto, universidades, comunidades, ciudades, masteres, sinCifra, sinPresupuesto };
 }
 
 /** Ramas con másteres, de más a menos; «sin rama asignada» siempre al final. */

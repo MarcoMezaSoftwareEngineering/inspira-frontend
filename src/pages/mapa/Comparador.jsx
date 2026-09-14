@@ -9,7 +9,9 @@
 // al mayor de la fila.
 import { precioDeUniversidad, ramaPrincipal } from "./indice";
 import { tonoDe } from "./tonosMapa";
-import { PRECIO, eur, etiquetaLista, importeMatricula, mayus, numero, textoRanking } from "./mapaTextos";
+import { gastoMensual } from "./vida";
+import { BotonGuardar } from "./GuardarComparativa";
+import { PAQUETE, PRECIO, VIDA, eur, etiquetaLista, importeMatricula, mayus, numero, textoRanking } from "./mapaTextos";
 
 function Marca({ children }) {
   return (
@@ -46,7 +48,7 @@ function filaPrecio(precioDe, items, extremos) {
   const max = maximo(items.map((it) => precioDe(it)?.tipico));
   return {
     id: "precio",
-    etiqueta: "Máster por año (lo habitual)",
+    etiqueta: "Matrícula de un máster por año (lo habitual)",
     opcional: (it) => !!precioDe(it),
     valor: (it) => {
       const p = precioDe(it);
@@ -63,6 +65,40 @@ function filaPrecio(precioDe, items, extremos) {
     },
   };
 }
+
+/** «Gasto mensual de un estudiante» (solo si la API trae `comunidad.vida`). */
+function filaGasto(gastoDe, items) {
+  const max = maximo(items.map((it) => gastoDe(it)?.medio));
+  return {
+    id: "gasto",
+    etiqueta: VIDA.fila,
+    opcional: (it) => !!gastoDe(it),
+    valor: (it) => {
+      const g = gastoDe(it);
+      return g ? (
+        <>
+          <ConBarra texto={g.texto} valor={g.medio} max={max} />
+          <span className="mt-1 block text-[11px] text-neutral-700">
+            {VIDA.aproximado} · {g.detalle}
+          </span>
+        </>
+      ) : (
+        "—"
+      );
+    },
+  };
+}
+
+/** Celda del paquete de postulación: nunca se confunde con la matrícula. */
+const celdaPaquete = (plan) =>
+  plan ? (
+    <>
+      <strong className="text-[#003648]">{PAQUETE.desde(plan.eur)}</strong>
+      <span className="block text-xs text-neutral-700">{plan.nombre}</span>
+    </>
+  ) : (
+    "—"
+  );
 
 function filasComunidad(indice, items, extremos) {
   const maxMatricula = maximo(items.map((c) => c.matricula?.min));
@@ -92,20 +128,9 @@ function filasComunidad(indice, items, extremos) {
       ),
     },
     { id: "rama", etiqueta: "Rama con más másteres", valor: (c) => textoRama(indice, c.ramas) },
+    filaGasto((c) => gastoMensual(c), items),
     { id: "postulacion", etiqueta: "Cómo se postula", valor: (c) => <span className="text-xs leading-relaxed">{c.postulacion.texto}</span> },
-    {
-      id: "plan",
-      etiqueta: "Plan de Inspira",
-      valor: (c) =>
-        c.plan ? (
-          <>
-            <strong className="text-[#003648]">Desde {eur(c.plan.eur)}</strong>
-            <span className="block text-xs text-neutral-700">{c.plan.nombre}</span>
-          </>
-        ) : (
-          "—"
-        ),
-    },
+    { id: "plan", etiqueta: PAQUETE.fila, valor: (c) => celdaPaquete(c.plan) },
   ];
 }
 
@@ -139,7 +164,8 @@ function filasUniversidad(indice, items, extremos) {
         />
       ),
     },
-    { id: "plan", etiqueta: "Plan de Inspira", valor: (u) => (com(u)?.plan ? <strong className="text-[#003648]">Desde {eur(com(u).plan.eur)}</strong> : "—") },
+    filaGasto((u) => gastoMensual(com(u), indice.ciudades.get(u.ciudad)?.nombre), items),
+    { id: "plan", etiqueta: PAQUETE.fila, valor: (u) => celdaPaquete(com(u)?.plan) },
   ];
 }
 
@@ -173,7 +199,7 @@ function IlustracionVacia() {
   );
 }
 
-export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar, onVaciar, onVer, onProbar }) {
+export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar, onVaciar, onVer, onProbar, onGuardar }) {
   const items = comparar.ids
     .map((id) => (comparar.tipo === "comunidad" ? indice.comunidades.get(id) : indice.universidades.get(id)))
     .filter(Boolean);
@@ -195,9 +221,12 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
           <p className="mt-1 text-sm text-neutral-700">Hasta 3 comunidades o 3 universidades. Añádelas con el botón «Comparar» de su ficha.</p>
         </div>
         {items.length > 0 && (
-          <button type="button" onClick={onVaciar} className="text-sm font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]">
-            Vaciar el comparador
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {onGuardar && <BotonGuardar claro onClick={onGuardar} />}
+            <button type="button" onClick={onVaciar} className="text-sm font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]">
+              Vaciar el comparador
+            </button>
+          </div>
         )}
       </div>
       {aviso && (
@@ -211,7 +240,8 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
           <IlustracionVacia />
           <p className="mapa-titular text-lg font-bold text-[#003648]">Aún no hay nada que comparar</p>
           <p className="max-w-md text-sm leading-relaxed text-neutral-700">
-            Abre una comunidad o una universidad en el mapa y pulsa «Comparar». Verás su precio, su oferta y cómo se postula, una junto a otra.
+            Abre una comunidad o una universidad en el mapa y pulsa «Comparar». Verás cuánto cuesta un máster en cada una, su oferta y cómo se
+            postula, una junto a otra.
           </p>
           {nombresEjemplo.length > 1 && (
             <button
@@ -284,7 +314,10 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
               </tbody>
             </table>
           </div>
-          {conPrecio && <p className="mt-2 text-[11px] text-neutral-700">{PRECIO.etiqueta}.</p>}
+          <p className="mt-2 text-[11px] text-neutral-700">
+            {conPrecio ? `${PRECIO.etiqueta}. ` : ""}
+            {PAQUETE.leyenda}
+          </p>
         </>
       )}
     </section>

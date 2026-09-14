@@ -26,9 +26,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
 import { proyectar } from "./proyeccion";
-import { masteresDe, prefiereMenosMovimiento } from "./indice";
+import { masteresDe, mejorRanking, prefiereMenosMovimiento } from "./indice";
 import { NOCHE, SOL, tonoDe } from "./tonosMapa";
-import { T, etiquetaLista, importeMatricula, numero, plural } from "./mapaTextos";
+import { T, etiquetaLista, importeMatricula, numero, plural, textoRanking } from "./mapaTextos";
 
 const CIUDADES_AUTONOMAS = new Set(["ceuta", "melilla"]);
 const PEQUENAS = ["la-rioja", "cantabria", "asturias", "navarra", "pais-vasco", "murcia", "baleares", "ceuta", "melilla"];
@@ -137,7 +137,7 @@ function Tooltip({ hover, indice, geoPorId, casos, filtros }) {
         <p className="text-[#96CCFC]">{etiquetaLista(indice.listas.get(c.lista))}</p>
         <p className="mt-1">
           {c.precioAnual
-            ? `Máster por año: ≈ ${numero(Math.round(c.precioAnual.tipico))} €`
+            ? `Matrícula de un máster al año: ≈ ${numero(Math.round(c.precioAnual.tipico))} €`
             : `Matrícula al año: ${importeMatricula(c.matricula)}`}
         </p>
         <p>
@@ -152,6 +152,7 @@ function Tooltip({ hover, indice, geoPorId, casos, filtros }) {
     const c = indice.ciudades.get(hover.id);
     if (!c) return null;
     const n = masteresDe(c, filtros.rama);
+    const mejor = mejorRanking(indice, [...c.universidades, ...c.campus]);
     return (
       <>
         <p className="mapa-titular text-sm font-bold">{c.nombre}</p>
@@ -164,6 +165,11 @@ function Tooltip({ hover, indice, geoPorId, casos, filtros }) {
         {c.campus.length > 0 && (
           <p className="text-white/75">
             Campus de {c.campus.map((id) => indice.universidades.get(id)?.sigla).filter(Boolean).join(", ")}
+          </p>
+        )}
+        {mejor && (
+          <p className="mt-1 text-[#96CCFC]">
+            {mejor.u.sigla}: {textoRanking(mejor.u.ranking)}
           </p>
         )}
         {noCumple(filtros.ciudades, c.id) && <p className="mt-1 text-[#F09C48]">{T.noCumple}</p>}
@@ -187,7 +193,7 @@ function Tooltip({ hover, indice, geoPorId, casos, filtros }) {
   return null;
 }
 
-export default function MapaInteractivo({ geo, indice, foco, filtros, capas, casos, onElegir, onToda }) {
+export default function MapaInteractivo({ geo, indice, foco, filtros, capas, casos, onElegir, onToda, recomendadas = [] }) {
   const base = useMemo(() => geo.viewBox.split(/\s+/).map(Number), [geo.viewBox]);
   const aspecto = base[2] / base[3];
   const geoPorId = useMemo(() => new Map(geo.comunidades.map((g) => [g.id, g])), [geo]);
@@ -292,6 +298,7 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
 
   const opacidadComunidad = (id) => {
     if (filtros.activos && !filtros.comunidades.has(id)) return 0.3;
+    if (recomendadas.length && !recomendadas.includes(id)) return 0.45;
     if (activa && activa !== id) return 0.55;
     return 1;
   };
@@ -526,6 +533,8 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
               const rpx = radioPx(n);
               const r = px(rpx);
               const fuera = filtros.activos && !filtros.ciudades.has(c.id);
+              // Con el filtro de ranking, las ciudades que cumplen llevan un anillo Sol.
+              const resaltada = !!filtros.ranking && !fuera;
               const soloCampus = c.masteres === 0;
               return (
                 <g
@@ -542,6 +551,9 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
                 >
                   <g opacity={fuera ? 0.25 : 1}>
                     <circle cx={x} cy={y} r={Math.max(r, px(11))} fill="transparent" />
+                    {resaltada && (
+                      <circle cx={x} cy={y} r={r + px(3.2)} fill="none" stroke={SOL} strokeWidth={px(3.2)} className="pointer-events-none" />
+                    )}
                     <circle
                       cx={x}
                       cy={y}
@@ -644,6 +656,38 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
               </g>
             );
           })()}
+
+        {/* Recomendador: contorno Sol discontinuo y número de orden en las 3 comunidades */}
+        {recomendadas.map((id, i) => {
+          const g = geoPorId.get(id);
+          if (!g) return null;
+          return (
+            <g key={`rec-${id}`} pointerEvents="none" aria-hidden="true">
+              {!CIUDADES_AUTONOMAS.has(id) && activa !== id && (
+                <use
+                  href={`#${PREFIJO}-${id}`}
+                  fill="none"
+                  stroke={SOL}
+                  strokeWidth={px(3)}
+                  strokeLinejoin="round"
+                  strokeDasharray={`${f1(px(8))} ${f1(px(4))}`}
+                />
+              )}
+              <circle cx={g.etiqueta[0]} cy={g.etiqueta[1]} r={px(13)} fill={SOL} stroke="#ffffff" strokeWidth={px(2.5)} />
+              <text
+                x={g.etiqueta[0]}
+                y={g.etiqueta[1]}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={px(14)}
+                fill={NOCHE}
+                className="mapa-titular font-bold"
+              >
+                {i + 1}
+              </text>
+            </g>
+          );
+        })}
 
         {/* Casos de éxito */}
         {capas.casos &&

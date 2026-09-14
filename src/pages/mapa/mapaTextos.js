@@ -17,21 +17,22 @@ export { eur, numero };
 export const RUTA = "/mapa-estudiar-en-espana";
 
 // Mismos textos que scripts/rutas-compartir.mjs (vista previa al compartir).
+// La imagen la genera scripts/og-compartir.py (función «mapa»).
 export const SEO = {
-  title: "Mapa para estudiar en España: comunidades, ciudades y universidades",
+  title: "¿Cuánto cuesta un máster en España? Mapa por comunidad y universidad",
   description:
-    "Mapa interactivo de las comunidades, ciudades y universidades españolas con másteres oficiales: matrícula orientativa, cómo se postula en cada una y el plan de Inspira que las cubre.",
+    "Descubre en el mapa cuánto cuesta un máster oficial al año en cada comunidad, ciudad y universidad de España, con su ranking QS y cómo se postula. Los precios de Inspira son paquetes de postulación: la matrícula se paga aparte.",
   path: RUTA,
-  imagen: "/og/inspira-general.jpg",
+  imagen: "/og/mapa-estudiar-en-espana.jpg",
 };
 
 export const HERO = {
-  etiqueta: "Mapa interactivo",
+  etiqueta: "Mapa de costos de máster",
   icono: "mapa",
-  titulo: "Mapa para estudiar",
-  destacado: "en España",
+  titulo: "Descubre cuánto cuesta estudiar un máster",
+  destacado: "en cada ciudad de España",
   descripcion:
-    "Comunidades, ciudades y universidades con másteres oficiales: cuánto cuesta la matrícula, cómo se postula en cada una y qué plan de Inspira la cubre.",
+    "Toca una comunidad, una ciudad o una universidad y verás la matrícula aproximada de un máster al año, su ranking QS y cómo se postula. Los precios de Inspira son paquetes de postulación: la matrícula de la universidad se paga aparte.",
   accesos: [
     { icono: "euro", label: "Calculadora de costos", href: "/calculadora-master" },
     { icono: "birrete", label: "Paquete Máster 2027/2028", href: "/servicios/master" },
@@ -66,28 +67,183 @@ export function notasMatricula(m) {
 }
 
 /**
- * «QS World University Rankings 2027 · puesto 171». Un ranking sin su fuente
- * no se publica; si la universidad no aparece en él, no se pinta nada.
- * Posiciones como las publica QS: «=165» (empate), «701-710» (banda), «1401+».
+ * Siempre «QS World University Rankings 2027 · puesto X», sin enlace
+ * (cliente, 14/09/2026). Un ranking sin su fuente no se publica; si la
+ * universidad no aparece en él, no se pinta nada. Posiciones como las publica
+ * QS: «=165» (empate) → «puesto 165»; «851-900» (banda) → «puesto 851–900».
  */
 export function textoRanking(r) {
   if (!r || !r.fuente) return null;
   const nombre = [r.fuente, r.edicion].filter(Boolean).join(" ");
-  const pos = r.posicion == null ? "" : String(r.posicion).trim();
-  if (pos) {
-    if (/^\d+$/.test(pos)) return `${nombre} · puesto ${numero(Number(pos))}`;
-    if (pos.startsWith("=")) return `${nombre} · puesto ${pos.slice(1)} (empatado)`;
-    if (pos.includes("-")) return `${nombre} · puestos ${pos.replace("-", "–")}`;
-    return `${nombre} · puesto ${pos}`;
-  }
+  const pos = r.posicion == null ? "" : String(r.posicion).trim().replace(/^=/, "").replace(/\s*-\s*/g, "–");
+  if (pos) return `${nombre} · puesto ${pos}`;
   return r.texto ? `${nombre} · ${r.texto}` : null;
 }
 
+// Filtro «Ranking QS» (topes en indice.js, RANKING_TOPES) y orden de las universidades.
+export const RANKING = {
+  etiqueta: "Ranking QS",
+  todas: "Ranking QS: todas",
+  opciones: [
+    { id: "top200", nombre: "QS Top 200" },
+    { id: "top500", nombre: "QS Top 500" },
+    { id: "top1000", nombre: "QS Top 1000" },
+    { id: "con", nombre: "Con ranking QS" },
+  ],
+  resumen: { top200: "en el QS Top 200", top500: "en el QS Top 500", top1000: "en el QS Top 1000", con: "con ranking QS" },
+  anillo: "Anillo naranja: ciudad con universidad en el ranking elegido",
+};
+
+export const ORDEN = {
+  etiqueta: "Ordenar universidades",
+  masteres: "Más másteres primero",
+  ranking: "Mejor ranking primero",
+};
+
+// Todo precio de Inspira es un paquete de postulación (cliente, 14/09/2026):
+// nunca se confunde con la matrícula ni con el precio del máster.
+export const PAQUETE = {
+  rotulo: "Paquete de postulación de Inspira",
+  desde: (n) => `Paquete de postulación desde ${eur(n)}`,
+  desdeCorto: (n) => `paquete de postulación desde ${eur(n)}`,
+  leyenda: "Precio de Inspira por la postulación; la matrícula de la universidad se paga aparte.",
+  fila: "Paquete de postulación de Inspira",
+};
+
+// Panel de inicio y estados vacíos: la página sirve para descubrir cuánto cuesta un máster.
+export const INICIO = {
+  rotulo: "Empieza aquí",
+  titulo: "¿Cuánto cuesta un máster en España?",
+  texto:
+    "Toca una comunidad o una ciudad del mapa y descubre cuánto cuesta un máster al año en sus universidades, con ejemplos, su ranking QS y cómo se postula. Cada burbuja es una ciudad: cuanto más grande, más másteres oficiales.",
+  precios: "Máster por año, comunidad a comunidad",
+  preciosNota: "Matrícula aproximada de un máster al año (lo habitual). Toca una para ver ejemplos.",
+};
+
+export const VACIO = {
+  filtros: "Ninguna universidad cumple estos filtros. Prueba a quitar alguno: toca después una comunidad en el mapa para descubrir cuánto cuesta un máster allí.",
+};
+
+// «Vivir aquí»: coste de vida por comunidad (`comunidad.vida` en la API). Siempre aproximado.
+export const VIDA = {
+  titulo: "Vivir aquí",
+  habitacion: "Habitación compartida",
+  estudio: "Estudio",
+  gasto: "Gasto mensual de un estudiante",
+  gastoNota: "Orientativo, de bajo a medio",
+  transporte: "Transporte",
+  clima: "Clima",
+  idioma: "Idioma cooficial",
+  iprem: "Extranjería exige acreditar al menos 600 €/mes (IPREM 2026).",
+  aproximado: "Aproximado",
+  sinVerificar: "estimación pendiente de verificar",
+  elegirCiudad: "Ciudad",
+  fila: "Gasto mensual de un estudiante",
+};
+
+// Plazos de postulación (`universidad.plazos`): siempre como fechas estimadas.
+export const PLAZOS = {
+  proximo: "Próximo plazo de postulación",
+  temprano: "Plazo de postulación más temprano",
+  fases: "Fases del curso",
+  estimadas: (curso) => `Fechas estimadas ${curso}`,
+  sinProximo: "Sin plazo por delante en el calendario estimado.",
+  filtro: "Plazo de postulación",
+  todas: "Plazos: todos",
+  opciones: [
+    { id: "feb", nombre: "Abre antes de febrero" },
+    { id: "abr", nombre: "Abre antes de abril" },
+  ],
+  resumen: { feb: "que abren plazo antes de febrero", abr: "que abren plazo antes de abril" },
+};
+
+// Becas vinculadas a sus másteres (`universidad.becas`, solo emparejamientos fiables).
+export const BECAS = {
+  titulo: "Becas con convocatoria para sus másteres",
+  filtro: "Con becas",
+  resumen: "con becas",
+  etiqueta: "Con becas",
+  aclaracion: "La beca la decide cada entidad; lo revisamos contigo.",
+};
+
+// Presupuesto total al año (matrícula + vida), cuando la API trae `comunidad.vida`.
+export const PRESUPUESTO = {
+  etiqueta: "Tengo hasta",
+  sufijo: "al año",
+  sinLimite: "Sin tope",
+  explicacion: "Suma matrícula típica + gasto de vida medio × 12 en cada comunidad.",
+  iprem: "Extranjería exige al menos 7.200 € al año (IPREM 2026: 600 €/mes).",
+  ficha: "Presupuesto anual orientativo",
+  desglose: (p) => `Matrícula ≈ ${eur(p.matricula)} + vida ≈ ${eur(p.vida)} (gasto medio × 12 en ${p.ciudad})`,
+  sinDato: (nombres) => `${nombres}: sin coste de vida o matrícula con los que sumar, queda fuera mientras uses el presupuesto.`,
+};
+
+export const RECOMENDAR = {
+  boton: "Recomiéndame",
+  rotulo: "Recomiéndame",
+  titulo: "3 preguntas y te marcamos 3 comunidades",
+  subtitulo: "Las resaltamos en el mapa con el motivo de cada una.",
+  p1: "¿Cuánto puedes pagar de matrícula al año, como máximo?",
+  topes: [
+    { valor: 1000, nombre: `Hasta ${eur(1000)}` },
+    { valor: 2000, nombre: `Hasta ${eur(2000)}` },
+    { valor: 3500, nombre: `Hasta ${eur(3500)}` },
+    { valor: null, nombre: "Sin tope" },
+  ],
+  p2: "¿Qué área te interesa?",
+  p3: "¿Ciudad grande o tranquila?",
+  grande: "Grande",
+  tranquila: "Tranquila",
+  igual: "Me da igual",
+  ver: "Ver mis 3 comunidades",
+  recalcular: "Volver a recomendar",
+  resultado: "Las que mejor encajan",
+  vacio: "Ninguna comunidad encaja con las tres respuestas. Prueba a subir el tope de matrícula o a elegir «Me da igual».",
+  verMapa: "Ver en el mapa",
+  sesion: "Reserva tu sesión",
+  guardar: "Guardar mi comparativa",
+  comparar: "Compararlas",
+  cerrar: "Cerrar el recomendador",
+  transparencia: (n) =>
+    `Según matrícula orientativa y oferta de másteres oficiales (ciudad grande: ${n} o más másteres). Es una orientación: la admisión la decide cada universidad.`,
+};
+
+export const GUARDAR = {
+  boton: "Guárdala y te la enviamos",
+  rotulo: "Tu comparativa",
+  titulo: "Guárdala y te la enviamos",
+  texto: "Te la enviamos por WhatsApp (y por correo, si lo dejas) para revisarla con calma.",
+  seleccion: "Tu selección",
+  nombre: "Nombre",
+  whatsapp: "WhatsApp",
+  prefijo: "Prefijo del país",
+  email: "Correo (opcional)",
+  politica: ["He leído y acepto la ", "política de privacidad", " (obligatorio)."],
+  marketing: "Quiero recibir novedades sobre plazos, convocatorias y becas (opcional).",
+  enviar: "Guardar y enviármela",
+  enviando: "Enviando…",
+  okTitulo: "Listo: tu comparativa está guardada",
+  okTexto: "Te la enviaremos por WhatsApp. Si quieres adelantar, escríbenos ahora:",
+  okWhatsapp: "Seguir por WhatsApp",
+  error: "No pudimos guardarla ahora mismo. Escríbenos por WhatsApp y te la preparamos igual.",
+  limite: "Hemos recibido varias solicitudes seguidas desde tu conexión. Espera unos minutos o escríbenos por WhatsApp y te la preparamos igual.",
+  reintentar: "Volver al formulario",
+  cerrar: "Cerrar",
+  mensajeWhatsapp: "Guardé mi comparativa del mapa y quiero orientación para postular.",
+  errores: {
+    nombre: "Escribe tu nombre.",
+    whatsapp: "Escribe tu número de WhatsApp, solo cifras.",
+    email: "Revisa el correo.",
+    politica: "Para guardarla, acepta la política de privacidad.",
+  },
+};
+
 // Precio aproximado de un máster por año (lo calcula la API por universidad y
 // por comunidad). Siempre con su etiqueta: es una referencia, no un precio.
+// Es la matrícula de la universidad, no el paquete de postulación de Inspira.
 export const PRECIO = {
   titulo: "¿Cuánto cuesta un máster aquí?",
-  etiqueta: "Aproximado por año · puede variar por máster y universidad",
+  etiqueta: "Matrícula aproximada de la universidad por año · puede variar por máster",
   habitual: "lo habitual",
   confianzaBaja: "Pocos másteres con precio publicado: tómalo solo como referencia.",
   ejemplos: "Ejemplos",
@@ -115,7 +271,7 @@ export const T = {
   errorWhatsapp: "El mapa no me cargó y quiero orientación para elegir dónde estudiar.",
 
   ariaMapa:
-    "Mapa de España por comunidades autónomas, coloreadas por lista. Las burbujas son ciudades con universidades; las estrellas, casos de éxito.",
+    "Mapa de España por comunidades autónomas, coloreadas por lista: toca una para descubrir cuánto cuesta un máster allí. Las burbujas son ciudades con universidades; las estrellas, casos de éxito.",
   todaEspana: "Ver toda España",
   canarias: "Canarias",
   fuera: "Fuera de las listas",
@@ -143,9 +299,10 @@ export const T = {
   comparadorLleno: "Ya hay 3",
   calculadora: "Calcular costos",
   webOficial: "Web oficial de sus másteres",
-  verPlanes: "Ver qué incluye cada plan",
+  verPlanes: "Ver qué incluye cada paquete",
   descargo: "Datos orientativos. La admisión la decide cada universidad.",
-  planCubre: "Cubre la asesoría y la gestión de Inspira. La matrícula y las tasas se pagan aparte a cada organismo.",
+  planCubre:
+    "Precio de Inspira por la postulación; la matrícula de la universidad se paga aparte. Cubre la asesoría y la gestión de Inspira; las tasas se pagan a cada organismo.",
 
   comparadorAhoraComunidades: "El comparador ahora compara comunidades: no se mezclan con universidades.",
   comparadorAhoraUniversidades: "El comparador ahora compara universidades: no se mezclan con comunidades.",

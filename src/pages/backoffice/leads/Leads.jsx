@@ -86,7 +86,10 @@ export default function Leads() {
 
   const [texto, setTexto] = useState("");
   const [textoAplicado, setTextoAplicado] = useState("");
-  const [origen, setOrigen] = useState("");
+  // ?origen=MAPA llega desde «Interés del mapa».
+  const [origen, setOrigen] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("origen") || ""; } catch { return ""; }
+  });
   const [asesor, setAsesor] = useState("");
   const [sinResponder, setSinResponder] = useState(false);
   const [etapaFiltro, setEtapaFiltro] = useState("");

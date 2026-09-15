@@ -439,6 +439,13 @@ function Carrusel({ style }) {
 export default function Enlaces() {
   useEffect(() => {
     document.title = "Inspira Legal · Enlaces";
+    // La web deja hueco abajo para la barra inferior; aquí no hay barra y se
+    // veía una franja blanca bajo la página.
+    const previo = document.body.style.backgroundColor;
+    document.body.style.backgroundColor = "#013446";
+    return () => {
+      document.body.style.backgroundColor = previo;
+    };
   }, []);
 
   let paso = 0;

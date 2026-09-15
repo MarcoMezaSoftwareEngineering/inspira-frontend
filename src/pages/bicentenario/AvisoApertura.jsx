@@ -235,48 +235,15 @@ export default function AvisoApertura() {
   );
 }
 
-/** Barra fija en móvil (encima de la barra inferior del sitio). Se esconde
- *  arriba del todo y mientras el simulador o el aviso están a la vista. */
+/** Barra fija con los dos atajos (simulador y aviso), siempre a la vista
+ *  (la clienta la quiere permanente): en móvil y tableta, encima de la barra
+ *  inferior del sitio; en escritorio, flotando abajo al centro
+ *  (.bic-barra-fija en bicentenario.css). */
 export function BarraMovil() {
-  const [ver, setVer] = useState(false);
-  useEffect(() => {
-    const visibles = new Set();
-    let pasado = false;
-    const pintar = () => setVer(pasado && visibles.size === 0);
-    const alBajar = () => {
-      pasado = window.scrollY > 520;
-      pintar();
-    };
-    const io = new IntersectionObserver(
-      (entradas) => {
-        entradas.forEach((en) => (en.isIntersecting ? visibles.add(en.target.id) : visibles.delete(en.target.id)));
-        pintar();
-      },
-      { threshold: 0.12 }
-    );
-    ["simulador", "aviso"].forEach((k) => {
-      const el = document.getElementById(k);
-      if (el) io.observe(el);
-    });
-    alBajar();
-    window.addEventListener("scroll", alBajar, { passive: true });
-    return () => {
-      io.disconnect();
-      window.removeEventListener("scroll", alBajar);
-    };
-  }, []);
-
   return (
-    <div
-      aria-hidden={!ver}
-      className={`fixed inset-x-3 z-[41] flex gap-2 transition-all duration-300 md:hidden ${
-        ver ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
-      }`}
-      style={{ bottom: "calc(4.75rem + env(safe-area-inset-bottom))" }}
-    >
+    <div className="bic-barra-fija fixed inset-x-3 z-[45] mx-auto flex max-w-md gap-2">
       <a
         href="#simulador"
-        tabIndex={ver ? 0 : -1}
         onClick={(e) => irA(e, "#simulador")}
         className="bic-press bic-cta flex-1 rounded-2xl bg-accent px-3 py-3 text-center text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30"
       >
@@ -284,7 +251,6 @@ export function BarraMovil() {
       </a>
       <a
         href="#aviso"
-        tabIndex={ver ? 0 : -1}
         onClick={(e) => irA(e, "#aviso")}
         className="bic-press rounded-2xl bg-primary px-4 py-3 text-sm font-extrabold text-white shadow-lg"
       >

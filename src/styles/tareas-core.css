@@ -1,0 +1,124 @@
+/* Tareas en Inspira Core. Todo con prefijo ase-tr- (las clases cortas chocan
+   con otras hojas: ver la nota del cerco de errores). Reutiliza el tablero, la
+   tabla y el panel lateral de leads-core.css (ase-ld-*). Tokens de asesor.css. */
+
+/* ── Vistas y áreas ────────────────────────────────────────────────────── */
+.ase-tr-alcance { margin: 0 0 12px; }
+
+.ase-tr-areas { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 640px) { .ase-tr-areas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .ase-tr-areas { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.ase-tr-area {
+  display: flex; align-items: center; gap: 10px; text-align: left; min-width: 0;
+  background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--tr-color, var(--sky-2));
+  border-radius: 13px; padding: 10px 12px; box-shadow: var(--sombra); cursor: pointer; color: var(--ink);
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.ase-tr-area:hover { transform: translateY(-2px); box-shadow: var(--sombra-alta); }
+.ase-tr-area[data-on="1"] { background: var(--sky-soft); border-color: var(--primary); border-left-color: var(--tr-color); }
+.ase-tr-area-ico {
+  width: 32px; height: 32px; border-radius: 10px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tr-color); background: color-mix(in srgb, var(--tr-color) 12%, #fff);
+}
+.ase-tr-area-n { display: block; font-size: 19px; font-weight: 800; color: var(--primary); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.ase-tr-area-l { display: block; font-size: 11px; font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Filtros ───────────────────────────────────────────────────────────── */
+.ase-tr-filtros { display: grid; gap: 8px; grid-template-columns: 1fr; align-items: center; margin: 14px 0; }
+@media (min-width: 720px) {
+  .ase-tr-filtros { grid-template-columns: minmax(12rem, 2fr) repeat(3, minmax(8rem, 1fr)) auto auto; }
+}
+.ase-tr-hueco { display: none; }
+@media (min-width: 720px) { .ase-tr-hueco { display: block; } }
+.ase-tr-cerradas input:checked + i { background: var(--primary); }
+
+/* ── Tarjeta del tablero ───────────────────────────────────────────────── */
+.ase-tr-card { border-left: 3px solid var(--tr-color, var(--sky-2)); }
+.ase-tr-card[data-vencida="1"] { box-shadow: inset 0 0 0 1px rgba(192, 57, 43, .35); }
+.ase-tr-card[data-cerrada="1"] { opacity: .7; }
+.ase-tr-card[data-cerrada="1"] .ase-ld-card-n { text-decoration: line-through; text-decoration-color: rgba(1, 52, 70, .35); }
+.ase-tr-card-cat {
+  font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--tr-color, var(--muted)); margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ase-tr-vence { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.ase-tr-vence[data-hoy="1"] { color: var(--amber); }
+.ase-tr-vence[data-vencida="1"] { color: var(--red); }
+
+/* ── Elegir área (alta y ficha) ────────────────────────────────────────── */
+.ase-tr-areas-elegir { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-top: 4px; }
+.ase-tr-area-op {
+  display: flex; align-items: center; gap: 7px; text-align: left; cursor: pointer;
+  padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff;
+  color: var(--ink); font-size: 12.5px; font-weight: 600;
+}
+.ase-tr-area-op svg { color: var(--tr-color); flex: 0 0 auto; }
+.ase-tr-area-op[data-on="1"] {
+  border-color: var(--tr-color); box-shadow: inset 0 0 0 1px var(--tr-color);
+  background: color-mix(in srgb, var(--tr-color) 9%, #fff);
+}
+.ase-tr-area-op:focus-visible { outline: 2px solid var(--sky-2); outline-offset: 1px; }
+
+/* ── Buscador de lead o expediente ─────────────────────────────────────── */
+.ase-tr-buscar { position: relative; }
+.ase-tr-resultados {
+  list-style: none; margin: 6px 0 0; padding: 4px; border: 1px solid var(--line); border-radius: 11px;
+  background: #fff; box-shadow: var(--sombra-alta); max-height: 240px; overflow-y: auto;
+}
+.ase-tr-resultados button {
+  display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left; cursor: pointer;
+  padding: 7px 9px; border: 0; background: transparent; border-radius: 8px; color: var(--ink); font-size: 12.5px;
+}
+.ase-tr-resultados button:hover, .ase-tr-resultados button:focus-visible { background: var(--sky-soft); outline: none; }
+.ase-tr-resultados span { font-size: 11px; color: var(--muted); }
+.ase-tr-nada { font-size: 11.5px; color: var(--muted); margin: 6px 2px 0; }
+.ase-tr-vinculo { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--sky-soft); border-radius: 11px; padding: 8px 10px; }
+.ase-tr-vinculo-t { font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.ase-tr-vinculo-d { font-size: 11px; color: var(--muted); }
+.ase-tr-vinculo-x {
+  margin-left: auto; flex: 0 0 auto; width: 26px; height: 26px; border: 0; border-radius: 8px; cursor: pointer;
+  background: rgba(1, 52, 70, .08); color: var(--primary); display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ── Carga del equipo ──────────────────────────────────────────────────── */
+.ase-tr-carga { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-top: 14px; }
+.ase-tr-carga-cab {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+}
+.ase-tr-sin {
+  text-transform: none; letter-spacing: 0; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  border: 1px solid rgba(185, 119, 14, .3); background: var(--amber-soft); color: var(--amber);
+  border-radius: 999px; padding: 3px 10px;
+}
+.ase-tr-sin[data-on="1"] { border-color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber); }
+.ase-tr-carga-grid { display: grid; gap: 6px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .ase-tr-carga-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .ase-tr-carga-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ase-tr-persona { display: flex; align-items: center; gap: 6px; min-width: 0; border: 1px solid var(--line); border-radius: 12px; padding: 3px 8px 3px 3px; background: #fbfdff; }
+.ase-tr-persona[data-on="1"] { border-color: var(--primary); background: var(--sky-soft); }
+.ase-tr-persona-btn {
+  display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; cursor: pointer; text-align: left;
+  border: 0; background: transparent; padding: 5px; border-radius: 9px; color: var(--ink);
+}
+.ase-tr-avatar {
+  width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; background: var(--primary); color: #fff;
+  font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.ase-tr-persona-n { display: block; font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ase-tr-persona-d { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ase-tr-persona-alerta {
+  flex: 0 0 auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+  background: var(--red); color: #fff; font-size: 10.5px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.ase-tr-gestor { font-size: 11px; gap: 6px; flex: 0 0 auto; }
+.ase-tr-gestor input:checked + i { background: var(--green); }
+.ase-tr-gestor-fijo { font-size: 10.5px; font-weight: 700; color: var(--muted); padding: 0 6px; }
+
+/* ── Ficha ─────────────────────────────────────────────────────────────── */
+.ase-tr-estados { display: flex; gap: 6px; flex-wrap: wrap; }
+.ase-tr-completada { font-size: 11.5px; font-weight: 600; color: var(--green); margin: 8px 0 0; }
+.ase-tr-completada[data-estado="DESCARTADA"] { color: var(--muted); }

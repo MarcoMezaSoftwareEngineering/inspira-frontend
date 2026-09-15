@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { navigate } from "../../../services/navigate";
 import { useAuth } from "../context/AuthContext";
 import { itemsVisibles, itemActivo, initials } from "./navSections";
+import ContadorTareas from "./ContadorTareas";
 
 const MIN_W = 150;
 const MAX_W = 380;
@@ -134,6 +135,7 @@ export default function Sidebar({ path, open, onClose, pinned, onTogglePin, user
                     >
                       {Icon && <Icon className="w-[17px] h-[17px] shrink-0 opacity-90" strokeWidth={1.8} />}
                       <span className="truncate">{it.label}</span>
+                      {it.id === "tareas" && <ContadorTareas />}
                     </a>
                   );
                 })}

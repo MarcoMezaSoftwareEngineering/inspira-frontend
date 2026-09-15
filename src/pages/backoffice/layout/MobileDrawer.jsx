@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { navigate } from "../../../services/navigate";
 import { useAuth } from "../context/AuthContext";
 import { itemsVisibles, itemActivo, initials } from "./navSections";
+import ContadorTareas from "./ContadorTareas";
 
 export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
   const auth = useAuth();
@@ -85,6 +86,7 @@ export default function MobileDrawer({ open, onClose, path, user, onLogout }) {
                       >
                         {Icon && <Icon className="w-[18px] h-[18px] shrink-0 opacity-90" strokeWidth={1.8} />}
                         <span className="truncate">{it.label}</span>
+                        {it.id === "tareas" && <ContadorTareas />}
                       </a>
                     );
                   })}

@@ -22,6 +22,7 @@ import Leads from "./leads/Leads";
 import InteresMapa from "./leads/InteresMapa";
 import EnlacesVisitas from "./leads/EnlacesVisitas";
 import Pagos from "./pagos/Pagos";
+import Tareas from "./tareas/Tareas";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
 import Procesos from "./procesos/Procesos";
@@ -258,6 +259,9 @@ export default function BackofficeApp() {
 
             {/* PAGOS — caja del mes, comprobantes y planes. ?cliente=, ?pago= y ?plan= abren lo suyo. */}
             {path === "/backoffice/pagos" && <ModuleGate perm="pagos.ver"><Pagos /></ModuleGate>}
+
+            {/* TAREAS — lo pendiente del equipo por área. ?tarea=ID abre la ficha (enlace de los correos). */}
+            {path === "/backoffice/tareas" && <Tareas />}
 
             {path === "/backoffice/tracker-universidades" && <ModuleGate perm="tracker.ver"><TrackerUniversidades /></ModuleGate>}
 

@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Calendar, FileText, TrendingUp, Users, Settings, Wrench, Wallet,
+  LayoutDashboard, Calendar, FileText, TrendingUp, Users, Settings, Wrench, Wallet, ListChecks,
 } from "lucide-react";
 
 // El menú de Inspira Core. Lo leen la barra lateral (Sidebar), el cajón del
@@ -66,14 +66,11 @@ export const NAV_SECTIONS = [
         id: "pagos", label: "Pagos", href: "/backoffice/pagos",
         perm: "pagos.ver", icon: Wallet,
       },
-      // ── Hueco reservado: «Tareas» ────────────────────────────────────────
-      // Todavía no tiene pantalla: NO se añade hasta que exista. Iría aquí,
-      // junto a Pagos, porque es trabajo de cada día:
-      //
-      //   { id: "tareas", label: "Tareas", href: "/backoffice/tareas", perm: "<clave>", icon: ListChecks },
-      //
-      // Al activarlo: la ruta en BackofficeApp.jsx, la clave de permiso en el
-      // backend (backoffice/permisos.catalog.js) y el icono en el import de arriba.
+      // Tareas (15/09/2026): lo pendiente del equipo por área. Sin `perm`:
+      // cualquier cuenta interna ve y crea las suyas; asignar a otros y ver las
+      // del equipo lo decide el servidor (tareas.gestionar o la marca personal).
+      // Junto a Pagos porque es trabajo de cada día. Lleva contador en el menú.
+      { id: "tareas", label: "Tareas", href: "/backoffice/tareas", icon: ListChecks },
       {
         id: "herramientas", label: "Herramientas", href: "/backoffice/herramientas",
         alsoActive: [

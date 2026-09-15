@@ -1,12 +1,12 @@
 // src/pages/backoffice/dashboard/BarraHoy.jsx
 //
-// La barra «Hoy» de Inspira Core: cinco chips con lo que hay que atender hoy.
+// La barra «Hoy» de Inspira Core: seis chips con lo que hay que atender hoy.
 // Cada chip abre la lista corta (máx. 10) con enlace a la solicitud o a la
 // sección correspondiente. Datos: GET /backoffice/hoy[?mio=1].
 import { useCallback, useEffect, useRef, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import {
-  AlarmClock, FileSearch, Wallet, Inbox, CalendarClock, ChevronDown, RefreshCw, X, ExternalLink,
+  AlarmClock, FileSearch, Wallet, Inbox, CalendarClock, ListChecks, ChevronDown, RefreshCw, X, ExternalLink,
 } from "lucide-react";
 
 const REFRESCO_MS = 5 * 60 * 1000;
@@ -40,6 +40,13 @@ const CHIPS = [
     clave: "leads", etiqueta: "Leads sin responder", icono: Inbox,
     sub: () => "más de 24 h",
     tono: (b) => (b.total ? "ambar" : "neutro"),
+  },
+  {
+    clave: "tareas", etiqueta: "Tareas", icono: ListChecks,
+    sub: (b) => [b.vencidas ? `${b.vencidas} vencida${b.vencidas === 1 ? "" : "s"}` : null,
+      b.hoy ? `${b.hoy} para hoy` : null].filter(Boolean).join(" · ") || "al día",
+    tono: (b) => (b.vencidas ? "rojo" : b.total ? "ambar" : "neutro"),
+    href: "/backoffice/tareas",
   },
   {
     clave: "sesiones", etiqueta: "Sesiones hoy", icono: CalendarClock,
@@ -160,13 +167,13 @@ export default function BarraHoy() {
       )}
 
       {!datos && !error && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {CHIPS.map((c) => <div key={c.clave} className="h-[74px] rounded-xl bg-neutral-100 animate-pulse" />)}
         </div>
       )}
 
       {datos && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {CHIPS.map((c) => {
             const b = bloques[c.clave] || { total: 0 };
             const t = TONOS[b.error ? "neutro" : c.tono(b)];
@@ -218,9 +225,24 @@ function ListaChip({ chip, bloque, mio, onCerrar }) {
           {bloque.total > items.length && <span className="font-semibold text-neutral-400"> · mostrando {items.length} de {bloque.total}</span>}
           {mio && chip.clave === "leads" && <span className="font-semibold text-neutral-400"> · sin asignar: se ven los del equipo</span>}
         </span>
-        <button type="button" onClick={onCerrar} title="Cerrar" className="w-6 h-6 rounded-lg text-neutral-400 hover:bg-neutral-100 flex items-center justify-center">
-          <X className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {chip.href && (
+            <a
+              href={chip.href}
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                e.preventDefault();
+                navegar(chip.href);
+              }}
+              className="text-[10.5px] font-bold text-[#147a4d] px-2 py-1 rounded-lg hover:bg-neutral-100"
+            >
+              Ver todas
+            </a>
+          )}
+          <button type="button" onClick={onCerrar} title="Cerrar" className="w-6 h-6 rounded-lg text-neutral-400 hover:bg-neutral-100 flex items-center justify-center">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
       {!items.length && !sinFecha.length ? (
         <p className="text-xs text-neutral-400 px-3 py-3">Nada pendiente.</p>
@@ -245,6 +267,7 @@ function FilaItem({ chip, it, sinFecha }) {
   if (sinFecha) derecha = it.plazo_texto ? `«${it.plazo_texto}»` : "sin plazo";
   else if (chip === "requerimientos") { derecha = `${fmtFecha(it.fecha)} · ${textoDias(it.dias)}`; rojo = it.vencido; }
   else if (chip === "pagos") { derecha = it.fecha ? `${it.vencido ? "venció" : "vence"} ${fmtFecha(it.fecha)}` : "sin vencimiento"; rojo = it.vencido; }
+  else if (chip === "tareas") { derecha = it.vencido ? `vencida hace ${-it.dias} d` : "vence hoy"; rojo = it.vencido; }
   else if (chip === "sesiones") derecha = it.hora || "hoy";
   else if (it.fecha) derecha = `desde ${fmtFecha(it.fecha)}`;
 

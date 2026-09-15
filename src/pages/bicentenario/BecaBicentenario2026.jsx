@@ -108,8 +108,7 @@ function Hero() {
       destacado="nuevas bases"
       descripcion="Te asesoramos para postular a la beca con universidades top 400 de España y de la Unión Europea."
     >
-      <div className="relative isolate grid w-full items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,25rem)]">
-        <div className="bic-aurora" aria-hidden="true" />
+      <div className="grid w-full items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,25rem)]">
         <div className="order-2 min-w-0 lg:order-1">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="bic-vidrio rounded-3xl bg-white/[0.08] p-5 ring-1 ring-white/15 backdrop-blur sm:p-6">

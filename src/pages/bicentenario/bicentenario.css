@@ -72,13 +72,6 @@
 .bic-tl > * { scroll-snap-align: start; }
 
 /* ── Retoque premium (opción A, 15/09/2026) ─────────────────────────────── */
-/* Aurora detrás del hero: dos luces difuminadas que se mueven despacio. */
-.bic-aurora { position: absolute; inset: -12% -8%; z-index: -1; pointer-events: none; filter: blur(60px); opacity: .55; }
-.bic-aurora::before, .bic-aurora::after { content: ""; position: absolute; border-radius: 9999px; }
-.bic-aurora::before { width: 38rem; height: 38rem; max-width: 90vw; max-height: 90vw; left: -6rem; top: -4rem; background: radial-gradient(circle, rgba(27, 141, 181, .9), transparent 65%); animation: bic-aurora 16s ease-in-out infinite alternate; }
-.bic-aurora::after { width: 30rem; height: 30rem; max-width: 80vw; max-height: 80vw; right: -4rem; bottom: -6rem; background: radial-gradient(circle, rgba(250, 148, 58, .55), transparent 65%); animation: bic-aurora 20s ease-in-out infinite alternate-reverse; }
-@keyframes bic-aurora { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(8%, 6%, 0) scale(1.15); } }
-
 /* Vidrio con borde degradado en las tarjetas del hero. */
 .bic-premium .bic-vidrio {
   border: 1px solid transparent;

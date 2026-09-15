@@ -20,6 +20,7 @@ import SolicitudDetalleBackoffice from "./solicitudes/SolicitudDetalleBackoffice
 import LeadsCalculadora from "./calculadora/LeadsCalculadora";
 import Leads from "./leads/Leads";
 import InteresMapa from "./leads/InteresMapa";
+import EnlacesVisitas from "./leads/EnlacesVisitas";
 import Pagos from "./pagos/Pagos";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
@@ -253,6 +254,7 @@ export default function BackofficeApp() {
             {/* LEADS — bandeja única y embudo. ?lead=ID abre la ficha. */}
             {path === "/backoffice/leads" && <ModuleGate perm="leads.ver"><Leads /></ModuleGate>}
             {path === "/backoffice/leads/mapa" && <ModuleGate perm="leads.ver"><InteresMapa /></ModuleGate>}
+            {path === "/backoffice/leads/enlaces" && <ModuleGate perm="leads.ver"><EnlacesVisitas /></ModuleGate>}
 
             {/* PAGOS — caja del mes, comprobantes y planes. ?cliente=, ?pago= y ?plan= abren lo suyo. */}
             {path === "/backoffice/pagos" && <ModuleGate perm="pagos.ver"><Pagos /></ModuleGate>}

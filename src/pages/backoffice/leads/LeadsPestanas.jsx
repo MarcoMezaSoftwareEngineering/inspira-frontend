@@ -10,6 +10,8 @@ const PESTANAS = [
   { id: "leads", label: "Bandeja de leads", href: "/backoffice/leads", perm: "leads.ver" },
   // Lo que se mira y se compara en el mapa público (desde el 14/09/2026).
   { id: "mapa-interes", label: "Interés del mapa", href: "/backoffice/leads/mapa", perm: "leads.ver" },
+  // Visitas a /enlaces, beca, mapa y grado; clics por botón y contactos (15/09/2026).
+  { id: "enlaces", label: "Enlaces y visitas", href: "/backoffice/leads/enlaces", perm: "leads.ver" },
   // Nunca pidió permiso: sigue abierta a cualquier rol interno.
   { id: "solicitudes-web", label: "Solicitudes web", href: "/backoffice/presupuestos" },
 ];

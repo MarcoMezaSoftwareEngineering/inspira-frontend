@@ -12,6 +12,7 @@ import AsesoriaCTA from "./components/common/AsesoriaCTA";
 import BarraProgreso from "./components/common/BarraProgreso";
 import BarraInferior from "./components/layout/BarraInferior";
 import { registrarVista } from "./lib/analytics";
+import { registrarVisita } from "./lib/visitas";
 import { getServicio } from "./config/servicios";
 import { getRuta } from "./config/rutas";
 import { useSEO } from "./hooks/useSEO";
@@ -397,6 +398,8 @@ export default function App() {
   // Vista de página en navegación SPA (solo si hay consentimiento analítico).
   useEffect(() => {
     registrarVista(path);
+    // Contador anónimo de las páginas de campaña: sin cookies, cuenta siempre.
+    registrarVisita(path);
   }, [path]);
 
   // Si se llegó aquí porque la sesión caducó a mitad de faena, se explica.

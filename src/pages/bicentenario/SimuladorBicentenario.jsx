@@ -30,6 +30,7 @@ import {
 } from "../../config/bicentenario2026";
 import { Alerta, Articulo, BotonCalendly, Check, Chevron, Cruz, Emoji, Pestanas, irA } from "./piezas";
 import { usePrefiereQuieto } from "./ilustraciones";
+import { BotonCompartir } from "./compartirResultado";
 
 const PASOS = [
   { txt: "Requisitos", emoji: "📋" },
@@ -585,6 +586,7 @@ function Resultado({ nivel, req, resp, onEditar, onReiniciar }) {
         >
           <span aria-hidden="true">💬</span> Recibir mi resultado por WhatsApp
         </a>
+        <BotonCompartir total={r.total} max={r.max.total} nivel={doc ? "doctorado" : "maestría"} />
         <BotonCalendly><span aria-hidden="true">📅</span> Reservar sesión diagnóstico</BotonCalendly>
         <button type="button" onClick={onEditar} className="bic-press px-2 py-2 text-sm font-bold text-primary underline underline-offset-4 hover:text-primary-light">
           ✏️ Cambiar respuestas

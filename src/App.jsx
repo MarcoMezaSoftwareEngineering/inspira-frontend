@@ -298,6 +298,8 @@ const LANDING_ADS_PATHS = ["/master-2027-2028"];
 const REDIRECCIONES = {
   "/metodo-inspira": "/servicios/master#pago-por-etapas",
   "/master-espana": "/master-2027-2028",
+  // Enlace corto para TikTok y redes (se dice en voz alta).
+  "/beca": "/beca-generacion-bicentenario-2026",
 };
 
 function rutaActual() {

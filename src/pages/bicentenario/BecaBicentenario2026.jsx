@@ -41,6 +41,7 @@ import {
   numeroPe,
 } from "../../config/bicentenario2026";
 import SimuladorBicentenario from "./SimuladorBicentenario";
+import AvisoApertura, { BarraMovil } from "./AvisoApertura";
 import {
   Acordeon,
   Articulo,
@@ -84,6 +85,7 @@ const SECCIONES = [
   ...(HAY_COMPARACION ? [{ id: "antes-y-ahora", emoji: "📊", txt: "2025 vs 2026" }] : []),
   { id: "bases", emoji: "📋", txt: "Bases" },
   { id: "simulador", emoji: "🧮", txt: "Simulador" },
+  { id: "aviso", emoji: "🔔", txt: "Aviso" },
   { id: "descubre", emoji: "🧭", txt: "Otros caminos" },
   { id: "asesoria-becas", emoji: "🤝", txt: "Asesoría" },
   { id: "preguntas", emoji: "❓", txt: "Preguntas" },
@@ -155,7 +157,17 @@ function Hero() {
             >
               <span aria-hidden="true">📋</span> Ver las bases en claro
             </a>
+            <a
+              href="#aviso"
+              onClick={(e) => irA(e, "#aviso")}
+              className="bic-press inline-flex items-center justify-center gap-2 rounded-xl px-6 py-4 font-bold text-white ring-2 ring-white/35 transition hover:bg-white/10"
+            >
+              <span aria-hidden="true">🔔</span> Avísame cuando abra
+            </a>
           </div>
+          <p className="mt-4 text-xs text-white/70">
+            <span aria-hidden="true">ℹ️ </span>Inspira Legal es una asesoría privada: no somos PRONABEC.
+          </p>
         </div>
         <div className="order-1 mx-auto w-full max-w-[15rem] sm:max-w-[20rem] lg:order-2 lg:max-w-none">
           <IlustracionHero className="h-auto w-full drop-shadow-2xl" />
@@ -746,11 +758,13 @@ export default function BecaBicentenario2026() {
       <Separador arriba={BLANCO} abajo={CLARO} />
       <Simulador />
       <Separador arriba={CLARO} abajo={BLANCO} invertir />
+      <AvisoApertura />
       <BloqueDescubre />
       <Separador arriba={BLANCO} abajo={CLARO} />
       <AsesoriaBecas />
       <Separador arriba={CLARO} abajo={BLANCO} invertir />
       <Preguntas />
+      <BarraMovil />
     </main>
   );
 }

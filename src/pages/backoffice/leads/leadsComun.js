@@ -23,6 +23,7 @@ export const ORIGENES = {
   PRESUPUESTO_WEB: "Presupuesto web",
   MANUAL: "Manual",
   MAPA: "Mapa",
+  BECA: "Beca Bicentenario",
 };
 
 export const TIPO_EVENTO = {

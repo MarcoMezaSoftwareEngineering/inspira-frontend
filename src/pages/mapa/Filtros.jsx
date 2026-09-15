@@ -225,7 +225,7 @@ export default function Filtros({
   const matices = [ranking && RANKING.resumen[ranking], abre && PLAZOS.resumen[abre], becas && BECAS.resumen].filter(Boolean).join(", ");
 
   return (
-    <div className="rounded-[28px] border border-[#E1EFFD] bg-white p-4 shadow-[0_22px_48px_-36px_rgba(0,54,72,0.5)] sm:p-5">
+    <div className="mapa-panel rounded-[28px] border border-[#E1EFFD] bg-white p-4 shadow-[0_22px_48px_-36px_rgba(0,54,72,0.5)] sm:p-5">
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_280px]">
         <Buscador indice={indice} onElegir={onBuscar} />
         <div>

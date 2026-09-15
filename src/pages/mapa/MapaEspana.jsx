@@ -147,7 +147,7 @@ function Cabecera({ totales, onRecomendar }) {
           { n: totales.universidades, t: "universidades" },
           { n: totales.comunidades, t: "comunidades" },
         ].map((d) => (
-          <div key={d.t} className="rounded-2xl bg-[#003648] px-4 py-2 text-white">
+          <div key={d.t} className="mapa-cifra rounded-2xl bg-[#003648] px-4 py-2 text-white">
             <dd className="mapa-titular text-xl font-bold leading-none">
               <Cifra n={d.n} />
             </dd>
@@ -503,7 +503,7 @@ function Explorador({ datos, geo }) {
 
       <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
         <div ref={mapaRef} className="scroll-mt-24">
-          <div className="mapa-mar relative overflow-hidden rounded-[28px] border border-[#CFE6FD] p-2 shadow-[0_30px_60px_-44px_rgba(0,54,72,0.55)] sm:p-4">
+          <div className="mapa-mar mapa-marco relative overflow-hidden rounded-[28px] border border-[#CFE6FD] p-2 shadow-[0_30px_60px_-44px_rgba(0,54,72,0.55)] sm:p-4">
             <span className="pointer-events-none absolute right-3 top-3 z-[1] hidden rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold text-[#003648] ring-1 ring-[#CFE6FD] sm:inline-flex">
               Listas {String(datos.curso || "").replace("-", "/")}
             </span>
@@ -591,7 +591,7 @@ export default function MapaEspana() {
   }, [intento]);
 
   return (
-    <main className="w-full bg-white">
+    <main className="mapa-premium w-full bg-white">
       <PageHero
         etiqueta={HERO.etiqueta}
         icono={HERO.icono}

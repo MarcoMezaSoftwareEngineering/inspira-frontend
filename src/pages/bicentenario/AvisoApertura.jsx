@@ -5,6 +5,7 @@
 // para que el equipo avise al abrir; «¿Dónde nos viste?» dice qué red trae gente.
 // También la barra fija del móvil con los dos atajos (simulador y aviso).
 import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { utmGuardados } from "../../lib/analytics";
 import { whatsappDesde } from "../../config/contacto";
 import { CIFRAS } from "../../config/bicentenario2026";
@@ -240,7 +241,10 @@ export default function AvisoApertura() {
  *  inferior del sitio; en escritorio, flotando abajo al centro
  *  (.bic-barra-fija en bicentenario.css). */
 export function BarraMovil() {
-  return (
+  // Portal a <body>: dentro de la página, un ancestro con transform convierte
+  // el `fixed` en relativo a él y la barra acababa al final, fuera de la vista.
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="bic-barra-fija fixed inset-x-3 z-[45] mx-auto flex max-w-md gap-2">
       <a
         href="#simulador"
@@ -256,6 +260,7 @@ export function BarraMovil() {
       >
         <span aria-hidden="true">🔔 </span>Avísame
       </a>
-    </div>
+    </div>,
+    document.body
   );
 }

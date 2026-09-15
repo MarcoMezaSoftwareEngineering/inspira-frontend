@@ -4,51 +4,62 @@
 // (https://linktr.ee/inspira_educa) desde el 15/09/2026. Sin cabecera, pie ni
 // barras del sitio (LANDING_ADS_PATHS en App.jsx) y sin indexar.
 //
+// Rediseño del mismo día (la clienta la quería más bonita e interactiva):
+// imágenes de las páginas (las de /og), beca con cuenta atrás, reserva de
+// asesoría con opciones que se eligen, carrusel de recursos gratuitos y fondo
+// animado. Todo respeta prefers-reduced-motion.
+//
 // Los enlaces internos llevan utm_source=enlaces para que Inspira Core sepa que
 // la visita llegó desde aquí. Redes y correo, copiados del Linktree el
-// 15/09/2026; el WhatsApp es la línea única de la web (config/contacto.js).
-import { useEffect } from "react";
+// 15/09/2026; el número es la línea única de la web (config/contacto.js).
+// Opiniones: se enlazan las publicadas en la web (/casos-de-exito), no la ficha
+// de Google, para no poner a mano el botón de escribir reseña (clienta).
+import { useEffect, useRef, useState } from "react";
 import logo from "../../assets/images/logo.png";
 import { CALENDLY_URL, LINEAS, whatsappDesde } from "../../config/contacto";
-
-// Línea única de la web (config/contacto.js), atendida por el equipo de Perú y España.
-const NUMERO = LINEAS[0].numero;
-const TEL = `tel:+${NUMERO.replace(/\D/g, "")}`;
+import { OPCIONES_ASESORIA, promoVigente } from "../../config/asesorias";
+import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 
 const UTM = "utm_source=enlaces&utm_medium=bio";
 const interno = (ruta) => `${ruta}${ruta.includes("?") ? "&" : "?"}${UTM}`;
+const BECA = interno("/beca-generacion-bicentenario-2026");
 
-const DESTACADOS = [
+// Línea única de la web, atendida por el equipo de Perú y España.
+const NUMERO = LINEAS[0].numero;
+const TEL = `tel:+${NUMERO.replace(/\D/g, "")}`;
+
+const RECURSOS = [
   {
-    emoji: "🎓",
-    titulo: "Beca Generación del Bicentenario 2026",
-    texto: "Solo 20 becas. ¿Calificas? Calcula tu puntaje",
-    etiqueta: "🔥 Nuevo",
-    href: interno("/beca-generacion-bicentenario-2026"),
-  },
-  {
-    emoji: "🗺️",
+    img: "/og/mapa-estudiar-en-espana.jpg",
     titulo: "Mapa de universidades y costos de máster",
     texto: "Cuánto cuesta un máster en cada ciudad de España",
     href: interno("/mapa-estudiar-en-espana"),
   },
   {
-    emoji: "👨‍👩‍👧",
+    img: "/og/grado-en-espana.jpg",
     titulo: "Grado en España: guía para familias",
     texto: "Cuánto cuesta que tu hijo estudie una carrera",
     href: interno("/grado-en-espana"),
   },
   {
-    emoji: "🧮",
+    img: "/og/calculadora-master.jpg",
     titulo: "Calculadora: encuentra gratis tu máster",
     texto: "Másteres oficiales en España según tu perfil",
     href: interno("/calculadora-master"),
   },
+  {
+    emoji: "🧭",
+    titulo: "Test: ¿visa o estancia por estudios?",
+    texto: "Descubre qué camino te conviene según tu caso",
+    href: interno("/visa-o-estancia"),
+  },
 ];
 
+// El portal va a /plataforma, como «Mi portal» de la barra inferior sin sesión.
 const ENLACES = [
-  { emoji: "📦", titulo: "Paquete Máster 2027/2028", href: interno("/servicios/master") },
-  { emoji: "📅", titulo: "Reserva tu sesión diagnóstico", href: CALENDLY_URL, externo: true },
+  { emoji: "⭐", titulo: "Opiniones y casos de éxito", href: interno("/casos-de-exito") },
+  { emoji: "🎤", titulo: "Eventos y charlas gratuitas", href: interno("/eventos") },
+  { emoji: "📱", titulo: "Mi portal: acceso para asesorados", href: interno("/plataforma") },
   { emoji: "🌎", titulo: "Nuestra web oficial", href: interno("/") },
 ];
 
@@ -104,20 +115,222 @@ const REDES = [
 ];
 
 const ESTILOS = `
-@keyframes enl-sube { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes enl-sube { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes enl-barrido { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+@keyframes enl-gira { to { transform: rotate(360deg); } }
+@keyframes enl-fondo { from { background-position: 0% 0%, 0% 50%; } to { background-position: 0% 0%, 100% 50%; } }
+@keyframes enl-latido { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, .7); } 100% { box-shadow: 0 0 0 9px rgba(74, 222, 128, 0); } }
+.enl-fondo {
+  background:
+    radial-gradient(900px 520px at 85% -8%, rgba(27, 141, 181, .85) 0%, transparent 60%),
+    linear-gradient(135deg, #013446, #02506B, #0A5873, #013446);
+  background-size: auto, 300% 300%;
+  animation: enl-fondo 16s ease-in-out infinite alternate;
+}
 .enl-sube { animation: enl-sube .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: var(--d, 0ms); }
 .enl-brillo { position: relative; overflow: hidden; }
 .enl-brillo::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .45) 50%, transparent 70%); transform: translateX(-120%); animation: enl-barrido 3.8s ease-in-out infinite; }
 .enl-vidrio { border: 1px solid transparent; background: linear-gradient(160deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .05)) padding-box, linear-gradient(135deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, .06) 45%, rgba(250, 148, 58, .5)) border-box; }
-@media (prefers-reduced-motion: reduce) { .enl-sube { animation: none; } .enl-brillo::after { display: none; } }
+.enl-anillo { position: relative; isolation: isolate; }
+.enl-anillo::before { content: ""; position: absolute; inset: -5px; z-index: -1; border-radius: 9999px; background: conic-gradient(#FA943A, #96CCFC, #FFC940, #FA943A); animation: enl-gira 6s linear infinite; }
+.enl-latido { animation: enl-latido 1.6s ease-out infinite; }
+.enl-carrusel { scroll-snap-type: x mandatory; scrollbar-width: none; }
+.enl-carrusel::-webkit-scrollbar { display: none; }
+.enl-carrusel > * { scroll-snap-align: start; }
+@media (prefers-reduced-motion: reduce) {
+  .enl-fondo, .enl-sube, .enl-anillo::before, .enl-latido { animation: none; }
+  .enl-brillo::after { display: none; }
+}
 `;
 
-function Flecha() {
+function Flecha({ className = "" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4 shrink-0 opacity-70" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-4 w-4 shrink-0 ${className}`} aria-hidden="true">
       <path d="m9 6 6 6-6 6" />
     </svg>
+  );
+}
+
+function Rotulo({ children, style }) {
+  return (
+    <p className="enl-sube mt-8 text-center text-[11px] font-bold uppercase tracking-[0.16em] text-white/65" style={style}>
+      {children}
+    </p>
+  );
+}
+
+const dias = (n) => `${n} ${n === 1 ? "día" : "días"}`;
+
+function BannerBeca({ style }) {
+  const est = estadoPostulacion();
+  const faltan = est.objetivo ? Math.max(0, Math.ceil((est.objetivo - Date.now()) / 86400000)) : 0;
+  const vivo =
+    est.fase === "antes" ? `Abre en ${dias(faltan)}` : est.fase === "abierta" ? `Abierta · cierra en ${dias(faltan)}` : "Postulación cerrada";
+  return (
+    <section aria-label="Beca Generación del Bicentenario 2026" className="enl-sube mt-6 overflow-hidden rounded-3xl bg-primary-dark shadow-2xl ring-1 ring-white/15" style={style}>
+      <a href={BECA} className="block">
+        <img
+          src="/og/beca-generacion-bicentenario-2026.jpg"
+          alt="Beca Generación del Bicentenario 2026: solo 20 becas"
+          className="aspect-[1200/630] w-full object-cover"
+          decoding="async"
+        />
+      </a>
+      <div className="p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-primary-dark">🔥 Solo {CIFRAS.total} becas</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white ring-1 ring-white/20">
+            <span className="enl-latido h-2 w-2 rounded-full bg-green-400" aria-hidden="true" />
+            {vivo}
+          </span>
+        </div>
+        <p className="mt-2 font-fraunces text-xl font-bold leading-snug text-white">Beca Generación del Bicentenario 2026</p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <a href={`${BECA}#simulador`} className="enl-brillo flex items-center justify-center gap-1.5 rounded-xl bg-accent px-2 py-3 text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun active:scale-[.98]">
+            <span aria-hidden="true">🎯</span> Calcula tu puntaje
+          </a>
+          <a href={`${BECA}#aviso`} className="flex items-center justify-center gap-1.5 rounded-xl bg-white px-2 py-3 text-sm font-extrabold text-primary transition hover:bg-secondary-light active:scale-[.98]">
+            <span aria-hidden="true">🔔</span> Avísame
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ReservaAsesoria({ style }) {
+  const promo = promoVigente();
+  const opciones = OPCIONES_ASESORIA.filter((o) => !o.promo || promo);
+  const [elegida, setElegida] = useState(() => (opciones.find((o) => o.destacada) || opciones[0])?.id);
+  const actual = opciones.find((o) => o.id === elegida) || opciones[0];
+  if (!actual) return null;
+  return (
+    <section aria-label="Reserva tu asesoría" className="enl-sube mt-6 overflow-hidden rounded-3xl bg-white shadow-2xl" style={style}>
+      <div className="px-4 pb-3 pt-4" style={{ background: "linear-gradient(135deg, #FA943A, #E07A1C)" }}>
+        <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-dark/80">📅 Reserva tu asesoría</p>
+        <p className="mt-0.5 font-fraunces text-xl font-bold leading-snug text-primary-dark">Online, con especialistas en extranjería</p>
+      </div>
+      <div role="radiogroup" aria-label="Elige tu asesoría" className="space-y-2 p-3">
+        {opciones.map((o) => {
+          const sel = o.id === actual.id;
+          return (
+            <button
+              key={o.id}
+              type="button"
+              role="radio"
+              aria-checked={sel}
+              onClick={() => setElegida(o.id)}
+              className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition active:scale-[.98] ${
+                sel ? "border-accent bg-accent/10" : "border-neutral-200 bg-white hover:border-accent/50"
+              }`}
+            >
+              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${sel ? "border-accent bg-accent" : "border-neutral-300"}`} aria-hidden="true">
+                {sel && <span className="h-2 w-2 rounded-full bg-white" />}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-extrabold uppercase tracking-wide text-neutral-500">{o.duracion}</span>
+                <span className="block font-bold leading-snug text-neutral-900">{o.nombre}</span>
+                {o.promo && <span className="block text-xs font-semibold text-green-700">Solo hasta el 22 de septiembre</span>}
+              </span>
+              <span className={`shrink-0 text-right text-lg font-extrabold ${o.promo ? "text-green-700" : "text-primary"}`}>
+                {o.precio}
+                {o.precioAlt && <span className="block text-[10px] font-semibold text-neutral-500">{o.precioAlt}</span>}
+              </span>
+            </button>
+          );
+        })}
+        <a
+          href={actual.url || CALENDLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="enl-brillo flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 text-center font-extrabold text-white shadow-lg transition hover:bg-primary-dark active:scale-[.98]"
+        >
+          <span aria-hidden="true">📅</span> Reservar: {actual.nombre}
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function Contacto({ style }) {
+  return (
+    <section aria-label="Contacto" className="enl-sube enl-vidrio mt-6 rounded-3xl p-4 text-center text-white" style={style}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-sky">📞 Equipo Perú · España</p>
+      <p className="mt-1 font-fraunces text-2xl font-bold tabular-nums">{NUMERO}</p>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <a
+          href={whatsappDesde("enlaces", "Quiero información.")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-extrabold text-white shadow-lg shadow-black/20 transition hover:bg-green-700 active:scale-[.98]"
+        >
+          <span aria-hidden="true">💬</span> WhatsApp
+        </a>
+        <a
+          href={TEL}
+          className="flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-extrabold text-primary shadow-lg shadow-black/20 transition hover:bg-secondary-light active:scale-[.98]"
+        >
+          <span aria-hidden="true">📲</span> Llamar
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function Carrusel({ style }) {
+  const ref = useRef(null);
+  const [activo, setActivo] = useState(0);
+  const alDesplazar = () => {
+    const el = ref.current;
+    const primero = el?.firstElementChild;
+    if (!el || !primero) return;
+    const paso = primero.getBoundingClientRect().width + 12;
+    setActivo(Math.min(RECURSOS.length - 1, Math.round(el.scrollLeft / paso)));
+  };
+  const ir = (i) => {
+    const el = ref.current;
+    const hijo = el?.children[i];
+    if (el && hijo) el.scrollTo({ left: hijo.offsetLeft - el.offsetLeft - 16, behavior: "smooth" });
+  };
+  return (
+    <div className="enl-sube" style={style}>
+      <div ref={ref} onScroll={alDesplazar} className="enl-carrusel relative -mx-4 flex gap-3 overflow-x-auto px-4 pb-2" style={{ scrollPaddingLeft: "1rem" }}>
+        {RECURSOS.map((r, i) => (
+          <a
+            key={r.titulo}
+            href={r.href}
+            className="enl-vidrio flex w-[78%] shrink-0 flex-col overflow-hidden rounded-3xl text-white transition active:scale-[.98] sm:w-[70%]"
+          >
+            {r.img ? (
+              <img src={r.img} alt="" className="aspect-[1200/630] w-full object-cover" loading={i === 0 ? "eager" : "lazy"} decoding="async" />
+            ) : (
+              <span className="flex aspect-[1200/630] w-full items-center justify-center bg-gradient-to-br from-sky/40 to-accent/40 text-6xl" aria-hidden="true">
+                {r.emoji}
+              </span>
+            )}
+            <span className="flex flex-1 flex-col p-3.5">
+              <span className="font-extrabold leading-snug">{r.titulo}</span>
+              <span className="mt-1 text-xs leading-snug text-white/75">{r.texto}</span>
+              <span className="mt-auto flex items-center gap-1 pt-2 text-xs font-bold text-sun">
+                Ver gratis <Flecha />
+              </span>
+            </span>
+          </a>
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-center gap-2">
+        {RECURSOS.map((r, i) => (
+          <button
+            key={r.titulo}
+            type="button"
+            onClick={() => ir(i)}
+            aria-label={`Ver ${r.titulo}`}
+            className={`h-2 rounded-full transition-all ${i === activo ? "w-6 bg-accent" : "w-2 bg-white/35"}`}
+          />
+        ))}
+        <span className="ml-2 text-[11px] font-semibold text-white/60">Desliza 👉</span>
+      </div>
+    </div>
   );
 }
 
@@ -130,15 +343,14 @@ export default function Enlaces() {
   const retraso = () => ({ "--d": `${(paso += 70)}ms` });
 
   return (
-    <main
-      className="min-h-[100dvh] w-full px-4 pb-12 pt-10"
-      style={{ background: "radial-gradient(900px 500px at 80% -10%, #1B8DB5 0%, transparent 60%), linear-gradient(160deg, #013446 0%, #02506B 60%, #0A5873 100%)" }}
-    >
+    <main className="enl-fondo min-h-[100dvh] w-full px-4 pb-12 pt-10 [overflow-x:clip]">
       <style>{ESTILOS}</style>
       <div className="mx-auto w-full max-w-md">
         <header className="enl-sube flex flex-col items-center text-center" style={retraso()}>
-          <span className="flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-2xl ring-4 ring-white/20">
-            <img src={logo} alt="Inspira Legal" className="h-auto w-[76%]" />
+          <span className="enl-anillo flex h-24 w-24 items-center justify-center rounded-full">
+            <span className="flex h-full w-full items-center justify-center rounded-full bg-white shadow-2xl">
+              <img src={logo} alt="Inspira Legal" className="h-auto w-[76%]" />
+            </span>
           </span>
           <h1 className="mt-4 font-fraunces text-2xl font-bold text-white">Inspira Legal</h1>
           <p className="mt-1 text-sm font-semibold text-sky">@inspira_educa</p>
@@ -147,74 +359,40 @@ export default function Enlaces() {
           </p>
         </header>
 
-        <section aria-label="Contacto" className="enl-sube enl-vidrio mt-6 rounded-3xl p-4 text-center text-white" style={retraso()}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-sky">📞 Equipo Perú · España</p>
-          <p className="mt-1 font-fraunces text-2xl font-bold tabular-nums">{NUMERO}</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <a
-              href={whatsappDesde("enlaces", "Quiero información.")}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-extrabold text-white shadow-lg shadow-black/20 transition hover:bg-green-700 active:scale-[.98]"
-            >
-              <span aria-hidden="true">💬</span> WhatsApp
-            </a>
-            <a
-              href={TEL}
-              className="flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-extrabold text-primary shadow-lg shadow-black/20 transition hover:bg-secondary-light active:scale-[.98]"
-            >
-              <span aria-hidden="true">📲</span> Llamar
-            </a>
-          </div>
-        </section>
+        <BannerBeca style={retraso()} />
+        <ReservaAsesoria style={retraso()} />
+        <Contacto style={retraso()} />
 
-        <nav aria-label="Enlaces de Inspira" className="mt-8 space-y-3">
-          <p className="enl-sube text-center text-[11px] font-bold uppercase tracking-[0.16em] text-white/60" style={retraso()}>
-            🎁 Recursos gratuitos
-          </p>
-          {DESTACADOS.map((d, i) => (
-            <a
-              key={d.titulo}
-              href={d.href}
-              className={`enl-sube group flex items-center gap-3 rounded-2xl p-3.5 transition active:scale-[.98] ${
-                i === 0 ? "enl-brillo bg-accent text-primary-dark shadow-lg shadow-accent/30 hover:bg-sun" : "enl-vidrio text-white hover:bg-white/10"
-              }`}
-              style={retraso()}
-            >
-              <span
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl ${i === 0 ? "bg-white/40" : "bg-white/10 ring-1 ring-white/15"}`}
-                aria-hidden="true"
-              >
-                {d.emoji}
-              </span>
-              <span className="min-w-0 flex-1">
-                {d.etiqueta && (
-                  <span className="mb-0.5 inline-block rounded-full bg-primary-dark px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
-                    {d.etiqueta}
-                  </span>
-                )}
-                <span className="block font-extrabold leading-snug">{d.titulo}</span>
-                <span className={`mt-0.5 block text-xs leading-snug ${i === 0 ? "text-primary-dark/80" : "text-white/70"}`}>{d.texto}</span>
-              </span>
-              <Flecha />
-            </a>
-          ))}
+        <Rotulo style={retraso()}>🎁 Recursos gratuitos</Rotulo>
+        <div className="mt-3">
+          <Carrusel style={retraso()} />
+        </div>
 
-          <p className="enl-sube pt-3 text-center text-[11px] font-bold uppercase tracking-[0.16em] text-white/60" style={retraso()}>
-            📦 Paquetes y asesoría
-          </p>
+        <Rotulo style={retraso()}>✨ Paquetes, asesoría y más</Rotulo>
+        <a
+          href={interno("/servicios/master")}
+          className="enl-sube mt-3 flex overflow-hidden rounded-3xl bg-white shadow-2xl transition active:scale-[.98]"
+          style={retraso()}
+        >
+          <img src="/og/master-2027-2028.jpg" alt="" className="w-[42%] shrink-0 object-cover" loading="lazy" decoding="async" />
+          <span className="flex min-w-0 flex-1 flex-col justify-center p-3.5 text-primary">
+            <span className="text-[10px] font-extrabold uppercase tracking-wide text-accent-dark">📦 Paquete Máster</span>
+            <span className="font-extrabold leading-snug">Postula a tu máster 2027/2028</span>
+            <span className="mt-1 text-xs leading-snug text-neutral-600">Paquetes de postulación desde 219 € y pago por etapas</span>
+          </span>
+        </a>
 
+        <nav aria-label="Más enlaces de Inspira" className="mt-3 space-y-3">
           {ENLACES.map((e) => (
             <a
               key={e.titulo}
               href={e.href}
-              {...(e.externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               className="enl-sube flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 font-bold text-primary shadow-lg shadow-black/10 transition hover:bg-secondary-light active:scale-[.98]"
               style={retraso()}
             >
               <span className="text-xl" aria-hidden="true">{e.emoji}</span>
               <span className="flex-1">{e.titulo}</span>
-              <Flecha />
+              <Flecha className="opacity-60" />
             </a>
           ))}
         </nav>

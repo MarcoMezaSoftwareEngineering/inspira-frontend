@@ -184,7 +184,6 @@ function BannerBeca({ style }) {
             {vivo}
           </span>
         </div>
-        <p className="mt-2 font-fraunces text-xl font-bold leading-snug text-white">Beca Generación del Bicentenario 2026</p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <a href={`${BECA}#simulador`} className="enl-brillo flex items-center justify-center gap-1.5 rounded-xl bg-accent px-2 py-3 text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun active:scale-[.98]">
             <span aria-hidden="true">🎯</span> Calcula tu puntaje
@@ -374,7 +373,7 @@ export default function Enlaces() {
           className="enl-sube mt-3 flex overflow-hidden rounded-3xl bg-white shadow-2xl transition active:scale-[.98]"
           style={retraso()}
         >
-          <img src="/og/master-2027-2028.jpg" alt="" className="w-[42%] shrink-0 object-cover" loading="lazy" decoding="async" />
+          <img src="/og/master-2027-2028.jpg" alt="" className="w-[42%] shrink-0 object-cover object-left" loading="lazy" decoding="async" />
           <span className="flex min-w-0 flex-1 flex-col justify-center p-3.5 text-primary">
             <span className="text-[10px] font-extrabold uppercase tracking-wide text-accent-dark">📦 Paquete Máster</span>
             <span className="font-extrabold leading-snug">Postula a tu máster 2027/2028</span>

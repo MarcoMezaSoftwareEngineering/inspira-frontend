@@ -81,17 +81,24 @@ export default function CookieConsent() {
       aria-label="Configuración de cookies"
     >
       <div className="mx-auto max-w-4xl rounded-2xl border border-neutral-200 bg-white shadow-2xl">
-        <div className="p-5 sm:p-6">
-          <h2 className="font-fraunces text-lg font-semibold text-primary">
+        <div className="p-4 sm:p-6">
+          <h2 className="font-fraunces text-base font-semibold text-primary sm:text-lg">
             Tu privacidad en este sitio
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-700">
+          {/* En el móvil el aviso tapaba media pantalla (clienta, 15/09/2026):
+              lo esencial y los enlaces siempre; el detalle, desde 640 px. */}
+          <p className="mt-1.5 text-[13px] leading-snug text-neutral-700 sm:mt-2 sm:text-sm sm:leading-relaxed">
             Usamos cookies y almacenamiento local propios y de terceros. Las{" "}
-            <strong>estrictamente necesarias</strong> mantienen tu sesión y
-            permiten procesar pagos: sin ellas el sitio no funciona. El resto{" "}
-            <strong>solo se activa si tú lo autorizas</strong>. Puedes aceptar,
-            rechazar o elegir categoría por categoría, y cambiar tu decisión
-            cuando quieras desde el pie de página. Más detalle en la{" "}
+            <strong>estrictamente necesarias</strong>
+            <span className="hidden sm:inline">
+              {" "}mantienen tu sesión y permiten procesar pagos: sin ellas el
+              sitio no funciona</span>
+            <span className="sm:hidden"> hacen funcionar el sitio</span>. El resto{" "}
+            <strong>solo se activa si tú lo autorizas</strong>.
+            <span className="hidden sm:inline">
+              {" "}Puedes aceptar, rechazar o elegir categoría por categoría, y
+              cambiar tu decisión cuando quieras desde el pie de página.</span>{" "}
+            Más detalle en la{" "}
             <a
               className="font-medium text-primary underline underline-offset-2"
               href={RUTAS_LEGALES.cookies}
@@ -159,13 +166,13 @@ export default function CookieConsent() {
             </div>
           )}
 
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <div className="mt-3 grid grid-cols-3 gap-2 sm:mt-5 sm:flex sm:flex-row sm:justify-end">
             {/* Las tres acciones comparten jerarquía visual: rechazar no es más
                 difícil ni menos visible que aceptar. */}
             <button
               type="button"
               onClick={onRechazar}
-              className="h-11 rounded-xl border border-primary px-5 text-sm font-semibold text-primary transition hover:bg-secondary sm:order-1"
+              className="h-11 rounded-xl border border-primary px-2 text-xs font-semibold leading-tight sm:px-5 sm:text-sm text-primary transition hover:bg-secondary sm:order-1"
             >
               Rechazar todas
             </button>
@@ -173,7 +180,7 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={onGuardar}
-                className="h-11 rounded-xl border border-primary px-5 text-sm font-semibold text-primary transition hover:bg-secondary sm:order-2"
+                className="h-11 rounded-xl border border-primary px-2 text-xs font-semibold leading-tight sm:px-5 sm:text-sm text-primary transition hover:bg-secondary sm:order-2"
               >
                 Guardar mi selección
               </button>
@@ -184,7 +191,7 @@ export default function CookieConsent() {
                   setSeleccion(obtenerConsentimiento());
                   setPanel(true);
                 }}
-                className="h-11 rounded-xl border border-primary px-5 text-sm font-semibold text-primary transition hover:bg-secondary sm:order-2"
+                className="h-11 rounded-xl border border-primary px-2 text-xs font-semibold leading-tight sm:px-5 sm:text-sm text-primary transition hover:bg-secondary sm:order-2"
               >
                 Configurar
               </button>
@@ -192,14 +199,14 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={onAceptar}
-              className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-dark sm:order-3"
+              className="h-11 rounded-xl bg-primary px-2 text-xs font-semibold leading-tight sm:px-5 sm:text-sm text-white transition hover:bg-primary-dark sm:order-3"
             >
               Aceptar todas
             </button>
           </div>
 
           {OPCIONALES.every((c) => contarItems(c) === 0) && (
-            <p className="mt-3 text-[11px] leading-relaxed text-neutral-500">
+            <p className="mt-3 hidden text-[11px] leading-relaxed text-neutral-500 sm:block">
               Hoy este sitio no tiene instaladas herramientas de analítica ni de
               publicidad. Si en el futuro se instalan, quedarán bloqueadas hasta
               que las autorices aquí.

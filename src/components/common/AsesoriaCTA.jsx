@@ -13,6 +13,9 @@ import ReservaLateral from "./ReservaLateral";
 
 const VISTO_KEY = "inspira_cta_asesoria_visto"; // sessionStorage: por sesión
 
+// Páginas con su propia barra de acción fija: la ventana no se abre sola ahí.
+const SIN_VENTANA = ["/beca-generacion-bicentenario-2026", "/mapa-estudiar-en-espana", "/enlaces"];
+
 export default function AsesoriaCTA() {
   const [abierto, setAbierto] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -28,15 +31,19 @@ export default function AsesoriaCTA() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Se abre solo una vez por sesión, tras leer un poco de la página.
+  // Se abre sola una vez por sesión, tras leer un poco de la página. En el
+  // móvil tapaba la lectura (clienta, 15/09/2026): allí espera más y sale como
+  // hoja compacta. La ruta se mira al disparar, porque se navega sin recargar.
   useEffect(() => {
     if (sessionStorage.getItem(VISTO_KEY)) return;
+    const movil = window.matchMedia("(max-width: 639px)").matches;
     const t = setTimeout(() => {
-      if (window.scrollY > 700) {
+      if (SIN_VENTANA.some((p) => window.location.pathname.startsWith(p))) return;
+      if (window.scrollY > (movil ? 1400 : 700)) {
         setAbierto(true);
         sessionStorage.setItem(VISTO_KEY, "1");
       }
-    }, 15000);
+    }, movil ? 45000 : 15000);
     return () => clearTimeout(t);
   }, []);
 
@@ -78,38 +85,45 @@ export default function AsesoriaCTA() {
 
       {/* Panel */}
       {abierto && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+        <div
+          className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Reserva tu asesoría"
+        >
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={cerrar}
           />
-          <div className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white shadow-2xl">
+          {/* Móvil: hoja compacta desde abajo; el ✕ queda fuera del scroll. */}
+          <div className="relative flex max-h-[78dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-3xl">
             <button
               type="button"
               onClick={cerrar}
               aria-label="Cerrar"
-              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-lg text-white transition hover:bg-white/25"
+              className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl font-bold text-primary shadow-lg ring-1 ring-black/10 transition hover:bg-neutral-100"
             >
               ✕
             </button>
 
             <div
-              className="px-7 pb-6 pt-8 text-white"
+              className="shrink-0 px-5 pb-4 pt-4 text-white sm:px-7 sm:pb-6 sm:pt-8"
               style={{ background: "linear-gradient(135deg, #013446, #02506B)" }}
             >
-              <span className="inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">
+              <span className="mx-auto mb-3 block h-1.5 w-12 rounded-full bg-white/30 sm:hidden" aria-hidden="true" />
+              <span className="hidden rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold sm:inline-block">
                 Reserva tu asesoría
               </span>
-              <h2 className="mt-4 font-fraunces text-2xl font-bold leading-tight">
+              <h2 className="pr-12 font-fraunces text-xl font-bold leading-tight sm:mt-4 sm:text-2xl">
                 Una asesoría a distancia para vivir en España 🇪🇸
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-white/70">
+              <p className="mt-2 hidden text-sm leading-relaxed text-white/70 sm:block">
                 Reunión online con un especialista en extranjería. Sales con un
                 diagnóstico de tu caso y un plan de acción.
               </p>
             </div>
 
-            <div className="space-y-3 px-7 py-6">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4 sm:px-7 sm:py-6">
               {opciones.map((o) => (
                 <a
                   key={o.id}
@@ -117,7 +131,7 @@ export default function AsesoriaCTA() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={cerrar}
-                  className={`flex items-center justify-between gap-4 rounded-2xl border-2 p-4 transition hover:-translate-y-0.5 hover:shadow-md ${
+                  className={`flex items-center justify-between gap-4 rounded-2xl border-2 p-3 transition sm:p-4 hover:-translate-y-0.5 hover:shadow-md ${
                     o.destacada
                       ? "border-accent bg-accent/5"
                       : o.promo
@@ -172,6 +186,13 @@ export default function AsesoriaCTA() {
               >
                 💬 Prefiero escribir por WhatsApp
               </a>
+              <button
+                type="button"
+                onClick={cerrar}
+                className="w-full py-2 text-sm font-bold text-neutral-600 underline underline-offset-4 hover:text-primary"
+              >
+                Ahora no, seguir leyendo
+              </button>
             </div>
           </div>
         </div>

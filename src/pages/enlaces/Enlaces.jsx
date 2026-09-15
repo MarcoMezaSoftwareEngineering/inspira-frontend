@@ -9,7 +9,11 @@
 // 15/09/2026; el WhatsApp es la línea única de la web (config/contacto.js).
 import { useEffect } from "react";
 import logo from "../../assets/images/logo.png";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { CALENDLY_URL, LINEAS, whatsappDesde } from "../../config/contacto";
+
+// Línea única de la web (config/contacto.js), atendida por el equipo de Perú y España.
+const NUMERO = LINEAS[0].numero;
+const TEL = `tel:+${NUMERO.replace(/\D/g, "")}`;
 
 const UTM = "utm_source=enlaces&utm_medium=bio";
 const interno = (ruta) => `${ruta}${ruta.includes("?") ? "&" : "?"}${UTM}`;
@@ -45,7 +49,6 @@ const DESTACADOS = [
 const ENLACES = [
   { emoji: "📦", titulo: "Paquete Máster 2027/2028", href: interno("/servicios/master") },
   { emoji: "📅", titulo: "Reserva tu sesión diagnóstico", href: CALENDLY_URL, externo: true },
-  { emoji: "💬", titulo: "Escríbenos por WhatsApp", href: whatsappDesde("enlaces", "Quiero información."), externo: true },
   { emoji: "🌎", titulo: "Nuestra web oficial", href: interno("/") },
 ];
 
@@ -143,6 +146,27 @@ export default function Enlaces() {
             Migra a España ✈️ · Especialistas en Extranjería y Visas 🎓🌍 · Reside legalmente
           </p>
         </header>
+
+        <section aria-label="Contacto" className="enl-sube enl-vidrio mt-6 rounded-3xl p-4 text-center text-white" style={retraso()}>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-sky">📞 Equipo Perú · España</p>
+          <p className="mt-1 font-fraunces text-2xl font-bold tabular-nums">{NUMERO}</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <a
+              href={whatsappDesde("enlaces", "Quiero información.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-extrabold text-white shadow-lg shadow-black/20 transition hover:bg-green-700 active:scale-[.98]"
+            >
+              <span aria-hidden="true">💬</span> WhatsApp
+            </a>
+            <a
+              href={TEL}
+              className="flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-extrabold text-primary shadow-lg shadow-black/20 transition hover:bg-secondary-light active:scale-[.98]"
+            >
+              <span aria-hidden="true">📲</span> Llamar
+            </a>
+          </div>
+        </section>
 
         <nav aria-label="Enlaces de Inspira" className="mt-8 space-y-3">
           <p className="enl-sube text-center text-[11px] font-bold uppercase tracking-[0.16em] text-white/60" style={retraso()}>

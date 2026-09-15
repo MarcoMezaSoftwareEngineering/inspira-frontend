@@ -11,7 +11,7 @@
 //
 // Datos: config/bicentenario2026.js (cada dato con su artículo). Aquí solo se
 // pintan. Nada de garantías: la beca la otorga PRONABEC.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageHero from "../../components/layout/PageHero";
 import CercoErrores from "../../components/common/CercoErrores";
 import { useSEO } from "../../hooks/useSEO";
@@ -745,6 +745,14 @@ function Preguntas() {
 
 export default function BecaBicentenario2026() {
   useSEO(SEO);
+  // Si se llega con #aviso, #simulador… (desde /enlaces o TikTok), baja a esa
+  // sección cuando ya está pintada: el navegador lo intenta antes de que exista.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id) return;
+    const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 450);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <main className="bic-premium w-full bg-white [overflow-x:clip]">
       <Hero />

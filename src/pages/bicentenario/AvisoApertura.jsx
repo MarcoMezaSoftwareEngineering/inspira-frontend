@@ -223,7 +223,7 @@ export default function AvisoApertura() {
               <button
                 type="submit"
                 disabled={estado === "enviando"}
-                className="bic-press flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
+                className="bic-press bic-cta flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
               >
                 <span aria-hidden="true">🔔</span> {estado === "enviando" ? "Guardando…" : "Avísame cuando abra"}
               </button>
@@ -278,7 +278,7 @@ export function BarraMovil() {
         href="#simulador"
         tabIndex={ver ? 0 : -1}
         onClick={(e) => irA(e, "#simulador")}
-        className="bic-press flex-1 rounded-2xl bg-accent px-3 py-3 text-center text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30"
+        className="bic-press bic-cta flex-1 rounded-2xl bg-accent px-3 py-3 text-center text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30"
       >
         <span aria-hidden="true">🎯 </span>Calcula tu puntaje
       </a>

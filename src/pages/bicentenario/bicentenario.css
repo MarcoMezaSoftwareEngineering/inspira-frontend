@@ -71,7 +71,47 @@
 .bic-tl { scroll-snap-type: x mandatory; scrollbar-width: thin; }
 .bic-tl > * { scroll-snap-align: start; }
 
+/* ── Retoque premium (opción A, 15/09/2026) ─────────────────────────────── */
+/* Aurora detrás del hero: dos luces difuminadas que se mueven despacio. */
+.bic-aurora { position: absolute; inset: -12% -8%; z-index: -1; pointer-events: none; filter: blur(60px); opacity: .55; }
+.bic-aurora::before, .bic-aurora::after { content: ""; position: absolute; border-radius: 9999px; }
+.bic-aurora::before { width: 38rem; height: 38rem; max-width: 90vw; max-height: 90vw; left: -6rem; top: -4rem; background: radial-gradient(circle, rgba(27, 141, 181, .9), transparent 65%); animation: bic-aurora 16s ease-in-out infinite alternate; }
+.bic-aurora::after { width: 30rem; height: 30rem; max-width: 80vw; max-height: 80vw; right: -4rem; bottom: -6rem; background: radial-gradient(circle, rgba(250, 148, 58, .55), transparent 65%); animation: bic-aurora 20s ease-in-out infinite alternate-reverse; }
+@keyframes bic-aurora { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(8%, 6%, 0) scale(1.15); } }
+
+/* Vidrio con borde degradado en las tarjetas del hero. */
+.bic-premium .bic-vidrio {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .04)) padding-box,
+    linear-gradient(135deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .06) 45%, rgba(250, 148, 58, .55)) border-box;
+  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+
+/* El «20» en dorado con brillo que pasa. */
+.bic-premium .bic-dorado {
+  background: linear-gradient(100deg, #FFD166 0%, #FFB347 35%, #FFF3C4 50%, #FFB347 65%, #FFD166 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 8px 26px rgba(255, 193, 64, .35));
+  animation: bic-dorado 5s linear infinite;
+}
+@keyframes bic-dorado { to { background-position: -220% center; } }
+
+/* Destello que recorre los botones principales. */
+.bic-cta { position: relative; overflow: hidden; box-shadow: 0 12px 32px -8px rgba(250, 148, 58, .65); }
+.bic-cta::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .55) 50%, transparent 70%); transform: translateX(-120%); animation: bic-barrido 3.8s ease-in-out infinite; }
+@keyframes bic-barrido { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+
+/* Títulos con degradado (solo los oscuros) y tarjetas con más relieve. */
+.bic-premium h2.text-primary { background: linear-gradient(90deg, #013446, #0A5873 55%, #1B8DB5); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bic-premium .bic-lift:hover { box-shadow: 0 26px 50px -14px rgba(1, 52, 70, .28), 0 0 0 1px rgba(27, 141, 181, .3); }
+
+/* Fondos claros con trama de puntos. */
+.bic-premium section.bg-secondary-light { background-image: radial-gradient(rgba(10, 88, 115, .09) 1px, transparent 1px); background-size: 22px 22px; }
+
 @media (prefers-reduced-motion: reduce) {
+  .bic-aurora::before, .bic-aurora::after, .bic-premium .bic-dorado, .bic-cta::after { animation: none !important; }
   .bic-rev, .bic-rev.bic-izq, .bic-rev.bic-der, .bic-rev.bic-zoom { opacity: 1 !important; transform: none !important; transition: none !important; }
   .bic-flotar, .bic-ruta, .bic-brillo, .bic-pulso, .bic-pop, .bic-entra { animation: none !important; }
   .bic-confeti { display: none; }

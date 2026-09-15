@@ -108,16 +108,17 @@ function Hero() {
       destacado="nuevas bases"
       descripcion="Te asesoramos para postular a la beca con universidades top 400 de España y de la Unión Europea."
     >
-      <div className="grid w-full items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,25rem)]">
+      <div className="relative isolate grid w-full items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,25rem)]">
+        <div className="bic-aurora" aria-hidden="true" />
         <div className="order-2 min-w-0 lg:order-1">
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-3xl bg-white/[0.08] p-5 ring-1 ring-white/15 backdrop-blur sm:p-6">
+            <div className="bic-vidrio rounded-3xl bg-white/[0.08] p-5 ring-1 ring-white/15 backdrop-blur sm:p-6">
               <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-sun">
                 <Emoji className="text-base">📉</Emoji>
                 {HAY_COMPARACION ? "Se reducen significativamente las plazas" : "Muy pocas plazas"}
               </p>
               <div className="mt-1 flex items-end gap-3">
-                <span className="font-fraunces text-[5.2rem] font-black leading-none tabular-nums text-sun sm:text-[6.5rem]" aria-hidden="true">
+                <span className="bic-dorado font-fraunces text-[5.2rem] font-black leading-none tabular-nums text-sun sm:text-[6.5rem]" aria-hidden="true">
                   {Math.round(n)}
                 </span>
                 <span className="pb-3 text-xl font-bold leading-tight text-white">
@@ -134,7 +135,7 @@ function Hero() {
                 )}
               </div>
             </div>
-            <div className="rounded-3xl bg-white/[0.08] p-5 ring-1 ring-white/15 backdrop-blur sm:p-6">
+            <div className="bic-vidrio rounded-3xl bg-white/[0.08] p-5 ring-1 ring-white/15 backdrop-blur sm:p-6">
               <CuentaAtras />
               <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                 <p className="rounded-xl bg-white/5 px-3 py-2 text-white/80"><span aria-hidden="true">🚪 </span>Abre<b className="block text-white">30/10/2026</b></p>
@@ -146,7 +147,7 @@ function Hero() {
             <a
               href="#simulador"
               onClick={(e) => irA(e, "#simulador")}
-              className="bic-press inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun"
+              className="bic-press bic-cta inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun"
             >
               <span aria-hidden="true">🎯</span> ¿Calificas? Descúbrelo en 2 minutos
             </a>
@@ -746,7 +747,7 @@ function Preguntas() {
 export default function BecaBicentenario2026() {
   useSEO(SEO);
   return (
-    <main className="w-full bg-white [overflow-x:clip]">
+    <main className="bic-premium w-full bg-white [overflow-x:clip]">
       <Hero />
       <Separador arriba="transparent" abajo={BLANCO} className="relative z-[2] -mt-7 sm:-mt-12" />
       <IndiceSecciones secciones={SECCIONES} />

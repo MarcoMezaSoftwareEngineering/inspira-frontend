@@ -128,7 +128,7 @@ export function BotonCompartir({ total, max, nivel }) {
         type="button"
         onClick={alPulsar}
         disabled={estado === "preparando"}
-        className="bic-press inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
+        className="bic-press bic-cta inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
       >
         <span aria-hidden="true">📲</span> {estado === "preparando" ? "Preparando tu imagen…" : "Compartir mi puntaje"}
       </button>

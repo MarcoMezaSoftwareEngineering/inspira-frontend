@@ -439,8 +439,8 @@ function Carrusel({ style }) {
 export default function Enlaces() {
   useEffect(() => {
     document.title = "Inspira Legal · Enlaces";
-    // La web deja hueco abajo para la barra inferior; aquí no hay barra y se
-    // veía una franja blanca bajo la página.
+    // Fondo azul también al estirar la página en iOS (rebote del scroll). El
+    // hueco de la barra inferior se quita aparte (.sin-relleno-barra en v4.css).
     const previo = document.body.style.backgroundColor;
     document.body.style.backgroundColor = "#013446";
     return () => {

@@ -454,7 +454,7 @@ export default function App() {
     !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle && !isPanel;
 
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className={`min-h-screen w-full bg-white${path === "/enlaces" ? " sin-relleno-barra" : ""}`}>
       <RouteSEO path={path} />
       {!isPanel && !isLandingAds && <BarraProgreso />}
 

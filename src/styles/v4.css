@@ -682,6 +682,8 @@
 /* Deja aire al final de la página para que la barra no tape contenido.
    Se aplica al contenedor raíz porque el preflight de Tailwind resetea body. */
 @media (max-width: 1099px) { #root > div { padding-bottom: 70px; } }
+/* /enlaces no monta la barra inferior: sin este hueco se veía una franja blanca. */
+@media (max-width: 1099px) { #root > div.sin-relleno-barra { padding-bottom: 0; } }
 
 /* Barra de progreso de lectura */
 .v4-progress { position: fixed; top: 0; left: 0; height: 3px; z-index: 200; background: linear-gradient(90deg, var(--accent), #ffc078); box-shadow: 0 0 12px rgba(250,148,58,.5); transition: width .1s linear; }

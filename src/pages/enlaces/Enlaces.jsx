@@ -245,13 +245,15 @@ function ReservaAsesoria({ style }) {
   const [elegida, setElegida] = useState(() => (opciones.find((o) => o.destacada) || opciones[0])?.id);
   const actual = opciones.find((o) => o.id === elegida) || opciones[0];
   if (!actual) return null;
+  // Compacta (clienta, 15/09/2026: «está muy grande»): tres botones en fila,
+  // una línea con la elegida y el botón de reservar.
+  const corta = (d) => String(d || "").replace(/\s*minutos?/i, " min");
   return (
-    <section aria-label="Reserva tu asesoría" className="enl-sube mt-6 overflow-hidden rounded-3xl bg-white shadow-2xl" style={style}>
-      <div className="px-4 pb-3 pt-4" style={{ background: "linear-gradient(135deg, #FA943A, #E07A1C)" }}>
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-dark/80">📅 Reserva tu asesoría</p>
-        <p className="mt-0.5 font-fraunces text-xl font-bold leading-snug text-primary-dark">Online, con especialistas en extranjería</p>
-      </div>
-      <div role="radiogroup" aria-label="Elige tu asesoría" className="space-y-2 p-3">
+    <section aria-label="Reserva tu asesoría" className="enl-sube mt-6 rounded-3xl bg-white p-3 shadow-2xl" style={style}>
+      <p className="px-1 text-sm font-extrabold text-primary">
+        📅 Reserva tu asesoría <span className="font-semibold text-neutral-500">· online</span>
+      </p>
+      <div role="radiogroup" aria-label="Elige tu asesoría" className="mt-2 grid grid-cols-3 gap-2">
         {opciones.map((o) => {
           const sel = o.id === actual.id;
           return (
@@ -260,40 +262,38 @@ function ReservaAsesoria({ style }) {
               type="button"
               role="radio"
               aria-checked={sel}
+              aria-label={`${o.nombre}, ${o.duracion}, ${o.precio}`}
               onClick={() => setElegida(o.id)}
-              className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition active:scale-[.98] ${
+              className={`rounded-xl border-2 px-1 py-2 text-center transition active:scale-[.97] ${
                 sel ? "border-accent bg-accent/10" : "border-neutral-200 bg-white hover:border-accent/50"
               }`}
             >
-              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${sel ? "border-accent bg-accent" : "border-neutral-300"}`} aria-hidden="true">
-                {sel && <span className="h-2 w-2 rounded-full bg-white" />}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[11px] font-extrabold uppercase tracking-wide text-neutral-500">{o.duracion}</span>
-                <span className="block font-bold leading-snug text-neutral-900">{o.nombre}</span>
-                {o.promo && (
-                  <span className="block text-xs font-semibold text-green-700">
-                    Solo hasta el 22 de septiembre · <span className="font-extrabold">⏳ {quedanPromo()}</span>
-                  </span>
-                )}
-              </span>
-              <span className={`shrink-0 text-right text-lg font-extrabold ${o.promo ? "text-green-700" : "text-primary"}`}>
-                {o.precio}
-                {o.precioAlt && <span className="block text-[10px] font-semibold text-neutral-500">{o.precioAlt}</span>}
-              </span>
+              <span className="block text-[11px] font-bold text-neutral-500">{corta(o.duracion)}</span>
+              <span className={`block text-base font-extrabold leading-tight ${o.promo ? "text-green-700" : "text-primary"}`}>{o.precio}</span>
             </button>
           );
         })}
-        <a
-          href={actual.url || CALENDLY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => marcar(`reserva:${actual.id}`)}
-          className="enl-brillo flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 text-center font-extrabold text-white shadow-lg transition hover:bg-primary-dark active:scale-[.98]"
-        >
-          <span aria-hidden="true">📅</span> Reservar: {actual.nombre}
-        </a>
       </div>
+      <p className="mt-2 px-1 text-xs leading-snug text-neutral-600">
+        <b className="text-neutral-900">{actual.nombre}</b>
+        {actual.promo ? (
+          <>
+            {" · "}
+            <span className="font-bold text-green-700">⏳ {quedanPromo()}</span>
+          </>
+        ) : actual.precioAlt ? (
+          ` · ${actual.precioAlt}`
+        ) : null}
+      </p>
+      <a
+        href={actual.url || CALENDLY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => marcar(`reserva:${actual.id}`)}
+        className="enl-brillo mt-2 flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-extrabold text-white shadow-lg transition hover:bg-primary-dark active:scale-[.98]"
+      >
+        <span aria-hidden="true">📅</span> Reservar ahora
+      </a>
     </section>
   );
 }

@@ -36,6 +36,7 @@ const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/Ma
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const GradoEspana = lazyConRecarga(() => import("./pages/grado/GradoEspana"));
 const BecaBicentenario2026 = lazyConRecarga(() => import("./pages/bicentenario/BecaBicentenario2026"));
+const Enlaces = lazyConRecarga(() => import("./pages/enlaces/Enlaces"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
@@ -289,9 +290,10 @@ const SCHEMA_ESTANCIA = {
 // ── Componente de SEO por ruta ──────────────────────────────────────────────
 const PRIVATE_PATHS = ["/panel", "/auth/success"];
 
-// Landings standalone para campañas de ads: sin Header/Footer del sitio, y
-// sin indexar (tráfico pagado, no orgánico).
-const LANDING_ADS_PATHS = ["/master-2027-2028"];
+// Landings standalone: sin Header/Footer del sitio, y sin indexar. La de Ads
+// (tráfico pagado) y /enlaces, la página de las biografías de redes que
+// sustituye a Linktree (15/09/2026).
+const LANDING_ADS_PATHS = ["/master-2027-2028", "/enlaces"];
 
 // Rutas retiradas: se sustituyen en el historial (replace) antes de pintar
 // nada, conservando los utm_* de la URL. La página vieja no se monta nunca.
@@ -367,6 +369,8 @@ const PUBLIC_PATHS = [
   "/grado-en-espana",
   // Sin enlace en menús; su SEO lo declara la propia página.
   "/beca-generacion-bicentenario-2026",
+  // Enlaces para las biografías de redes (sustituye a Linktree).
+  "/enlaces",
   // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
   // cabecera. Solo se llega por URL: la reserva de la web va por Calendly.
   "/reservar",
@@ -490,6 +494,7 @@ export default function App() {
       {path === "/visa-o-estancia" && <VisaOEstancia />}
       {path === "/grado-en-espana" && <GradoEspana />}
       {path === "/beca-generacion-bicentenario-2026" && <BecaBicentenario2026 />}
+      {path === "/enlaces" && <Enlaces />}
       {path === "/pago-exitoso" && <PagoExitoso />}
       {path === "/pago-fallido" && <PagoFallido />}
       {path === "/pago-pendiente" && <PagoPendiente />}

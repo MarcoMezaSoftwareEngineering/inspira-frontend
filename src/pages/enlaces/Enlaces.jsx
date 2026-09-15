@@ -6,48 +6,68 @@
 //
 // Rediseño del mismo día (la clienta la quería más bonita e interactiva):
 // imágenes de las páginas (las de /og), beca con cuenta atrás, reserva de
-// asesoría con opciones que se eligen, carrusel de recursos gratuitos y fondo
-// animado. Todo respeta prefers-reduced-motion.
+// asesoría con opciones que se eligen, opiniones que rotan, carrusel de
+// recursos gratuitos, visado y estancia, y fondo animado. Todo respeta
+// prefers-reduced-motion.
 //
-// Los enlaces internos llevan utm_source=enlaces para que Inspira Core sepa que
-// la visita llegó desde aquí. Redes y correo, copiados del Linktree el
-// 15/09/2026; el número es la línea única de la web (config/contacto.js).
-// Opiniones: se enlazan las publicadas en la web (/casos-de-exito), no la ficha
-// de Google, para no poner a mano el botón de escribir reseña (clienta).
+// Medición: los enlaces internos llevan utm_source=enlaces y cada botón manda
+// un evento ENLACE a Inspira Core (origen_detalle = qué botón), solo con
+// consentimiento de analítica (lib/analytics).
+// Redes y correo, copiados del Linktree el 15/09/2026; el número es la línea
+// única de la web (config/contacto.js). Opiniones: literales y completas de
+// config/testimonios.js, sin enlazar la ficha de Google (clienta: no poner a
+// mano el botón de escribir reseña).
 import { useEffect, useRef, useState } from "react";
 import logo from "../../assets/images/logo.png";
 import { CALENDLY_URL, LINEAS, whatsappDesde } from "../../config/contacto";
-import { OPCIONES_ASESORIA, promoVigente } from "../../config/asesorias";
+import { OPCIONES_ASESORIA, PROMO_GRATIS, promoVigente } from "../../config/asesorias";
 import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
+import { getServicio, hrefServicio } from "../../config/servicios";
+import { TESTIMONIOS } from "../../config/testimonios";
+import { enviarEventoEmbudo } from "../../lib/analytics";
 
 const UTM = "utm_source=enlaces&utm_medium=bio";
-const interno = (ruta) => `${ruta}${ruta.includes("?") ? "&" : "?"}${UTM}`;
+/** Ruta interna con utm (antes del #, si lo hay). */
+const interno = (ruta) => {
+  const [base, hash] = ruta.split("#");
+  return `${base}${base.includes("?") ? "&" : "?"}${UTM}${hash ? `#${hash}` : ""}`;
+};
 const BECA = interno("/beca-generacion-bicentenario-2026");
+const marcar = (clave) => enviarEventoEmbudo("ENLACE", { origen_detalle: clave });
 
 // Línea única de la web, atendida por el equipo de Perú y España.
 const NUMERO = LINEAS[0].numero;
 const TEL = `tel:+${NUMERO.replace(/\D/g, "")}`;
 
+const hrefDe = (id) => {
+  const s = getServicio(id);
+  return s ? hrefServicio(s) : "/servicios";
+};
+
 const RECURSOS = [
   {
+    clave: "recurso:mapa",
     img: "/og/mapa-estudiar-en-espana.jpg",
     titulo: "Mapa de universidades y costos de máster",
     texto: "Cuánto cuesta un máster en cada ciudad de España",
     href: interno("/mapa-estudiar-en-espana"),
   },
   {
+    clave: "recurso:grado",
     img: "/og/grado-en-espana.jpg",
     titulo: "Grado en España: guía para familias",
     texto: "Cuánto cuesta que tu hijo estudie una carrera",
     href: interno("/grado-en-espana"),
   },
   {
+    clave: "recurso:calculadora",
     img: "/og/calculadora-master.jpg",
     titulo: "Calculadora: encuentra gratis tu máster",
     texto: "Másteres oficiales en España según tu perfil",
     href: interno("/calculadora-master"),
   },
   {
+    clave: "recurso:visa-o-estancia",
     emoji: "🧭",
     titulo: "Test: ¿visa o estancia por estudios?",
     texto: "Descubre qué camino te conviene según tu caso",
@@ -55,13 +75,20 @@ const RECURSOS = [
   },
 ];
 
+const SERVICIOS = [
+  { clave: "servicio:visado", emoji: "🛂", titulo: "Visado de estudios", texto: "Te acompañamos en todo el trámite", href: interno(hrefDe("visa-estudios")) },
+  { clave: "servicio:estancia", emoji: "🏠", titulo: "Estancia por estudios", texto: "El trámite desde España, paso a paso", href: interno(hrefDe("estancia-estudios")) },
+];
+
 // El portal va a /plataforma, como «Mi portal» de la barra inferior sin sesión.
 const ENLACES = [
-  { emoji: "⭐", titulo: "Opiniones y casos de éxito", href: interno("/casos-de-exito") },
-  { emoji: "🎤", titulo: "Eventos y charlas gratuitas", href: interno("/eventos") },
-  { emoji: "📱", titulo: "Mi portal: acceso para asesorados", href: interno("/plataforma") },
-  { emoji: "🌎", titulo: "Nuestra web oficial", href: interno("/") },
+  { clave: "eventos", emoji: "🎤", titulo: "Eventos y charlas gratuitas", href: interno("/eventos") },
+  { clave: "portal", emoji: "📱", titulo: "Mi portal: acceso para asesorados", href: interno("/plataforma") },
+  { clave: "web", emoji: "🌎", titulo: "Nuestra web oficial", href: interno("/") },
 ];
+
+// Solo las opiniones cortas: se citan completas, nunca recortadas.
+const OPINIONES = TESTIMONIOS.filter((t) => t.texto.length <= 260);
 
 const REDES = [
   {
@@ -116,6 +143,7 @@ const REDES = [
 
 const ESTILOS = `
 @keyframes enl-sube { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes enl-aparece { from { opacity: 0; } to { opacity: 1; } }
 @keyframes enl-barrido { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
 @keyframes enl-gira { to { transform: rotate(360deg); } }
 @keyframes enl-fondo { from { background-position: 0% 0%, 0% 50%; } to { background-position: 0% 0%, 100% 50%; } }
@@ -128,6 +156,7 @@ const ESTILOS = `
   animation: enl-fondo 16s ease-in-out infinite alternate;
 }
 .enl-sube { animation: enl-sube .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: var(--d, 0ms); }
+.enl-aparece { animation: enl-aparece .5s ease both; }
 .enl-brillo { position: relative; overflow: hidden; }
 .enl-brillo::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .45) 50%, transparent 70%); transform: translateX(-120%); animation: enl-barrido 3.8s ease-in-out infinite; }
 .enl-vidrio { border: 1px solid transparent; background: linear-gradient(160deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .05)) padding-box, linear-gradient(135deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, .06) 45%, rgba(250, 148, 58, .5)) border-box; }
@@ -138,7 +167,7 @@ const ESTILOS = `
 .enl-carrusel::-webkit-scrollbar { display: none; }
 .enl-carrusel > * { scroll-snap-align: start; }
 @media (prefers-reduced-motion: reduce) {
-  .enl-fondo, .enl-sube, .enl-anillo::before, .enl-latido { animation: none; }
+  .enl-fondo, .enl-sube, .enl-aparece, .enl-anillo::before, .enl-latido { animation: none; }
   .enl-brillo::after { display: none; }
 }
 `;
@@ -168,7 +197,7 @@ function BannerBeca({ style }) {
     est.fase === "antes" ? `Abre en ${dias(faltan)}` : est.fase === "abierta" ? `Abierta · cierra en ${dias(faltan)}` : "Postulación cerrada";
   return (
     <section aria-label="Beca Generación del Bicentenario 2026" className="enl-sube mt-6 overflow-hidden rounded-3xl bg-primary-dark shadow-2xl ring-1 ring-white/15" style={style}>
-      <a href={BECA} className="block">
+      <a href={BECA} onClick={() => marcar("beca:imagen")} className="block">
         <img
           src="/og/beca-generacion-bicentenario-2026.jpg"
           alt="Beca Generación del Bicentenario 2026: solo 20 becas"
@@ -185,16 +214,29 @@ function BannerBeca({ style }) {
           </span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <a href={`${BECA}#simulador`} className="enl-brillo flex items-center justify-center gap-1.5 rounded-xl bg-accent px-2 py-3 text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun active:scale-[.98]">
+          <a
+            href={`${BECA}#simulador`}
+            onClick={() => marcar("beca:simulador")}
+            className="enl-brillo flex items-center justify-center gap-1.5 rounded-xl bg-accent px-2 py-3 text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun active:scale-[.98]"
+          >
             <span aria-hidden="true">🎯</span> Calcula tu puntaje
           </a>
-          <a href={`${BECA}#aviso`} className="flex items-center justify-center gap-1.5 rounded-xl bg-white px-2 py-3 text-sm font-extrabold text-primary transition hover:bg-secondary-light active:scale-[.98]">
+          <a
+            href={`${BECA}#aviso`}
+            onClick={() => marcar("beca:aviso")}
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-white px-2 py-3 text-sm font-extrabold text-primary transition hover:bg-secondary-light active:scale-[.98]"
+          >
             <span aria-hidden="true">🔔</span> Avísame
           </a>
         </div>
       </div>
     </section>
   );
+}
+
+function quedanPromo() {
+  const n = Math.max(0, Math.ceil((new Date(`${PROMO_GRATIS.hasta}T23:59:59`) - Date.now()) / 86400000));
+  return n <= 1 ? "¡Último día!" : `Quedan ${n} días`;
 }
 
 function ReservaAsesoria({ style }) {
@@ -229,7 +271,11 @@ function ReservaAsesoria({ style }) {
               <span className="min-w-0 flex-1">
                 <span className="block text-[11px] font-extrabold uppercase tracking-wide text-neutral-500">{o.duracion}</span>
                 <span className="block font-bold leading-snug text-neutral-900">{o.nombre}</span>
-                {o.promo && <span className="block text-xs font-semibold text-green-700">Solo hasta el 22 de septiembre</span>}
+                {o.promo && (
+                  <span className="block text-xs font-semibold text-green-700">
+                    Solo hasta el 22 de septiembre · <span className="font-extrabold">⏳ {quedanPromo()}</span>
+                  </span>
+                )}
               </span>
               <span className={`shrink-0 text-right text-lg font-extrabold ${o.promo ? "text-green-700" : "text-primary"}`}>
                 {o.precio}
@@ -242,9 +288,55 @@ function ReservaAsesoria({ style }) {
           href={actual.url || CALENDLY_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => marcar(`reserva:${actual.id}`)}
           className="enl-brillo flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 text-center font-extrabold text-white shadow-lg transition hover:bg-primary-dark active:scale-[.98]"
         >
           <span aria-hidden="true">📅</span> Reservar: {actual.nombre}
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function Opiniones({ style }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (OPINIONES.length < 2) return undefined;
+    const t = setInterval(() => setI((n) => (n + 1) % OPINIONES.length), 7000);
+    return () => clearInterval(t);
+  }, []);
+  const o = OPINIONES[i];
+  if (!o) return null;
+  return (
+    <section aria-label="Opiniones de asesorados" className="enl-sube mt-6 rounded-3xl bg-white p-4 shadow-2xl" style={style}>
+      <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary">💬 Lo que dicen nuestros asesorados</p>
+      <div key={i} className="enl-aparece mt-2 min-h-[7.5rem]">
+        <p className="text-base leading-none text-accent" aria-label={`${o.estrellas} de 5 estrellas`}>
+          {"★".repeat(o.estrellas)}
+        </p>
+        <blockquote className="mt-2 text-sm leading-relaxed text-neutral-800">“{o.texto}”</blockquote>
+        <p className="mt-2 text-xs font-bold text-primary">
+          {o.nombre} <span className="font-semibold text-neutral-500">· {o.servicio} · opinión publicada en {o.fuente}</span>
+        </p>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="flex gap-1.5">
+          {OPINIONES.map((op, n) => (
+            <button
+              key={op.nombre}
+              type="button"
+              onClick={() => setI(n)}
+              aria-label={`Ver la opinión de ${op.nombre}`}
+              className={`h-2 rounded-full transition-all ${n === i ? "w-5 bg-accent" : "w-2 bg-neutral-300"}`}
+            />
+          ))}
+        </div>
+        <a
+          href={interno("/casos-de-exito")}
+          onClick={() => marcar("opiniones")}
+          className="flex items-center gap-1 text-xs font-extrabold text-primary underline underline-offset-4"
+        >
+          Opiniones y casos de éxito <Flecha />
         </a>
       </div>
     </section>
@@ -261,17 +353,27 @@ function Contacto({ style }) {
           href={whatsappDesde("enlaces", "Quiero información.")}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => marcar("contacto:whatsapp")}
           className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-extrabold text-white shadow-lg shadow-black/20 transition hover:bg-green-700 active:scale-[.98]"
         >
           <span aria-hidden="true">💬</span> WhatsApp
         </a>
         <a
           href={TEL}
+          onClick={() => marcar("contacto:llamar")}
           className="flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-extrabold text-primary shadow-lg shadow-black/20 transition hover:bg-secondary-light active:scale-[.98]"
         >
           <span aria-hidden="true">📲</span> Llamar
         </a>
       </div>
+      <a
+        href="/contacto/inspira-legal.vcf"
+        type="text/vcard"
+        onClick={() => marcar("contacto:guardar")}
+        className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-bold text-white ring-1 ring-white/25 transition hover:bg-white/20 active:scale-[.98]"
+      >
+        <span aria-hidden="true">👤</span> Guardar contacto en mi celular
+      </a>
     </section>
   );
 }
@@ -298,6 +400,7 @@ function Carrusel({ style }) {
           <a
             key={r.titulo}
             href={r.href}
+            onClick={() => marcar(r.clave)}
             className="enl-vidrio flex w-[78%] shrink-0 flex-col overflow-hidden rounded-3xl text-white transition active:scale-[.98] sm:w-[70%]"
           >
             {r.img ? (
@@ -360,6 +463,7 @@ export default function Enlaces() {
 
         <BannerBeca style={retraso()} />
         <ReservaAsesoria style={retraso()} />
+        <Opiniones style={retraso()} />
         <Contacto style={retraso()} />
 
         <Rotulo style={retraso()}>🎁 Recursos gratuitos</Rotulo>
@@ -367,9 +471,27 @@ export default function Enlaces() {
           <Carrusel style={retraso()} />
         </div>
 
-        <Rotulo style={retraso()}>✨ Paquetes, asesoría y más</Rotulo>
+        <Rotulo style={retraso()}>✨ Servicios, paquetes y más</Rotulo>
+        <div className="enl-sube mt-3 grid grid-cols-2 gap-3" style={retraso()}>
+          {SERVICIOS.map((s) => (
+            <a
+              key={s.clave}
+              href={s.href}
+              onClick={() => marcar(s.clave)}
+              className="enl-vidrio flex flex-col rounded-3xl p-3.5 text-white transition hover:bg-white/10 active:scale-[.98]"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-2xl ring-1 ring-white/15" aria-hidden="true">
+                {s.emoji}
+              </span>
+              <span className="mt-2 font-extrabold leading-snug">{s.titulo}</span>
+              <span className="mt-0.5 text-xs leading-snug text-white/70">{s.texto}</span>
+            </a>
+          ))}
+        </div>
+
         <a
           href={interno("/servicios/master")}
+          onClick={() => marcar("paquete-master")}
           className="enl-sube mt-3 flex overflow-hidden rounded-3xl bg-white shadow-2xl transition active:scale-[.98]"
           style={retraso()}
         >
@@ -384,8 +506,9 @@ export default function Enlaces() {
         <nav aria-label="Más enlaces de Inspira" className="mt-3 space-y-3">
           {ENLACES.map((e) => (
             <a
-              key={e.titulo}
+              key={e.clave}
               href={e.href}
+              onClick={() => marcar(e.clave)}
               className="enl-sube flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 font-bold text-primary shadow-lg shadow-black/10 transition hover:bg-secondary-light active:scale-[.98]"
               style={retraso()}
             >
@@ -404,6 +527,7 @@ export default function Enlaces() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={r.nombre}
+              onClick={() => marcar(`red:${r.nombre.toLowerCase()}`)}
               className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 active:scale-95"
             >
               {r.icono}

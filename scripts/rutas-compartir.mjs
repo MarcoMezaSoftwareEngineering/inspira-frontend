@@ -163,6 +163,14 @@ export const RUTAS_COMPARTIR = {
     image: IMG_BICENTENARIO,
     imageAlt: "Beca Generación del Bicentenario 2026: solo 20 becas. ¿Calificas? Calcula tu puntaje",
   },
+  // Página de enlaces de las biografías de redes (pages/enlaces/Enlaces.jsx).
+  "/enlaces": {
+    title: "Inspira Legal · Enlaces: becas, máster en España y asesoría",
+    description:
+      "Beca Generación del Bicentenario 2026, mapa de costos de máster, guía de grado en España, calculadora de máster y reserva de tu asesoría con el equipo Perú · España.",
+    image: "/og/inspira-general.jpg",
+    imageAlt: "Inspira Legal: asesoría en extranjería, visas y estudios en España",
+  },
   "/mapa-estudiar-en-espana": {
     title: "¿Cuánto cuesta un máster en España? Mapa por comunidad y universidad | Inspira Legal",
     description:

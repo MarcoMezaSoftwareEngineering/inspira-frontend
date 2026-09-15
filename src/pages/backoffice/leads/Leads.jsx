@@ -204,6 +204,7 @@ export default function Leads() {
     { n: embudo?.etapas?.CONTRATADO || 0, l: "contratados", tono: "ok" },
     { n: `${(embudo?.conversion || 0).toLocaleString("es-ES")} %`, l: "conversión" },
     { n: embudo?.clics_30d?.WHATSAPP || 0, l: "clics WhatsApp · 30 d", tono: "cielo" },
+    { n: embudo?.clics_30d?.ENLACE || 0, l: "clics en /enlaces · 30 d", tono: "cielo" },
   ];
 
   const columnas = etapaFiltro ? ETAPAS.filter((e) => e.valor === etapaFiltro) : ETAPAS;

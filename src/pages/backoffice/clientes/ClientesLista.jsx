@@ -4,6 +4,7 @@
 // filas no distinguía nada. Lo que hace falta ver de un vistazo es qué tiene
 // cada uno en marcha, si debe dinero y si nadie lo está llevando.
 import { useMemo, useState } from "react";
+import { boPATCH } from "../../../services/backofficeApi";
 
 const SERVICIO = {
   master: { corto: "Máster",      tono: "bg-[#EEF2F8] text-[#1A3557]" },
@@ -52,17 +53,52 @@ function soloDigitos(t) {
    mira de un cliente; el correo y el teléfono van a los botones. */
 function ProcesoMini({ e }) {
   const sv = SERVICIO[e.servicio] || SERVICIO.master;
-  const pct = e.paso && e.pasos ? Math.round((e.paso / e.pasos) * 100) : 0;
+  // La etapa se cambia aquí mismo: optimista, y vuelve atrás si falla.
+  const [etapa, setEtapa] = useState(e.etapa);
+  const [deducida, setDeducida] = useState(e.etapa_deducida);
+  const [estado, setEstado] = useState("");
+  const pasos = e.opciones?.length || e.pasos || 0;
+  const paso = etapa && e.opciones ? e.opciones.indexOf(etapa) + 1 : e.paso;
+  const pct = paso && pasos ? Math.round((paso / pasos) * 100) : 0;
+
+  async function cambiar(nueva) {
+    if (!nueva || nueva === etapa) return;
+    const antes = etapa;
+    setEtapa(nueva); setDeducida(false); setEstado("guardando");
+    const r = await boPATCH(`/backoffice/procesos/${e.id_solicitud}/etapa`, { etapa: nueva, servicio: e.servicio });
+    if (r.ok) { setEstado("ok"); setTimeout(() => setEstado(""), 1500); }
+    else { setEtapa(antes); setEstado("error"); }
+  }
+
   return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-neutral-50 border border-neutral-100 px-2.5 py-2">
+    <div className="flex items-center gap-2.5 rounded-xl bg-neutral-50 border border-neutral-100 px-2.5 py-2"
+      onClick={(ev) => ev.stopPropagation()} role="presentation">
       <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${sv.tono}`}>{sv.corto}</span>
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="text-[12px] font-semibold text-neutral-800 truncate">{e.etapa || "Sin etapa"}</span>
-          {e.paso && <span className="shrink-0 text-[10px] text-neutral-400 tabular-nums">{e.paso}/{e.pasos}</span>}
+        <div className="flex items-center justify-between gap-2">
+          <label className="relative min-w-0 inline-flex items-center gap-1 rounded-lg -ml-1 px-1 py-0.5 hover:bg-white cursor-pointer">
+            <span className={`text-[12px] font-semibold truncate ${etapa ? "text-neutral-800" : "text-amber-700"}`}>
+              {etapa || "Elegir etapa"}
+            </span>
+            {deducida && <span className="text-[9px] text-neutral-400" title="Deducida del expediente; elígela para fijarla">(auto)</span>}
+            <svg className="w-3 h-3 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+            <select value={etapa || ""} onChange={(ev) => cambiar(ev.target.value)} aria-label={`Etapa de ${sv.corto}`}
+              disabled={estado === "guardando"} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+              {!etapa && <option value="">Elegir etapa…</option>}
+              {(e.opciones || []).map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </label>
+          <span className="shrink-0 text-[10px] tabular-nums">
+            {estado === "guardando" ? <span className="text-neutral-400">guardando…</span>
+              : estado === "ok" ? <span className="text-[#1D6A4A] font-bold">✓ guardado</span>
+              : estado === "error" ? <span className="text-red-600 font-bold">no se guardó</span>
+              : paso ? <span className="text-neutral-400">{paso}/{pasos}</span> : null}
+          </span>
         </div>
         <div className="h-1 rounded-full bg-neutral-200/80 mt-1 overflow-hidden">
-          <div className="h-full rounded-full" style={{ width: `${pct}%`, background: ACENTO[e.servicio] || "#1A3557" }} />
+          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: ACENTO[e.servicio] || "#1A3557" }} />
         </div>
       </div>
       <span title={e.responsable || "Sin responsable"}
@@ -291,11 +327,11 @@ export default function ClientesLista({
       <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-1 pb-1.5">
         <div className="ase-tira">
         <div className="ase-tira-scroll">
+        {chip("activos", "Con proceso activo", contadores.activos, "bg-[#E8F5EE] text-[#1D6A4A]")}
         {chip("", "Todos", contadores.todos)}
         {chip("mios", "Mis clientes", contadores.mios, "bg-[#EEF2F8] text-[#1A3557]")}
         {chip("nuevos", "Nuevos (7 días)", contadores.nuevos, "bg-[#E8F5EE] text-[#1D6A4A]")}
         {chip("sin_abrir", "Sin abrir", contadores.sin_abrir, "bg-red-50 text-red-700")}
-        {chip("activos", "Con proceso activo", contadores.activos, "bg-[#E8F5EE] text-[#1D6A4A]")}
         {chip("sin_servicio", "Sin servicios", contadores.sin_servicio, "bg-amber-50 text-amber-700")}
         {chip("con_deuda", "Con deuda", contadores.deuda, "bg-red-50 text-red-700")}
         {chip("sin_responsable", "Sin responsable", contadores.sin_resp, "bg-amber-50 text-amber-700")}

@@ -48,7 +48,8 @@ export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [altaAbierta, setAltaAbierta] = useState(false);
   const [orden, setOrden] = useState("recientes");
-  const [filtro, setFiltro] = useState("");
+  // Por defecto, quien tiene un proceso en marcha: es con quien se trabaja.
+  const [filtro, setFiltro] = useState("activos");
   const [conteos, setConteos] = useState({});
   // Ficha completa: sustituye a la lista mientras esta abierta.
   const [fichaDe, setFichaDe] = useState(null);

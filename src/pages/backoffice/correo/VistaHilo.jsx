@@ -6,6 +6,7 @@ import { dialog } from "../../../services/dialogService";
 import { navigate } from "../../../services/navigate";
 import SelectorRespuestas from "../comun/SelectorRespuestas";
 import { DESDE_BUZON } from "./desdeBuzon";
+import AccionesHilo from "./AccionesHilo";
 
 
 function hora(ms) {
@@ -49,15 +50,6 @@ export default function VistaHilo({ id, direcciones: dirs = [], onVolver, onResp
     const t = setInterval(marcar, 60000);
     return () => { clearInterval(t); boPOST(`/backoffice/correo/hilo/${id}/atender`, { soltar: true }); };
   }, [id]);
-
-  async function noRequiere() {
-    const quitar = Boolean(h.no_requiere);
-    const r = await boPOST(`/backoffice/correo/hilo/${id}/no-requiere`, { quitar });
-    if (!r.ok) { dialog.toast(r.msg || "No se pudo marcar", "error"); return; }
-    setH((x) => ({ ...x, no_requiere: !quitar }));
-    dialog.toast(quitar ? "Vuelve a pendientes" : "Marcado: no requiere respuesta", "success");
-    onRespondido?.();
-  }
 
   async function asignar(id_usuario) {
     const r = await boPOST(`/backoffice/correo/hilo/${id}/asignar`, { id_usuario: id_usuario || null });
@@ -113,10 +105,8 @@ export default function VistaHilo({ id, direcciones: dirs = [], onVolver, onResp
             </p>
           )}
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-          <button type="button" onClick={noRequiere}
-            className={`text-[11.5px] font-semibold rounded-lg px-2.5 py-1 border ${h.no_requiere ? "bg-[#e8f5ee] border-[#1d6a4a]/30 text-[#1d6a4a]" : "bg-white border-[#d8e4ef] text-[#0d2c3a]"}`}>
-            {h.no_requiere ? "✓ No requiere respuesta" : "No requiere respuesta"}
-          </button>
+          <AccionesHilo hilo={h} equipo={equipo} onHecho={onRespondido}
+            onNoLeido={async () => { await boPOST(`/backoffice/correo/hilo/${id}/leido`, { leido: false }); onRespondido?.(); onVolver?.(); }} />
           <label className="inline-flex items-center gap-1.5 text-[11.5px] text-[#62808f]">
             Asignado a
             <select value={equipo.find((u) => u.nombre === h.asignado)?.id_usuario || ""} onChange={(e) => asignar(e.target.value)}

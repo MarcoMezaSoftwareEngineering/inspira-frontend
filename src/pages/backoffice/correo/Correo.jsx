@@ -12,7 +12,8 @@ import { DESDE_BUZON } from "./desdeBuzon";
 import { Boton } from "../ui";
 import { Plus } from "lucide-react";
 
-const ESTADOS = [["sin_responder", "Sin responder"], ["no_leidos", "No leídos"], ["todos", "Todos"]];
+// Por defecto, no leídos: ningún correo es pendiente por sí solo (16/09/2026).
+const ESTADOS = [["no_leidos", "No leídos"], ["todos", "Todos"]];
 
 function espera(h, ahora) {
   const desde = h.espera_desde || h.fecha;
@@ -25,7 +26,7 @@ function espera(h, ahora) {
 export default function Correo() {
   const [info, setInfo] = useState(null);
   const [buzon, setBuzon] = useState("");
-  const [estado, setEstado] = useState("sin_responder");
+  const [estado, setEstado] = useState("no_leidos");
   const [q, setQ] = useState("");
   const [busca, setBusca] = useState("");
   const [mios, setMios] = useState(false);
@@ -79,9 +80,9 @@ export default function Correo() {
         acciones={<Boton tono="cta" icono={Plus} onClick={() => setRedactar(true)}>Redactar</Boton>}
         subtitulo={`Todas las direcciones de Inspira en un sitio. Es la cuenta ${info?.cuenta || "administracion@"}: lo que se responde aquí también se ve en Gmail.`}
         stats={hilos ? [
-          { n: estado === "sin_responder" ? hilos.length : 0, l: "sin responder en esta vista", tono: hilos.length ? "alerta" : "ok" },
+          { n: hilos.filter((h) => h.no_leido).length, l: "no leídos en esta vista", tono: "alerta" },
           { n: clientes, l: "son de clientes", tono: "cielo" },
-          { n: hilos.filter((h) => h.espera_desde && ahora - h.espera_desde > 86400000).length, l: "esperan más de 24 h", tono: "rojo" },
+          { n: hilos.filter((h) => h.asignado).length, l: "asignados a alguien", tono: "ok" },
         ] : undefined}
       />
       <Cuerpo className={dividida && abierto ? "!max-w-none" : ""}>
@@ -119,9 +120,8 @@ export default function Correo() {
               {lista === null ? (
                 <div className="p-3 space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="ase-esq" style={{ height: 64 }} />)}</div>
               ) : !lista.length ? (
-                <div className="ase-vacio"><p className="ase-vacio-t">{estado === "sin_responder" ? "Todo respondido" : "Nada por aquí"}</p><p className="ase-vacio-p">No hay correos en esta vista.</p></div>
+                <div className="ase-vacio"><p className="ase-vacio-t">{estado === "no_leidos" ? "Todo leído" : "Nada por aquí"}</p><p className="ase-vacio-p">No hay correos en esta vista.</p></div>
               ) : lista.map((h) => {
-                const vieja = h.espera_desde && ahora - h.espera_desde > 86400000;
                 return (
                   <button key={h.id} type="button" onClick={() => setAbierto(h.id)}
                     className={`w-full text-left px-4 py-3 border-b border-[#eef2f6] last:border-b-0 hover:bg-[#f7fafc] ${abierto === h.id ? "bg-[#e3f0fe]" : ""}`}>
@@ -130,8 +130,8 @@ export default function Correo() {
                       <span className={`text-[13.5px] truncate flex-1 ${h.no_leido ? "font-bold text-[#0d2c3a]" : "font-semibold text-[#0d2c3a]"}`}>
                         {h.cliente?.nombre || h.lead?.nombre || h.contacto?.nombre || h.contacto?.correo}
                       </span>
-                      <span className={`text-[11px] whitespace-nowrap ${!h.respondido && vieja ? "text-[#c0392b] font-bold" : "text-[#62808f]"}`}>
-                        {!h.respondido ? `espera ${espera(h, ahora)}` : espera(h, ahora)}
+                      <span className="text-[11px] whitespace-nowrap text-[#62808f]">
+                        {espera(h, ahora)}
                       </span>
                     </span>
                     <span className="block text-[12.5px] text-[#0d2c3a] truncate mt-0.5">{h.asunto}</span>

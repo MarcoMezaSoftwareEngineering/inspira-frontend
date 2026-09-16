@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import BarraHoy from "./BarraHoy";
+import { Pagina, Cabecera, Cuerpo, Boton } from "../ui";
+import { navigate } from "../../../services/navigate";
 import MiDia from "./MiDia";
 import PanelEquipo from "./PanelEquipo";
 import {
@@ -53,8 +55,7 @@ export default function Dashboard() {
     </div>
   );
 
-  const { kpis, clientes_por_mes, solicitudes_por_tipo, documentos_por_estado, top_clientes } = stats;
-  const totalDocs = documentos_por_estado.reduce((s, d) => s + d.count, 0);
+  const { kpis, clientes_por_mes, solicitudes_por_tipo, top_clientes } = stats;
   const totalClientesNuevos = clientes_por_mes.reduce((s, d) => s + d.count, 0);
 
   const chartData = clientes_por_mes.map((d) => {
@@ -62,33 +63,26 @@ export default function Dashboard() {
     return { mes: new Date(Number(y), Number(mo) - 1, 1).toLocaleDateString("es-ES", { month: "short" }), count: d.count };
   });
 
+  const yo = (() => { try { return JSON.parse(localStorage.getItem("bo_user") || "{}"); } catch { return {}; } })();
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
+  const pila = String(yo.nombre || "").split(" ")[0];
+
   return (
-    <div className="p-4 sm:p-6 space-y-4 bg-[#f4f7f5] min-h-full">
-      {/* Cabecera */}
-      <header className="flex items-start justify-between flex-wrap gap-4 mb-1">
-        <div>
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#147a4d] mb-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#46b77f] shadow-[0_0_0_4px_rgba(70,183,127,0.12)]" />
-            Resumen operativo
-          </div>
-          <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-[#15231b]">Dashboard</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">Indicadores clave, actividad comercial y carga operativa.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {lastSync && (
-            <span className="text-[11px] text-neutral-400 hidden sm:inline">
-              Actualizado {lastSync.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
-            </span>
-          )}
-          <button
-            onClick={cargar}
-            title="Actualizar"
-            className="w-9 h-9 border border-neutral-200 bg-white rounded-xl text-neutral-500 flex items-center justify-center shadow-sm hover:bg-[#f8faf8] hover:-translate-y-px transition-all"
-          >
-            <RefreshCw className="w-4 h-4" strokeWidth={2} />
-          </button>
-        </div>
-      </header>
+    <Pagina>
+      <Cabecera
+        eyebrow="Hoy"
+        titulo={pila ? `${saludo}, ${pila}` : saludo}
+        subtitulo={`Lo tuyo primero, luego cómo va todo.${lastSync ? ` Actualizado a las ${lastSync.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}.` : ""}`}
+        acciones={<Boton tono="cristal" icono={RefreshCw} onClick={cargar}>Actualizar</Boton>}
+        stats={[
+          { n: kpis.expedientes_activos, l: "expedientes activos", tono: "ok", onClick: () => navigate("/backoffice/procesos") },
+          { n: kpis.documentos_pendientes, l: "documentos por revisar", tono: kpis.documentos_pendientes ? "alerta" : undefined },
+          { n: kpis.total_clientes, l: "clientes", onClick: () => navigate("/backoffice/clientes") },
+          { n: kpis.leads_semana, l: "leads esta semana", tono: "cielo", onClick: () => navigate("/backoffice/leads") },
+        ]}
+      />
+      <Cuerpo>
 
       {/* Mi día: tareas vencidas y de hoy, y clientes que esperan algo de mí */}
       <MiDia />
@@ -98,14 +92,6 @@ export default function Dashboard() {
 
       {/* Equipo: solo para quien lo gestiona */}
       <PanelEquipo />
-
-      {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <KpiCard icon={TrendingUp} title="Leads esta semana" value={kpis.leads_semana} sub="Entrada comercial reciente" trend="últimos 7 días" accent="#0d8d82" soft="#e5f7f4" />
-        <KpiCard icon={Users} title="Clientes activos" value={kpis.total_clientes} sub="Clientes registrados" accent="#173454" soft="#eaf0f7" />
-        <KpiCard icon={FileText} title="Expedientes activos" value={kpis.expedientes_activos} sub="Carga operativa actual" trend="en curso" accent="#147a4d" soft="#e7f4ed" />
-        <KpiCard icon={FileWarning} title="Docs pendientes" value={kpis.documentos_pendientes} sub={totalDocs ? `${((kpis.documentos_pendientes / totalDocs) * 100).toFixed(1)}% de ${totalDocs} documentos` : ""} trend="requieren revisión" warn accent="#e6a400" soft="#fff6dc" />
-      </div>
 
       {/* Fila 1: gráfico + top clientes */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] gap-3">
@@ -155,7 +141,8 @@ export default function Dashboard() {
         <HorizontalBarChart title="Expedientes por servicio" subtitle={`Distribución de los ${kpis.expedientes_activos} expedientes activos`} data={solicitudes_por_tipo.slice(0, 8)} labelKey="nombre" valueKey="count" total={kpis.expedientes_activos} barColor="#173454" />
 
       </div>
-    </div>
+      </Cuerpo>
+    </Pagina>
   );
 }
 

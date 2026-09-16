@@ -8,7 +8,7 @@ import { boGET } from "../../../services/backofficeApi";
 import { navigate } from "../../../services/navigate";
 import RevisionRapida from "../comun/RevisionRapida";
 
-const PRIORIDAD = { URGENTE: "bg-red-600 text-white", ALTA: "bg-amber-100 text-amber-800", MEDIA: "bg-neutral-100 text-neutral-600", BAJA: "bg-neutral-50 text-neutral-400" };
+const PRIORIDAD = { URGENTE: "bg-red-600 text-white", ALTA: "bg-amber-100 text-amber-800", MEDIA: "bg-neutral-100 text-neutral-600", BAJA: "bg-neutral-50 text-[#62808f]" };
 
 export default function MiDia() {
   const [tareas, setTareas] = useState(null);
@@ -54,7 +54,7 @@ export default function MiDia() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13px] font-semibold text-neutral-800 truncate">{t.titulo}</span>
-                  {t.origen === "AUTO" && <span className="block text-[10.5px] text-neutral-400">Automática · se cierra sola al resolverse</span>}
+                  {t.origen === "AUTO" && <span className="block text-[10.5px] text-[#62808f]">Automática · se cierra sola al resolverse</span>}
                 </span>
                 {esRevision ? (
                   <button type="button" onClick={() => setRevisar(t.id_solicitud)}
@@ -80,8 +80,13 @@ export default function MiDia() {
                   <span className="block text-[13px] font-semibold text-neutral-800 truncate">{c.nombre}</span>
                   {e && <span className="block text-[11px] text-neutral-500 truncate">{e.que}{e.proximo ? ` · ${e.proximo.etiqueta} ${e.proximo.vencido ? `hace ${-e.proximo.dias} d` : `en ${e.proximo.dias} d`}` : ""}</span>}
                 </span>
-                <button type="button" onClick={() => navigate(`/backoffice/clientes?cliente=${c.id_cliente}`)}
-                  className="shrink-0 text-[12px] font-semibold text-[#1D6A4A] border border-[#1D6A4A]/30 rounded-lg px-3 py-1.5">Abrir</button>
+                {e && /^Revisar/.test(e.que || "") ? (
+                  <button type="button" onClick={() => setRevisar(e.id_solicitud)}
+                    className="shrink-0 min-h-[36px] text-[12px] font-bold text-white bg-[#013446] rounded-lg px-3">Revisar</button>
+                ) : (
+                  <button type="button" onClick={() => navigate(`/backoffice/clientes?cliente=${c.id_cliente}`)}
+                    className="shrink-0 min-h-[36px] text-[12px] font-semibold text-[#1D6A4A] border border-[#1D6A4A]/30 rounded-lg px-3">Abrir</button>
+                )}
               </div>
             );
           })}

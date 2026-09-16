@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import { ACTORES, FLUJOS } from "./flujos.config";
+import { Pagina, Cabecera, Cuerpo } from "../ui";
 
 function pasoDe(flujo, p) {
   // Estancia manda por su propio expediente; el resto, por la etapa.
@@ -136,11 +137,13 @@ export default function Flujos() {
   const abrir = (id) => { window.location.href = `/backoffice/solicitudes/${id}`; };
 
   return (
-    <div className="px-3 pb-8 sm:px-6 max-w-3xl mx-auto space-y-3.5">
-      <div className="pt-3.5">
-        <h1 className="font-serif text-[22px] text-[#1A3557] leading-tight">Flujos</h1>
-        <p className="text-[12px] text-neutral-500">El camino de cada servicio: qué toca en cada paso, quién lo mueve y quién está ahí ahora.</p>
-      </div>
+    <Pagina>
+      <Cabecera
+        eyebrow="Flujos"
+        titulo="El camino de cada servicio"
+        subtitulo="Qué toca en cada paso, quién lo mueve y quién está ahí ahora."
+      />
+      <Cuerpo className="!max-w-3xl">
 
       <div className="ase-tira">
         <div className="ase-tira-scroll">
@@ -186,6 +189,7 @@ export default function Flujos() {
       <p className="text-[11px] text-neutral-400 leading-relaxed">
         Los pasos 2 y 4 de Máster no tienen etapa propia en Procesos todavía: sus clientes aparecen en el paso anterior.
       </p>
-    </div>
+      </Cuerpo>
+    </Pagina>
   );
 }

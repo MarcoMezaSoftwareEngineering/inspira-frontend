@@ -10,6 +10,8 @@ import AltaRapida from "../clientes/AltaRapida";
 import ProximasFechas from "./ProximasFechas";
 import TrackerVisa from "./TrackerVisa";
 import TrackerMaster from "./TrackerMaster";
+import { Pagina, Cabecera, Boton } from "../ui";
+import { Plus, X } from "lucide-react";
 import { cambiarEtapa as patchEtapa } from "../comun/cambiarEtapa";
 
 const COLOR_SERVICIO = {
@@ -420,28 +422,26 @@ export default function Procesos({ onAbrirProceso }) {
   const sel = "text-[12px] text-neutral-700 border border-neutral-300 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]";
 
   return (
-    <div className="px-3 pb-6 sm:px-6 space-y-3">
-      {/* Cabecera y pestañas acompañan al desplazar: en el móvil, perderlas
-          obligaba a subir del todo para cambiar de vista. */}
-      <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-3.5 pb-2 space-y-2.5">
-        <div className="flex items-center gap-3 md:pl-11">
-          <div className="min-w-0 flex-1">
-            <h1 className="font-serif text-[19px] text-[#1A3557] leading-tight">Procesos</h1>
-            <p className="text-[11.5px] text-neutral-500 truncate">Todo lo que está en marcha</p>
-          </div>
-          <button
-            type="button" onClick={() => setAltaAbierta((v) => !v)}
-            aria-expanded={altaAbierta}
-            className="shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 bg-[#1D6A4A] text-white text-[12.5px] font-semibold rounded-xl hover:bg-[#15533a] active:scale-95 transition-all"
-          >
-            <svg className={`w-3.5 h-3.5 transition-transform ${altaAbierta ? "rotate-45" : ""}`}
-              fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
+    <Pagina>
+      <Cabecera
+        eyebrow="Procesos"
+        titulo="Todo lo que está en marcha"
+        subtitulo="Por servicio, con sus etapas, fechas y cobros. Toca una cifra para verla."
+        acciones={
+          <Boton tono="cta" icono={altaAbierta ? X : Plus} onClick={() => setAltaAbierta((v) => !v)}>
             {altaAbierta ? "Cerrar" : "Nuevo cliente"}
-          </button>
-        </div>
-
+          </Boton>
+        }
+        stats={[
+          { n: resumen.activos, l: "procesos activos", tono: "ok", onClick: () => setPestana("metricas") },
+          { n: resumen.vencidos, l: "con fecha vencida", tono: resumen.vencidos ? "rojo" : undefined, onClick: () => setPestana("fechas") },
+          { n: resumen.semana, l: "vencen esta semana", tono: resumen.semana ? "alerta" : undefined, onClick: () => setPestana("fechas") },
+          { n: resumen.sinResp, l: "sin responsable", tono: resumen.sinResp ? "alerta" : undefined },
+          { n: resumen.debiendo, l: "con deuda", tono: resumen.debiendo ? "rojo" : undefined },
+        ]}
+      />
+    <div className="px-3 pb-6 sm:px-6 space-y-3 max-w-[1240px] mx-auto">
+      <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-3 pb-2 space-y-2.5">
         <div className="ase-tira">
           <div className="ase-tira-scroll" ref={tiraRef}>
             {[
@@ -757,5 +757,6 @@ export default function Procesos({ onAbrirProceso }) {
 
       </>)}
     </div>
+    </Pagina>
   );
 }

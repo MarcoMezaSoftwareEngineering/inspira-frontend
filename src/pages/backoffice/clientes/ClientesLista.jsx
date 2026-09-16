@@ -31,7 +31,7 @@ const QUIEN = {
 };
 
 // Servicios con recordatorio de pendientes al asesorado (correo formal).
-const RUTA_RECORDATORIO = { master: "master", ee: "estancia", mod: "modificatoria" };
+const RUTA_RECORDATORIO = { master: "master", ee: "estancia", mod: "modificatoria", visa: "visa" };
 
 function primerNombre(nombre) {
   return String(nombre || "").trim().split(/\s+/)[0] || "otro cliente";

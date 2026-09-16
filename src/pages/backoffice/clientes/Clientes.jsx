@@ -48,7 +48,8 @@ function Toast({ msg, tipo, onClose }) {
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
-  const [altaAbierta, setAltaAbierta] = useState(false);
+  // ?alta=1 (botón «+» del móvil) abre el alta directamente.
+  const [altaAbierta, setAltaAbierta] = useState(() => new URLSearchParams(window.location.search).get("alta") === "1");
   // Lo más urgente arriba: vencido, luego lo que vence antes.
   const [orden, setOrden] = useState("urgentes");
   const [equipo, setEquipo] = useState([]);

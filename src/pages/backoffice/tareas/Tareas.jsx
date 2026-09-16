@@ -104,7 +104,8 @@ export default function Tareas() {
   const [verCerradas, setVerCerradas] = useState(false);
 
   const [abierta, setAbierta] = useState(() => Number(leerParam("tarea")) || null);
-  const [altaAbierta, setAltaAbierta] = useState(false);
+  // ?nueva=1 (botón «+» del móvil) abre el alta directamente.
+  const [altaAbierta, setAltaAbierta] = useState(() => leerParam("nueva") === "1");
   const [sobre, setSobre] = useState(null);
   const [versionCarga, setVersionCarga] = useState(0);
   const arrastrada = useRef(null);

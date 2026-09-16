@@ -12,9 +12,13 @@ import { MoreHorizontal } from "lucide-react";
 import { navigate } from "../../../services/navigate";
 import { useAuth } from "../context/AuthContext";
 import { NAV_SECTIONS, resolverItem, itemActivo } from "./navSections";
+import ContadorTareas from "./ContadorTareas";
 
 // Por `id` (navSections.js): el destino puede cambiar con los permisos.
-const PRINCIPALES = ["inicio", "procesos", "clientes", "leads"];
+// Desde el 16/09/2026: Hoy (Inicio con «Mi día») · Clientes · Tareas · Procesos.
+// Leads baja al cajón: se abre menos que las tareas del día.
+const PRINCIPALES = ["inicio", "clientes", "tareas", "procesos"];
+const ETIQUETA_CORTA = { inicio: "Hoy" };
 
 export default function BottomNav({ path, onMas, drawerAbierto }) {
   const auth = useAuth();
@@ -39,10 +43,15 @@ export default function BottomNav({ path, onMas, drawerAbierto }) {
             className="ux-nav-item" data-on={on ? "1" : "0"}
             aria-current={on ? "page" : undefined}
             onClick={() => navigate(it.href)}>
-            <span className="ux-nav-icono">
+            <span className="ux-nav-icono relative">
               <Icono size={21} strokeWidth={on ? 2.4 : 1.9} />
+              {it.id === "tareas" && (
+                <span className="absolute -top-1.5 left-[14px] [&>span]:!ml-0 [&>span]:!h-[17px] [&>span]:!min-w-[17px] [&>span]:!text-[9.5px] [&>span]:!bg-[#e5533d] [&>span]:!text-white">
+                  <ContadorTareas />
+                </span>
+              )}
             </span>
-            {it.label}
+            {ETIQUETA_CORTA[it.id] || it.label}
           </button>
         );
       })}

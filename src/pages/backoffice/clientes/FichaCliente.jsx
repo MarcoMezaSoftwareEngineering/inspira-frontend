@@ -3,6 +3,7 @@
 // Antes había que abrir cuatro sitios distintos para entender a alguien: sus
 // datos en Clientes, sus procesos en Solicitudes, sus pagos en ningún lado y
 // sus notas dentro de cada expediente. Aquí está junto.
+import HistorialCliente from "./HistorialCliente";
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boPOST, boPATCH, boDELETE, boFetch } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
@@ -311,6 +312,9 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
               </div>
             )}
           </Bloque>
+
+          {/* Todo lo que ha pasado con el cliente, en orden. */}
+          <HistorialCliente idCliente={idCliente} />
 
           {/* Planes de pago: cuotas, vencimientos y comprobantes (portal de Pagos). */}
           <PlanesCliente idCliente={idCliente} onCambio={cargar} />

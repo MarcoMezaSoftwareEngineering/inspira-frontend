@@ -228,6 +228,7 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
       t: `Sin abrir · ${x.horas < 24 ? `${x.horas} h` : `${Math.floor(x.horas / 24)} d`}`,
     })),
     c.debe > 0 && { k: "debe", rojo: true, t: `Debe ${c.debe.toFixed(0)}` },
+    c.activos > 0 && (c.sin_movimiento_dias ?? 0) >= 10 && { k: "mov", rojo: c.sin_movimiento_dias >= 21, t: `Sin movimiento · ${c.sin_movimiento_dias} d` },
     c.activos > 0 && !tel && { k: "tel", t: "Falta teléfono" },
   ].filter(Boolean);
 
@@ -371,6 +372,72 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
   );
 }
 
+/* Vista de tabla (ordenador): una fila por proceso activo, para comparar
+   muchos de un vistazo. Tocar la fila abre al cliente. */
+function Tabla({ clientes, onAbrir }) {
+  const filas = clientes.flatMap((c) => (c.etapas?.length ? c.etapas : [null]).map((e) => ({ c, e })));
+  const th = "text-[9.5px] font-bold uppercase tracking-widest font-mono text-neutral-400 px-3 py-2 text-left whitespace-nowrap";
+  return (
+    <div className="bg-white border border-neutral-200 rounded-2xl overflow-x-auto">
+      <table className="w-full min-w-[980px]">
+        <thead className="bg-neutral-50 border-b border-neutral-200">
+          <tr>
+            {["Cliente", "Servicio · etapa", "Le toca", "Qué hay que hacer", "Próxima fecha", "Responsable", "Recordado", "Sin mov."].map((h) => (
+              <th key={h} className={th}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {filas.map(({ c, e }, i) => {
+            const sv = e ? SERVICIO[e.servicio] || SERVICIO.master : null;
+            const quien = e ? QUIEN[e.le_toca] : null;
+            return (
+              <tr key={`${c.id_cliente}-${e?.id_solicitud || i}`} onClick={() => onAbrir(c)}
+                className="border-b border-neutral-100 last:border-b-0 hover:bg-[#F7FAF8] cursor-pointer">
+                <td className="px-3 py-2.5">
+                  <p className="text-[12.5px] font-semibold text-neutral-900 truncate max-w-[220px]">{c.nombre}</p>
+                  <p className="text-[10.5px] text-neutral-400 truncate max-w-[220px]">{c.telefono || c.email_contacto}</p>
+                </td>
+                <td className="px-3 py-2.5 whitespace-nowrap">
+                  {e ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${sv.tono}`}>{sv.corto}</span>
+                      <span className="text-[12px] text-neutral-700">{e.etapa || "—"}</span>
+                    </span>
+                  ) : <span className="text-[11.5px] text-neutral-400">Sin proceso activo</span>}
+                </td>
+                <td className="px-3 py-2.5 whitespace-nowrap">
+                  {quien && e.le_toca !== "nadie" ? (
+                    <span className={`inline-flex items-center gap-1.5 text-[10.5px] font-semibold px-2 py-0.5 rounded-md ${quien.clase}`}>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: quien.punto }} />
+                      {{ asesor: "Asesor", asesorado: "Asesorado", tercero: "Organismo" }[e.le_toca]}
+                    </span>
+                  ) : <span className="text-neutral-300">—</span>}
+                </td>
+                <td className="px-3 py-2.5 text-[12px] text-neutral-700 max-w-[240px]">{e?.que || "—"}</td>
+                <td className="px-3 py-2.5">{e?.proximo ? <Fecha p={e.proximo} /> : <span className="text-neutral-300">—</span>}</td>
+                <td className="px-3 py-2.5 text-[12px] whitespace-nowrap">
+                  {e?.responsable || (e ? <span className="text-amber-700 font-semibold">Sin asignar</span> : "—")}
+                </td>
+                <td className="px-3 py-2.5 text-[11.5px] text-neutral-500 whitespace-nowrap">
+                  {e?.recordado ? (e.recordado.dias === 0 ? "hoy" : `hace ${e.recordado.dias} d`) : "—"}
+                </td>
+                <td className="px-3 py-2.5 text-[11.5px] whitespace-nowrap">
+                  {e?.sin_movimiento_dias != null ? (
+                    <span className={e.sin_movimiento_dias >= 21 ? "text-red-700 font-bold" : e.sin_movimiento_dias >= 10 ? "text-amber-700 font-semibold" : "text-neutral-500"}>
+                      {e.sin_movimiento_dias} d
+                    </span>
+                  ) : "—"}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function Resumen({ k, t, color, fondo, n, filtro, onFiltro }) {
   const on = filtro === k;
   return (
@@ -395,6 +462,12 @@ export default function ClientesLista({
   const [marcados, setMarcados] = useState(new Set());
   const [enLote, setEnLote] = useState(false);
   const [ahora] = useState(() => Date.now());
+  // Tarjetas o tabla (la tabla solo se ofrece en pantallas anchas). Se
+  // recuerda por navegador: es una preferencia de cada persona.
+  const [vista, setVista] = useState(() => {
+    try { return localStorage.getItem("inspira.clientes.vista") || "tarjetas"; } catch { return "tarjetas"; }
+  });
+  const cambiarVista = (v) => { setVista(v); try { localStorage.setItem("inspira.clientes.vista", v); } catch { /* sin almacenamiento */ } };
 
   const porServicio = useMemo(() => {
     const n = {};
@@ -506,6 +579,12 @@ export default function ClientesLista({
             </svg>
             Filtros
           </button>
+          <div className="hidden lg:inline-flex shrink-0 rounded-xl border border-neutral-200 overflow-hidden text-[12px] font-semibold">
+            {[["tarjetas", "Tarjetas"], ["tabla", "Tabla"]].map(([k, t]) => (
+              <button key={k} type="button" onClick={() => cambiarVista(k)} aria-pressed={vista === k}
+                className={`px-2.5 py-2 ${vista === k ? "bg-[#023A4B] text-white" : "bg-white text-neutral-600"}`}>{t}</button>
+            ))}
+          </div>
           <button type="button" onClick={() => (seleccionando ? salirSeleccion() : setSeleccionando(true))}
             className={`shrink-0 text-[12px] font-semibold px-2.5 py-2 rounded-xl border ${
               seleccionando ? "border-[#023A4B] bg-[#023A4B] text-white" : "border-neutral-200 text-neutral-600 bg-white"}`}>
@@ -518,6 +597,7 @@ export default function ClientesLista({
             <div className="flex flex-wrap gap-1.5">
               {chip("sin_responsable", "Sin responsable", "bg-amber-50 text-amber-700")}
               {chip("con_deuda", "Con deuda", "bg-red-50 text-red-700")}
+              {chip("sin_movimiento", "Sin movimiento 10+ días", "bg-red-50 text-red-700")}
               {chip("sin_servicio", "Sin servicios", "bg-neutral-100 text-neutral-500")}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -561,6 +641,8 @@ export default function ClientesLista({
           <button type="button" onClick={() => { setServicio(""); onFiltro("activos"); }}
             className="mt-2 text-[12px] font-semibold text-[#1D6A4A] underline">Ver los activos</button>
         </div>
+      ) : vista === "tabla" && !seleccionando && typeof window !== "undefined" && window.innerWidth >= 1024 ? (
+        <Tabla clientes={visibles} onAbrir={onAbrir} />
       ) : (
         <div className="grid gap-2.5 md:grid-cols-2 items-start">
           {visibles.map((c) => (

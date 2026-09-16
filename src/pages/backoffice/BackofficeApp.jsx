@@ -25,6 +25,7 @@ import Pagos from "./pagos/Pagos";
 import Tareas from "./tareas/Tareas";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
+import Flujos from "./flujos/Flujos";
 import Procesos from "./procesos/Procesos";
 import PresupuestosPortal from "./presupuestos/PresupuestosPortal";
 import CatalogoMasters from "./catalogo/CatalogoMasters";
@@ -262,6 +263,7 @@ export default function BackofficeApp() {
 
             {/* TAREAS — lo pendiente del equipo por área. ?tarea=ID abre la ficha (enlace de los correos). */}
             {path === "/backoffice/tareas" && <Tareas />}
+            {path === "/backoffice/flujos" && <Flujos />}
 
             {path === "/backoffice/tracker-universidades" && <ModuleGate perm="tracker.ver"><TrackerUniversidades /></ModuleGate>}
 

@@ -5,7 +5,7 @@
 // su próxima fecha clave. Desde la tarjeta se cambia la etapa, se asigna el
 // responsable y se recuerda al asesorado lo que le falta; y en lote, con
 // «Seleccionar», lo mismo para varios a la vez.
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { boPATCH, boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import RevisionRapida from "../comun/RevisionRapida";
@@ -93,6 +93,40 @@ function Fecha({ p }) {
   );
 }
 
+/* Envío con «Deshacer»: la acción espera 5 s con una barra abajo; si nadie
+   la deshace, sale. Es más rápido que confirmar antes y da la misma red. */
+let ponerPendiente = null;
+function conDeshacer(texto, accion) {
+  if (ponerPendiente) ponerPendiente({ texto, accion });
+  else accion();
+}
+
+function BarraDeshacer() {
+  const [p, setP] = useState(null);
+  const [queda, setQueda] = useState(5);
+  useEffect(() => {
+    ponerPendiente = (nuevo) => { setP(nuevo); setQueda(5); };
+    return () => { ponerPendiente = null; };
+  }, []);
+  useEffect(() => {
+    if (!p) return undefined;
+    const t = setTimeout(() => {
+      if (queda <= 1) { const a = p.accion; setP(null); a(); } else setQueda(queda - 1);
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [p, queda]);
+  if (!p) return null;
+  return (
+    <div className="fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-6 z-[70] w-[calc(100%-24px)] max-w-md
+      bg-[#013446] text-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-[0_18px_40px_rgba(1,52,70,.35)]">
+      <span className="flex-1 text-[13px] leading-snug">{p.texto}</span>
+      <span className="text-[12px] text-white/60 tabular-nums">{queda} s</span>
+      <button type="button" onClick={() => setP(null)}
+        className="text-[13px] font-bold text-[#ffb066] px-2 py-1.5 rounded-lg hover:bg-white/10">Deshacer</button>
+    </div>
+  );
+}
+
 /* Recordar al asesorado lo que le falta. Usa el recordatorio de cada servicio,
    que lista sus pendientes reales y queda registrado. */
 async function recordar(e, nombre) {
@@ -142,17 +176,16 @@ function Proceso({ e, cliente, equipo, onCambio }) {
     if (r.ok) { acusar(); onCambio?.(); } else { setResp(antes); setEstado("error"); }
   }
 
-  async function onRecordar() {
-    const ok = await dialog.confirm(
-      `Se enviará a ${cliente.nombre} un correo formal con lo que le falta en ${sv.corto}.`,
-      "Recordar al asesorado",
-    );
-    if (!ok) return;
+  function onRecordar() {
     setEnviando(true);
-    const r = await recordar(e, primerNombre(cliente.nombre));
-    setEnviando(false);
-    dialog.toast(r.msg || (r.ok ? "Enviado" : "No se pudo enviar"), r.ok ? "success" : "error");
-    if (r.ok) onCambio?.();
+    conDeshacer(`Recordatorio a ${primerNombre(cliente.nombre)} (${sv.corto})`, async () => {
+      const r = await recordar(e, primerNombre(cliente.nombre));
+      setEnviando(false);
+      dialog.toast(r.msg || (r.ok ? "Enviado" : "No se pudo enviar"), r.ok ? "success" : "error");
+      if (r.ok) onCambio?.();
+    });
+    // Si se deshace, el botón vuelve a estar disponible pasados los 5 s.
+    setTimeout(() => setEnviando(false), 5600);
   }
 
   const [revisando, setRevisando] = useState(false);
@@ -171,8 +204,8 @@ function Proceso({ e, cliente, equipo, onCambio }) {
               <span className={`text-[12px] font-semibold truncate ${etapa ? "text-neutral-800" : "text-amber-700"}`}>
                 {etapa || "Elegir etapa"}
               </span>
-              {deducida && <span className="text-[9px] text-neutral-400" title="Deducida del expediente; elígela para fijarla">(auto)</span>}
-              <svg className="w-3 h-3 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+              {deducida && <span className="text-[9px] text-[#62808f]" title="Deducida del expediente; elígela para fijarla">(auto)</span>}
+              <svg className="w-3 h-3 shrink-0 text-[#62808f]" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
               </svg>
               <select value={etapa || ""} onChange={(ev) => cambiarEtapa(ev.target.value)} aria-label={`Etapa de ${sv.corto}`}
@@ -182,10 +215,10 @@ function Proceso({ e, cliente, equipo, onCambio }) {
               </select>
             </label>
             <span className="shrink-0 text-[10px] tabular-nums">
-              {estado === "guardando" ? <span className="text-neutral-400">guardando…</span>
+              {estado === "guardando" ? <span className="text-[#62808f]">guardando…</span>
                 : estado === "ok" ? <span className="text-[#1D6A4A] font-bold">✓ guardado</span>
                 : estado === "error" ? <span className="text-red-600 font-bold">no se guardó</span>
-                : paso ? <span className="text-neutral-400">{paso}/{pasos}</span> : null}
+                : paso ? <span className="text-[#62808f]">{paso}/{pasos}</span> : null}
             </span>
           </div>
           <div className="h-1 rounded-full bg-neutral-200/80 mt-1 overflow-hidden">
@@ -195,7 +228,7 @@ function Proceso({ e, cliente, equipo, onCambio }) {
 
         {/* Responsable: tocar para asignar o cambiar (le llega un correo). */}
         <label className="relative shrink-0 cursor-pointer" title={resp ? `${resp} · tocar para cambiar` : "Sin responsable · tocar para asignar"}>
-          <span className={`w-7 h-7 rounded-full grid place-items-center text-[9.5px] font-bold ${
+          <span className={`w-9 h-9 rounded-full grid place-items-center text-[10.5px] font-bold ${
             resp ? "bg-[#023A4B] text-white" : "bg-amber-100 text-amber-700 border border-amber-300 border-dashed"}`}>
             {resp ? iniciales(resp) : "+"}
           </span>
@@ -207,54 +240,52 @@ function Proceso({ e, cliente, equipo, onCambio }) {
         </label>
       </div>
 
-      {((quien && e.que) || e.proximo) && (
-        <div className="flex items-center gap-1.5 flex-wrap mt-2">
-          {quien && e.que && (
-            <span className={`inline-flex items-center gap-1.5 text-[10.5px] font-semibold px-2 py-0.5 rounded-md ${quien.clase}`}>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: quien.punto }} />
-              {e.le_toca === "asesor" && resp ? `${primerNombre(resp)}: ` : ""}
-              {e.le_toca === "asesorado" ? `${primerNombre(cliente.nombre)}: ` : ""}
-              {e.que}
-            </span>
-          )}
-          <Fecha p={e.proximo} />
-        </div>
+      {/* Una frase: quién mueve, qué y para cuándo. */}
+      {quien && e.que && (
+        <p className="mt-2 flex items-start gap-1.5 text-[12.5px] leading-snug text-[#0d2c3a]">
+          <span className="mt-[6px] w-2 h-2 rounded-full shrink-0" style={{ background: quien.punto }} />
+          <span className="min-w-0">
+            <b className="font-semibold">
+              {e.le_toca === "asesor" ? (resp ? primerNombre(resp) : "Asesor")
+                : e.le_toca === "asesorado" ? primerNombre(cliente.nombre) : "Organismo"}
+            </b>
+            {": "}{e.que}
+            {e.proximo && (
+              <span className={e.proximo.vencido ? "text-[#c0392b] font-semibold" : e.proximo.urgente ? "text-[#b9770e] font-semibold" : "text-[#62808f]"}>
+                {" · "}{e.proximo.etiqueta} {e.proximo.vencido ? `hace ${-e.proximo.dias} d` : e.proximo.dias === 0 ? "hoy" : `en ${e.proximo.dias} d`}
+              </span>
+            )}
+          </span>
+        </p>
       )}
 
-      {puedeRevisar && (
-        <button type="button" onClick={() => setRevisando(true)}
-          className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-[12px] font-bold text-white bg-[#1A3557] rounded-lg py-1.5 hover:bg-[#15294a]">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-          Revisar ahora
-        </button>
-      )}
-      {revisando && <RevisionRapida idSolicitud={e.id_solicitud} onCerrar={(cambio) => { setRevisando(false); if (cambio) onCambio?.(); }} />}
-
-      {(puedeRecordar || recordado) && (
-        <div className="flex items-center gap-2 mt-2">
+      {/* Una acción principal, la que toca ahora. */}
+      {(puedeRevisar || puedeRecordar) && (
+        <div className="mt-2 flex items-center gap-2">
           {recordado && (
-            <span className="text-[10.5px] text-neutral-500 truncate">
-              Recordado {recordado.dias === 0 ? "hoy" : `hace ${recordado.dias} d`}
-              {recordado.por ? ` por ${primerNombre(recordado.por)}` : ""}
-              {recordado.total > 1 ? ` · ${recordado.total} veces` : ""}
+            <span className="text-[11px] text-[#62808f] truncate">
+              Recordado {recordado.dias === 0 ? "hoy" : `hace ${recordado.dias} d`}{recordado.total > 1 ? ` · ${recordado.total}×` : ""}
             </span>
           )}
-          {puedeRecordar && (
+          {puedeRevisar ? (
+            <button type="button" onClick={() => setRevisando(true)}
+              className="ml-auto min-h-[40px] inline-flex items-center gap-1.5 text-[12.5px] font-bold text-white bg-[#013446] rounded-xl px-4 hover:bg-[#02506b] active:scale-[.98] transition">
+              Revisar ahora
+            </button>
+          ) : (
             <button type="button" onClick={onRecordar} disabled={enviando}
-              className="ml-auto shrink-0 inline-flex items-center gap-1 text-[11px] font-bold text-[#92400E] bg-white border border-amber-200 rounded-lg px-2.5 py-1 hover:bg-amber-50 disabled:opacity-50">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0" />
-              </svg>
-              {enviando ? "Enviando…" : "Recordar"}
+              className="ml-auto min-h-[40px] inline-flex items-center gap-1.5 text-[12.5px] font-bold text-[#92400E] bg-[#fef3e7] border border-[#f5d3a8] rounded-xl px-4 hover:bg-[#fde6cc] active:scale-[.98] transition disabled:opacity-50">
+              {enviando ? "En cola…" : "Recordar"}
             </button>
           )}
         </div>
       )}
+      {revisando && <RevisionRapida idSolicitud={e.id_solicitud} onCerrar={(cambio) => { setRevisando(false); if (cambio) onCambio?.(); }} />}
     </div>
   );
 }
 
-function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, onEditar, onServicios, onActivo, onPurgar, onCambio, isAdmin }) {
+function Ficha({ seleccionadoId, c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, onEditar, onServicios, onActivo, onPurgar, onCambio, isAdmin }) {
   const [menu, setMenu] = useState(false);
 
   function whatsapp(ev) {
@@ -295,13 +326,14 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
 
   return (
     <div
-      role="button" tabIndex={0}
+      role="button" tabIndex={0} data-tarjeta="1"
       onClick={() => (seleccionando ? onMarcar(c) : onAbrir(c))}
       onKeyDown={(e) => { if (e.key === "Enter") onAbrir(c); }}
       className={`relative overflow-hidden bg-white rounded-2xl border transition-all cursor-pointer select-none touch-manipulation
         shadow-[0_1px_2px_rgba(16,24,40,.04),0_8px_24px_-18px_rgba(2,58,75,.35)]
         hover:shadow-[0_2px_4px_rgba(16,24,40,.05),0_16px_32px_-18px_rgba(2,58,75,.45)]
-        ${marcado ? "border-[#1D6A4A] ring-2 ring-[#1D6A4A]/20" : "border-neutral-200/80"}
+        focus:outline-none focus-visible:ring-4 focus-visible:ring-[#88c4fc]/60
+        ${marcado || seleccionadoId === c.id_cliente ? "border-[#02506b] ring-2 ring-[#02506b]/20" : "border-neutral-200/80"}
         ${c.activo === false ? "opacity-60" : ""}`}
     >
       {acento && <span aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-1" style={{ background: acento }} />}
@@ -339,7 +371,7 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
               {(c.etiquetas || []).map((t) => (
                 <span key={t} className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[#FFF4E8] text-[#B45309] border border-[#FAD9B5]">{t}</span>
               ))}
-              <span className="text-[11px] text-neutral-400 truncate">
+              <span className="text-[11px] text-[#62808f] truncate">
                 {desdeCuando(c.fecha_registro, ahora)}{c.canal_origen ? ` · ${c.canal_origen}` : ""}
               </span>
             </div>
@@ -349,7 +381,7 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
             <div className="relative shrink-0 -mr-1 -mt-1">
               <button type="button" aria-label="Más acciones"
                 onClick={(e) => { parar(e); setMenu((v) => !v); }}
-                className="w-8 h-8 rounded-full grid place-items-center text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700">
+                className="w-10 h-10 rounded-full grid place-items-center text-[#62808f] hover:bg-neutral-100 hover:text-neutral-700">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" />
                 </svg>
@@ -388,7 +420,7 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
             ))}
           </div>
         ) : !c.solo_invitado && (
-          <p className="mt-2.5 text-[11.5px] text-neutral-400">
+          <p className="mt-2.5 text-[11.5px] text-[#62808f]">
             {c.total_servicios > 0
               ? `${c.total_servicios} servicio${c.total_servicios > 1 ? "s" : ""}, ninguno activo`
               : "Sin servicios contratados"}
@@ -422,7 +454,7 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
           {tel && (
             <a href={`https://wa.me/${tel}`} target="_blank" rel="noreferrer" onClick={(ev) => { ev.preventDefault(); whatsapp(ev); }}
               aria-label="Escribir por WhatsApp con mensaje preparado" title={`${c.telefono} · mensaje preparado`}
-              className="shrink-0 w-8 h-8 rounded-full grid place-items-center bg-[#E8F5EE] text-[#1D6A4A]">
+              className="shrink-0 w-10 h-10 rounded-full grid place-items-center bg-[#E8F5EE] text-[#1D6A4A] active:scale-95 transition">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 21l1.7-4.6A8.5 8.5 0 1 1 8 19.6L3 21z" />
               </svg>
@@ -431,7 +463,7 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
           {c.email_contacto && (
             <a href={`mailto:${c.email_contacto}`} onClick={parar}
               aria-label="Enviar correo" title={c.email_contacto}
-              className="shrink-0 w-8 h-8 rounded-full grid place-items-center bg-[#EEF2F8] text-[#1A3557]">
+              className="shrink-0 w-10 h-10 rounded-full grid place-items-center bg-[#EEF2F8] text-[#1A3557] active:scale-95 transition">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -447,7 +479,7 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
    muchos de un vistazo. Tocar la fila abre al cliente. */
 function Tabla({ clientes, onAbrir }) {
   const filas = clientes.flatMap((c) => (c.etapas?.length ? c.etapas : [null]).map((e) => ({ c, e })));
-  const th = "text-[9.5px] font-bold uppercase tracking-widest font-mono text-neutral-400 px-3 py-2 text-left whitespace-nowrap";
+  const th = "text-[9.5px] font-bold uppercase tracking-widest font-mono text-[#62808f] px-3 py-2 text-left whitespace-nowrap";
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl overflow-x-auto">
       <table className="w-full min-w-[980px]">
@@ -467,7 +499,7 @@ function Tabla({ clientes, onAbrir }) {
                 className="border-b border-neutral-100 last:border-b-0 hover:bg-[#F7FAF8] cursor-pointer">
                 <td className="px-3 py-2.5">
                   <p className="text-[12.5px] font-semibold text-neutral-900 truncate max-w-[220px]">{c.nombre}</p>
-                  <p className="text-[10.5px] text-neutral-400 truncate max-w-[220px]">{c.telefono || c.email_contacto}</p>
+                  <p className="text-[10.5px] text-[#62808f] truncate max-w-[220px]">{c.telefono || c.email_contacto}</p>
                 </td>
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   {e ? (
@@ -475,7 +507,7 @@ function Tabla({ clientes, onAbrir }) {
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${sv.tono}`}>{sv.corto}</span>
                       <span className="text-[12px] text-neutral-700">{e.etapa || "—"}</span>
                     </span>
-                  ) : <span className="text-[11.5px] text-neutral-400">Sin proceso activo</span>}
+                  ) : <span className="text-[11.5px] text-[#62808f]">Sin proceso activo</span>}
                 </td>
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   {quien && e.le_toca !== "nadie" ? (
@@ -525,8 +557,25 @@ function Resumen({ k, t, color, fondo, n, filtro, onFiltro }) {
 export default function ClientesLista({
   clientes, loading, orden, onOrden, onAbrir, onEditar,
   onServicios, onActivo, onPurgar, isAdmin, filtro, onFiltro, conteos = {},
-  equipo = [], onRecargar, etiquetas = {}, etiqueta = "", onEtiqueta,
+  equipo = [], onRecargar, etiquetas = {}, etiqueta = "", onEtiqueta, compacta = false, seleccionado = null,
 }) {
+  // Teclado en ordenador: J/K para moverse entre clientes, Enter para abrir.
+  const contenedor = useRef(null);
+  useEffect(() => {
+    const tecla = (ev) => {
+      if (/input|textarea|select/i.test(ev.target.tagName) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+      if (!["j", "k"].includes(ev.key.toLowerCase())) return;
+      const tarjetas = [...(contenedor.current?.querySelectorAll("[data-tarjeta]") || [])];
+      if (!tarjetas.length) return;
+      const i = tarjetas.indexOf(document.activeElement);
+      const sig = ev.key.toLowerCase() === "j" ? Math.min(tarjetas.length - 1, i + 1) : Math.max(0, i - 1);
+      tarjetas[i < 0 ? 0 : sig].focus();
+      tarjetas[i < 0 ? 0 : sig].scrollIntoView({ block: "nearest", behavior: "smooth" });
+      ev.preventDefault();
+    };
+    document.addEventListener("keydown", tecla);
+    return () => document.removeEventListener("keydown", tecla);
+  }, []);
   const [traspaso, setTraspaso] = useState(null);
   const [servicio, setServicio] = useState("");
   const [masFiltros, setMasFiltros] = useState(false);
@@ -590,11 +639,8 @@ export default function ClientesLista({
       dialog.toast("Ninguno de los seleccionados está esperando al asesorado en un servicio con recordatorio", "error");
       return;
     }
-    const ok = await dialog.confirm(
-      `Se enviará un correo formal con sus pendientes a ${destino.length} proceso(s).`,
-      "Recordar a los seleccionados",
-    );
-    if (!ok) return;
+    salirSeleccion();
+    conDeshacer(`${destino.length} recordatorio(s) en cola`, async () => {
     setEnLote(true);
     const r = [];
     // De uno en uno: el servidor de correo no agradece las ráfagas.
@@ -602,14 +648,15 @@ export default function ClientesLista({
     setEnLote(false);
     const fallos = r.filter((x) => !x.ok).length;
     dialog.toast(fallos ? `${r.length - fallos} enviados · ${fallos} fallaron` : `${r.length} recordatorio(s) enviados`, fallos ? "error" : "success");
-    salirSeleccion(); onRecargar?.();
+    onRecargar?.();
+    });
   }
 
   const tab = (k, t) => (
     <button key={k || "todos"} type="button" onClick={() => onFiltro(k)} aria-pressed={filtro === k}
       className={`shrink-0 text-[12.5px] font-semibold px-3 py-1.5 rounded-lg transition-all ${
         filtro === k ? "bg-white text-[#1A3557] shadow-[0_1px_3px_rgba(16,24,40,.12)]" : "text-neutral-500 hover:text-neutral-800"}`}>
-      {t} <span className="text-[10.5px] text-neutral-400 font-bold">{n(k === "" ? "todos" : k)}</span>
+      {t} <span className="text-[10.5px] text-[#62808f] font-bold">{n(k === "" ? "todos" : k)}</span>
     </button>
   );
 
@@ -624,16 +671,6 @@ export default function ClientesLista({
 
   return (
     <div className="space-y-3">
-      {/* Resumen: lo que pide atención hoy. Cada cifra filtra la lista. */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {[
-          { k: "le_toca_asesor", t: "Le toca al asesor", color: "#1A3557", fondo: "#EEF2F8" },
-          { k: "esperando_asesorado", t: "Esperando al asesorado", color: "#B45309", fondo: "#FEF3E7" },
-          { k: "vencidos", t: "Con fecha vencida", color: "#B91C1C", fondo: "#FDEDEC" },
-          { k: "sin_abrir", t: "Sin abrir por su asesor", color: "#B91C1C", fondo: "#F4F4F5" },
-        ].map((x) => <Resumen key={x.k} {...x} n={n(x.k)} filtro={filtro} onFiltro={onFiltro} />)}
-      </div>
-
       <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-1 pb-1.5 space-y-2">
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1 overflow-x-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
@@ -721,17 +758,31 @@ export default function ClientesLista({
           ))}
         </div>
       ) : visibles.length === 0 ? (
-        <div className="py-12 text-center">
-          <p className="text-[13px] font-semibold text-neutral-600">Ningún cliente en este filtro</p>
-          <button type="button" onClick={() => { setServicio(""); onFiltro("activos"); }}
-            className="mt-2 text-[12px] font-semibold text-[#1D6A4A] underline">Ver los activos</button>
+        <div className="ase-vacio">
+          <p className="ase-vacio-t">{filtro === "vencidos" || filtro === "le_toca_asesor" ? "Nada pendiente aquí" : "Ningún cliente en este filtro"}</p>
+          <p className="ase-vacio-p">
+            {filtro === "vencidos" ? "No hay fechas vencidas. Buen trabajo."
+              : filtro === "le_toca_asesor" ? "No hay nada que te toque ahora mismo."
+              : "Prueba con otro filtro o vuelve a los activos."}
+          </p>
+          <div className="ase-vacio-acc">
+            {(conteos.esperando_asesorado ?? 0) > 0 && filtro !== "esperando_asesorado" && (
+              <button type="button" onClick={() => onFiltro("esperando_asesorado")}
+                className="text-[12.5px] font-semibold text-white bg-[#013446] rounded-xl px-4 py-2.5">
+                Ver los {conteos.esperando_asesorado} que esperan al asesorado
+              </button>
+            )}
+            <button type="button" onClick={() => { setServicio(""); onFiltro("activos"); }}
+              className="text-[12.5px] font-semibold text-[#013446] bg-white border border-[#d8e4ef] rounded-xl px-4 py-2.5">Ver los activos</button>
+          </div>
         </div>
       ) : vista === "tabla" && !seleccionando && typeof window !== "undefined" && window.innerWidth >= 1024 ? (
         <Tabla clientes={visibles} onAbrir={onAbrir} />
       ) : (
-        <div className="grid gap-2.5 md:grid-cols-2 items-start">
+        <div ref={contenedor} className={`grid gap-2.5 items-start ${compacta ? "" : "md:grid-cols-2"}`}>
           {visibles.map((c) => (
             <Ficha
+              seleccionadoId={seleccionado}
               key={c.id_cliente} c={c} ahora={ahora} isAdmin={isAdmin} equipo={equipo}
               seleccionando={seleccionando} marcado={marcados.has(c.id_cliente)} onMarcar={marcar}
               onAbrir={onAbrir} onEditar={onEditar} onServicios={onServicios}
@@ -787,6 +838,8 @@ export default function ClientesLista({
           </div>
         </div>
       )}
+
+      <BarraDeshacer />
 
       {/* Acciones en lote */}
       {seleccionando && (

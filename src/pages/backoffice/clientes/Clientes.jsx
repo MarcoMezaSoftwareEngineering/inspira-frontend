@@ -10,6 +10,8 @@ import ServiciosClienteModal from "./ServiciosClienteModal";
 import PerfilClienteModal from "./PerfilClienteModal";
 import FichaCliente from "./FichaCliente";
 import { useAuth } from "../context/AuthContext";
+import { Pagina, Cabecera, Cuerpo, Boton } from "../ui";
+import { Plus, X } from "lucide-react";
 
 const FORM_INICIAL = {
   id_cliente: null,
@@ -248,83 +250,60 @@ export default function Clientes() {
   }
 
 
-  // La ficha completa sustituye a la lista mientras esta abierta: es una
-  // pantalla, no un modal, porque hay demasiado que mirar.
-  if (fichaDe) {
-    return (
-      <FichaCliente
-        idCliente={fichaDe}
-        onVolver={() => { setFichaDe(null); cargar(); }}
-        onAbrirProceso={(id) => { window.location.href = `/backoffice/solicitudes/${id}`; }}
-      />
-    );
-  }
+  // En pantallas anchas la ficha se abre al lado de la lista: se pasa de un
+  // cliente a otro sin perder el sitio. En el móvil sustituye a la lista.
+  const [ancho, setAncho] = useState(() => window.innerWidth);
+  useEffect(() => {
+    const r = () => setAncho(window.innerWidth);
+    window.addEventListener("resize", r);
+    return () => window.removeEventListener("resize", r);
+  }, []);
+  const dividida = ancho >= 1280;
+
+  const ficha = fichaDe ? (
+    <FichaCliente
+      key={fichaDe}
+      idCliente={fichaDe}
+      onVolver={() => { setFichaDe(null); cargar(); }}
+      onAbrirProceso={(id) => { window.location.href = `/backoffice/solicitudes/${id}`; }}
+    />
+  ) : null;
+
+  if (fichaDe && !dividida) return <Pagina><Cuerpo>{ficha}</Cuerpo></Pagina>;
 
   if (verDuplicados) {
     return (
-      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
-        <Duplicados
-          isAdmin={isAdmin}
-          avisar={(msg, tipo) => setToast({ msg, tipo })}
-          onVolver={() => { setVerDuplicados(false); cargar(); }}
-        />
-        {toast && (
-          <Toast msg={toast.msg} tipo={toast.tipo} onClose={() => setToast(null)} />
-        )}
-      </div>
+      <Pagina>
+        <Cuerpo>
+          <Duplicados
+            isAdmin={isAdmin}
+            avisar={(msg, tipo) => setToast({ msg, tipo })}
+            onVolver={() => { setVerDuplicados(false); cargar(); }}
+          />
+          {toast && <Toast msg={toast.msg} tipo={toast.tipo} onClose={() => setToast(null)} />}
+        </Cuerpo>
+      </Pagina>
     );
   }
 
-  return (
-    <div className="p-3 sm:p-6 space-y-4 max-w-6xl mx-auto">
-      {/* Cabecera */}
-      <div className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="font-serif text-[22px] sm:text-2xl text-[#1A3557] leading-tight">Clientes</h1>
-            <p className="text-[12px] sm:text-sm text-neutral-500">
-              {conteos.activos ?? 0} con proceso activo · {conteos.nuevos ?? 0} nuevos esta semana
-            </p>
-          </div>
-          {isAdmin && (
-            <button
-              type="button"
-              onClick={() => setAltaAbierta((v) => !v)}
-              aria-expanded={altaAbierta}
-              className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-sm"
-            >
-              <svg className={`w-4 h-4 transition-transform ${altaAbierta ? "rotate-45" : ""}`}
-                fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              {altaAbierta ? "Cerrar" : "Nuevo cliente"}
-            </button>
-          )}
-        </div>
-        {/* Accesos secundarios: el alta suelta se conserva para cuando solo se
-            quiere registrar a alguien sin contratarle nada todavía. */}
-        {isAdmin && (
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => openModal("nuevo")}
-              className="text-[12px] font-semibold text-neutral-500 hover:text-primary active:scale-95 transition-all py-1"
-            >
-              Solo ficha
-            </button>
-            <button
-              type="button"
-              onClick={() => setVerDuplicados(true)}
-              className="text-[12px] font-semibold text-neutral-500 hover:text-primary active:scale-95 transition-all py-1"
-            >
-              Duplicados
-            </button>
-          </div>
-        )}
-      </div>
+  const stats = [
+    { n: conteos.le_toca_asesor ?? 0, l: "le toca al asesor", onClick: () => cambiarFiltro("le_toca_asesor") },
+    { n: conteos.esperando_asesorado ?? 0, l: "esperando al asesorado", tono: "cielo", onClick: () => cambiarFiltro("esperando_asesorado") },
+    { n: conteos.vencidos ?? 0, l: "con fecha vencida", tono: conteos.vencidos ? "rojo" : undefined, onClick: () => cambiarFiltro("vencidos") },
+    { n: conteos.sin_abrir ?? 0, l: "sin abrir por su asesor", tono: conteos.sin_abrir ? "alerta" : undefined, onClick: () => cambiarFiltro("sin_abrir") },
+    { n: conteos.activos ?? 0, l: "con proceso activo", tono: "ok", onClick: () => cambiarFiltro("activos") },
+  ];
 
+  function cambiarFiltro(v) {
+    const nuevo = filtro === v ? "activos" : v;
+    setFiltro(nuevo);
+    cargar(undefined, undefined, nuevo);
+  }
+
+  const lista = (
+    <>
       {altaAbierta && (
-        <div className="bg-white border-2 border-primary/20 rounded-2xl shadow-sm p-5">
+        <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "var(--sombra)" }}>
           <AltaRapida
             onCancelar={() => setAltaAbierta(false)}
             onCreado={() => { setAltaAbierta(false); cargar(); }}
@@ -332,27 +311,20 @@ export default function Clientes() {
         </div>
       )}
 
-      {/* Buscador global (debounce, sin botón) */}
       <div className="relative">
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none"
-          fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
-        >
+        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#62808f] pointer-events-none"
+          fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" />
         </svg>
         <input
           type="text"
-          className="w-full bg-white border border-neutral-200 rounded-2xl pl-9 pr-4 py-3 text-sm shadow-[0_1px_2px_rgba(16,24,40,.04)] focus:outline-none focus:ring-4 focus:ring-[#1D6A4A]/10 focus:border-[#1D6A4A] transition-shadow"
+          className="w-full bg-white border border-[#d8e4ef] rounded-2xl pl-10 pr-4 py-3 text-[14px] focus:outline-none focus:ring-4 focus:ring-[#013446]/10 focus:border-[#02506b] transition-shadow"
+          style={{ boxShadow: "var(--sombra)" }}
           placeholder="Buscar por nombre, correo, celular o DNI…"
           value={q}
           onChange={(e) => onSearchChange(e.target.value)}
         />
-        {loading && (
-          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-          </svg>
-        )}
+        {loading && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 ase-spin" />}
       </div>
 
       <ClientesLista
@@ -374,40 +346,47 @@ export default function Clientes() {
         onActivo={onToggleActivoCliente}
         onPurgar={onPurgarCliente}
         isAdmin={isAdmin}
+        compacta={dividida && Boolean(fichaDe)}
+        seleccionado={fichaDe}
+      />
+    </>
+  );
+
+  return (
+    <Pagina>
+      <Cabecera
+        eyebrow="Clientes"
+        titulo="Tu cartera"
+        subtitulo="Quién espera algo, de quién y para cuándo. Toca una cifra para filtrar."
+        acciones={isAdmin && (
+          <>
+            <Boton tono="cta" icono={altaAbierta ? X : Plus} onClick={() => setAltaAbierta((v) => !v)}>
+              {altaAbierta ? "Cerrar" : "Nuevo cliente"}
+            </Boton>
+            <Boton tono="cristal" onClick={() => openModal("nuevo")}>Solo ficha</Boton>
+            <Boton tono="cristal" onClick={() => setVerDuplicados(true)}>Duplicados</Boton>
+          </>
+        )}
+        stats={stats}
       />
 
-      {/* Modal crear/editar */}
+      <Cuerpo className={dividida && fichaDe ? "!max-w-none" : ""}>
+        {dividida && fichaDe ? (
+          <div className="grid grid-cols-[minmax(380px,440px)_1fr] gap-4 items-start">
+            <div className="space-y-3 sticky top-3 max-h-[calc(100vh-24px)] overflow-y-auto pr-1">{lista}</div>
+            <div className="min-w-0">{ficha}</div>
+          </div>
+        ) : (
+          <div className="space-y-3">{lista}</div>
+        )}
+      </Cuerpo>
+
       {isAdmin && showModal && (
-        <ClienteForm
-          form={form}
-          modo={modo}
-          onChange={onChangeForm}
-          onSubmit={onSubmitForm}
-          onCancel={closeModal}
-          saving={saving}
-        />
+        <ClienteForm form={form} modo={modo} onChange={onChangeForm} onSubmit={onSubmitForm} onCancel={closeModal} saving={saving} />
       )}
-
-      {/* Modal servicios */}
-      {clienteServicios && (
-        <ServiciosClienteModal
-          cliente={clienteServicios}
-          onClose={() => setClienteServicios(null)}
-        />
-      )}
-
-      {/* Modal perfil completo */}
-      {clientePerfil && (
-        <PerfilClienteModal
-          cliente={clientePerfil}
-          onClose={() => setClientePerfil(null)}
-        />
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <Toast msg={toast.msg} tipo={toast.tipo} onClose={() => setToast(null)} />
-      )}
-    </div>
+      {clienteServicios && <ServiciosClienteModal cliente={clienteServicios} onClose={() => setClienteServicios(null)} />}
+      {clientePerfil && <PerfilClienteModal cliente={clientePerfil} onClose={() => setClientePerfil(null)} />}
+      {toast && <Toast msg={toast.msg} tipo={toast.tipo} onClose={() => setToast(null)} />}
+    </Pagina>
   );
 }

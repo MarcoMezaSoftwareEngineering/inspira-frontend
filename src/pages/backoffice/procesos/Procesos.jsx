@@ -552,7 +552,7 @@ export default function Procesos({ onAbrirProceso }) {
                     checked={visibles.length > 0 && seleccion.size === visibles.length}
                     onChange={alternarTodos} />
                 </th>
-                {["Cliente", "Servicio", "Etapa", "Responsable", "Próximo", "Pago", ""].map((h) => (
+                {["Cliente", "Servicio", "Etapa", "Responsable", "Plazo legal", "Próximo", "Pago", ""].map((h) => (
                   <th key={h} className="text-[9px] font-bold uppercase tracking-widest font-mono text-neutral-400 px-2.5 py-2">{h}</th>
                 ))}
               </tr>

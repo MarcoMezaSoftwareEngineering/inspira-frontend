@@ -190,6 +190,63 @@ function Plazo({ dias, cerrado, abierto }) {
   );
 }
 
+/* Qué hay que hacer con la fila, no solo lo que se anotó. La calcula el
+   servidor cruzando estado, plazo, justificantes y requerimientos. */
+const TONO_SIT = {
+  red: "bg-red-50 text-red-700 border-red-200",
+  amber: "bg-amber-50 text-amber-800 border-amber-200",
+  neutral: "bg-neutral-50 text-neutral-500 border-neutral-200",
+  sky: "bg-sky-50 text-sky-700 border-sky-200",
+  pink: "bg-pink-50 text-pink-700 border-pink-200",
+  violet: "bg-violet-50 text-violet-700 border-violet-200",
+  slate: "bg-slate-50 text-slate-500 border-slate-200",
+};
+const LE_TOCA = { asesor: "le toca al asesor", universidad: "espera a la universidad", nadie: "" };
+
+function Situacion({ f, situaciones }) {
+  const def = situaciones.find((s) => s.clave === f.situacion);
+  if (!def || f.situacion === "cerrado") return null;
+  const extra = f.situacion === "abierto" && f.dias_cierre !== null
+    ? (f.dias_cierre === 0 ? " · cierra hoy" : ` · cierra en ${f.dias_cierre}d`)
+    : f.situacion === "por_abrir" && f.dias_apertura > 0 ? ` · abre en ${f.dias_apertura}d`
+    : f.situacion === "plazo_pasado" ? ` · cerró hace ${Math.abs(f.dias_cierre)}d` : "";
+  return (
+    <span title={LE_TOCA[def.le_toca] || undefined}
+      className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border whitespace-nowrap ${TONO_SIT[def.tono]}`}>
+      {def.t}{extra}
+    </span>
+  );
+}
+
+/* Lo demás que conviene ver sin abrir la ficha: resguardo, requerimientos,
+   revisión del portal y cuánto hace que nadie toca la fila. */
+function Senales({ f }) {
+  const posterior = ["POSTULADO"].includes(f.estado) || f.estado.startsWith("LISTA DE ESPERA") || f.estado === "ADMITIDO";
+  return (
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-neutral-500">
+      {f.portal && <span className="font-semibold text-[#1A3557]">{f.portal}</span>}
+      {posterior && (
+        f.justificantes
+          ? <span className="text-[#1D6A4A] font-semibold" title="Justificantes subidos">📎 {f.justificantes}</span>
+          : <span className="text-amber-700 font-semibold">sin justificante</span>
+      )}
+      {(f.requerimientos || []).map((r, i) => (
+        <span key={i} className="text-red-700 font-semibold" title={r.texto}>
+          ⚠ requerimiento{r.dias !== null ? (r.dias < 0 ? ` vencido hace ${-r.dias}d` : ` · ${r.dias}d`) : ""}
+        </span>
+      ))}
+      {f.dias_sin_revisar !== null && f.situacion === "esperando" && (
+        <span className={f.dias_sin_revisar > 7 ? "text-amber-700 font-semibold" : ""}>
+          portal revisado hace {f.dias_sin_revisar}d
+        </span>
+      )}
+      {f.tocada_hace > 14 && !["cerrado", "en_pausa"].includes(f.situacion) && (
+        <span>sin tocar hace {f.tocada_hace}d</span>
+      )}
+    </span>
+  );
+}
+
 /* Quitar en dos toques. Borraba a la primera, y en el móvil basta con rozar
    la pantalla al desplazar para perder una postulación cargada a mano. */
 function Quitar({ onQuitar }) {
@@ -216,6 +273,12 @@ export default function TrackerMaster({ onAbrirProceso }) {
   const [grupo, setGrupo] = useState("");
   // "" = todos · "2026-27" · "sin" = no ha dicho a qué curso va
   const [curso, setCurso] = useState("");
+  // Seguimiento: una situación ("abierto", "semana"…), el asesor, solo nuevos,
+  // y si la hoja se lee por cliente o por universidad.
+  const [sit, setSit] = useState("");
+  const [asesor, setAsesor] = useState("");
+  const [soloNuevos, setSoloNuevos] = useState(false);
+  const [agrupar, setAgrupar] = useState("cliente");
   const [nuevaUni, setNuevaUni] = useState({});
   const [hoyCurso] = useState(() => cursoActual());
   const opcionesCurso = [hoyCurso, cursoMas(hoyCurso, 1), cursoMas(hoyCurso, 2)];
@@ -290,27 +353,44 @@ export default function TrackerMaster({ onAbrirProceso }) {
       if (uni && (f.universidad || "").trim() !== uni) return;
       if (pasa && !pasa(f.estado || "")) return;
       if (!pasaCurso(curso, f)) return;
+      if (sit === "semana" ? !(f.situacion === "abierto" && f.dias_cierre <= 7) : sit && f.situacion !== sit) return;
+      if (asesor && String(f.id_responsable || "") !== asesor) return;
+      if (soloNuevos && !f.nuevo) return;
       if (t && !`${f.cliente} ${f.universidad} ${f.master}`.toLowerCase().includes(t)) return;
-      if (!g.has(f.id_solicitud)) {
-        g.set(f.id_solicitud, {
-          cliente: f.cliente, paquete: f.paquete, responsable: f.responsable,
-          curso_objetivo: f.curso_objetivo || null, curso_deducido: Boolean(f.curso_deducido), filas: [],
-        });
+      // Por universidad, el Distrito Único es un solo portal aunque sean
+      // varias universidades: se postula una vez con los másteres en orden.
+      const clave = agrupar === "universidad"
+        ? (f.portal || (f.universidad || "").trim() || "(sin universidad)")
+        : f.id_solicitud;
+      if (!g.has(clave)) {
+        g.set(clave, agrupar === "universidad"
+          ? { titulo: clave, porUni: true, filas: [] }
+          : {
+              cliente: f.cliente, paquete: f.paquete, responsable: f.responsable, nuevo: f.nuevo,
+              curso_objetivo: f.curso_objetivo || null, curso_deducido: Boolean(f.curso_deducido), filas: [],
+            });
       }
-      g.get(f.id_solicitud).filas.push(f);
+      g.get(clave).filas.push(f);
     });
-    return [...g.entries()];
-  }, [datos.filas, q, uni, grupo, curso]);
+    // Lo que más aprieta, arriba: primero por la fila más urgente del grupo,
+    // luego por el cierre más cercano.
+    const peor = (x) => Math.min(...x.filas.map((f) => f.urgencia ?? 99));
+    const cierre = (x) => Math.min(...x.filas.map((f) => (f.dias_cierre >= 0 ? f.dias_cierre : 999)));
+    g.forEach((x) => x.filas.sort((a, b) => (a.urgencia ?? 99) - (b.urgencia ?? 99)));
+    return [...g.entries()].sort(([, a], [, b]) => peor(a) - peor(b) || cierre(a) - cierre(b));
+  }, [datos.filas, q, uni, grupo, curso, sit, asesor, soloNuevos, agrupar]);
 
   const sinPost = useMemo(() => {
     // Con un filtro puesto —una universidad, un estado— quien no tiene ninguna
     // postulación no pinta nada: se está mirando otra cosa.
-    if (uni || grupo) return [];
+    if (uni || grupo || sit || agrupar === "universidad") return [];
     const t = q.trim().toLowerCase();
     return (datos.sin_postulacion || [])
       .filter((s) => pasaCurso(curso, s))
+      .filter((s) => !asesor || String(s.id_responsable || "") === asesor)
+      .filter((s) => !soloNuevos || s.nuevo)
       .filter((s) => !t || s.cliente.toLowerCase().includes(t));
-  }, [datos.sin_postulacion, q, uni, grupo, curso]);
+  }, [datos.sin_postulacion, q, uni, grupo, curso, sit, asesor, soloNuevos, agrupar]);
 
   // Cuántos clientes van a cada curso, para las pestañas de arriba.
   const porCurso = useMemo(() => {
@@ -334,7 +414,9 @@ export default function TrackerMaster({ onAbrirProceso }) {
   }
 
   const r = datos.resumen || {};
-  const filtrando = Boolean(q.trim() || uni || grupo);
+  const filtrando = Boolean(q.trim() || uni || grupo || sit || asesor || soloNuevos);
+  const situaciones = datos.situaciones || [];
+  const quitarFiltros = () => { setQ(""); setUni(""); setGrupo(""); setSit(""); setAsesor(""); setSoloNuevos(false); };
   const todosPlegados = porCliente.length > 0 && porCliente.every(([id]) => plegados.has(id));
 
   const input = "text-[12.5px] text-neutral-700 border border-neutral-300 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-[#1D6A4A] focus:ring-4 focus:ring-[#1D6A4A]/10 transition-shadow";
@@ -403,6 +485,56 @@ export default function TrackerMaster({ onAbrirProceso }) {
         </div>
       </div>
 
+      {/* Seguimiento: lo que falta por hacer, de lo más urgente a lo menos.
+          Cada cifra filtra la hoja; volver a pulsarla quita el filtro. */}
+      <div className="ase-tira">
+        <div className="ase-tira-scroll">
+          {[
+            { k: "requerimiento",    n: r.requerimientos,        t: "Requerimientos",      c: "text-red-600" },
+            { k: "plazo_pasado",     n: r.plazo_pasado,          t: "Plazo pasado",        c: "text-red-600" },
+            { k: "semana",           n: r.cierran_semana,        t: "Cierran en 7 días",   c: "text-red-600" },
+            { k: "abierto",          n: r.abiertos_sin_postular, t: "Abiertos sin postular", c: "text-amber-600" },
+            { k: "sin_justificante", n: r.sin_justificante,      t: "Sin justificante",    c: "text-amber-600" },
+            { k: "sin_plazo",        n: r.sin_plazo,             t: "Sin plazo",           c: "text-neutral-600" },
+          ].map((c) => {
+            const on = sit === c.k;
+            const hay = (c.n ?? 0) > 0;
+            return (
+              <button key={c.k} type="button" aria-pressed={on} disabled={!hay && !on}
+                onClick={() => setSit(on ? "" : c.k)}
+                className={`shrink-0 rounded-xl px-3 py-2 min-w-[104px] text-left border transition-all active:scale-[.97] ${
+                  on ? "border-[#1D6A4A] bg-[#E8F5EE]"
+                     : hay ? "border-neutral-200 bg-white hover:border-[#1D6A4A]/50" : "border-neutral-100 bg-neutral-50/60"}`}>
+                <p className={`text-[18px] font-bold leading-none ase-num ${hay ? c.c : "text-neutral-300"}`}>{c.n ?? 0}</p>
+                <p className="text-[10px] text-neutral-500 mt-1 whitespace-nowrap">
+                  {c.t}{on && <span className="text-[#1D6A4A] font-bold"> · quitar</span>}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <select value={asesor} onChange={(e) => setAsesor(e.target.value)} aria-label="Filtrar por asesor"
+          className={input}>
+          <option value="">Todos los asesores</option>
+          {(datos.responsables || []).map((x) => <option key={x.id} value={String(x.id)}>{x.nombre}</option>)}
+        </select>
+        <label className="flex items-center gap-1.5 text-[12px] text-neutral-600">
+          <input type="checkbox" checked={soloNuevos} onChange={(e) => setSoloNuevos(e.target.checked)} />
+          Nuevos (7 días)
+        </label>
+        <div className="ml-auto inline-flex rounded-lg border border-neutral-300 overflow-hidden text-[12px]" role="group" aria-label="Agrupar la hoja">
+          {[["cliente", "Por cliente"], ["universidad", "Por universidad"]].map(([k, t]) => (
+            <button key={k} type="button" aria-pressed={agrupar === k} onClick={() => setAgrupar(k)}
+              className={`px-3 py-1.5 font-semibold ${agrupar === k ? "bg-[#1D6A4A] text-white" : "bg-white text-neutral-600 hover:bg-neutral-50"}`}>
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <input value={q} onChange={(e) => setQ(e.target.value)}
@@ -466,8 +598,20 @@ export default function TrackerMaster({ onAbrirProceso }) {
               <span className="text-neutral-400 text-[13px] leading-none">×</span>
             </button>
           )}
+          {sit && (
+            <button type="button" onClick={() => setSit("")}
+              className="inline-flex items-center gap-1.5 font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-full pl-2.5 pr-2 py-1">
+              {sit === "semana" ? "Cierran en 7 días" : situaciones.find((s) => s.clave === sit)?.t}
+              <span className="text-neutral-400 text-[13px] leading-none">×</span>
+            </button>
+          )}
+          {filtrando && (
+            <button type="button" onClick={quitarFiltros} className="font-semibold text-neutral-500 hover:text-[#1D6A4A] underline">
+              quitar todo
+            </button>
+          )}
           <span className="text-neutral-400">
-            {porCliente.length} cliente{porCliente.length === 1 ? "" : "s"}
+            {porCliente.length} {agrupar === "universidad" ? `grupo${porCliente.length === 1 ? "" : "s"}` : `cliente${porCliente.length === 1 ? "" : "s"}`}
             {filtrando && ` · ${porCliente.reduce((n, [, g]) => n + g.filas.length, 0)} postulaciones`}
           </span>
           {/* Con un filtro puesto todo va desplegado a la fuerza: plegar no
@@ -518,7 +662,7 @@ export default function TrackerMaster({ onAbrirProceso }) {
               </p>
               {filtrando && (
                 <div className="ase-vacio-acc">
-                  <button type="button" onClick={() => { setQ(""); setUni(""); setGrupo(""); }}
+                  <button type="button" onClick={quitarFiltros}
                     className="text-[12px] font-semibold text-white bg-[#1D6A4A] rounded-lg px-3.5 py-2">
                     Quitar los filtros
                   </button>
@@ -547,27 +691,48 @@ export default function TrackerMaster({ onAbrirProceso }) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                       </svg>
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="ase-tm-nombre">{g.cliente}</span>
-                      <span className="ase-tm-meta">
-                        {g.paquete && <><b>{g.paquete}</b> · </>}
-                        {g.filas.length} universidad{g.filas.length === 1 ? "" : "es"} ·{" "}
-                        {g.responsable || <i>sin asignar</i>}
+                    {g.porUni ? (() => {
+                      const clientes = new Set(g.filas.map((f) => f.id_solicitud)).size;
+                      const porPostular = g.filas.filter((f) => ["abierto", "plazo_pasado", "sin_plazo"].includes(f.situacion)).length;
+                      const cierres = g.filas.map((f) => f.dias_cierre).filter((d) => d !== null && d >= 0);
+                      return (
+                        <span className="min-w-0 flex-1">
+                          <span className="ase-tm-nombre">{g.titulo}</span>
+                          <span className="ase-tm-meta">
+                            {clientes} cliente{clientes === 1 ? "" : "s"}
+                            {porPostular > 0 && <> · <b className="text-amber-700">{porPostular} por postular</b></>}
+                            {cierres.length > 0 && <> · cierra en {Math.min(...cierres)}d</>}
+                          </span>
+                        </span>
+                      );
+                    })() : (
+                      <span className="min-w-0 flex-1">
+                        <span className="ase-tm-nombre">
+                          {g.cliente}
+                          {g.nuevo && <span className="ml-1.5 align-middle text-[9px] font-bold text-white bg-[#046C8C] rounded px-1.5 py-0.5">NUEVO</span>}
+                        </span>
+                        <span className="ase-tm-meta">
+                          {g.paquete && <><b>{g.paquete}</b> · </>}
+                          {g.filas.length} universidad{g.filas.length === 1 ? "" : "es"} ·{" "}
+                          {g.responsable || <i>sin asignar</i>}
+                        </span>
                       </span>
+                    )}
+                  </button>
+                  {!g.porUni && (<>
+                    <span className="mr-1.5 self-center">
+                      <Curso valor={g.curso_objetivo} deducido={g.curso_deducido} opciones={opcionesCurso}
+                        onCambiar={(v) => cambiarCurso(id_solicitud, v)} />
                     </span>
-                  </button>
-                  <span className="mr-1.5 self-center">
-                    <Curso valor={g.curso_objetivo} deducido={g.curso_deducido} opciones={opcionesCurso}
-                      onCambiar={(v) => cambiarCurso(id_solicitud, v)} />
-                  </span>
-                  <button type="button" className="ase-tm-abrir"
-                    onClick={() => onAbrirProceso?.(id_solicitud)}
-                    title={`Abrir el expediente de ${g.cliente}`}>
-                    Ficha
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H18v4.5M17.5 6.5L10 14M16 14v4H6V8h4" />
-                    </svg>
-                  </button>
+                    <button type="button" className="ase-tm-abrir"
+                      onClick={() => onAbrirProceso?.(id_solicitud)}
+                      title={`Abrir el expediente de ${g.cliente}`}>
+                      Ficha
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H18v4.5M17.5 6.5L10 14M16 14v4H6V8h4" />
+                      </svg>
+                    </button>
+                  </>)}
                 </div>
 
                 {/* Plegada, la tarjeta sigue diciendo en qué punto está: sin
@@ -610,14 +775,22 @@ export default function TrackerMaster({ onAbrirProceso }) {
                         {g.filas.map((f) => (
                           <tr key={f.id_acceso} className="border-b border-neutral-50 last:border-b-0 align-top hover:bg-neutral-50/60 transition-colors">
                             <td className="px-2 py-2 space-y-1">
+                              {g.porUni && (
+                                <button type="button" onClick={() => onAbrirProceso?.(f.id_solicitud)}
+                                  className="block text-[12px] font-bold text-[#1A3557] hover:underline text-left">
+                                  {f.cliente}{f.nuevo && <span className="ml-1 text-[9px] text-[#046C8C]">NUEVO</span>}
+                                </button>
+                              )}
                               <Celda valor={f.universidad} placeholder="Vigo" etiqueta="Universidad"
                                 onGuardar={(v) => guardar(f.id_acceso, "universidad", v)} />
                               <Celda valor={f.master} placeholder="máster…" etiqueta="Máster"
                                 onGuardar={(v) => guardar(f.id_acceso, "master", v)} />
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-2 py-2 space-y-1">
                               <Estado valor={f.estado} estados={datos.estados}
                                 onCambiar={(v) => guardar(f.id_acceso, "estado", v)} />
+                              <div><Situacion f={f} situaciones={situaciones} /></div>
+                              <Senales f={f} />
                             </td>
                             <td className="px-2 py-2">
                               <Celda valor={f.detalle} multilinea etiqueta="Detalle personalizado"
@@ -654,6 +827,16 @@ export default function TrackerMaster({ onAbrirProceso }) {
                           <Plazo dias={f.dias_cierre} cerrado="cerró" abierto="cierra" />
                           <span className="ml-auto"><Quitar onQuitar={() => quitar(f.id_acceso)} /></span>
                         </div>
+                        <div className="space-y-1 mb-1.5">
+                          {g.porUni && (
+                            <button type="button" onClick={() => onAbrirProceso?.(f.id_solicitud)}
+                              className="block text-[12.5px] font-bold text-[#1A3557] text-left">
+                              {f.cliente}{f.nuevo && <span className="ml-1 text-[9px] text-[#046C8C]">NUEVO</span>}
+                            </button>
+                          )}
+                          <Situacion f={f} situaciones={situaciones} />
+                          <Senales f={f} />
+                        </div>
                         <dl className="ase-tm-campos">
                           <dt>Universidad</dt>
                           <dd>
@@ -689,7 +872,7 @@ export default function TrackerMaster({ onAbrirProceso }) {
                     ))}
                   </div>
 
-                  <div className="ase-tm-anadir">
+                  {!g.porUni && <div className="ase-tm-anadir">
                     <input
                       list="ase-tm-unis"
                       value={nuevaUni[id_solicitud] || ""}
@@ -702,7 +885,7 @@ export default function TrackerMaster({ onAbrirProceso }) {
                       disabled={!(nuevaUni[id_solicitud] || "").trim()}>
                       Añadir
                     </button>
-                  </div>
+                  </div>}
                 </>)}
               </article>
             );

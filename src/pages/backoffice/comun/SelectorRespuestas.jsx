@@ -10,10 +10,10 @@ import { dialog } from "../../../services/dialogService";
 import { rellenar } from "./rellenar";
 
 
-export default function SelectorRespuestas({ idSolicitud, variables, onElegir, onCerrar }) {
+export default function SelectorRespuestas({ idSolicitud, variables, busquedaInicial = "", onElegir, onCerrar }) {
   const [lista, setLista] = useState(null);
   const [vars, setVars] = useState(variables || {});
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(busquedaInicial);
   const [elegida, setElegida] = useState(null);
   const [nueva, setNueva] = useState(null);
 

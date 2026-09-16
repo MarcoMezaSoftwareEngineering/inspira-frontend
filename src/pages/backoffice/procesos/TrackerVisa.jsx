@@ -70,11 +70,16 @@ function Etapa({ fila, etapas, onCambiar }) {
   );
 }
 
+// Etapas en las que el caso ya no se trabaja.
+const CERRADAS = new Set(["finalizado", "finalizada", "suspendido", "suspendida"]);
+
 export default function TrackerVisa({ onAbrirProceso }) {
   const [datos, setDatos] = useState({ filas: [], etapas: [], resumen: {} });
   const [cargando, setCargando] = useState(true);
   const [q, setQ] = useState("");
   const [soloConCita, setSoloConCita] = useState(false);
+  // Lo terminado no se trabaja: fuera por defecto, a un toque si se busca.
+  const [verCerrados, setVerCerrados] = useState(false);
 
   const cargar = useCallback(() => (
     boGET("/backoffice/tracker-visa").then((r) => {
@@ -104,23 +109,39 @@ export default function TrackerVisa({ onAbrirProceso }) {
     if (!r.ok) cargar();
   }
 
+  const esCerrado = (f) => CERRADAS.has(String(f.etapa || "").toLowerCase());
+  const cerrados = datos.filas.filter(esCerrado).length;
+
   const visibles = useMemo(() => {
     const t = q.trim().toLowerCase();
     return datos.filas.filter((f) => {
+      if (!verCerrados && CERRADAS.has(String(f.etapa || "").toLowerCase())) return false;
       if (soloConCita && !f.cita_fecha) return false;
       if (t && !`${f.cliente} ${f.paquete}`.toLowerCase().includes(t)) return false;
       return true;
     });
-  }, [datos.filas, q, soloConCita]);
+  }, [datos.filas, q, soloConCita, verCerrados]);
 
-  const r = datos.resumen || {};
+  // Las cifras de arriba cuentan lo mismo que se ve: sin los cerrados salvo
+  // que se pidan. Contaban los 42 con los finalizados dentro.
+  const r = useMemo(() => {
+    const base = datos.filas.filter((f) => verCerrados || !CERRADAS.has(String(f.etapa || "").toLowerCase()));
+    return {
+      total: base.length,
+      con_cita: base.filter((f) => f.cita_fecha).length,
+      solo_tentativa: base.filter((f) => f.cita_es_tentativa).length,
+      sin_fecha: base.filter((f) => !f.cita_fecha && !f.cita_tentativa).length,
+      con_requerimiento: base.filter((f) => f.requerimiento === "SOLICITADO").length,
+      aprobadas: base.filter((f) => f.resultado === "FAVORABLE").length,
+    };
+  }, [datos.filas, verCerrados]);
   const sel = "text-[12px] text-neutral-700 border border-neutral-300 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]";
 
   return (
     <div className="space-y-3">
       <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
         {[
-          { n: r.total, t: "Expedientes" },
+          { n: r.total, t: verCerrados ? "Expedientes" : "En curso" },
           { n: r.con_cita, t: "Con cita final" },
           { n: r.solo_tentativa, t: "Solo tentativa" },
           { n: r.sin_fecha, t: "Sin fecha" },
@@ -140,6 +161,10 @@ export default function TrackerVisa({ onAbrirProceso }) {
         <label className="flex items-center gap-1 text-[11.5px] text-neutral-600">
           <input type="checkbox" checked={soloConCita} onChange={(e) => setSoloConCita(e.target.checked)} />
           Solo con cita confirmada
+        </label>
+        <label className="flex items-center gap-1 text-[11.5px] text-neutral-600">
+          <input type="checkbox" checked={verCerrados} onChange={(e) => setVerCerrados(e.target.checked)} />
+          Ver finalizados ({cerrados})
         </label>
         <span className="text-[11px] text-neutral-400 ml-auto">{visibles.length} de {datos.filas.length}</span>
       </div>

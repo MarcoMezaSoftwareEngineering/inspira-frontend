@@ -1,22 +1,38 @@
 // Lista de clientes.
 //
-// Sustituye a la tabla de columnas sueltas (Tel · País · Alta), que en cien
-// filas no distinguía nada. Lo que hace falta ver de un vistazo es qué tiene
-// cada uno en marcha, si debe dinero y si nadie lo está llevando.
+// Responde a tres preguntas sin abrir nada: qué tiene en marcha cada cliente,
+// a quién le toca mover (al asesor, al asesorado o a un organismo) y cuál es
+// su próxima fecha clave. Desde la tarjeta se cambia la etapa, se asigna el
+// responsable y se recuerda al asesorado lo que le falta; y en lote, con
+// «Seleccionar», lo mismo para varios a la vez.
 import { useMemo, useState } from "react";
-import { boPATCH } from "../../../services/backofficeApi";
+import { boPATCH, boPOST } from "../../../services/backofficeApi";
+import { dialog } from "../../../services/dialogService";
 
 const SERVICIO = {
-  master: { corto: "Máster",      tono: "bg-[#EEF2F8] text-[#1A3557]" },
-  visa:   { corto: "Visado",      tono: "bg-[#FEF3E7] text-[#B9770E]" },
-  ee:     { corto: "Estancia",    tono: "bg-[#F5EEF8] text-[#7D3C98]" },
+  master: { corto: "Máster",        tono: "bg-[#EEF2F8] text-[#1A3557]" },
+  visa:   { corto: "Visado",        tono: "bg-[#FEF3E7] text-[#B9770E]" },
+  ee:     { corto: "Estancia",      tono: "bg-[#F5EEF8] text-[#7D3C98]" },
   mod:    { corto: "Modificatoria", tono: "bg-[#FEF3E7] text-[#B9770E]" },
-  fp:     { corto: "FP",          tono: "bg-[#E8F5EE] text-[#1D6A4A]" },
-  legal:  { corto: "Extranjería", tono: "bg-[#FDEDEC] text-[#C0392B]" },
+  fp:     { corto: "FP",            tono: "bg-[#E8F5EE] text-[#1D6A4A]" },
+  legal:  { corto: "Extranjería",   tono: "bg-[#FDEDEC] text-[#C0392B]" },
 };
 
-/* En el distintivo solo cabe el nombre de pila del titular: los nombres
-   legales completos pasan de 35 caracteres y romperían la fila. */
+/* Color del servicio principal, para el avatar, la franja y la barra. */
+const ACENTO = {
+  master: "#1A3557", visa: "#B9770E", ee: "#7D3C98", mod: "#B9770E", fp: "#1D6A4A", legal: "#C0392B",
+};
+
+// Quién tiene que mover. Mismo código de color que la pantalla Flujos.
+const QUIEN = {
+  asesor:    { clase: "bg-[#EEF2F8] text-[#1A3557]", punto: "#1A3557" },
+  asesorado: { clase: "bg-[#FEF3E7] text-[#92400E]", punto: "#B45309" },
+  tercero:   { clase: "bg-[#F5EEF8] text-[#6B2F86]", punto: "#7D3C98" },
+};
+
+// Servicios con recordatorio de pendientes al asesorado (correo formal).
+const RUTA_RECORDATORIO = { master: "master", ee: "estancia", mod: "modificatoria" };
+
 function primerNombre(nombre) {
   return String(nombre || "").trim().split(/\s+/)[0] || "otro cliente";
 }
@@ -27,8 +43,6 @@ function iniciales(nombre) {
     .map((p) => p[0]?.toUpperCase() || "").join("") || "?";
 }
 
-/* "hace 3 días" dice más que una fecha cuando lo que se mira es quién acaba
-   de entrar. Pasada la semana ya se prefiere la fecha. */
 function desdeCuando(iso, ahora) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -40,112 +54,211 @@ function desdeCuando(iso, ahora) {
   return d.toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-/* Color del servicio principal, para el avatar y la franja de la tarjeta. */
-const ACENTO = {
-  master: "#1A3557", visa: "#B9770E", ee: "#7D3C98", mod: "#B9770E", fp: "#1D6A4A", legal: "#C0392B",
-};
+const soloDigitos = (t) => String(t || "").replace(/[^\d]/g, "");
 
-function soloDigitos(t) {
-  return String(t || "").replace(/[^\d]/g, "");
+function Fecha({ p }) {
+  if (!p) return null;
+  const cuando = p.vencido ? `hace ${-p.dias} d` : p.dias === 0 ? "hoy" : `en ${p.dias} d`;
+  const clase = p.vencido ? "bg-red-50 text-red-700 border-red-200"
+    : p.urgente ? "bg-amber-50 text-amber-800 border-amber-200"
+    : "bg-white text-neutral-600 border-neutral-200";
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10.5px] font-semibold px-1.5 py-0.5 rounded-md border whitespace-nowrap ${clase}`}>
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" />
+      </svg>
+      {p.etiqueta} · {cuando}
+    </span>
+  );
 }
 
-/* Un proceso activo: servicio, etapa, avance y quién lo lleva. Es lo que se
-   mira de un cliente; el correo y el teléfono van a los botones. */
-function ProcesoMini({ e }) {
+/* Recordar al asesorado lo que le falta. Usa el recordatorio de cada servicio,
+   que lista sus pendientes reales y queda registrado. */
+async function recordar(e, nombre) {
+  const ruta = RUTA_RECORDATORIO[e.servicio];
+  if (!ruta) return { ok: false, msg: "Este servicio no tiene recordatorio por correo" };
+  const r = await boPOST(`/backoffice/solicitudes/${e.id_solicitud}/${ruta}/recordatorio`, {});
+  return { ...r, msg: r.ok ? `Recordatorio enviado a ${nombre || "el asesorado"}` : r.msg };
+}
+
+/* Un proceso activo: servicio, etapa (editable), avance, responsable
+   (asignable), a quién le toca, próxima fecha y botón de recordar. */
+function Proceso({ e, cliente, equipo, onCambio }) {
   const sv = SERVICIO[e.servicio] || SERVICIO.master;
-  // La etapa se cambia aquí mismo: optimista, y vuelve atrás si falla.
   const [etapa, setEtapa] = useState(e.etapa);
   const [deducida, setDeducida] = useState(e.etapa_deducida);
+  const [resp, setResp] = useState(e.responsable);
   const [estado, setEstado] = useState("");
+  const [enviando, setEnviando] = useState(false);
   const pasos = e.opciones?.length || e.pasos || 0;
   const paso = etapa && e.opciones ? e.opciones.indexOf(etapa) + 1 : e.paso;
   const pct = paso && pasos ? Math.round((paso / pasos) * 100) : 0;
+  const quien = QUIEN[e.le_toca];
 
-  async function cambiar(nueva) {
+  const acusar = () => { setEstado("ok"); setTimeout(() => setEstado(""), 1800); };
+
+  async function cambiarEtapa(nueva) {
     if (!nueva || nueva === etapa) return;
     const antes = etapa;
     setEtapa(nueva); setDeducida(false); setEstado("guardando");
     const r = await boPATCH(`/backoffice/procesos/${e.id_solicitud}/etapa`, { etapa: nueva, servicio: e.servicio });
-    if (r.ok) { setEstado("ok"); setTimeout(() => setEstado(""), 1500); }
-    else { setEtapa(antes); setEstado("error"); }
+    if (r.ok) acusar(); else { setEtapa(antes); setEstado("error"); }
   }
 
+  async function asignar(id) {
+    if (!id) return;
+    const persona = equipo.find((u) => String(u.id_usuario) === String(id));
+    const antes = resp;
+    setResp(persona?.nombre || null); setEstado("guardando");
+    const r = await boPATCH(`/backoffice/solicitudes/${e.id_solicitud}/asesor`, { id_asesor_asignado: Number(id) });
+    if (r.ok) { acusar(); onCambio?.(); } else { setResp(antes); setEstado("error"); }
+  }
+
+  async function onRecordar() {
+    const ok = await dialog.confirm(
+      `Se enviará a ${cliente.nombre} un correo formal con lo que le falta en ${sv.corto}.`,
+      "Recordar al asesorado",
+    );
+    if (!ok) return;
+    setEnviando(true);
+    const r = await recordar(e, primerNombre(cliente.nombre));
+    setEnviando(false);
+    dialog.toast(r.msg || (r.ok ? "Enviado" : "No se pudo enviar"), r.ok ? "success" : "error");
+    if (r.ok) onCambio?.();
+  }
+
+  const recordado = e.recordado;
+  const puedeRecordar = e.le_toca === "asesorado" && RUTA_RECORDATORIO[e.servicio];
+
   return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-neutral-50 border border-neutral-100 px-2.5 py-2"
+    <div className="rounded-xl bg-neutral-50/80 border border-neutral-100 px-2.5 py-2"
       onClick={(ev) => ev.stopPropagation()} role="presentation">
-      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${sv.tono}`}>{sv.corto}</span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <label className="relative min-w-0 inline-flex items-center gap-1 rounded-lg -ml-1 px-1 py-0.5 hover:bg-white cursor-pointer">
-            <span className={`text-[12px] font-semibold truncate ${etapa ? "text-neutral-800" : "text-amber-700"}`}>
-              {etapa || "Elegir etapa"}
+      <div className="flex items-center gap-2.5">
+        <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${sv.tono}`}>{sv.corto}</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <label className="relative min-w-0 inline-flex items-center gap-1 rounded-lg -ml-1 px-1 py-0.5 hover:bg-white cursor-pointer">
+              <span className={`text-[12px] font-semibold truncate ${etapa ? "text-neutral-800" : "text-amber-700"}`}>
+                {etapa || "Elegir etapa"}
+              </span>
+              {deducida && <span className="text-[9px] text-neutral-400" title="Deducida del expediente; elígela para fijarla">(auto)</span>}
+              <svg className="w-3 h-3 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+              <select value={etapa || ""} onChange={(ev) => cambiarEtapa(ev.target.value)} aria-label={`Etapa de ${sv.corto}`}
+                disabled={estado === "guardando"} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                {!etapa && <option value="">Elegir etapa…</option>}
+                {(e.opciones || []).map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </label>
+            <span className="shrink-0 text-[10px] tabular-nums">
+              {estado === "guardando" ? <span className="text-neutral-400">guardando…</span>
+                : estado === "ok" ? <span className="text-[#1D6A4A] font-bold">✓ guardado</span>
+                : estado === "error" ? <span className="text-red-600 font-bold">no se guardó</span>
+                : paso ? <span className="text-neutral-400">{paso}/{pasos}</span> : null}
             </span>
-            {deducida && <span className="text-[9px] text-neutral-400" title="Deducida del expediente; elígela para fijarla">(auto)</span>}
-            <svg className="w-3 h-3 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-            </svg>
-            <select value={etapa || ""} onChange={(ev) => cambiar(ev.target.value)} aria-label={`Etapa de ${sv.corto}`}
-              disabled={estado === "guardando"} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-              {!etapa && <option value="">Elegir etapa…</option>}
-              {(e.opciones || []).map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </label>
-          <span className="shrink-0 text-[10px] tabular-nums">
-            {estado === "guardando" ? <span className="text-neutral-400">guardando…</span>
-              : estado === "ok" ? <span className="text-[#1D6A4A] font-bold">✓ guardado</span>
-              : estado === "error" ? <span className="text-red-600 font-bold">no se guardó</span>
-              : paso ? <span className="text-neutral-400">{paso}/{pasos}</span> : null}
+          </div>
+          <div className="h-1 rounded-full bg-neutral-200/80 mt-1 overflow-hidden">
+            <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: ACENTO[e.servicio] || "#1A3557" }} />
+          </div>
+        </div>
+
+        {/* Responsable: tocar para asignar o cambiar (le llega un correo). */}
+        <label className="relative shrink-0 cursor-pointer" title={resp ? `${resp} · tocar para cambiar` : "Sin responsable · tocar para asignar"}>
+          <span className={`w-7 h-7 rounded-full grid place-items-center text-[9.5px] font-bold ${
+            resp ? "bg-[#023A4B] text-white" : "bg-amber-100 text-amber-700 border border-amber-300 border-dashed"}`}>
+            {resp ? iniciales(resp) : "+"}
           </span>
-        </div>
-        <div className="h-1 rounded-full bg-neutral-200/80 mt-1 overflow-hidden">
-          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: ACENTO[e.servicio] || "#1A3557" }} />
-        </div>
+          <select value="" onChange={(ev) => asignar(ev.target.value)} aria-label="Asignar responsable"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+            <option value="">{resp ? `Ahora: ${resp}` : "Asignar a…"}</option>
+            {equipo.map((u) => <option key={u.id_usuario} value={u.id_usuario}>{u.nombre}</option>)}
+          </select>
+        </label>
       </div>
-      <span title={e.responsable || "Sin responsable"}
-        className={`shrink-0 w-6 h-6 rounded-full grid place-items-center text-[9px] font-bold ${
-          e.responsable ? "bg-[#023A4B] text-white" : "bg-amber-100 text-amber-700 border border-amber-300 border-dashed"}`}>
-        {e.responsable ? iniciales(e.responsable) : "?"}
-      </span>
+
+      {((quien && e.que) || e.proximo) && (
+        <div className="flex items-center gap-1.5 flex-wrap mt-2">
+          {quien && e.que && (
+            <span className={`inline-flex items-center gap-1.5 text-[10.5px] font-semibold px-2 py-0.5 rounded-md ${quien.clase}`}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: quien.punto }} />
+              {e.le_toca === "asesor" && resp ? `${primerNombre(resp)}: ` : ""}
+              {e.le_toca === "asesorado" ? `${primerNombre(cliente.nombre)}: ` : ""}
+              {e.que}
+            </span>
+          )}
+          <Fecha p={e.proximo} />
+        </div>
+      )}
+
+      {(puedeRecordar || recordado) && (
+        <div className="flex items-center gap-2 mt-2">
+          {recordado && (
+            <span className="text-[10.5px] text-neutral-500 truncate">
+              Recordado {recordado.dias === 0 ? "hoy" : `hace ${recordado.dias} d`}
+              {recordado.por ? ` por ${primerNombre(recordado.por)}` : ""}
+              {recordado.total > 1 ? ` · ${recordado.total} veces` : ""}
+            </span>
+          )}
+          {puedeRecordar && (
+            <button type="button" onClick={onRecordar} disabled={enviando}
+              className="ml-auto shrink-0 inline-flex items-center gap-1 text-[11px] font-bold text-[#92400E] bg-white border border-amber-200 rounded-lg px-2.5 py-1 hover:bg-amber-50 disabled:opacity-50">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0" />
+              </svg>
+              {enviando ? "Enviando…" : "Recordar"}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, isAdmin }) {
+function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, onEditar, onServicios, onActivo, onPurgar, onCambio, isAdmin }) {
   const [menu, setMenu] = useState(false);
   const principal = c.etapas?.[0]?.servicio;
   const acento = principal ? ACENTO[principal] : null;
   const tel = soloDigitos(c.telefono);
   const parar = (e) => e.stopPropagation();
 
-  // Lo que pide atención, en una sola línea y por orden de gravedad.
   const alertas = [
     ...(c.sin_abrir || []).map((x) => ({
       k: `sa${x.id_solicitud}`, rojo: x.horas >= 48,
       t: `Sin abrir · ${x.horas < 24 ? `${x.horas} h` : `${Math.floor(x.horas / 24)} d`}`,
     })),
     c.debe > 0 && { k: "debe", rojo: true, t: `Debe ${c.debe.toFixed(0)}` },
-    c.sin_responsable && c.activos > 0 && { k: "resp", t: "Sin responsable" },
+    c.activos > 0 && !tel && { k: "tel", t: "Falta teléfono" },
   ].filter(Boolean);
 
   return (
     <div
       role="button" tabIndex={0}
-      onClick={() => onAbrir(c)}
+      onClick={() => (seleccionando ? onMarcar(c) : onAbrir(c))}
       onKeyDown={(e) => { if (e.key === "Enter") onAbrir(c); }}
-      className={`relative overflow-hidden bg-white rounded-2xl border border-neutral-200/80
+      className={`relative overflow-hidden bg-white rounded-2xl border transition-all cursor-pointer select-none touch-manipulation
         shadow-[0_1px_2px_rgba(16,24,40,.04),0_8px_24px_-18px_rgba(2,58,75,.35)]
         hover:shadow-[0_2px_4px_rgba(16,24,40,.05),0_16px_32px_-18px_rgba(2,58,75,.45)]
-        active:scale-[.995] transition-all cursor-pointer select-none touch-manipulation
+        ${marcado ? "border-[#1D6A4A] ring-2 ring-[#1D6A4A]/20" : "border-neutral-200/80"}
         ${c.activo === false ? "opacity-60" : ""}`}
     >
       {acento && <span aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-1" style={{ background: acento }} />}
 
       <div className="p-3.5 pl-4">
         <div className="flex items-start gap-3">
-          <span className="shrink-0 w-11 h-11 rounded-2xl grid place-items-center text-[13px] font-bold text-white"
-            style={{ background: acento ? `linear-gradient(135deg, ${acento}, #023A4B)` : "#cfd4da" }}>
-            {iniciales(c.nombre)}
-          </span>
+          {seleccionando ? (
+            <span className={`shrink-0 w-11 h-11 rounded-2xl grid place-items-center border-2 ${
+              marcado ? "bg-[#1D6A4A] border-[#1D6A4A] text-white" : "border-neutral-300 text-transparent"}`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </span>
+          ) : (
+            <span className="shrink-0 w-11 h-11 rounded-2xl grid place-items-center text-[13px] font-bold text-white"
+              style={{ background: acento ? `linear-gradient(135deg, ${acento}, #023A4B)` : "#cfd4da" }}>
+              {iniciales(c.nombre)}
+            </span>
+          )}
 
           <div className="min-w-0 flex-1">
             <p className="text-[14.5px] font-semibold text-neutral-900 leading-snug line-clamp-2 break-words">
@@ -164,7 +277,7 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
             </div>
           </div>
 
-          {isAdmin && (
+          {isAdmin && !seleccionando && (
             <div className="relative shrink-0 -mr-1 -mt-1">
               <button type="button" aria-label="Más acciones"
                 onClick={(e) => { parar(e); setMenu((v) => !v); }}
@@ -198,7 +311,9 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
 
         {c.etapas?.length > 0 ? (
           <div className="mt-3 space-y-1.5">
-            {c.etapas.map((e) => <ProcesoMini key={e.id_solicitud} e={e} />)}
+            {c.etapas.map((e) => (
+              <Proceso key={`${e.id_solicitud}-${e.etapa}-${e.responsable}-${e.le_toca}`} e={e} cliente={c} equipo={equipo} onCambio={onCambio} />
+            ))}
           </div>
         ) : !c.solo_invitado && (
           <p className="mt-2.5 text-[11.5px] text-neutral-400">
@@ -225,14 +340,12 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
 
         <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-neutral-100">
           <div className="min-w-0 flex-1 flex flex-wrap gap-1.5">
-            {alertas.length ? alertas.map((a) => (
+            {alertas.map((a) => (
               <span key={a.k}
                 className={`text-[10.5px] font-semibold px-2 py-0.5 rounded-full ${a.rojo ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
                 {a.t}
               </span>
-            )) : (
-              <span className="text-[11px] text-neutral-400 truncate">{c.responsables?.join(", ")}</span>
-            )}
+            ))}
           </div>
           {tel && (
             <a href={`https://wa.me/${tel}`} target="_blank" rel="noreferrer" onClick={parar}
@@ -258,41 +371,35 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
   );
 }
 
+function Resumen({ k, t, color, fondo, n, filtro, onFiltro }) {
+  const on = filtro === k;
+  return (
+    <button type="button" onClick={() => onFiltro(on ? "activos" : k)} aria-pressed={on}
+      className={`text-left rounded-2xl px-3 py-2.5 border transition-all active:scale-[.98] ${
+        on ? "border-[#1D6A4A] ring-2 ring-[#1D6A4A]/15 bg-white" : "border-transparent"}`}
+      style={on ? undefined : { background: fondo }}>
+      <span className="block text-[22px] font-bold leading-none tabular-nums" style={{ color: n ? color : "#c4c4c4" }}>{n}</span>
+      <span className="block text-[11px] font-semibold text-neutral-600 mt-1 leading-tight">{t}</span>
+    </button>
+  );
+}
+
 export default function ClientesLista({
   clientes, loading, orden, onOrden, onAbrir, onEditar,
   onServicios, onActivo, onPurgar, isAdmin, filtro, onFiltro, conteos = {},
+  equipo = [], onRecargar,
 }) {
-  const setFiltro = onFiltro;
-  // Va aparte de los chips para poder cruzarlos: «Estancia» con «Con deuda»
-  // es la pregunta que de verdad se hace, y con un solo selector no cabría.
   const [servicio, setServicio] = useState("");
-  // Se fija al montar: leer el reloj en cada render hace impuro el componente.
+  const [masFiltros, setMasFiltros] = useState(false);
+  const [seleccionando, setSeleccionando] = useState(false);
+  const [marcados, setMarcados] = useState(new Set());
+  const [enLote, setEnLote] = useState(false);
   const [ahora] = useState(() => Date.now());
 
-  // Los filtros y sus cifras salen del servidor, sobre TODOS los clientes: en
-  // el navegador solo contaban la primera página.
-  const contadores = {
-    todos: conteos.todos ?? clientes.length,
-    activos: conteos.activos ?? 0,
-    sin_servicio: conteos.sin_servicio ?? 0,
-    deuda: conteos.con_deuda ?? 0,
-    sin_resp: conteos.sin_responsable ?? 0,
-    nuevos: conteos.nuevos ?? 0,
-    sin_abrir: conteos.sin_abrir ?? 0,
-    mios: conteos.mios ?? 0,
-  };
-
-  // Cuántos tienen algo en marcha de cada servicio.
-  //
-  // Sale de `etapas`, que son sus procesos activos. Las invitaciones viven
-  // aparte en `invitado_en` y no cuentan: quien está invitado al expediente de
-  // otra persona no tiene ese servicio, lo está mirando.
   const porServicio = useMemo(() => {
     const n = {};
     for (const c of clientes) {
-      for (const clave of new Set((c.etapas || []).map((e) => e.servicio))) {
-        n[clave] = (n[clave] || 0) + 1;
-      }
+      for (const clave of new Set((c.etapas || []).map((e) => e.servicio))) n[clave] = (n[clave] || 0) + 1;
     }
     return n;
   }, [clientes]);
@@ -301,107 +408,192 @@ export default function ClientesLista({
     !servicio || (c.etapas || []).some((e) => e.servicio === servicio)
   ), [clientes, servicio]);
 
-  const chip = (id, texto, n, tono) => (
-    <button
-      key={id} type="button" onClick={() => setFiltro(filtro === id ? "" : id)}
-      aria-pressed={filtro === id}
-      className={`shrink-0 flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-xl border
-        transition-all active:scale-95 ${
-        filtro === id
-          ? "border-[#1D6A4A] bg-[#1D6A4A] text-white shadow-[0_8px_18px_-12px_rgba(29,106,74,.95)]"
-          : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
-      }`}
-    >
+  const marcar = (c) => setMarcados((s) => {
+    const n = new Set(s);
+    if (n.has(c.id_cliente)) n.delete(c.id_cliente); else n.add(c.id_cliente);
+    return n;
+  });
+  const salirSeleccion = () => { setSeleccionando(false); setMarcados(new Set()); };
+  const elegidos = clientes.filter((c) => marcados.has(c.id_cliente));
+  const n = (k) => conteos[k] ?? 0;
+
+  async function asignarLote(id) {
+    if (!id) return;
+    const persona = equipo.find((u) => String(u.id_usuario) === String(id));
+    const procesos = elegidos.flatMap((c) => c.etapas || []);
+    if (!procesos.length) { dialog.toast("Los seleccionados no tienen procesos activos", "error"); return; }
+    const ok = await dialog.confirm(
+      `Se asignarán ${procesos.length} proceso(s) de ${elegidos.length} cliente(s) a ${persona?.nombre}. Le llegará un correo por cada uno.`,
+      "Asignar responsable",
+    );
+    if (!ok) return;
+    setEnLote(true);
+    const r = await Promise.all(procesos.map((e) =>
+      boPATCH(`/backoffice/solicitudes/${e.id_solicitud}/asesor`, { id_asesor_asignado: Number(id) })));
+    setEnLote(false);
+    const fallos = r.filter((x) => !x.ok).length;
+    dialog.toast(fallos ? `${r.length - fallos} asignados · ${fallos} fallaron` : `${r.length} proceso(s) asignados a ${persona?.nombre}`, fallos ? "error" : "success");
+    salirSeleccion(); onRecargar?.();
+  }
+
+  async function recordarLote() {
+    const destino = elegidos.flatMap((c) => (c.etapas || [])
+      .filter((e) => e.le_toca === "asesorado" && RUTA_RECORDATORIO[e.servicio])
+      .map((e) => ({ e, c })));
+    if (!destino.length) {
+      dialog.toast("Ninguno de los seleccionados está esperando al asesorado en un servicio con recordatorio", "error");
+      return;
+    }
+    const ok = await dialog.confirm(
+      `Se enviará un correo formal con sus pendientes a ${destino.length} proceso(s).`,
+      "Recordar a los seleccionados",
+    );
+    if (!ok) return;
+    setEnLote(true);
+    const r = [];
+    // De uno en uno: el servidor de correo no agradece las ráfagas.
+    for (const x of destino) r.push(await recordar(x.e, x.c.nombre));
+    setEnLote(false);
+    const fallos = r.filter((x) => !x.ok).length;
+    dialog.toast(fallos ? `${r.length - fallos} enviados · ${fallos} fallaron` : `${r.length} recordatorio(s) enviados`, fallos ? "error" : "success");
+    salirSeleccion(); onRecargar?.();
+  }
+
+  const tab = (k, t) => (
+    <button key={k || "todos"} type="button" onClick={() => onFiltro(k)} aria-pressed={filtro === k}
+      className={`shrink-0 text-[12.5px] font-semibold px-3 py-1.5 rounded-lg transition-all ${
+        filtro === k ? "bg-white text-[#1A3557] shadow-[0_1px_3px_rgba(16,24,40,.12)]" : "text-neutral-500 hover:text-neutral-800"}`}>
+      {t} <span className="text-[10.5px] text-neutral-400 font-bold">{n(k === "" ? "todos" : k)}</span>
+    </button>
+  );
+
+  const chip = (id, texto, tono) => (
+    <button key={id} type="button" onClick={() => onFiltro(filtro === id ? "activos" : id)} aria-pressed={filtro === id}
+      className={`shrink-0 flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border transition-all active:scale-95 ${
+        filtro === id ? "border-[#1D6A4A] bg-[#1D6A4A] text-white" : "border-neutral-200 bg-white text-neutral-600"}`}>
       {texto}
-      <span className={`text-[10.5px] font-bold px-1.5 rounded-full ${
-        filtro === id ? "bg-white/20" : tono || "bg-neutral-100 text-neutral-500"
-      }`}>{n}</span>
+      <span className={`text-[10.5px] font-bold px-1.5 rounded-full ${filtro === id ? "bg-white/20" : tono}`}>{n(id)}</span>
     </button>
   );
 
   return (
     <div className="space-y-3">
-      {/* La tira de filtros acompaña a la lista al desplazar. El pegado y el
-          difuminado del borde van en elementos distintos: los dos fijan
-          `position` y en el mismo nodo se anulaban. */}
-      <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-1 pb-1.5">
-        <div className="ase-tira">
-        <div className="ase-tira-scroll">
-        {chip("activos", "Con proceso activo", contadores.activos, "bg-[#E8F5EE] text-[#1D6A4A]")}
-        {chip("", "Todos", contadores.todos)}
-        {chip("mios", "Mis clientes", contadores.mios, "bg-[#EEF2F8] text-[#1A3557]")}
-        {chip("nuevos", "Nuevos (7 días)", contadores.nuevos, "bg-[#E8F5EE] text-[#1D6A4A]")}
-        {chip("sin_abrir", "Sin abrir", contadores.sin_abrir, "bg-red-50 text-red-700")}
-        {chip("sin_servicio", "Sin servicios", contadores.sin_servicio, "bg-amber-50 text-amber-700")}
-        {chip("con_deuda", "Con deuda", contadores.deuda, "bg-red-50 text-red-700")}
-        {chip("sin_responsable", "Sin responsable", contadores.sin_resp, "bg-amber-50 text-amber-700")}
-
-        <select
-          value={servicio} onChange={(e) => setServicio(e.target.value)}
-          className={`shrink-0 ml-auto text-[12px] border rounded-lg px-2 py-1.5 focus:outline-none ${
-            servicio
-              ? "border-[#1D6A4A] bg-[#1D6A4A] text-white font-semibold"
-              : "border-neutral-200 bg-white text-neutral-600 focus:border-[#1D6A4A]"
-          }`}
-        >
-          <option value="">Todos los servicios</option>
-          {Object.entries(SERVICIO)
-            .filter(([clave]) => porServicio[clave])
-            .map(([clave, sv]) => (
-              <option key={clave} value={clave}>{sv.corto} ({porServicio[clave]})</option>
-            ))}
-        </select>
-
-        <select
-          value={orden} onChange={(e) => onOrden(e.target.value)}
-          className="shrink-0 text-[12px] text-neutral-600 border border-neutral-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#1D6A4A]"
-        >
-          <option value="recientes">Últimos creados</option>
-          <option value="antiguos">Más antiguos</option>
-          <option value="nombre">Por nombre</option>
-        </select>
-        </div>
-        </div>
+      {/* Resumen: lo que pide atención hoy. Cada cifra filtra la lista. */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {[
+          { k: "le_toca_asesor", t: "Le toca al asesor", color: "#1A3557", fondo: "#EEF2F8" },
+          { k: "esperando_asesorado", t: "Esperando al asesorado", color: "#B45309", fondo: "#FEF3E7" },
+          { k: "vencidos", t: "Con fecha vencida", color: "#B91C1C", fondo: "#FDEDEC" },
+          { k: "sin_abrir", t: "Sin abrir por su asesor", color: "#B91C1C", fondo: "#F4F4F5" },
+        ].map((x) => <Resumen key={x.k} {...x} n={n(x.k)} filtro={filtro} onFiltro={onFiltro} />)}
       </div>
 
-      {loading ? (
-        <div className="space-y-2">
-          {/* Esqueleto: mantiene la altura para que la lista no dé un salto
-              cuando llegan los datos. */}
+      <div className="ase-sticky -mx-3 px-3 sm:-mx-6 sm:px-6 pt-1 pb-1.5 space-y-2">
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1 overflow-x-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
+            <div className="inline-flex items-center gap-0.5 bg-neutral-100 rounded-xl p-1">
+              {tab("activos", "Activos")}
+              {tab("mios", "Míos")}
+              {tab("nuevos", "Nuevos")}
+              {tab("", "Todos")}
+            </div>
+          </div>
+          <button type="button" onClick={() => setMasFiltros((v) => !v)} aria-expanded={masFiltros}
+            className={`shrink-0 inline-flex items-center gap-1 text-[12px] font-semibold px-2.5 py-2 rounded-xl border ${
+              masFiltros ? "border-[#1D6A4A] text-[#1D6A4A] bg-[#E8F5EE]" : "border-neutral-200 text-neutral-600 bg-white"}`}>
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" d="M4 6h16M7 12h10M10 18h4" />
+            </svg>
+            Filtros
+          </button>
+          <button type="button" onClick={() => (seleccionando ? salirSeleccion() : setSeleccionando(true))}
+            className={`shrink-0 text-[12px] font-semibold px-2.5 py-2 rounded-xl border ${
+              seleccionando ? "border-[#023A4B] bg-[#023A4B] text-white" : "border-neutral-200 text-neutral-600 bg-white"}`}>
+            {seleccionando ? "Cancelar" : "Seleccionar"}
+          </button>
+        </div>
+
+        {masFiltros && (
+          <div className="bg-white border border-neutral-200 rounded-2xl p-2.5 space-y-2">
+            <div className="flex flex-wrap gap-1.5">
+              {chip("sin_responsable", "Sin responsable", "bg-amber-50 text-amber-700")}
+              {chip("con_deuda", "Con deuda", "bg-red-50 text-red-700")}
+              {chip("sin_servicio", "Sin servicios", "bg-neutral-100 text-neutral-500")}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <select value={servicio} onChange={(e) => setServicio(e.target.value)}
+                className="text-[12px] border border-neutral-200 rounded-lg px-2 py-1.5 bg-white text-neutral-700">
+                <option value="">Todos los servicios</option>
+                {Object.entries(SERVICIO).filter(([k]) => porServicio[k]).map(([k, sv]) => (
+                  <option key={k} value={k}>{sv.corto} ({porServicio[k]})</option>
+                ))}
+              </select>
+              <select value={orden} onChange={(e) => onOrden(e.target.value)}
+                className="text-[12px] border border-neutral-200 rounded-lg px-2 py-1.5 bg-white text-neutral-700">
+                <option value="urgentes">Más urgentes primero</option>
+                <option value="recientes">Últimos creados</option>
+                <option value="antiguos">Más antiguos</option>
+                <option value="nombre">Por nombre</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {loading && !clientes.length ? (
+        <div className="grid gap-2.5 md:grid-cols-2">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="bg-white border border-neutral-200 rounded-2xl px-3.5 py-3 animate-pulse">
+            <div key={i} className="bg-white border border-neutral-200 rounded-2xl p-3.5 animate-pulse">
               <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-xl bg-neutral-100" />
-                <div className="flex-1 space-y-2 py-0.5">
-                  <div className="h-3 bg-neutral-100 rounded w-1/3" />
-                  <div className="h-2.5 bg-neutral-50 rounded w-1/2" />
+                <div className="w-11 h-11 rounded-2xl bg-neutral-100" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-3 bg-neutral-100 rounded w-1/2" />
+                  <div className="h-2.5 bg-neutral-50 rounded w-1/3" />
                 </div>
               </div>
+              <div className="h-12 bg-neutral-50 rounded-xl mt-3" />
             </div>
           ))}
         </div>
       ) : visibles.length === 0 ? (
         <div className="py-12 text-center">
-          <p className="text-[13px] font-semibold text-neutral-600">
-            {filtro || servicio ? "Ningún cliente en este filtro" : "Todavía no hay clientes"}
-          </p>
-          <p className="text-[12px] text-neutral-400 mt-1">
-            {filtro && servicio
-              ? "Los dos filtros a la vez no dejan a nadie. Prueba quitando uno."
-              : filtro || servicio
-                ? "Prueba con otro."
-                : "Usa «Nuevo cliente» para dar de alta al primero."}
-          </p>
+          <p className="text-[13px] font-semibold text-neutral-600">Ningún cliente en este filtro</p>
+          <button type="button" onClick={() => { setServicio(""); onFiltro("activos"); }}
+            className="mt-2 text-[12px] font-semibold text-[#1D6A4A] underline">Ver los activos</button>
         </div>
       ) : (
-        <div className="grid gap-2.5 md:grid-cols-2">
+        <div className="grid gap-2.5 md:grid-cols-2 items-start">
           {visibles.map((c) => (
             <Ficha
-              key={c.id_cliente} c={c} ahora={ahora} isAdmin={isAdmin}
-              onAbrir={onAbrir} onEditar={onEditar}
-              onServicios={onServicios} onActivo={onActivo} onPurgar={onPurgar}
+              key={c.id_cliente} c={c} ahora={ahora} isAdmin={isAdmin} equipo={equipo}
+              seleccionando={seleccionando} marcado={marcados.has(c.id_cliente)} onMarcar={marcar}
+              onAbrir={onAbrir} onEditar={onEditar} onServicios={onServicios}
+              onActivo={onActivo} onPurgar={onPurgar} onCambio={onRecargar}
             />
           ))}
+        </div>
+      )}
+
+      {/* Acciones en lote */}
+      {seleccionando && (
+        <div className="sticky bottom-20 md:bottom-4 z-30 bg-[#023A4B] text-white rounded-2xl px-3 py-2.5 shadow-[0_18px_40px_-18px_rgba(2,58,75,.9)] flex items-center gap-2 flex-wrap">
+          <span className="text-[12.5px] font-semibold">
+            {marcados.size ? `${marcados.size} seleccionado${marcados.size > 1 ? "s" : ""}` : "Toca los clientes"}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <label className={`relative text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-white text-[#023A4B] ${!marcados.size || enLote ? "opacity-50 pointer-events-none" : ""}`}>
+              Asignar a…
+              <select value="" onChange={(e) => asignarLote(e.target.value)} aria-label="Asignar responsable a los seleccionados"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                <option value="">Asignar a…</option>
+                {equipo.map((u) => <option key={u.id_usuario} value={u.id_usuario}>{u.nombre}</option>)}
+              </select>
+            </label>
+            <button type="button" onClick={recordarLote} disabled={!marcados.size || enLote}
+              className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border border-white/40 disabled:opacity-50">
+              {enLote ? "Enviando…" : "Recordar"}
+            </button>
+          </div>
         </div>
       )}
     </div>

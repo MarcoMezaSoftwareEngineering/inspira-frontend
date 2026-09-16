@@ -47,7 +47,9 @@ function Toast({ msg, tipo, onClose }) {
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [altaAbierta, setAltaAbierta] = useState(false);
-  const [orden, setOrden] = useState("recientes");
+  // Lo más urgente arriba: vencido, luego lo que vence antes.
+  const [orden, setOrden] = useState("urgentes");
+  const [equipo, setEquipo] = useState([]);
   // Por defecto, quien tiene un proceso en marcha: es con quien se trabaja.
   const [filtro, setFiltro] = useState("activos");
   const [conteos, setConteos] = useState({});
@@ -68,6 +70,7 @@ export default function Clientes() {
   const { isAdmin } = useAuth();
 
   useEffect(() => {
+    boGET("/backoffice/solicitudes/equipo").then((r) => r.ok && setEquipo(r.equipo || []));
     cargar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -352,6 +355,8 @@ export default function Clientes() {
         filtro={filtro}
         onFiltro={(v) => { setFiltro(v); cargar(undefined, undefined, v); }}
         conteos={conteos}
+        equipo={equipo}
+        onRecargar={() => cargar()}
         onAbrir={onVerPerfilCliente}
         onEditar={onEditarCliente}
         onServicios={onVerServiciosCliente}

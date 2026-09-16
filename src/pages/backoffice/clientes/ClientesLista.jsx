@@ -41,7 +41,8 @@ function desdeCuando(iso, ahora) {
 
 function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, isAdmin }) {
   const [menu, setMenu] = useState(false);
-  const nuevo = c.fecha_registro && (ahora - new Date(c.fecha_registro)) < 7 * 86400000;
+  // Lo decide el servidor: registrado en la semana o con un servicio nuevo.
+  const nuevo = c.nuevo;
 
   return (
     <div
@@ -77,6 +78,7 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
 
           <p className="text-[11.5px] text-neutral-400 truncate">
             {c.email_contacto}{c.telefono ? ` · ${c.telefono}` : ""}
+            {c.responsables?.length > 0 && <> · <span className="text-neutral-500">{c.responsables.join(", ")}</span></>}
           </p>
 
           {/* Qué tiene en marcha */}
@@ -123,6 +125,14 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
                 debe {c.debe.toFixed(0)}
               </span>
             )}
+            {c.sin_abrir?.map((x) => (
+              <span key={`sa-${x.id_solicitud}`}
+                title="Su asesor aún no ha abierto este proceso desde que se lo asignaron"
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                  x.horas >= 48 ? "bg-red-50 text-red-700 border-red-200" : "bg-sky-50 text-sky-700 border-sky-200"}`}>
+                sin abrir · {x.horas < 24 ? `${x.horas} h` : `${Math.floor(x.horas / 24)} d`}
+              </span>
+            ))}
             {c.sin_responsable && c.activos > 0 && (
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
                 sin responsable
@@ -180,22 +190,27 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
 
 export default function ClientesLista({
   clientes, loading, orden, onOrden, onAbrir, onEditar,
-  onServicios, onActivo, onPurgar, isAdmin,
+  onServicios, onActivo, onPurgar, isAdmin, filtro, onFiltro, conteos = {},
 }) {
-  const [filtro, setFiltro] = useState("");
+  const setFiltro = onFiltro;
   // Va aparte de los chips para poder cruzarlos: «Estancia» con «Con deuda»
   // es la pregunta que de verdad se hace, y con un solo selector no cabría.
   const [servicio, setServicio] = useState("");
   // Se fija al montar: leer el reloj en cada render hace impuro el componente.
   const [ahora] = useState(() => Date.now());
 
-  const contadores = useMemo(() => ({
-    todos: clientes.length,
-    activos: clientes.filter((c) => c.activos > 0).length,
-    sin_servicio: clientes.filter((c) => c.total_servicios === 0).length,
-    deuda: clientes.filter((c) => c.debe > 0).length,
-    sin_resp: clientes.filter((c) => c.sin_responsable && c.activos > 0).length,
-  }), [clientes]);
+  // Los filtros y sus cifras salen del servidor, sobre TODOS los clientes: en
+  // el navegador solo contaban la primera página.
+  const contadores = {
+    todos: conteos.todos ?? clientes.length,
+    activos: conteos.activos ?? 0,
+    sin_servicio: conteos.sin_servicio ?? 0,
+    deuda: conteos.con_deuda ?? 0,
+    sin_resp: conteos.sin_responsable ?? 0,
+    nuevos: conteos.nuevos ?? 0,
+    sin_abrir: conteos.sin_abrir ?? 0,
+    mios: conteos.mios ?? 0,
+  };
 
   // Cuántos tienen algo en marcha de cada servicio.
   //
@@ -212,14 +227,9 @@ export default function ClientesLista({
     return n;
   }, [clientes]);
 
-  const visibles = useMemo(() => clientes.filter((c) => {
-    if (servicio && !(c.etapas || []).some((e) => e.servicio === servicio)) return false;
-    if (filtro === "activos") return c.activos > 0;
-    if (filtro === "sin_servicio") return c.total_servicios === 0;
-    if (filtro === "deuda") return c.debe > 0;
-    if (filtro === "sin_resp") return c.sin_responsable && c.activos > 0;
-    return true;
-  }), [clientes, filtro, servicio]);
+  const visibles = useMemo(() => clientes.filter((c) =>
+    !servicio || (c.etapas || []).some((e) => e.servicio === servicio)
+  ), [clientes, servicio]);
 
   const chip = (id, texto, n, tono) => (
     <button
@@ -248,10 +258,13 @@ export default function ClientesLista({
         <div className="ase-tira">
         <div className="ase-tira-scroll">
         {chip("", "Todos", contadores.todos)}
+        {chip("mios", "Mis clientes", contadores.mios, "bg-[#EEF2F8] text-[#1A3557]")}
+        {chip("nuevos", "Nuevos (7 días)", contadores.nuevos, "bg-[#E8F5EE] text-[#1D6A4A]")}
+        {chip("sin_abrir", "Sin abrir", contadores.sin_abrir, "bg-red-50 text-red-700")}
         {chip("activos", "Con proceso activo", contadores.activos, "bg-[#E8F5EE] text-[#1D6A4A]")}
         {chip("sin_servicio", "Sin servicios", contadores.sin_servicio, "bg-amber-50 text-amber-700")}
-        {chip("deuda", "Con deuda", contadores.deuda, "bg-red-50 text-red-700")}
-        {chip("sin_resp", "Sin responsable", contadores.sin_resp, "bg-amber-50 text-amber-700")}
+        {chip("con_deuda", "Con deuda", contadores.deuda, "bg-red-50 text-red-700")}
+        {chip("sin_responsable", "Sin responsable", contadores.sin_resp, "bg-amber-50 text-amber-700")}
 
         <select
           value={servicio} onChange={(e) => setServicio(e.target.value)}

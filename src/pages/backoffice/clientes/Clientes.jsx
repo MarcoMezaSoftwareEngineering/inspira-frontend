@@ -48,6 +48,8 @@ export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [altaAbierta, setAltaAbierta] = useState(false);
   const [orden, setOrden] = useState("recientes");
+  const [filtro, setFiltro] = useState("");
+  const [conteos, setConteos] = useState({});
   // Ficha completa: sustituye a la lista mientras esta abierta.
   const [fichaDe, setFichaDe] = useState(null);
   const [verDuplicados, setVerDuplicados] = useState(false);
@@ -82,15 +84,17 @@ export default function Clientes() {
     return () => document.removeEventListener("keydown", onKey);
   }, [showModal, clienteServicios, clientePerfil]);
 
-  async function cargar(qParam, ordenParam) {
+  async function cargar(qParam, ordenParam, filtroParam) {
     setLoading(true);
     const query = qParam !== undefined ? qParam : q;
     const ord = ordenParam !== undefined ? ordenParam : orden;
-    const partes = [`orden=${ord}`];
+    const fil = filtroParam !== undefined ? filtroParam : filtro;
+    const partes = [`orden=${ord}`, "pageSize=200"];
+    if (fil) partes.push(`filtro=${fil}`);
     if (query.trim()) partes.push(`q=${encodeURIComponent(query.trim())}`);
     const url = `/backoffice/clientes?${partes.join("&")}`;
     const r = await boGET(url);
-    if (r.ok) setClientes(r.clientes || []);
+    if (r.ok) { setClientes(r.clientes || []); setConteos(r.conteos || {}); }
     setLoading(false);
   }
 
@@ -342,6 +346,9 @@ export default function Clientes() {
         loading={loading}
         orden={orden}
         onOrden={(v) => { setOrden(v); cargar(undefined, v); }}
+        filtro={filtro}
+        onFiltro={(v) => { setFiltro(v); cargar(undefined, undefined, v); }}
+        conteos={conteos}
         onAbrir={onVerPerfilCliente}
         onEditar={onEditarCliente}
         onServicios={onVerServiciosCliente}

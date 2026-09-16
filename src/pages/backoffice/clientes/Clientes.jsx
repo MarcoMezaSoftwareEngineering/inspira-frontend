@@ -269,8 +269,10 @@ export default function Clientes() {
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary">Clientes</h1>
-            <p className="text-[12.5px] sm:text-sm text-neutral-500">Buscar y gestionar clientes de la plataforma.</p>
+            <h1 className="font-serif text-[22px] sm:text-2xl text-[#1A3557] leading-tight">Clientes</h1>
+            <p className="text-[12px] sm:text-sm text-neutral-500">
+              {conteos.activos ?? 0} con proceso activo · {conteos.nuevos ?? 0} nuevos esta semana
+            </p>
           </div>
           {isAdmin && (
             <button
@@ -328,7 +330,7 @@ export default function Clientes() {
         </svg>
         <input
           type="text"
-          className="w-full border border-neutral-300 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-colors"
+          className="w-full bg-white border border-neutral-200 rounded-2xl pl-9 pr-4 py-3 text-sm shadow-[0_1px_2px_rgba(16,24,40,.04)] focus:outline-none focus:ring-4 focus:ring-[#1D6A4A]/10 focus:border-[#1D6A4A] transition-shadow"
           placeholder="Buscar por nombre, correo, celular o DNI…"
           value={q}
           onChange={(e) => onSearchChange(e.target.value)}

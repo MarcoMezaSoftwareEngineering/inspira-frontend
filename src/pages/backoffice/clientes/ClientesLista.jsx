@@ -39,141 +39,117 @@ function desdeCuando(iso, ahora) {
   return d.toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+/* Color del servicio principal, para el avatar y la franja de la tarjeta. */
+const ACENTO = {
+  master: "#1A3557", visa: "#B9770E", ee: "#7D3C98", mod: "#B9770E", fp: "#1D6A4A", legal: "#C0392B",
+};
+
+function soloDigitos(t) {
+  return String(t || "").replace(/[^\d]/g, "");
+}
+
+/* Un proceso activo: servicio, etapa, avance y quién lo lleva. Es lo que se
+   mira de un cliente; el correo y el teléfono van a los botones. */
+function ProcesoMini({ e }) {
+  const sv = SERVICIO[e.servicio] || SERVICIO.master;
+  const pct = e.paso && e.pasos ? Math.round((e.paso / e.pasos) * 100) : 0;
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl bg-neutral-50 border border-neutral-100 px-2.5 py-2">
+      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${sv.tono}`}>{sv.corto}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-[12px] font-semibold text-neutral-800 truncate">{e.etapa || "Sin etapa"}</span>
+          {e.paso && <span className="shrink-0 text-[10px] text-neutral-400 tabular-nums">{e.paso}/{e.pasos}</span>}
+        </div>
+        <div className="h-1 rounded-full bg-neutral-200/80 mt-1 overflow-hidden">
+          <div className="h-full rounded-full" style={{ width: `${pct}%`, background: ACENTO[e.servicio] || "#1A3557" }} />
+        </div>
+      </div>
+      <span title={e.responsable || "Sin responsable"}
+        className={`shrink-0 w-6 h-6 rounded-full grid place-items-center text-[9px] font-bold ${
+          e.responsable ? "bg-[#023A4B] text-white" : "bg-amber-100 text-amber-700 border border-amber-300 border-dashed"}`}>
+        {e.responsable ? iniciales(e.responsable) : "?"}
+      </span>
+    </div>
+  );
+}
+
 function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, isAdmin }) {
   const [menu, setMenu] = useState(false);
-  // Lo decide el servidor: registrado en la semana o con un servicio nuevo.
-  const nuevo = c.nuevo;
+  const principal = c.etapas?.[0]?.servicio;
+  const acento = principal ? ACENTO[principal] : null;
+  const tel = soloDigitos(c.telefono);
+  const parar = (e) => e.stopPropagation();
+
+  // Lo que pide atención, en una sola línea y por orden de gravedad.
+  const alertas = [
+    ...(c.sin_abrir || []).map((x) => ({
+      k: `sa${x.id_solicitud}`, rojo: x.horas >= 48,
+      t: `Sin abrir · ${x.horas < 24 ? `${x.horas} h` : `${Math.floor(x.horas / 24)} d`}`,
+    })),
+    c.debe > 0 && { k: "debe", rojo: true, t: `Debe ${c.debe.toFixed(0)}` },
+    c.sin_responsable && c.activos > 0 && { k: "resp", t: "Sin responsable" },
+  ].filter(Boolean);
 
   return (
     <div
       role="button" tabIndex={0}
       onClick={() => onAbrir(c)}
       onKeyDown={(e) => { if (e.key === "Enter") onAbrir(c); }}
-      className={`ase-fila group bg-white border border-neutral-200 rounded-2xl px-3.5 py-3 cursor-pointer
-        select-none touch-manipulation ${c.activo === false ? "opacity-60" : ""}`}
+      className={`relative overflow-hidden bg-white rounded-2xl border border-neutral-200/80
+        shadow-[0_1px_2px_rgba(16,24,40,.04),0_8px_24px_-18px_rgba(2,58,75,.35)]
+        hover:shadow-[0_2px_4px_rgba(16,24,40,.05),0_16px_32px_-18px_rgba(2,58,75,.45)]
+        active:scale-[.995] transition-all cursor-pointer select-none touch-manipulation
+        ${c.activo === false ? "opacity-60" : ""}`}
     >
-      <div className="flex items-start gap-3">
-        <span className={`shrink-0 w-10 h-10 rounded-xl grid place-items-center text-[12.5px] font-bold ${
-          c.activos > 0
-            ? "bg-gradient-to-br from-[#023A4B] to-[#02506b] text-white shadow-[0_8px_18px_-12px_rgba(2,58,75,.95)]"
-            : "bg-neutral-100 text-neutral-400"
-        }`}>
-          {iniciales(c.nombre)}
-        </span>
+      {acento && <span aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-1" style={{ background: acento }} />}
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-[13.5px] font-semibold text-neutral-900 truncate">{c.nombre}</p>
-            {nuevo && (
-              <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[#1D6A4A] text-white">
-                nuevo
+      <div className="p-3.5 pl-4">
+        <div className="flex items-start gap-3">
+          <span className="shrink-0 w-11 h-11 rounded-2xl grid place-items-center text-[13px] font-bold text-white"
+            style={{ background: acento ? `linear-gradient(135deg, ${acento}, #023A4B)` : "#cfd4da" }}>
+            {iniciales(c.nombre)}
+          </span>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-[14.5px] font-semibold text-neutral-900 leading-snug line-clamp-2 break-words">
+              {c.nombre || c.email_contacto}
+            </p>
+            <div className="flex items-center gap-1.5 flex-wrap mt-1">
+              {c.nuevo && (
+                <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#E8F5EE] text-[#1D6A4A]">Nuevo</span>
+              )}
+              {c.activo === false && (
+                <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-500">Inactivo</span>
+              )}
+              <span className="text-[11px] text-neutral-400 truncate">
+                {desdeCuando(c.fecha_registro, ahora)}{c.canal_origen ? ` · ${c.canal_origen}` : ""}
               </span>
-            )}
-            {c.activo === false && (
-              <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-neutral-200 text-neutral-500">
-                inactivo
-              </span>
-            )}
+            </div>
           </div>
 
-          <p className="text-[11.5px] text-neutral-400 truncate">
-            {c.email_contacto}{c.telefono ? ` · ${c.telefono}` : ""}
-            {c.responsables?.length > 0 && <> · <span className="text-neutral-500">{c.responsables.join(", ")}</span></>}
-          </p>
-
-          {/* Qué tiene en marcha */}
-          <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-            {c.etapas?.length > 0 ? (
-              c.etapas.map((e) => {
-                const sv = SERVICIO[e.servicio] || SERVICIO.master;
-                return (
-                  <span key={e.id_solicitud}
-                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${sv.tono}`}>
-                    {sv.corto}{e.etapa ? ` · ${e.etapa}` : ""}
-                  </span>
-                );
-              })
-            ) : c.total_servicios > 0 ? (
-              <span className="text-[10.5px] text-neutral-400">
-                {c.total_servicios} servicio{c.total_servicios > 1 ? "s" : ""}, ninguno activo
-              </span>
-            ) : c.solo_invitado ? null : (
-              <span className="text-[10.5px] font-semibold text-amber-600">Sin servicios</span>
-            )}
-
-            {/* A qué expedientes AJENOS entra. Sin esto, la madre de una
-                asesorada con acceso de edición a un expediente activo salía
-                como "Sin servicios" en ámbar, que se lee como contacto frío
-                al que hay que venderle algo. */}
-            {c.invitado_en?.map((i) => {
-              const sv = SERVICIO[i.servicio] || SERVICIO.master;
-              return (
-                <span
-                  key={i.id_solicitud}
-                  title={`${i.quien} · ${i.puede_editar ? "puede subir documentos y rellenar datos" : "solo lectura"}${i.ha_entrado ? "" : " · invitada, aún no ha entrado"}`}
-                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border border-dashed ${sv.tono} border-current/30`}
-                >
-                  invitada · {sv.corto} de {primerNombre(i.titular)}
-                  {i.puede_editar && " ✎"}
-                  {!i.ha_entrado && " · sin entrar"}
-                </span>
-              );
-            })}
-
-            {c.debe > 0 && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">
-                debe {c.debe.toFixed(0)}
-              </span>
-            )}
-            {c.sin_abrir?.map((x) => (
-              <span key={`sa-${x.id_solicitud}`}
-                title="Su asesor aún no ha abierto este proceso desde que se lo asignaron"
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                  x.horas >= 48 ? "bg-red-50 text-red-700 border-red-200" : "bg-sky-50 text-sky-700 border-sky-200"}`}>
-                sin abrir · {x.horas < 24 ? `${x.horas} h` : `${Math.floor(x.horas / 24)} d`}
-              </span>
-            ))}
-            {c.sin_responsable && c.activos > 0 && (
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                sin responsable
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="shrink-0 text-right">
-          <p className="text-[10.5px] text-neutral-400 whitespace-nowrap">{desdeCuando(c.fecha_registro, ahora)}</p>
-          {c.canal_origen && (
-            <p className="text-[10px] text-neutral-300 whitespace-nowrap">{c.canal_origen}</p>
-          )}
           {isAdmin && (
-            <div className="relative mt-1">
-              <button
-                type="button" aria-label="Más acciones"
-                onClick={(e) => { e.stopPropagation(); setMenu((v) => !v); }}
-                className="text-[13px] leading-none text-neutral-300 group-hover:text-neutral-600 px-1"
-              >
-                ⋯
+            <div className="relative shrink-0 -mr-1 -mt-1">
+              <button type="button" aria-label="Más acciones"
+                onClick={(e) => { parar(e); setMenu((v) => !v); }}
+                className="w-8 h-8 rounded-full grid place-items-center text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" />
+                </svg>
               </button>
               {menu && (
                 <>
-                  {/* Capa para cerrar al pulsar fuera, sin listeners globales */}
-                  <div className="fixed inset-0 z-10"
-                    onClick={(e) => { e.stopPropagation(); setMenu(false); }} />
-                  <div className="absolute right-0 top-5 z-20 w-44 bg-white border border-neutral-200 rounded-lg shadow-lg py-1 text-left">
+                  <div className="fixed inset-0 z-10" onClick={(e) => { parar(e); setMenu(false); }} />
+                  <div className="absolute right-0 top-9 z-20 w-44 bg-white border border-neutral-200 rounded-xl shadow-xl py-1 text-left">
                     {[
                       ["Editar datos", () => onEditar(c)],
                       ["Ver servicios", () => onServicios(c)],
                       [c.activo === false ? "Reactivar" : "Desactivar", () => onActivo(c)],
                       ["Eliminar", () => onPurgar(c), true],
                     ].map(([txt, fn, peligro]) => (
-                      <button
-                        key={txt} type="button"
-                        onClick={(e) => { e.stopPropagation(); setMenu(false); fn(); }}
-                        className={`block w-full text-left text-[12px] px-3 py-1.5 hover:bg-neutral-50 ${
-                          peligro ? "text-red-600" : "text-neutral-700"
-                        }`}
-                      >
+                      <button key={txt} type="button"
+                        onClick={(e) => { parar(e); setMenu(false); fn(); }}
+                        className={`block w-full text-left text-[12.5px] px-3 py-2 hover:bg-neutral-50 ${peligro ? "text-red-600" : "text-neutral-700"}`}>
                         {txt}
                       </button>
                     ))}
@@ -181,6 +157,64 @@ function Ficha({ c, ahora, onAbrir, onEditar, onServicios, onActivo, onPurgar, i
                 </>
               )}
             </div>
+          )}
+        </div>
+
+        {c.etapas?.length > 0 ? (
+          <div className="mt-3 space-y-1.5">
+            {c.etapas.map((e) => <ProcesoMini key={e.id_solicitud} e={e} />)}
+          </div>
+        ) : !c.solo_invitado && (
+          <p className="mt-2.5 text-[11.5px] text-neutral-400">
+            {c.total_servicios > 0
+              ? `${c.total_servicios} servicio${c.total_servicios > 1 ? "s" : ""}, ninguno activo`
+              : "Sin servicios contratados"}
+          </p>
+        )}
+
+        {c.invitado_en?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {c.invitado_en.map((i) => {
+              const sv = SERVICIO[i.servicio] || SERVICIO.master;
+              return (
+                <span key={i.id_solicitud}
+                  title={`${i.quien} · ${i.puede_editar ? "puede subir documentos y rellenar datos" : "solo lectura"}`}
+                  className={`text-[10.5px] font-semibold px-2 py-0.5 rounded-full border border-dashed ${sv.tono}`}>
+                  Invitada a {sv.corto} de {primerNombre(i.titular)}{!i.ha_entrado && " · sin entrar"}
+                </span>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-neutral-100">
+          <div className="min-w-0 flex-1 flex flex-wrap gap-1.5">
+            {alertas.length ? alertas.map((a) => (
+              <span key={a.k}
+                className={`text-[10.5px] font-semibold px-2 py-0.5 rounded-full ${a.rojo ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
+                {a.t}
+              </span>
+            )) : (
+              <span className="text-[11px] text-neutral-400 truncate">{c.responsables?.join(", ")}</span>
+            )}
+          </div>
+          {tel && (
+            <a href={`https://wa.me/${tel}`} target="_blank" rel="noreferrer" onClick={parar}
+              aria-label="Escribir por WhatsApp" title={c.telefono}
+              className="shrink-0 w-8 h-8 rounded-full grid place-items-center bg-[#E8F5EE] text-[#1D6A4A]">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 21l1.7-4.6A8.5 8.5 0 1 1 8 19.6L3 21z" />
+              </svg>
+            </a>
+          )}
+          {c.email_contacto && (
+            <a href={`mailto:${c.email_contacto}`} onClick={parar}
+              aria-label="Enviar correo" title={c.email_contacto}
+              className="shrink-0 w-8 h-8 rounded-full grid place-items-center bg-[#EEF2F8] text-[#1A3557]">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
           )}
         </div>
       </div>
@@ -324,7 +358,7 @@ export default function ClientesLista({
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid gap-2.5 md:grid-cols-2">
           {visibles.map((c) => (
             <Ficha
               key={c.id_cliente} c={c} ahora={ahora} isAdmin={isAdmin}

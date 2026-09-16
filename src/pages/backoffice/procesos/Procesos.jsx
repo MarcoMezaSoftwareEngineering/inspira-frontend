@@ -109,6 +109,34 @@ function Proximo({ p }) {
   );
 }
 
+/* Estancia: fase real del expediente, a quién le toca, documentos y plazo.
+   Sin esto la fila solo decía «Nuevo» aunque el expediente supiera más. */
+const LE_TOCA_TONO = {
+  asesor: "bg-[#EEF2F8] text-[#1A3557] border-[#c9d6e6]",
+  asesorado: "bg-amber-50 text-amber-800 border-amber-200",
+  "extranjería": "bg-violet-50 text-violet-700 border-violet-200",
+  nadie: "bg-neutral-50 text-neutral-500 border-neutral-200",
+};
+function DetalleEstancia({ ee }) {
+  if (!ee) return <p className="text-[10.5px] text-neutral-400 mt-1">Sin expediente de estancia abierto</p>;
+  const d = ee.docs;
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[10.5px] text-neutral-500">
+      <span className="font-semibold text-neutral-700">{ee.fase}</span>
+      {ee.le_toca !== "nadie" && (
+        <span className={`font-semibold px-1.5 py-0.5 rounded border ${LE_TOCA_TONO[ee.le_toca] || LE_TOCA_TONO.nadie}`}>
+          le toca: {ee.le_toca}
+        </span>
+      )}
+      {d.total > 0 && <span>docs {d.aprobados}/{d.total}</span>}
+      {d.por_revisar > 0 && <span className="text-[#1A3557] font-semibold">{d.por_revisar} por revisar</span>}
+      {d.observados > 0 && <span className="text-red-600 font-semibold">{d.observados} observados</span>}
+      {ee.sin_fechas && <span className="text-amber-700 font-semibold">sin fechas de clases/llegada</span>}
+      {ee.expediente && <span>exp. {ee.expediente}</span>}
+    </div>
+  );
+}
+
 /* Alta de cobro.
  *
  * Casi todo entra por transferencia, así que el sistema no se entera solo:
@@ -212,6 +240,38 @@ function NuevoPago({ proceso, metodos, onHecho, onCerrar }) {
   );
 }
 
+/* Las tarjetas de Métricas. Cada una dice qué cuenta, por qué importa y, al
+   abrirla, quiénes son y el motivo de cada uno: una cifra sola no se trabaja. */
+const cuando = (d) => (d < 0 ? `hace ${-d} días` : d === 0 ? "hoy" : `en ${d} días`);
+const METRICAS = [
+  { k: "vencidos", t: "Fecha vencida", c: "text-red-600", tono: "rojo",
+    d: "Una fecha clave ya pasó",
+    explica: "Cita, plazo de presentación o de requerimiento que ya pasó sin cerrarse. Revisar hoy.",
+    pasa: (p) => p.proximo?.vencido, motivo: (p) => `${p.proximo.etiqueta}: ${cuando(p.proximo.dias)}` },
+  { k: "semana", t: "Vence esta semana", c: "text-amber-600", tono: "ambar",
+    d: "Fecha clave en 7 días o menos",
+    explica: "Lo que hay que preparar ya para no llegar tarde.",
+    pasa: (p) => p.proximo?.urgente, motivo: (p) => `${p.proximo.etiqueta}: ${cuando(p.proximo.dias)}` },
+  { k: "observados", t: "Documentos observados", c: "text-red-600", tono: "rojo",
+    d: "El asesorado tiene que corregir",
+    explica: "Documentos devueltos con observaciones. Le toca al asesorado; conviene recordárselo.",
+    pasa: (p) => p.docs_observados > 0 || p.ee?.docs?.observados > 0,
+    motivo: (p) => `${p.ee?.docs?.observados || p.docs_observados} documento(s) por corregir` },
+  { k: "sin_resp", t: "Sin responsable", c: "text-amber-600", tono: "ambar",
+    d: "Nadie los está llevando",
+    explica: "Procesos sin asesor asignado. Asignar uno desde la ficha (le llega un correo).",
+    pasa: (p) => !p.responsable, motivo: (p) => `${p.etapa} · alta ${new Date(p.creado).toLocaleDateString("es-PE")}` },
+  { k: "deuda", t: "Con deuda", c: "text-red-600", tono: "rojo",
+    d: "Queda dinero por cobrar",
+    explica: "Cobros registrados que aún no están pagados del todo.",
+    pasa: (p) => p.pago?.pendiente > 0,
+    motivo: (p) => `Debe ${p.pago.pendiente.toFixed(0)}${p.pago.vencido ? " · cuota vencida" : ""}` },
+  { k: "activos", t: "Procesos en marcha", c: "text-[#1A3557]", tono: "azul",
+    d: "Todos los que no están cerrados",
+    explica: "Todo lo activo, de cualquier servicio.",
+    pasa: () => true, motivo: (p) => `${p.etapa}${p.responsable ? ` · ${p.responsable}` : " · sin asignar"}` },
+];
+
 export default function Procesos({ onAbrirProceso }) {
   const [procesos, setProcesos] = useState([]);
   const [filtros, setFiltros] = useState({ servicios: [], etapas: {}, responsables: [], origenes: [] });
@@ -238,6 +298,7 @@ export default function Procesos({ onAbrirProceso }) {
   // pestanas, no secciones distintas del menu. Es el mismo dato mirado de
   // otra forma, y tenerlos separados obligaba a saltar entre pantallas.
   const [pestana, setPestana] = useState("metricas");
+  const [metrica, setMetrica] = useState("");
 
   // Volcado de la respuesta al estado. Aparte de la peticion para que tanto el
   // efecto como el refresco manual usen exactamente el mismo tratamiento.
@@ -303,6 +364,11 @@ export default function Procesos({ onAbrirProceso }) {
       }
       if (texto && !`${p.cliente} ${p.email} ${p.subtipo}`.toLowerCase().includes(texto)) return false;
       return true;
+    }).sort((a, b) => {
+      // Lo que tiene fecha más cerca, arriba; lo que no tiene fecha, al final.
+      const da = a.proximo ? a.proximo.dias : 9999;
+      const db = b.proximo ? b.proximo.dias : 9999;
+      return da - db;
     });
   }, [procesos, pestana, q, etapa, responsable, soloAtencion, verCerrados, antiguos, corteAntiguos]);
 
@@ -410,38 +476,58 @@ export default function Procesos({ onAbrirProceso }) {
       {/* MÉTRICAS · sin tabla: es la vista de "cómo vamos", no de trabajar */}
       {pestana === "metricas" && (
         <div className="space-y-3">
+          <p className="text-[12px] text-neutral-500 leading-relaxed">
+            Toca una tarjeta para ver <b>quiénes son</b> y abrir su proceso. Solo cuenta lo que está en marcha.
+          </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {[
-              { n: resumen.activos,    t: "Procesos activos",  c: "text-[#1A3557]", tono: "azul",  d: "En marcha ahora mismo" },
-              { n: resumen.vencidos,   t: "Vencidos",          c: "text-red-600",   tono: "rojo",  d: "Su fecha ya pasó", ir: "fechas" },
-              { n: resumen.semana,     t: "Esta semana",       c: "text-amber-600", tono: "ambar", d: "Vencen en 7 días o menos", ir: "fechas" },
-              { n: resumen.observados, t: "Con observaciones", c: "text-red-600",   tono: "rojo",  d: "Documentos que corregir" },
-              { n: resumen.sinResp,    t: "Sin responsable",   c: "text-amber-600", tono: "ambar", d: "Nadie los está llevando" },
-              { n: resumen.debiendo,   t: "Con deuda",         c: "text-red-600",   tono: "rojo",  d: "Queda dinero por cobrar" },
-            ].map((c) => {
+            {METRICAS.map((c) => {
+              const lista = procesos.filter((p) => !p.cerrado && c.pasa(p));
+              const n = lista.length;
+              const on = metrica === c.k;
               // Un cero no es una alarma: la franja de color solo se enciende
               // cuando de verdad hay algo que atender.
-              const tono = c.n > 0 ? c.tono : "calma";
-              const contenido = (
-                <>
-                  <span className={`ase-metrica-n ${c.n > 0 ? c.c : "text-neutral-300"}`}>{c.n}</span>
+              const tono = n > 0 ? c.tono : "calma";
+              return (
+                <button key={c.k} type="button" className="ase-metrica text-left" data-tono={tono}
+                  aria-pressed={on} disabled={n === 0}
+                  onClick={() => setMetrica(on ? "" : c.k)}
+                  style={on ? { outline: "2px solid #1D6A4A", outlineOffset: 1 } : undefined}>
+                  <span className={`ase-metrica-n ${n > 0 ? c.c : "text-neutral-300"}`}>{n}</span>
                   <span className="ase-metrica-t">{c.t}</span>
                   <span className="ase-metrica-d">{c.d}</span>
-                </>
-              );
-              // Solo lleva a otra vista lo que se puede mirar de verdad allí.
-              return c.ir && c.n > 0 ? (
-                <button key={c.t} type="button" className="ase-metrica" data-tono={tono}
-                  onClick={() => setPestana(c.ir)}
-                  title="Ver en Próximas fechas">
-                  {contenido}
-                  <span className="ase-metrica-ir">ver →</span>
+                  {n > 0 && <span className="ase-metrica-ir">{on ? "cerrar" : "ver quiénes →"}</span>}
                 </button>
-              ) : (
-                <div key={c.t} className="ase-metrica" data-tono={tono}>{contenido}</div>
               );
             })}
           </div>
+
+          {metrica && (() => {
+            const def = METRICAS.find((m) => m.k === metrica);
+            const lista = procesos.filter((p) => !p.cerrado && def.pasa(p));
+            return (
+              <div className="bg-white border-2 border-[#1D6A4A]/25 rounded-xl overflow-hidden">
+                <p className="px-3.5 pt-3 pb-2 text-[12.5px] font-bold text-[#1A3557]">
+                  {def.t} · {lista.length}
+                  <span className="block text-[11px] font-normal text-neutral-500">{def.explica}</span>
+                </p>
+                <div className="divide-y divide-neutral-100">
+                  {lista.map((p) => (
+                    <button key={p.id_solicitud} type="button" onClick={() => onAbrirProceso?.(p.id_solicitud)}
+                      className="w-full text-left px-3.5 py-2.5 hover:bg-neutral-50 flex items-start gap-2">
+                      <span className={`shrink-0 text-[9.5px] font-bold px-1.5 py-0.5 rounded mt-0.5 ${COLOR_SERVICIO[p.servicio] || ""}`}>
+                        {CORTO[p.servicio]}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[13px] font-semibold text-neutral-800 truncate">{p.cliente}</span>
+                        <span className="block text-[11px] text-neutral-500">{def.motivo(p)}</span>
+                      </span>
+                      <span className="shrink-0 text-[11.5px] font-semibold text-[#1D6A4A]">Abrir →</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Reparto por servicio: pulsando se va a esa pestaña */}
           <div className="bg-white border border-neutral-200 rounded-xl p-4">
@@ -572,7 +658,8 @@ export default function Procesos({ onAbrirProceso }) {
                     <td className="px-2.5 py-2">
                       <p className="text-[12.5px] font-semibold text-neutral-800 leading-tight">{p.cliente}</p>
                       <p className="text-[10.5px] text-neutral-400 truncate max-w-[170px]">{p.subtipo || p.email}</p>
-                      {(p.docs_observados > 0 || p.docs_pendientes > 0) && (
+                      {p.servicio === "ee" && <DetalleEstancia ee={p.ee} />}
+                      {p.servicio !== "ee" && (p.docs_observados > 0 || p.docs_pendientes > 0) && (
                         <p className="text-[10px] mt-0.5">
                           {p.docs_observados > 0 && <span className="text-red-600 font-semibold">{p.docs_observados} obs </span>}
                           {p.docs_pendientes > 0 && <span className="text-neutral-400">{p.docs_pendientes} pend</span>}
@@ -650,14 +737,17 @@ export default function Procesos({ onAbrirProceso }) {
                     a dos y en el móvil caben el doble de procesos. */}
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <Etapa p={p} onCambiar={cambiarEtapa} />
-                  {!p.responsable && <span className="text-[10.5px] font-semibold text-amber-600">sin asignar</span>}
-                  {p.docs_observados > 0 && <span className="text-[10.5px] font-semibold text-red-600">{p.docs_observados} obs</span>}
+                  {p.responsable
+                    ? <span className="text-[10.5px] text-neutral-500">{p.responsable}</span>
+                    : <span className="text-[10.5px] font-semibold text-amber-600">sin asignar</span>}
+                  {p.servicio !== "ee" && p.docs_observados > 0 && <span className="text-[10.5px] font-semibold text-red-600">{p.docs_observados} obs</span>}
                   {p.pago.pendiente > 0 && (
                     <span className={`text-[10.5px] font-semibold ${p.pago.vencido ? "text-red-600" : "text-neutral-500"}`}>
                       debe {p.pago.pendiente.toFixed(0)}
                     </span>
                   )}
                 </div>
+                {p.servicio === "ee" && <DetalleEstancia ee={p.ee} />}
               </div>
             ))}
           </div>

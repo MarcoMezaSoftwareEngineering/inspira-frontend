@@ -9,6 +9,7 @@ import { dialog } from "../../../services/dialogService";
 import { navigate } from "../../../services/navigate";
 import { Boton, Chip, Campo, Esqueleto, Pill } from "../ui";
 import BuscarVinculo from "./BuscarVinculo";
+import RevisionRapida from "../comun/RevisionRapida";
 import {
   CATEGORIAS, CATEGORIA, CON_SERVICIO, ESTADO, PRIORIDADES, PRIORIDAD,
   textoVence, fechaHora, diaDesdeHoy, avisarCambioTareas,
@@ -60,6 +61,7 @@ function BotonesEstado({ estado, guardando, onCambiar }) {
 
 export default function TareaDetalle({ id, opciones, onCerrar, onCambio }) {
   const [tarea, setTarea] = useState(null);
+  const [revisando, setRevisando] = useState(false);
   const [permisos, setPermisos] = useState({});
   const [error, setError] = useState(null);
   const [guardando, setGuardando] = useState(null);
@@ -432,6 +434,12 @@ export default function TareaDetalle({ id, opciones, onCerrar, onCambio }) {
                   >
                     {vinculo.tipo === "lead" ? "Abrir el lead" : "Abrir el expediente"}
                   </Boton>
+                  {tarea?.regla === "rev" && tarea?.id_solicitud && (
+                    <Boton tam="sm" icono={Check} onClick={() => setRevisando(true)} style={{ marginLeft: 6 }}>
+                      Revisar ahora
+                    </Boton>
+                  )}
+                  {revisando && <RevisionRapida idSolicitud={tarea.id_solicitud} onCerrar={() => setRevisando(false)} />}
                 </div>
               )}
             </div>

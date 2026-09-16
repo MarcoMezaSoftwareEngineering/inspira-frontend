@@ -4,6 +4,7 @@
 // datos en Clientes, sus procesos en Solicitudes, sus pagos en ningún lado y
 // sus notas dentro de cada expediente. Aquí está junto.
 import HistorialCliente from "./HistorialCliente";
+import CoherenciaDatos from "./CoherenciaDatos";
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boPOST, boPATCH, boDELETE, boFetch } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
@@ -366,6 +367,8 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
         </div>
 
         <div className="space-y-3">
+          <CoherenciaDatos idCliente={idCliente} />
+
           <Bloque titulo="Datos">
             <div className="grid grid-cols-2 gap-3">
               <Dato label="Origen" valor={cliente.origen} />

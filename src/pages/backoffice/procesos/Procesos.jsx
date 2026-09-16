@@ -10,6 +10,7 @@ import AltaRapida from "../clientes/AltaRapida";
 import ProximasFechas from "./ProximasFechas";
 import TrackerVisa from "./TrackerVisa";
 import TrackerMaster from "./TrackerMaster";
+import { cambiarEtapa as patchEtapa } from "../comun/cambiarEtapa";
 
 const COLOR_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -338,8 +339,8 @@ export default function Procesos({ onAbrirProceso }) {
       x.id_solicitud === p.id_solicitud
         ? { ...x, etapa: nueva, etapa_deducida: false }
         : x));
-    const r = await boPATCH(`/backoffice/procesos/${p.id_solicitud}/etapa`, { etapa: nueva, servicio: p.servicio });
-    if (!r.ok) { setError(r.msg || "No se pudo cambiar la etapa"); cargar(); }
+    const r = await patchEtapa(p.id_solicitud, nueva, p.servicio);
+    if (!r.ok) { if (!r.cancelado) setError(r.msg || "No se pudo cambiar la etapa"); cargar(); }
   }
 
   // Se fija una sola vez al montar: leer el reloj durante el render hace que

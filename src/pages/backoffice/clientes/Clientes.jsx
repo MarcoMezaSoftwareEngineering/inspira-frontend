@@ -53,8 +53,14 @@ export default function Clientes() {
   // Por defecto, quien tiene un proceso en marcha: es con quien se trabaja.
   const [filtro, setFiltro] = useState("activos");
   const [conteos, setConteos] = useState({});
+  const [etiquetas, setEtiquetas] = useState({});
+  const [etiqueta, setEtiqueta] = useState("");
   // Ficha completa: sustituye a la lista mientras esta abierta.
-  const [fichaDe, setFichaDe] = useState(null);
+  // ?cliente=ID abre su ficha directamente (buscador global, enlaces).
+  const [fichaDe, setFichaDe] = useState(() => {
+    const id = Number(new URLSearchParams(window.location.search).get("cliente"));
+    return id || null;
+  });
   const [verDuplicados, setVerDuplicados] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -88,17 +94,19 @@ export default function Clientes() {
     return () => document.removeEventListener("keydown", onKey);
   }, [showModal, clienteServicios, clientePerfil]);
 
-  async function cargar(qParam, ordenParam, filtroParam) {
+  async function cargar(qParam, ordenParam, filtroParam, etiquetaParam) {
     setLoading(true);
     const query = qParam !== undefined ? qParam : q;
     const ord = ordenParam !== undefined ? ordenParam : orden;
     const fil = filtroParam !== undefined ? filtroParam : filtro;
     const partes = [`orden=${ord}`, "pageSize=200"];
     if (fil) partes.push(`filtro=${fil}`);
+    const et = etiquetaParam !== undefined ? etiquetaParam : etiqueta;
+    if (et) partes.push(`etiqueta=${encodeURIComponent(et)}`);
     if (query.trim()) partes.push(`q=${encodeURIComponent(query.trim())}`);
     const url = `/backoffice/clientes?${partes.join("&")}`;
     const r = await boGET(url);
-    if (r.ok) { setClientes(r.clientes || []); setConteos(r.conteos || {}); }
+    if (r.ok) { setClientes(r.clientes || []); setConteos(r.conteos || {}); setEtiquetas(r.etiquetas || {}); }
     setLoading(false);
   }
 
@@ -357,6 +365,9 @@ export default function Clientes() {
         conteos={conteos}
         equipo={equipo}
         onRecargar={() => cargar()}
+        etiquetas={etiquetas}
+        etiqueta={etiqueta}
+        onEtiqueta={(v) => { setEtiqueta(v); cargar(undefined, undefined, undefined, v); }}
         onAbrir={onVerPerfilCliente}
         onEditar={onEditarCliente}
         onServicios={onVerServiciosCliente}

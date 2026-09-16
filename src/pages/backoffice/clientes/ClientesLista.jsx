@@ -8,6 +8,27 @@
 import { useMemo, useState } from "react";
 import { boPATCH, boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
+import RevisionRapida from "../comun/RevisionRapida";
+import { cambiarEtapa as patchEtapa } from "../comun/cambiarEtapa";
+
+const NOMBRE_SERVICIO = { master: "postulación a máster", visa: "visado de estudios", ee: "estancia por estudios", mod: "modificatoria", fp: "formación profesional", legal: "extranjería" };
+
+/* Mensaje de WhatsApp ya redactado, de usted, según lo que le toca. */
+function plantillaWhatsApp(c) {
+  const pila = String(c.nombre || "").trim().split(/\s+/)[0] || "";
+  const e = (c.etapas || []).find((x) => x.le_toca === "asesorado") || (c.etapas || [])[0];
+  const servicio = e ? NOMBRE_SERVICIO[e.servicio] || "su expediente" : "su expediente";
+  const pendiente = e?.le_toca === "asesorado" && e.que
+    ? ` Para continuar con su trámite queda pendiente: ${e.que.charAt(0).toLowerCase()}${e.que.slice(1)}.`
+    : "";
+  const fecha = e?.proximo && !e.proximo.vencido
+    ? ` Le recordamos que la fecha a tener en cuenta es el ${new Date(`${e.proximo.fecha}T12:00:00`).toLocaleDateString("es-ES", { day: "numeric", month: "long" })}.`
+    : "";
+  return {
+    texto: `Estimado/a ${pila}: le escribimos de Inspira Legal en relación con su expediente de ${servicio}.${pendiente}${fecha} Quedamos a su disposición.`,
+    id_solicitud: e?.id_solicitud,
+  };
+}
 
 const SERVICIO = {
   master: { corto: "Máster",        tono: "bg-[#EEF2F8] text-[#1A3557]" },
@@ -101,16 +122,23 @@ function Proceso({ e, cliente, equipo, onCambio }) {
     if (!nueva || nueva === etapa) return;
     const antes = etapa;
     setEtapa(nueva); setDeducida(false); setEstado("guardando");
-    const r = await boPATCH(`/backoffice/procesos/${e.id_solicitud}/etapa`, { etapa: nueva, servicio: e.servicio });
-    if (r.ok) acusar(); else { setEtapa(antes); setEstado("error"); }
+    const r = await patchEtapa(e.id_solicitud, nueva, e.servicio);
+    if (r.ok) { acusar(); if (nueva === "Finalizado") onCambio?.(); }
+    else { setEtapa(antes); setEstado(r.cancelado ? "" : "error"); }
   }
 
   async function asignar(id) {
     if (!id) return;
     const persona = equipo.find((u) => String(u.id_usuario) === String(id));
+    // Traspaso: si ya lo llevaba alguien, la nota es obligatoria.
+    let nota = null;
+    if (resp) {
+      nota = await dialog.prompt(`Nota de traspaso para ${persona?.nombre}: qué está pasando y qué falta.`, "", "Traspasar proceso");
+      if (!nota || !nota.trim()) { dialog.toast("Sin nota no se traspasa", "error"); return; }
+    }
     const antes = resp;
     setResp(persona?.nombre || null); setEstado("guardando");
-    const r = await boPATCH(`/backoffice/solicitudes/${e.id_solicitud}/asesor`, { id_asesor_asignado: Number(id) });
+    const r = await boPATCH(`/backoffice/solicitudes/${e.id_solicitud}/asesor`, { id_asesor_asignado: Number(id), nota: nota?.trim() || undefined });
     if (r.ok) { acusar(); onCambio?.(); } else { setResp(antes); setEstado("error"); }
   }
 
@@ -127,6 +155,8 @@ function Proceso({ e, cliente, equipo, onCambio }) {
     if (r.ok) onCambio?.();
   }
 
+  const [revisando, setRevisando] = useState(false);
+  const puedeRevisar = e.le_toca === "asesor" && /^Revisar/.test(e.que || "");
   const recordado = e.recordado;
   const puedeRecordar = e.le_toca === "asesorado" && RUTA_RECORDATORIO[e.servicio];
 
@@ -191,6 +221,15 @@ function Proceso({ e, cliente, equipo, onCambio }) {
         </div>
       )}
 
+      {puedeRevisar && (
+        <button type="button" onClick={() => setRevisando(true)}
+          className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-[12px] font-bold text-white bg-[#1A3557] rounded-lg py-1.5 hover:bg-[#15294a]">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          Revisar ahora
+        </button>
+      )}
+      {revisando && <RevisionRapida idSolicitud={e.id_solicitud} onCerrar={(cambio) => { setRevisando(false); if (cambio) onCambio?.(); }} />}
+
       {(puedeRecordar || recordado) && (
         <div className="flex items-center gap-2 mt-2">
           {recordado && (
@@ -217,6 +256,28 @@ function Proceso({ e, cliente, equipo, onCambio }) {
 
 function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, onEditar, onServicios, onActivo, onPurgar, onCambio, isAdmin }) {
   const [menu, setMenu] = useState(false);
+
+  function whatsapp(ev) {
+    ev.stopPropagation();
+    const { texto, id_solicitud } = plantillaWhatsApp(c);
+    window.open(`https://wa.me/${soloDigitos(c.telefono)}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
+    if (id_solicitud) boPOST(`/backoffice/gestion-clientes/proceso/${id_solicitud}/contacto`, { texto }).then(() => onCambio?.());
+  }
+
+  async function editarEtiquetas() {
+    const v = await dialog.prompt("Etiquetas separadas por comas (VIP, Beca, Urgente…)", (c.etiquetas || []).join(", "), "Etiquetas");
+    if (v === null) return;
+    const r = await boPATCH(`/backoffice/gestion-clientes/cliente/${c.id_cliente}/marcas`, { etiquetas: v.split(",") });
+    if (r.ok) onCambio?.(); else dialog.toast(r.msg || "No se pudo guardar", "error");
+  }
+
+  async function alternarPrueba() {
+    const r = await boPATCH(`/backoffice/gestion-clientes/cliente/${c.id_cliente}/marcas`, { prueba: !c.prueba });
+    if (r.ok) {
+      dialog.toast(c.prueba ? "Ya no es cliente de prueba" : "Marcado como prueba: no cuenta en cifras ni genera tareas", "success");
+      onCambio?.();
+    }
+  }
   const principal = c.etapas?.[0]?.servicio;
   const acento = principal ? ACENTO[principal] : null;
   const tel = soloDigitos(c.telefono);
@@ -272,13 +333,19 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
               {c.activo === false && (
                 <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-500">Inactivo</span>
               )}
+              {c.prueba && (
+                <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700">Prueba</span>
+              )}
+              {(c.etiquetas || []).map((t) => (
+                <span key={t} className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[#FFF4E8] text-[#B45309] border border-[#FAD9B5]">{t}</span>
+              ))}
               <span className="text-[11px] text-neutral-400 truncate">
                 {desdeCuando(c.fecha_registro, ahora)}{c.canal_origen ? ` · ${c.canal_origen}` : ""}
               </span>
             </div>
           </div>
 
-          {isAdmin && !seleccionando && (
+          {!seleccionando && (
             <div className="relative shrink-0 -mr-1 -mt-1">
               <button type="button" aria-label="Más acciones"
                 onClick={(e) => { parar(e); setMenu((v) => !v); }}
@@ -292,10 +359,14 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
                   <div className="fixed inset-0 z-10" onClick={(e) => { parar(e); setMenu(false); }} />
                   <div className="absolute right-0 top-9 z-20 w-44 bg-white border border-neutral-200 rounded-xl shadow-xl py-1 text-left">
                     {[
-                      ["Editar datos", () => onEditar(c)],
-                      ["Ver servicios", () => onServicios(c)],
-                      [c.activo === false ? "Reactivar" : "Desactivar", () => onActivo(c)],
-                      ["Eliminar", () => onPurgar(c), true],
+                      ["Etiquetas…", editarEtiquetas],
+                      [c.prueba ? "Quitar marca de prueba" : "Marcar como prueba", alternarPrueba],
+                      ...(isAdmin ? [
+                        ["Editar datos", () => onEditar(c)],
+                        ["Ver servicios", () => onServicios(c)],
+                        [c.activo === false ? "Reactivar" : "Desactivar", () => onActivo(c)],
+                        ["Eliminar", () => onPurgar(c), true],
+                      ] : []),
                     ].map(([txt, fn, peligro]) => (
                       <button key={txt} type="button"
                         onClick={(e) => { parar(e); setMenu(false); fn(); }}
@@ -349,8 +420,8 @@ function Ficha({ c, ahora, equipo, seleccionando, marcado, onMarcar, onAbrir, on
             ))}
           </div>
           {tel && (
-            <a href={`https://wa.me/${tel}`} target="_blank" rel="noreferrer" onClick={parar}
-              aria-label="Escribir por WhatsApp" title={c.telefono}
+            <a href={`https://wa.me/${tel}`} target="_blank" rel="noreferrer" onClick={(ev) => { ev.preventDefault(); whatsapp(ev); }}
+              aria-label="Escribir por WhatsApp con mensaje preparado" title={`${c.telefono} · mensaje preparado`}
               className="shrink-0 w-8 h-8 rounded-full grid place-items-center bg-[#E8F5EE] text-[#1D6A4A]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 21l1.7-4.6A8.5 8.5 0 1 1 8 19.6L3 21z" />
@@ -454,8 +525,9 @@ function Resumen({ k, t, color, fondo, n, filtro, onFiltro }) {
 export default function ClientesLista({
   clientes, loading, orden, onOrden, onAbrir, onEditar,
   onServicios, onActivo, onPurgar, isAdmin, filtro, onFiltro, conteos = {},
-  equipo = [], onRecargar,
+  equipo = [], onRecargar, etiquetas = {}, etiqueta = "", onEtiqueta,
 }) {
+  const [traspaso, setTraspaso] = useState(null);
   const [servicio, setServicio] = useState("");
   const [masFiltros, setMasFiltros] = useState(false);
   const [seleccionando, setSeleccionando] = useState(false);
@@ -495,14 +567,15 @@ export default function ClientesLista({
     const persona = equipo.find((u) => String(u.id_usuario) === String(id));
     const procesos = elegidos.flatMap((c) => c.etapas || []);
     if (!procesos.length) { dialog.toast("Los seleccionados no tienen procesos activos", "error"); return; }
-    const ok = await dialog.confirm(
-      `Se asignarán ${procesos.length} proceso(s) de ${elegidos.length} cliente(s) a ${persona?.nombre}. Le llegará un correo por cada uno.`,
-      "Asignar responsable",
+    const nota = await dialog.prompt(
+      `Se asignarán ${procesos.length} proceso(s) de ${elegidos.length} cliente(s) a ${persona?.nombre} (le llega un correo por cada uno). Nota de traspaso:`,
+      "", "Asignar responsable",
     );
-    if (!ok) return;
+    if (nota === null) return;
+    if (procesos.some((e) => e.responsable) && !nota.trim()) { dialog.toast("Hay procesos que ya llevaba alguien: la nota es obligatoria", "error"); return; }
     setEnLote(true);
     const r = await Promise.all(procesos.map((e) =>
-      boPATCH(`/backoffice/solicitudes/${e.id_solicitud}/asesor`, { id_asesor_asignado: Number(id) })));
+      boPATCH(`/backoffice/solicitudes/${e.id_solicitud}/asesor`, { id_asesor_asignado: Number(id), nota: nota.trim() || undefined })));
     setEnLote(false);
     const fallos = r.filter((x) => !x.ok).length;
     dialog.toast(fallos ? `${r.length - fallos} asignados · ${fallos} fallaron` : `${r.length} proceso(s) asignados a ${persona?.nombre}`, fallos ? "error" : "success");
@@ -599,6 +672,7 @@ export default function ClientesLista({
               {chip("con_deuda", "Con deuda", "bg-red-50 text-red-700")}
               {chip("sin_movimiento", "Sin movimiento 10+ días", "bg-red-50 text-red-700")}
               {chip("sin_servicio", "Sin servicios", "bg-neutral-100 text-neutral-500")}
+              {chip("prueba", "De prueba", "bg-violet-50 text-violet-700")}
             </div>
             <div className="flex flex-wrap gap-2">
               <select value={servicio} onChange={(e) => setServicio(e.target.value)}
@@ -608,6 +682,17 @@ export default function ClientesLista({
                   <option key={k} value={k}>{sv.corto} ({porServicio[k]})</option>
                 ))}
               </select>
+              {Object.keys(etiquetas).length > 0 && (
+                <select value={etiqueta} onChange={(e) => onEtiqueta?.(e.target.value)}
+                  className="text-[12px] border border-neutral-200 rounded-lg px-2 py-1.5 bg-white text-neutral-700">
+                  <option value="">Todas las etiquetas</option>
+                  {Object.entries(etiquetas).map(([t, k]) => <option key={t} value={t}>{t} ({k})</option>)}
+                </select>
+              )}
+              <button type="button" onClick={() => setTraspaso({ de: "", a: "", hasta: "", nota: "" })}
+                className="text-[12px] font-semibold border border-neutral-200 rounded-lg px-2.5 py-1.5 bg-white text-neutral-700">
+                Traspasar cartera…
+              </button>
               <select value={orden} onChange={(e) => onOrden(e.target.value)}
                 className="text-[12px] border border-neutral-200 rounded-lg px-2 py-1.5 bg-white text-neutral-700">
                 <option value="urgentes">Más urgentes primero</option>
@@ -653,6 +738,53 @@ export default function ClientesLista({
               onActivo={onActivo} onPurgar={onPurgar} onCambio={onRecargar}
             />
           ))}
+        </div>
+      )}
+
+      {traspaso && (
+        <div className="fixed inset-0 z-[85] bg-[#011c26]/60 grid place-items-center p-4" onClick={() => setTraspaso(null)} role="presentation">
+          <div className="bg-white rounded-2xl w-full max-w-md p-4 space-y-3 shadow-2xl" onClick={(ev) => ev.stopPropagation()} role="presentation">
+            <p className="text-[16px] font-semibold text-[#1A3557]">Traspasar cartera</p>
+            <p className="text-[12px] text-neutral-500">
+              Pasa todos los procesos activos de una persona a otra (vacaciones, bajas). A quien los recibe le llega un
+              correo por cada uno. Con fecha de vuelta, vuelven solos ese día.
+            </p>
+            {["de", "a"].map((k) => (
+              <label key={k} className="block">
+                <span className="text-[11.5px] font-semibold text-neutral-600">{k === "de" ? "De" : "A"}</span>
+                <select value={traspaso[k]} onChange={(ev) => setTraspaso({ ...traspaso, [k]: ev.target.value })}
+                  className="mt-1 w-full text-[13px] border border-neutral-300 rounded-xl px-3 py-2.5 bg-white">
+                  <option value="">Elegir…</option>
+                  {equipo.map((u) => <option key={u.id_usuario} value={u.id_usuario}>{u.nombre}</option>)}
+                </select>
+              </label>
+            ))}
+            <label className="block">
+              <span className="text-[11.5px] font-semibold text-neutral-600">Vuelven el (opcional)</span>
+              <input type="date" value={traspaso.hasta} onChange={(ev) => setTraspaso({ ...traspaso, hasta: ev.target.value })}
+                className="mt-1 w-full text-[13px] border border-neutral-300 rounded-xl px-3 py-2" />
+            </label>
+            <label className="block">
+              <span className="text-[11.5px] font-semibold text-neutral-600">Nota de traspaso (obligatoria)</span>
+              <textarea rows={3} value={traspaso.nota} onChange={(ev) => setTraspaso({ ...traspaso, nota: ev.target.value })}
+                placeholder="Qué está pasando con estos clientes y qué falta"
+                className="mt-1 w-full text-[13px] border border-neutral-300 rounded-xl px-3 py-2" />
+            </label>
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setTraspaso(null)} className="text-[13px] font-semibold px-4 py-2 rounded-xl text-neutral-600">Cancelar</button>
+              <button type="button" disabled={!traspaso.de || !traspaso.a || !traspaso.nota.trim() || enLote}
+                onClick={async () => {
+                  setEnLote(true);
+                  const r = await boPOST("/backoffice/gestion-clientes/traspaso", { ...traspaso, de: Number(traspaso.de), a: Number(traspaso.a) });
+                  setEnLote(false);
+                  if (r.ok) { dialog.toast(`${r.traspasados} proceso(s) traspasados`, "success"); setTraspaso(null); onRecargar?.(); }
+                  else dialog.toast(r.msg || "No se pudo traspasar", "error");
+                }}
+                className="text-[13px] font-bold px-4 py-2 rounded-xl bg-[#1D6A4A] text-white disabled:opacity-40">
+                Traspasar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -26,6 +26,7 @@ import Tareas from "./tareas/Tareas";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
 import Agenda from "./agenda/Agenda";
 import Flujos from "./flujos/Flujos";
+import BuscadorGlobal from "./layout/BuscadorGlobal";
 import Procesos from "./procesos/Procesos";
 import PresupuestosPortal from "./presupuestos/PresupuestosPortal";
 import CatalogoMasters from "./catalogo/CatalogoMasters";
@@ -167,6 +168,7 @@ export default function BackofficeApp() {
         <MobileAppBar onMenuToggle={() => setMobileDrawerOpen(true)} user={user} />
         {/* Lo que los asesorados han escrito y nadie ha leído, de todos los expedientes. */}
         <CampanaMensajes navigate={navigate} path={path} />
+        <BuscadorGlobal />
         <MobileDrawer
           open={mobileDrawerOpen}
           onClose={() => setMobileDrawerOpen(false)}

@@ -30,6 +30,7 @@ import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
 import IconoPaso, { ICONO_POR_BLOQUE } from "../../../components/common/IconoPaso";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../components/common/RutaPasos";
 import CercoErrores from "../../../components/common/CercoErrores";
+import RevisionRapida from "../comun/RevisionRapida";
 
 // Nombre corto de cada bloque del máster para la fila de iconos del móvil.
 const CORTO_BO = { cliente: "Ficha", checklist: "Documentos", formulario: "Formulario", informe: "Informe", eleccion: "Elección", programacion: "Postular", cierre: "Cierre" };
@@ -107,6 +108,8 @@ function CBox({ children }) {
 }
 
 export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
+  // ?revisar=1 abre la revisión rápida de documentos (desde tareas y avisos).
+  const [revisarRapido, setRevisarRapido] = useState(() => new URLSearchParams(window.location.search).get("revisar") === "1");
   const mainRef = useRef(null);
 
   const {
@@ -337,6 +340,12 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
+      {revisarRapido && (
+        <RevisionRapida idSolicitud={idSolicitud} onCerrar={(cambio) => {
+          setRevisarRapido(false);
+          if (cambio) window.location.replace(window.location.pathname);
+        }} />
+      )}
 
       {/* ── NAVEGACIÓN EN MÓVIL ──
           La barra lateral mide 220 px fijos: en un teléfono se come la

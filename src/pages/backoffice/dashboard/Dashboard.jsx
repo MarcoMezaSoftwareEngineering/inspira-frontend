@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import BarraHoy from "./BarraHoy";
+import MiDia from "./MiDia";
+import PanelEquipo from "./PanelEquipo";
 import {
   TrendingUp, Users, FileText, FileWarning, RefreshCw,
 } from "lucide-react";
@@ -88,8 +90,14 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Mi día: tareas vencidas y de hoy, y clientes que esperan algo de mí */}
+      <MiDia />
+
       {/* Hoy: lo que hay que atender en el día */}
       <BarraHoy />
+
+      {/* Equipo: solo para quien lo gestiona */}
+      <PanelEquipo />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

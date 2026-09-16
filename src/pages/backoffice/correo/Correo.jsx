@@ -7,6 +7,10 @@ import { useCallback, useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import { Pagina, Cabecera, Cuerpo } from "../ui";
 import VistaHilo from "./VistaHilo";
+import Redactar from "./Redactar";
+import { DESDE_BUZON } from "./desdeBuzon";
+import { Boton } from "../ui";
+import { Plus } from "lucide-react";
 
 const ESTADOS = [["sin_responder", "Sin responder"], ["no_leidos", "No leídos"], ["todos", "Todos"]];
 
@@ -24,6 +28,8 @@ export default function Correo() {
   const [estado, setEstado] = useState("sin_responder");
   const [q, setQ] = useState("");
   const [busca, setBusca] = useState("");
+  const [mios, setMios] = useState(false);
+  const [redactar, setRedactar] = useState(false);
   const [hilos, setHilos] = useState(null);
   const [error, setError] = useState("");
   const [abierto, setAbierto] = useState(() => new URLSearchParams(window.location.search).get("hilo"));
@@ -45,11 +51,12 @@ export default function Correo() {
     const p = new URLSearchParams({ estado });
     if (buzon) p.set("buzon", buzon);
     if (busca) p.set("q", busca);
+    if (mios) p.set("mios", "1");
     boGET(`/backoffice/correo/hilos?${p}`).then((r) => {
       setAhora(Date.now());
       if (r.ok) { setHilos(r.hilos || []); setError(""); } else { setHilos([]); setError(r.msg || "No se pudieron cargar"); }
     });
-  }, [buzon, estado, busca]);
+  }, [buzon, estado, busca, mios]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
@@ -69,6 +76,7 @@ export default function Correo() {
       <Cabecera
         eyebrow="Correo"
         titulo="Buzón del equipo"
+        acciones={<Boton tono="cta" icono={Plus} onClick={() => setRedactar(true)}>Redactar</Boton>}
         subtitulo={`Todas las direcciones de Inspira en un sitio. Es la cuenta ${info?.cuenta || "administracion@"}: lo que se responde aquí también se ve en Gmail.`}
         stats={hilos ? [
           { n: estado === "sin_responder" ? hilos.length : 0, l: "sin responder en esta vista", tono: hilos.length ? "alerta" : "ok" },
@@ -95,6 +103,10 @@ export default function Correo() {
                     className={`text-[12.5px] font-semibold px-3 py-1.5 rounded-lg ${estado === k ? "bg-white text-[#013446] shadow-sm" : "text-[#62808f]"}`}>{t}</button>
                 ))}
               </div>
+              <button type="button" onClick={() => setMios((v) => !v)} aria-pressed={mios}
+                className={`text-[12.5px] font-semibold px-3 rounded-xl border ${mios ? "bg-[#013446] border-[#013446] text-white" : "bg-white border-[#d8e4ef] text-[#0d2c3a]"}`}>
+                Míos
+              </button>
               <form className="flex-1 min-w-[180px]" onSubmit={(e) => { e.preventDefault(); setBusca(q.trim()); }}>
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar (nombre, correo, asunto)…"
                   className="w-full text-[13.5px] bg-white border border-[#d8e4ef] rounded-xl px-3 py-2" />
@@ -128,6 +140,8 @@ export default function Correo() {
                       {h.cliente && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#e8f5ee] text-[#1d6a4a]">Cliente{h.cliente.proceso?.responsable ? ` · ${h.cliente.proceso.responsable.split(" ")[0]}` : ""}</span>}
                       {h.lead && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#e3f0fe] text-[#013446]">Lead</span>}
                       {h.buzon && !buzon && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#eef2f6] text-[#62808f]">{info?.buzones?.find((b) => b.k === h.buzon)?.t}</span>}
+                      {h.asignado && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#fef3e7] text-[#92400E]">→ {h.asignado.split(" ")[0]}</span>}
+                      {h.atendiendo && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#fdedec] text-[#c0392b]">{h.atendiendo.nombre.split(" ")[0]} lo está respondiendo</span>}
                       {h.mensajes > 1 && <span className="text-[10px] text-[#62808f]">{h.mensajes} mensajes</span>}
                     </span>
                   </button>
@@ -140,6 +154,8 @@ export default function Correo() {
           )}
         </div>
       </Cuerpo>
+      {redactar && <Redactar onCerrar={() => setRedactar(false)} onEnviado={cargar}
+        desde={buzon && DESDE_BUZON[buzon] ? `${DESDE_BUZON[buzon]}@inspira-legal.cloud` : ""} />}
     </Pagina>
   );
 }

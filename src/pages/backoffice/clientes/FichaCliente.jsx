@@ -5,6 +5,7 @@
 // sus notas dentro de cada expediente. Aquí está junto.
 import HistorialCliente from "./HistorialCliente";
 import CoherenciaDatos from "./CoherenciaDatos";
+import CorreosCliente from "./CorreosCliente";
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boPOST, boPATCH, boDELETE, boFetch } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
@@ -287,6 +288,7 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
     { k: "resumen", t: "Resumen" },
     { k: "servicios", t: "Servicios", n: activos.length },
     { k: "historial", t: "Historial" },
+    { k: "correos", t: "Correos" },
     { k: "pagos", t: "Pagos", alerta: finanzas.pendiente > 0 },
     { k: "notas", t: "Notas", n: notas.length },
     { k: "datos", t: "Datos" },
@@ -533,6 +535,7 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
       )}
       {pestana === "servicios" && servicios}
       {pestana === "historial" && <HistorialCliente idCliente={idCliente} />}
+      {pestana === "correos" && <CorreosCliente idCliente={idCliente} correo={cliente.email} procesos={procesos} />}
       {pestana === "pagos" && (
         <div className="space-y-3">
           {bloqueFinanzas}

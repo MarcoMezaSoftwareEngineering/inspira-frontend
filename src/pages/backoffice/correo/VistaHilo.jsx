@@ -27,12 +27,34 @@ async function abrirAdjunto(mensaje, a) {
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
-export default function VistaHilo({ id, direcciones = [], onVolver, onRespondido }) {
+export default function VistaHilo({ id, direcciones: dirs = [], onVolver, onRespondido }) {
   const [h, setH] = useState(null);
   const [texto, setTexto] = useState("");
   const [desde, setDesde] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [plantillas, setPlantillas] = useState(false);
+  const [direcciones, setDirecciones] = useState(dirs);
+  const [equipo, setEquipo] = useState([]);
+
+  // Direcciones y equipo, si no vienen del buzón (p. ej. desde la ficha).
+  useEffect(() => {
+    if (!dirs.length) boGET("/backoffice/correo/buzones").then((r) => r.ok && setDirecciones(r.direcciones || []));
+    boGET("/backoffice/solicitudes/equipo").then((r) => r.ok && setEquipo(r.equipo || []));
+  }, [dirs.length]);
+
+  // «Lo estoy respondiendo yo»: aviso a los demás mientras está abierto.
+  useEffect(() => {
+    const marcar = () => boPOST(`/backoffice/correo/hilo/${id}/atender`, {});
+    marcar();
+    const t = setInterval(marcar, 60000);
+    return () => { clearInterval(t); boPOST(`/backoffice/correo/hilo/${id}/atender`, { soltar: true }); };
+  }, [id]);
+
+  async function asignar(id_usuario) {
+    const r = await boPOST(`/backoffice/correo/hilo/${id}/asignar`, { id_usuario: id_usuario || null });
+    if (r.ok) { setH((x) => ({ ...x, asignado: r.asignado })); dialog.toast(r.asignado ? `Asignado a ${r.asignado}` : "Sin asignar", "success"); onRespondido?.(); }
+    else dialog.toast(r.msg || "No se pudo asignar", "error");
+  }
 
   useEffect(() => {
     boGET(`/backoffice/correo/hilo/${id}`).then((r) => {
@@ -76,6 +98,19 @@ export default function VistaHilo({ id, direcciones = [], onVolver, onRespondido
             )}
             {!h.cliente && !h.lead && <span className="text-[11px] text-[#62808f]">No está en Core como cliente ni lead</span>}
           </div>
+          {h.atendiendo && (
+            <p className="mt-1.5 text-[12px] font-semibold text-[#92400E] bg-[#fef3e7] rounded-lg px-2 py-1">
+              {h.atendiendo.nombre} lo tiene abierto ahora: cuidado con responder dos veces.
+            </p>
+          )}
+          <label className="mt-1.5 inline-flex items-center gap-1.5 text-[11.5px] text-[#62808f]">
+            Asignado a
+            <select value={equipo.find((u) => u.nombre === h.asignado)?.id_usuario || ""} onChange={(e) => asignar(e.target.value)}
+              className="text-[12px] border border-[#d8e4ef] rounded-lg px-2 py-1 bg-white text-[#0d2c3a]">
+              <option value="">Nadie</option>
+              {equipo.map((u) => <option key={u.id_usuario} value={u.id_usuario}>{u.nombre}</option>)}
+            </select>
+          </label>
         </div>
       </div>
 

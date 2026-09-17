@@ -157,14 +157,27 @@ export const ENLACES_CORTOS = {
 
 /** El enlace corto de Inspira: el que Carina usa en sus publicaciones. */
 export const WHATSAPP_INSPIRA = "https://wa.link/s6cfmu";
-/** El de Félix Olaya (StarSeguro), para el seguro de salud. */
-export const WHATSAPP_SEGURO = "https://wa.link/9z7i3d";
 
 /** Enlace de WhatsApp a una línea concreta. */
 export const whatsappLinea = (linea, mensaje) =>
   `https://wa.me/${soloDigitos(linea.numero)}?text=${encodeURIComponent(
     mensaje || "Hola Inspira, quiero información."
   )}`;
+
+/**
+ * Seguro de salud con Félix Olaya (StarSeguro).
+ *
+ * El mensaje lo escribimos nosotros —y no el enlace corto de Félix— porque es
+ * obligatorio que llegue diciendo que va de parte de Carina: su enlace lo dice
+ * hoy, pero lo edita él desde su panel y podría dejar de decirlo sin que nos
+ * enteremos. La comisión de la recomendación depende de esa frase.
+ */
+export const MENSAJE_SEGURO =
+  "¡Hola, Félix! Vengo por recomendación de Carina Meza - Inspira, quisiera cotizar mi seguro de salud para visa de estudios. Me recomendó cotizar Adeslas.";
+export const WHATSAPP_SEGURO = whatsappLinea(
+  { numero: "+34 632 10 79 13" },
+  MENSAJE_SEGURO,
+);
 
 // Datos de la sesión que se vende, repetidos en toda la web.
 export const ASESORIA = {

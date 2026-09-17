@@ -18,6 +18,7 @@
 // config/testimonios.js, sin enlazar la ficha de Google (clienta: no poner a
 // mano el botón de escribir reseña).
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import logo from "../../assets/images/logo.png";
 import { CALENDLY_URL, LINEAS, whatsappDesde } from "../../config/contacto";
 import { OPCIONES_ASESORIA, PROMO_GRATIS, promoVigente } from "../../config/asesorias";
@@ -167,6 +168,13 @@ const REDES = [
 ];
 
 const ESTILOS = `
+.enl-wa { position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; align-items: center; gap: 8px; height: 58px; padding: 0 18px 0 14px; border-radius: 999px; background: #25D366; color: #fff; font-weight: 800; font-size: 14px; text-decoration: none; box-shadow: 0 14px 30px -10px rgba(0,0,0,.55); animation: enl-wa-entra .6s cubic-bezier(.34,1.36,.64,1) .8s both; transition: transform .2s; }
+.enl-wa:active { transform: scale(.94); }
+.enl-wa::before { content: ""; position: absolute; inset: 0; border-radius: inherit; animation: enl-wa-late 2.4s ease-out 1.6s infinite; pointer-events: none; }
+.enl-wa svg { width: 30px; height: 30px; flex: 0 0 auto; }
+@keyframes enl-wa-entra { from { opacity: 0; transform: translateY(24px) scale(.8); } to { opacity: 1; transform: none; } }
+@keyframes enl-wa-late { 0% { box-shadow: 0 0 0 0 rgba(37,211,102,.6); } 80%, 100% { box-shadow: 0 0 0 16px rgba(37,211,102,0); } }
+@media (prefers-reduced-motion: reduce) { .enl-wa, .enl-wa::before { animation: none; } }
 .enl-mapa { margin-top: 22px; border-radius: 28px; background: #fff; padding: 12px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.55); }
 .enl-mapa-cab { display: flex; align-items: center; gap: 8px; padding: 2px 6px 10px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #013446; }
 .enl-mapa-vivo { width: 8px; height: 8px; border-radius: 999px; background: #22c55e; animation: enl-latido 1.6s ease-out infinite; }
@@ -492,7 +500,8 @@ export default function Enlaces() {
   const retraso = () => ({ "--d": `${(paso += 70)}ms` });
 
   return (
-    <main className="enl-fondo min-h-[100dvh] w-full px-4 pb-12 pt-10 [overflow-x:clip]">
+    <>
+    <main className="enl-fondo min-h-[100dvh] w-full px-4 pb-28 pt-10 [overflow-x:clip]">
       <style>{ESTILOS}</style>
       <div className="mx-auto w-full max-w-md">
         <header className="enl-sube flex flex-col items-center text-center" style={retraso()}>
@@ -617,6 +626,28 @@ export default function Enlaces() {
           inspira-legal.cloud
         </p>
       </div>
+
     </main>
+      {/* WhatsApp siempre a mano: un toque y se abre el chat con la línea de
+        Inspira (17/09/2026). Va al <body> con un portal: el contenedor de página
+        de App.jsx tiene `transform`, y eso ancla lo `fixed` a la página en vez
+        de a la pantalla —el botón se quedaba al final, fuera de vista—. El
+        relleno de abajo de <main> evita que tape el último enlace. */}
+    {createPortal(
+    <a
+      href={whatsappDesde("enlaces", "Quiero información.")}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => marcar("whatsapp:flotante")}
+      className="enl-wa"
+      aria-label="Escríbenos por WhatsApp"
+    >
+      <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+        <path d="M16.04 3C8.86 3 3.04 8.8 3.04 15.96c0 2.29.6 4.52 1.74 6.49L3 29l6.72-1.76a13 13 0 0 0 6.32 1.61h.01c7.17 0 13-5.8 13-12.96C29.05 8.8 23.22 3 16.04 3Zm0 23.67h-.01a10.8 10.8 0 0 1-5.5-1.5l-.4-.23-3.99 1.04 1.07-3.88-.26-.4a10.7 10.7 0 0 1-1.65-5.73c0-5.95 4.85-10.79 10.83-10.79 5.97 0 10.82 4.84 10.82 10.79 0 5.95-4.85 10.7-10.91 10.7Zm5.94-8.05c-.33-.16-1.93-.95-2.23-1.06-.3-.11-.52-.16-.73.16-.22.33-.84 1.06-1.03 1.28-.19.22-.38.24-.71.08-.33-.16-1.38-.51-2.63-1.62-.97-.86-1.63-1.93-1.82-2.25-.19-.33-.02-.5.14-.66.15-.15.33-.38.49-.57.16-.19.22-.33.33-.54.11-.22.05-.41-.03-.57-.08-.16-.73-1.76-1-2.41-.27-.63-.54-.55-.73-.56h-.62c-.22 0-.57.08-.87.41-.3.33-1.14 1.11-1.14 2.71 0 1.6 1.17 3.14 1.33 3.36.16.22 2.3 3.5 5.57 4.91.78.34 1.39.54 1.86.69.78.25 1.49.21 2.05.13.63-.09 1.93-.79 2.2-1.55.27-.76.27-1.41.19-1.55-.08-.14-.3-.22-.62-.38Z" />
+      </svg>
+      WhatsApp
+    </a>,
+    document.body)}
+    </>
   );
 }

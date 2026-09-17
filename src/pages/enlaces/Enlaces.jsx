@@ -17,7 +17,7 @@
 // única de la web (config/contacto.js). Opiniones: literales y completas de
 // config/testimonios.js, sin enlazar la ficha de Google (clienta: no poner a
 // mano el botón de escribir reseña).
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import logo from "../../assets/images/logo.png";
 import { CALENDLY_URL, LINEAS, whatsappDesde } from "../../config/contacto";
 import { OPCIONES_ASESORIA, PROMO_GRATIS, promoVigente } from "../../config/asesorias";
@@ -25,6 +25,9 @@ import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 import { getServicio, hrefServicio } from "../../config/servicios";
 import { TESTIMONIOS } from "../../config/testimonios";
 import { enviarEventoEmbudo } from "../../lib/analytics";
+
+// El mapa en vivo va en su propio trozo: no pesa hasta que se pinta.
+const MuestraMapa = lazy(() => import("./MuestraMapa"));
 
 const UTM = "utm_source=enlaces&utm_medium=bio";
 /** Ruta interna con utm (antes del #, si lo hay). */
@@ -164,6 +167,21 @@ const REDES = [
 ];
 
 const ESTILOS = `
+.enl-mapa { margin-top: 22px; border-radius: 28px; background: #fff; padding: 12px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.55); }
+.enl-mapa-cab { display: flex; align-items: center; gap: 8px; padding: 2px 6px 10px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #013446; }
+.enl-mapa-vivo { width: 8px; height: 8px; border-radius: 999px; background: #22c55e; animation: enl-latido 1.6s ease-out infinite; }
+.enl-mapa-lienzo { position: relative; overflow: hidden; border-radius: 20px; border: 1px solid #CFE6FD; min-height: 260px; }
+.enl-mapa-cargando { display: grid; place-items: center; min-height: 260px; font-size: 13px; font-weight: 700; color: #02506b; }
+.enl-mapa-rotulo { position: absolute; left: 10px; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 1px; padding: 10px 12px; border-radius: 16px; background: rgba(1,52,70,.92); color: #fff; box-shadow: 0 12px 30px -12px rgba(1,41,56,.7); backdrop-filter: blur(6px); animation: enl-sube .45s cubic-bezier(.22,1,.36,1) both; pointer-events: none; }
+.enl-mapa-rotulo small { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #ffb066; }
+.enl-mapa-rotulo b { font-size: 16px; line-height: 1.25; }
+.enl-mapa-rotulo span { font-size: 12.5px; color: rgba(255,255,255,.8); }
+.enl-mapa-puntos { display: flex; justify-content: center; gap: 6px; padding: 10px 0 4px; }
+.enl-mapa-puntos button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 999px; background: #CFE6FD; cursor: pointer; transition: width .3s, background-color .3s; }
+.enl-mapa-puntos button.on { width: 20px; background: #FA943A; }
+.enl-mapa-cta { margin-top: 6px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border: 0; border-radius: 16px; background: linear-gradient(135deg, #FA943A, #e07f22); color: #fff; font: inherit; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 12px 24px -10px rgba(250,148,58,.7); transition: transform .2s; }
+.enl-mapa-cta:active { transform: scale(.97); }
+@media (prefers-reduced-motion: reduce) { .enl-mapa-vivo, .enl-mapa-rotulo { animation: none; } }
 @keyframes enl-sube { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes enl-aparece { from { opacity: 0; } to { opacity: 1; } }
 @keyframes enl-barrido { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
@@ -490,7 +508,13 @@ export default function Enlaces() {
           </p>
         </header>
 
-        <BannerBeca style={retraso()} />
+        {/* Arriba: el mapa funcionando, para quien llega desde los vídeos del mapa. */}
+        <div className="enl-sube" style={retraso()}>
+          <Suspense fallback={<div className="enl-mapa"><div className="enl-mapa-lienzo enl-mapa-cargando">Cargando el mapa…</div></div>}>
+            <MuestraMapa onAbrir={() => marcar("mapa:muestra")} />
+          </Suspense>
+        </div>
+
         <ReservaAsesoria style={retraso()} />
         <Opiniones style={retraso()} />
         <Contacto style={retraso()} />
@@ -499,6 +523,9 @@ export default function Enlaces() {
         <div className="mt-3">
           <Carrusel style={retraso()} />
         </div>
+
+        {/* La beca bajó aquí el 17/09/2026: arriba va la muestra del mapa. */}
+        <BannerBeca style={retraso()} />
 
         <Rotulo style={retraso()}>✨ Servicios, paquetes y más</Rotulo>
         <div className="enl-sube mt-3 grid grid-cols-2 gap-3" style={retraso()}>

@@ -157,14 +157,20 @@ const VIAJE = [
     emoji: "🩺",
     titulo: "Seguro de salud para España",
     texto: "Cotiza tu seguro Adeslas para la visa con StarSeguro",
-    // El enlace corto de Félix (StarSeguro), con su propio mensaje.
+    // El mensaje sale escrito y es el que da la atención prioritaria: si lo
+    // borran, entran como cualquier consulta. Se avisa antes de tocar.
+    chip: "⚡ Atención prioritaria",
+    nota: "Envía el mensaje tal como aparece: es lo que te da la atención prioritaria.",
     href: WHATSAPP_SEGURO,
   },
   {
     clave: "aliado:esim",
     emoji: "📶",
     titulo: "eSIM para Europa",
-    texto: "10 % de descuento con nuestro enlace de Holafly",
+    texto: "Datos en toda Europa desde el aterrizaje, con nuestro enlace de Holafly",
+    // El descuento es el gancho: va en grande, no escondido en la frase.
+    descuento: "10 %",
+    descuentoPie: "de descuento",
     href: "https://holafly.go.link/3pDol",
   },
 ];
@@ -224,6 +230,10 @@ const REDES = [
 ];
 
 const ESTILOS = `
+.enl-chip-prioridad { align-self: flex-start; margin-top: 6px; padding: 3px 9px; border-radius: 999px; background: #FFF3E0; color: #96591a; font-size: 11px; font-weight: 800; letter-spacing: .01em; }
+.enl-dcto { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 74px; padding: 8px 10px; border-radius: 18px; background: linear-gradient(135deg, #FA943A, #e07f22); color: #fff; box-shadow: 0 10px 20px -10px rgba(250,148,58,.8); }
+.enl-dcto b { font-size: 22px; font-weight: 900; line-height: 1; letter-spacing: -.02em; }
+.enl-dcto small { font-size: 9.5px; font-weight: 700; line-height: 1.15; text-align: center; margin-top: 3px; opacity: .95; }
 .enl-numero { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 16px 8px 12px; border-radius: 999px; background: rgba(37,211,102,.16); border: 1px solid rgba(37,211,102,.5); color: #fff; font-size: 16px; font-weight: 800; letter-spacing: .01em; text-decoration: none; transition: transform .2s, background-color .2s; }
 .enl-numero:hover { background: rgba(37,211,102,.28); }
 .enl-numero:active { transform: scale(.96); }
@@ -293,11 +303,61 @@ function Rotulo({ children, style }) {
 
 const dias = (n) => `${n} ${n === 1 ? "día" : "días"}`;
 
-function BannerBeca({ style }) {
+/**
+ * Estado de la beca y cuántos días faltan.
+ *
+ * La hora se lee en un efecto y no al pintar: leer el reloj durante el render
+ * es impuro (lo avisa el compilador de React) y, además, así la cuenta atrás
+ * se actualiza sola si la pestaña se queda abierta.
+ */
+function useBeca() {
+  const [ahora, setAhora] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setAhora(Date.now()), 60000);
+    return () => clearInterval(t);
+  }, []);
   const est = estadoPostulacion();
-  const faltan = est.objetivo ? Math.max(0, Math.ceil((est.objetivo - Date.now()) / 86400000)) : 0;
-  const vivo =
+  const faltan = est.objetivo ? Math.max(0, Math.ceil((est.objetivo - ahora) / 86400000)) : 0;
+  const estado =
     est.fase === "antes" ? `Abre en ${dias(faltan)}` : est.fase === "abierta" ? `Abierta · cierra en ${dias(faltan)}` : "Postulación cerrada";
+  return { est, faltan, estado };
+}
+
+/**
+ * La beca, debajo del mapa: un botón con vista previa (17/09/2026).
+ *
+ * El bloque grande empujaba todo lo demás hacia abajo. Aquí solo va la imagen
+ * pequeña, el titular y el estado de la convocatoria; quien quiera, entra.
+ */
+function BotonBeca({ style }) {
+  const { estado } = useBeca();
+  return (
+    <a
+      data-wa="beca"
+      href={BECA}
+      onClick={() => marcar("beca:boton")}
+      className="enl-sube mt-3 flex items-center gap-3 overflow-hidden rounded-3xl bg-white p-2.5 shadow-2xl transition active:scale-[.98]"
+      style={style}
+    >
+      <img
+        src="/og/beca-generacion-bicentenario-2026.jpg"
+        alt=""
+        className="h-16 w-24 shrink-0 rounded-2xl object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="text-[10px] font-extrabold uppercase tracking-wide text-accent-dark">🔥 Solo {CIFRAS.total} becas</span>
+        <span className="font-extrabold leading-snug text-primary">Beca Generación del Bicentenario</span>
+        <span className="text-xs leading-snug text-neutral-600">{estado}</span>
+      </span>
+      <Flecha className="mr-1 shrink-0 text-primary opacity-60" />
+    </a>
+  );
+}
+
+function BannerBeca({ style }) {
+  const { estado: vivo } = useBeca();
   return (
     <section data-wa="beca" aria-label="Beca Generación del Bicentenario 2026" className="enl-sube mt-6 overflow-hidden rounded-3xl bg-primary-dark shadow-2xl ring-1 ring-white/15" style={style}>
       <a href={BECA} onClick={() => marcar("beca:imagen")} className="block">
@@ -717,8 +777,8 @@ export default function Enlaces() {
           />
         </div>
 
-        {/* Temporada: con la postulación abierta, la beca va lo primero. */}
-        {faseBeca === "abierta" && <BannerBeca style={retraso()} />}
+        {/* La beca, justo debajo del mapa: un botón con vista previa. */}
+        <BotonBeca style={retraso()} />
 
         <ReservaAsesoria style={retraso()} />
         <Opiniones style={retraso()} />
@@ -731,7 +791,9 @@ export default function Enlaces() {
 
         {/* La beca bajó aquí el 17/09/2026: arriba va la muestra del mapa.
           Este es su sitio mientras la convocatoria aún no abre. */}
-        {faseBeca === "antes" && <BannerBeca style={retraso()} />}
+        {/* Con la convocatoria abierta, además del botón, el bloque grande con
+            su cuenta atrás y el simulador. */}
+        {faseBeca === "abierta" && <BannerBeca style={retraso()} />}
 
         <Rotulo style={retraso()}>✨ Servicios, paquetes y más</Rotulo>
         <div data-wa="servicios" className="enl-sube mt-3 grid grid-cols-2 gap-3" style={retraso()}>
@@ -782,8 +844,17 @@ export default function Enlaces() {
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="font-bold leading-snug">{v.titulo}</span>
                 <span className="text-xs leading-snug text-neutral-600">{v.texto}</span>
+                {v.chip && <span className="enl-chip-prioridad">{v.chip}</span>}
+                {v.nota && <span className="mt-1 text-[11px] leading-snug text-neutral-500">{v.nota}</span>}
               </span>
-              <Flecha className="opacity-60" />
+              {v.descuento ? (
+                <span className="enl-dcto" aria-hidden="true">
+                  <b>{v.descuento}</b>
+                  <small>{v.descuentoPie}</small>
+                </span>
+              ) : (
+                <Flecha className="opacity-60" />
+              )}
             </a>
           ))}
         </div>
@@ -806,7 +877,7 @@ export default function Enlaces() {
 
         {/* Cerrada la convocatoria, la beca deja de ocupar sitio arriba y se
           queda aquí abajo, con su enlace intacto. */}
-        {faseBeca === "cerrada" && <BannerBeca style={retraso()} />}
+        {faseBeca !== "abierta" && <BannerBeca style={retraso()} />}
 
         <div className="enl-sube mt-8 flex justify-center gap-3" style={retraso()}>
           {REDES.map((r) => (

@@ -1,0 +1,407 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO — capa de app (17/09/2026)
+
+   Lo que le faltaba al panel para sentirse una aplicación y no una web:
+   movimiento con intención, navegación al alcance del pulgar y respuesta a
+   cada toque. Va aparte de panel.css para poder leerse de una vez; se importa
+   en PanelCliente justo después, en el mismo trozo, así que llega a tiempo.
+
+   Reglas:
+   · Todo con prefijo pnl- (ver errores_web_cerco: nada de clases sueltas).
+   · Solo se animan transform y opacity: lo demás hace saltar el móvil.
+   · prefers-reduced-motion lo apaga todo al final del fichero.
+   ========================================================================== */
+
+.pnl {
+  --muelle: cubic-bezier(0.34, 1.36, 0.64, 1);   /* rebote corto */
+  --salida: cubic-bezier(0.22, 1, 0.36, 1);      /* frena al llegar */
+  --tabbar-alto: 64px;
+  --sombra-1: 0 1px 2px rgba(1, 52, 70, .05), 0 8px 24px -12px rgba(1, 52, 70, .14);
+  --sombra-2: 0 2px 6px rgba(1, 52, 70, .06), 0 22px 44px -18px rgba(1, 52, 70, .26);
+}
+
+/* ── Entrada en cascada ───────────────────────────────────────────────
+   Cada bloque de la pantalla entra un poco después del anterior: el ojo
+   sigue el orden de lectura en vez de recibirlo todo de golpe. */
+@keyframes pnlSube {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+.pnl-cascada > * { animation: pnlSube .55s var(--salida) both; }
+.pnl-cascada > *:nth-child(1) { animation-delay: 0ms; }
+.pnl-cascada > *:nth-child(2) { animation-delay: 60ms; }
+.pnl-cascada > *:nth-child(3) { animation-delay: 120ms; }
+.pnl-cascada > *:nth-child(4) { animation-delay: 180ms; }
+.pnl-cascada > *:nth-child(5) { animation-delay: 230ms; }
+.pnl-cascada > *:nth-child(6) { animation-delay: 280ms; }
+.pnl-cascada > *:nth-child(n+7) { animation-delay: 320ms; }
+
+/* Listas: cada fila con su propio retraso, que pone el componente. */
+.pnl-fila-entra { animation: pnlSube .45s var(--salida) both; animation-delay: calc(var(--i, 0) * 45ms + 120ms); }
+
+/* ── Respuesta al tacto ───────────────────────────────────────────────
+   Todo lo que se puede tocar se hunde un poco al tocarlo. */
+.pnl-card, .ex-resumen-tarjeta, .pnl-pend-item, .ex-proximo, .pnl-btn, .pnl-btn-cta,
+.ex-resumen-fila, .pnl-hero-stat, .ex-miruta-paso {
+  -webkit-tap-highlight-color: transparent;
+}
+.pnl-card-link, .ex-resumen-tarjeta, .pnl-pend-item {
+  transition: transform .35s var(--muelle), box-shadow .3s var(--salida), border-color .2s;
+}
+.pnl-card-link:active, .pnl-pend-item:active { transform: scale(.985); }
+.pnl-btn:active, .pnl-btn-cta:active { transform: scale(.96); transition-duration: .08s; }
+@media (hover: hover) {
+  .ex-resumen-tarjeta:hover, .pnl-pend-item:hover { transform: translateY(-2px); box-shadow: var(--sombra-2); }
+}
+
+/* ── Barra superior: se compacta al bajar ─────────────────────────────── */
+.pnl-top { transition: box-shadow .3s var(--salida), background-color .3s; }
+.pnl-top[data-elevada="1"] { box-shadow: 0 10px 30px -18px rgba(1, 52, 70, .35); background: rgba(255, 255, 255, .94); }
+.pnl-top .pnl-top-titulo h1 { transition: opacity .25s var(--salida), transform .35s var(--salida); }
+/* En Inicio el título grande vive en el saludo: arriba solo aparece al bajar.
+   La marca («Expediente Digital») se queda, para que la barra no quede vacía. */
+.pnl-top[data-oculto="1"] .pnl-top-titulo h1 { opacity: 0; transform: translateY(6px); }
+.pnl-top-titulo { transition: transform .35s var(--salida); }
+.pnl-top[data-oculto="1"] .pnl-top-titulo { transform: translateY(9px); }
+
+.pnl-top-avatar {
+  border: 0; padding: 0; background: none; cursor: pointer; border-radius: 999px;
+  transition: transform .3s var(--muelle);
+}
+.pnl-top-avatar:active { transform: scale(.92); }
+.pnl-top-avatar:focus-visible { outline: 2px solid var(--sky-2); outline-offset: 3px; }
+
+/* ── Saludo (Inicio) ──────────────────────────────────────────────────
+   El petróleo de la marca con dos halos que derivan despacio: la pantalla
+   está viva sin pedir atención. */
+.pnl-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  border-radius: 26px; padding: 22px 20px 16px; color: #fff;
+  background: linear-gradient(150deg, #012938 0%, #013446 44%, #02506b 100%);
+  box-shadow: 0 24px 50px -28px rgba(1, 41, 56, .75);
+}
+.pnl-hero::before, .pnl-hero::after {
+  content: ""; position: absolute; z-index: -1; border-radius: 999px; filter: blur(8px);
+  pointer-events: none;
+}
+.pnl-hero::before {
+  width: 320px; height: 260px; top: -120px; right: -90px;
+  background: radial-gradient(closest-side, rgba(136, 196, 252, .38), transparent);
+  animation: pnlDeriva 14s ease-in-out infinite alternate;
+}
+.pnl-hero::after {
+  width: 300px; height: 260px; bottom: -150px; left: -110px;
+  background: radial-gradient(closest-side, rgba(250, 148, 58, .30), transparent);
+  animation: pnlDeriva 17s ease-in-out -6s infinite alternate-reverse;
+}
+@keyframes pnlDeriva {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-26px, 18px) scale(1.08); }
+  100% { transform: translate(18px, -10px) scale(.96); }
+}
+.pnl-hero-reticula {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(120% 90% at 100% 0%, black, transparent 70%);
+  -webkit-mask-image: radial-gradient(120% 90% at 100% 0%, black, transparent 70%);
+}
+.pnl-hero-fecha {
+  margin: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .6);
+}
+.pnl-hero-saludo {
+  margin: 6px 0 0; font-family: Merriweather, Georgia, serif; font-weight: 800;
+  font-size: clamp(23px, 6.4vw, 30px); line-height: 1.15; letter-spacing: -.03em;
+}
+.pnl-hero-saludo span { color: var(--accent-2); }
+.pnl-hero-resumen { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; color: rgba(255, 255, 255, .74); }
+
+.pnl-hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 18px; }
+.pnl-hero-stat {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0;
+  padding: 10px 12px; border-radius: 16px; text-align: left; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .07);
+  color: #fff; font: inherit; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: transform .35s var(--muelle), background-color .2s;
+}
+.pnl-hero-stat:hover { background: rgba(255, 255, 255, .13); }
+.pnl-hero-stat:active { transform: scale(.95); }
+.pnl-hero-stat:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+.pnl-hero-stat b {
+  font-family: Merriweather, Georgia, serif; font-size: 24px; font-weight: 800; line-height: 1.1;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+}
+.pnl-hero-stat small {
+  font-size: 11px; font-weight: 650; color: rgba(255, 255, 255, .66);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.pnl-hero-stat[data-tono="alto"] b { color: #ffb4a8; }
+.pnl-hero-stat[data-tono="aviso"] b { color: var(--accent-2); }
+.pnl-hero-stat[data-tono="ok"] b { color: #9fe0bf; }
+
+.pnl-hero-asesor {
+  display: flex; align-items: center; gap: 11px; margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+}
+.pnl-hero-asesor-ini {
+  display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 auto; border-radius: 999px;
+  font-size: 14px; font-weight: 800; letter-spacing: .02em; color: var(--primary);
+  background: linear-gradient(135deg, #fff, var(--sky-soft));
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .14);
+}
+.pnl-hero-asesor-datos { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.pnl-hero-asesor-datos small { font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-2); }
+.pnl-hero-asesor-datos strong { font-size: 14px; font-weight: 750; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pnl-hero-asesor-datos span { font-size: 11.5px; color: rgba(255, 255, 255, .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pnl-hero-wa {
+  position: relative; display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto;
+  height: 42px; padding: 0 16px; border-radius: 999px; text-decoration: none;
+  background: linear-gradient(135deg, var(--accent), #e07f22); color: #fff;
+  font-size: 12.5px; font-weight: 800;
+  box-shadow: 0 10px 22px -8px rgba(250, 148, 58, .7);
+  transition: transform .35s var(--muelle), box-shadow .25s;
+}
+.pnl-hero-wa:active { transform: scale(.94); }
+.pnl-hero-wa::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(250, 148, 58, .55); animation: pnlLatido 2.8s ease-out 1.2s 3;
+}
+@keyframes pnlLatido { 0% { box-shadow: 0 0 0 0 rgba(250, 148, 58, .5); } 80%, 100% { box-shadow: 0 0 0 12px rgba(250, 148, 58, 0); } }
+@media (max-width: 380px) { .pnl-hero-wa .pnl-hero-wa-texto { display: none; } .pnl-hero-wa { width: 42px; padding: 0; justify-content: center; } }
+
+/* ── Tu próximo paso: más presencia ───────────────────────────────────── */
+.ex-proximo {
+  border-radius: 22px; padding: 18px 18px 18px 22px; box-shadow: var(--sombra-1);
+  transition: transform .35s var(--muelle), box-shadow .3s;
+}
+.ex-proximo::after {
+  content: ""; position: absolute; right: -60px; top: -60px; width: 180px; height: 180px; border-radius: 999px;
+  background: radial-gradient(closest-side, rgba(78, 158, 232, .14), transparent); pointer-events: none;
+}
+.ex-proximo[data-tono="alto"]::after { background: radial-gradient(closest-side, rgba(192, 57, 43, .12), transparent); }
+.ex-proximo[data-tono="aviso"]::after { background: radial-gradient(closest-side, rgba(250, 148, 58, .16), transparent); }
+.ex-proximo[data-tono="ok"]::after { background: radial-gradient(closest-side, rgba(29, 106, 74, .14), transparent); }
+.ex-proximo-icono { position: relative; }
+.ex-proximo[data-tono="alto"] .ex-proximo-icono::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 16px; border: 2px solid rgba(192, 57, 43, .35);
+  animation: pnlAnillo 2.4s var(--salida) infinite;
+}
+@keyframes pnlAnillo { 0% { opacity: .9; transform: scale(.9); } 70%, 100% { opacity: 0; transform: scale(1.25); } }
+.ex-proximo-botones .pnl-btn-cta { height: 44px; padding: 0 20px; font-size: 13px; }
+.ex-proximo-botones .pnl-btn-cta svg { transition: transform .3s var(--muelle); }
+.ex-proximo-botones .pnl-btn-cta:hover svg { transform: translateX(3px); }
+@media (max-width: 520px) {
+  .ex-proximo-botones { gap: 10px; }
+  .ex-proximo-botones .pnl-btn-cta { flex: 1 1 100%; justify-content: center; }
+  .ex-proximo-falta { margin: 0 auto; }
+}
+
+/* ── Cabeceras de sección más ligeras ─────────────────────────────────── */
+.pnl-seccion-titulo { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 2px 10px; }
+.pnl-seccion-titulo h2 { margin: 0; font-family: Merriweather, Georgia, serif; font-size: 18px; font-weight: 800; letter-spacing: -.02em; color: var(--primary); }
+.pnl-seccion-titulo small { font-size: 12px; font-weight: 650; color: var(--muted); }
+.pnl-seccion-titulo button {
+  border: 0; background: none; padding: 4px 2px; font: inherit; font-size: 12.5px; font-weight: 750;
+  color: var(--primary-2); cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+}
+
+/* ── Esqueletos con brillo ────────────────────────────────────────────── */
+.pnl-esq {
+  background: linear-gradient(100deg, #e8f0f7 20%, #f6fafd 40%, #e8f0f7 60%) 0 0 / 250% 100%;
+  animation: pnlBrillo 1.3s linear infinite;
+}
+@keyframes pnlBrillo { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+
+/* ── Tirar para recargar ──────────────────────────────────────────────── */
+.pnl-ptr {
+  position: absolute; left: 50%; top: 0; z-index: 5; pointer-events: none;
+  width: 38px; height: 38px; margin-left: -19px; border-radius: 999px;
+  display: grid; place-items: center; background: #fff; color: var(--primary-2);
+  box-shadow: 0 8px 22px -8px rgba(1, 52, 70, .4);
+  opacity: 0; transform: translateY(calc(var(--tiron, 0px) - 44px)) rotate(calc(var(--tiron, 0px) * 3.2deg));
+}
+[data-tiron] > .pnl-ptr { opacity: 1; }
+[data-tiron="listo"] > .pnl-ptr { color: var(--accent); }
+[data-tiron="recargando"] > .pnl-ptr { transition: transform .3s var(--salida); }
+[data-tiron="recargando"] > .pnl-ptr svg { animation: pnlGiro .8s linear infinite; }
+:not([data-tiron]) > .pnl-ptr { transition: transform .35s var(--salida), opacity .2s; }
+.pnl-ptr-marco { position: relative; }
+[data-tiron="tirando"] .pnl-ptr-contenido, [data-tiron="listo"] .pnl-ptr-contenido { transform: translateY(calc(var(--tiron, 0px) * .6)); }
+.pnl-ptr-contenido { transition: transform .35s var(--salida); }
+[data-tiron="tirando"] .pnl-ptr-contenido, [data-tiron="listo"] .pnl-ptr-contenido { transition: none; }
+
+/* ── Barra de pestañas (teléfono) ─────────────────────────────────────── */
+.pnl-tabbar {
+  position: fixed; left: 10px; right: 10px; z-index: 25;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  height: var(--tabbar-alto); padding: 6px;
+  display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+  border-radius: 22px; border: 1px solid rgba(216, 231, 245, .9);
+  background: rgba(255, 255, 255, .86);
+  backdrop-filter: saturate(1.6) blur(18px); -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  box-shadow: 0 18px 40px -16px rgba(1, 41, 56, .38);
+  animation: pnlTabbarEntra .5s var(--muelle) .15s both;
+  view-transition-name: pnl-tabbar;
+}
+@keyframes pnlTabbarEntra { from { transform: translateY(120%); } to { transform: none; } }
+.pnl-tabbar-pildora {
+  position: absolute; top: 6px; bottom: 6px; left: 6px;
+  width: calc((100% - 12px) / var(--n, 5));
+  border-radius: 16px; background: var(--primary);
+  box-shadow: 0 8px 18px -8px rgba(1, 52, 70, .6);
+  transform: translateX(calc(var(--i, 0) * 100%));
+  transition: transform .45s var(--muelle), opacity .2s;
+}
+.pnl-tabbar[data-sin-activo="1"] .pnl-tabbar-pildora { opacity: 0; }
+.pnl-tab {
+  position: relative; z-index: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border: 0; background: none; padding: 0; cursor: pointer; font: inherit;
+  color: var(--muted); -webkit-tap-highlight-color: transparent;
+  transition: color .25s var(--salida);
+}
+.pnl-tab svg { transition: transform .4s var(--muelle); }
+.pnl-tab:active svg { transform: scale(.85); }
+.pnl-tab span { font-size: 10.5px; font-weight: 700; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pnl-tab[aria-current="page"] { color: #fff; }
+.pnl-tab[aria-current="page"] svg { transform: translateY(-1px) scale(1.06); color: var(--accent-2); }
+.pnl-tab:focus-visible { outline: 2px solid var(--sky-2); outline-offset: -4px; border-radius: 14px; }
+.pnl-tab-badge {
+  position: absolute; top: 4px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: 999px; display: grid; place-items: center;
+  background: var(--accent); color: #fff; font-size: 9.5px; font-weight: 800;
+  box-shadow: 0 0 0 2px #fff; animation: pnlRebota .5s var(--muelle) .5s both;
+}
+@keyframes pnlRebota { from { transform: scale(0); } to { transform: scale(1); } }
+
+/* Hueco para que la barra no tape lo último de la página. */
+@media (max-width: 767px) {
+  .pnl-con-tabbar { padding-bottom: calc(var(--tabbar-alto) + 26px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (min-width: 768px) { .pnl-tabbar { display: none; } }
+
+/* ── Menú lateral: fondo que se funde, no que aparece ─────────────────── */
+.pnl-velo {
+  position: fixed; inset: 0; z-index: 20; background: rgba(1, 26, 38, .5);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none; transition: opacity .3s var(--salida);
+}
+.pnl-velo[data-abierto="1"] { opacity: 1; pointer-events: auto; }
+@media (min-width: 768px) { .pnl-velo { display: none; } }
+.pnl-side { transition-timing-function: var(--salida) !important; transition-duration: .42s !important; }
+
+/* ── Aviso de sesión ──────────────────────────────────────────────────── */
+.pnl-sesion {
+  position: fixed; inset: 0; z-index: 90; display: grid; place-items: end center; padding: 0;
+  background: rgba(1, 26, 38, .45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  animation: pnlFunde .3s var(--salida) both;
+}
+@keyframes pnlFunde { from { opacity: 0; } to { opacity: 1; } }
+.pnl-sesion-caja {
+  width: 100%; max-width: 440px; background: #fff; color: var(--ink);
+  border-radius: 26px 26px 0 0; padding: 24px 22px calc(20px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -24px 60px rgba(1, 26, 38, .3); text-align: center;
+  animation: pnlHoja .5s var(--muelle) both;
+}
+@keyframes pnlHoja { from { transform: translateY(100%); } to { transform: none; } }
+@media (min-width: 640px) {
+  .pnl-sesion { place-items: center; padding: 24px; }
+  .pnl-sesion-caja { border-radius: 26px; padding-bottom: 22px; animation-name: pnlSube; }
+}
+.pnl-sesion-icono {
+  width: 58px; height: 58px; margin: 0 auto 14px; border-radius: 18px; display: grid; place-items: center;
+  background: var(--sky-soft); color: var(--primary-2);
+}
+.pnl-sesion-caja h2 { margin: 0; font-family: Merriweather, Georgia, serif; font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: var(--primary); }
+.pnl-sesion-caja p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--muted); }
+.pnl-sesion-botones { display: grid; gap: 8px; margin-top: 18px; }
+.pnl-sesion-botones .pnl-btn-cta, .pnl-sesion-botones .pnl-btn { height: 46px; justify-content: center; font-size: 13.5px; }
+.pnl-sesion-nota { margin-top: 12px !important; font-size: 11.5px !important; }
+
+/* ── Transiciones entre pantallas (View Transitions) ──────────────────────
+   Solo se mueve el contenido; la barra de arriba, el menú y las pestañas se
+   quedan quietos, que es lo que hace que parezca una app. Más profundo entra
+   desde la derecha; volver, desde la izquierda. */
+.pnl-vista { view-transition-name: pnl-vista; }
+.pnl-top { view-transition-name: pnl-top; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+::view-transition-group(pnl-vista) { animation-duration: .38s; animation-timing-function: var(--salida, cubic-bezier(.22,1,.36,1)); }
+@keyframes pnlVtSaleIzq { to { opacity: 0; transform: translateX(-8%); } }
+@keyframes pnlVtEntraDer { from { opacity: 0; transform: translateX(10%); } }
+@keyframes pnlVtSaleDer { to { opacity: 0; transform: translateX(8%); } }
+@keyframes pnlVtEntraIzq { from { opacity: 0; transform: translateX(-10%); } }
+@keyframes pnlVtSale { to { opacity: 0; transform: scale(.98); } }
+@keyframes pnlVtEntra { from { opacity: 0; transform: translateY(10px) scale(.995); } }
+::view-transition-old(pnl-vista) { animation: pnlVtSale .2s cubic-bezier(.4,0,1,1) both; }
+::view-transition-new(pnl-vista) { animation: pnlVtEntra .38s cubic-bezier(.22,1,.36,1) both; }
+html[data-vt="adelante"]::view-transition-old(pnl-vista) { animation: pnlVtSaleIzq .28s cubic-bezier(.4,0,1,1) both; }
+html[data-vt="adelante"]::view-transition-new(pnl-vista) { animation: pnlVtEntraDer .42s cubic-bezier(.22,1,.36,1) both; }
+html[data-vt="atras"]::view-transition-old(pnl-vista) { animation: pnlVtSaleDer .28s cubic-bezier(.4,0,1,1) both; }
+html[data-vt="atras"]::view-transition-new(pnl-vista) { animation: pnlVtEntraIzq .42s cubic-bezier(.22,1,.36,1) both; }
+/* Con transiciones nativas, la entrada propia de cada vista sobra. */
+html.pnl-vt .pnl-vista > .pnl-entra { animation: none; }
+
+/* ── Menos movimiento ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pnl-cascada > *, .pnl-fila-entra, .pnl-tabbar, .pnl-tab-badge, .pnl-sesion, .pnl-sesion-caja { animation: none !important; }
+  .pnl-hero::before, .pnl-hero::after, .pnl-hero-wa::after, .ex-proximo-icono::after { animation: none !important; }
+  .pnl-esq { animation: none; }
+  .pnl-tabbar-pildora, .pnl-card-link, .ex-resumen-tarjeta, .pnl-pend-item, .ex-proximo { transition: none; }
+  .ex-resumen-tarjeta:hover, .pnl-pend-item:hover { transform: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* ── Pendientes: toda la fila se toca ─────────────────────────────────── */
+.pnl-pend-item { cursor: pointer; }
+.pnl-pend-item:focus-visible { outline: 2px solid var(--sky-2); outline-offset: 2px; }
+.pnl-pend-ir { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; color: var(--primary-2); font-size: 12px; font-weight: 750; }
+.pnl-pend-ir svg { transition: transform .3s var(--muelle); }
+.pnl-pend-item:hover .pnl-pend-ir svg { transform: translateX(3px); }
+@media (max-width: 767px) {
+  .pnl-pend-item { flex-wrap: nowrap; }
+  .pnl-pend-ir-texto { display: none; }
+}
+
+/* ── Resumen por servicio: tarjeta con acento ─────────────────────────── */
+.ex-resumen-tarjeta { position: relative; overflow: hidden; border-radius: 20px; padding: 14px 16px; box-shadow: var(--sombra-1); }
+.ex-resumen-tarjeta::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--primary-2), var(--sky-2), var(--accent)); opacity: .85; }
+.ex-resumen-abrir { height: 32px; padding: 0 12px; border-radius: 999px; background: var(--sky-soft); transition: transform .3s var(--muelle), background-color .2s; }
+.ex-resumen-abrir:active { transform: scale(.94); }
+.ex-resumen-fila { transition: background-color .2s; }
+.ex-resumen-fila:active { background: var(--surface); }
+
+/* ── Tarjetas de «Mis servicios» ──────────────────────────────────────── */
+.pnl-grid.pnl-cascada > * { animation-duration: .5s; }
+.pnl-card { border-radius: 22px; box-shadow: var(--sombra-1); }
+.pnl-card-pie .pnl-btn-cta svg { transition: transform .3s var(--muelle); }
+.pnl-card-link:hover .pnl-card-pie .pnl-btn-cta svg { transform: translateX(3px); }
+
+/* ── Seguridad de la cuenta (pie del perfil) ──────────────────────────── */
+.pnl-seguridad {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 20px;
+  padding: 16px 18px; border-radius: 22px; border: 1px solid var(--line); background: #fff; box-shadow: var(--sombra-1);
+}
+.pnl-seguridad-icono { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 auto; border-radius: 14px; background: var(--sky-soft); color: var(--primary-2); }
+.pnl-seguridad-cuerpo { flex: 1 1 240px; min-width: 0; }
+.pnl-seguridad-cuerpo h3 { margin: 0; font-size: 15px; font-weight: 750; color: var(--primary); }
+.pnl-seguridad-cuerpo p { margin: 3px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.pnl-seguridad-cuerpo b { color: var(--ink); font-weight: 700; }
+.pnl-seguridad-botones { display: flex; gap: 8px; flex-wrap: wrap; }
+.pnl-btn-peligro { color: #a5262f; border-color: rgba(190, 60, 66, .3); }
+.pnl-btn-peligro:hover { background: #fdecec; border-color: rgba(190, 60, 66, .5); }
+.pnl-seguridad-botones button:disabled { opacity: .55; cursor: default; transform: none; }
+@media (max-width: 520px) { .pnl-seguridad-botones { width: 100%; } .pnl-seguridad-botones .pnl-btn { flex: 1 1 100%; justify-content: center; } }
+
+/* Foco de teclado con la marca, no el anillo negro del navegador (la hoja de
+   sesión enfoca su botón al abrirse). */
+.pnl-btn-cta:focus-visible, .pnl-btn:focus-visible { outline: 3px solid rgba(78, 158, 232, .45); outline-offset: 2px; }
+
+/* ── Cabecera compacta de «Mis servicios» ─────────────────────────────── */
+.pnl-lista-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 2px; }
+.pnl-lista-cab p { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
+.pnl-lista-cab .pnl-btn { height: 36px; padding: 0 13px; }
+.pnl-lista-cab .pnl-btn svg { transition: transform .5s var(--salida); }
+.pnl-lista-cab .pnl-btn:active svg { transform: rotate(180deg); }

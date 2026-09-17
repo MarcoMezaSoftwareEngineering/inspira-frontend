@@ -14,6 +14,8 @@
 // La solución es pedir el archivo con fetch, llevando el token, y entregar el
 // blob resultante al navegador.
 
+import { comprobarRespuesta } from "./sesion";
+
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
 // Misma clave que usa services/api.js para el panel del cliente.
@@ -40,6 +42,7 @@ export async function descargarArchivoProtegido(ruta, { nombre, token } = {}) {
       headers: { Authorization: `Bearer ${jwt}` },
       cache: "no-store",
     });
+    await comprobarRespuesta(r);
 
     if (r.status === 401) return { ok: false, error: "Tu sesión ha caducado. Vuelve a iniciar sesión." };
     if (r.status === 403) return { ok: false, error: "Este documento no está disponible para ti." };

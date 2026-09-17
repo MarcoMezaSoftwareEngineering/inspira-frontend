@@ -15,6 +15,7 @@ import QueMeFalta from "../QueMeFalta";
 import { queMeFaltaVisado } from "../../queMeFalta";
 import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
+import { comprobarRespuesta } from "../../../../services/sesion";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -127,6 +128,7 @@ function DescargaDoc({ slot, doc, idSolicitud }) {
       const r = await fetch(`${API_URL}/solicitudes/${idSolicitud}/visa-documentos/${slot}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      await comprobarRespuesta(r);
       if (!r.ok) throw new Error("No se pudo descargar");
       const blob = await r.blob();
       const url = URL.createObjectURL(blob);

@@ -11,6 +11,7 @@ import { guiaParaItem } from "../guiaDocumentosMaster";
 import GuiaDocumento from "./GuiaDocumento";
 import TextoConEnlaces from "../../../../../components/common/TextoConEnlaces";
 import { InstructivosContenido } from "./InstructivosPlantillas";
+import { comprobarRespuesta } from "../../../../../services/sesion";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -50,6 +51,7 @@ function VisorModal({ doc, onClose }) {
       const url = `${API_URL}/api/documentos/${doc.id_documento}/descargar`;
       try {
         const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        await comprobarRespuesta(r);
         if (cancelled) return;
         if (!r.ok) { setError("No se pudo cargar el archivo."); setCargando(false); return; }
         const blob = await r.blob();

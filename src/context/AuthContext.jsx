@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { borrarSesionLocal, cerrarSesionServidor } from "../services/sesion";
 
 const AuthContext = createContext(null);
 const API = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -8,7 +9,9 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMe = async () => {
+  // Estable entre renders: AuthSuccess lo tiene como dependencia de su efecto,
+  // y con una función nueva en cada render el canje del token se repetía.
+  const fetchMe = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
 
@@ -33,7 +36,7 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // ✅ Si NO hay token, no tiene sentido llamar /auth/me
@@ -45,40 +48,24 @@ export function AuthProvider({ children }) {
     }
 
     fetchMe();
-  }, []);
+  }, [fetchMe]);
 
-    const logout = async () => {
-    try {
-      await fetch(`${API}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (e) {
-      // aunque falle backend, igual limpiamos front
-    } finally {
-      // ✅ borrar token y datos locales
-      localStorage.removeItem("token");
-      localStorage.removeItem("last_pre_reserva_id");
-      localStorage.removeItem("user");
+  // Cerrar sesión la invalida también en el servidor —el token deja de valer
+  // aunque alguien lo hubiera copiado— y avisa a las demás pestañas. Con
+  // `todos` se cierran además las de sus otros dispositivos.
+  const logout = async ({ todos = false } = {}) => {
+    await cerrarSesionServidor({ todos });
+    borrarSesionLocal();
+    try { localStorage.removeItem("post_login_redirect"); } catch { /* noop */ }
+    setUser(null);
 
-      setUser(null);
-
-      // ✅ volver a la misma página donde estaba el usuario (solo paths relativos)
-      const currentPath =
-        window.location.pathname +
-        window.location.search +
-        window.location.hash;
-
-      let redirect = currentPath && currentPath.startsWith("/") ? currentPath : "/";
-
-      if (redirect.startsWith("/panel")) {
-        redirect = "/";
-      }
-
-      window.location.href = redirect;
-    }
+    // Se vuelve a la misma página donde estaba (solo rutas relativas); desde
+    // el panel, a la portada.
+    const actual = window.location.pathname + window.location.search + window.location.hash;
+    let redirect = actual && actual.startsWith("/") ? actual : "/";
+    if (redirect.startsWith("/panel")) redirect = "/";
+    window.location.href = redirect;
   };
-
 
   return (
     <AuthContext.Provider value={{ user, loading, logout, refreshUser: fetchMe }}>

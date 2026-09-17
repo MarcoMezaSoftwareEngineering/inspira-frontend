@@ -144,13 +144,16 @@ function ServiciosList({ servicios, loading, error, onRecargar, onVerDetalle }) 
   const hayServicios = !loading && !error && servicios && servicios.length > 0;
 
   return (
-    <div className="space-y-5">
-      <div className="pnl-head">
-        <div>
-          <h2>Mis servicios</h2>
-          <p>Servicios contratados con Inspira</p>
-        </div>
-        <button type="button" onClick={onRecargar} className="pnl-btn">
+    <div className="space-y-4">
+      {/* El título ya lo dice la barra de arriba: aquí solo cuántos son y
+          recargar (en el teléfono también se recarga tirando hacia abajo). */}
+      <div className="pnl-lista-cab">
+        <p>
+          {hayServicios
+            ? `${servicios.length} ${servicios.length === 1 ? "servicio contratado" : "servicios contratados"} con Inspira`
+            : "Servicios contratados con Inspira"}
+        </p>
+        <button type="button" onClick={onRecargar} className="pnl-btn ux-tap" aria-label="Actualizar la lista">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M16.02 9.35h5V4.36M2.99 14.65h5v4.99" />
@@ -167,7 +170,7 @@ function ServiciosList({ servicios, loading, error, onRecargar, onVerDetalle }) 
       {!loading && !error && (!servicios || servicios.length === 0) && <SinAcceso />}
 
       {hayServicios && (
-        <div className="pnl-grid">
+        <div className="pnl-grid pnl-cascada">
           {servicios.map((s) => (
             <ServicioCard key={s.id_solicitud} s={s} onVerDetalle={onVerDetalle} />
           ))}

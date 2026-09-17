@@ -9,6 +9,7 @@
 // Apostilla, Guía Estancia, Guía Residencia y Trabajo) más un segundo «Mis
 // guías» en el pie. Ahora son una sola entrada y, dentro, una pestaña por guía
 // (MisGuias.jsx); cada guía conserva su URL.
+import { useRef } from "react";
 import SidebarItem from "./SidebarItem";
 import Avatar from "../../../components/common/Avatar";
 import Icono from "../../../components/common/Icono";
@@ -40,8 +41,41 @@ export default function PanelSidebar({
   const { logout } = useAuth();
   const { nombre, iniciales, correo, foto } = datosUsuario(user);
 
+  // En el teléfono el cajón se cierra arrastrándolo hacia la izquierda, como
+  // cualquier menú de app. Se mueve con el dedo escribiendo el transform en
+  // el DOM (sin repintar) y, al soltar, se cierra si pasó un tercio.
+  const arrastre = useRef({ x0: null, dx: 0 });
+  const alTocar = (e) => {
+    if (!isOpen || window.innerWidth >= 768) return;
+    arrastre.current = { x0: e.touches[0].clientX, y0: e.touches[0].clientY, dx: 0, lateral: null };
+  };
+  const alArrastrar = (e) => {
+    const a = arrastre.current;
+    if (a.x0 == null) return;
+    const dx = e.touches[0].clientX - a.x0;
+    const dy = e.touches[0].clientY - a.y0;
+    if (a.lateral === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) a.lateral = Math.abs(dx) > Math.abs(dy);
+    if (!a.lateral) return;
+    a.dx = Math.min(0, dx);
+    e.currentTarget.style.transition = "none";
+    e.currentTarget.style.transform = `translateX(${a.dx}px)`;
+  };
+  const alSoltar = (e) => {
+    const a = arrastre.current;
+    if (a.x0 == null) return;
+    const el = e.currentTarget;
+    el.style.transition = "";
+    el.style.transform = "";
+    if (a.lateral && a.dx < -el.offsetWidth / 3) onClose?.();
+    arrastre.current = { x0: null, dx: 0 };
+  };
+
   return (
     <aside
+      onTouchStart={alTocar}
+      onTouchMove={alArrastrar}
+      onTouchEnd={alSoltar}
+      onTouchCancel={alSoltar}
       className={[
         "pnl pnl-side flex flex-col overflow-hidden flex-none",
         "fixed inset-y-0 left-0 z-30 w-72 transition-transform duration-300 ease-in-out",
@@ -161,7 +195,7 @@ export default function PanelSidebar({
           <Icono nombre="casa" size={16} />
           Volver al inicio
         </button>
-        <button type="button" onClick={logout} className="pnl-item pnl-salir">
+        <button type="button" onClick={() => logout()} className="pnl-item pnl-salir">
           <Icono nombre="salir" size={16} />
           Cerrar sesión
         </button>

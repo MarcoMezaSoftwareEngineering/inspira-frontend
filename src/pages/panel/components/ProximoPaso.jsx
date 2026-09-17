@@ -79,6 +79,9 @@ export function ProximoPaso({ items, servicios }) {
       <div className="ex-proximo-botones">
         <button type="button" className="pnl-btn-cta ux-tap" onClick={() => navigate(primero.href)}>
           {primero.accion}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M13.5 4.5 21 12l-7.5 7.5M21 12H3" />
+          </svg>
         </button>
         {irFalta && (
           <button type="button" className="ex-proximo-falta" onClick={irFalta}>¿Qué me falta?</button>
@@ -183,11 +186,12 @@ export function ResumenExpediente({ servicios }) {
   if (!lista.length) return null;
   return (
     <section>
-      <div className="pnl-head mb-3">
-        <div>
-          <h2>Resumen de tu expediente</h2>
-          <p>Cómo va cada servicio. Toca una línea para ir a su sección.</p>
-        </div>
+      <div className="pnl-seccion-titulo">
+        <h2>Tus servicios</h2>
+        <button type="button" onClick={() => navigate(rutaDe({ tab: "servicios" }))}>
+          Ver todos
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+        </button>
       </div>
       <div className="ex-resumen">
         {lista.map((s) => <TarjetaResumen key={s.id_solicitud} s={s} />)}

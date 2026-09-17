@@ -1,6 +1,7 @@
 // F:\PROGRAMACION\paginaweb_insipira\inspira-frontend\src\App.jsx
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
+import { flushSync } from "react-dom";
 import { lazyConRecarga } from "./lib/cargaDiferida";
 import { dialog } from "./services/dialogService";
 import { NOMBRE_PORTAL } from "./config/portalMarca";
@@ -389,8 +390,27 @@ const PUBLIC_PATHS = [
 export default function App() {
   const [path, setPath] = useState(rutaActual);
 
+  // Dentro del panel, cambiar de pantalla es una transición y no un corte:
+  // View Transitions donde el navegador las tiene (Chrome, Safari 18). Hacia
+  // dentro entra por la derecha; hacia atrás, por la izquierda. Si el propio
+  // navegador ya anima el gesto de volver (deslizar en iPhone), no se duplica.
+  const pathRef = useRef(path);
   useEffect(() => {
-    const onPop = () => setPath(rutaActual());
+    const puede = typeof document.startViewTransition === "function";
+    if (puede) document.documentElement.classList.add("pnl-vt");
+    const onPop = (e) => {
+      const nuevo = rutaActual();
+      const viejo = pathRef.current;
+      pathRef.current = nuevo;
+      const enPanel = viejo.startsWith("/panel") && nuevo.startsWith("/panel") && viejo !== nuevo;
+      const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (!puede || !enPanel || quieto || e?.hasUAVisualTransition) { setPath(nuevo); return; }
+      const hondo = (r) => r.split("/").filter(Boolean).length;
+      const html = document.documentElement;
+      html.dataset.vt = hondo(nuevo) > hondo(viejo) ? "adelante" : hondo(nuevo) < hondo(viejo) ? "atras" : "lado";
+      const t = document.startViewTransition(() => flushSync(() => setPath(nuevo)));
+      t.finished.finally(() => { delete html.dataset.vt; });
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
@@ -410,6 +430,14 @@ export default function App() {
       if (sessionStorage.getItem("inspira:sesion-caducada")) {
         sessionStorage.removeItem("inspira:sesion-caducada");
         dialog.toast("Tu sesión caducó. Vuelve a entrar y seguirás donde estabas.", "info");
+      }
+      // Google volvió pero la cuenta está desactivada: el servidor no da sesión.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("acceso") === "desactivado") {
+        params.delete("acceso");
+        const resto = params.toString();
+        window.history.replaceState({}, "", window.location.pathname + (resto ? `?${resto}` : "") + window.location.hash);
+        dialog.toast("Esta cuenta no tiene acceso al Expediente Digital. Escríbenos si crees que es un error.", "error");
       }
     } catch { /* noop */ }
   }, []);

@@ -10,6 +10,7 @@
 // El mismo componente sirve a los dos paneles: el asesor sube y borra, el
 // cliente sólo descarga.
 import { useCallback, useEffect, useState } from "react";
+import { comprobarRespuesta } from "../../services/sesion";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -57,6 +58,7 @@ export default function DocumentosProceso({ idSolicitud, modo = "cliente" }) {
       : `/portales/panel/solicitudes/${idSolicitud}/documentos-proceso`;
     try {
       const r = await fetch(API_URL + ruta, { headers: { Authorization: `Bearer ${token()}` } });
+      await comprobarRespuesta(r);
       const data = await r.json().catch(() => ({}));
       if (data.ok) {
         setDocs(data.documentos || []);
@@ -109,6 +111,7 @@ export default function DocumentosProceso({ idSolicitud, modo = "cliente" }) {
       const r = await fetch(`${API_URL}/portales/justificantes/${doc.id_justificante}/descargar`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
+      await comprobarRespuesta(r);
       if (!r.ok) throw new Error("No se pudo descargar");
       const blob = await r.blob();
       const url = URL.createObjectURL(blob);

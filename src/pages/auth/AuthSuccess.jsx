@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { guardarToken } from "../../services/sesion";
 import { useAuth } from "../../context/AuthContext";
 import { navigate } from "../../services/navigate";
 import logo from "../../assets/images/logo.png";
@@ -33,9 +34,22 @@ function destinoSeguro(valor) {
 export default function AuthSuccess() {
   const { refreshUser } = useAuth();
   const [fallo, setFallo] = useState("");
+  // El código de Google es de un solo uso. Si el efecto corre dos veces (modo
+  // estricto, o un `refreshUser` que cambia), la segunda vuelta ya no
+  // encuentra el destino ni el código, recibe un 401 y mandaba a la portada a
+  // alguien que acababa de entrar bien. Se canjea una vez y punto.
+  const canjeado = useRef(false);
+  // «Sigue en pantalla» va aparte: si lo llevara el efecto del canje, su
+  // limpieza lo apagaría al repetirse y nunca se navegaría.
+  const montado = useRef(true);
+  useEffect(() => {
+    montado.current = true;
+    return () => { montado.current = false; };
+  }, []);
 
   useEffect(() => {
-    let vivo = true;
+    if (canjeado.current) return;
+    canjeado.current = true;
 
     async function canjearToken() {
       const destino = destinoSeguro(localStorage.getItem("post_login_redirect"));
@@ -55,20 +69,19 @@ export default function AuthSuccess() {
         if (!data?.ok || !data.token) {
           // Sin token no hay sesión: se vuelve a donde se iba, y si era el
           // panel, este le pedirá entrar otra vez.
-          if (vivo) navigate(destino.startsWith("/panel") ? "/" : destino, { replace: true });
+          if (montado.current) navigate(destino.startsWith("/panel") ? "/" : destino, { replace: true });
           return;
         }
 
-        localStorage.setItem("token", data.token);
+        guardarToken(data.token);
         await refreshUser();
-        if (vivo) navigate(destino, { replace: true });
+        if (montado.current) navigate(destino, { replace: true });
       } catch {
-        if (vivo) setFallo("No hemos podido completar el acceso. Vuelve a intentarlo.");
+        if (montado.current) setFallo("No hemos podido completar el acceso. Vuelve a intentarlo.");
       }
     }
 
     canjearToken();
-    return () => { vivo = false; };
   }, [refreshUser]);
 
   return (

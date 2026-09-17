@@ -4,6 +4,7 @@ import { formatearFecha } from "../utils";
 import { dialog } from "../../../../../services/dialogService";
 import SeccionPanel from "./SeccionPanel";
 import TarjetaMaster from "../../../../../components/common/TarjetaMaster";
+import { comprobarRespuesta } from "../../../../../services/sesion";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -192,6 +193,7 @@ export default function InformeBusqueda({ idSolicitud, informe, hasFormData, com
         `${API_URL}/api/panel/solicitudes/${idSolicitud}/informe${modo === "ver" ? "?view=1" : ""}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      await comprobarRespuesta(resp);
       if (!resp.ok) { dialog.toast("No se pudo obtener el PDF", "error"); return; }
       const blob = await resp.blob();
       const url  = window.URL.createObjectURL(blob);

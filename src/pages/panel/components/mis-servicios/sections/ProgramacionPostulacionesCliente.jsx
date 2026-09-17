@@ -4,6 +4,7 @@ import { apiGET, apiPOST, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
 import IconoPaso from "../../../../../components/common/IconoPaso";
 import { agruparPorPortal, estadoPortal, fechasPortal, unirCampo } from "../../../../../lib/portales";
+import { comprobarRespuesta } from "../../../../../services/sesion";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,7 @@ async function verArchivo(idSolicitud, storagePath) {
     const token = localStorage.getItem("token");
     const url = `${API_URL}/solicitudes/${idSolicitud}/justificante-stream?path=${encodeURIComponent(storagePath)}`;
     const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    await comprobarRespuesta(res);
     if (!res.ok) throw new Error("No se pudo cargar el archivo");
     const blob = await res.blob();
     const objUrl = URL.createObjectURL(blob);
@@ -208,6 +210,7 @@ function TabDocs({ post, idSolicitud, onSave }) {
     try {
       const token = localStorage.getItem("token");
       const r = await fetch(`${API_URL}/portales/justificantes/${j.id_justificante}/descargar`, { headers: { Authorization: `Bearer ${token}` } });
+      await comprobarRespuesta(r);
       if (!r.ok) throw new Error();
       const blob = await r.blob();
       const url = URL.createObjectURL(blob);

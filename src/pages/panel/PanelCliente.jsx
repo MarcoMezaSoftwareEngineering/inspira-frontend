@@ -1,7 +1,9 @@
 // src/pages/panel/PanelCliente.jsx
-import { useEffect, useMemo, useState, Suspense } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { lazyConRecarga } from "../../lib/cargaDiferida";
 import "../../styles/panel.css";
+// La capa de app (movimiento, pestañas, saludo). Después de panel.css: la afina.
+import "../../styles/panel-app.css";
 import "../../styles/pasos-core.css";
 // pasos.css define las clases ex-* de las tarjetas de documentos y las
 // secciones (ChecklistDocumentos, SeccionPanel), que usan también el visado y
@@ -11,6 +13,7 @@ import "../../styles/pasos.css";
 import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";
+import Icono from "../../components/common/Icono";
 import { datosUsuario } from "../../components/common/usuario";
 import PerfilCliente from "./components/PerfilCliente";
 import MisServicios from "./components/MisServicios";
@@ -27,6 +30,11 @@ import { leerRuta, rutaDe } from "./ruta";
 import { navigate } from "../../services/navigate";
 import AvisoVersionNueva from "../backoffice/layout/AvisoVersionNueva";
 import CercoErrores from "../../components/common/CercoErrores";
+import BarraPestanas from "./components/BarraPestanas";
+import AvisoSesion from "./components/AvisoSesion";
+import SeguridadSesion from "./components/SeguridadSesion";
+import { alTerminarSesion, borrarSesionLocal, caducado, leerToken, vigilarSesion } from "../../services/sesion";
+import { useTirarParaRecargar } from "./hooks/useMovimiento";
 
 // Las guías (GuiaMaster, GuiaApostilla…) las descarga MisGuias al abrirlas.
 const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
@@ -47,17 +55,17 @@ const PASOS_INICIO = [
   {
     clave: "hoy",
     titulo: "Lo que te toca hacer",
-    texto: "Cada línea es una tarea tuya, ordenada por urgencia. El botón te lleva justo a donde se resuelve.",
+    texto: "Arriba, en grande, lo más urgente. Aquí, el resto por orden. Toca cualquier línea y te lleva justo a donde se resuelve.",
   },
   {
     clave: "servicios",
     titulo: "Tus servicios",
-    texto: "Cada trámite contratado es una tarjeta. Entra con «Ver servicio»: dentro está tu expediente por secciones —documentos, formulario, informe, plazos—.",
+    texto: "Cada trámite contratado, con cómo va: documentos, formulario, plazos. Toca una línea para ir a esa sección, o «Abrir» para entrar al expediente.",
   },
   {
     clave: "menu",
     titulo: "El menú",
-    texto: "Desde aquí vuelves a Mi expediente, ves tu ruta, abres tus servicios, tu perfil y «Mis guías», con todas las guías de tu trámite. Y si quieres ver este recorrido otra vez, está en «¿Cómo funciona?».",
+    texto: "Desde aquí vuelves a Inicio, abres tus servicios, tus pagos o tu ruta y tu perfil. En «Más» están tus guías y, si quieres ver este recorrido otra vez, «¿Cómo funciona?».",
   },
 ];
 
@@ -133,34 +141,63 @@ export default function PanelCliente({ path }) {
   // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
   // ofrece entrar. Al pulsar, el login conserva esta misma URL, así que un
   // enlace de correo a un expediente sigue funcionando con la sesión caducada.
+  // Un token caducado cuenta como sin sesión: se limpia aquí mismo en vez de
+  // montar el panel y esperar a que la primera petición falle.
   const [sinSesion] = useState(() => {
-    try { return !localStorage.getItem("token"); } catch { return true; }
+    const token = leerToken();
+    if (token && caducado(token)) { borrarSesionLocal({ avisarPestanas: false }); return true; }
+    return !token;
   });
+  // La sesión terminó con el panel abierto (caducó, se cerró en otra pestaña o
+  // dispositivo, se desactivó la cuenta). Se avisa encima, sin expulsar.
+  const [finSesion, setFinSesion] = useState(null);
+  // /cliente/me no respondió (red, servidor). Antes se mandaba a la portada.
+  const [errorMe, setErrorMe] = useState("");
 
   useEffect(() => {
-    if (sinSesion) return;
+    if (sinSesion) return undefined;
     cargarMe();
+    const dejarDeVigilar = vigilarSesion(setFinSesion);
+    const dejarDeEscuchar = alTerminarSesion(setFinSesion);
+    return () => { dejarDeVigilar(); dejarDeEscuchar(); };
   }, [sinSesion]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function cargarMe() {
+  async function cargarMe({ silencioso = false } = {}) {
+    if (!silencioso) setErrorMe("");
     try {
       const r = await apiGET("/cliente/me");
-      if (!r.ok) { window.location.href = "/"; return; }
+      // Sin `ok` es que la sesión terminó: ya lo pinta AvisoSesion.
+      if (r.ok === undefined) return;
+      if (!r.ok) {
+        if (!silencioso) setErrorMe(r.msg || r.message || "No hemos podido cargar tu expediente.");
+        return;
+      }
       setUser(r.cliente || r.user || r);
-    } catch { window.location.href = "/"; }
+    } catch {
+      if (!silencioso) setErrorMe("No hay conexión. Comprueba tu internet y vuelve a intentarlo.");
+      return;
+    }
+    if (silencioso) return;
     cargarServicios();
     cargarPagos();
   }
 
-  async function cargarServicios() {
-    setCargandoServicios(true);
+  // Tirar para recargar: lo mismo que entrar, sin esqueletos ni saltos.
+  const recargarTodo = useCallback(
+    () => Promise.all([cargarMe({ silencioso: true }), cargarServicios({ silencioso: true }), cargarPagos()]),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  async function cargarServicios({ silencioso = false } = {}) {
+    if (!silencioso) setCargandoServicios(true);
     setErrorServicios("");
     try {
       const rs = await apiGET("/solicitudes/mias");
       if (!rs.ok) throw new Error(rs.msg || rs.message || "No se pudieron cargar los servicios");
       setServicios(rs.solicitudes || []);
     } catch (e) {
-      setServicios([]);
+      // Recargando en silencio no se vacía lo que ya se veía.
+      if (!silencioso) setServicios([]);
       setErrorServicios(e.message || "Error al cargar servicios");
     } finally {
       setCargandoServicios(false);
@@ -238,17 +275,64 @@ export default function PanelCliente({ path }) {
     ...Object.fromEntries(CLAVES_GUIAS.map((clave) => [clave, "Mis guías"])),
   };
 
-  const { nombre, corto, iniciales, foto } = datosUsuario(user);
+  const { nombre, iniciales, foto } = datosUsuario(user);
+
+  // En el teléfono se navega con la barra de abajo; dentro de un expediente
+  // no, que allí mandan sus secciones y sus botones de guardar.
+  const conTabbar = !ruta.idServicio;
+  const tituloBarra = titles[tab] || "Mi panel";
+  const enPortada = tab === "inicio" && !ruta.idServicio;
+
+  // La zona que se desplaza: para la barra de arriba (sombra al bajar, título
+  // que aparece cuando el saludo se va) y para tirar y recargar. Se escribe
+  // en el DOM y no en el estado: un scroll no debe repintar el panel.
+  const zonaRef = useRef(null);
+  const barraRef = useRef(null);
+  const { recargando } = useTirarParaRecargar(zonaRef, recargarTodo, !sinSesion && !esScrollInterno && !finSesion);
+
+  useEffect(() => {
+    const zona = zonaRef.current;
+    const barra = barraRef.current;
+    if (!zona || !barra) return undefined;
+    zona.scrollTop = 0; // cada vista empieza arriba
+    const alDesplazar = () => {
+      const y = zona.scrollTop;
+      barra.dataset.elevada = y > 6 ? "1" : "0";
+      barra.dataset.oculto = enPortada && y < 150 ? "1" : "0";
+    };
+    alDesplazar();
+    zona.addEventListener("scroll", alDesplazar, { passive: true });
+    return () => zona.removeEventListener("scroll", alDesplazar);
+  }, [claveVista, enPortada, esScrollInterno]);
 
   if (sinSesion) return <Bienvenida />;
+
+  // Sin perfil no hay panel que enseñar: se dice qué pasó y se ofrece
+  // reintentar, en vez de mandar a la portada como antes.
+  if (!user && errorMe) {
+    return (
+      <div className="pnl min-h-dvh flex items-center justify-center p-4">
+        <div className="pnl-sesion-caja pnl-entra" style={{ borderRadius: 26, animation: "none" }}>
+          <div className="pnl-sesion-icono"><Icono nombre="escudo" size={26} /></div>
+          <h2>No hemos podido abrir tu expediente</h2>
+          <p>{errorMe}</p>
+          <div className="pnl-sesion-botones">
+            <button type="button" className="pnl-btn-cta" onClick={() => cargarMe()}>Reintentar</button>
+            <a href="/" className="pnl-btn">Ir a la web</a>
+          </div>
+        </div>
+        {finSesion && <AvisoSesion motivo={finSesion} />}
+      </div>
+    );
+  }
 
   // `h-dvh` y no `h-screen`: en Safari de iPhone 100vh cuenta la barra del
   // navegador y el borde de abajo quedaba tapado. El backoffice ya lo usa.
   return (
     <div className="pnl h-dvh overflow-hidden flex relative">
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
+      {/* El velo se funde en vez de aparecer de golpe: siempre está, y se
+          enciende con el menú. */}
+      <div className="pnl-velo" data-abierto={sidebarOpen ? "1" : "0"} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
 
       <PanelSidebar
         user={user}
@@ -272,10 +356,11 @@ export default function PanelCliente({ path }) {
           de pasos tiene que permanecer a la vista. */}
       <main className={`flex-1 min-w-0 flex flex-col overflow-y-auto ${esScrollInterno ? "lg:min-h-0 lg:overflow-hidden" : ""}`}>
         {/* Barra superior */}
-        <div className="pnl-top sticky top-0 z-10 shrink-0">
+        <div ref={barraRef} className="pnl-top sticky top-0 z-10 shrink-0">
+          {/* El ☰ solo hace falta donde no hay barra de pestañas. */}
           <button
-            className="pnl-burger"
-            data-tour="menu"
+            className={`pnl-burger${conTabbar ? " !hidden" : ""}`}
+            data-tour={conTabbar ? undefined : "menu"}
             onClick={() => setSidebarOpen(true)}
             aria-label="Abrir menú"
           >
@@ -286,21 +371,21 @@ export default function PanelCliente({ path }) {
             {nPendientes > 0 && <span className="pnl-burger-punto" aria-hidden="true">{nPendientes}</span>}
           </button>
 
-          <div className="min-w-0">
+          <div className="min-w-0 pnl-top-titulo">
             <p className="pnl-top-eyebrow">
               <span className="punto" />
               Expediente Digital<span className="hidden sm:inline">&nbsp;Inspira</span>
             </p>
-            <h1>{titles[tab] || "Mi panel"}</h1>
+            <h1>{tituloBarra}</h1>
           </div>
 
-          {/* Solo el primer nombre. Aqui se volcaba el nombre legal completo
-              -los hay de 38 caracteres- y aplastaba contra el titulo de la
-              pagina; el entero se lee al pasar el raton. */}
+          {/* Tocar la foto abre el perfil, como en cualquier app. */}
           {user && (
             <div className="pnl-top-user ml-auto">
-              <span className="pnl-top-nombre hidden sm:block" title={nombre}>{corto}</span>
-              <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={34} />
+              <span className="pnl-top-nombre hidden sm:block" title={nombre}>{datosUsuario(user).corto}</span>
+              <button type="button" className="pnl-top-avatar" onClick={() => handleChangeTab("perfil")} aria-label="Abrir mi perfil">
+                <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={34} />
+              </button>
             </div>
           )}
         </div>
@@ -309,9 +394,20 @@ export default function PanelCliente({ path }) {
             y cada una entra con su transición. No cambia al cambiar de sección
             dentro de un expediente: eso lo anima el propio expediente, sin
             remontarse ni volver a pedir nada. */}
-        <div className={`flex-1 min-h-0 flex flex-col ${esScrollInterno ? "" : "overflow-auto"}`}>
-        <div key={claveVista} className="pnl-entra pnl-entra-llena">
-          {avisarPerfil && (
+        <div
+          ref={zonaRef}
+          className={`relative flex-1 min-h-0 flex flex-col ${esScrollInterno ? "" : "overflow-auto overscroll-contain"}`}
+          aria-busy={recargando || undefined}
+        >
+        {!esScrollInterno && (
+          <span className="pnl-ptr" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
+            </svg>
+          </span>
+        )}
+        <div key={claveVista} className={`pnl-entra pnl-entra-llena pnl-vista pnl-ptr-contenido${conTabbar ? " pnl-con-tabbar" : ""}`}>
+          {avisarPerfil && !enPortada && (
             <div className="px-4 sm:px-6 pt-4 shrink-0">
               <AvisoPerfil faltan={faltanDatos} imprescindible={conCompleto} onIr={() => handleChangeTab("perfil")} />
             </div>
@@ -319,7 +415,7 @@ export default function PanelCliente({ path }) {
 
           {/* Servicios: scroll interno */}
           {esServicios && (
-            <div className="flex-1 min-h-0 flex flex-col w-full px-4 sm:px-6 py-5">
+            <div className="flex-1 min-h-0 flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-6 py-5">
               <MisServicios
                 ruta={ruta}
                 perfil={user}
@@ -341,6 +437,7 @@ export default function PanelCliente({ path }) {
           {tab === "perfil" && (
             <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-5">
               <PerfilCliente user={user} conAcademico={conAcademico} onUserUpdated={(nuevo) => setUser(nuevo)} />
+              <SeguridadSesion />
             </div>
           )}
 
@@ -372,19 +469,33 @@ export default function PanelCliente({ path }) {
         </div>
       </main>
 
+      {conTabbar && user && (
+        <BarraPestanas
+          tab={tab}
+          pendientes={nPendientes}
+          conPagos={conPagos}
+          conRuta={lista.length > 0}
+          menuAbierto={sidebarOpen}
+          onIr={handleChangeTab}
+          onMas={() => setSidebarOpen((v) => !v)}
+        />
+      )}
+
       {/* La app instalada se queda abierta días: si hay versión nueva, se
           recarga sola al volver o avisa si se está usando. */}
       <AvisoVersionNueva producto="Inspira" />
 
       {tour && <Tour pasos={PASOS_INICIO} onFin={terminarTour} />}
 
-      {mostrarWizard && (
+      {mostrarWizard && !finSesion && (
         <WizardPerfilCliente
           user={user}
           conAcademico={conAcademico}
           onComplete={(updatedUser) => setUser(updatedUser)}
         />
       )}
+
+      {finSesion && <AvisoSesion motivo={finSesion} />}
     </div>
   );
 }

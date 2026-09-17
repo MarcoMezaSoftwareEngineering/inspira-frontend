@@ -9,6 +9,7 @@
 // «yo», para pintar los míos a la derecha.
 import { useEffect, useRef, useState } from "react";
 import { fechaHoraDoble } from "../../lib/horas";
+import { comprobarRespuesta } from "../../services/sesion";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -47,6 +48,7 @@ export default function HiloMensajes({ cargar, enviar, lado, aviso, idSolicitud 
         ? `${API_URL}/backoffice/solicitudes/${idSolicitud}/mensajes.pdf`
         : `${API_URL}/solicitudes/${idSolicitud}/mensajes.pdf`;
       const r = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      await comprobarRespuesta(r);
       if (!r.ok) throw new Error();
       const blob = await r.blob();
       window.open(URL.createObjectURL(blob), "_blank");

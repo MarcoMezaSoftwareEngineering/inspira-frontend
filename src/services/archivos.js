@@ -17,6 +17,7 @@
 // Así que hay que pedirlo con fetch, con el token, y abrir el resultado.
 
 import { dialog } from "./dialogService";
+import { comprobarRespuesta } from "./sesion";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -38,6 +39,7 @@ export async function pedirArchivo(ruta, { interno = false } = {}) {
     const r = await fetch(`${API_URL}${ruta}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    await comprobarRespuesta(r);
     if (!r.ok) {
       return {
         error:
@@ -89,6 +91,7 @@ export async function abrirArchivo(ruta, { interno = false, nombre } = {}) {
     const r = await fetch(`${API_URL}${ruta}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    await comprobarRespuesta(r);
 
     if (!r.ok) {
       ventana?.close();

@@ -191,3 +191,118 @@
     opacity: 0;
   }
 }
+
+/* ── Rediseño 17/09/2026 ───────────────────────────────────────────────────
+   Encargo de la clienta: «que se vea profesional, con movimiento y con iconos
+   propios». Lo de aquí abajo solo reviste: ningún control cambia de sitio ni
+   desaparece.
+
+   Los colores del mapa (kit de marca: Noche, Petróleo, Cielo y Sol) se
+   declaran una vez como variables para que el markup nuevo no tenga que
+   repetir hex sueltos. Los componentes antiguos siguen con sus clases
+   arbitrarias de Tailwind: cambiarlas todas a la vez era arriesgar el
+   degradado de los titulares, que se elige por [class*="text-[#003648]"]. */
+.mapa-premium {
+  --mapa-noche: #003648;
+  --mapa-petroleo: #0a5873;
+  --mapa-cielo: #96ccfc;
+  --mapa-cielo-claro: #cfe6fd;
+  --mapa-nube: #f6fbff;
+  --mapa-sol: #f09c48;
+  --mapa-sol-oscuro: #b8661f;
+  --mapa-borde: #e1effd;
+}
+
+/* Rótulo de sección: el icono ocupa el sitio que antes tenía el aire, y la
+   línea corta de color ancla el bloque a la izquierda. */
+.mapa-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  /* 12 px: por debajo de eso, en un teléfono y en versalitas, el rótulo deja
+     de leerse. Se compensa el ancho bajando un punto el espaciado. */
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mapa-petroleo);
+}
+.mapa-rotulo > svg {
+  color: var(--mapa-sol);
+  flex: none;
+}
+
+/* Dos variantes del rótulo: sobre fondo Sol (el paquete de Inspira) y sobre
+   fondo Noche (las tarjetas oscuras). El icono conserva su color de acento. */
+.mapa-rotulo-sol { color: var(--mapa-sol-oscuro); }
+.mapa-rotulo-claro { color: var(--mapa-cielo); }
+
+/* Tarjeta de sección del explorador: mismo lenguaje que .mapa-panel pero sin
+   el borde degradado, para los bloques que van sobre fondo claro. */
+.mapa-tarjeta {
+  border: 1px solid var(--mapa-borde);
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 22px 48px -38px rgba(0, 54, 72, 0.5);
+}
+
+/* Carga: bloques en gris que laten, en vez de la frase «Cargando el mapa…».
+   Solo se anima la opacidad; el texto sigue existiendo para quien no ve. */
+@keyframes mapa-late {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.9; }
+}
+.mapa-esqueleto {
+  background: linear-gradient(100deg, #e9f3fe 0%, #f6fbff 45%, #e9f3fe 100%);
+  animation: mapa-late 1.5s ease-in-out infinite;
+  animation-delay: var(--r, 0ms);
+}
+
+/* Pista de toque sobre el mapa en móvil: flota despacio para que se lea como
+   una invitación y no como un aviso. */
+@keyframes mapa-flota {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.mapa-pista {
+  animation: mapa-flota 2.6s ease-in-out infinite;
+}
+
+/* Comunidad bajo el puntero: además de subir, recupera el color entero aunque
+   esté atenuada por un filtro. Así se ve qué se está señalando. */
+@media (hover: hover) and (pointer: fine) {
+  .mapa-comunidad:not([aria-pressed="true"]):hover {
+    fill-opacity: 1;
+  }
+}
+
+/* Tooltip del mapa: más cuerpo y borde propio para que se lea sobre el mar. */
+.mapa-globo {
+  border: 1px solid rgba(150, 204, 252, 0.35);
+  box-shadow: 0 18px 34px -18px rgba(0, 54, 72, 0.85);
+}
+
+/* Los tres pasos de la cabecera: la cifra en grande detrás del texto. */
+.mapa-paso {
+  position: relative;
+  overflow: hidden;
+}
+.mapa-paso::before {
+  content: attr(data-paso);
+  position: absolute;
+  right: 0.35rem;
+  top: -0.65rem;
+  font-family: "Quicksand", "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  font-size: 66px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(150, 204, 252, 0.28);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-esqueleto,
+  .mapa-pista {
+    animation: none;
+  }
+}

@@ -7,6 +7,7 @@
 // ciudades, selector de ciudad. Con `presupuesto` (vida.js, presupuestoAnual),
 // la suma orientativa de matrícula y vida al año.
 import { useState } from "react";
+import Icono from "../../components/common/Icono";
 import { leerVida, mismaCiudad, textoMes } from "./vida";
 import { fechaCorta } from "./plazos";
 import { PRESUPUESTO, VIDA, eur } from "./mapaTextos";
@@ -40,7 +41,8 @@ export default function VivirAqui({ comunidad, soloCiudad = null, presupuesto = 
   return (
     <section className="mt-6 rounded-3xl bg-[#F6FBFF] p-4 ring-1 ring-[#E1EFFD]" aria-labelledby={`vida-${comunidad.id}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 id={`vida-${comunidad.id}`} className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">
+        <h3 id={`vida-${comunidad.id}`} className="mapa-rotulo">
+          <Icono nombre="casa" size={14} />
           {VIDA.titulo}
           {ciudades.length === 1 ? ` · ${ciudad.nombre}` : ""}
         </h3>
@@ -55,7 +57,7 @@ export default function VivirAqui({ comunidad, soloCiudad = null, presupuesto = 
               type="button"
               aria-pressed={i === elegida}
               onClick={() => setElegida(i)}
-              className={`mapa-boton rounded-full px-2.5 py-1 text-[11px] font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
+              className={`mapa-boton mov-toque inline-flex min-h-[40px] items-center rounded-full px-3 py-1 text-[11px] font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
                 i === elegida ? "bg-[#003648] text-white" : "bg-white text-[#003648] ring-1 ring-[#CFE6FD] hover:bg-[#E6F2FE]"
               }`}
             >
@@ -97,13 +99,19 @@ export default function VivirAqui({ comunidad, soloCiudad = null, presupuesto = 
 
       {presupuesto && (
         <div className="mt-3 rounded-2xl bg-[#003648] px-3 py-2.5 text-white">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#96CCFC]">{PRESUPUESTO.ficha}</p>
+          <p className="mapa-rotulo mapa-rotulo-claro">
+            <Icono nombre="maletin" size={14} />
+            {PRESUPUESTO.ficha}
+          </p>
           <p className="mapa-titular mt-0.5 text-lg font-bold leading-tight">≈ {eur(presupuesto.total)} al año</p>
           <p className="mt-0.5 text-[11px] leading-snug text-white/80">{PRESUPUESTO.desglose(presupuesto)}</p>
         </div>
       )}
 
-      <p className="mt-3 rounded-xl bg-white px-3 py-2 text-[11.5px] font-semibold leading-snug text-[#003648] ring-1 ring-[#F09C48]/50">{VIDA.iprem}</p>
+      <p className="mt-3 flex items-start gap-2 rounded-xl bg-white px-3 py-2 text-[11.5px] font-semibold leading-snug text-[#003648] ring-1 ring-[#F09C48]/50">
+        <Icono nombre="balanza" size={15} className="mt-0.5 shrink-0 text-[#F09C48]" />
+        <span>{VIDA.iprem}</span>
+      </p>
       <p className="mt-2 text-[11px] leading-snug text-neutral-700">
         {VIDA.aproximado}
         {ciudad.verificado === false ? ` (${VIDA.sinVerificar})` : ""}

@@ -3,6 +3,8 @@
 // cumplen) o cuando se pide «Mejor ranking primero» (todas, en ese orden).
 // Cada tarjeta abre su ficha en el mapa. El ranking siempre como
 // «QS World University Rankings 2027 · puesto X», sin enlace.
+import Icono from "../../components/common/Icono";
+import { cascada } from "../../lib/revelar";
 import { ordenarUniversidades, posicionRanking, precioDeUniversidad } from "./indice";
 import { tonoDe } from "./tonosMapa";
 import { ORDEN, RANKING, VACIO, eur, plural, textoRanking } from "./mapaTextos";
@@ -19,8 +21,8 @@ export function SelectorOrden({ orden, onOrden, compacto = false }) {
           type="button"
           aria-pressed={orden === id}
           onClick={() => onOrden(id)}
-          className={`rounded-full font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
-            compacto ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs"
+          className={`mov-toque rounded-full font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
+            compacto ? "px-2.5 py-1 text-[11px]" : "min-h-[40px] px-3.5 py-1.5 text-xs"
           } ${orden === id ? "bg-[#003648] text-white shadow-sm" : "text-[#003648] hover:bg-white"}`}
         >
           {texto}
@@ -34,6 +36,7 @@ export default function ResultadosUniversidades({ indice, filtros, orden, onOrde
   if (!filtros.activos && orden !== "ranking") return null;
   const base = filtros.activos ? [...filtros.universidades].map((id) => indice.universidades.get(id)).filter(Boolean) : indice.datos.universidades;
   const unis = ordenarUniversidades(base, orden, filtros.rama);
+  const paso = cascada(35, 300);
   const titulo = filtros.ranking
     ? `Universidades ${RANKING.resumen[filtros.ranking]}`
     : filtros.activos
@@ -41,10 +44,13 @@ export default function ResultadosUniversidades({ indice, filtros, orden, onOrde
       : "Universidades por ranking QS";
 
   return (
-    <section id="mapa-resultados" aria-labelledby="mapa-resultados-titulo" className="mt-10 scroll-mt-28">
+    <section id="mapa-resultados" aria-labelledby="mapa-resultados-titulo" className="mt-10 scroll-mt-28" data-revelar>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">Resultados</p>
+          <p className="mapa-rotulo">
+            <Icono nombre="lupa" size={14} />
+            Resultados
+          </p>
           <h2 id="mapa-resultados-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
             {titulo}
           </h2>
@@ -56,10 +62,16 @@ export default function ResultadosUniversidades({ indice, filtros, orden, onOrde
       </div>
 
       {unis.length === 0 ? (
-        <p className="mt-4 rounded-3xl border border-dashed border-[#96CCFC] bg-[#F6FBFF] px-5 py-6 text-sm font-semibold text-[#003648]">{VACIO.filtros}</p>
+        <div className="mt-4 flex items-start gap-3 rounded-3xl border border-dashed border-[#96CCFC] bg-[#F6FBFF] px-5 py-6">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#F09C48] ring-1 ring-[#CFE6FD]">
+            <Icono nombre="lupa" size={19} />
+          </span>
+          <p className="text-sm font-semibold leading-relaxed text-[#003648]">{VACIO.filtros}</p>
+        </div>
       ) : (
         <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {unis.map((u) => {
+            const retraso = paso();
             const puesto = posicionRanking(u);
             const ranking = textoRanking(u.ranking);
             const precio = precioDeUniversidad(indice, u);
@@ -67,11 +79,11 @@ export default function ResultadosUniversidades({ indice, filtros, orden, onOrde
             const com = indice.comunidades.get(u.comunidad)?.nombre;
             const sinPublicar = indice.datos.precios?.sinPublicar?.includes(u.comunidad);
             return (
-              <li key={u.id}>
+              <li key={u.id} data-revelar="suave" style={retraso}>
                 <button
                   type="button"
                   onClick={() => onElegir("universidad", u.id)}
-                  className="mapa-boton flex h-full w-full items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-3 text-left hover:border-[#96CCFC] hover:bg-[#F6FBFF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+                  className="mapa-boton mov-toque flex h-full w-full items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-3 text-left hover:border-[#96CCFC] hover:bg-[#F6FBFF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
                 >
                   <span
                     className={`flex h-11 min-w-[3.4rem] shrink-0 flex-col items-center justify-center rounded-xl px-1.5 text-center ${

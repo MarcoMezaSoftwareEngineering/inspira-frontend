@@ -13,6 +13,7 @@
 //   15 % ciudades del tamaño pedido.
 import { useState } from "react";
 import Icono from "../../components/common/Icono";
+import IconoMapa from "./IconosMapa";
 import { CALENDLY_URL } from "../../config/contacto";
 import { SIN_RAMA, masteresDe, nombreRama } from "./indice";
 import { RECOMENDAR, eur, numero } from "./mapaTextos";
@@ -84,7 +85,7 @@ function Opcion({ activa, onClick, children }) {
       type="button"
       aria-pressed={activa}
       onClick={onClick}
-      className={`mapa-boton rounded-full px-3 py-2 text-xs font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
+      className={`mapa-boton mov-toque inline-flex min-h-[44px] items-center rounded-full px-3.5 py-2 text-xs font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
         activa ? "bg-[#003648] text-white" : "bg-white text-[#003648] ring-1 ring-[#CFE6FD] hover:bg-[#F6FBFF]"
       }`}
     >
@@ -128,7 +129,7 @@ export default function Recomendador({ indice, onCerrar, onResultado, onElegir, 
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#B8661F]">
+          <p className="mapa-rotulo mapa-rotulo-sol">
             <Icono nombre="brujula" size={14} />
             {RECOMENDAR.rotulo}
           </p>
@@ -141,9 +142,9 @@ export default function Recomendador({ indice, onCerrar, onResultado, onElegir, 
           type="button"
           onClick={onCerrar}
           aria-label={RECOMENDAR.cerrar}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-lg font-bold text-[#003648] ring-1 ring-[#F09C48]/50 hover:bg-[#FFEBD6] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+          className="mov-toque flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#003648] ring-1 ring-[#F09C48]/50 hover:bg-[#FFEBD6] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
         >
-          ×
+          <IconoMapa nombre="cerrar" size={18} strokeWidth={2.1} />
         </button>
       </div>
 
@@ -189,7 +190,7 @@ export default function Recomendador({ indice, onCerrar, onResultado, onElegir, 
       <button
         type="button"
         onClick={calcular}
-        className="mapa-boton mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#003648] px-5 py-3 text-sm font-extrabold text-white sm:w-auto focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+        className="mapa-boton mov-toque mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#003648] px-5 py-3 text-sm font-extrabold text-white sm:w-auto focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
       >
         <Icono nombre="destello" size={17} />
         {resultado ? RECOMENDAR.recalcular : RECOMENDAR.ver}
@@ -201,7 +202,10 @@ export default function Recomendador({ indice, onCerrar, onResultado, onElegir, 
             <p className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#003648] ring-1 ring-[#F09C48]/40">{RECOMENDAR.vacio}</p>
           ) : (
             <>
-              <h3 className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#B8661F]">{RECOMENDAR.resultado}</h3>
+              <h3 className="mapa-rotulo mapa-rotulo-sol">
+                <Icono nombre="trofeo" size={14} />
+                {RECOMENDAR.resultado}
+              </h3>
               <ol className="mt-2 grid gap-2 md:grid-cols-3">
                 {resultado.map((r, i) => (
                   <li key={r.id} className="flex gap-3 rounded-2xl bg-white p-3 ring-1 ring-[#F09C48]/40">
@@ -214,8 +218,9 @@ export default function Recomendador({ indice, onCerrar, onResultado, onElegir, 
                       <button
                         type="button"
                         onClick={() => onElegir("comunidad", r.id)}
-                        className="mt-1 text-xs font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
+                        className="mov-toque mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
                       >
+                        <Icono nombre="mapa" size={12} />
                         {RECOMENDAR.verMapa}
                       </button>
                     </div>

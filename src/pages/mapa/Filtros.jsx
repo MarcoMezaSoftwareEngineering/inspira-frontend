@@ -5,7 +5,13 @@
 // presupuesto total (matrícula + vida), contador de resultados, orden de las
 // universidades y capas visibles. Los filtros no esconden nada: atenúan en el
 // mapa lo que no cumple. Cada filtro opcional solo sale si la API trae su dato.
+//
+// 17/09/2026: cada control lleva su icono de trazo delante (antes el buscador
+// tenía una lupa dibujada aquí y la casilla de becas era el carácter «✓», que
+// cada sistema pinta de un tamaño). Los filtros y su comportamiento no cambian.
 import { useId, useMemo, useState } from "react";
+import Icono from "../../components/common/Icono";
+import IconoMapa from "./IconosMapa";
 import { SIN_RAMA, buscar, hayRanking, hayTitularidad, nombreRama } from "./indice";
 import { tonoDe } from "./tonosMapa";
 import {
@@ -24,17 +30,8 @@ import {
 } from "./mapaTextos";
 
 const CLASE_SELECT =
-  "w-full rounded-2xl border border-neutral-300 bg-white px-3 py-3 text-sm font-semibold text-[#003648] focus:outline-none focus:ring-4 focus:ring-[#96CCFC]";
+  "w-full min-h-[46px] rounded-2xl border border-neutral-300 bg-white pr-3 py-3 text-sm font-semibold text-[#003648] focus:outline-none focus:ring-4 focus:ring-[#96CCFC]";
 const ACTIVO = "border-[#F09C48] ring-2 ring-[#F09C48]/40";
-
-function IconoLupa() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
-}
 
 function Buscador({ indice, onElegir }) {
   const id = useId();
@@ -75,7 +72,7 @@ function Buscador({ indice, onElegir }) {
         {T.buscar}
       </label>
       <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0A5873]">
-        <IconoLupa />
+        <Icono nombre="lupa" size={18} />
       </span>
       <input
         id={`${id}-q`}
@@ -139,23 +136,38 @@ function Buscador({ indice, onElegir }) {
   );
 }
 
-function Interruptor({ etiqueta, activo, onCambiar }) {
+function Interruptor({ etiqueta, activo, onCambiar, icono = null }) {
   return (
-    <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-[#003648]">
+    <label
+      className={`mov-toque inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold text-[#003648] ${
+        activo ? "border-[#96CCFC] bg-[#E6F2FE]" : "border-neutral-200 bg-white hover:bg-[#F6FBFF]"
+      }`}
+    >
       <input type="checkbox" checked={activo} onChange={(e) => onCambiar(e.target.checked)} className="h-4 w-4 accent-[#0A5873]" />
+      {icono && <Icono nombre={icono} size={14} className={activo ? "text-[#0A5873]" : "text-neutral-500"} />}
       {etiqueta}
     </label>
   );
 }
 
-function Selector({ etiqueta, valor, vacio, opciones, onCambiar }) {
+function Selector({ etiqueta, valor, vacio, opciones, onCambiar, icono = null }) {
   const id = useId();
   return (
-    <div className="min-w-0">
+    <div className="relative min-w-0">
       <label htmlFor={id} className="sr-only">
         {etiqueta}
       </label>
-      <select id={id} value={valor || ""} onChange={(e) => onCambiar(e.target.value || null)} className={`${CLASE_SELECT} ${valor ? ACTIVO : ""}`}>
+      {icono && (
+        <span aria-hidden="true" className={`pointer-events-none absolute left-3 top-1/2 z-[1] -translate-y-1/2 ${valor ? "text-[#F09C48]" : "text-[#0A5873]"}`}>
+          <Icono nombre={icono} size={16} />
+        </span>
+      )}
+      <select
+        id={id}
+        value={valor || ""}
+        onChange={(e) => onCambiar(e.target.value || null)}
+        className={`${CLASE_SELECT} ${icono ? "pl-9" : "pl-3"} ${valor ? ACTIVO : ""}`}
+      >
         <option value="">{vacio}</option>
         {opciones.map((o) => (
           <option key={o.id} value={o.id}>
@@ -167,13 +179,14 @@ function Selector({ etiqueta, valor, vacio, opciones, onCambiar }) {
   );
 }
 
-function Deslizador({ etiqueta, limites, valor, onCambiar, textoValor, acento = "accent-[#F09C48]" }) {
+function Deslizador({ etiqueta, limites, valor, onCambiar, textoValor, acento = "accent-[#F09C48]", icono = "euro" }) {
   const id = useId();
   const v = Math.min(valor ?? limites.max, limites.max);
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <label htmlFor={id} className="w-[7.4rem] shrink-0 text-xs font-bold text-[#003648]">
-        {etiqueta}
+      <label htmlFor={id} className="flex w-[7.4rem] shrink-0 items-center gap-1.5 text-xs font-bold text-[#003648]">
+        <Icono nombre={icono} size={14} className={valor == null ? "text-[#0A5873]" : "text-[#F09C48]"} />
+        <span className="min-w-0">{etiqueta}</span>
       </label>
       <input
         id={id}
@@ -225,18 +238,25 @@ export default function Filtros({
   const matices = [ranking && RANKING.resumen[ranking], abre && PLAZOS.resumen[abre], becas && BECAS.resumen].filter(Boolean).join(", ");
 
   return (
-    <div className="mapa-panel rounded-[28px] border border-[#E1EFFD] bg-white p-4 shadow-[0_22px_48px_-36px_rgba(0,54,72,0.5)] sm:p-5">
+    <div className="mapa-panel rounded-[28px] border border-[#E1EFFD] bg-white p-4 shadow-[0_22px_48px_-36px_rgba(0,54,72,0.5)] sm:p-5" data-revelar="suave">
+      <p className="mapa-rotulo mb-2.5">
+        <IconoMapa nombre="ajustes" size={14} />
+        Busca y filtra
+      </p>
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_280px]">
         <Buscador indice={indice} onElegir={onBuscar} />
-        <div>
+        <div className="relative">
           <label htmlFor={`${id}-rama`} className="sr-only">
             {T.filtroRama}
           </label>
+          <span aria-hidden="true" className={`pointer-events-none absolute left-3 top-1/2 z-[1] -translate-y-1/2 ${rama ? "text-[#F09C48]" : "text-[#0A5873]"}`}>
+            <Icono nombre="birrete" size={16} />
+          </span>
           <select
             id={`${id}-rama`}
             value={rama || ""}
             onChange={(e) => onCambiar({ rama: e.target.value || null })}
-            className={`${CLASE_SELECT} ${rama ? ACTIVO : ""}`}
+            className={`${CLASE_SELECT} pl-9 ${rama ? ACTIVO : ""}`}
           >
             <option value="">{T.todasRamas}</option>
             {indice.ramas
@@ -255,6 +275,7 @@ export default function Filtros({
           {conTitularidad && (
             <Selector
               etiqueta={TITULARIDAD.etiqueta}
+              icono="escudo"
               valor={titularidad}
               vacio={TITULARIDAD.todas}
               opciones={TITULARIDAD.opciones}
@@ -264,6 +285,7 @@ export default function Filtros({
           {conRanking && (
             <Selector
               etiqueta={RANKING.etiqueta}
+              icono="trofeo"
               valor={ranking}
               vacio={RANKING.todas}
               opciones={RANKING.opciones}
@@ -272,23 +294,33 @@ export default function Filtros({
             />
           )}
           {conPlazos && (
-            <Selector etiqueta={PLAZOS.filtro} valor={abre} vacio={PLAZOS.todas} opciones={PLAZOS.opciones} onCambiar={(v) => onCambiar({ abre: v })} />
+            <Selector
+              etiqueta={PLAZOS.filtro}
+              icono="calendario"
+              valor={abre}
+              vacio={PLAZOS.todas}
+              opciones={PLAZOS.opciones}
+              onCambiar={(v) => onCambiar({ abre: v })}
+            />
           )}
           {conBecas && (
             <button
               type="button"
               aria-pressed={becas}
               onClick={() => onCambiar({ becas: !becas })}
-              className={`mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-sm font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
+              className={`mapa-boton mov-toque inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-sm font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
                 becas ? `bg-[#FFF6EC] text-[#003648] ${ACTIVO}` : "border-neutral-300 bg-white text-[#003648] hover:bg-[#F6FBFF]"
               }`}
             >
               <span
                 aria-hidden="true"
-                className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] ${becas ? "border-[#F09C48] bg-[#F09C48] text-[#003648]" : "border-neutral-400"}`}
+                className={`flex h-5 w-5 items-center justify-center rounded-md border ${
+                  becas ? "border-[#F09C48] bg-[#F09C48] text-[#003648]" : "border-neutral-400 text-transparent"
+                }`}
               >
-                {becas ? "✓" : ""}
+                <Icono nombre="check" size={13} strokeWidth={2.6} />
               </span>
+              <Icono nombre="regalo" size={16} className={becas ? "text-[#B8661F]" : "text-neutral-500"} />
               {BECAS.filtro}
             </button>
           )}
@@ -307,12 +339,13 @@ export default function Filtros({
                   type="button"
                   aria-pressed={activa}
                   onClick={() => alternarLista(l.id)}
-                  className={`mapa-boton inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
+                  className={`mapa-boton mov-toque inline-flex min-h-[44px] items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
                     activa ? `border-transparent bg-[#E6F2FE] text-[#003648] ring-2 ${tono.anillo}` : "border-neutral-200 bg-white text-neutral-900 hover:bg-[#F6FBFF]"
                   }`}
                 >
                   <span aria-hidden="true" className={`h-3 w-3 shrink-0 rounded ${tono.muestra}`} />
                   {etiquetaLista(l)}
+                  {activa && <Icono nombre="check" size={13} strokeWidth={2.6} className="text-[#0A5873]" />}
                 </button>
               );
             })}
@@ -341,6 +374,7 @@ export default function Filtros({
                 onCambiar={(v) => onCambiar({ presupuesto: v })}
                 textoValor={presupuesto == null ? PRESUPUESTO.sinLimite : `${eur(presupuesto)} ${PRESUPUESTO.sufijo}`}
                 acento="accent-[#0A5873]"
+                icono="maletin"
               />
               <p className="text-[11px] leading-snug text-neutral-700">
                 {PRESUPUESTO.explicacion} <strong className="text-[#003648]">{PRESUPUESTO.iprem}</strong>
@@ -363,8 +397,13 @@ export default function Filtros({
               {onVerResultados && (
                 <>
                   {" · "}
-                  <button type="button" onClick={onVerResultados} className="font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]">
+                  <button
+                    type="button"
+                    onClick={onVerResultados}
+                    className="inline-flex items-center gap-1 font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
+                  >
                     Ver la lista
+                    <Icono nombre="flecha" size={12} />
                   </button>
                 </>
               )}
@@ -383,6 +422,7 @@ export default function Filtros({
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {conRanking && (
             <label className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-0.5 pl-3 pr-1 text-xs font-bold text-[#003648]">
+              <Icono nombre="grafico" size={14} className="text-[#0A5873]" />
               <span className="sr-only sm:not-sr-only">{ORDEN.etiqueta}</span>
               <select
                 value={orden}
@@ -395,21 +435,27 @@ export default function Filtros({
               </select>
             </label>
           )}
-          <Interruptor etiqueta={T.capaCiudades} activo={capas.ciudades} onCambiar={(v) => onCapas((c) => ({ ...c, ciudades: v }))} />
-          <Interruptor etiqueta={T.capaCasos} activo={capas.casos} onCambiar={(v) => onCapas((c) => ({ ...c, casos: v }))} />
+          <Interruptor icono="ubicacion" etiqueta={T.capaCiudades} activo={capas.ciudades} onCambiar={(v) => onCapas((c) => ({ ...c, ciudades: v }))} />
+          <Interruptor icono="estrella" etiqueta={T.capaCasos} activo={capas.casos} onCambiar={(v) => onCapas((c) => ({ ...c, casos: v }))} />
           {filtros.activos && (
             <button
               type="button"
               onClick={() =>
                 onCambiar({ listas: [], rama: null, max: null, titularidad: null, ranking: null, abre: null, becas: false, presupuesto: null })
               }
-              className="rounded-full px-3 py-1.5 text-xs font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
+              className="mov-toque inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
             >
+              <IconoMapa nombre="cerrar" size={13} />
               {T.limpiar}
             </button>
           )}
           {comparados > 0 && (
-            <button type="button" onClick={onVerComparador} className="mapa-boton rounded-full bg-[#003648] px-3 py-1.5 text-xs font-bold text-white">
+            <button
+              type="button"
+              onClick={onVerComparador}
+              className="mapa-boton mov-toque inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-[#003648] px-3.5 py-1.5 text-xs font-bold text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+            >
+              <Icono nombre="balanza" size={14} className="text-[#F09C48]" />
               {T.verComparador} ({comparados})
             </button>
           )}

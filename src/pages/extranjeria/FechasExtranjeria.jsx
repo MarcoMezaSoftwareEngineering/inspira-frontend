@@ -59,7 +59,7 @@ const WA_GENERAL = whatsappDesde(
 );
 const WA_SIN_OFICINA = whatsappDesde(
   "extranjeria-fechas",
-  "Mi provincia no publica las fechas de Extranjería. ¿Cómo consulto el estado de mi expediente?",
+  "Mi provincia no publica las fechas de Extranjería. ¿Pueden ayudarme con mi trámite?",
 );
 const WA_SILENCIO = whatsappDesde(
   "extranjeria-fechas",
@@ -69,14 +69,22 @@ const WA_SILENCIO = whatsappDesde(
 // Enlaces oficiales de respaldo: SOLO se enseñan si la API no responde, para
 // que nadie se quede sin a dónde ir. La fuente de cada oficina llega en
 // `fuente_url` y es la que se enseña en condiciones normales.
+//
+// Son las páginas de donde salen las fechas, no la sede electrónica: esta
+// página trata de por qué fecha va cada oficina, y consultar el estado del
+// expediente propio es otra cosa, que cada uno hace con su número.
 const FUENTES_GENERALES = [
   {
-    nombre: "Consulta del estado de tu expediente (sede electrónica)",
-    url: "https://sede.administracionespublicas.gob.es/pagina/index/directorio/infoext2",
+    nombre: "Delegación del Gobierno en Madrid · Extranjería",
+    url: "https://mptmd.gob.es/portal/delegaciones_gobierno/delegaciones/madrid/servicios/extranjeria",
   },
   {
-    nombre: "Portal de Inmigración del Ministerio de Inclusión",
-    url: "https://extranjeros.inclusion.gob.es/",
+    nombre: "Delegación del Gobierno en la Comunitat Valenciana · Extranjería",
+    url: "https://mptmd.gob.es/portal/delegaciones_gobierno/delegaciones/comunidad_valenciana/servicios/extranjeria",
+  },
+  {
+    nombre: "Delegación del Gobierno en Illes Balears · Extranjería",
+    url: "https://mptmd.gob.es/portal/delegaciones_gobierno/delegaciones/illesbalears/servicios/extranjeria",
   },
 ];
 
@@ -84,7 +92,7 @@ const FUENTES_GENERALES = [
 // (lo edita el equipo desde Core); este solo cubre el rato en que aún no ha
 // llegado o la petición falló.
 const AVISO_POR_DEFECTO =
-  "Las fechas de esta página son las que publican las propias oficinas de Extranjería con carácter orientativo. No son plazos legales ni comprometen a la Administración ni a Inspira Legal: una oficina puede adelantarse, retrasarse o dejar de publicarlas sin avisar. Para conocer el estado exacto de tu expediente, consulta la sede electrónica con tu número de expediente.";
+  "Las fechas de esta página son las que publican las propias oficinas de Extranjería con carácter orientativo. No son plazos legales ni comprometen a la Administración ni a Inspira Legal: una oficina puede adelantarse, retrasarse o dejar de publicarlas sin avisar. Cada oficina publica las suyas cuando quiere y en el formato que quiere; aquí las recogemos tal como las publica.";
 
 const PREGUNTAS = [
   {
@@ -708,9 +716,8 @@ export default function FechasExtranjeria() {
               inventado, y con un expediente de extranjería en juego eso hace más daño que no saber.
             </p>
             <p>
-              Lo que sí se puede hacer en cualquier provincia es consultar <b>el estado concreto de tu
-              expediente</b> con su número. Si no sabes por dónde empezar, escríbenos y te decimos
-              exactamente qué mirar y qué significa lo que salga.
+              Si tu subdelegación empieza a publicarlas, la añadimos aquí. Y si crees que ya las
+              publica y no la ves, dínoslo: la buscamos y la damos de alta.
             </p>
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -726,8 +733,8 @@ export default function FechasExtranjeria() {
             </a>
             <EnlaceFuente
               url={FUENTES_GENERALES[0].url}
-              nombre="Consultar el estado de mi expediente"
-              onClick={() => evento("extranjeria_fechas_fuente", { oficina: "sede" })}
+              nombre="Ver las delegaciones del Gobierno"
+              onClick={() => evento("extranjeria_fechas_fuente", { oficina: "delegaciones" })}
             />
           </div>
         </div>

@@ -17,6 +17,7 @@ import Icono from "../../components/common/Icono";
 import { whatsappDesde } from "../../config/contacto";
 import { utmGuardados } from "../../lib/analytics";
 import { PAISES } from "../panel/components/perfil.shared";
+import IconoMapa from "./IconosMapa";
 import { eventoMapa } from "./eventosMapa";
 import { GUARDAR } from "./mapaTextos";
 
@@ -137,7 +138,10 @@ function Dialogo({ seleccion, indice, filtros, onCerrar }) {
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{GUARDAR.rotulo}</p>
+            <p className="mapa-rotulo">
+              <Icono nombre="documento" size={14} />
+              {GUARDAR.rotulo}
+            </p>
             <h2 id={`${id}-titulo`} className="mapa-titular mt-1 text-[22px] font-bold leading-tight text-[#003648]">
               {estado === "ok" ? GUARDAR.okTitulo : GUARDAR.titulo}
             </h2>
@@ -146,9 +150,9 @@ function Dialogo({ seleccion, indice, filtros, onCerrar }) {
             type="button"
             onClick={onCerrar}
             aria-label={GUARDAR.cerrar}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E6F2FE] text-lg font-bold text-[#003648] hover:bg-[#CFE6FD] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+            className="mov-toque flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E6F2FE] text-[#003648] hover:bg-[#CFE6FD] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
           >
-            ×
+            <IconoMapa nombre="cerrar" size={18} strokeWidth={2.1} />
           </button>
         </div>
 
@@ -165,7 +169,7 @@ function Dialogo({ seleccion, indice, filtros, onCerrar }) {
               href={enlaceWhatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="mapa-boton mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-3 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648]"
+              className="mapa-boton mov-toque mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-3 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648]"
             >
               <Icono nombre="chat" size={18} />
               {GUARDAR.okWhatsapp}
@@ -272,7 +276,7 @@ function Dialogo({ seleccion, indice, filtros, onCerrar }) {
             <button
               type="submit"
               disabled={estado === "enviando"}
-              className="mapa-boton inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#003648] px-4 py-3 text-sm font-extrabold text-white disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+              className="mapa-boton mov-toque inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#003648] px-4 py-3 text-sm font-extrabold text-white disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
             >
               <Icono nombre="documento" size={17} />
               {estado === "enviando" ? GUARDAR.enviando : GUARDAR.enviar}
@@ -297,7 +301,7 @@ export function BotonGuardar({ onClick, claro = false }) {
     <button
       type="button"
       onClick={onClick}
-      className={`mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-extrabold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
+      className={`mapa-boton mov-toque inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-extrabold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
         claro ? "bg-white text-[#003648] ring-1 ring-[#96CCFC] hover:bg-[#F6FBFF]" : "bg-[#E6F2FE] text-[#003648] hover:bg-[#CFE6FD]"
       }`}
     >

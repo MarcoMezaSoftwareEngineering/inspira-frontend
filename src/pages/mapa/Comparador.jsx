@@ -7,6 +7,8 @@
 //
 // Barras: un solo tono, cada una con su cifra al lado; la longitud es relativa
 // al mayor de la fila.
+import Icono from "../../components/common/Icono";
+import IconoMapa from "./IconosMapa";
 import { precioDeUniversidad, ramaPrincipal } from "./indice";
 import { tonoDe } from "./tonosMapa";
 import { gastoMensual } from "./vida";
@@ -211,10 +213,13 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
   const nombresEjemplo = ejemplo.map((id) => indice.comunidades.get(id)?.nombre).filter(Boolean);
 
   return (
-    <section id="mapa-comparador" aria-labelledby="mapa-comparador-titulo" className="mt-14 scroll-mt-28">
+    <section id="mapa-comparador" aria-labelledby="mapa-comparador-titulo" className="mt-14 scroll-mt-28" data-revelar>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">Comparador</p>
+          <p className="mapa-rotulo">
+            <Icono nombre="balanza" size={14} />
+            Comparador
+          </p>
           <h2 id="mapa-comparador-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
             Compara lado a lado
           </h2>
@@ -223,7 +228,12 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
         {items.length > 0 && (
           <div className="flex flex-wrap items-center gap-3">
             {onGuardar && <BotonGuardar claro onClick={onGuardar} />}
-            <button type="button" onClick={onVaciar} className="text-sm font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]">
+            <button
+              type="button"
+              onClick={onVaciar}
+              className="mov-toque inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
+            >
+              <IconoMapa nombre="cerrar" size={14} />
               Vaciar el comparador
             </button>
           </div>
@@ -237,7 +247,9 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
 
       {items.length === 0 ? (
         <div className="mt-4 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-[#96CCFC] bg-[#F6FBFF] px-5 py-9 text-center">
-          <IlustracionVacia />
+          <span className="mov-flota">
+            <IlustracionVacia />
+          </span>
           <p className="mapa-titular text-lg font-bold text-[#003648]">Aún no hay nada que comparar</p>
           <p className="max-w-md text-sm leading-relaxed text-neutral-700">
             Abre una comunidad o una universidad en el mapa y pulsa «Comparar». Verás cuánto cuesta un máster en cada una, su oferta y cómo se
@@ -247,15 +259,22 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
             <button
               type="button"
               onClick={onProbar}
-              className="mapa-boton mt-1 rounded-xl bg-[#003648] px-4 py-2.5 text-sm font-extrabold text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+              className="mapa-boton mov-toque mt-1 inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-[#003648] px-4 py-2.5 text-sm font-extrabold text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
             >
+              <Icono nombre="destello" size={16} className="text-[#F09C48]" />
               Probar con {nombresEjemplo.slice(0, -1).join(", ")} y {nombresEjemplo[nombresEjemplo.length - 1]}
             </button>
           )}
         </div>
       ) : (
         <>
-          <div className="mt-4 overflow-x-auto rounded-3xl border border-neutral-200 bg-white">
+          {/* La tabla se desplaza dentro de su caja; en el teléfono eso no se
+              adivina, así que se dice. Desaparece en cuanto hay sitio. */}
+          <p className="mt-4 flex items-center gap-1.5 text-[12px] font-semibold text-neutral-700 sm:hidden">
+            <Icono nombre="toque" size={14} className="text-[#F09C48]" />
+            Desliza la tabla a los lados para ver todas las columnas.
+          </p>
+          <div className="mt-2 overflow-x-auto rounded-3xl border border-neutral-200 bg-white sm:mt-4">
             <table className="w-full min-w-[600px] border-collapse text-left text-sm">
               <caption className="sr-only">Comparación de {comparar.tipo === "comunidad" ? "comunidades" : "universidades"}</caption>
               <thead>
@@ -281,16 +300,18 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
                             type="button"
                             onClick={() => onQuitar(it.id)}
                             aria-label={`Quitar ${it.nombre} del comparador`}
-                            className="shrink-0 rounded-full px-2 py-0.5 text-xs font-bold text-neutral-700 hover:bg-[#E6F2FE] hover:text-[#003648]"
+                            className="mov-toque inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-bold text-neutral-700 hover:bg-[#E6F2FE] hover:text-[#003648]"
                           >
+                            <IconoMapa nombre="cerrar" size={12} />
                             Quitar
                           </button>
                         </span>
                         <button
                           type="button"
                           onClick={() => onVer(comparar.tipo, it.id)}
-                          className="mt-2 text-xs font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
+                          className="mov-toque mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#0A5873] underline underline-offset-2 hover:text-[#003648]"
                         >
+                          <Icono nombre="mapa" size={12} />
                           Ver en el mapa
                         </button>
                       </th>

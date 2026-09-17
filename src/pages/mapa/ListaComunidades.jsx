@@ -5,6 +5,8 @@
 //
 // Con «Mejor ranking primero», dentro de cada lista van primero las comunidades
 // cuya mejor universidad tiene mejor puesto en QS, y se dice cuál es.
+import Icono from "../../components/common/Icono";
+import { cascada } from "../../lib/revelar";
 import { mejorRanking } from "./indice";
 import { tonoDe } from "./tonosMapa";
 import { PAQUETE, eur, etiquetaLista, importeMatricula, mayus, plural } from "./mapaTextos";
@@ -24,10 +26,14 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
       ),
   }));
   const fuera = indice.datos.fueraDeListas.comunidades.map((id) => ({ id, nombre: geoPorId.get(id)?.nombre || id }));
+  const paso = cascada(90);
 
   return (
-    <section aria-labelledby="mapa-lista-titulo" className="mt-14">
-      <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">En texto</p>
+    <section aria-labelledby="mapa-lista-titulo" className="mt-14" data-revelar>
+      <p className="mapa-rotulo">
+        <Icono nombre="libro" size={14} />
+        En texto
+      </p>
       <h2 id="mapa-lista-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
         Cuánto cuesta un máster en cada comunidad
       </h2>
@@ -41,7 +47,7 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {grupos.map(({ lista, comunidades }) => (
-          <div key={lista.id} className="rounded-3xl border border-neutral-200 bg-white p-4">
+          <div key={lista.id} data-revelar="suave" style={paso()} className="mapa-tarjeta p-4">
             <h3 className="flex flex-wrap items-center gap-2 text-sm font-extrabold text-[#003648]">
               <span aria-hidden="true" className={`h-3.5 w-3.5 rounded ${tonoDe(lista.id).muestra}`} />
               <span className="mapa-titular text-base">{etiquetaLista(lista)}</span>
@@ -58,7 +64,7 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
                       type="button"
                       aria-pressed={activa}
                       onClick={() => onElegir("comunidad", c.id)}
-                      className={`mapa-boton flex w-full items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-left hover:bg-[#F6FBFF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
+                      className={`mapa-boton mov-toque flex w-full items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-left hover:bg-[#F6FBFF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
                         activa ? "border-[#0A5873] bg-[#E6F2FE]" : "border-neutral-200 bg-white"
                       } ${noCumple ? "opacity-55" : ""}`}
                     >
@@ -100,7 +106,7 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
               key={f.id}
               type="button"
               onClick={() => onElegir("comunidad", f.id)}
-              className="mapa-boton rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-bold text-[#003648] hover:bg-[#F6FBFF]"
+              className="mapa-boton mov-toque inline-flex min-h-[44px] items-center rounded-full border border-neutral-200 bg-white px-3.5 py-1 text-xs font-bold text-[#003648] hover:bg-[#F6FBFF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
             >
               {f.nombre}
             </button>

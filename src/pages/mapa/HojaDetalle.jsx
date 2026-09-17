@@ -12,18 +12,11 @@
 // en relativo a él; sin el portal la hoja quedaba al final de la página.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import IconoMapa from "./IconosMapa";
 import { prefiereMenosMovimiento } from "./indice";
 
 // Alto de la barra inferior (v4.css .barra-inferior), sin el área segura.
 const BARRA_INFERIOR_PX = 62;
-
-function IconoCerrar() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-      <path d="M6 6l12 12M18 6 6 18" />
-    </svg>
-  );
-}
 
 export default function HojaDetalle({ esEscritorio, abierta, clave, titulo, onCerrar, children }) {
   const contenido = useRef(null);
@@ -115,13 +108,13 @@ export default function HojaDetalle({ esEscritorio, abierta, clave, titulo, onCe
         onPointerUp={soltar}
         onPointerCancel={soltar}
       >
-        <span aria-hidden="true" className="mx-auto block h-1.5 w-12 rounded-full bg-[#CFE6FD]" />
+        <span aria-hidden="true" className="mx-auto block h-1.5 w-12 rounded-full bg-[#96CCFC]" />
         <div className="mt-2 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setModo((m) => (m === "media" ? "completa" : "media"))}
             aria-expanded={modo === "completa"}
-            className="mapa-titular min-w-0 truncate text-left text-sm font-bold text-[#003648]"
+            className="mapa-titular flex min-h-[44px] min-w-0 items-center truncate text-left text-sm font-bold text-[#003648]"
           >
             {titulo}
           </button>
@@ -129,9 +122,9 @@ export default function HojaDetalle({ esEscritorio, abierta, clave, titulo, onCe
             type="button"
             onClick={onCerrar}
             aria-label="Cerrar la ficha"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E6F2FE] text-[#003648] transition hover:bg-[#CFE6FD] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+            className="mov-toque flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E6F2FE] text-[#003648] hover:bg-[#CFE6FD] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
           >
-            <IconoCerrar />
+            <IconoMapa nombre="cerrar" size={17} strokeWidth={2.1} />
           </button>
         </div>
       </div>

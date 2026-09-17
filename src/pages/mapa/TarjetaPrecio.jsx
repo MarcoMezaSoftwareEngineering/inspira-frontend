@@ -7,6 +7,7 @@
 // universidad». Si la confianza del dato es baja, se dice con discreción. En
 // las comunidades que la API marca en `precios.sinPublicar` (Cataluña) no hay
 // cifra: «La matrícula la fija cada universidad». Si no hay dato, no se pinta.
+import Icono from "../../components/common/Icono";
 import { useContador } from "./useContador";
 import { PRECIO, eur, numero, plural } from "./mapaTextos";
 
@@ -16,7 +17,10 @@ export default function TarjetaPrecio({ precio, ejemplos = [], ramas = [], refer
   if (sinPublicar) {
     return (
       <section className="relative mt-5 overflow-hidden rounded-3xl bg-white p-4 ring-1 ring-[#CFE6FD]">
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{PRECIO.titulo}</p>
+        <p className="mapa-rotulo">
+          <Icono nombre="euro" size={14} />
+          {PRECIO.titulo}
+        </p>
         <p className="mapa-titular mt-1.5 text-xl font-bold leading-snug text-[#003648]">{PRECIO.sinPublicar}</p>
         <p className="mt-1 text-[11px] leading-snug text-neutral-700">{PRECIO.sinPublicarDetalle}</p>
       </section>
@@ -32,7 +36,10 @@ export default function TarjetaPrecio({ precio, ejemplos = [], ramas = [], refer
   return (
     <section className="relative mt-5 overflow-hidden rounded-3xl bg-white p-4 shadow-[0_22px_44px_-32px_rgba(0,54,72,0.55)] ring-1 ring-[#CFE6FD]">
       <span aria-hidden="true" className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#96CCFC]/25" />
-      <p className="relative text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{PRECIO.titulo}</p>
+      <p className="mapa-rotulo relative">
+        <Icono nombre="euro" size={14} />
+        {PRECIO.titulo}
+      </p>
       <p className="mapa-titular relative mt-1.5 flex flex-wrap items-baseline gap-x-2 text-[#003648]">
         <span className="text-[32px] font-bold leading-none tabular-nums">
           ≈ {numero(habitual)}
@@ -77,7 +84,10 @@ export default function TarjetaPrecio({ precio, ejemplos = [], ramas = [], refer
 
       {ejemplos.length > 0 && (
         <div className="relative mt-4 border-t border-[#E1EFFD] pt-3">
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{PRECIO.ejemplos}</p>
+          <p className="mapa-rotulo">
+            <Icono nombre="libro" size={14} />
+            {PRECIO.ejemplos}
+          </p>
           <ul className="mt-2 space-y-2">
             {ejemplos.map((x, i) => (
               <li key={`${x.nombre}-${i}`} className="flex items-start justify-between gap-3 rounded-2xl bg-[#F6FBFF] px-3 py-2">

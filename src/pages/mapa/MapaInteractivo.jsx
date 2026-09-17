@@ -25,6 +25,7 @@
 // trazado.
 import { useEffect, useMemo, useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
+import IconoMapa from "./IconosMapa";
 import { proyectar } from "./proyeccion";
 import { masteresDe, mejorRanking, prefiereMenosMovimiento } from "./indice";
 import { NOCHE, SOL, tonoDe } from "./tonosMapa";
@@ -726,9 +727,10 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
         <button
           type="button"
           onClick={onToda}
-          className="mapa-boton absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-xs font-extrabold text-[#003648] shadow-md ring-1 ring-[#96CCFC] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+          className="mapa-boton mov-toque absolute left-2 top-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-2 text-xs font-extrabold text-[#003648] shadow-md ring-1 ring-[#96CCFC] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
         >
-          <span aria-hidden="true">←</span> {T.todaEspana}
+          <IconoMapa nombre="izquierda" size={15} className="text-[#0A5873]" />
+          {T.todaEspana}
         </button>
       )}
 
@@ -737,7 +739,7 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
           className="pointer-events-none absolute left-2 inline-flex items-center gap-1.5 rounded-full bg-[#003648] px-2.5 py-1 text-[11px] font-bold text-white shadow-md"
           style={{ top: "calc(80% - 13px)" }}
         >
-          <Icono nombre="avion" size={13} className="text-[#F09C48]" />
+          <Icono nombre="avion" size={13} className="mov-flota text-[#F09C48]" />
           Desde Lima
         </span>
       )}
@@ -745,7 +747,7 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
       <div
         ref={tooltipRef}
         aria-hidden="true"
-        className={`pointer-events-none absolute left-0 top-0 z-10 w-max max-w-[240px] rounded-xl bg-[#003648] px-3 py-2 text-xs leading-snug text-white shadow-lg transition-opacity duration-100 ${
+        className={`mapa-globo pointer-events-none absolute left-0 top-0 z-10 w-max max-w-[240px] rounded-xl bg-[#003648] px-3.5 py-2.5 text-xs leading-snug text-white transition-opacity duration-100 ${
           hover ? "opacity-100" : "opacity-0"
         }`}
       >

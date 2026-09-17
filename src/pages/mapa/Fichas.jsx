@@ -6,6 +6,10 @@
 // Decisión del cliente (14/09/2026): no se enlaza a las webs de las
 // universidades. Las acciones son WhatsApp («Quiero postular aquí») y la
 // calculadora.
+//
+// 17/09/2026: cada rótulo y cada bloque llevan su icono, para que la ficha se
+// recorra con la vista sin leerla entera. Los iconos son opcionales: un Bloque
+// sin `icono` sigue pintando igual que antes.
 import Icono from "../../components/common/Icono";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
@@ -61,8 +65,13 @@ export function Cifra({ n }) {
   return <span className="tabular-nums">{numero(v)}</span>;
 }
 
-function Rotulo({ children }) {
-  return <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{children}</p>;
+function Rotulo({ children, icono = null }) {
+  return (
+    <p className="mapa-rotulo">
+      {icono && <Icono nombre={icono} size={14} />}
+      {children}
+    </p>
+  );
 }
 
 function Titulo({ children }) {
@@ -109,11 +118,14 @@ function Dato({ etiqueta, valor, nota, ancho = false }) {
   );
 }
 
-function Bloque({ titulo, accion = null, children }) {
+function Bloque({ titulo, accion = null, icono = null, children }) {
   return (
     <section className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">{titulo}</h3>
+        <h3 className="mapa-rotulo">
+          {icono && <Icono nombre={icono} size={14} />}
+          {titulo}
+        </h3>
         {accion}
       </div>
       <div className="mt-2">{children}</div>
@@ -126,7 +138,7 @@ function BotonChip({ children, onClick, icono }) {
     <button
       type="button"
       onClick={onClick}
-      className={`mapa-boton inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-[#003648] hover:border-[#96CCFC] hover:bg-[#F6FBFF] ${FOCO}`}
+      className={`mapa-boton mov-toque inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-bold text-[#003648] hover:border-[#96CCFC] hover:bg-[#F6FBFF] ${FOCO}`}
     >
       {icono && <Icono nombre={icono} size={13} className="text-[#F09C48]" />}
       {children}
@@ -153,11 +165,7 @@ function Migas({ foco, indice, geoPorId, onElegir }) {
       <ol className="flex flex-wrap items-center gap-1 text-xs">
         {pasos.map((p, i) => (
           <li key={`${i}-${p.etiqueta}`} className="flex items-center gap-1">
-            {i > 0 && (
-              <span aria-hidden="true" className="text-neutral-500">
-                ›
-              </span>
-            )}
+            {i > 0 && <Icono nombre="flecha" size={11} className="text-neutral-400" />}
             {i === pasos.length - 1 ? (
               <span aria-current="location" className="font-bold text-[#003648]">
                 {p.etiqueta}
@@ -228,7 +236,10 @@ function PlanInspira({ plan, lista }) {
       <span aria-hidden="true" className="pointer-events-none absolute -right-3 -top-3 text-[#F09C48]/25">
         <Icono nombre="avion" size={72} />
       </span>
-      <p className="relative text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#B8661F]">{PAQUETE.rotulo}</p>
+      <p className="mapa-rotulo mapa-rotulo-sol relative">
+        <Icono nombre="paquete" size={14} />
+        {PAQUETE.rotulo}
+      </p>
       <p className="mapa-titular relative mt-1 text-[15px] font-bold leading-tight text-[#003648]">Paquete de postulación desde</p>
       <p className="mapa-titular relative text-[28px] font-bold leading-none text-[#003648]">
         <Cifra n={plan.eur} />
@@ -299,7 +310,7 @@ function ListaUniversidades({ unis, campus = [], indice, rama, onElegir }) {
                 <span className="block text-[10px] font-semibold text-neutral-700">másteres</span>
               </span>
               <span aria-hidden="true" className="shrink-0 text-[#96CCFC] transition group-hover:translate-x-0.5 group-hover:text-[#0A5873]">
-                ›
+                <Icono nombre="flecha" size={14} />
               </span>
             </button>
           </li>
@@ -318,7 +329,7 @@ function BotonComparar({ tipo, id, comparador }) {
       aria-pressed={dentro}
       disabled={lleno}
       onClick={() => comparador.alternar(tipo, id)}
-      className={`mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold disabled:cursor-not-allowed disabled:opacity-50 ${FOCO} ${
+      className={`mapa-boton mov-toque inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold disabled:cursor-not-allowed disabled:opacity-50 ${FOCO} ${
         dentro ? "border-[#003648] bg-[#003648] text-white" : "border-[#003648] text-[#003648] hover:bg-[#F6FBFF]"
       }`}
     >
@@ -336,7 +347,7 @@ function Acciones({ whatsapp, guardar = null, children }) {
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => registrarEvento("mapa_whatsapp", whatsapp.evento)}
-        className={`mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-3 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] ${FOCO}`}
+        className={`mapa-boton mov-toque inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-3 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] ${FOCO}`}
       >
         <Icono nombre="chat" size={18} />
         {whatsapp.texto}
@@ -345,7 +356,7 @@ function Acciones({ whatsapp, guardar = null, children }) {
         <a
           href="/calculadora-master"
           onClick={irA("/calculadora-master")}
-          className={`mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-[#003648] px-3 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F6FBFF] ${FOCO}`}
+          className={`mapa-boton mov-toque inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border-2 border-[#003648] px-3 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F6FBFF] ${FOCO}`}
         >
           <Icono nombre="euro" size={17} />
           {T.calculadora}
@@ -363,8 +374,8 @@ const Descargo = () => <p className="mt-4 text-[11px] leading-snug text-neutral-
 function Plazo({ rotulo, fase, curso, detalle = null, fases = [] }) {
   return (
     <section className="mt-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-[#96CCFC]">
-      <p className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0A5873]">
-        <Icono nombre="calendario" size={13} className="text-[#F09C48]" />
+      <p className="mapa-rotulo">
+        <Icono nombre="calendario" size={14} />
         {rotulo}
       </p>
       {fase ? (
@@ -399,7 +410,7 @@ function Plazo({ rotulo, fase, curso, detalle = null, fases = [] }) {
 function BecasUniversidad({ becas }) {
   if (!becas.length) return null;
   return (
-    <Bloque titulo={BECAS.titulo}>
+    <Bloque titulo={BECAS.titulo} icono="regalo">
       <ul className="flex flex-wrap gap-2">
         {becas.map((b, i) => (
           <li key={`${b.nombre}-${i}`} className="inline-flex flex-col rounded-2xl bg-[#FFF6EC] px-3 py-1.5 ring-1 ring-[#F09C48]/50">
@@ -435,14 +446,14 @@ export function FichaInicio({ indice, casos, onElegir, onRecomendar = null }) {
   const desdePaquete = Math.min(...listas.map((l) => l.desde).filter(Number.isFinite));
   return (
     <article>
-      <Rotulo>{INICIO.rotulo}</Rotulo>
+      <Rotulo icono="diana">{INICIO.rotulo}</Rotulo>
       <Titulo>{INICIO.titulo}</Titulo>
       <p className="mt-2 text-sm leading-relaxed text-neutral-700">{INICIO.texto}</p>
       {onRecomendar && (
         <button
           type="button"
           onClick={onRecomendar}
-          className={`mapa-boton mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] ${FOCO}`}
+          className={`mapa-boton mov-toque mt-3 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] ${FOCO}`}
         >
           <Icono nombre="brujula" size={17} />
           {RECOMENDAR.boton}: {RECOMENDAR.titulo.charAt(0).toLowerCase() + RECOMENDAR.titulo.slice(1)}
@@ -454,7 +465,7 @@ export function FichaInicio({ indice, casos, onElegir, onRecomendar = null }) {
         <Dato etiqueta="Másteres" valor={<Cifra n={totales.masteres} />} />
       </dl>
       {conPrecio.length > 0 && (
-        <Bloque titulo={INICIO.precios}>
+        <Bloque titulo={INICIO.precios} icono="euro">
           <div className="flex flex-wrap gap-2">
             {conPrecio.map((c) => (
               <BotonChip key={c.id} onClick={() => onElegir("comunidad", c.id)}>
@@ -465,7 +476,7 @@ export function FichaInicio({ indice, casos, onElegir, onRecomendar = null }) {
           <p className="mt-2 text-[11px] leading-snug text-neutral-700">{INICIO.preciosNota}</p>
         </Bloque>
       )}
-      <Bloque titulo="Las tres listas">
+      <Bloque titulo="Las tres listas" icono="paquete">
         <ul className="space-y-2.5">
           {listas.map((l) => (
             <li key={l.id} className="flex items-start gap-2.5 text-sm">
@@ -485,7 +496,7 @@ export function FichaInicio({ indice, casos, onElegir, onRecomendar = null }) {
         </ul>
         {Number.isFinite(desdePaquete) && <p className="mt-2 text-[11px] leading-snug text-neutral-700">{PAQUETE.leyenda}</p>}
       </Bloque>
-      <Bloque titulo="Ciudades con más másteres">
+      <Bloque titulo="Ciudades con más másteres" icono="ubicacion">
         <div className="flex flex-wrap gap-2">
           {top.map((c) => (
             <BotonChip key={c.id} onClick={() => onElegir("ciudad", c.id)}>
@@ -495,7 +506,7 @@ export function FichaInicio({ indice, casos, onElegir, onRecomendar = null }) {
         </div>
       </Bloque>
       {casos.length > 0 && (
-        <Bloque titulo="Casos de éxito en el mapa">
+        <Bloque titulo="Casos de éxito en el mapa" icono="estrella">
           <div className="flex flex-wrap gap-2">
             {casos.map((k) => (
               <BotonChip key={k.id} icono="estrella" onClick={() => onElegir("caso", k.id)}>
@@ -527,7 +538,7 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
       <div className="mt-3">
-        <Rotulo>Comunidad autónoma</Rotulo>
+        <Rotulo icono="mapa">Comunidad autónoma</Rotulo>
         <Titulo>{c.nombre}</Titulo>
         <div className="mt-2">
           <ChipLista lista={lista} />
@@ -555,22 +566,22 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden
 
       <VivirAqui comunidad={c} presupuesto={indice.presupuestos?.get(c.id) || null} />
 
-      <Bloque titulo="Cómo se postula">
+      <Bloque titulo="Cómo se postula" icono="documento">
         <p className="text-sm leading-relaxed text-neutral-900">{c.postulacion.texto}</p>
       </Bloque>
 
       <PlanInspira plan={c.plan} lista={lista} />
 
-      <Bloque titulo={`Universidades (${unis.length})`} accion={<SelectorOrden compacto orden={orden} onOrden={onOrden} />}>
+      <Bloque titulo={`Universidades (${unis.length})`} icono="casa" accion={<SelectorOrden compacto orden={orden} onOrden={onOrden} />}>
         <ListaUniversidades unis={unis} indice={indice} rama={rama} onElegir={onElegir} />
       </Bloque>
 
-      <Bloque titulo="Másteres oficiales por rama">
+      <Bloque titulo="Másteres oficiales por rama" icono="grafico">
         <BarrasRamas conteo={c.ramas} ramas={indice.ramas} resaltada={rama} />
       </Bloque>
 
       {ciudades.length > 0 && (
-        <Bloque titulo="Ciudades">
+        <Bloque titulo="Ciudades" icono="ubicacion">
           <div className="flex flex-wrap gap-2">
             {ciudades.map((ci) => (
               <BotonChip key={ci.id} onClick={() => onElegir("ciudad", ci.id)}>
@@ -603,7 +614,7 @@ export function FichaFuera({ id, foco, indice, geoPorId, planFuera, onElegir }) 
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
       <div className="mt-3">
-        <Rotulo>{islas ? "Comunidad autónoma" : "Ciudad autónoma"}</Rotulo>
+        <Rotulo icono="mapa">{islas ? "Comunidad autónoma" : "Ciudad autónoma"}</Rotulo>
         <Titulo>{nombre}</Titulo>
         <div className="mt-2">
           <ChipLista lista={null} />
@@ -653,7 +664,7 @@ export function FichaCiudad({ c, indice, foco, geoPorId, rama, orden, onOrden, c
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
       <div className="mt-3">
-        <Rotulo>Ciudad</Rotulo>
+        <Rotulo icono="ubicacion">Ciudad</Rotulo>
         <Titulo>{c.nombre}</Titulo>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <ChipLista lista={lista} />
@@ -682,20 +693,20 @@ export function FichaCiudad({ c, indice, foco, geoPorId, rama, orden, onOrden, c
         </p>
       )}
 
-      <Bloque titulo="Universidades" accion={unis.length + campus.length > 1 ? <SelectorOrden compacto orden={orden} onOrden={onOrden} /> : null}>
+      <Bloque titulo="Universidades" icono="casa" accion={unis.length + campus.length > 1 ? <SelectorOrden compacto orden={orden} onOrden={onOrden} /> : null}>
         <ListaUniversidades unis={unis} campus={campus} indice={indice} rama={rama} onElegir={onElegir} />
       </Bloque>
 
       {com && <VivirAqui comunidad={com} soloCiudad={c.nombre} />}
 
       {c.masteres > 0 && (
-        <Bloque titulo="Másteres oficiales por rama">
+        <Bloque titulo="Másteres oficiales por rama" icono="grafico">
           <BarrasRamas conteo={c.ramas} ramas={indice.ramas} resaltada={rama} />
         </Bloque>
       )}
 
       {casosAqui.length > 0 && (
-        <Bloque titulo="Casos de éxito aquí">
+        <Bloque titulo="Casos de éxito aquí" icono="estrella">
           <div className="flex flex-wrap gap-2">
             {casosAqui.map((k) => (
               <BotonChip key={k.id} icono="estrella" onClick={() => onElegir("caso", k.id)}>
@@ -740,7 +751,7 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
       <div className="mt-3">
-        <Rotulo>Universidad</Rotulo>
+        <Rotulo icono="casa">Universidad</Rotulo>
         <Titulo>{u.nombre}</Titulo>
         <p className="mt-1 text-sm font-semibold text-[#0A5873]">
           {u.sigla} · {u.sedes.join(", ")}
@@ -779,7 +790,7 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
             <Icono nombre="estrella" size={18} />
           </span>
           <span className="min-w-0">
-            <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#96CCFC]">Ranking mundial</span>
+            <span className="mapa-rotulo mapa-rotulo-claro">Ranking mundial</span>
             {/* Siempre «QS World University Rankings 2027 · puesto X» y sin enlace (cliente, 14/09/2026). */}
             <span className="mapa-titular block text-sm font-bold leading-snug">{ranking}</span>
           </span>
@@ -790,12 +801,12 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
 
       <BecasUniversidad becas={leerBecas(u)} />
 
-      <Bloque titulo="Másteres oficiales por rama">
+      <Bloque titulo="Másteres oficiales por rama" icono="grafico">
         <BarrasRamas conteo={u.ramas} ramas={indice.ramas} resaltada={rama} />
       </Bloque>
 
       {com && (
-        <Bloque titulo="Cómo se postula">
+        <Bloque titulo="Cómo se postula" icono="documento">
           <p className="text-sm leading-relaxed text-neutral-900">{com.postulacion.texto}</p>
         </Bloque>
       )}
@@ -833,7 +844,10 @@ export function FichaCaso({ k, indice, foco, geoPorId, onElegir }) {
         <span aria-hidden="true" className="pointer-events-none absolute -right-2 -top-2 text-white/10">
           <Icono nombre="avion" size={84} />
         </span>
-        <p className="relative text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#96CCFC]">Caso de éxito real</p>
+        <p className="mapa-rotulo mapa-rotulo-claro relative">
+          <Icono nombre="trofeo" size={14} />
+          Caso de éxito real
+        </p>
         <h2 className="mapa-titular relative mt-1 text-[26px] font-bold leading-tight">{k.nombre}</h2>
         <span className="relative mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#F09C48] px-3 py-1 text-[11px] font-extrabold text-[#003648]">
           <Icono nombre="estrella" size={12} />

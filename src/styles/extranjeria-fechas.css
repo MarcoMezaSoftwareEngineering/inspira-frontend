@@ -1,0 +1,498 @@
+/* src/styles/extranjeria-fechas.css
+   Estilos de «¿Por qué fecha va Extranjería?» (/por-que-fecha-va-extranjeria).
+
+   Todas las clases llevan el prefijo ext- para no chocar con las hojas ya
+   existentes: ex- es del Expediente Digital (pasos.css) y mapa- es del mapa.
+   Una clase corta ya descuadró el panel del asesorado una vez.
+
+   La hoja la importa la propia página, que se carga con lazy(): Vite la
+   separa en su trozo de CSS y solo se descarga al entrar aquí.
+
+   Nada se anima con prefers-reduced-motion (al final del archivo). */
+
+.ext-pagina {
+  /* Colores del kit de marca, repetidos aquí como variables para poder
+     cambiar el tono de un bloque entero (solicitudes / recursos) con una
+     sola clase en vez de repetir el color en cada celda. */
+  --ext-primary: #013446;
+  --ext-primary-light: #02506b;
+  --ext-accent: #fa943a;
+  --ext-sky: #88c4fc;
+  --ext-sky-light: #e3f0fe;
+  --ext-sun: #f9c846;
+  --ext-linea: #e5e5e5;
+  /* Tono del grupo: lo reescriben .ext-grupo-* */
+  --ext-tono: var(--ext-primary-light);
+  --ext-tono-suave: #e3f0fe;
+}
+
+/* ── Foco visible ─────────────────────────────────────────────────────────
+   Un anillo claro y grueso en todo lo que se puede tabular. El naranja de
+   marca sobre fondo blanco no llega a 3:1, así que sobre claro el anillo es
+   azul petróleo y sobre el azul de la cabecera, amarillo sol. */
+.ext-foco:focus-visible {
+  outline: 3px solid var(--ext-primary);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+.ext-foco-claro:focus-visible {
+  outline: 3px solid var(--ext-sun);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* ── Cabecera: la línea de «solo estas ciudades publican» ─────────────────
+   Va dentro de .page-hero-acciones, que es flex con wrap: ocupa su propia
+   línea completa y queda justo debajo del subtítulo, no en letra pequeña. */
+.ext-hero-nota {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 3px solid var(--ext-sun);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  /* Que quepa en dos líneas de móvil: por eso la frase es corta y el ancho
+     no se estira más allá de la columna de texto. */
+  max-width: 620px;
+}
+.ext-hero-nota svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--ext-sun);
+}
+@media (min-width: 640px) {
+  .ext-hero-nota { font-size: 15.5px; }
+}
+
+/* ── «Lo esencial» ───────────────────────────────────────────────────── */
+.ext-esencial {
+  border: 1px solid var(--ext-sky);
+  border-radius: 20px;
+  background: #fff;
+  padding: 18px 20px;
+}
+.ext-esencial-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--ext-primary-light);
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.ext-esencial-texto {
+  margin: 8px 0 0;
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: #1a1a1a;
+}
+@media (min-width: 640px) {
+  .ext-esencial-texto { font-size: 17px; }
+}
+
+/* ── Buscador ────────────────────────────────────────────────────────── */
+.ext-buscador-icono {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ext-primary-light);
+  pointer-events: none;
+}
+.ext-campo-buscador { padding-left: 40px; }
+/* La cruz nativa de <input type="search"> en WebKit es diminuta; se deja el
+   campo limpio y se borra con la tecla de siempre. */
+.ext-campo-buscador::-webkit-search-decoration { -webkit-appearance: none; }
+
+/* ── Tarjeta de oficina ──────────────────────────────────────────────── */
+.ext-oficina {
+  border: 1px solid var(--ext-linea);
+  border-radius: 24px;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Franja superior de color: es lo primero que distingue una oficina de otra
+   cuando se hace scroll con el móvil. */
+.ext-oficina::before {
+  content: "";
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, var(--ext-primary) 0%, var(--ext-sky) 55%, var(--ext-accent) 100%);
+}
+
+/* ── Las dos fechas ───────────────────────────────────────────────────────
+   La del folleto oficial y la de nuestra revisión NO son lo mismo, y
+   mezclarlas es el error más repetido en las páginas que ya hacen esto. Van
+   en un <dl>, cada una con su etiqueta y su explicación. */
+.ext-fechas-meta {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+@media (min-width: 560px) {
+  .ext-fechas-meta { grid-template-columns: 1fr 1fr; }
+}
+.ext-fechas-meta > div {
+  border: 1px solid var(--ext-linea);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: #fbfdff;
+}
+.ext-fechas-meta dt {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b6b6b;
+}
+.ext-fechas-meta dd {
+  margin: 2px 0 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--ext-primary);
+}
+.ext-fechas-meta p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6b6b6b;
+}
+
+/* ── Histórico ───────────────────────────────────────────────────────── */
+.ext-historial {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--ext-sky-light);
+  color: #10303f;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.ext-historial svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--ext-primary-light);
+}
+
+/* ── Grupos: solicitudes vs recursos ──────────────────────────────────────
+   La diferencia no puede ser solo el color (daltonismo): cada grupo lleva
+   además su propio rótulo, su icono y, en recursos, borde discontinuo. */
+.ext-grupo {
+  border: 1px solid var(--ext-linea);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+}
+.ext-grupo-solicitudes {
+  --ext-tono: var(--ext-primary-light);
+  --ext-tono-suave: #e3f0fe;
+}
+.ext-grupo-recursos {
+  --ext-tono: #b4640f; /* naranja de marca oscurecido: 4.5:1 sobre blanco */
+  --ext-tono-suave: #fdf0e0;
+  border-style: dashed;
+}
+
+.ext-grupo-cabecera {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--ext-tono-suave);
+  border-bottom: 1px solid var(--ext-linea);
+  color: var(--ext-tono);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.ext-grupo-intro {
+  flex: 1 1 100%;
+  color: #4a4a4a;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.45;
+}
+
+/* ── Familias plegables ───────────────────────────────────────────────────
+   <details> nativo: funciona sin JavaScript y el navegador ya se encarga de
+   aria-expanded. En escritorio salen abiertas; en móvil, plegadas, para poder
+   hojear las familias sin hacer scroll infinito (lo decide la página). */
+.ext-familia + .ext-familia { border-top: 1px solid var(--ext-linea); }
+
+.ext-familia-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  background: #fff;
+  transition: background 0.18s ease;
+}
+.ext-familia-summary::-webkit-details-marker { display: none; }
+.ext-familia-summary:hover { background: #f7fbff; }
+
+.ext-familia-nombre {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--ext-primary);
+}
+.ext-familia-cuenta {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #6b6b6b;
+  white-space: nowrap;
+}
+
+/* Chevron: gira al abrir. Es el único indicador de estado además del propio
+   contenido, así que no desaparece en móvil. */
+.ext-chevron {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--ext-primary-light);
+  border-bottom: 2px solid var(--ext-primary-light);
+  transform: rotate(45deg);
+  transform-origin: 65% 65%;
+  transition: transform 0.2s ease;
+}
+details[open] > summary .ext-chevron { transform: rotate(-135deg); }
+
+/* ── Tabla ────────────────────────────────────────────────────────────────
+   Se mantiene como <table> de verdad (con <caption> y <th scope>) para que
+   los lectores de pantalla anuncien fila y columna. En móvil no se convierte
+   en tarjetas —eso rompe la semántica—: se reduce el tipo y, si aun así no
+   cabe, el contenedor desplaza en horizontal y es enfocable con el teclado. */
+.ext-tabla-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.ext-tabla-wrap:focus-visible {
+  outline: 3px solid var(--ext-primary);
+  outline-offset: -3px;
+}
+
+.ext-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.35;
+}
+@media (min-width: 640px) {
+  .ext-tabla { font-size: 14.5px; }
+}
+
+.ext-tabla caption {
+  /* El rótulo de la familia y del grupo ya se ven arriba; el caption queda
+     para quien escucha la página. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ext-tabla th,
+.ext-tabla td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid var(--ext-linea);
+}
+
+.ext-tabla thead th {
+  background: #fbfdff;
+  color: #1a1a1a;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* Trámite: es el encabezado de su fila, así que va en <th scope="row">. */
+.ext-tabla tbody th {
+  font-weight: 700;
+  color: var(--ext-primary);
+  min-width: 10.5rem;
+}
+
+.ext-tabla tbody tr:hover th,
+.ext-tabla tbody tr:hover td {
+  background: #f7fbff;
+}
+
+/* La fecha es el dato que se viene a buscar: se lee sin tener que rastrearlo. */
+.ext-fecha {
+  font-weight: 800;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+.ext-fecha-vacia {
+  font-weight: 700;
+  color: #6b6b6b;
+}
+
+/* ── Píldora de fase ─────────────────────────────────────────────────── */
+.ext-fase {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--ext-tono-suave);
+  color: var(--ext-tono);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ── Aviso legal ─────────────────────────────────────────────────────── */
+.ext-aviso {
+  border-left: 4px solid var(--ext-accent);
+  background: #fffaf3;
+  border-radius: 0 14px 14px 0;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #3d3323;
+}
+
+/* ── Preguntas frecuentes ────────────────────────────────────────────── */
+.ext-faq {
+  border: 1px solid var(--ext-linea);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+.ext-faq > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ext-primary);
+}
+.ext-faq > summary::-webkit-details-marker { display: none; }
+.ext-faq > summary .ext-chevron { margin-left: auto; }
+.ext-faq > p {
+  margin: 0;
+  padding: 0 16px 15px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #4a4a4a;
+}
+
+/* ── Esqueleto de carga ──────────────────────────────────────────────── */
+.ext-esqueleto {
+  background: linear-gradient(90deg, #eef4f9 25%, #f7fbff 50%, #eef4f9 75%);
+  background-size: 400% 100%;
+  animation: ext-brillo 1.4s ease-in-out infinite;
+  border-radius: 12px;
+}
+@keyframes ext-brillo {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* ── Calculadora ─────────────────────────────────────────────────────── */
+.ext-campo {
+  width: 100%;
+  border: 1px solid #cfdce6;
+  border-radius: 12px;
+  padding: 11px 12px;
+  font: inherit;
+  font-size: 15px; /* menos de 15px hace que iOS haga zoom al enfocar */
+  font-weight: 600;
+  color: var(--ext-primary);
+  background: #fff;
+  min-height: 46px;
+}
+.ext-campo:focus-visible {
+  outline: 3px solid var(--ext-primary);
+  outline-offset: 1px;
+  border-color: var(--ext-primary);
+}
+
+/* Resultado: entra con un desvanecido corto para que se note que cambió sin
+   que el salto despiste a quien está leyendo. */
+.ext-resultado {
+  animation: ext-entra 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ext-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Recorrido de las tres fases dentro de la calculadora. El estado no se fía
+   solo del color: cada tarjeta lleva su icono y su frase. */
+.ext-paso {
+  border: 1px solid var(--ext-linea);
+  border-radius: 14px;
+  padding: 12px 13px;
+  background: #fff;
+}
+.ext-paso[data-estado="pasada"] {
+  border-color: #6fa96f;
+  background: #f4fbf4;
+}
+.ext-paso[data-estado="espera"] {
+  border-color: #e0a55f;
+  background: #fffaf3;
+}
+.ext-paso[data-estado="sin-dato"] {
+  border-style: dashed;
+  background: #fafafa;
+}
+
+/* ── Enlace a la fuente oficial ──────────────────────────────────────── */
+.ext-fuente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ext-primary-light);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ext-fuente:hover { color: var(--ext-primary); }
+
+/* ── Sin movimiento ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ext-esqueleto,
+  .ext-resultado {
+    animation: none;
+  }
+  .ext-esqueleto { background: #eef4f9; }
+  .ext-chevron,
+  .ext-familia-summary {
+    transition: none;
+  }
+}

@@ -38,6 +38,7 @@ const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"
 const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/MasterAds2027"));
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const GradoEspana = lazyConRecarga(() => import("./pages/grado/GradoEspana"));
+const FechasExtranjeria = lazyConRecarga(() => import("./pages/extranjeria/FechasExtranjeria"));
 const BecaBicentenario2026 = lazyConRecarga(() => import("./pages/bicentenario/BecaBicentenario2026"));
 const Enlaces = lazyConRecarga(() => import("./pages/enlaces/Enlaces"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
@@ -130,6 +131,16 @@ const SEO_PAGES = {
       "Matrícula en universidades públicas y privadas, acceso, visado o estancia y becas: simula la inversión de tu hijo o hija año a año y conoce el Paquete Grado de Inspira.",
     path: "/grado-en-espana",
     imagen: "/og/grado-en-espana.jpg",
+  },
+  // Las fechas que publican las oficinas de Extranjeria. El titulo nombra
+  // las tres ciudades que hoy publican porque es lo que se busca en Google;
+  // la lista que se ve DENTRO de la pagina si sale de la API.
+  "/por-que-fecha-va-extranjeria": {
+    title: "¿Por qué fecha va Extranjería? Madrid, Valencia y Mallorca",
+    description:
+      "Hasta qué fecha de presentación están grabando, instruyendo y resolviendo las oficinas de Extranjería que publican sus datos, trámite a trámite y también en los recursos. Con calculadora para situar tu expediente.",
+    path: "/por-que-fecha-va-extranjeria",
+    imagen: "/og/servicios.jpg",
   },
   "/visa-o-estancia": {
     title: "¿Visa o estancia por estudios? Test rápido",
@@ -370,6 +381,7 @@ const PUBLIC_PATHS = [
   "/master-2027-2028",
   "/visa-o-estancia",
   "/grado-en-espana",
+  "/por-que-fecha-va-extranjeria",
   // Sin enlace en menús; su SEO lo declara la propia página.
   "/beca-generacion-bicentenario-2026",
   // Enlaces para las biografías de redes (sustituye a Linktree).
@@ -525,6 +537,7 @@ export default function App() {
       {path === "/master-2027-2028" && <MasterAds2027 />}
       {path === "/visa-o-estancia" && <VisaOEstancia />}
       {path === "/grado-en-espana" && <GradoEspana />}
+      {path === "/por-que-fecha-va-extranjeria" && <FechasExtranjeria />}
       {path === "/beca-generacion-bicentenario-2026" && <BecaBicentenario2026 />}
       {path === "/enlaces" && <Enlaces />}
       {path === "/pago-exitoso" && <PagoExitoso />}

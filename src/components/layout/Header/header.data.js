@@ -44,6 +44,16 @@ export const HERRAMIENTAS_GRATIS = [
     href: "/calculadora-master",
     icono: "euro",
   },
+  // La pregunta que más llega por WhatsApp (17/09/2026): por qué fecha va
+  // cada oficina de Extranjería. Entra aquí, con las otras dos herramientas
+  // gratuitas, y sale a la vez en el mega-menú y en «Explora» del móvil.
+  {
+    label: "¿Por qué fecha va Extranjería?",
+    titulo: "¿Por qué fecha va Extranjería?",
+    texto: "Hasta qué fecha están resolviendo las oficinas",
+    href: "/por-que-fecha-va-extranjeria",
+    icono: "reloj",
+  },
 ];
 
 // «Explora» del menú móvil. No repite lo que ya está en la barra inferior

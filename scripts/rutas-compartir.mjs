@@ -153,6 +153,16 @@ export const RUTAS_COMPARTIR = {
     image: IMG_GRADO,
     imageAlt: "Guía para familias: cuánto cuesta estudiar un grado en España",
   },
+  // Fechas de Extranjería. El título nombra las tres ciudades que hoy
+  // publican porque es lo que se busca en Google y el rastreador no ejecuta
+  // JavaScript; la lista que se ve dentro de la página sí sale de la API.
+  "/por-que-fecha-va-extranjeria": {
+    title: "¿Por qué fecha va Extranjería? Madrid, Valencia y Mallorca | Inspira Legal",
+    description:
+      "Hasta qué fecha de presentación están grabando, instruyendo y resolviendo las oficinas de Extranjería que publican sus datos, trámite a trámite y también en los recursos. Con calculadora para situar tu expediente.",
+    image: "/og/servicios.jpg",
+    imageAlt: "Fechas orientativas de tramitación de las oficinas de Extranjería en España",
+  },
   // Sus textos viven en la propia página (pages/mapa/mapaTextos.js, SEO), no en
   // SEO_PAGES de App.jsx: si cambias uno, cambia el otro.
   // Sus textos viven en la propia página (pages/bicentenario/BecaBicentenario2026.jsx, SEO).

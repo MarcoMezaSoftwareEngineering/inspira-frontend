@@ -121,6 +121,15 @@ const RECURSOS = [
     texto: "Descubre qué camino te conviene según tu caso",
     href: interno("/visa-o-estancia"),
   },
+  {
+    // Sin nombrar las ciudades: las que publican salen de la API y aquí no
+    // se puede consultar, así que el texto no puede quedarse viejo.
+    clave: "recurso:extranjeria-fechas",
+    icono: "calendario",
+    titulo: "¿Por qué fecha va Extranjería?",
+    texto: "Hasta qué fecha están resolviendo las oficinas que lo publican",
+    href: interno("/por-que-fecha-va-extranjeria"),
+  },
 ];
 
 const SERVICIOS = [

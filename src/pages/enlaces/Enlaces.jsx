@@ -87,6 +87,28 @@ const ENLACES = [
   { clave: "web", emoji: "🌎", titulo: "Nuestra web oficial", href: interno("/") },
 ];
 
+// Para el viaje: aliados externos que la clienta recomienda (17/09/2026). Se
+// abren fuera de la web. El seguro va a WhatsApp de StarSeguro con el mensaje
+// que pidió Carina; la eSIM, a su enlace de referido de Holafly.
+const MENSAJE_SEGURO =
+  "¡Hola! Vengo por recomendación de Carina Meza - Inspira, quisiera cotizar mi seguro de salud para visa de estudios: Me recomendó cotizar Adeslas";
+const VIAJE = [
+  {
+    clave: "aliado:seguro",
+    emoji: "🩺",
+    titulo: "Seguro de salud para España",
+    texto: "Cotiza tu seguro Adeslas para la visa con StarSeguro",
+    href: `https://wa.me/34632107913?text=${encodeURIComponent(MENSAJE_SEGURO)}`,
+  },
+  {
+    clave: "aliado:esim",
+    emoji: "📶",
+    titulo: "eSIM para Europa",
+    texto: "10 % de descuento con nuestro enlace de Holafly",
+    href: "https://holafly.go.link/3pDol",
+  },
+];
+
 // Solo las opiniones cortas: se citan completas, nunca recortadas.
 const OPINIONES = TESTIMONIOS.filter((t) => t.texto.length <= 260);
 
@@ -510,7 +532,29 @@ export default function Enlaces() {
           </span>
         </a>
 
-        <nav aria-label="Más enlaces de Inspira" className="mt-3 space-y-3">
+        <Rotulo style={retraso()}>🧳 Para tu viaje a España</Rotulo>
+        <div className="mt-3 space-y-3">
+          {VIAJE.map((v) => (
+            <a
+              key={v.clave}
+              href={v.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => marcar(v.clave)}
+              className="enl-sube flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 text-primary shadow-lg shadow-black/10 transition hover:bg-secondary-light active:scale-[.98]"
+              style={retraso()}
+            >
+              <span className="text-2xl" aria-hidden="true">{v.emoji}</span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="font-bold leading-snug">{v.titulo}</span>
+                <span className="text-xs leading-snug text-neutral-600">{v.texto}</span>
+              </span>
+              <Flecha className="opacity-60" />
+            </a>
+          ))}
+        </div>
+
+        <nav aria-label="Más enlaces de Inspira" className="mt-6 space-y-3">
           {ENLACES.map((e) => (
             <a
               key={e.clave}

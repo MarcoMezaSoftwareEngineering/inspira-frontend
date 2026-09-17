@@ -15,11 +15,16 @@ import InspiraDialog from "./components/ui/InspiraDialog";
 
 import { BrowserRouter } from "react-router-dom";
 import { vigilarVersionNueva, marcarArranqueCorrecto } from "./lib/versionNueva";
+import { vigilarEnlacesWhatsApp } from "./lib/whatsapp";
 
 // Si llegamos hasta aquí, la aplicación cargó: se limpia la marca de recarga
 // para que un fallo futuro pueda volver a intentarlo.
 marcarArranqueCorrecto();
 vigilarVersionNueva();
+
+// Los enlaces de WhatsApp abren la aplicación, también dentro del navegador
+// incrustado de Instagram o TikTok, donde wa.me se queda en su pantalla.
+vigilarEnlacesWhatsApp();
 
 // Recargar al volver con el botón "atrás" desde la caché de retroceso (bfcache),
 // para que el panel no muestre datos de una sesión que ya cerró.

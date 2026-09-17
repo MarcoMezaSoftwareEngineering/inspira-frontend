@@ -30,8 +30,8 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import logo from "../../assets/images/logo.png";
 import WhatsAppFlotante from "../../components/common/WhatsAppFlotante";
-import { CALENDLY_URL, LINEAS, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
-import { OPCIONES_ASESORIA, PROMO_GRATIS, promoVigente } from "../../config/asesorias";
+import { CALENDLY_URL, LINEAS, MENSAJE_SEGURO, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
+import { OPCIONES_ASESORIA } from "../../config/asesorias";
 import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 import { eventosActivos } from "../../config/eventos";
 import { getServicio, hrefServicio } from "../../config/servicios";
@@ -40,6 +40,7 @@ import { enviarEventoEmbudo } from "../../lib/analytics";
 
 // El mapa en vivo va en su propio trozo: no pesa hasta que se pinta.
 const MuestraMapa = lazy(() => import("./MuestraMapa"));
+const MuestraPortal = lazy(() => import("./MuestraPortal"));
 
 const UTM = "utm_source=enlaces&utm_medium=bio";
 /** Ruta interna con utm (antes del #, si lo hay). */
@@ -160,7 +161,8 @@ const VIAJE = [
     // El mensaje sale escrito y es el que da la atención prioritaria: si lo
     // borran, entran como cualquier consulta. Se avisa antes de tocar.
     chip: "⚡ Atención prioritaria",
-    nota: "Envía el mensaje tal como aparece: es lo que te da la atención prioritaria.",
+    nota: "Envía este mensaje tal cual: es lo que te da la atención prioritaria.",
+    mensaje: MENSAJE_SEGURO,
     href: WHATSAPP_SEGURO,
   },
   {
@@ -230,6 +232,24 @@ const REDES = [
 ];
 
 const ESTILOS = `
+.enl-msg { display: block; margin-top: 8px; border-radius: 14px; border: 1px dashed rgba(255,255,255,.28); background: rgba(255,255,255,.06); padding: 8px 10px; }
+.enl-msg-texto { display: block; font-size: 11.5px; line-height: 1.45; color: rgba(255,255,255,.8); }
+.enl-msg button { margin-top: 6px; border: 0; border-radius: 999px; background: rgba(250,148,58,.22); color: #ffd7ae; font: inherit; font-size: 11px; font-weight: 800; padding: 4px 10px; cursor: pointer; }
+.enl-msg button:active { transform: scale(.96); }
+.enl-portal-eyebrow { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #88C4FC; }
+.enl-portal-lema { margin: 4px 0 0; font-family: Fraunces, Merriweather, Georgia, serif; font-style: italic; font-size: 15px; font-weight: 700; color: #FFB066; }
+.enl-portal-fila { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.enl-portal-movil { position: relative; flex: 0 0 auto; width: 104px; height: 208px; border-radius: 18px; overflow: hidden; border: 2px solid rgba(255,255,255,.35); background: #012938; box-shadow: 0 16px 30px -18px rgba(0,0,0,.9); }
+.enl-portal-pantalla { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; opacity: 0; transition: opacity .6s ease; }
+.enl-portal-pantalla[data-on="1"] { opacity: 1; }
+.enl-portal-texto { min-width: 0; flex: 1; }
+.enl-portal-titulo { margin: 0 0 2px; font-size: 15px; font-weight: 800; color: #fff; }
+.enl-portal-puntos { display: flex; gap: 6px; margin-top: 10px; }
+.enl-portal-puntos button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 999px; background: rgba(255,255,255,.3); cursor: pointer; transition: width .3s, background-color .3s; }
+.enl-portal-puntos button.on { width: 20px; background: #FA943A; }
+.enl-portal-cta { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; height: 44px; border-radius: 14px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: 13.5px; font-weight: 800; text-decoration: none; }
+.enl-portal-cta:active { transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) { .enl-portal-pantalla { transition: none; } }
 /* Tarjetas de la página: cristal sobre el petróleo de la marca, no bloques
    blancos. El blanco recortado sobre el fondo oscuro pesaba y rompía la
    continuidad; el cristal deja ver el fondo y la marca se lee como una sola
@@ -421,57 +441,52 @@ function BannerBeca({ style }) {
   );
 }
 
-function quedanPromo() {
-  const n = Math.max(0, Math.ceil((new Date(`${PROMO_GRATIS.hasta}T23:59:59`) - Date.now()) / 86400000));
-  return n <= 1 ? "¡Último día!" : `Quedan ${n} días`;
+/**
+ * El mensaje que da la atención prioritaria, a la vista y copiable.
+ *
+ * WhatsApp lo lleva ya escrito, pero mucha gente lo borra antes de enviar sin
+ * saber que es justo lo que le abre la puerta. Aquí se lee antes de tocar y se
+ * puede copiar para pegarlo si hiciera falta.
+ */
+function MensajeParaCopiar({ texto, clave }) {
+  const [copiado, setCopiado] = useState(false);
+  return (
+    <span className="enl-msg">
+      <span className="enl-msg-texto">«{texto}»</span>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          marcar(`${clave}:copiar`);
+          navigator.clipboard?.writeText(texto).then(() => setCopiado(true), () => setCopiado(false));
+        }}
+      >
+        {copiado ? "Copiado ✓" : "Copiar mensaje"}
+      </button>
+    </span>
+  );
 }
 
 function ReservaAsesoria({ style }) {
-  const promo = promoVigente();
-  const opciones = OPCIONES_ASESORIA.filter((o) => !o.promo || promo);
-  const [elegida, setElegida] = useState(() => (opciones.find((o) => o.destacada) || opciones[0])?.id);
-  const actual = opciones.find((o) => o.id === elegida) || opciones[0];
+  // Una sola asesoría (clienta, 17/09/2026): la de 30 minutos. Tres precios a
+  // elegir distraían de lo único que se reserva desde aquí. Las demás siguen
+  // en la web y en Calendly; aquí no se ofrecen.
+  const actual = OPCIONES_ASESORIA.find((o) => o.destacada) || OPCIONES_ASESORIA[0];
   if (!actual) return null;
-  // Compacta (clienta, 15/09/2026: «está muy grande»): tres botones en fila,
-  // una línea con la elegida y el botón de reservar.
-  const corta = (d) => String(d || "").replace(/\s*minutos?/i, " min");
   return (
-    <section data-wa="reserva" aria-label="Reserva tu asesoría" className="enl-sube enl-tarjeta mt-6 p-3" style={style}>
-      <p className="px-1 text-sm font-extrabold text-white">
-        📅 Reserva tu asesoría <span className="font-semibold text-white/55">· online</span>
-      </p>
-      <div role="radiogroup" aria-label="Elige tu asesoría" className="mt-2 grid grid-cols-3 gap-2">
-        {opciones.map((o) => {
-          const sel = o.id === actual.id;
-          return (
-            <button
-              key={o.id}
-              type="button"
-              role="radio"
-              aria-checked={sel}
-              aria-label={`${o.nombre}, ${o.duracion}, ${o.precio}`}
-              onClick={() => setElegida(o.id)}
-              className={`rounded-xl border-2 px-1 py-2 text-center transition active:scale-[.97] ${
-                sel ? "border-accent bg-accent/20" : "border-white/20 bg-white/5 hover:border-accent/50"
-              }`}
-            >
-              <span className="block text-[11px] font-bold text-white/60">{corta(o.duracion)}</span>
-              <span className={`block text-base font-extrabold leading-tight ${o.promo ? "text-green-300" : "text-white"}`}>{o.precio}</span>
-            </button>
-          );
-        })}
+    <section data-wa="reserva" aria-label="Reserva tu asesoría" className="enl-sube enl-tarjeta mt-3 p-4" style={style}>
+      <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-sky">📅 Reserva tu asesoría · online</p>
+      <div className="mt-2 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <p className="enl-tarjeta-titulo text-[15px]">{actual.nombre}</p>
+          <p className="enl-tarjeta-texto">{actual.duracion} · con un abogado especialista</p>
+        </div>
+        <p className="shrink-0 text-right">
+          <span className="block font-fraunces text-2xl font-bold leading-none text-white">{actual.precio}</span>
+          <span className="block text-[11px] font-semibold text-white/60">{actual.precioAlt}</span>
+        </p>
       </div>
-      <p className="mt-2 px-1 text-xs leading-snug text-white/70">
-        <b className="text-white">{actual.nombre}</b>
-        {actual.promo ? (
-          <>
-            {" · "}
-            <span className="font-bold text-green-300">⏳ {quedanPromo()}</span>
-          </>
-        ) : actual.precioAlt ? (
-          ` · ${actual.precioAlt}`
-        ) : null}
-      </p>
       <a
         href={actual.url || CALENDLY_URL}
         target="_blank"
@@ -805,19 +820,16 @@ export default function Enlaces() {
         <BotonBeca style={retraso()} />
 
         <ReservaAsesoria style={retraso()} />
-        <Opiniones style={retraso()} />
-        <Contacto style={retraso()} />
 
-        <Rotulo style={retraso()}>🎁 Recursos gratuitos</Rotulo>
-        <div className="mt-3">
-          <Carrusel style={retraso()} />
-        </div>
-
-        {/* La beca bajó aquí el 17/09/2026: arriba va la muestra del mapa.
-          Este es su sitio mientras la convocatoria aún no abre. */}
-        {/* Con la convocatoria abierta, además del botón, el bloque grande con
-            su cuenta atrás y el simulador. */}
-        {faseBeca === "abierta" && <BannerBeca style={retraso()} />}
+        {/* El portal del asesorado, enseñado: tres pantallas reales (clienta
+            ficticia) que se van pasando solas. */}
+        <Suspense fallback={<div className="enl-tarjeta mt-3" style={{ height: 300 }} />}>
+          <MuestraPortal
+            style={retraso()}
+            href={interno("/plataforma")}
+            onAbrir={() => marcar("portal:muestra")}
+          />
+        </Suspense>
 
         <Rotulo style={retraso()}>✨ Servicios, paquetes y más</Rotulo>
         <div data-wa="servicios" className="enl-sube mt-3 grid grid-cols-2 gap-3" style={retraso()}>
@@ -870,6 +882,7 @@ export default function Enlaces() {
                 <span className="enl-tarjeta-texto">{v.texto}</span>
                 {v.chip && <span className="enl-chip-prioridad">{v.chip}</span>}
                 {v.nota && <span className="mt-1 text-[11px] leading-snug text-white/55">{v.nota}</span>}
+                {v.mensaje && <MensajeParaCopiar texto={v.mensaje} clave={v.clave} />}
               </span>
               {v.descuento ? (
                 <span className="enl-dcto" aria-hidden="true">
@@ -882,6 +895,21 @@ export default function Enlaces() {
             </a>
           ))}
         </div>
+
+        <Rotulo style={retraso()}>🎁 Recursos gratuitos</Rotulo>
+        <div className="mt-3">
+          <Carrusel style={retraso()} />
+        </div>
+
+        {/* La beca bajó aquí el 17/09/2026: arriba va la muestra del mapa.
+          Este es su sitio mientras la convocatoria aún no abre. */}
+
+        <Opiniones style={retraso()} />
+        <Contacto style={retraso()} />
+
+        {/* Con la convocatoria abierta, además del botón, el bloque grande con
+            su cuenta atrás y el simulador. */}
+        {faseBeca === "abierta" && <BannerBeca style={retraso()} />}
 
         <nav aria-label="Más enlaces de Inspira" className="mt-6 space-y-3">
           {enlacesPorTemporada().map((e) => (

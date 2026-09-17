@@ -102,17 +102,70 @@
 
 /* Barra fija de atajos: encima de la barra inferior del sitio (que se oculta
    desde 1100 px, v4.css) y flotando abajo al centro en escritorio. */
-.bic-barra-fija { bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); }
+.bic-barra-fija { bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); transition: opacity .3s ease, transform .3s cubic-bezier(.22,1,.36,1); }
 @media (min-width: 1100px) { .bic-barra-fija { bottom: 1.25rem; } }
+/* Se retira cuando el bloque al que lleva ya se está viendo: ahí solo tapa. */
+.bic-barra-fija[data-oculta="1"] { opacity: 0; transform: translateY(120%); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .bic-barra-fija { transition: none; } }
+
+/* Hueco al final del contenido para que la barra no se coma la última línea. */
+.bic-premium { padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); }
 
 /* Fondos claros con trama de puntos. */
 .bic-premium section.bg-secondary-light { background-image: radial-gradient(rgba(10, 88, 115, .09) 1px, transparent 1px); background-size: 22px 22px; }
+
+/* ── Iconos propios (17/09/2026) ────────────────────────────────────────── */
+/* El icono nunca va suelto sobre el fondo: siempre dentro de su medallón, que
+   es lo que le da el peso visual que antes tenía el emoji. El tamaño, el color
+   y el fondo los pone quien lo usa; aquí solo el centrado y el gesto. */
+.bic-medallon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: .9rem;
+}
+.bic-icono { transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+.bic-lift:hover .bic-icono { transform: scale(1.12) rotate(-5deg); }
+
+/* ── Simulador ──────────────────────────────────────────────────────────── */
+/* Los pasos entran por el lado del que vienen: al avanzar, desde la derecha;
+   al volver atrás, desde la izquierda. Sin eso, ir y venir se sentía igual. */
+@keyframes bic-paso-adelante { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+@keyframes bic-paso-atras    { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
+.bic-paso-adelante { animation: bic-paso-adelante .42s cubic-bezier(.22, 1, .36, 1) both; }
+.bic-paso-atras    { animation: bic-paso-atras .42s cubic-bezier(.22, 1, .36, 1) both; }
+
+/* Barra de progreso: un brillo recorre lo que ya se lleva conseguido, para que
+   se vea viva aunque el visitante esté parado leyendo una pregunta. */
+.bic-progreso > div { position: relative; overflow: hidden; }
+.bic-progreso > div::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, .6) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: bic-progreso-brillo 2.8s ease-in-out infinite;
+}
+@keyframes bic-progreso-brillo { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+
+/* Foco siempre visible: mucha gente llega con teclado desde el índice lateral. */
+.bic-premium :focus-visible,
+.bic-barra-fija :focus-visible,
+.bic-riel :focus-visible {
+  outline: 3px solid #FA943A;
+  outline-offset: 2px;
+  border-radius: .55rem;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .bic-aurora::before, .bic-aurora::after, .bic-premium .bic-dorado, .bic-cta::after { animation: none !important; }
   .bic-rev, .bic-rev.bic-izq, .bic-rev.bic-der, .bic-rev.bic-zoom { opacity: 1 !important; transform: none !important; transition: none !important; }
   .bic-flotar, .bic-ruta, .bic-brillo, .bic-pulso, .bic-pop, .bic-entra { animation: none !important; }
+  .bic-paso-adelante, .bic-paso-atras { animation: none !important; }
+  .bic-progreso > div::after { display: none; }
   .bic-confeti { display: none; }
-  .bic-lift, .bic-lift:hover, .bic-press:active, .bic-lift:hover .bic-emoji-hover { transform: none; transition: none; }
+  .bic-lift, .bic-lift:hover, .bic-press:active, .bic-lift:hover .bic-emoji-hover, .bic-lift:hover .bic-icono { transform: none; transition: none; }
+  .bic-icono { transition: none; }
   .bic-expand, .bic-flecha { transition: none; }
 }

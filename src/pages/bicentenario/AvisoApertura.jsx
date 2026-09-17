@@ -4,27 +4,21 @@
 // el día que ve el video. Guarda un lead de origen BECA (POST /api/leads/aviso-beca)
 // para que el equipo avise al abrir; «¿Dónde nos viste?» dice qué red trae gente.
 // También la barra fija del móvil con los dos atajos (simulador y aviso).
+//
+// 17/09/2026: iconos propios en vez de emojis y zonas de toque de 44 px (la
+// mayoría llega desde el teléfono).
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { utmGuardados } from "../../lib/analytics";
 import { whatsappDesde } from "../../config/contacto";
 import { CIFRAS } from "../../config/bicentenario2026";
-import { Revelar, Seccion, Titulo, irA } from "./piezas";
+import { Revelar, Seccion, Titulo } from "./piezas";
+import IconoBic from "./iconos";
+import { CANALES_AVISO, NIVELES_AVISO } from "./textos";
+import { irA } from "./utiles";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const CANALES = [
-  ["tiktok", "🎵", "TikTok"],
-  ["instagram", "📸", "Instagram"],
-  ["facebook", "👍", "Facebook"],
-  ["whatsapp", "💬", "WhatsApp"],
-  ["google", "🔎", "Google"],
-  ["otro", "✨", "Otro"],
-];
-const NIVELES = [
-  ["maestria", "🎓", "Maestría"],
-  ["doctorado", "🔬", "Doctorado"],
-];
 const CAMPO =
   "mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-base text-primary focus:border-accent focus:outline-none";
 
@@ -32,24 +26,24 @@ function canalInicial() {
   const fuente = String(
     utmGuardados().utm_source || new URLSearchParams(window.location.search).get("utm_source") || ""
   ).toLowerCase();
-  return CANALES.some(([k]) => k === fuente) ? fuente : "";
+  return CANALES_AVISO.some(([k]) => k === fuente) ? fuente : "";
 }
 
 function Chips({ nombre, opciones, valor, onCambio }) {
   return (
     <div role="radiogroup" aria-label={nombre} className="mt-2 flex flex-wrap gap-2">
-      {opciones.map(([k, emoji, txt]) => (
+      {opciones.map(([k, icono, txt]) => (
         <button
           key={k}
           type="button"
           role="radio"
           aria-checked={valor === k}
           onClick={() => onCambio(valor === k ? "" : k)}
-          className={`bic-press rounded-full px-3.5 py-2 text-sm font-bold ring-1 transition ${
+          className={`bic-press mov-toque inline-flex min-h-[44px] items-center gap-2 rounded-full px-3.5 py-2 text-sm font-bold ring-1 transition ${
             valor === k ? "bg-primary text-white ring-primary" : "bg-white text-primary ring-neutral-300 hover:ring-sky"
           }`}
         >
-          <span aria-hidden="true">{emoji} </span>
+          <IconoBic nombre={icono} size={17} className="shrink-0" />
           {txt}
         </button>
       ))}
@@ -59,14 +53,20 @@ function Chips({ nombre, opciones, valor, onCambio }) {
 
 export default function AvisoApertura() {
   const id = useId();
-  const [c, setC] = useState({ nombre: "", prefijo: "+51", numero: "", email: "", nivel: "", canal: "", politica: false, marketing: false });
+  // El canal se preselecciona con la utm_source de la visita. Va en el estado
+  // inicial y no en un efecto: leer window durante el pintado ensucia el render.
+  const [c, setC] = useState(() => ({
+    nombre: "",
+    prefijo: "+51",
+    numero: "",
+    email: "",
+    nivel: "",
+    canal: canalInicial(),
+    politica: false,
+    marketing: false,
+  }));
   const [errores, setErrores] = useState({});
   const [estado, setEstado] = useState("form");
-
-  useEffect(() => {
-    const k = canalInicial();
-    if (k) setC((x) => ({ ...x, canal: x.canal || k }));
-  }, []);
 
   const poner = (k) => (e) => setC((x) => ({ ...x, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
   const elegir = (k) => (v) => setC((x) => ({ ...x, [k]: v }));
@@ -132,34 +132,37 @@ export default function AvisoApertura() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
         <div>
           <Titulo
-            emoji="🔔"
+            icono="campana"
             eyebrow="Abre el 30/10/2026"
             titulo="Avísame cuando abra la postulación"
             texto={`Solo hay ${CIFRAS.total} becas y la postulación dura dos semanas. Déjanos tu WhatsApp y te avisamos el día que abra.`}
           />
           <Revelar as="ul" className="space-y-3 text-sm leading-snug text-neutral-700">
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-2xl">📲</span>
+            <li className="flex items-start gap-3">
+              <span className="bic-medallon h-11 w-11 bg-secondary text-primary"><IconoBic nombre="movil" size={21} className="bic-icono" /></span>
               <span><b className="block text-primary">Un aviso por WhatsApp</b>el día que abre la postulación, para que no se te pase.</span>
             </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-2xl">⏳</span>
+            <li className="flex items-start gap-3">
+              <span className="bic-medallon h-11 w-11 bg-secondary text-primary"><IconoBic nombre="reloj" size={21} className="bic-icono" /></span>
               <span><b className="block text-primary">Del 30/10 al 13/11/2026</b>es todo el plazo: conviene llegar con los documentos listos.</span>
             </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-2xl">🔒</span>
+            <li className="flex items-start gap-3">
+              <span className="bic-medallon h-11 w-11 bg-secondary text-primary"><IconoBic nombre="candado" size={21} className="bic-icono" /></span>
               <span><b className="block text-primary">Sin spam</b>solo te escribimos por esta beca, salvo que marques lo contrario.</span>
             </li>
           </Revelar>
-          <p className="mt-5 rounded-2xl bg-secondary-light p-3 text-xs leading-snug text-neutral-700">
-            <span aria-hidden="true">ℹ️ </span>Inspira Legal es una asesoría privada: <b>no somos PRONABEC</b>. La beca la convoca y la otorga PRONABEC.
+          <p className="mt-5 flex gap-2 rounded-2xl bg-secondary-light p-3 text-xs leading-snug text-neutral-700">
+            <IconoBic nombre="info" size={15} className="mt-px shrink-0" />
+            <span>Inspira Legal es una asesoría privada: <b>no somos PRONABEC</b>. La beca la convoca y la otorga PRONABEC.</span>
           </p>
         </div>
 
         <Revelar className="rounded-3xl border-2 border-sky bg-secondary-light p-5 sm:p-7">
           {estado === "listo" ? (
             <div className="bic-entra py-6 text-center" role="status">
-              <p className="bic-pop text-6xl" aria-hidden="true">🎉</p>
+              <span className="bic-pop bic-medallon mx-auto h-20 w-20 bg-accent text-primary-dark">
+                <IconoBic nombre="fiesta" size={40} />
+              </span>
               <p className="mt-3 font-fraunces text-2xl font-bold text-primary">¡Listo! Te avisaremos</p>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-neutral-700">
                 Te escribiremos por WhatsApp cuando abra la postulación, el 30/10/2026. Mientras tanto, calcula tu puntaje orientativo.
@@ -167,14 +170,17 @@ export default function AvisoApertura() {
               <a
                 href="#simulador"
                 onClick={(e) => irA(e, "#simulador")}
-                className="bic-press mt-5 inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-accent/30 hover:bg-sun"
+                className="bic-press mov-toque mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-accent/30 hover:bg-sun"
               >
-                <span aria-hidden="true">🎯</span> Calcular mi puntaje
+                <IconoBic nombre="diana" size={19} className="shrink-0" /> Calcular mi puntaje
               </a>
             </div>
           ) : (
             <form onSubmit={enviar} noValidate className="space-y-4">
-              <p className="font-fraunces text-xl font-bold text-primary"><span aria-hidden="true">🔔 </span>Quiero el aviso</p>
+              <p className="flex items-center gap-2.5 font-fraunces text-xl font-bold text-primary">
+                <span className="bic-medallon h-11 w-11 bg-accent text-primary-dark"><IconoBic nombre="campana" size={21} className="bic-icono" /></span>
+                Quiero el aviso
+              </p>
               <label className="block text-sm font-bold text-primary">
                 Tu nombre
                 <input value={c.nombre} onChange={poner("nombre")} autoComplete="given-name" aria-invalid={!!errores.nombre} className={CAMPO} placeholder="Ej. Lucía" />
@@ -183,7 +189,9 @@ export default function AvisoApertura() {
               <div>
                 <span className="text-sm font-bold text-primary">Tu WhatsApp</span>
                 <div className="mt-1 flex gap-2">
-                  <input value={c.prefijo} onChange={poner("prefijo")} aria-label="Prefijo del país" inputMode="tel" className={`${CAMPO} mt-0 w-20 shrink-0 text-center`} />
+                  {/* max-w además de w-20: CAMPO trae w-full y en Tailwind gana
+                      la clase que va después en la hoja, no la del elemento. */}
+                  <input value={c.prefijo} onChange={poner("prefijo")} aria-label="Prefijo del país" inputMode="tel" className={`${CAMPO} mt-0 w-20 max-w-[5rem] shrink-0 text-center`} />
                   <input value={c.numero} onChange={poner("numero")} aria-label="Número de WhatsApp" aria-invalid={!!errores.numero} inputMode="tel" autoComplete="tel-national" className={`${CAMPO} mt-0 min-w-0 flex-1`} placeholder="999 999 999" />
                 </div>
                 {error("numero")}
@@ -195,14 +203,14 @@ export default function AvisoApertura() {
               </label>
               <div>
                 <span className="text-sm font-bold text-primary">¿Qué quieres estudiar?</span>
-                <Chips nombre="Qué quieres estudiar" opciones={NIVELES} valor={c.nivel} onCambio={elegir("nivel")} />
+                <Chips nombre="Qué quieres estudiar" opciones={NIVELES_AVISO} valor={c.nivel} onCambio={elegir("nivel")} />
               </div>
               <div>
                 <span className="text-sm font-bold text-primary">¿Dónde nos viste? <span className="font-normal text-neutral-600">(opcional)</span></span>
-                <Chips nombre="Dónde nos viste" opciones={CANALES} valor={c.canal} onCambio={elegir("canal")} />
+                <Chips nombre="Dónde nos viste" opciones={CANALES_AVISO} valor={c.canal} onCambio={elegir("canal")} />
               </div>
               <label className="flex items-start gap-2 text-xs leading-snug text-neutral-800">
-                <input type="checkbox" checked={c.politica} onChange={poner("politica")} aria-invalid={!!errores.politica} className="mt-0.5 h-4 w-4 shrink-0 accent-[#0A5873]" />
+                <input type="checkbox" checked={c.politica} onChange={poner("politica")} aria-invalid={!!errores.politica} className="mt-0.5 h-5 w-5 shrink-0 accent-[#0A5873]" />
                 <span>
                   Acepto la{" "}
                   <a href="/legal/privacidad" target="_blank" rel="noopener" className="font-bold text-primary underline underline-offset-2">política de privacidad</a>{" "}
@@ -211,7 +219,7 @@ export default function AvisoApertura() {
               </label>
               {error("politica")}
               <label className="flex items-start gap-2 text-xs leading-snug text-neutral-800">
-                <input type="checkbox" checked={c.marketing} onChange={poner("marketing")} className="mt-0.5 h-4 w-4 shrink-0 accent-[#0A5873]" />
+                <input type="checkbox" checked={c.marketing} onChange={poner("marketing")} className="mt-0.5 h-5 w-5 shrink-0 accent-[#0A5873]" />
                 <span>También quiero recibir otras becas y novedades (opcional).</span>
               </label>
               {error("general")}
@@ -224,9 +232,9 @@ export default function AvisoApertura() {
               <button
                 type="submit"
                 disabled={estado === "enviando"}
-                className="bic-press bic-cta flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
+                className="bic-press bic-cta mov-toque flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
               >
-                <span aria-hidden="true">🔔</span> {estado === "enviando" ? "Guardando…" : "Avísame cuando abra"}
+                <IconoBic nombre="campana" size={21} className="shrink-0" /> {estado === "enviando" ? "Guardando…" : "Avísame cuando abra"}
               </button>
             </form>
           )}
@@ -241,24 +249,53 @@ export default function AvisoApertura() {
  *  inferior del sitio; en escritorio, flotando abajo al centro
  *  (.bic-barra-fija en bicentenario.css). */
 export function BarraMovil() {
+  // Se aparta cuando estorba (17/09/2026). La barra flota por encima de todo y
+  // tapaba dos cosas que no puede tapar: el puntaje que va subiendo dentro del
+  // simulador —encima invitando a ir a donde ya estabas— y, al final de la
+  // página, el aviso legal del pie. Cuando el bloque al que lleva ya se ve, o
+  // cuando se ha llegado al pie, la barra sobra.
+  const [tapa, setTapa] = useState(false);
+  useEffect(() => {
+    if (typeof IntersectionObserver !== "function") return undefined;
+    const vistos = new Set();
+    const obs = new IntersectionObserver(
+      (entradas) => {
+        entradas.forEach((e) => (e.isIntersecting ? vistos.add(e.target) : vistos.delete(e.target)));
+        setTapa(vistos.size > 0);
+      },
+      { threshold: 0.12 }
+    );
+    const nodos = ["simulador", "aviso"].map((id) => document.getElementById(id));
+    // El pie es del sitio, no de esta página: se busca por etiqueta.
+    nodos.push(document.querySelector("footer"));
+    nodos.forEach((n) => n && obs.observe(n));
+    return () => obs.disconnect();
+  }, []);
+
   // Portal a <body>: dentro de la página, un ancestro con transform convierte
   // el `fixed` en relativo a él y la barra acababa al final, fuera de la vista.
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="bic-barra-fija fixed inset-x-3 z-[45] mx-auto flex max-w-md gap-2">
+    <div
+      className="bic-barra-fija fixed inset-x-3 z-[45] mx-auto flex max-w-md gap-2"
+      data-oculta={tapa ? "1" : "0"}
+      aria-hidden={tapa || undefined}
+    >
       <a
         href="#simulador"
         onClick={(e) => irA(e, "#simulador")}
-        className="bic-press bic-cta flex-1 rounded-2xl bg-accent px-3 py-3 text-center text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30"
+        className="bic-press bic-cta mov-toque flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl bg-accent px-3 py-3 text-center text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30"
       >
-        <span aria-hidden="true">🎯 </span>Calcula tu puntaje
+        <IconoBic nombre="diana" size={18} className="shrink-0" />
+        Calcula tu puntaje
       </a>
       <a
         href="#aviso"
         onClick={(e) => irA(e, "#aviso")}
-        className="bic-press rounded-2xl bg-primary px-4 py-3 text-sm font-extrabold text-white shadow-lg"
+        className="bic-press mov-toque flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-extrabold text-white shadow-lg"
       >
-        <span aria-hidden="true">🔔 </span>Avísame
+        <IconoBic nombre="campana" size={18} className="shrink-0" />
+        Avísame
       </a>
     </div>,
     document.body

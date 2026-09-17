@@ -5,6 +5,7 @@
 // imagen; donde no se puede, la descarga para subirla a mano.
 import { useState } from "react";
 import { CIFRAS } from "../../config/bicentenario2026";
+import IconoBic from "./iconos";
 
 const W = 1080;
 const H = 1920;
@@ -128,12 +129,15 @@ export function BotonCompartir({ total, max, nivel }) {
         type="button"
         onClick={alPulsar}
         disabled={estado === "preparando"}
-        className="bic-press bic-cta inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
+        className="bic-press bic-cta mov-toque inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun disabled:opacity-70"
       >
-        <span aria-hidden="true">📲</span> {estado === "preparando" ? "Preparando tu imagen…" : "Compartir mi puntaje"}
+        <IconoBic nombre="movil" size={19} className="shrink-0" /> {estado === "preparando" ? "Preparando tu imagen…" : "Compartir mi puntaje"}
       </button>
       {estado === "descargado" && (
-        <span role="status" className="text-xs font-bold text-primary">✅ Imagen descargada: súbela a tus historias.</span>
+        <span role="status" className="inline-flex items-center gap-1.5 text-xs font-bold text-primary">
+          <IconoBic nombre="descarga" size={14} className="shrink-0" />
+          Imagen descargada: súbela a tus historias.
+        </span>
       )}
       {estado === "error" && (
         <span role="status" className="text-xs font-bold text-red-700">No se pudo crear la imagen.</span>

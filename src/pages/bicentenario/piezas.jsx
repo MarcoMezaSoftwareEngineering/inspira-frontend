@@ -1,13 +1,14 @@
 // src/pages/bicentenario/piezas.jsx
 // Piezas de la página de la Beca Generación del Bicentenario 2026: aparición al
-// hacer scroll, contadores, pestañas, acordeones, índice con emojis, cuenta
-// atrás y el bloque «Descubre otras becas o elige un máster económico».
-// Movimiento solo con CSS e IntersectionObserver; con prefers-reduced-motion
-// todo aparece quieto y con su valor final.
+// hacer scroll, contadores, pestañas, acordeones, índice, cuenta atrás y el
+// bloque «Descubre otras becas o elige un máster económico».
+//
+// 17/09/2026: los rótulos llevan iconos propios en vez de emojis (ver
+// iconos.jsx) y el movimiento se apoya en styles/movimiento.css. Aquí solo hay
+// componentes; los hooks y utilidades viven en utiles.js.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CALENDLY_URL } from "../../config/contacto";
-import { navigate } from "../../services/navigate";
 import { BECAS } from "../../config/paqueteMaster2027";
 import { PRECIO_DESDE, eur } from "../../config/paqueteMaster2027Resumen";
 import {
@@ -19,65 +20,15 @@ import {
   estadoPostulacion,
 } from "../../config/bicentenario2026";
 import { Bandera, IlustracionBecas, IlustracionMaster } from "./ilustraciones";
-
-const quietoAhora = () =>
-  typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-// ── Aparición al hacer scroll ───────────────────────────────────────────────
-// Un solo IntersectionObserver para toda la página. Si el elemento ya está en
-// pantalla al montarse, aparece en el siguiente frame (no depende del observer).
-let observador = null;
-const avisos = new WeakMap();
-
-function observar(el, cb) {
-  if (typeof IntersectionObserver === "undefined") {
-    cb();
-    return () => {};
-  }
-  if (!observador) {
-    observador = new IntersectionObserver(
-      (entradas) => {
-        for (const e of entradas) {
-          if (!e.isIntersecting) continue;
-          const f = avisos.get(e.target);
-          observador.unobserve(e.target);
-          avisos.delete(e.target);
-          if (f) f();
-        }
-      },
-      { rootMargin: "0px 0px -6% 0px", threshold: 0 }
-    );
-  }
-  avisos.set(el, cb);
-  observador.observe(el);
-  return () => {
-    avisos.delete(el);
-    observador?.unobserve(el);
-  };
-}
-
-export function useEnPantalla() {
-  const ref = useRef(null);
-  const [visto, setVisto] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || visto) return;
-    if (quietoAhora()) {
-      setVisto(true);
-      return;
-    }
-    const r = el.getBoundingClientRect();
-    if (r.top < window.innerHeight && r.bottom > 0) {
-      const t = requestAnimationFrame(() => setVisto(true));
-      return () => cancelAnimationFrame(t);
-    }
-    return observar(el, () => setVisto(true));
-  }, [visto]);
-  return [ref, visto];
-}
+import IconoBic from "./iconos";
+import { irA, quietoAhora, useConteo, useEnPantalla } from "./utiles";
 
 /** Envoltorio que aparece con fade/slide. efecto: "", "bic-izq", "bic-der", "bic-zoom". */
-export function Revelar({ as: Tag = "div", className = "", efecto = "", retraso = 0, style, children, ...resto }) {
+export function Revelar(props) {
+  // El componente y las clases se sacan aquí dentro (y no en la firma) para que
+  // el nombre en mayúscula sea una variable y no un parámetro: así eslint ve
+  // que se usa dentro del JSX.
+  const { as: Tag = "div", className = "", efecto = "", retraso = 0, style, children, ...resto } = props;
   const [ref, visto] = useEnPantalla();
   return (
     <Tag
@@ -89,29 +40,6 @@ export function Revelar({ as: Tag = "div", className = "", efecto = "", retraso 
       {children}
     </Tag>
   );
-}
-
-// ── Contadores ──────────────────────────────────────────────────────────────
-export function useConteo(desde, hasta, ms = 1400, activo = true) {
-  const [valor, setValor] = useState(desde);
-  useEffect(() => {
-    if (!activo) return;
-    if (quietoAhora()) {
-      setValor(hasta);
-      return;
-    }
-    let raf;
-    let t0;
-    const paso = (t) => {
-      if (!t0) t0 = t;
-      const k = Math.min(1, (t - t0) / ms);
-      setValor(desde + (hasta - desde) * (1 - Math.pow(1 - k, 3)));
-      if (k < 1) raf = requestAnimationFrame(paso);
-    };
-    raf = requestAnimationFrame(paso);
-    return () => cancelAnimationFrame(raf);
-  }, [desde, hasta, ms, activo]);
-  return valor;
 }
 
 /** Número que cuenta al entrar en pantalla. El lector de pantalla oye el valor final. */
@@ -131,6 +59,19 @@ export function Emoji({ children, className = "" }) {
   return <span aria-hidden="true" className={`bic-emoji-hover leading-none ${className}`}>{children}</span>;
 }
 
+/**
+ * Icono dentro de su pastilla. Es el gesto que se repite en toda la página:
+ * el icono nunca va suelto sobre el fondo, siempre en su medallón, para que
+ * tenga el mismo peso visual que tenía el emoji.
+ */
+export function Medallon({ icono, size = 22, className = "" }) {
+  return (
+    <span className={`bic-medallon ${className}`}>
+      <IconoBic nombre={icono} size={size} className="bic-icono" />
+    </span>
+  );
+}
+
 export function Seccion({ id, fondo = "bg-white", children, className = "" }) {
   return (
     <section id={id} className={`scroll-mt-32 px-4 py-12 sm:px-6 sm:py-16 xl:scroll-mt-24 ${fondo} ${className}`}>
@@ -139,19 +80,20 @@ export function Seccion({ id, fondo = "bg-white", children, className = "" }) {
   );
 }
 
-export function Eyebrow({ emoji, children, claro = false }) {
+export function Eyebrow({ icono, emoji, children, claro = false }) {
   return (
     <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.12em] ${claro ? "bg-white/10 text-sun" : "bg-accent/15 text-primary"}`}>
-      {emoji && <Emoji className="text-base">{emoji}</Emoji>}
+      {icono && <IconoBic nombre={icono} size={15} className="shrink-0" />}
+      {!icono && emoji && <Emoji className="text-base">{emoji}</Emoji>}
       {children}
     </span>
   );
 }
 
-export function Titulo({ emoji, eyebrow, titulo, texto, centro = false }) {
+export function Titulo({ icono, emoji, eyebrow, titulo, texto, centro = false }) {
   return (
     <Revelar className={`mb-8 max-w-3xl sm:mb-10 ${centro ? "mx-auto text-center" : ""}`}>
-      {eyebrow && <Eyebrow emoji={emoji}>{eyebrow}</Eyebrow>}
+      {eyebrow && <Eyebrow icono={icono} emoji={emoji}>{eyebrow}</Eyebrow>}
       <h2 className="mt-3 font-fraunces text-[1.7rem] font-bold leading-tight text-primary sm:text-4xl">{titulo}</h2>
       {texto && <p className="mt-3 text-base leading-relaxed text-neutral-700 sm:text-lg">{texto}</p>}
     </Revelar>
@@ -161,7 +103,7 @@ export function Titulo({ emoji, eyebrow, titulo, texto, centro = false }) {
 export function Articulo({ children, claro = false, className = "" }) {
   if (!children) return null;
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-bold ${claro ? "bg-white/15 text-white" : "bg-secondary text-primary"} ${className}`}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11.5px] font-bold ${claro ? "bg-white/15 text-white" : "bg-secondary text-primary"} ${className}`}>
       {children}
     </span>
   );
@@ -187,24 +129,13 @@ export function Chevron({ size = 16 }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" {...trazo} /></svg>;
 }
 
-/** Enlace interno (SPA) o ancla de la misma página. */
-export function irA(e, href) {
-  e.preventDefault();
-  if (href.startsWith("#")) {
-    document.getElementById(href.slice(1))?.scrollIntoView({ behavior: quietoAhora() ? "auto" : "smooth", block: "start" });
-    return;
-  }
-  navigate(href);
-  window.scrollTo({ top: 0, behavior: "instant" });
-}
-
 export function BotonCalendly({ children, className = "" }) {
   return (
     <a
       href={CALENDLY_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className={`bic-press inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-center font-extrabold text-primary-dark shadow-lg shadow-accent/25 transition hover:bg-sun ${className}`}
+      className={`bic-press mov-toque inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-center font-extrabold text-primary-dark shadow-lg shadow-accent/25 transition hover:bg-sun ${className}`}
     >
       {children}
     </a>
@@ -220,15 +151,19 @@ export function Expandible({ abierto, id, children }) {
   );
 }
 
-/** Acordeón nativo (details) con emoji y flecha. */
-export function Acordeon({ emoji, titulo, resumen, children, className = "" }) {
+/** Acordeón nativo (details) con icono y flecha. */
+export function Acordeon({ icono, emoji, titulo, resumen, children, className = "" }) {
   return (
     <details className={`bic-acordeon group rounded-2xl border border-neutral-200 bg-white transition open:border-sky open:shadow-md ${className}`}>
-      <summary className="flex cursor-pointer items-center gap-3 p-4 sm:p-5">
-        {emoji && (
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-xl">
-            <Emoji>{emoji}</Emoji>
-          </span>
+      <summary className="flex min-h-[56px] cursor-pointer items-center gap-3 p-4 sm:p-5">
+        {icono ? (
+          <Medallon icono={icono} size={21} className="h-11 w-11 bg-secondary text-primary" />
+        ) : (
+          emoji && (
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-xl">
+              <Emoji>{emoji}</Emoji>
+            </span>
+          )
         )}
         <span className="min-w-0 flex-1">
           <span className="block font-bold leading-snug text-primary">{titulo}</span>
@@ -255,12 +190,13 @@ export function Pestanas({ opciones, valor, onChange, etiqueta, className = "" }
             type="button"
             aria-pressed={activo}
             onClick={() => onChange(o.v)}
-            className={`bic-press flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-extrabold transition ${activo ? "bg-primary text-white shadow" : "text-primary hover:bg-white/70"}`}
+            className={`bic-press mov-toque flex min-h-[44px] shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-extrabold transition ${activo ? "bg-primary text-white shadow" : "text-primary hover:bg-white/70"}`}
           >
-            {o.emoji && <Emoji>{o.emoji}</Emoji>}
+            {o.icono && <IconoBic nombre={o.icono} size={17} className="shrink-0" />}
+            {!o.icono && o.emoji && <Emoji>{o.emoji}</Emoji>}
             {o.txt}
             {o.n != null && (
-              <span className={`rounded-full px-1.5 py-px text-[11px] ${activo ? "bg-white/20 text-white" : "bg-white text-primary"}`}>{o.n}</span>
+              <span className={`rounded-full px-1.5 py-px text-xs ${activo ? "bg-white/20 text-white" : "bg-white text-primary"}`}>{o.n}</span>
             )}
           </button>
         );
@@ -277,7 +213,14 @@ export function CuentaAtras() {
     return () => clearInterval(t);
   }, []);
   const e = estadoPostulacion(ahora);
-  if (!e.objetivo) return <p className="text-lg font-bold text-white">{e.rotulo}</p>;
+  if (!e.objetivo) {
+    return (
+      <p className="flex items-center gap-2 text-lg font-bold text-white">
+        <IconoBic nombre="candado" size={20} className="shrink-0 text-sun" />
+        {e.rotulo}
+      </p>
+    );
+  }
   const ms = Math.max(0, e.objetivo - ahora);
   const partes = [
     { n: Math.floor(ms / 86400000), u: "días" },
@@ -288,14 +231,20 @@ export function CuentaAtras() {
   return (
     <div>
       <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/80">
-        <Emoji className="text-base">⏳</Emoji>
+        <span className="bic-pulso inline-block h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+        <IconoBic nombre="reloj" size={15} className="shrink-0 text-sun" />
         {e.rotulo}
       </p>
       <div className="mt-3 grid grid-cols-4 gap-2" role="timer" aria-live="off">
         {partes.map((p) => (
           <div key={p.u} className="rounded-2xl bg-white/10 px-1 py-3 text-center ring-1 ring-white/15">
-            <span className="block font-fraunces text-3xl font-black tabular-nums text-white sm:text-4xl">{String(p.n).padStart(2, "0")}</span>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-white/70">{p.u}</span>
+            {/* El contenedor manda el salto de línea: mov-cifra es inline-block
+                y, puesto en el mismo span, dejaba la unidad al lado del número
+                y desbordaba la tarjeta en el móvil. */}
+            <span className="block font-fraunces text-3xl font-black tabular-nums text-white sm:text-4xl">
+              <span key={p.n} className="mov-cifra">{String(p.n).padStart(2, "0")}</span>
+            </span>
+            <span className="block text-[11.5px] font-bold uppercase tracking-wider text-white/70">{p.u}</span>
           </div>
         ))}
       </div>
@@ -303,7 +252,7 @@ export function CuentaAtras() {
   );
 }
 
-// ── Índice flotante con emojis ──────────────────────────────────────────────
+// ── Índice flotante ─────────────────────────────────────────────────────────
 // Móvil y tablet: chips horizontales pegados bajo la cabecera.
 // Escritorio ancho: riel vertical a la izquierda (en un portal, para que
 // ninguna animación de la página le cambie la referencia de position: fixed).
@@ -353,9 +302,9 @@ export function IndiceSecciones({ secciones }) {
               href={`#${s.id}`}
               onClick={(e) => irA(e, `#${s.id}`)}
               aria-current={activa === s.id ? "true" : undefined}
-              className={`bic-press flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-bold transition ${activa === s.id ? "bg-primary text-white shadow" : "bg-secondary text-primary"}`}
+              className={`bic-press mov-toque flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-bold transition ${activa === s.id ? "bg-primary text-white shadow" : "bg-secondary text-primary"}`}
             >
-              <Emoji>{s.emoji}</Emoji>
+              <IconoBic nombre={s.icono} size={17} className="shrink-0" />
               {s.txt}
             </a>
           ))}
@@ -376,9 +325,9 @@ export function IndiceSecciones({ secciones }) {
                 onClick={(e) => irA(e, `#${s.id}`)}
                 aria-label={s.txt}
                 aria-current={activa === s.id ? "true" : undefined}
-                className={`group relative flex h-10 w-10 items-center justify-center rounded-full text-lg transition ${activa === s.id ? "bg-primary shadow" : "hover:bg-secondary"}`}
+                className={`group relative flex h-11 w-11 items-center justify-center rounded-full transition ${activa === s.id ? "bg-primary text-white shadow" : "text-primary hover:bg-secondary"}`}
               >
-                <span aria-hidden="true">{s.emoji}</span>
+                <IconoBic nombre={s.icono} size={20} />
                 <span className="pointer-events-none absolute left-12 whitespace-nowrap rounded-lg bg-primary px-2.5 py-1 text-xs font-bold text-white opacity-0 shadow transition group-hover:opacity-100 group-focus-visible:opacity-100">
                   {s.txt}
                 </span>
@@ -423,16 +372,17 @@ function listaBecas() {
 function TarjetaBeca({ b, abierta, onToggle, i }) {
   return (
     <li className="bic-entra" style={{ "--bic-d": `${i * 55}ms` }}>
-      <div className={`bic-lift h-full rounded-2xl border-2 bg-white p-4 ${abierta ? "border-accent shadow-lg" : "border-neutral-200"}`}>
+      <div className={`bic-lift mov-eleva h-full rounded-2xl border-2 bg-white p-4 ${abierta ? "border-accent shadow-lg" : "border-neutral-200"}`}>
         <button type="button" onClick={onToggle} aria-expanded={abierta} aria-controls={`beca-${b.id}`} className="bic-press flex w-full items-start gap-3 text-left">
           <Bandera pais={b.bandera} titulo={b.pais} className="mt-1" />
           <span className="min-w-0 flex-1">
             <span className="block font-bold leading-snug text-primary">{b.nombre}</span>
             <span className="mt-1.5 flex flex-wrap gap-1.5">
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-primary">{b.pais}</span>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-primary">{b.pais}</span>
               {b.lograda && (
-                <span className="rounded-full bg-sun/45 px-2 py-0.5 text-[11px] font-bold text-primary">
-                  <span aria-hidden="true">🏅 </span>Lograda por asesorados en nuestra asesoría
+                <span className="inline-flex items-center gap-1 rounded-full bg-sun/45 px-2 py-0.5 text-xs font-bold text-primary">
+                  <IconoBic nombre="trofeo" size={13} className="shrink-0" />
+                  Lograda por asesorados en nuestra asesoría
                 </span>
               )}
             </span>
@@ -441,15 +391,15 @@ function TarjetaBeca({ b, abierta, onToggle, i }) {
             <Chevron />
           </span>
         </button>
-        <p className="mt-3 flex gap-1.5 text-xs font-semibold leading-snug text-neutral-700">
-          <span aria-hidden="true">🗓️</span>
+        <p className="mt-3 flex items-start gap-1.5 text-xs font-semibold leading-snug text-neutral-700">
+          <IconoBic nombre="calendario" size={14} className="mt-px shrink-0 text-primary-light" />
           {b.ventana}
         </p>
         <Expandible abierto={abierta} id={`beca-${b.id}`}>
           <p className="mt-3 border-t border-neutral-200 pt-3 text-sm leading-relaxed text-neutral-700">{b.texto}</p>
           {b.fuente && (
-            <a href={b.fuente} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-primary-light underline underline-offset-2">
-              <span aria-hidden="true">🔗</span> Web oficial
+            <a href={b.fuente} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold text-primary-light underline underline-offset-2">
+              <IconoBic nombre="enlace" size={15} /> Web oficial
             </a>
           )}
         </Expandible>
@@ -459,14 +409,14 @@ function TarjetaBeca({ b, abierta, onToggle, i }) {
 }
 
 function ExploradorBecas() {
-  const todas = useMemo(listaBecas, []);
+  const todas = useMemo(() => listaBecas(), []);
   const [filtro, setFiltro] = useState("todas");
   const [abierta, setAbierta] = useState(null);
   const filtros = [
-    { v: "todas", txt: "Todas", emoji: "✨", n: todas.length },
+    { v: "todas", txt: "Todas", icono: "destello", n: todas.length },
     { v: "espana", txt: "España", bandera: "es", n: todas.filter((b) => b.grupo === "espana").length },
     { v: "ue", txt: "Unión Europea", bandera: "ue", n: todas.filter((b) => b.grupo === "ue").length },
-    { v: "lograda", txt: "Logradas por asesorados", emoji: "🏅", n: todas.filter((b) => b.lograda).length },
+    { v: "lograda", txt: "Logradas por asesorados", icono: "trofeo", n: todas.filter((b) => b.lograda).length },
   ];
   const lista = todas.filter((b) => filtro === "todas" || (filtro === "lograda" ? b.lograda : b.grupo === filtro));
 
@@ -484,11 +434,11 @@ function ExploradorBecas() {
                 setFiltro(f.v);
                 setAbierta(null);
               }}
-              className={`bic-press flex shrink-0 items-center gap-2 rounded-full border-2 px-3.5 py-2 text-sm font-bold transition ${activo ? "border-primary bg-primary text-white shadow" : "border-neutral-200 bg-white text-primary hover:border-primary/40"}`}
+              className={`bic-press mov-toque flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border-2 px-3.5 py-2 text-sm font-bold transition ${activo ? "border-primary bg-primary text-white shadow" : "border-neutral-200 bg-white text-primary hover:border-primary/40"}`}
             >
-              {f.bandera ? <Bandera pais={f.bandera} titulo={f.txt} /> : <Emoji>{f.emoji}</Emoji>}
+              {f.bandera ? <Bandera pais={f.bandera} titulo={f.txt} /> : <IconoBic nombre={f.icono} size={16} className="shrink-0" />}
               {f.txt}
-              <span className={`rounded-full px-1.5 text-[11px] ${activo ? "bg-white/20" : "bg-secondary"}`}>{f.n}</span>
+              <span className={`rounded-full px-1.5 text-xs ${activo ? "bg-white/20" : "bg-secondary"}`}>{f.n}</span>
             </button>
           );
         })}
@@ -509,18 +459,19 @@ export function BloqueDescubre() {
     <Seccion id="descubre" fondo="bg-white">
       <Titulo
         centro
-        emoji="🧭"
+        icono="brujula"
         eyebrow="Sea cual sea tu resultado"
         titulo="Descubre otras becas o elige un máster económico"
         texto="¿No calificas o no quieres depender de 20 plazas? Tranquilo: tienes dos caminos."
       />
       <div className="grid gap-5 lg:grid-cols-2">
         <Revelar efecto="bic-izq" className="h-full">
-          <div className="bic-lift relative flex h-full flex-col overflow-hidden rounded-[2rem] border-2 border-sky bg-gradient-to-br from-secondary-light to-secondary p-6 sm:p-8">
+          <div className="bic-lift mov-eleva relative flex h-full flex-col overflow-hidden rounded-[2rem] border-2 border-sky bg-gradient-to-br from-secondary-light to-secondary p-6 sm:p-8">
             <span className="absolute right-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-black text-primary shadow">Camino 1</span>
             <IlustracionBecas className="mx-auto h-36 w-auto sm:h-44" />
-            <h3 className="mt-3 font-fraunces text-2xl font-bold text-primary sm:text-3xl">
-              <Emoji>🏅</Emoji> Otras becas para ti
+            <h3 className="mt-3 flex items-center gap-2.5 font-fraunces text-2xl font-bold text-primary sm:text-3xl">
+              <Medallon icono="trofeo" size={22} className="h-11 w-11 bg-white text-primary shadow-sm" />
+              Otras becas para ti
             </h3>
             <p className="mt-2 text-neutral-700">
               {nEs} becas en España y {nUe} en la Unión Europea, con su ventana de postulación.
@@ -533,20 +484,21 @@ export function BloqueDescubre() {
               <a
                 href="#explorador-becas"
                 onClick={(e) => irA(e, "#explorador-becas")}
-                className="bic-press inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 font-extrabold text-white transition hover:bg-primary-light sm:w-auto"
+                className="bic-press mov-toque inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 font-extrabold text-white transition hover:bg-primary-light sm:w-auto"
               >
-                <Emoji>🔎</Emoji> Explorar las becas
+                <IconoBic nombre="lupa" size={19} /> Explorar las becas
               </a>
             </div>
           </div>
         </Revelar>
 
         <Revelar efecto="bic-der" retraso={120} className="h-full">
-          <div className="bic-lift relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-primary p-6 text-white sm:p-8">
+          <div className="bic-lift mov-eleva relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-primary p-6 text-white sm:p-8">
             <span className="absolute right-4 top-4 rounded-full bg-sun px-3 py-1 text-xs font-black text-primary shadow">Camino 2</span>
             <IlustracionMaster className="mx-auto h-36 w-auto sm:h-44" />
-            <h3 className="mt-3 font-fraunces text-2xl font-bold sm:text-3xl">
-              <Emoji>💶</Emoji> Un máster económico
+            <h3 className="mt-3 flex items-center gap-2.5 font-fraunces text-2xl font-bold sm:text-3xl">
+              <Medallon icono="euro" size={22} className="h-11 w-11 bg-white/10 text-sun ring-1 ring-white/20" />
+              Un máster económico
             </h3>
             <p className="mt-2 text-white/80">¿Y si no es con beca? Másteres oficiales en España</p>
             <p className="mt-1 font-fraunces font-black leading-none">
@@ -555,7 +507,7 @@ export function BloqueDescubre() {
               <span className="text-lg text-white"> al año</span>
             </p>
             <details className="bic-acordeon mt-3 text-sm">
-              <summary className="inline-flex cursor-pointer items-center gap-1 font-bold text-sky">
+              <summary className="inline-flex min-h-[44px] cursor-pointer items-center gap-1 font-bold text-sky">
                 ¿De dónde sale esta cifra? <span className="bic-flecha"><Chevron size={14} /></span>
               </summary>
               <p className="mt-2 leading-relaxed text-white/80">{PLAN_B.nota}</p>
@@ -564,12 +516,13 @@ export function BloqueDescubre() {
               <a
                 href={PLAN_B.hrefMapa}
                 onClick={(e) => irA(e, PLAN_B.hrefMapa)}
-                className="bic-press inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-black/20 transition hover:bg-sun sm:w-auto"
+                className="bic-press mov-toque inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-primary-dark shadow-lg shadow-black/20 transition hover:bg-sun sm:w-auto"
               >
-                <Emoji>🗺️</Emoji> Descúbrelo en el mapa
+                <IconoBic nombre="mapa" size={19} /> Descúbrelo en el mapa
               </a>
-              <p className="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm text-white/85">
-                <span aria-hidden="true">📦 </span>Paquetes de postulación <b className="text-sun">desde {eur(PRECIO_DESDE)}</b>{" · "}
+              <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-2xl bg-white/10 px-4 py-3 text-sm text-white/85">
+                <IconoBic nombre="paquete" size={16} className="shrink-0 text-sun" />
+                Paquetes de postulación <b className="text-sun">desde {eur(PRECIO_DESDE)}</b>{" · "}
                 <a href={PLAN_B.hrefPaquete} onClick={(e) => irA(e, PLAN_B.hrefPaquete)} className="font-bold text-white underline underline-offset-4">
                   Ver los paquetes
                 </a>
@@ -581,8 +534,9 @@ export function BloqueDescubre() {
 
       <div id="explorador-becas" className="mt-12 scroll-mt-32 xl:scroll-mt-24">
         <Revelar className="mb-4 flex flex-wrap items-end justify-between gap-2">
-          <h3 className="font-fraunces text-2xl font-bold text-primary">
-            <Emoji>🔎</Emoji> Explora las becas
+          <h3 className="flex items-center gap-2.5 font-fraunces text-2xl font-bold text-primary">
+            <Medallon icono="lupa" size={21} className="h-10 w-10 bg-secondary text-primary" />
+            Explora las becas
           </h3>
           <p className="text-sm text-neutral-600">Filtra y toca una tarjeta para ver qué cubre.</p>
         </Revelar>
@@ -600,25 +554,26 @@ export function BloqueDescubre() {
 export function DescubreCompacto() {
   return (
     <div>
-      <p className="font-fraunces text-xl font-bold text-primary sm:text-2xl">
-        <Emoji>🧭</Emoji> Descubre otras becas o elige un máster económico
+      <p className="flex items-center gap-2.5 font-fraunces text-xl font-bold text-primary sm:text-2xl">
+        <Medallon icono="brujula" size={21} className="h-10 w-10 bg-secondary text-primary" />
+        Descubre otras becas o elige un máster económico
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <a href="#descubre" onClick={(e) => irA(e, "#descubre")} className="bic-lift bic-press group flex items-center gap-3 rounded-2xl border-2 border-sky bg-white p-3">
+        <a href="#descubre" onClick={(e) => irA(e, "#descubre")} className="bic-lift bic-press mov-toque group flex items-center gap-3 rounded-2xl border-2 border-sky bg-white p-3">
           <IlustracionBecas className="h-16 w-20 shrink-0" />
           <span className="min-w-0 flex-1">
             <span className="block font-bold text-primary">Otras becas para ti</span>
             <span className="block text-sm text-neutral-700">España y Unión Europea</span>
           </span>
-          <span aria-hidden="true" className="text-primary transition group-hover:translate-x-1">→</span>
+          <IconoBic nombre="flecha" size={18} className="shrink-0 text-primary transition group-hover:translate-x-1" />
         </a>
-        <a href={PLAN_B.hrefMapa} onClick={(e) => irA(e, PLAN_B.hrefMapa)} className="bic-lift bic-press group flex items-center gap-3 rounded-2xl bg-primary p-3 text-white">
+        <a href={PLAN_B.hrefMapa} onClick={(e) => irA(e, PLAN_B.hrefMapa)} className="bic-lift bic-press mov-toque group flex items-center gap-3 rounded-2xl bg-primary p-3 text-white">
           <IlustracionMaster className="h-16 w-20 shrink-0" />
           <span className="min-w-0 flex-1">
             <span className="block font-bold">Un máster económico</span>
             <span className="block text-sm text-white/80">Desde unos {eur(PLAN_B.matriculaDesde)} al año · paquetes de postulación desde {eur(PRECIO_DESDE)}</span>
           </span>
-          <span aria-hidden="true" className="transition group-hover:translate-x-1">→</span>
+          <IconoBic nombre="flecha" size={18} className="shrink-0 transition group-hover:translate-x-1" />
         </a>
       </div>
     </div>

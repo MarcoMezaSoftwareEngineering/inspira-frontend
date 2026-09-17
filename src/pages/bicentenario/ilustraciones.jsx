@@ -2,7 +2,8 @@
 // Ilustraciones SVG propias, en línea y con la paleta de la marca:
 // petróleo #013446, celeste #88C4FC, naranja #FA943A, amarillo #F9C846.
 // Sin fotos de stock ni recursos de otros dominios.
-import { useEffect, useState } from "react";
+// (usePrefiereQuieto vive en utiles.js: aquí solo hay componentes.)
+import { usePrefiereQuieto } from "./utiles";
 
 const PETROLEO = "#013446";
 const PETROLEO_2 = "#02506B";
@@ -11,20 +12,6 @@ const CELESTE_CLARO = "#E3F0FE";
 const NARANJA = "#FA943A";
 const AMARILLO = "#F9C846";
 const FUENTE = "Montserrat, system-ui, sans-serif";
-
-/** true si el sistema pide menos movimiento. */
-export function usePrefiereQuieto() {
-  const consulta = "(prefers-reduced-motion: reduce)";
-  const [quieto, setQuieto] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.(consulta).matches);
-  useEffect(() => {
-    const m = window.matchMedia?.(consulta);
-    if (!m) return;
-    const f = () => setQuieto(m.matches);
-    m.addEventListener?.("change", f);
-    return () => m.removeEventListener?.("change", f);
-  }, []);
-  return quieto;
-}
 
 const destello = (x, y, s) => `M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s}Z`;
 

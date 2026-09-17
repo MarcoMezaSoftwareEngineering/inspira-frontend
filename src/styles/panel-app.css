@@ -553,3 +553,5 @@ html.pnl-vt .pnl-vista > .pnl-entra { animation: none; }
   .pnl-top { gap: 10px; }
   .pnl-top-pct { padding: 3px 7px; font-size: 11px; }
 }
+.pnl-seccion-titulo .pnl-recargar { margin-left: auto; width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: 999px; background: var(--sky-soft); }
+.pnl-seccion-titulo .pnl-recargar:active svg { transform: rotate(-180deg); transition: transform .4s var(--salida); }

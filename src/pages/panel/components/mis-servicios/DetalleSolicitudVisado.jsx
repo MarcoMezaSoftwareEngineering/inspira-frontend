@@ -327,7 +327,9 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
     eyebrow: detalle ? `Solicitud #${detalle.id_solicitud}` : null,
     // Con el nombre del titular, como decía la tarjeta que en el teléfono ya
     // no sale: quien entra invitado tiene que saber de quién es.
-    titulo: `${detalle?.tipo?.nombre || "Visado de estudios"}${cli.nombre ? ` · ${cli.nombre}` : ""}`,
+    titulo: solicitudBase?.invitado && cli.nombre
+      ? `De ${cli.nombre}`
+      : `${detalle?.tipo?.nombre || "Visado de estudios"}${cli.nombre ? ` · ${cli.nombre}` : ""}`,
     pct: detalle ? pct : null,
   });
 

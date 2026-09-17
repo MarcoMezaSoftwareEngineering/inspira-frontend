@@ -181,13 +181,21 @@ function TarjetaResumen({ s }) {
   );
 }
 
-export function ResumenExpediente({ servicios }) {
+export function ResumenExpediente({ servicios, onRecargar = null }) {
   const lista = servicios || [];
   if (!lista.length) return null;
   return (
     <section>
       <div className="pnl-seccion-titulo">
         <h2>Tus servicios</h2>
+        {/* Recargar también en el ordenador, donde no se tira hacia abajo. */}
+        {onRecargar && (
+          <button type="button" className="pnl-recargar" onClick={() => onRecargar()} aria-label="Actualizar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
+            </svg>
+          </button>
+        )}
         <button type="button" onClick={() => navigate(rutaDe({ tab: "servicios" }))}>
           Ver todos
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>

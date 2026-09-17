@@ -29,7 +29,7 @@ function Pendientes({ items }) {
       {visibles.map((it, i) => (
         // Toda la fila es el botón: en el móvil el dedo no apunta a una píldora.
         <li key={it.clave} className="pnl-pend-item pnl-fila-entra" data-tono={it.tono} style={{ "--i": i }}
-          role="button" tabIndex={0}
+          role="button" tabIndex={0} aria-label={`${it.texto}. ${it.accion}`}
           onClick={() => navigate(it.href)}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(it.href); } }}
         >
@@ -59,7 +59,7 @@ function Pendientes({ items }) {
   );
 }
 
-export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle, avisoAppBloqueado = false, pagos = null }) {
+export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle, avisoAppBloqueado = false, pagos = null, avisoPerfil = null }) {
   const lista = servicios || [];
   // `pagos`: sus planes de pago; las cuotas que vencen pronto entran en «Hoy».
   const items = loading ? [] : pendientesDe(lista, perfil, conAcademico, conCompleto, pagos);
@@ -94,7 +94,9 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
       <SaludoInicio perfil={perfil} servicios={lista} pendientes={items.length} onVerPendientes={irAPendientes} />
 
       {!loading && (
-        <div id="pnl-proximo" style={{ scrollMarginTop: 12 }}>
+        // Con 0 o 1 pendientes no hay «También pendiente»: el paso «hoy» del
+        // recorrido señala entonces el próximo paso.
+        <div id="pnl-proximo" style={{ scrollMarginTop: 12 }} data-tour={resto.length ? undefined : "hoy"}>
           <ProximoPaso items={items} servicios={lista} />
         </div>
       )}
@@ -114,8 +116,12 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
         </section>
       )}
 
+      {/* El aviso de perfil, si su pendiente no es ya el próximo paso: con
+          peso bajo podía quedar escondido tras «Ver más». */}
+      {avisoPerfil}
+
       <div data-tour="servicios">
-        <ResumenExpediente servicios={lista} />
+        <ResumenExpediente servicios={lista} onRecargar={onRecargar} />
       </div>
 
       {!loading && <MiRutaResumen servicios={lista} />}

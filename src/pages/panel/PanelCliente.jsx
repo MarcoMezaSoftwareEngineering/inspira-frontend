@@ -67,7 +67,7 @@ const PASOS_INICIO = [
   {
     clave: "menu",
     titulo: "El menú",
-    texto: "Desde aquí vuelves a Inicio, abres tus servicios, tus pagos o tu ruta y tu perfil. En «Más» están tus guías y, si quieres ver este recorrido otra vez, «¿Cómo funciona?».",
+    texto: "Desde aquí vuelves a Inicio y abres tus servicios, tus pagos o tu ruta, tu perfil y tus guías. Si quieres ver este recorrido otra vez, está en «¿Cómo funciona?» (en el teléfono, dentro de «Más»).",
   },
 ];
 
@@ -135,10 +135,12 @@ export default function PanelCliente({ path }) {
   const faltanPerfil = user !== null && cargado ? datosQueFaltan(user, conAcademico, conCompleto) : 0;
   // Cuántas cosas esperan: sale en el menú junto a «Inicio» y como punto sobre
   // el botón del menú, para saberlo sin abrir nada.
-  const nPendientes = useMemo(
-    () => (user && cargado ? pendientesDe(lista, user, conAcademico, conCompleto, planesPago).length : 0),
+  const listaPendientes = useMemo(
+    () => (user && cargado ? pendientesDe(lista, user, conAcademico, conCompleto, planesPago) : []),
     [user, cargado, lista, conAcademico, conCompleto, planesPago],
   );
+  const nPendientes = listaPendientes.length;
+  const primerPendiente = listaPendientes[0]?.clave || null;
 
   // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
   // ofrece entrar. Al pulsar, el login conserva esta misma URL, así que un
@@ -459,6 +461,9 @@ export default function PanelCliente({ path }) {
                 avisoAppBloqueado={tour || tourPendiente || mostrarWizard}
                 faltanPerfil={faltanPerfil}
                 pagos={planesPago}
+                avisoPerfil={avisarPerfil && enPortada && primerPendiente !== "perfil"
+                  ? <AvisoPerfil faltan={faltanDatos} imprescindible={conCompleto} onIr={() => handleChangeTab("perfil")} />
+                  : null}
               />
               </CabeceraExpedienteCtx.Provider>
             </div>

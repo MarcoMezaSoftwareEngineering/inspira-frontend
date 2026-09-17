@@ -25,7 +25,7 @@
 // WHATSAPP que lib/analytics saca solo de cualquier clic a wa.me.
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { origenDeRuta, whatsappDesde } from "../../config/contacto";
+import { WHATSAPP_INSPIRA, origenDeRuta, whatsappDesde } from "../../config/contacto";
 import { enviarEventoEmbudo } from "../../lib/analytics";
 // La hoja se importa aquí y no en un trozo perezoso: App.jsx importa este
 // componente de forma estática, así que el CSS viaja en el paquete inicial y
@@ -101,7 +101,10 @@ export default function WhatsAppFlotante({
 
   return createPortal(
     <a
-      href={whatsappDesde(origen || ruta, texto)}
+      // El enlace corto de Carina (wa.link) es el que reparte por fuera y trae
+      // su mensaje; `lib/whatsapp.js` lo abre en la aplicación. El de siempre,
+      // con el mensaje según la página, queda de respaldo si algún día se quita.
+      href={WHATSAPP_INSPIRA || whatsappDesde(origen || ruta, texto)}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() =>

@@ -30,7 +30,7 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import logo from "../../assets/images/logo.png";
 import WhatsAppFlotante from "../../components/common/WhatsAppFlotante";
-import { CALENDLY_URL, LINEAS, whatsappDesde } from "../../config/contacto";
+import { CALENDLY_URL, LINEAS, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
 import { OPCIONES_ASESORIA, PROMO_GRATIS, promoVigente } from "../../config/asesorias";
 import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 import { eventosActivos } from "../../config/eventos";
@@ -67,7 +67,6 @@ const DETALLE_WA = {
   master: "Quiero información del Paquete Máster 2027/2028.",
   viaje: "Quiero información para preparar mi viaje a España.",
 };
-const waDe = (clave) => whatsappDesde("enlaces", DETALLE_WA[clave] || DETALLE_WA.general);
 
 // Línea única de la web, atendida por el equipo de Perú y España.
 const NUMERO = LINEAS[0].numero;
@@ -152,15 +151,14 @@ function enlacesPorTemporada() {
 // Para el viaje: aliados externos que la clienta recomienda (17/09/2026). Se
 // abren fuera de la web. El seguro va a WhatsApp de StarSeguro con el mensaje
 // que pidió Carina; la eSIM, a su enlace de referido de Holafly.
-const MENSAJE_SEGURO =
-  "¡Hola! Vengo por recomendación de Carina Meza - Inspira, quisiera cotizar mi seguro de salud para visa de estudios: Me recomendó cotizar Adeslas";
 const VIAJE = [
   {
     clave: "aliado:seguro",
     emoji: "🩺",
     titulo: "Seguro de salud para España",
     texto: "Cotiza tu seguro Adeslas para la visa con StarSeguro",
-    href: `https://wa.me/34632107913?text=${encodeURIComponent(MENSAJE_SEGURO)}`,
+    // El enlace corto de Félix (StarSeguro), con su propio mensaje.
+    href: WHATSAPP_SEGURO,
   },
   {
     clave: "aliado:esim",
@@ -455,7 +453,7 @@ function Contacto({ style }) {
       <p className="mt-1 font-fraunces text-2xl font-bold tabular-nums">{NUMERO}</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <a
-          href={waDe("contacto")}
+          href={WHATSAPP_INSPIRA}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => marcar("contacto:whatsapp")}
@@ -697,7 +695,7 @@ export default function Enlaces() {
           {/* El número, escrito y a un toque: es lo que más piden desde la
               biografía, y así se ve sin bajar ni abrir nada (17/09/2026). */}
           <a
-            href={waDe("cabecera")}
+            href={WHATSAPP_INSPIRA}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => marcar("whatsapp:cabecera")}

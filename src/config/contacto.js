@@ -133,6 +133,33 @@ export function whatsappDesde(origen, detalle = "Quiero información.") {
   return whatsappLinea(LINEAS[0], texto);
 }
 
+/**
+ * Enlaces cortos de Walink (wa.link), los que Carina reparte por fuera de la
+ * web. Se usan tal cual en los botones principales —son los suyos y llevan su
+ * mensaje— y `lib/whatsapp.js` sabe traducirlos a `whatsapp://` para abrir la
+ * aplicación en el móvil: por sí solos redirigen a api.whatsapp.com, que es
+ * justo la pantalla donde sale «La acción no se pudo completar».
+ *
+ * Si Carina cambia el mensaje en su panel de Walink, aquí solo hay que
+ * actualizar `texto` (el enlace sigue funcionando igual, y el respaldo del
+ * móvil es lo único que se quedaría con el texto viejo).
+ */
+export const ENLACES_CORTOS = {
+  "wa.link/s6cfmu": {
+    telefono: "51992009397",
+    texto: "Hola 👋 estoy interesad@ en sus servicios como Inspira Legal ⚖️ me darían información por favor ✨ ",
+  },
+  "wa.link/9z7i3d": {
+    telefono: "34632107913",
+    texto: "¡Hola, Félix! Vengo por recomendación de Carina Meza - Inspira, quisiera cotizar mi seguro de salud para visa de estudios ✨ ",
+  },
+};
+
+/** El enlace corto de Inspira: el que Carina usa en sus publicaciones. */
+export const WHATSAPP_INSPIRA = "https://wa.link/s6cfmu";
+/** El de Félix Olaya (StarSeguro), para el seguro de salud. */
+export const WHATSAPP_SEGURO = "https://wa.link/9z7i3d";
+
 /** Enlace de WhatsApp a una línea concreta. */
 export const whatsappLinea = (linea, mensaje) =>
   `https://wa.me/${soloDigitos(linea.numero)}?text=${encodeURIComponent(

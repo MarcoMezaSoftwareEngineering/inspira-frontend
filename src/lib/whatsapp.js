@@ -18,6 +18,8 @@
 // componente. Con Ctrl/Cmd, con el botón central o en escritorio no se toca
 // nada: el enlace normal ya funciona.
 
+import { ENLACES_CORTOS } from "../config/contacto";
+
 const ESPERA_MS = 1200;
 
 /** ¿Es un teléfono o una tableta? En escritorio `whatsapp://` no lleva a ningún sitio. */
@@ -34,6 +36,12 @@ export function esMovil() {
 export function enlaceDeAplicacion(href) {
   try {
     const u = new URL(href, window.location.origin);
+    // Los enlaces cortos de Walink no dicen a qué número van: su equivalencia
+    // está escrita en config/contacto.js.
+    const corto = ENLACES_CORTOS[`${u.hostname}${u.pathname}`.replace(/\/$/, "")];
+    if (corto) {
+      return `whatsapp://send?phone=${corto.telefono}${corto.texto ? `&text=${encodeURIComponent(corto.texto)}` : ""}`;
+    }
     if (!/(^|\.)wa\.me$|(^|\.)whatsapp\.com$/.test(u.hostname)) return null;
     // wa.me/<numero> o api.whatsapp.com/send?phone=<numero>
     const telefono = (u.pathname.replace(/\D/g, "") || u.searchParams.get("phone") || "").replace(/\D/g, "");
@@ -143,7 +151,7 @@ export function vigilarEnlacesWhatsApp() {
     const a = e.target?.closest?.("a[href]");
     if (!a) return;
     const href = a.getAttribute("href") || "";
-    if (!/wa\.me|api\.whatsapp\.com/.test(href)) return;
+    if (!/wa\.me|api\.whatsapp\.com|wa\.link/.test(href)) return;
     if (abrirWhatsApp(a.href)) e.preventDefault();
   };
   document.addEventListener("click", alPulsar);

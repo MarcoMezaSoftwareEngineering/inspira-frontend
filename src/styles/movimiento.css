@@ -1,0 +1,107 @@
+/* src/styles/movimiento.css
+ *
+ * El movimiento común de las páginas de marca: /enlaces, el mapa y la beca.
+ * Antes cada una tenía sus propios @keyframes copiados, con curvas y tiempos
+ * distintos, y se notaba al pasar de una a otra. Aquí están una sola vez.
+ *
+ * Reglas de la casa:
+ * - Solo se animan `opacity` y `transform`. Nada que obligue al navegador a
+ *   recalcular la página mientras se hace scroll.
+ * - Todo aparece al asomar (lib/revelar.js pone data-visto), no al cargar.
+ * - Con `prefers-reduced-motion: reduce` no se mueve nada y todo se ve.
+ */
+
+/* ── Aparición al asomar ─────────────────────────────────────────────── */
+/* Ojo al `[data-armado]`: un bloque solo se esconde después de que lib/revelar
+   lo haya puesto a la escucha. Sin esa marca se ve con normalidad, así que si
+   el JavaScript falla la página sigue leyéndose en vez de quedarse en blanco. */
+[data-revelar][data-armado] {
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--r, 0ms),
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1) var(--r, 0ms);
+}
+[data-revelar][data-armado]:not([data-visto]) {
+  opacity: 0;
+  transform: translateY(22px);
+  will-change: opacity, transform;
+}
+[data-revelar="escala"][data-armado]:not([data-visto]) { transform: translateY(22px) scale(0.965); }
+[data-revelar="izquierda"][data-armado]:not([data-visto]) { transform: translateX(-26px); }
+[data-revelar="derecha"][data-armado]:not([data-visto]) { transform: translateX(26px); }
+[data-revelar="suave"][data-armado]:not([data-visto]) { transform: translateY(10px); }
+
+/* ── Gestos que se repiten ───────────────────────────────────────────── */
+
+/* Late: el punto verde del «en vivo» y las cuentas atrás. */
+@keyframes mov-latido {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+  100% { box-shadow: 0 0 0 9px rgba(74, 222, 128, 0); }
+}
+.mov-latido { animation: mov-latido 1.6s ease-out infinite; }
+
+/* Flota: iconos y medallas, muy poco recorrido para que no maree. */
+@keyframes mov-flota {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+.mov-flota { animation: mov-flota 4.5s ease-in-out infinite; animation-delay: var(--r, 0ms); }
+
+/* Brillo: un barrido de luz sobre los botones principales. */
+@keyframes mov-barrido {
+  0%, 62% { transform: translateX(-130%); }
+  100%    { transform: translateX(130%); }
+}
+.mov-brillo { position: relative; overflow: hidden; isolation: isolate; }
+.mov-brillo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+  transform: translateX(-130%);
+  animation: mov-barrido 4.2s ease-in-out infinite;
+}
+
+/* Presión: la respuesta al dedo. Se aplica a botones y tarjetas enlazadas. */
+.mov-toque { transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s, border-color 0.22s, background-color 0.22s; }
+.mov-toque:active { transform: scale(0.975); }
+
+/* Elevación al pasar por encima (solo donde hay puntero de verdad). */
+@media (hover: hover) and (pointer: fine) {
+  .mov-eleva:hover { transform: translateY(-3px); }
+}
+
+/* Cuenta que sube: la cifra cambia con un pequeño golpe. */
+@keyframes mov-sube-cifra {
+  from { opacity: 0; transform: translateY(0.5em); }
+  to   { opacity: 1; transform: none; }
+}
+.mov-cifra { display: inline-block; animation: mov-sube-cifra 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Subrayado que se dibuja al asomar el bloque. */
+.mov-subrayado { position: relative; }
+.mov-subrayado::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #fa943a, #f9c846);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+[data-visto] .mov-subrayado::after,
+.mov-subrayado[data-visto]::after { transform: scaleX(1); }
+
+/* ── Respeto al sistema ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  [data-revelar] { opacity: 1; transform: none; transition: none; }
+  .mov-latido, .mov-flota, .mov-cifra { animation: none; }
+  .mov-brillo::after { display: none; }
+  .mov-toque, .mov-eleva:hover { transition: none; transform: none; }
+  .mov-subrayado::after { transition: none; transform: scaleX(1); }
+}

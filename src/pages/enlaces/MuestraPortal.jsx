@@ -7,7 +7,9 @@
 // Las capturas son de una clienta ficticia (banco de pruebas con la API
 // interceptada): nunca salen datos reales. Van en public/enlaces/portal-*.jpg
 // a 520 px de ancho, ~50 KB cada una, y solo la primera se carga al entrar.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Icono from "../../components/common/Icono";
+import { useRevelar } from "../../lib/revelar";
 
 const PANTALLAS = [
   { img: "/enlaces/portal-1.jpg", titulo: "Tu próximo paso", texto: "Al entrar ves qué te toca hacer, con su fecha límite." },
@@ -19,6 +21,10 @@ const PASO_MS = 3800;
 
 export default function MuestraPortal({ style, onAbrir, href }) {
   const [i, setI] = useState(0);
+  // Este bloque llega tarde (va en su propio trozo de JavaScript), así que el
+  // barrido de la página ya pasó: se pone a la escucha por su cuenta.
+  const raiz = useRef(null);
+  useRevelar(raiz);
   // Se lee una vez al montar, no en cada pintado.
   const [quieto] = useState(() => {
     try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
@@ -33,11 +39,13 @@ export default function MuestraPortal({ style, onAbrir, href }) {
   const p = PANTALLAS[i];
 
   return (
-    <section data-wa="portal" aria-label="Expediente Digital Inspira" className="enl-sube enl-tarjeta mt-3 p-4" style={style}>
-      <p className="enl-portal-eyebrow">📱 Expediente Digital Inspira</p>
+    <section ref={raiz} data-wa="portal" aria-label="Expediente Digital Inspira" className="enl-sube enl-tarjeta mt-3 p-4" style={style}>
+      <p className="enl-portal-eyebrow">
+        <Icono nombre="movil" size={13} aria-hidden="true" /> Expediente Digital Inspira
+      </p>
       <p className="enl-portal-lema">No tienes una carpeta. Tienes un expediente.</p>
 
-      <div className="enl-portal-fila">
+      <div className="enl-portal-fila" data-revelar="suave">
         {/* El teléfono: marco fino y la pantalla que toca, que se funde con la
             siguiente. Altura fija para que la tarjeta no salte al cambiar. */}
         <div className="enl-portal-movil" aria-hidden="true">
@@ -73,11 +81,9 @@ export default function MuestraPortal({ style, onAbrir, href }) {
         </div>
       </div>
 
-      <a href={href} onClick={onAbrir} className="enl-portal-cta">
+      <a href={href} onClick={onAbrir} className="enl-portal-cta" data-revelar="suave" style={{ "--r": "120ms" }}>
         Así trabajamos contigo
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M13.5 4.5 21 12l-7.5 7.5M21 12H3" />
-        </svg>
+        <Icono nombre="flecha" size={15} strokeWidth={2.4} />
       </a>
     </section>
   );

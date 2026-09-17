@@ -28,7 +28,9 @@
 //   cambia el detalle según lo que se está mirando.
 // - La beca y los eventos se ordenan solos por temporada (ver más abajo).
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import logo from "../../assets/images/logo.png";
+import Icono from "../../components/common/Icono";
 import WhatsAppFlotante from "../../components/common/WhatsAppFlotante";
 import { CALENDLY_URL, LINEAS, MENSAJE_SEGURO, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
 import { OPCIONES_ASESORIA } from "../../config/asesorias";
@@ -37,6 +39,8 @@ import { eventosActivos } from "../../config/eventos";
 import { getServicio, hrefServicio } from "../../config/servicios";
 import { TESTIMONIOS } from "../../config/testimonios";
 import { enviarEventoEmbudo } from "../../lib/analytics";
+import { useRevelar } from "../../lib/revelar";
+import "../../styles/movimiento.css";
 
 // El mapa en vivo va en su propio trozo: no pesa hasta que se pinta.
 const MuestraMapa = lazy(() => import("./MuestraMapa"));
@@ -73,6 +77,16 @@ const DETALLE_WA = {
 const NUMERO = LINEAS[0].numero;
 const TEL = `tel:+${NUMERO.replace(/\D/g, "")}`;
 
+// Lo que hacemos, en tres palabras. Sustituye a la línea de emojis de la
+// biografía (17/09/2026): cada sistema dibuja los emojis a su manera —en varios
+// Android salían de otra familia y de otro tamaño— y la cabecera cambiaba de
+// aspecto según el teléfono. Estos iconos son nuestros y siempre se ven igual.
+const OFICIOS = [
+  { icono: "balanza", texto: "Extranjería" },
+  { icono: "pasaporte", texto: "Visados" },
+  { icono: "birrete", texto: "Másteres" },
+];
+
 const hrefDe = (id) => {
   const s = getServicio(id);
   return s ? hrefServicio(s) : "/servicios";
@@ -102,7 +116,7 @@ const RECURSOS = [
   },
   {
     clave: "recurso:visa-o-estancia",
-    emoji: "🧭",
+    icono: "brujula",
     titulo: "Test: ¿visa o estancia por estudios?",
     texto: "Descubre qué camino te conviene según tu caso",
     href: interno("/visa-o-estancia"),
@@ -110,15 +124,15 @@ const RECURSOS = [
 ];
 
 const SERVICIOS = [
-  { clave: "servicio:visado", emoji: "🛂", titulo: "Visado de estudios", texto: "Te acompañamos en todo el trámite", href: interno(hrefDe("visa-estudios")) },
-  { clave: "servicio:estancia", emoji: "🏠", titulo: "Estancia por estudios", texto: "El trámite desde España, paso a paso", href: interno(hrefDe("estancia-estudios")) },
+  { clave: "servicio:visado", icono: "pasaporte", titulo: "Visado de estudios", texto: "Te acompañamos en todo el trámite", href: interno(hrefDe("visa-estudios")) },
+  { clave: "servicio:estancia", icono: "casa", titulo: "Estancia por estudios", texto: "El trámite desde España, paso a paso", href: interno(hrefDe("estancia-estudios")) },
 ];
 
 // El portal va a /plataforma, como «Mi portal» de la barra inferior sin sesión.
 const ENLACES = [
-  { clave: "eventos", emoji: "🎤", titulo: "Eventos y charlas gratuitas", href: interno("/eventos") },
-  { clave: "portal", emoji: "📱", titulo: "Mi portal: acceso para asesorados", href: interno("/plataforma") },
-  { clave: "web", emoji: "🌎", titulo: "Nuestra web oficial", href: interno("/") },
+  { clave: "eventos", icono: "microfono", titulo: "Eventos y charlas gratuitas", href: interno("/eventos") },
+  { clave: "portal", icono: "movil", titulo: "Mi portal: acceso para asesorados", href: interno("/plataforma") },
+  { clave: "web", icono: "globo", titulo: "Nuestra web oficial", href: interno("/") },
 ];
 
 /**
@@ -155,19 +169,19 @@ function enlacesPorTemporada() {
 const VIAJE = [
   {
     clave: "aliado:seguro",
-    emoji: "🩺",
+    icono: "salud",
     titulo: "Seguro de salud para España",
     texto: "Cotiza tu seguro Adeslas para la visa con StarSeguro",
     // El mensaje sale escrito y es el que da la atención prioritaria: si lo
     // borran, entran como cualquier consulta. Se avisa antes de tocar.
-    chip: "⚡ Atención prioritaria",
+    chip: "Atención prioritaria",
     nota: "Envía este mensaje tal cual: es lo que te da la atención prioritaria.",
     mensaje: MENSAJE_SEGURO,
     href: WHATSAPP_SEGURO,
   },
   {
     clave: "aliado:esim",
-    emoji: "📶",
+    icono: "senal",
     titulo: "eSIM para Europa",
     texto: "Datos en toda Europa desde el aterrizaje, con nuestro enlace de Holafly",
     // El descuento es el gancho: va en grande, no escondido en la frase.
@@ -232,11 +246,31 @@ const REDES = [
 ];
 
 const ESTILOS = `
+/* Hilo de progreso de lectura, arriba del todo. */
+.enl-hilo { position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 3px; pointer-events: none; transform-origin: left; transform: scaleX(var(--p, 0)); background: linear-gradient(90deg, #FA943A, #F9C846 45%, #88C4FC); }
+/* Rótulo de sección: el texto entre dos hilos. */
+.enl-rotulo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 32px; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.66); }
+.enl-rotulo-linea { flex: 1 1 0; max-width: 56px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.3)); }
+.enl-rotulo-linea:last-child { background: linear-gradient(90deg, rgba(255,255,255,.3), transparent); }
+/* Epígrafe de tarjeta: icono y texto, siempre a la misma altura. */
+.enl-epigrafe { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #88C4FC; }
+/* Lo que hacemos, en la cabecera. */
+.enl-oficios { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
+.enl-oficio { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); font-size: 11.5px; font-weight: 700; color: rgba(255,255,255,.9); }
+.enl-oficio svg { color: #FA943A; }
+/* Marca de urgencia: las becas que quedan, el paquete. */
+.enl-marca-fuego { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #F9C846; }
+/* La portada de un recurso que no tiene imagen. */
+.enl-recurso-icono { display: flex; aspect-ratio: 1200 / 630; width: 100%; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, rgba(136,196,252,.38), rgba(250,148,58,.38)); }
+/* El dedo que desliza, en el pie del carrusel. */
+@keyframes enl-desliza { 0%, 70%, 100% { transform: none; } 80% { transform: translateX(5px); } 90% { transform: translateX(1px); } }
+.enl-desliza { animation: enl-desliza 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .enl-desliza { animation: none; } }
 .enl-msg { display: block; margin-top: 8px; border-radius: 14px; border: 1px dashed rgba(255,255,255,.28); background: rgba(255,255,255,.06); padding: 8px 10px; }
 .enl-msg-texto { display: block; font-size: 11.5px; line-height: 1.45; color: rgba(255,255,255,.8); }
-.enl-msg button { margin-top: 6px; border: 0; border-radius: 999px; background: rgba(250,148,58,.22); color: #ffd7ae; font: inherit; font-size: 11px; font-weight: 800; padding: 4px 10px; cursor: pointer; }
+.enl-msg button { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; border: 0; border-radius: 999px; background: rgba(250,148,58,.22); color: #ffd7ae; font: inherit; font-size: 11px; font-weight: 800; padding: 4px 10px; cursor: pointer; }
 .enl-msg button:active { transform: scale(.96); }
-.enl-portal-eyebrow { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #88C4FC; }
+.enl-portal-eyebrow { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #88C4FC; }
 .enl-portal-lema { margin: 4px 0 0; font-family: Fraunces, Merriweather, Georgia, serif; font-style: italic; font-size: 15px; font-weight: 700; color: #FFB066; }
 .enl-portal-fila { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
 .enl-portal-movil { position: relative; flex: 0 0 auto; width: 104px; height: 208px; border-radius: 18px; overflow: hidden; border: 2px solid rgba(255,255,255,.35); background: #012938; box-shadow: 0 16px 30px -18px rgba(0,0,0,.9); }
@@ -264,17 +298,26 @@ const ESTILOS = `
   color: #fff;
 }
 a.enl-tarjeta { text-decoration: none; transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s, background-color .25s; }
-a.enl-tarjeta:hover { border-color: rgba(250, 148, 58, .5); }
+@media (hover: hover) and (pointer: fine) {
+  a.enl-tarjeta:hover { border-color: rgba(250, 148, 58, .5); transform: translateY(-3px); box-shadow: 0 26px 46px -28px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .16); }
+}
 a.enl-tarjeta:active { transform: scale(.985); }
 .enl-tarjeta-titulo { font-weight: 800; line-height: 1.3; color: #fff; }
 .enl-tarjeta-texto { font-size: 12.5px; line-height: 1.45; color: rgba(255, 255, 255, .72); }
 /* Placa del icono, el mismo gesto que las píldoras del hero. */
 .enl-icono {
   display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 auto;
-  border-radius: 15px; font-size: 20px;
-  background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 15px; color: #FFC58A;
+  background: linear-gradient(145deg, rgba(250, 148, 58, .28), rgba(136, 196, 252, .16));
+  border: 1px solid rgba(255, 255, 255, .18);
+  transition: transform .3s cubic-bezier(.22,1,.36,1), color .3s, box-shadow .3s;
 }
-.enl-chip-prioridad { align-self: flex-start; margin-top: 6px; padding: 3px 9px; border-radius: 999px; background: #FFF3E0; color: #96591a; font-size: 11px; font-weight: 800; letter-spacing: .01em; }
+.enl-icono-chico { width: 38px; height: 38px; border-radius: 13px; }
+@media (hover: hover) and (pointer: fine) {
+  a:hover > .enl-icono { transform: translateY(-2px) scale(1.06); color: #fff; box-shadow: 0 10px 22px -12px rgba(250, 148, 58, .9); }
+}
+@media (prefers-reduced-motion: reduce) { .enl-icono { transition: none; } }
+.enl-chip-prioridad { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; margin-top: 6px; padding: 3px 9px; border-radius: 999px; background: #FFF3E0; color: #96591a; font-size: 11px; font-weight: 800; letter-spacing: .01em; }
 .enl-dcto { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 74px; padding: 8px 10px; border-radius: 18px; background: linear-gradient(135deg, #FA943A, #e07f22); color: #fff; box-shadow: 0 10px 20px -10px rgba(250,148,58,.8); }
 .enl-dcto b { font-size: 22px; font-weight: 900; line-height: 1; letter-spacing: -.02em; }
 .enl-dcto small { font-size: 9.5px; font-weight: 700; line-height: 1.15; text-align: center; margin-top: 3px; opacity: .95; }
@@ -312,7 +355,10 @@ a.enl-tarjeta:active { transform: scale(.985); }
   background-size: auto, 300% 300%;
   animation: enl-fondo 16s ease-in-out infinite alternate;
 }
-.enl-sube { animation: enl-sube .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: var(--d, 0ms); }
+/* .enl-sube ya no anima nada: desde el 17/09/2026 la entrada la manda
+   data-revelar (styles/movimiento.css), que espera a que el bloque asome. La
+   clase se queda porque marca los bloques que entran y la usa el barrido de
+   lib/revelar. El @keyframes enl-sube sigue vivo: lo usa el rótulo del mapa. */
 .enl-aparece { animation: enl-aparece .5s ease both; }
 .enl-brillo { position: relative; overflow: hidden; }
 .enl-brillo::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .45) 50%, transparent 70%); transform: translateX(-120%); animation: enl-barrido 3.8s ease-in-out infinite; }
@@ -324,7 +370,7 @@ a.enl-tarjeta:active { transform: scale(.985); }
 .enl-carrusel::-webkit-scrollbar { display: none; }
 .enl-carrusel > * { scroll-snap-align: start; }
 @media (prefers-reduced-motion: reduce) {
-  .enl-fondo, .enl-sube, .enl-aparece, .enl-anillo::before, .enl-latido { animation: none; }
+  .enl-fondo, .enl-aparece, .enl-anillo::before, .enl-latido { animation: none; }
   .enl-brillo::after { display: none; }
 }
 `;
@@ -337,10 +383,49 @@ function Flecha({ className = "" }) {
   );
 }
 
-function Rotulo({ children, style }) {
+/**
+ * Hilo de progreso de lectura.
+ *
+ * La página es larga y aquí no hay cabecera ni barra que diga por dónde vas.
+ * Este hilo de tres píxeles lo dice sin robar sitio. Va al <body> con un portal
+ * porque el contenedor de página de App.jsx lleva `transform`, y eso ancla lo
+ * `fixed` a la página en vez de a la pantalla (el mismo motivo que el botón
+ * flotante de WhatsApp). El avance se escribe en una variable CSS desde un
+ * listener pasivo: React no vuelve a pintar en cada scroll.
+ */
+function HiloProgreso() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    let pendiente = 0;
+    const medir = () => {
+      pendiente = 0;
+      const recorrido = document.documentElement.scrollHeight - window.innerHeight;
+      el.style.setProperty("--p", recorrido > 40 ? String(Math.min(1, window.scrollY / recorrido)) : "0");
+    };
+    const alDesplazar = () => {
+      if (!pendiente) pendiente = requestAnimationFrame(medir);
+    };
+    medir();
+    window.addEventListener("scroll", alDesplazar, { passive: true });
+    window.addEventListener("resize", alDesplazar);
+    return () => {
+      if (pendiente) cancelAnimationFrame(pendiente);
+      window.removeEventListener("scroll", alDesplazar);
+      window.removeEventListener("resize", alDesplazar);
+    };
+  }, []);
+  return createPortal(<div ref={ref} className="enl-hilo" aria-hidden="true" />, document.body);
+}
+
+function Rotulo({ icono, children }) {
   return (
-    <p className="enl-sube mt-8 text-center text-[11px] font-bold uppercase tracking-[0.16em] text-white/65" style={style}>
+    <p data-revelar="suave" className="enl-rotulo">
+      <span className="enl-rotulo-linea" aria-hidden="true" />
+      {icono && <Icono nombre={icono} size={14} className="text-sun" />}
       {children}
+      <span className="enl-rotulo-linea" aria-hidden="true" />
     </p>
   );
 }
@@ -380,7 +465,7 @@ function BotonBeca({ style }) {
       data-wa="beca"
       href={BECA}
       onClick={() => marcar("beca:boton")}
-      className="enl-sube enl-tarjeta mt-3 flex items-center gap-3 overflow-hidden p-2.5"
+      data-revelar className="enl-sube enl-tarjeta mt-3 flex items-center gap-3 overflow-hidden p-2.5"
       style={style}
     >
       <img
@@ -391,7 +476,9 @@ function BotonBeca({ style }) {
         decoding="async"
       />
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-[10px] font-extrabold uppercase tracking-wide text-sun">🔥 Solo {CIFRAS.total} becas</span>
+        <span className="enl-marca-fuego">
+          <Icono nombre="llama" size={12} aria-hidden="true" /> Solo {CIFRAS.total} becas
+        </span>
         <span className="enl-tarjeta-titulo">Beca Generación del Bicentenario</span>
         <span className="enl-tarjeta-texto">{estado}</span>
       </span>
@@ -403,7 +490,7 @@ function BotonBeca({ style }) {
 function BannerBeca({ style }) {
   const { estado: vivo } = useBeca();
   return (
-    <section data-wa="beca" aria-label="Beca Generación del Bicentenario 2026" className="enl-sube mt-6 overflow-hidden rounded-3xl bg-primary-dark shadow-2xl ring-1 ring-white/15" style={style}>
+    <section data-wa="beca" aria-label="Beca Generación del Bicentenario 2026" data-revelar className="enl-sube mt-6 overflow-hidden rounded-3xl bg-primary-dark shadow-2xl ring-1 ring-white/15" style={style}>
       <a href={BECA} onClick={() => marcar("beca:imagen")} className="block">
         <img
           src="/og/beca-generacion-bicentenario-2026.jpg"
@@ -414,7 +501,9 @@ function BannerBeca({ style }) {
       </a>
       <div className="p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-primary-dark">🔥 Solo {CIFRAS.total} becas</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-primary-dark">
+            <Icono nombre="llama" size={12} aria-hidden="true" /> Solo {CIFRAS.total} becas
+          </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white ring-1 ring-white/20">
             <span className="enl-latido h-2 w-2 rounded-full bg-green-400" aria-hidden="true" />
             {vivo}
@@ -426,14 +515,14 @@ function BannerBeca({ style }) {
             onClick={() => marcar("beca:simulador")}
             className="enl-brillo flex items-center justify-center gap-1.5 rounded-xl bg-accent px-2 py-3 text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/30 transition hover:bg-sun active:scale-[.98]"
           >
-            <span aria-hidden="true">🎯</span> Calcula tu puntaje
+            <Icono nombre="diana" size={17} /> Calcula tu puntaje
           </a>
           <a
             href={`${BECA}#aviso`}
             onClick={() => marcar("beca:aviso")}
             className="flex items-center justify-center gap-1.5 rounded-xl bg-white px-2 py-3 text-sm font-extrabold text-primary transition hover:bg-secondary-light active:scale-[.98]"
           >
-            <span aria-hidden="true">🔔</span> Avísame
+            <Icono nombre="campana" size={17} /> Avísame
           </a>
         </div>
       </div>
@@ -462,7 +551,8 @@ function MensajeParaCopiar({ texto, clave }) {
           navigator.clipboard?.writeText(texto).then(() => setCopiado(true), () => setCopiado(false));
         }}
       >
-        {copiado ? "Copiado ✓" : "Copiar mensaje"}
+        <Icono nombre={copiado ? "check" : "copiar"} size={12} aria-hidden="true" />
+        {copiado ? "Copiado" : "Copiar mensaje"}
       </button>
     </span>
   );
@@ -475,8 +565,10 @@ function ReservaAsesoria({ style }) {
   const actual = OPCIONES_ASESORIA.find((o) => o.destacada) || OPCIONES_ASESORIA[0];
   if (!actual) return null;
   return (
-    <section data-wa="reserva" aria-label="Reserva tu asesoría" className="enl-sube enl-tarjeta mt-3 p-4" style={style}>
-      <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-sky">📅 Reserva tu asesoría · online</p>
+    <section data-wa="reserva" aria-label="Reserva tu asesoría" data-revelar className="enl-sube enl-tarjeta mt-3 p-4" style={style}>
+      <p className="enl-epigrafe">
+        <Icono nombre="calendario" size={13} /> Reserva tu asesoría · online
+      </p>
       <div className="mt-2 flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="enl-tarjeta-titulo text-[15px]">{actual.nombre}</p>
@@ -492,9 +584,9 @@ function ReservaAsesoria({ style }) {
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => marcar(`reserva:${actual.id}`)}
-        className="enl-brillo mt-2 flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-extrabold text-white shadow-lg transition hover:bg-primary-dark active:scale-[.98]"
+        className="enl-brillo mov-toque mt-3 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3.5 text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/25 transition hover:bg-sun"
       >
-        <span aria-hidden="true">📅</span> Reservar ahora
+        <Icono nombre="calendario" size={17} /> Reservar ahora
       </a>
     </section>
   );
@@ -510,11 +602,15 @@ function Opiniones({ style }) {
   const o = OPINIONES[i];
   if (!o) return null;
   return (
-    <section data-wa="opiniones" aria-label="Opiniones de asesorados" className="enl-sube enl-tarjeta mt-6 p-4" style={style}>
-      <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-sky">💬 Lo que dicen nuestros asesorados</p>
+    <section data-wa="opiniones" aria-label="Opiniones de asesorados" data-revelar className="enl-sube enl-tarjeta mt-6 p-4" style={style}>
+      <p className="enl-epigrafe">
+        <Icono nombre="chat" size={13} /> Lo que dicen nuestros asesorados
+      </p>
       <div key={i} className="enl-aparece mt-2 min-h-[7.5rem]">
-        <p className="text-base leading-none text-accent" aria-label={`${o.estrellas} de 5 estrellas`}>
-          {"★".repeat(o.estrellas)}
+        <p className="flex gap-1 text-accent" aria-label={`${o.estrellas} de 5 estrellas`}>
+          {Array.from({ length: o.estrellas }, (_, n) => (
+            <Icono key={n} nombre="estrella" size={15} />
+          ))}
         </p>
         <blockquote className="mt-2 text-sm leading-relaxed text-white/90">“{o.texto}”</blockquote>
         <p className="mt-2 text-xs font-bold text-white">
@@ -547,8 +643,10 @@ function Opiniones({ style }) {
 
 function Contacto({ style }) {
   return (
-    <section data-wa="contacto" aria-label="Contacto" className="enl-sube enl-vidrio mt-6 rounded-3xl p-4 text-center text-white" style={style}>
-      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-sky">📞 Equipo Perú · España</p>
+    <section data-wa="contacto" aria-label="Contacto" data-revelar className="enl-sube enl-vidrio mt-6 rounded-3xl p-4 text-center text-white" style={style}>
+      <p className="enl-epigrafe justify-center">
+        <Icono nombre="telefono" size={13} /> Equipo Perú · España
+      </p>
       <p className="mt-1 font-fraunces text-2xl font-bold tabular-nums">{NUMERO}</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <a
@@ -558,14 +656,14 @@ function Contacto({ style }) {
           onClick={() => marcar("contacto:whatsapp")}
           className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-extrabold text-white shadow-lg shadow-black/20 transition hover:bg-green-700 active:scale-[.98]"
         >
-          <span aria-hidden="true">💬</span> WhatsApp
+          <Icono nombre="whatsapp" size={18} /> WhatsApp
         </a>
         <a
           href={TEL}
           onClick={() => marcar("contacto:llamar")}
           className="flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-extrabold text-primary shadow-lg shadow-black/20 transition hover:bg-secondary-light active:scale-[.98]"
         >
-          <span aria-hidden="true">📲</span> Llamar
+          <Icono nombre="telefono" size={17} /> Llamar
         </a>
       </div>
       <a
@@ -574,7 +672,7 @@ function Contacto({ style }) {
         onClick={() => marcar("contacto:guardar")}
         className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-bold text-white ring-1 ring-white/25 transition hover:bg-white/20 active:scale-[.98]"
       >
-        <span aria-hidden="true">👤</span> Guardar contacto en mi celular
+        <Icono nombre="usuario-mas" size={17} /> Guardar contacto en mi celular
       </a>
     </section>
   );
@@ -596,7 +694,7 @@ function Carrusel({ style }) {
     if (el && hijo) el.scrollTo({ left: hijo.offsetLeft - el.offsetLeft - 16, behavior: "smooth" });
   };
   return (
-    <div data-wa="recursos" className="enl-sube" style={style}>
+    <div data-wa="recursos" data-revelar className="enl-sube" style={style}>
       <div ref={ref} onScroll={alDesplazar} className="enl-carrusel relative -mx-4 flex gap-3 overflow-x-auto px-4 pb-2" style={{ scrollPaddingLeft: "1rem" }}>
         {RECURSOS.map((r, i) => (
           <a
@@ -608,8 +706,8 @@ function Carrusel({ style }) {
             {r.img ? (
               <img src={r.img} alt="" className="aspect-[1200/630] w-full object-cover" loading={i === 0 ? "eager" : "lazy"} decoding="async" />
             ) : (
-              <span className="flex aspect-[1200/630] w-full items-center justify-center bg-gradient-to-br from-sky/40 to-accent/40 text-6xl" aria-hidden="true">
-                {r.emoji}
+              <span className="enl-recurso-icono" aria-hidden="true">
+                <Icono nombre={r.icono} size={58} strokeWidth={1.3} />
               </span>
             )}
             <span className="flex flex-1 flex-col p-3.5">
@@ -632,7 +730,9 @@ function Carrusel({ style }) {
             className={`h-2 rounded-full transition-all ${i === activo ? "w-6 bg-accent" : "w-2 bg-white/35"}`}
           />
         ))}
-        <span className="ml-2 text-[11px] font-semibold text-white/60">Desliza 👉</span>
+        <span className="ml-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-white/60">
+          <Icono nombre="toque" size={13} className="enl-desliza" aria-hidden="true" /> Desliza
+        </span>
       </div>
     </div>
   );
@@ -707,7 +807,7 @@ function MapaDiferido({ abrirYa, comunidad, onAbrir }) {
       </div>
       <button type="button" className="enl-mapa-cta" onClick={() => setCargar(true)}>
         Ver el mapa en vivo
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13.5 4.5 21 12l-7.5 7.5M21 12H3" /></svg>
+        <Icono nombre="flecha" size={16} strokeWidth={2.4} />
       </button>
     </section>
   );
@@ -772,15 +872,17 @@ export default function Enlaces() {
   // resultados el 15/12/2026).
   const faseBeca = estadoPostulacion().fase;
 
-  let paso = 0;
-  const retraso = () => ({ "--d": `${(paso += 70)}ms` });
+  // Cada bloque entra cuando asoma. Se vuelve a barrer si cambia la temporada
+  // de la beca, porque entonces aparece (o desaparece) su bloque grande.
+  useRevelar(refPagina, [faseBeca]);
 
   return (
     <>
+    <HiloProgreso />
     <main className="enl-fondo min-h-[100dvh] w-full px-4 pb-28 pt-10 [overflow-x:clip]">
       <style>{ESTILOS}</style>
       <div ref={refPagina} className="mx-auto w-full max-w-md">
-        <header className="enl-sube flex flex-col items-center text-center" style={retraso()}>
+        <header data-revelar className="enl-sube flex flex-col items-center text-center">
           <span className="enl-anillo flex h-24 w-24 items-center justify-center rounded-full">
             <span className="flex h-full w-full items-center justify-center rounded-full bg-white shadow-2xl">
               <img src={logo} alt="Inspira Legal" className="h-auto w-[76%]" />
@@ -789,8 +891,16 @@ export default function Enlaces() {
           <h1 className="mt-4 font-fraunces text-2xl font-bold text-white">Inspira Legal</h1>
           <p className="mt-1 text-sm font-semibold text-sky">@inspira_educa</p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/85">
-            Migra a España ✈️ · Especialistas en Extranjería y Visas 🎓🌍 · Reside legalmente
+            Te acompañamos hasta que resides legalmente en España.
           </p>
+          <ul className="enl-oficios" aria-label="Lo que hacemos">
+            {OFICIOS.map((o, i) => (
+              <li key={o.texto} className="enl-oficio" style={{ "--r": `${i * 90}ms` }} data-revelar="escala">
+                <Icono nombre={o.icono} size={14} />
+                {o.texto}
+              </li>
+            ))}
+          </ul>
           {/* El número, escrito y a un toque: es lo que más piden desde la
               biografía, y así se ve sin bajar ni abrir nada (17/09/2026). */}
           <a
@@ -808,7 +918,7 @@ export default function Enlaces() {
         </header>
 
         {/* Arriba: el mapa funcionando, para quien llega desde los vídeos del mapa. */}
-        <div ref={refMapa} data-wa="mapa" className="enl-sube" style={retraso()}>
+        <div ref={refMapa} data-wa="mapa" data-revelar className="enl-sube">
           <MapaDiferido
             abrirYa={profundo.verMapa}
             comunidad={profundo.comunidad}
@@ -817,31 +927,32 @@ export default function Enlaces() {
         </div>
 
         {/* La beca, justo debajo del mapa: un botón con vista previa. */}
-        <BotonBeca style={retraso()} />
+        <BotonBeca />
 
-        <ReservaAsesoria style={retraso()} />
+        <ReservaAsesoria />
 
         {/* El portal del asesorado, enseñado: tres pantallas reales (clienta
             ficticia) que se van pasando solas. */}
         <Suspense fallback={<div className="enl-tarjeta mt-3" style={{ height: 300 }} />}>
           <MuestraPortal
-            style={retraso()}
+           
             href={interno("/plataforma")}
             onAbrir={() => marcar("portal:muestra")}
           />
         </Suspense>
 
-        <Rotulo style={retraso()}>✨ Servicios, paquetes y más</Rotulo>
-        <div data-wa="servicios" className="enl-sube mt-3 grid grid-cols-2 gap-3" style={retraso()}>
-          {SERVICIOS.map((s) => (
+        <Rotulo icono="destello">Servicios, paquetes y más</Rotulo>
+        <div data-wa="servicios" data-revelar className="enl-sube mt-3 grid grid-cols-2 gap-3">
+          {SERVICIOS.map((s, i) => (
             <a
               key={s.clave}
               href={s.href}
+              style={{ "--r": `${i * 80}ms` }}
               onClick={() => marcar(s.clave)}
               className="enl-vidrio flex flex-col rounded-3xl p-3.5 text-white transition hover:bg-white/10 active:scale-[.98]"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-2xl ring-1 ring-white/15" aria-hidden="true">
-                {s.emoji}
+              <span className="enl-icono" aria-hidden="true">
+                <Icono nombre={s.icono} size={22} />
               </span>
               <span className="mt-2 font-extrabold leading-snug">{s.titulo}</span>
               <span className="mt-0.5 text-xs leading-snug text-white/70">{s.texto}</span>
@@ -853,74 +964,86 @@ export default function Enlaces() {
           href={interno("/servicios/master")}
           onClick={() => marcar("paquete-master")}
           data-wa="master"
-          className="enl-sube enl-tarjeta mt-3 flex overflow-hidden"
-          style={retraso()}
+          data-revelar className="enl-sube enl-tarjeta mt-3 flex overflow-hidden"
+         
         >
           <img src="/og/master-2027-2028.jpg" alt="" className="w-[42%] shrink-0 object-cover object-left" loading="lazy" decoding="async" />
           <span className="flex min-w-0 flex-1 flex-col justify-center p-3.5 text-white">
-            <span className="text-[10px] font-extrabold uppercase tracking-wide text-sun">📦 Paquete Máster</span>
+            <span className="enl-marca-fuego">
+              <Icono nombre="paquete" size={12} aria-hidden="true" /> Paquete Máster
+            </span>
             <span className="font-extrabold leading-snug">Postula a tu máster 2027/2028</span>
             <span className="enl-tarjeta-texto mt-1">Paquetes de postulación desde 219 € y pago por etapas</span>
           </span>
         </a>
 
-        <Rotulo style={retraso()}>🧳 Para tu viaje a España</Rotulo>
+        <Rotulo icono="maleta">Para tu viaje a España</Rotulo>
         <div data-wa="viaje" className="mt-3 space-y-3">
-          {VIAJE.map((v) => (
+          {VIAJE.map((v, i) => (
             <a
               key={v.clave}
               href={v.href}
+              style={{ "--r": `${i * 80}ms` }}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => marcar(v.clave)}
-              className="enl-sube enl-tarjeta flex items-center gap-3 px-3.5 py-3.5"
-              style={retraso()}
+              data-revelar className="enl-sube enl-tarjeta flex items-start gap-3 px-3.5 py-3.5"
+             
             >
-              <span className="enl-icono" aria-hidden="true">{v.emoji}</span>
+              <span className="enl-icono" aria-hidden="true">
+                <Icono nombre={v.icono} size={22} />
+              </span>
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="enl-tarjeta-titulo">{v.titulo}</span>
                 <span className="enl-tarjeta-texto">{v.texto}</span>
-                {v.chip && <span className="enl-chip-prioridad">{v.chip}</span>}
+                {v.chip && (
+                  <span className="enl-chip-prioridad">
+                    <Icono nombre="rayo" size={11} aria-hidden="true" /> {v.chip}
+                  </span>
+                )}
                 {v.nota && <span className="mt-1 text-[11px] leading-snug text-white/55">{v.nota}</span>}
                 {v.mensaje && <MensajeParaCopiar texto={v.mensaje} clave={v.clave} />}
               </span>
               {v.descuento ? (
-                <span className="enl-dcto" aria-hidden="true">
+                <span className="enl-dcto self-center" aria-hidden="true">
                   <b>{v.descuento}</b>
                   <small>{v.descuentoPie}</small>
                 </span>
               ) : (
-                <Flecha className="opacity-60" />
+                <Flecha className="mt-3.5 opacity-60" />
               )}
             </a>
           ))}
         </div>
 
-        <Rotulo style={retraso()}>🎁 Recursos gratuitos</Rotulo>
+        <Rotulo icono="regalo">Recursos gratuitos</Rotulo>
         <div className="mt-3">
-          <Carrusel style={retraso()} />
+          <Carrusel />
         </div>
 
         {/* La beca bajó aquí el 17/09/2026: arriba va la muestra del mapa.
           Este es su sitio mientras la convocatoria aún no abre. */}
 
-        <Opiniones style={retraso()} />
-        <Contacto style={retraso()} />
+        <Opiniones />
+        <Contacto />
 
         {/* Con la convocatoria abierta, además del botón, el bloque grande con
             su cuenta atrás y el simulador. */}
-        {faseBeca === "abierta" && <BannerBeca style={retraso()} />}
+        {faseBeca === "abierta" && <BannerBeca />}
 
         <nav aria-label="Más enlaces de Inspira" className="mt-6 space-y-3">
-          {enlacesPorTemporada().map((e) => (
+          {enlacesPorTemporada().map((e, i) => (
             <a
               key={e.clave}
               href={e.href}
+              style={{ "--r": `${i * 80}ms` }}
               onClick={() => marcar(e.clave)}
-              className="enl-sube enl-tarjeta flex items-center gap-3 px-4 py-3.5 font-bold"
-              style={retraso()}
+              data-revelar className="enl-sube enl-tarjeta flex items-center gap-3 px-4 py-3.5 font-bold"
+             
             >
-              <span className="text-xl" aria-hidden="true">{e.emoji}</span>
+              <span className="enl-icono enl-icono-chico" aria-hidden="true">
+                <Icono nombre={e.icono} size={19} />
+              </span>
               <span className="flex-1">{e.titulo}</span>
               <Flecha className="opacity-60" />
             </a>
@@ -929,13 +1052,15 @@ export default function Enlaces() {
 
         {/* Cerrada la convocatoria, la beca deja de ocupar sitio arriba y se
           queda aquí abajo, con su enlace intacto. */}
-        {faseBeca !== "abierta" && <BannerBeca style={retraso()} />}
+        {faseBeca !== "abierta" && <BannerBeca />}
 
-        <div className="enl-sube mt-8 flex justify-center gap-3" style={retraso()}>
-          {REDES.map((r) => (
+        <div data-revelar className="enl-sube mt-8 flex justify-center gap-3">
+          {REDES.map((r, i) => (
             <a
               key={r.nombre}
               href={r.href}
+              style={{ "--r": `${i * 60}ms` }}
+              data-revelar="escala"
               target="_blank"
               rel="noopener noreferrer"
               aria-label={r.nombre}
@@ -947,7 +1072,7 @@ export default function Enlaces() {
           ))}
         </div>
 
-        <p className="enl-sube mt-8 text-center text-xs text-white/55" style={retraso()}>
+        <p data-revelar className="enl-sube mt-8 text-center text-xs text-white/55">
           inspira-legal.cloud
         </p>
       </div>

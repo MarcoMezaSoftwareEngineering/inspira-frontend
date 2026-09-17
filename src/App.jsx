@@ -12,6 +12,7 @@ import CookieConsent from "./components/legal/CookieConsent";
 import AsesoriaCTA from "./components/common/AsesoriaCTA";
 import BarraProgreso from "./components/common/BarraProgreso";
 import BarraInferior from "./components/layout/BarraInferior";
+import WhatsAppFlotante from "./components/common/WhatsAppFlotante";
 import { registrarVista } from "./lib/analytics";
 import { registrarVisita } from "./lib/visitas";
 import { getServicio } from "./config/servicios";
@@ -555,6 +556,11 @@ export default function App() {
 
       {/* Navegación inferior tipo app (móvil y tablet). «Reservar» abre Calendly. */}
       {!isPanel && !isLandingAds && <BarraInferior />}
+
+      {/* WhatsApp siempre a mano. Decide él dónde no debe salir (panel,
+          backoffice, /auth y las landings con su propia barra de acción), así
+          que la regla vive en un solo sitio. */}
+      <WhatsAppFlotante path={path} />
 
       {/* Banner de cookies: siempre montado, decide él si se muestra */}
       <CookieConsent />

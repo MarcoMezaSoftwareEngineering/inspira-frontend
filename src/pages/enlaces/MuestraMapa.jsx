@@ -13,7 +13,14 @@
 //
 // Con «reducir movimiento» no avanza solo: se queda en la primera comunidad y
 // se cambia con los puntos.
-import { useEffect, useMemo, useState } from "react";
+//
+// Props (todas opcionales, el comportamiento de siempre es el de por defecto):
+// - `comunidadInicial`: id de comunidad que abre el recorrido, para el enlace
+//   profundo /enlaces?ver=mapa&comunidad=<id>. Entra como primera parada
+//   aunque no sea de las cuatro con más másteres.
+// - `avanceAuto`: a false el recorrido no pasa solo de parada (quien llega por
+//   enlace profundo quiere ver SU comunidad, no que se le escape).
+import { useEffect, useMemo, useRef, useState } from "react";
 import MapaInteractivo from "../mapa/MapaInteractivo";
 import { aplicarFiltros, casosEnMapa, crearIndice, prefiereMenosMovimiento } from "../mapa/indice";
 import { importeMatricula } from "../mapa/mapaTextos";
@@ -29,12 +36,16 @@ const NADA = { tipo: null, comunidad: null, ciudad: null, universidad: null, cas
 
 const num = (n) => Number(n || 0).toLocaleString("es-ES");
 
-/** Las paradas del recorrido: las 4 comunidades con más másteres y su ciudad principal. */
-function recorrido(indice, datos) {
-  const comunidades = [...(datos.comunidades || [])]
-    .filter((c) => c.masteres > 0)
-    .sort((a, b) => b.masteres - a.masteres)
-    .slice(0, 4);
+/**
+ * Las paradas del recorrido: las 4 comunidades con más másteres y su ciudad
+ * principal. Con `comunidadFija` (enlace profundo) esa comunidad abre la
+ * lista, esté o no entre las cuatro.
+ */
+function recorrido(indice, datos, comunidadFija) {
+  const conMasteres = [...(datos.comunidades || [])].filter((c) => c.masteres > 0);
+  const top = [...conMasteres].sort((a, b) => b.masteres - a.masteres).slice(0, 4);
+  const fija = comunidadFija ? conMasteres.find((c) => c.id === comunidadFija) : null;
+  const comunidades = fija ? [fija, ...top.filter((c) => c.id !== fija.id)] : top;
   const pasos = [{ foco: NADA, eyebrow: "Así funciona", titulo: "Toca una comunidad de España", texto: `${num(datos.totales?.masteres)} másteres oficiales con su matrícula aproximada` }];
   for (const c of comunidades) {
     pasos.push({
@@ -65,7 +76,7 @@ function recorrido(indice, datos) {
   return pasos;
 }
 
-export default function MuestraMapa({ onAbrir }) {
+export default function MuestraMapa({ onAbrir, comunidadInicial = null, avanceAuto = true }) {
   const [fuente, setFuente] = useState({ geo: null, datos: null, error: false });
   const [i, setI] = useState(0);
   const quieto = useMemo(() => prefiereMenosMovimiento(), []);
@@ -89,13 +100,26 @@ export default function MuestraMapa({ onAbrir }) {
   const indice = useMemo(() => (fuente.datos ? crearIndice(fuente.datos) : null), [fuente.datos]);
   const filtros = useMemo(() => (indice ? aplicarFiltros(indice, {}) : null), [indice]);
   const casos = useMemo(() => (indice ? casosEnMapa(indice, CASOS) : []), [indice]);
-  const pasos = useMemo(() => (indice ? recorrido(indice, fuente.datos) : []), [indice, fuente.datos]);
+  const pasos = useMemo(
+    () => (indice ? recorrido(indice, fuente.datos, comunidadInicial) : []),
+    [indice, fuente.datos, comunidadInicial]
+  );
+
+  // Enlace profundo: la primera parada es su comunidad, y solo la primera vez.
+  // Después mandan los puntos, como siempre.
+  const fijada = useRef(false);
+  useEffect(() => {
+    if (fijada.current || !comunidadInicial || pasos.length < 2) return;
+    fijada.current = true;
+    const k = pasos.findIndex((p) => p.comunidad === comunidadInicial);
+    if (k > 0) setI(k);
+  }, [comunidadInicial, pasos]);
 
   useEffect(() => {
-    if (quieto || pasos.length < 2) return undefined;
+    if (quieto || !avanceAuto || pasos.length < 2) return undefined;
     const t = setTimeout(() => setI((x) => (x + 1) % pasos.length), PASO_MS);
     return () => clearTimeout(t);
-  }, [i, pasos.length, quieto]);
+  }, [avanceAuto, i, pasos.length, quieto]);
 
   // Si falla la API, no se enseña un mapa roto: la página sigue igual.
   if (fuente.error) return null;

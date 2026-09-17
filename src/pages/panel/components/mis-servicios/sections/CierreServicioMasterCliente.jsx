@@ -107,7 +107,7 @@ function Derivacion({ idSolicitud, derivacion, opciones, testUrl, onCambio }) {
 
   async function contratar(plan) {
     const ok = await dialog.confirm(
-      `Se enviará a tu asesor la petición de contratar «${plan.nombre}» (${plan.precio} €). Él confirma el alta y te indica la forma de pago; hasta entonces no se cobra nada.`,
+      `Se enviará a tu asesor la petición de contratar «${plan.nombre}» (${plan.precio} €). Él confirma el alta y te indica la forma de pago dentro de las 48 horas hábiles siguientes; hasta entonces no se cobra nada.`,
       "Solicitar contratación"
     );
     if (!ok) return;
@@ -176,7 +176,7 @@ function Derivacion({ idSolicitud, derivacion, opciones, testUrl, onCambio }) {
           <p className="ex-sub">Planes y precios vigentes</p>
           {pendiente && (
             <p className="text-[12.5px] leading-relaxed text-primary bg-sky/10 border border-sky/30 rounded-xl px-3 py-2 mb-2">
-              Pediste <b>{c.nombre}</b> ({c.precio} €) el {fecha(c.solicitada_at)}. Tu asesor confirmará el alta y te indicará la forma de pago. Puedes cambiar de plan mientras tanto.
+              Pediste <b>{c.nombre}</b> ({c.precio} €) el {fecha(c.solicitada_at)}. Tu asesor confirmará el alta y te indicará la forma de pago dentro de las 48 horas hábiles siguientes; cuando lo haga verás aquí el nuevo expediente. Puedes cambiar de plan mientras tanto.
             </p>
           )}
           {c?.estado === "DESCARTADA" && (

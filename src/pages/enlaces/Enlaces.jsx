@@ -230,6 +230,30 @@ const REDES = [
 ];
 
 const ESTILOS = `
+/* Tarjetas de la página: cristal sobre el petróleo de la marca, no bloques
+   blancos. El blanco recortado sobre el fondo oscuro pesaba y rompía la
+   continuidad; el cristal deja ver el fondo y la marca se lee como una sola
+   pieza (17/09/2026). */
+.enl-tarjeta {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: linear-gradient(160deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .06));
+  box-shadow: 0 18px 40px -26px rgba(0, 0, 0, .85), inset 0 1px 0 rgba(255, 255, 255, .12);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  color: #fff;
+}
+a.enl-tarjeta { text-decoration: none; transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s, background-color .25s; }
+a.enl-tarjeta:hover { border-color: rgba(250, 148, 58, .5); }
+a.enl-tarjeta:active { transform: scale(.985); }
+.enl-tarjeta-titulo { font-weight: 800; line-height: 1.3; color: #fff; }
+.enl-tarjeta-texto { font-size: 12.5px; line-height: 1.45; color: rgba(255, 255, 255, .72); }
+/* Placa del icono, el mismo gesto que las píldoras del hero. */
+.enl-icono {
+  display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 auto;
+  border-radius: 15px; font-size: 20px;
+  background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .16);
+}
 .enl-chip-prioridad { align-self: flex-start; margin-top: 6px; padding: 3px 9px; border-radius: 999px; background: #FFF3E0; color: #96591a; font-size: 11px; font-weight: 800; letter-spacing: .01em; }
 .enl-dcto { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 74px; padding: 8px 10px; border-radius: 18px; background: linear-gradient(135deg, #FA943A, #e07f22); color: #fff; box-shadow: 0 10px 20px -10px rgba(250,148,58,.8); }
 .enl-dcto b { font-size: 22px; font-weight: 900; line-height: 1; letter-spacing: -.02em; }
@@ -336,7 +360,7 @@ function BotonBeca({ style }) {
       data-wa="beca"
       href={BECA}
       onClick={() => marcar("beca:boton")}
-      className="enl-sube mt-3 flex items-center gap-3 overflow-hidden rounded-3xl bg-white p-2.5 shadow-2xl transition active:scale-[.98]"
+      className="enl-sube enl-tarjeta mt-3 flex items-center gap-3 overflow-hidden p-2.5"
       style={style}
     >
       <img
@@ -347,11 +371,11 @@ function BotonBeca({ style }) {
         decoding="async"
       />
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-[10px] font-extrabold uppercase tracking-wide text-accent-dark">🔥 Solo {CIFRAS.total} becas</span>
-        <span className="font-extrabold leading-snug text-primary">Beca Generación del Bicentenario</span>
-        <span className="text-xs leading-snug text-neutral-600">{estado}</span>
+        <span className="text-[10px] font-extrabold uppercase tracking-wide text-sun">🔥 Solo {CIFRAS.total} becas</span>
+        <span className="enl-tarjeta-titulo">Beca Generación del Bicentenario</span>
+        <span className="enl-tarjeta-texto">{estado}</span>
       </span>
-      <Flecha className="mr-1 shrink-0 text-primary opacity-60" />
+      <Flecha className="mr-1 shrink-0 text-white opacity-60" />
     </a>
   );
 }
@@ -412,9 +436,9 @@ function ReservaAsesoria({ style }) {
   // una línea con la elegida y el botón de reservar.
   const corta = (d) => String(d || "").replace(/\s*minutos?/i, " min");
   return (
-    <section data-wa="reserva" aria-label="Reserva tu asesoría" className="enl-sube mt-6 rounded-3xl bg-white p-3 shadow-2xl" style={style}>
-      <p className="px-1 text-sm font-extrabold text-primary">
-        📅 Reserva tu asesoría <span className="font-semibold text-neutral-500">· online</span>
+    <section data-wa="reserva" aria-label="Reserva tu asesoría" className="enl-sube enl-tarjeta mt-6 p-3" style={style}>
+      <p className="px-1 text-sm font-extrabold text-white">
+        📅 Reserva tu asesoría <span className="font-semibold text-white/55">· online</span>
       </p>
       <div role="radiogroup" aria-label="Elige tu asesoría" className="mt-2 grid grid-cols-3 gap-2">
         {opciones.map((o) => {
@@ -428,21 +452,21 @@ function ReservaAsesoria({ style }) {
               aria-label={`${o.nombre}, ${o.duracion}, ${o.precio}`}
               onClick={() => setElegida(o.id)}
               className={`rounded-xl border-2 px-1 py-2 text-center transition active:scale-[.97] ${
-                sel ? "border-accent bg-accent/10" : "border-neutral-200 bg-white hover:border-accent/50"
+                sel ? "border-accent bg-accent/20" : "border-white/20 bg-white/5 hover:border-accent/50"
               }`}
             >
-              <span className="block text-[11px] font-bold text-neutral-500">{corta(o.duracion)}</span>
-              <span className={`block text-base font-extrabold leading-tight ${o.promo ? "text-green-700" : "text-primary"}`}>{o.precio}</span>
+              <span className="block text-[11px] font-bold text-white/60">{corta(o.duracion)}</span>
+              <span className={`block text-base font-extrabold leading-tight ${o.promo ? "text-green-300" : "text-white"}`}>{o.precio}</span>
             </button>
           );
         })}
       </div>
-      <p className="mt-2 px-1 text-xs leading-snug text-neutral-600">
-        <b className="text-neutral-900">{actual.nombre}</b>
+      <p className="mt-2 px-1 text-xs leading-snug text-white/70">
+        <b className="text-white">{actual.nombre}</b>
         {actual.promo ? (
           <>
             {" · "}
-            <span className="font-bold text-green-700">⏳ {quedanPromo()}</span>
+            <span className="font-bold text-green-300">⏳ {quedanPromo()}</span>
           </>
         ) : actual.precioAlt ? (
           ` · ${actual.precioAlt}`
@@ -471,15 +495,15 @@ function Opiniones({ style }) {
   const o = OPINIONES[i];
   if (!o) return null;
   return (
-    <section data-wa="opiniones" aria-label="Opiniones de asesorados" className="enl-sube mt-6 rounded-3xl bg-white p-4 shadow-2xl" style={style}>
-      <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary">💬 Lo que dicen nuestros asesorados</p>
+    <section data-wa="opiniones" aria-label="Opiniones de asesorados" className="enl-sube enl-tarjeta mt-6 p-4" style={style}>
+      <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-sky">💬 Lo que dicen nuestros asesorados</p>
       <div key={i} className="enl-aparece mt-2 min-h-[7.5rem]">
         <p className="text-base leading-none text-accent" aria-label={`${o.estrellas} de 5 estrellas`}>
           {"★".repeat(o.estrellas)}
         </p>
-        <blockquote className="mt-2 text-sm leading-relaxed text-neutral-800">“{o.texto}”</blockquote>
-        <p className="mt-2 text-xs font-bold text-primary">
-          {o.nombre} <span className="font-semibold text-neutral-500">· {o.servicio} · opinión publicada en {o.fuente}</span>
+        <blockquote className="mt-2 text-sm leading-relaxed text-white/90">“{o.texto}”</blockquote>
+        <p className="mt-2 text-xs font-bold text-white">
+          {o.nombre} <span className="font-semibold text-white/55">· {o.servicio} · opinión publicada en {o.fuente}</span>
         </p>
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
@@ -490,14 +514,14 @@ function Opiniones({ style }) {
               type="button"
               onClick={() => setI(n)}
               aria-label={`Ver la opinión de ${op.nombre}`}
-              className={`h-2 rounded-full transition-all ${n === i ? "w-5 bg-accent" : "w-2 bg-neutral-300"}`}
+              className={`h-2 rounded-full transition-all ${n === i ? "w-5 bg-accent" : "w-2 bg-white/30"}`}
             />
           ))}
         </div>
         <a
           href={interno("/casos-de-exito")}
           onClick={() => marcar("opiniones")}
-          className="flex items-center gap-1 text-xs font-extrabold text-primary underline underline-offset-4"
+          className="flex items-center gap-1 text-xs font-extrabold text-sky underline underline-offset-4"
         >
           Opiniones y casos de éxito <Flecha />
         </a>
@@ -817,14 +841,14 @@ export default function Enlaces() {
           href={interno("/servicios/master")}
           onClick={() => marcar("paquete-master")}
           data-wa="master"
-          className="enl-sube mt-3 flex overflow-hidden rounded-3xl bg-white shadow-2xl transition active:scale-[.98]"
+          className="enl-sube enl-tarjeta mt-3 flex overflow-hidden"
           style={retraso()}
         >
           <img src="/og/master-2027-2028.jpg" alt="" className="w-[42%] shrink-0 object-cover object-left" loading="lazy" decoding="async" />
-          <span className="flex min-w-0 flex-1 flex-col justify-center p-3.5 text-primary">
-            <span className="text-[10px] font-extrabold uppercase tracking-wide text-accent-dark">📦 Paquete Máster</span>
+          <span className="flex min-w-0 flex-1 flex-col justify-center p-3.5 text-white">
+            <span className="text-[10px] font-extrabold uppercase tracking-wide text-sun">📦 Paquete Máster</span>
             <span className="font-extrabold leading-snug">Postula a tu máster 2027/2028</span>
-            <span className="mt-1 text-xs leading-snug text-neutral-600">Paquetes de postulación desde 219 € y pago por etapas</span>
+            <span className="enl-tarjeta-texto mt-1">Paquetes de postulación desde 219 € y pago por etapas</span>
           </span>
         </a>
 
@@ -837,15 +861,15 @@ export default function Enlaces() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => marcar(v.clave)}
-              className="enl-sube flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 text-primary shadow-lg shadow-black/10 transition hover:bg-secondary-light active:scale-[.98]"
+              className="enl-sube enl-tarjeta flex items-center gap-3 px-3.5 py-3.5"
               style={retraso()}
             >
-              <span className="text-2xl" aria-hidden="true">{v.emoji}</span>
+              <span className="enl-icono" aria-hidden="true">{v.emoji}</span>
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="font-bold leading-snug">{v.titulo}</span>
-                <span className="text-xs leading-snug text-neutral-600">{v.texto}</span>
+                <span className="enl-tarjeta-titulo">{v.titulo}</span>
+                <span className="enl-tarjeta-texto">{v.texto}</span>
                 {v.chip && <span className="enl-chip-prioridad">{v.chip}</span>}
-                {v.nota && <span className="mt-1 text-[11px] leading-snug text-neutral-500">{v.nota}</span>}
+                {v.nota && <span className="mt-1 text-[11px] leading-snug text-white/55">{v.nota}</span>}
               </span>
               {v.descuento ? (
                 <span className="enl-dcto" aria-hidden="true">
@@ -865,7 +889,7 @@ export default function Enlaces() {
               key={e.clave}
               href={e.href}
               onClick={() => marcar(e.clave)}
-              className="enl-sube flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 font-bold text-primary shadow-lg shadow-black/10 transition hover:bg-secondary-light active:scale-[.98]"
+              className="enl-sube enl-tarjeta flex items-center gap-3 px-4 py-3.5 font-bold"
               style={retraso()}
             >
               <span className="text-xl" aria-hidden="true">{e.emoji}</span>

@@ -1,0 +1,62 @@
+/* ── Avisos en el móvil (AvisosMovil.jsx) ────────────────────────────────
+   Tarjeta compacta: icono, una línea de qué se avisa y un botón. Usa los
+   tokens de marca de .pnl; nada de colores sueltos. */
+.pnl-avisos {
+  background: var(--surface, #fff);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--sombra-1);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pnl-avisos-activo { border-color: color-mix(in srgb, var(--green) 35%, var(--line)); }
+
+.pnl-avisos-cabecera { display: flex; align-items: flex-start; gap: 12px; }
+.pnl-avisos-icono {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--sky-soft);
+  color: var(--primary);
+}
+.pnl-avisos-activo .pnl-avisos-icono {
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+  color: var(--green);
+}
+.pnl-avisos-textos { min-width: 0; }
+.pnl-avisos-titulo {
+  margin: 0 0 2px;
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl-avisos-texto { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.pnl-avisos-texto b { color: var(--ink); font-weight: 700; }
+
+.pnl-avisos-error { margin: 0; font-size: 12px; color: var(--accent); font-weight: 650; }
+
+.pnl-avisos-botones { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-left: 48px; }
+.pnl-avisos-btn { height: 40px; padding: 0 18px; font-size: 13px; justify-content: center; }
+.pnl-avisos-btn:disabled { opacity: .6; cursor: default; }
+.pnl-avisos-ahora-no {
+  background: none;
+  border: 0;
+  padding: 8px 4px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--muted);
+  cursor: pointer;
+}
+.pnl-avisos-ahora-no:hover { color: var(--primary); }
+.pnl-avisos-ahora-no:focus-visible { outline: 3px solid rgba(78, 158, 232, .45); outline-offset: 2px; border-radius: 6px; }
+
+@media (max-width: 520px) {
+  .pnl-avisos-botones { padding-left: 0; }
+  .pnl-avisos-inicio .pnl-avisos-btn { flex: 1 1 auto; }
+}

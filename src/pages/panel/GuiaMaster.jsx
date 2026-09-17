@@ -138,7 +138,7 @@ export default function GuiaMaster() {
   return (
     <div className="min-h-screen bg-[#F4F6F9] font-sans">
       {/* ── Header ── */}
-      <div className="bg-gradient-to-r from-primary to-[#1D6A4A] px-6 py-10">
+      <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light px-6 py-10">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1.5 mb-4">
             <span className="text-white text-xs font-semibold">⚖️ Inspira Legal · Asesoría Especializada</span>
@@ -153,7 +153,7 @@ export default function GuiaMaster() {
             <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
               📋 Guía completa 2026
             </span>
-            <span className="inline-flex items-center gap-1.5 bg-[#F5C842]/20 text-[#F5C842] text-xs font-semibold px-3 py-1.5 rounded-full border border-[#F5C842]/30">
+            <span className="inline-flex items-center gap-1.5 bg-accent/20 text-accent text-xs font-semibold px-3 py-1.5 rounded-full border border-accent/30">
               ✅ {doneCount}/{totalCount} completado
             </span>
           </div>
@@ -185,7 +185,7 @@ export default function GuiaMaster() {
         {tabActiva === "inicio" && (
           <div>
             {/* Welcome banner */}
-            <div className="bg-gradient-to-r from-primary to-[#1D6A4A] rounded-2xl p-7 mb-6 text-white">
+            <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light rounded-2xl p-7 mb-6 text-white">
               <p className="text-xs uppercase tracking-widest text-white/60 mb-2">Bienvenido/a</p>
               <h2 className="font-serif text-2xl font-bold mb-3">Tu camino al máster en España</h2>
               <p className="text-white/80 text-sm leading-relaxed max-w-2xl">
@@ -630,7 +630,7 @@ export default function GuiaMaster() {
               <p className="text-white/80 text-sm mb-4">Inspira Legal te orienta en cada paso del proceso de legalización documental.</p>
               <a
                 href="mailto:administracion@inspira-legal.cloud"
-                className="inline-block bg-[#F5C842] text-primary font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
+                className="inline-block bg-accent text-primary font-bold text-sm px-6 py-3 rounded-xl hover:bg-accent/90 transition-colors"
               >
                 Consultar con Inspira Legal
               </a>
@@ -642,7 +642,7 @@ export default function GuiaMaster() {
         {tabActiva === "visa" && (
           <div>
             {/* Visa hero */}
-            <div className="bg-gradient-to-r from-primary to-[#1D6A4A] rounded-2xl p-7 mb-6 text-white">
+            <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light rounded-2xl p-7 mb-6 text-white">
               <p className="text-xs uppercase tracking-widest text-white/60 mb-2">Trámite migratorio</p>
               <h2 className="font-serif text-2xl font-bold mb-3">Visa y autorización de estancia</h2>
               <p className="text-white/80 text-sm leading-relaxed max-w-xl">
@@ -743,7 +743,7 @@ export default function GuiaMaster() {
             </Card>
 
             {/* Inspira CTA */}
-            <div className="bg-gradient-to-r from-primary to-[#1D6A4A] text-white rounded-2xl p-7 text-center mt-2">
+            <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light text-white rounded-2xl p-7 text-center mt-2">
               <p className="font-serif text-xl font-bold mb-2">Inspira Legal te acompaña en ambos procesos</p>
               <p className="text-white/80 text-sm mb-5 max-w-md mx-auto leading-relaxed">
                 Desde determinar qué tipo de autorización necesitas hasta preparar el expediente completo para el consulado.
@@ -751,7 +751,7 @@ export default function GuiaMaster() {
               <div className="flex flex-wrap gap-3 justify-center">
                 <a
                   href="mailto:administracion@inspira-legal.cloud"
-                  className="inline-block bg-[#F5C842] text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
+                  className="inline-block bg-accent text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-accent/90 transition-colors"
                 >
                   Consultar ahora
                 </a>
@@ -775,11 +775,11 @@ export default function GuiaMaster() {
             <Card>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-serif font-bold text-primary text-lg">Tu progreso</h3>
-                <span className="text-sm font-semibold text-[#1D6A4A]">{doneCount}/{totalCount} completados</span>
+                <span className="text-sm font-semibold text-primary-light">{doneCount}/{totalCount} completados</span>
               </div>
               <div className="w-full bg-[#E2E8F0] rounded-full h-3 mb-2">
                 <div
-                  className="bg-gradient-to-r from-[#1D6A4A] to-primary h-3 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-primary-light to-accent h-3 rounded-full transition-all duration-500"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -845,7 +845,7 @@ export default function GuiaMaster() {
 
             {/* CTA */}
             {pct === 100 && (
-              <div className="mt-6 bg-gradient-to-r from-[#1D6A4A] to-primary text-white rounded-2xl p-7 text-center">
+              <div className="mt-6 bg-gradient-to-br from-[#012938] via-primary to-primary-light text-white rounded-2xl p-7 text-center">
                 <p className="text-3xl mb-3">🎉</p>
                 <p className="font-serif text-xl font-bold mb-2">¡Lo lograste!</p>
                 <p className="text-white/80 text-sm mb-5 leading-relaxed">
@@ -853,7 +853,7 @@ export default function GuiaMaster() {
                 </p>
                 <a
                   href="mailto:administracion@inspira-legal.cloud"
-                  className="inline-block bg-[#F5C842] text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-[#F5C842]/90 transition-colors"
+                  className="inline-block bg-accent text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-accent/90 transition-colors"
                 >
                   Contactar a Inspira Legal
                 </a>

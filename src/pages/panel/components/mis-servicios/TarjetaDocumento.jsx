@@ -9,6 +9,8 @@
 import { useRef, useState } from "react";
 import { apiUpload, apiDELETE } from "../../../../services/api";
 import VisorArchivo from "../../../../components/common/VisorArchivo";
+import useSubidaDocumento from "../../hooks/useSubidaDocumento";
+import AvisoArchivo, { BotonHacerFoto } from "./AvisoArchivo";
 
 const ESTADO_DOC = {
   SIN_SUBIR: { label: "Pendiente",   bg: "bg-amber-50",   text: "text-amber-700",   borde: "border-neutral-200 bg-white" },
@@ -45,34 +47,38 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
   // Qué documento está mirando. El asesorado también merece verlos sin
   // descargarlos: son suyos.
   const [viendo, setViendo] = useState(null);
-  const [subiendo, setSubiendo] = useState(false);
   const [encima, setEncima] = useState(false);
-  const [error, setError] = useState("");
   const entradaRef = useRef(null);
 
   const cfg = ESTADO_DOC[def.estado] || ESTADO_DOC.SIN_SUBIR;
   const ultimo = def.archivos[0];
   const esDelAsesor = def.de === "asesor";
 
-  async function subir(archivo) {
-    if (!archivo) return;
-    setSubiendo(true); setError("");
-    try {
-      const datos = new FormData();
-      datos.append("archivo", archivo);
-      await apiUpload(`${base}/documentos/${clave}`, datos);
-      onCambio();
-    } catch (e) {
-      setError(e.message || "No se pudo subir");
-    } finally { setSubiendo(false); }
-  }
+  // Las fotos se juntan en un PDF, se mira si están borrosas o les falta una
+  // cara, y solo entonces se sube. El endpoint no cambia: un archivo por
+  // petición en el campo «archivo»; si la ranura admite varios, uno tras otro.
+  const subida = useSubidaDocumento({
+    texto: `${def.etiqueta || ""} ${def.requisito || ""}`,
+    varios: Boolean(def.varios),
+    // La firma digitalizada y las fotografías se usan como imagen.
+    convertir: !(def.clave === "firma" || /foto|firma/i.test(def.etiqueta || "")),
+    enviar: async (archivos) => {
+      for (const archivo of archivos) {
+        const datos = new FormData();
+        datos.append("archivo", archivo);
+        await apiUpload(`${base}/documentos/${clave}`, datos);
+      }
+    },
+    onHecho: onCambio,
+  });
+  const subiendo = subida.ocupado;
 
   async function quitar(idDoc) {
     const r = await apiDELETE(`${base}/documentos/archivo/${idDoc}`);
     if (r?.ok) onCambio();
   }
 
-  const textoSubida = subiendo ? "Subiendo…"
+  const textoSubida = subida.preparando ? "Preparando…" : subiendo ? "Subiendo…"
     : def.estado === "OBSERVADO" ? "↑ Subir la corrección"
     : def.archivos.length ? (def.varios ? "↑ Añadir otro archivo" : "↑ Reemplazar el archivo")
     : "↑ Subir archivo";
@@ -100,7 +106,7 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
         </div>
       )}
 
-      {def.estado === "PENDIENTE" && (
+      {def.estado === "PENDIENTE" && !subida.recibido && (
         <p className="text-[12px] text-sky-700 leading-relaxed">
           Lo tenemos. Tu asesor lo está revisando y te dirá si está correcto.
         </p>
@@ -156,7 +162,7 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
             onDragLeave={() => setEncima(false)}
             onDrop={(e) => {
               e.preventDefault(); setEncima(false);
-              subir(e.dataTransfer.files?.[0]);
+              subida.elegir(e.dataTransfer.files);
             }}
             className={`w-full rounded-xl border-2 border-dashed py-3.5 text-[13px]
               font-semibold transition-colors disabled:opacity-60 ${
@@ -166,12 +172,19 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
           >
             {textoSubida}
           </button>
-          <p className="text-[11px] text-neutral-400 leading-relaxed -mt-0.5">
-            Un solo archivo, nítido, menos de 4 MB.
-          </p>
+          <div className="pnl-arch-pie">
+            <p className="text-[11px] text-neutral-400 leading-relaxed">
+              Un solo archivo, nítido, menos de 4 MB. Si son fotos, elígelas todas a la vez y
+              las juntamos en un PDF.
+            </p>
+            <BotonHacerFoto onFotos={subida.elegir} disabled={subiendo} />
+          </div>
+          {/* `multiple`: las dos caras o todas las hojas en fotos se eligen de
+              una vez y salen en un solo PDF. */}
           <input ref={entradaRef} type="file" className="hidden"
-            accept="application/pdf,image/*" disabled={subiendo}
-            onChange={(e) => { subir(e.target.files?.[0]); e.target.value = ""; }} />
+            accept="application/pdf,image/*" disabled={subiendo} multiple
+            onChange={(e) => { subida.elegir(e.target.files); e.target.value = ""; }} />
+          <AvisoArchivo subida={subida} onElegirOtra={() => entradaRef.current?.click()} />
         </>
       )}
 
@@ -180,8 +193,6 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
           Lo preparamos nosotros y aparecerá aquí cuando esté listo.
         </p>
       )}
-
-      {error && <p className="text-[12px] text-red-600">{error}</p>}
 
       {viendo && (
         <VisorArchivo

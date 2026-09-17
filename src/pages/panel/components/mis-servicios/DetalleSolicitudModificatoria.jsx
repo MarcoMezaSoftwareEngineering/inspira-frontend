@@ -12,10 +12,14 @@ import { apiGET, apiPUT, apiPOST, apiUpload, apiDELETE } from "../../../../servi
 import { abrirArchivo } from "../../../../services/archivos";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 import VisorArchivo from "../../../../components/common/VisorArchivo";
+import useSubidaDocumento from "../../hooks/useSubidaDocumento";
+import AvisoArchivo, { BotonHacerFoto } from "./AvisoArchivo";
+import AyudaPlegable from "../AyudaPlegable";
 
 
 import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
-import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
+import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
+import NovedadesExpediente from "../NovedadesExpediente";
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
   azul:    "bg-[#EEF2F8] text-primary border-primary/20",
@@ -132,23 +136,28 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
   // El asesorado ve sus documentos con el mismo visor que en estancia:
   // antes aqui se abrian en otra pestaña y en estancia no, sin motivo.
   const [viendo, setViendo] = useState(null);
-  const [subiendo, setSubiendo] = useState(false);
-  const [error, setError] = useState("");
+  const entradaRef = useRef(null);
   const cfg = ESTADO_DOC[def.estado] || ESTADO_DOC.SIN_SUBIR;
   const ultimo = def.archivos[0];
   const esDelAsesor = def.de === "asesor";
 
-  async function subir(archivo) {
-    if (!archivo) return;
-    setSubiendo(true); setError("");
-    try {
-      const datos = new FormData();
-      datos.append("archivo", archivo);
-      await apiUpload(`/solicitudes/${id}/modificatoria/documentos/${clave}`, datos);
-      onCambio();
-    } catch (e) { setError(e.message || "No se pudo subir"); }
-    finally { setSubiendo(false); }
-  }
+  // Mismo recorrido que en estancia: fotos a un PDF, avisos de borrosa o de
+  // una sola cara, y el mismo endpoint de siempre, un archivo por petición.
+  const subida = useSubidaDocumento({
+    texto: `${def.etiqueta || ""} ${def.requisito || ""}`,
+    varios: Boolean(def.varios),
+    // La firma digitalizada y las fotografías se usan como imagen.
+    convertir: !(def.clave === "firma" || /foto|firma/i.test(def.etiqueta || "")),
+    enviar: async (archivos) => {
+      for (const archivo of archivos) {
+        const datos = new FormData();
+        datos.append("archivo", archivo);
+        await apiUpload(`/solicitudes/${id}/modificatoria/documentos/${clave}`, datos);
+      }
+    },
+    onHecho: onCambio,
+  });
+  const subiendo = subida.ocupado;
 
   async function quitar(idDoc) {
     const r = await apiDELETE(`/solicitudes/${id}/modificatoria/documentos/archivo/${idDoc}`);
@@ -186,7 +195,7 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
         </div>
       )}
 
-      {def.estado === "PENDIENTE" && (
+      {def.estado === "PENDIENTE" && !subida.recibido && (
         <p className="text-[11.5px] text-sky-700 leading-relaxed">
           Lo tenemos. Tu asesor lo está revisando.
         </p>
@@ -216,15 +225,24 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
       )}
 
       {!esDelAsesor && (
-        <label className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold
-          text-primary cursor-pointer hover:underline w-fit">
-          {subiendo ? "Subiendo…"
-            : def.estado === "OBSERVADO" ? "📎 Subir la corrección"
-            : def.archivos.length ? (def.varios ? "+ añadir otro" : "Reemplazar")
-            : "📎 Subir"}
-          <input type="file" className="hidden" accept="application/pdf,image/*"
-            disabled={subiendo} onChange={(e) => subir(e.target.files?.[0])} />
-        </label>
+        <div className="pnl-arch-pie">
+          <label className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold
+            text-primary cursor-pointer hover:underline w-fit">
+            {subida.preparando ? "Preparando…"
+              : subiendo ? "Subiendo…"
+              : def.estado === "OBSERVADO" ? "📎 Subir la corrección"
+              : def.archivos.length ? (def.varios ? "+ añadir otro" : "Reemplazar")
+              : "📎 Subir"}
+            {/* `multiple`: varias fotos del mismo documento salen en un PDF. */}
+            <input ref={entradaRef} type="file" className="hidden" accept="application/pdf,image/*"
+              multiple disabled={subiendo}
+              onChange={(e) => { subida.elegir(e.target.files); e.target.value = ""; }} />
+          </label>
+          <BotonHacerFoto onFotos={subida.elegir} disabled={subiendo} />
+        </div>
+      )}
+      {!esDelAsesor && (
+        <AvisoArchivo subida={subida} onElegirOtra={() => entradaRef.current?.click()} />
       )}
 
       {esDelAsesor && def.archivos.length === 0 && (
@@ -232,7 +250,6 @@ function TarjetaDocumento({ id, clave, def, onCambio }) {
           Lo preparamos nosotros y aparecerá aquí.
         </p>
       )}
-      {error && <p className="text-[11.5px] text-red-600">{error}</p>}
     </div>
   );
 }
@@ -444,6 +461,13 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
 
         <EstadoProceso revision={rev} />
 
+        {/* Qué ha cambiado desde su última visita. Aquí las secciones son
+            bloques plegables: se abre el que corresponde. */}
+        <NovedadesExpediente
+          idSolicitud={solicitudBase?.id_solicitud}
+          onIrSeccion={(sec) => { const n = ({ docs: 3, estado: 4, mensajes: 5 })[sec]; if (n) setBloque(n); }}
+        />
+
         {/* ── 1 · Datos ── */}
 <ComoInvitado solicitud={solicitudBase} />
         <OtraPersona invitados={exp.invitados} />
@@ -452,18 +476,20 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
           subtitulo={rev?.completo ? "Completos" : `${hechos} de ${totalCampos} completados`}
           abierto={bloque === 1} onToggle={() => setBloque(bloque === 1 ? 0 : 1)}>
 
-          <div className="rounded-xl border-l-[3px] border-orange-400 bg-orange-50 px-3.5 py-3 mb-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-orange-800 mb-1">
-              Antes de empezar</p>
-            <p className="text-[12.5px] text-orange-900 leading-relaxed">
+          {/* Plegado para no tapar el formulario, pero la frase de la
+              responsabilidad va en el resumen: esa no puede quedar escondida. */}
+          <AyudaPlegable clave="modificatoria-datos-antes" tono="importante"
+            titulo="Antes de empezar"
+            resumen={<>Se copian tal cual al formulario oficial: <b>es tu responsabilidad que sean correctos</b>.</>}>
+            <p>
               Estos datos se copian <b>tal cual</b> al formulario oficial que presentamos ante
               Extranjería. Escríbelos exactamente como figuran en tus documentos y en tu
               precontrato: <b>es tu responsabilidad que sean correctos</b>.
             </p>
-            <p className="text-[12px] text-orange-800 leading-relaxed mt-1.5">
+            <p>
               Si dudas de algún campo, pulsa la <b>ⓘ</b> que hay junto a su nombre.
             </p>
-          </div>
+          </AyudaPlegable>
 
           <div className="flex items-center gap-2.5 mb-3">
             <div className="flex-1 h-2 rounded-full bg-neutral-100 overflow-hidden">

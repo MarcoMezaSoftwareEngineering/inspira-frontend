@@ -1,5 +1,5 @@
 // src/pages/panel/components/mis-servicios/sections/ChecklistDocumentos.jsx
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { apiDELETE, apiUpload } from "../../../../../services/api";
 import SeccionPanel from "./SeccionPanel";
 import PedirRevisionMaster from "./PedirRevisionMaster";
@@ -12,6 +12,9 @@ import GuiaDocumento from "./GuiaDocumento";
 import TextoConEnlaces from "../../../../../components/common/TextoConEnlaces";
 import { InstructivosContenido } from "./InstructivosPlantillas";
 import { comprobarRespuesta } from "../../../../../services/sesion";
+import useSubidaDocumento from "../../../hooks/useSubidaDocumento";
+import AvisoArchivo, { BotonHacerFoto } from "../AvisoArchivo";
+import AyudaPlegable from "../../AyudaPlegable";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -145,27 +148,41 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
   const guia = guiaMaster ? guiaParaItem(it.item?.nombre_item) : null;
   const requisitos = guia ? null : requisitosDe(it.item?.nombre_item);
   const itemAprobado = (it.estado_item || "").toLowerCase() === "aprobado";
-  const [subiendo, setSubiendo] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const entradaRef = useRef(null);
 
-  async function handleUpload(e) {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    setSubiendo(true);
-    try {
+  // Antes de subir: las fotos se juntan en un PDF, se avisa si están
+  // borrosas o si el documento pide dos caras y llega una. Se lee todo lo que
+  // describe el ítem (nombre, descripción, requisitos y guía), que es donde
+  // dice «ambas caras» o «todas las hojas».
+  const textoItem = [
+    it.item?.nombre_item, it.item?.descripcion,
+    ...(requisitos || []), guia?.que_es, ...(guia?.verifica || []),
+  ].filter(Boolean).join(" ");
+  const subida = useSubidaDocumento({
+    texto: textoItem,
+    varios,
+    // Esta ruta admite hasta 100 MB (documentos.routes.js): el tope general
+    // de 12 MB bloquearía escaneos grandes que hoy se aceptan.
+    tope: 100 * 1024 * 1024,
+    // Una fotografía o una firma se quieren como imagen, no dentro de un PDF.
+    convertir: !/foto|firma/i.test(textoItem || ""),
+    // El endpoint de siempre: todos los archivos en «archivos», en una petición.
+    enviar: async (archivos) => {
       const formData = new FormData();
-      for (const f of files) formData.append("archivos", f);
+      for (const f of archivos) formData.append("archivos", f);
       await apiUpload(
         `/api/panel/solicitudes/${solicitudId}/items/${it.id_solicitud_item}/documento`,
         formData
       );
-      if (onUploaded) onUploaded();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubiendo(false);
-      e.target.value = "";
-    }
+    },
+    onHecho: onUploaded,
+  });
+  const subiendo = subida.ocupado;
+
+  function handleUpload(e) {
+    subida.elegir(e.target.files);
+    e.target.value = "";
   }
 
   async function handleDelete(idDoc) {
@@ -262,23 +279,31 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
       {/* Subir */}
       {it.item?.permite_archivo && !itemAprobado && (
         <>
-          <label className="ex-subir">
-            <IconoPaso nombre="upload" className="w-4 h-4" />
-            {subiendo ? "Subiendo…" : varios ? "Subir archivo" : hayDocs ? "Reemplazar el archivo" : "Subir el documento"}
-            <input
-              type="file"
-              className="hidden"
-              onChange={handleUpload}
-              multiple={varios}
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
-              disabled={subiendo}
-            />
-          </label>
+          <div className="pnl-arch-pie">
+            <label className="ex-subir">
+              <IconoPaso nombre="upload" className="w-4 h-4" />
+              {subida.preparando ? "Preparando…" : subiendo ? "Subiendo…" : varios ? "Subir archivo" : hayDocs ? "Reemplazar el archivo" : "Subir el documento"}
+              {/* `multiple` también cuando va un solo archivo: varias fotos del
+                  mismo documento se juntan en un PDF antes de subir. Si elige
+                  varios PDFs donde va uno, se le para con una explicación. */}
+              <input
+                ref={entradaRef}
+                type="file"
+                className="hidden"
+                onChange={handleUpload}
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                disabled={subiendo}
+              />
+            </label>
+            <BotonHacerFoto onFotos={subida.elegir} disabled={subiendo} />
+          </div>
           <p className="ex-nota">
             {varios
-              ? "Aquí sí puedes subir más de un archivo, cada uno completo."
-              : "Todo el documento junto, en un solo PDF. Si subes otro, reemplaza al anterior."}
+              ? "Aquí sí puedes subir más de un archivo, cada uno completo. Las fotos que elijas a la vez se juntan en un PDF: sube cada documento por separado."
+              : "Todo el documento junto, en un solo PDF. Si subes otro, reemplaza al anterior. Si son fotos, elígelas todas a la vez y las juntamos en un PDF."}
           </p>
+          <AvisoArchivo subida={subida} onElegirOtra={() => entradaRef.current?.click()} />
         </>
       )}
     </div>
@@ -390,21 +415,21 @@ export default function ChecklistDocumentos({
 
         {/* Cómo subir. Va arriba del todo: es la duda que más frena a la
             gente antes de empezar a cargar archivos. */}
+        {/* Plegada tras la primera lectura: la idea cabe en una línea y la
+            lista de documentos es lo que tiene que verse. */}
         {!bloqueado && total > 0 && (
-          <div className="flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-3 mb-4">
-            <span className="shrink-0 text-base leading-none mt-0.5">📤</span>
-            <div className="text-[12.5px] text-sky-900 leading-relaxed space-y-1">
-              <p><b>Sube todo lo que tengas</b>, aunque no estés seguro de si sirve.</p>
-              <p>
-                Si un documento no encaja en ningún campo de esta lista, súbelo en{" "}
-                <b>«Otros documentos»</b> — ahí caben varios archivos.
-              </p>
-              <p>
-                Si algo <b>no lo tienes</b>, no subas nada en su lugar: déjalo vacío.
-                Tus asesores revisarán qué falta y te lo dirán.
-              </p>
-            </div>
-          </div>
+          <AyudaPlegable clave="checklist-como-subir" tono="info" titulo="Cómo subir"
+            resumen={<><b>Sube todo lo que tengas</b>, aunque no estés seguro de si sirve.</>}>
+            <p><b>Sube todo lo que tengas</b>, aunque no estés seguro de si sirve.</p>
+            <p>
+              Si un documento no encaja en ningún campo de esta lista, súbelo en{" "}
+              <b>«Otros documentos»</b> — ahí caben varios archivos.
+            </p>
+            <p>
+              Si algo <b>no lo tienes</b>, no subas nada en su lugar: déjalo vacío.
+              Tus asesores revisarán qué falta y te lo dirán.
+            </p>
+          </AyudaPlegable>
         )}
 
         {/* Cuántos van, de un vistazo: el número grande y la barra. */}

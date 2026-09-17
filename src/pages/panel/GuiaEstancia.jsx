@@ -158,7 +158,7 @@ function Calculadora() {
 
   return (
     <div className="rounded-2xl border border-primary/15 overflow-hidden">
-      <div className="px-4 py-3" style={{ background: "linear-gradient(135deg,#013446,#013446)" }}>
+      <div className="px-4 py-3" style={{ background: "linear-gradient(150deg, #012938 0%, #013446 48%, #02506b 100%)" }}>
         <p className="text-[13px] font-bold text-white">🗓️ Calcula tus fechas</p>
         <p className="text-[11.5px] text-white/70 mt-0.5">
           Pon tus dos fechas y te digo cuándo hay que presentarlo.
@@ -267,7 +267,7 @@ export default function GuiaEstancia() {
     <div className="max-w-3xl mx-auto pb-10">
       {/* Portada */}
       <div className="rounded-2xl px-6 py-6 mb-4 text-white"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #013446 100%)" }}>
+        style={{ background: "linear-gradient(150deg, #012938 0%, #013446 48%, #02506b 100%)" }}>
         <p className="text-[10px] font-bold uppercase tracking-[.2em] text-white/60 font-mono mb-2">
           Guía del proceso
         </p>
@@ -282,7 +282,7 @@ export default function GuiaEstancia() {
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 rounded-full bg-white/15 overflow-hidden">
-            <div className="h-full bg-[#F5C842] transition-all"
+            <div className="h-full bg-accent transition-all"
               style={{ width: `${total.total ? (total.hechos / total.total) * 100 : 0}%` }} />
           </div>
           <span className="text-[12px] font-bold text-white/80 shrink-0">
@@ -423,7 +423,7 @@ export default function GuiaEstancia() {
       )}
 
       <div className="rounded-2xl px-5 py-4 text-white text-center mt-4"
-        style={{ background: "linear-gradient(135deg, #013446 0%, #013446 100%)" }}>
+        style={{ background: "linear-gradient(150deg, #012938 0%, #013446 48%, #02506b 100%)" }}>
         <p className="text-[13px] font-semibold mb-1">El trámite tarda de 1 a 3 meses</p>
         <p className="text-[12px] text-white/70 leading-relaxed">
           Varía según la carga de la Oficina de Extranjería y la complejidad del expediente.

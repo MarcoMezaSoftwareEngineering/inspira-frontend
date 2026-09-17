@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { borrarSesionLocal, cerrarSesionServidor } from "../services/sesion";
+import { desactivarAvisos } from "../services/push";
 
 const AuthContext = createContext(null);
 const API = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -54,6 +55,10 @@ export function AuthProvider({ children }) {
   // aunque alguien lo hubiera copiado— y avisa a las demás pestañas. Con
   // `todos` se cierran además las de sus otros dispositivos.
   const logout = async ({ todos = false } = {}) => {
+    // Antes que el token: en un equipo compartido no pueden seguir llegando
+    // los avisos del asesorado anterior.
+    // Con tope: sin service worker (desarrollo) la consulta espera hasta 5 s.
+    try { await Promise.race([desactivarAvisos(), new Promise((r) => setTimeout(r, 1500))]); } catch { /* sin avisos que quitar */ }
     await cerrarSesionServidor({ todos });
     borrarSesionLocal();
     try { localStorage.removeItem("post_login_redirect"); } catch { /* noop */ }

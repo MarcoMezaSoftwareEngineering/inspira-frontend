@@ -14,6 +14,8 @@ import AvisoInstalarApp from "./AvisoInstalarApp";
 import { ProximoPaso, ResumenExpediente } from "./ProximoPaso";
 import { MiRutaResumen } from "./MiRuta";
 import SaludoInicio from "./SaludoInicio";
+import PlazosLinea from "./PlazosLinea";
+import AvisosMovil from "./AvisosMovil";
 import { EsqueletoTarjetas } from "./Esqueleto";
 
 // Cinco a la vista y el resto tras «ver más»: el resumen va debajo y tiene
@@ -105,6 +107,12 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
           el recorrido guiado o el asistente de perfil. Va después del
           próximo paso: no compite con él. */}
       <AvisoInstalarApp bloqueado={avisoAppBloqueado} />
+
+      {/* Las fechas que vienen, con cuenta atrás (se oculta si no hay). */}
+      {!loading && <PlazosLinea servicios={lista} pagos={pagos} />}
+
+      {/* Avisos en el móvil (gratis, Web Push). Se oculta si ya están activos. */}
+      {!avisoAppBloqueado && <AvisosMovil variante="inicio" />}
 
       {resto.length > 0 && (
         <section id="pnl-hoy" data-tour="hoy" style={{ scrollMarginTop: 12 }}>

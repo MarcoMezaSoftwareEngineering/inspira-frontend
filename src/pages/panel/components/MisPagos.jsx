@@ -15,7 +15,7 @@ import IconoPaso from "../../../components/common/IconoPaso";
 import { apiPOST, apiUpload } from "../../../services/api";
 import { abrirArchivo } from "../../../services/archivos";
 import { whatsappDesde } from "../../../config/contacto";
-import { importe, nombreCuota, estadoCuota, diaPago } from "../pagosCliente";
+import { importe, nombreCuota, estadoCuota, diaPago, proximaCuota, importeSoles } from "../pagosCliente";
 
 const MODALIDAD = { CONTADO: "Pago al contado", DOS_CUOTAS: "En dos cuotas", PERSONALIZADO: "Plan a medida" };
 const MEDIOS = [
@@ -119,10 +119,7 @@ function Resumen({ planes, resumen }) {
     return partes.length ? partes.join(" · ") : importe(0, monedas[0]?.[0] || "EUR");
   };
   const hay = (campo) => monedas.some(([, r]) => r[campo] > 0);
-  const proxima = planes
-    .flatMap((p) => p.cuotas || [])
-    .filter((c) => c.estado === "PENDIENTE")
-    .sort((a, b) => String(a.fecha_vencimiento || "9999").localeCompare(String(b.fecha_vencimiento || "9999")))[0] || null;
+  const proxima = proximaCuota(planes);
   const ep = proxima ? estadoCuota(proxima) : null;
 
   return (
@@ -243,9 +240,11 @@ function SubirComprobante({ cuota, medios, onCerrar, onHecho }) {
   );
 }
 
-function Cuota({ c, destacada, medios, mp, onSubir, onPagarLinea }) {
+function Cuota({ c, destacada, medios, mp, datosAbiertos, onVerDatos, onSubir, onPagarLinea }) {
   const e = estadoCuota(c);
   const pendiente = c.estado === "PENDIENTE";
+  const enLinea = Boolean(c.pago_en_linea?.disponible);
+  const soles = importeSoles(c);
   return (
     <li id={`ex-pg-cuota-${c.id_pago}`} className="ex-pg-cuota" data-tono={e.tono} data-destacada={destacada ? "1" : "0"}>
       <span className="ex-pg-marca" data-tono={e.tono} aria-hidden="true">
@@ -262,21 +261,60 @@ function Cuota({ c, destacada, medios, mp, onSubir, onPagarLinea }) {
 
         {e.texto && c.estado !== "PAGADO" && <p className="ex-pg-cuota-texto" data-tono={e.tono}>{e.texto}</p>}
 
-        {(pendiente || c.estado === "EN_REVISION" || c.tiene_comprobante) && (
-          <div className="ex-pg-botones">
-            {pendiente && c.puede_subir_comprobante && (
-              <button type="button" className="pnl-btn-cta ux-tap" onClick={() => onSubir(c)}>
-                <Icono nombre="documento" size={15} />
-                Subir comprobante
-              </button>
-            )}
-            {pendiente && c.pago_en_linea?.disponible && (
-              <button type="button" className="pnl-btn ux-tap" onClick={() => onPagarLinea(c)} disabled={mp?.cargando}>
+        {/* Una cuota por pagar lleva su propio «Pagar», con el importe a la
+            vista, y el «Ya pagué» al lado. Antes el botón principal era subir
+            el comprobante y Mercado Pago quedaba en segundo plano, así que
+            quien aún no había pagado no veía por dónde empezar. «Pagar» usa lo
+            que ya existe: Mercado Pago si la cuota tiene importe en soles; si
+            no, abre aquí mismo los datos de transferencia y Plin. */}
+        {pendiente && (
+          <div className="ex-pg-botones pnl-pagos-acciones">
+            {enLinea ? (
+              <button type="button" className="pnl-btn-cta ux-tap pnl-pagos-pagar" onClick={() => onPagarLinea(c)} disabled={mp?.cargando}>
                 <Icono nombre="euro" size={15} />
-                {mp?.cargando ? "Abriendo Mercado Pago…" : "Pagar con Mercado Pago"}
-                {c.pago_en_linea.monto_pen ? <span className="ex-pg-soles">S/ {Number(c.pago_en_linea.monto_pen).toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span> : null}
+                {mp?.cargando ? "Abriendo Mercado Pago…" : `Pagar ${soles || importe(c.monto, c.moneda)}`}
+                {!mp?.cargando && <span className="pnl-pagos-via">con Mercado Pago</span>}
+              </button>
+            ) : (
+              <button type="button" className="pnl-btn-cta ux-tap pnl-pagos-pagar" onClick={() => onVerDatos(c)} aria-expanded={datosAbiertos}>
+                <Icono nombre="euro" size={15} />
+                Pagar {importe(c.monto, c.moneda)}
               </button>
             )}
+            {c.puede_subir_comprobante && (
+              <button type="button" className="pnl-btn ux-tap" onClick={() => onSubir(c)}>
+                <Icono nombre="documento" size={15} />
+                {c.motivo_rechazo ? "Subir otro comprobante" : "Ya pagué: subir comprobante"}
+              </button>
+            )}
+            {enLinea && (
+              <button type="button" className="ex-pg-enlace" onClick={() => onVerDatos(c)} aria-expanded={datosAbiertos}>
+                {datosAbiertos ? "Ocultar transferencia y Plin" : "Prefiero transferencia o Plin"}
+              </button>
+            )}
+            {c.tiene_comprobante && (
+              <button
+                type="button"
+                className="ex-pg-enlace"
+                onClick={() => abrirArchivo(`/cliente/pagos/${c.id_pago}/comprobante`, { nombre: `comprobante-${c.id_pago}` })}
+              >
+                Ver comprobante
+              </button>
+            )}
+          </div>
+        )}
+
+        {pendiente && datosAbiertos && !mp?.msg && (
+          <div className="pnl-pagos-datos">
+            <p>
+              Paga {importe(c.monto, c.moneda)} con estos datos y después pulsa «Ya pagué» para subir el comprobante.
+            </p>
+            <DatosPago medios={medios} compacto />
+          </div>
+        )}
+
+        {!pendiente && ((c.estado === "EN_REVISION" && c.puede_subir_comprobante) || c.tiene_comprobante) && (
+          <div className="ex-pg-botones">
             {c.estado === "EN_REVISION" && c.puede_subir_comprobante && (
               <button type="button" className="pnl-btn ux-tap" onClick={() => onSubir(c)}>Cambiar comprobante</button>
             )}
@@ -303,7 +341,7 @@ function Cuota({ c, destacada, medios, mp, onSubir, onPagarLinea }) {
   );
 }
 
-function Plan({ plan, destacada, medios, mp, onSubir, onPagarLinea }) {
+function Plan({ plan, destacada, medios, mp, verDatos, onVerDatos, onSubir, onPagarLinea }) {
   const pct = plan.total > 0 ? Math.min(100, Math.round((plan.pagado / plan.total) * 100)) : 0;
   return (
     <section className="ex-pg-plan">
@@ -334,6 +372,8 @@ function Plan({ plan, destacada, medios, mp, onSubir, onPagarLinea }) {
             destacada={destacada === c.id_pago}
             medios={medios}
             mp={mp[c.id_pago]}
+            datosAbiertos={Boolean(verDatos[c.id_pago])}
+            onVerDatos={onVerDatos}
             onSubir={onSubir}
             onPagarLinea={onPagarLinea}
           />
@@ -343,15 +383,47 @@ function Plan({ plan, destacada, medios, mp, onSubir, onPagarLinea }) {
   );
 }
 
+/**
+ * La próxima cuota, fija abajo en el teléfono. Con varias cuotas y los datos
+ * de pago, el botón de la que toca quedaba varias pantallas más abajo. Va al
+ * final de la página con position: sticky, así que al llegar abajo del todo se
+ * queda en su sitio y no tapa nada. En escritorio no sale (ver el CSS).
+ */
+function BarraProxima({ cuota, mp, onPagarLinea, onIrADatos }) {
+  const e = estadoCuota(cuota);
+  // Si Mercado Pago ya dijo que no (mp.msg), la barra lleva a la cuota, donde
+  // está su aviso con los datos de transferencia, en vez de reintentarlo.
+  const enLinea = Boolean(cuota.pago_en_linea?.disponible) && !mp?.msg;
+  const cargando = Boolean(mp?.cargando);
+  return (
+    <div className="pnl-pagos-barra" data-tono={e.tono} role="region" aria-label="Próxima cuota">
+      <div className="pnl-pagos-barra-texto">
+        <strong>{nombreCuota(cuota)} · {importe(cuota.monto, cuota.moneda)}</strong>
+        <small>{e.tono === "tipo" ? `Vence el ${diaPago(cuota.fecha_vencimiento)}` : e.etiqueta}</small>
+      </div>
+      <button
+        type="button"
+        className="pnl-btn-cta ux-tap"
+        disabled={cargando}
+        onClick={() => (enLinea ? onPagarLinea(cuota) : onIrADatos(cuota))}
+      >
+        {cargando ? "Abriendo…" : `Pagar ${enLinea ? importeSoles(cuota) || importe(cuota.monto, cuota.moneda) : importe(cuota.monto, cuota.moneda)}`}
+      </button>
+    </div>
+  );
+}
+
 export default function MisPagos({ datos, onRecargar }) {
   const [subiendo, setSubiendo] = useState(null);
   const [enviado, setEnviado] = useState(false);
   const [mp, setMp] = useState({}); // id_pago → { cargando } | { msg, medios }
+  const [verDatos, setVerDatos] = useState({}); // id_pago → true: datos de transferencia abiertos en esa cuota
   const [destacada] = useState(cuotaDeUrl);
   const desplazado = useRef(false);
 
   const planes = datos?.planes || [];
   const medios = datos?.medios_pago || null;
+  const proxima = proximaCuota(planes);
 
   // Llegar desde «Hoy» o un correo con ?cuota=ID: se baja hasta esa cuota.
   useEffect(() => {
@@ -374,6 +446,18 @@ export default function MisPagos({ datos, onRecargar }) {
       ...x,
       [c.id_pago]: { msg: r?.msg || "No se pudo abrir el pago en línea. Puedes pagar por transferencia o Plin.", medios: r?.medios_pago || null },
     }));
+  }
+
+  function alternarDatos(c) {
+    setVerDatos((x) => ({ ...x, [c.id_pago]: !x[c.id_pago] }));
+  }
+
+  // Desde la barra fija: se abren los datos de esa cuota y se baja hasta ella.
+  function irADatos(c) {
+    setVerDatos((x) => ({ ...x, [c.id_pago]: true }));
+    requestAnimationFrame(() => {
+      document.getElementById(`ex-pg-cuota-${c.id_pago}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   }
 
   if (!datos) {
@@ -426,6 +510,8 @@ export default function MisPagos({ datos, onRecargar }) {
               destacada={destacada}
               medios={medios}
               mp={mp}
+              verDatos={verDatos}
+              onVerDatos={alternarDatos}
               onSubir={setSubiendo}
               onPagarLinea={pagarLinea}
             />
@@ -434,6 +520,9 @@ export default function MisPagos({ datos, onRecargar }) {
           <p className="pnl-nota">
             Si ves algo que no cuadra en tus cuotas, escríbele a tu asesor desde Mensajes en tu expediente.
           </p>
+          {proxima && !subiendo && (
+            <BarraProxima cuota={proxima} mp={mp[proxima.id_pago]} onPagarLinea={pagarLinea} onIrADatos={irADatos} />
+          )}
         </>
       ) : !datos.error && (
         <div className="pnl-pend-vacio">

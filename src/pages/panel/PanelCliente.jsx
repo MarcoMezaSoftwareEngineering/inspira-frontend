@@ -4,6 +4,13 @@ import { lazyConRecarga } from "../../lib/cargaDiferida";
 import "../../styles/panel.css";
 // La capa de app (movimiento, pestañas, saludo). Después de panel.css: la afina.
 import "../../styles/panel-app.css";
+// Hojas de las piezas nuevas del 17/09 (avisos, novedades y plazos, documentos,
+// perfil y pagos). Se importan aquí y no en cada componente: varios van en
+// trozos perezosos y una hoja importada desde ahí puede llegar tarde.
+import "../../styles/panel-avisos.css";
+import "../../styles/panel-novedades.css";
+import "../../styles/panel-documentos.css";
+import "../../styles/panel-perfil-pagos.css";
 import "../../styles/pasos-core.css";
 // pasos.css define las clases ex-* de las tarjetas de documentos y las
 // secciones (ChecklistDocumentos, SeccionPanel), que usan también el visado y
@@ -33,6 +40,8 @@ import CercoErrores from "../../components/common/CercoErrores";
 import BarraPestanas from "./components/BarraPestanas";
 import AvisoSesion from "./components/AvisoSesion";
 import SeguridadSesion from "./components/SeguridadSesion";
+import AvisosMovil from "./components/AvisosMovil";
+import { desactivarAvisos } from "../../services/push";
 import { alTerminarSesion, borrarSesionLocal, caducado, leerToken, vigilarSesion } from "../../services/sesion";
 import { useTirarParaRecargar } from "./hooks/useMovimiento";
 import { CabeceraExpedienteCtx } from "./cabeceraExpediente";
@@ -157,6 +166,11 @@ export default function PanelCliente({ path }) {
   const [finSesion, setFinSesion] = useState(null);
   // Nombre y avance que publica el expediente abierto para la barra de arriba.
   const [cabExp, setCabExp] = useState(null);
+  // Si la sesión termina con el panel abierto, este dispositivo deja de
+  // recibir avisos: puede ser un equipo compartido.
+  useEffect(() => {
+    if (finSesion && finSesion !== "otra-cuenta") desactivarAvisos().catch(() => {});
+  }, [finSesion]);
   // /cliente/me no respondió (red, servidor). Antes se mandaba a la portada.
   const [errorMe, setErrorMe] = useState("");
 
@@ -473,6 +487,7 @@ export default function PanelCliente({ path }) {
           {tab === "perfil" && (
             <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-5">
               <PerfilCliente user={user} conAcademico={conAcademico} onUserUpdated={(nuevo) => setUser(nuevo)} />
+              <AvisosMovil variante="perfil" />
               <SeguridadSesion />
             </div>
           )}

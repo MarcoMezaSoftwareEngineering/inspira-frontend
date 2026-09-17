@@ -389,7 +389,7 @@ export default function GuiaModificatoria() {
     <div className="max-w-3xl mx-auto pb-10">
       {/* Portada */}
       <div className="rounded-2xl overflow-hidden mb-4 shadow-sm">
-        <div className="px-5 py-6" style={{ background: `linear-gradient(135deg, ${AZUL} 0%, #013446 100%)` }}>
+        <div className="px-5 py-6" style={{ background: `linear-gradient(150deg, #012938 0%, ${AZUL} 48%, #02506b 100%)` }}>
           <p className="text-[10.5px] font-bold uppercase tracking-[.18em] text-white/60 mb-1.5">
             Guía del proceso
           </p>

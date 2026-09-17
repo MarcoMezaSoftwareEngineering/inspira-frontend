@@ -16,7 +16,8 @@ import { queMeFaltaVisado } from "../../queMeFalta";
 import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
 import { comprobarRespuesta } from "../../../../services/sesion";
-import { usePublicarCabecera } from "../../cabeceraExpediente";
+import { usePublicarCabecera } from "../../cabeceraExpediente";
+import NovedadesExpediente from "../NovedadesExpediente";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -591,6 +592,11 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
 
       {!loading && !error && detalle && (
         <QueMeFalta className="shrink-0 mb-3" resumen={falta.resumen} filas={falta.filas} />
+      )}
+
+      {/* Qué ha cambiado desde su última visita. */}
+      {!loading && !error && detalle && (
+        <div className="shrink-0 mb-3"><NovedadesExpediente idSolicitud={idSolicitud} plegable /></div>
       )}
 
       {/* Panel principal */}

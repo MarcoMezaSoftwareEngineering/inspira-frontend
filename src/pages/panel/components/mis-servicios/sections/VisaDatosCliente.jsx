@@ -9,6 +9,7 @@
 // expediente de visado sólo necesita lo que exige el consulado.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiPUT } from "../../../../../services/api";
+import AyudaPlegable from "../../AyudaPlegable";
 
 /* ── Fechas ───────────────────────────────────────────────────────────────────
    En base de datos se guardan como texto libre porque el expediente arrastra
@@ -270,12 +271,17 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
 
       {/* Aviso permanente mientras falte algo. Estos datos van al impreso
           oficial: uno vacio significa formulario rechazado en el consulado. */}
+      {/* La consecuencia (el consulado no lo acepta) queda en el resumen, a
+          la vista: plegar no puede esconder por qué importa. */}
       {!bloqueado && faltantes.length > 0 && (
-        <Aviso tono="warn" icono="⚠️">
-          Te faltan <b>{faltantes.length} de {CAMPOS.length} datos</b> por completar.
-          Todos son obligatorios: con ellos emitimos tu formulario oficial, y si falta
-          alguno el consulado no lo acepta.
-        </Aviso>
+        <AyudaPlegable clave="visa-datos-faltan" tono="aviso"
+          resumen={<>Te faltan <b>{faltantes.length} de {CAMPOS.length} datos</b>: si falta alguno, el consulado no acepta tu formulario.</>}>
+          <p>
+            Te faltan <b>{faltantes.length} de {CAMPOS.length} datos</b> por completar.
+            Todos son obligatorios: con ellos emitimos tu formulario oficial, y si falta
+            alguno el consulado no lo acepta.
+          </p>
+        </AyudaPlegable>
       )}
 
       {!bloqueado && faltantes.length === 0 && (
@@ -287,10 +293,13 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
       {pestana === 1 ? (
         <>
           {!bloqueado && (
-            <Aviso tono="info" icono="💾">
-              Puedes completar poco a poco y <b>guardar</b>. Para emitir tu formulario oficial
-              necesitamos la <b>versión final</b> de estos datos — revísalos bien antes de tu cita.
-            </Aviso>
+            <AyudaPlegable clave="visa-datos-poco-a-poco" tono="info"
+              resumen={<>Puedes completar poco a poco y <b>guardar</b>.</>}>
+              <p>
+                Puedes completar poco a poco y <b>guardar</b>. Para emitir tu formulario oficial
+                necesitamos la <b>versión final</b> de estos datos — revísalos bien antes de tu cita.
+              </p>
+            </AyudaPlegable>
           )}
 
           <Grupo titulo="Datos personales">

@@ -47,6 +47,24 @@ export function estadoCuota(c) {
 }
 
 /**
+ * La cuota pendiente que vence antes (las que no tienen fecha, al final).
+ * La usan el resumen y la barra fija de «Mis pagos», para que las dos hablen
+ * de la misma cuota.
+ */
+export function proximaCuota(planes) {
+  return (planes || [])
+    .flatMap((p) => p.cuotas || [])
+    .filter((c) => c.estado === "PENDIENTE")
+    .sort((a, b) => String(a.fecha_vencimiento || "9999").localeCompare(String(b.fecha_vencimiento || "9999")))[0] || null;
+}
+
+/** «S/ 300,00»: lo que cobrará Mercado Pago, que siempre va en soles. */
+export function importeSoles(c) {
+  const n = Number(c?.pago_en_linea?.monto_pen);
+  return Number.isFinite(n) && n > 0 ? `S/ ${n.toLocaleString("es-PE", { minimumFractionDigits: 2 })}` : null;
+}
+
+/**
  * Las cuotas que piden algo al asesorado ya: vencidas, que vencen en siete
  * días o menos, o con el comprobante rechazado. Lo que está en revisión
  * espera al equipo, no a él.

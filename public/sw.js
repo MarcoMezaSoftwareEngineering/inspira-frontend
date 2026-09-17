@@ -67,6 +67,7 @@ self.addEventListener("fetch", (e) => {
   }
 
   // Iconos, manifiesto, favicon: lo guardado, y se refresca por detrás.
+  // (Los avisos al móvil están al final del archivo, aparte de la caché.)
   if (/\.(png|svg|webmanifest|ico)$/.test(url.pathname)) {
     e.respondWith(
       caches.match(req).then((hit) => {
@@ -78,4 +79,55 @@ self.addEventListener("fetch", (e) => {
       }),
     );
   }
+});
+
+/*
+ * Avisos al móvil (Web Push estándar con VAPID, sin servicios de pago).
+ *
+ * El servidor manda {title, body, url, tag}. La etiqueta agrupa: un aviso
+ * nuevo del mismo expediente sustituye al anterior en la bandeja en vez de
+ * apilar varios iguales. La URL es siempre una ruta del panel.
+ */
+self.addEventListener("push", (e) => {
+  let datos = {};
+  try { datos = e.data ? e.data.json() : {}; } catch {
+    datos = { body: e.data ? e.data.text() : "" };
+  }
+  const titulo = datos.title || "Inspira Legal";
+  e.waitUntil(
+    self.registration.showNotification(titulo, {
+      body: datos.body || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: datos.tag || undefined,
+      // Con etiqueta repetida, que vuelva a sonar: es una novedad, no la misma.
+      renotify: Boolean(datos.tag),
+      data: { url: datos.url || "/panel" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  // Solo rutas de este sitio: una URL de fuera no se abre desde un aviso.
+  let destino = "/panel";
+  try {
+    const u = new URL((e.notification.data && e.notification.data.url) || "/panel", self.location.origin);
+    if (u.origin === self.location.origin) destino = u.pathname + u.search + u.hash;
+  } catch { /* URL rara: al panel */ }
+
+  e.waitUntil((async () => {
+    const abiertas = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    // Si el panel ya está abierto, se usa esa ventana en vez de abrir otra.
+    const panel = abiertas.find((c) => new URL(c.url).pathname.startsWith("/panel"));
+    if (panel) {
+      await panel.focus();
+      if ("navigate" in panel) {
+        try { await panel.navigate(destino); return; } catch { /* sin control del SW: se abre aparte */ }
+      } else {
+        return;
+      }
+    }
+    await self.clients.openWindow(destino);
+  })());
 });

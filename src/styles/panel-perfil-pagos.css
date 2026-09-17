@@ -1,0 +1,146 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Perfil y Pagos del panel del asesorado (17/09/2026)
+
+   Se importa desde PanelCliente y no desde MisPagos: MisPagos se carga en
+   diferido y sus estilos tienen que estar ya cuando se pinta (por eso los
+   ex-pg-* viven en panel.css). Todo va con prefijo pnl-perfil- / pnl-pagos-
+   y usa los tokens de .pnl, con valor de reserva por si algún día se pinta
+   fuera de él.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Perfil: cada dato es un botón que se abre en su sitio ─────────────── */
+.pnl-perfil-pista {
+  margin: 0; font-size: 11.5px; font-weight: 600; color: var(--muted, #62808f);
+}
+
+/* Blanco con borde fino en lugar del relleno verde: con catorce datos
+   rellenos, el bloque entero se veía como una mancha verde. */
+.pnl-perfil-dato {
+  position: relative; display: flex; flex-direction: column; align-items: stretch;
+  min-width: 0; margin: 0; padding: 7px 28px 8px 11px;
+  text-align: left; font: inherit; color: inherit;
+  border: 1px solid var(--line, #d8e7f5); border-radius: 12px;
+  background: #fff; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s, box-shadow .25s var(--salida, ease), background-color .2s;
+}
+.pnl-perfil-dato:hover { border-color: rgba(2, 80, 107, .35); box-shadow: var(--sombra-1, 0 6px 18px -10px rgba(1, 52, 70, .2)); }
+.pnl-perfil-dato:focus-visible { outline: 2px solid var(--sky-2, #4e9ee8); outline-offset: 2px; }
+.pnl-perfil-dato:active:not([data-editando]) { transform: scale(.985); }
+
+.pnl-perfil-dato-label {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 0 0 2px; font-size: 9px; font-weight: 700; line-height: 1.3;
+  text-transform: uppercase; letter-spacing: .12em; color: var(--muted, #62808f);
+}
+.pnl-perfil-dato-valor {
+  display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 12.5px; font-weight: 650; color: var(--ink, #0d2c3a);
+}
+.pnl-perfil-dato-lapiz {
+  position: absolute; top: 8px; right: 8px; display: grid; place-items: center;
+  color: var(--primary-2, #02506b); opacity: .35; transition: opacity .2s;
+}
+.pnl-perfil-dato:hover .pnl-perfil-dato-lapiz,
+.pnl-perfil-dato:focus-visible .pnl-perfil-dato-lapiz { opacity: .9; }
+@media (hover: none) { .pnl-perfil-dato-lapiz { opacity: .55; } }
+
+/* Vacío: una invitación a «Añadir», no un «N/D» gris que parecía un error. */
+.pnl-perfil-dato[data-vacio="1"] { border-style: dashed; background: var(--surface, #f4f9fe); }
+.pnl-perfil-anadir { font-weight: 700; color: var(--primary-2, #02506b); }
+
+/* Vacío y exigido: se marca en naranja de marca para que se vea qué falta. */
+.pnl-perfil-dato[data-falta="1"] { border-color: rgba(250, 148, 58, .6); background: #fff8f0; }
+.pnl-perfil-dato[data-falta="1"] .pnl-perfil-anadir { color: #b45f14; }
+.pnl-perfil-dato-req {
+  padding: 1px 6px; border-radius: 999px; letter-spacing: .04em;
+  background: rgba(250, 148, 58, .16); color: #96591a; font-size: 8.5px;
+}
+
+/* Recién guardado: un destello breve en el propio dato. */
+.pnl-perfil-dato[data-guardado="1"] {
+  border-color: rgba(29, 106, 74, .45);
+  animation: pnlPerfilGuardado 1.2s var(--salida, ease) both;
+}
+@keyframes pnlPerfilGuardado {
+  0%   { box-shadow: 0 0 0 0 rgba(29, 106, 74, .35); }
+  100% { box-shadow: 0 0 0 8px rgba(29, 106, 74, 0); }
+}
+.pnl-perfil-dato-ok {
+  position: absolute; right: 6px; bottom: -8px; z-index: 1;
+  padding: 1px 7px; border-radius: 999px;
+  background: var(--green, #1d6a4a); color: #fff;
+  font-size: 9.5px; font-weight: 800; letter-spacing: .02em;
+  animation: pnlPerfilOk 2.6s var(--salida, ease) both;
+}
+@keyframes pnlPerfilOk {
+  0%   { opacity: 0; transform: translateY(4px) scale(.9); }
+  12%  { opacity: 1; transform: none; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Abierto: ocupa toda la fila para que el teléfono o la universidad quepan. */
+.pnl-perfil-dato[data-editando="1"] {
+  cursor: default; padding: 10px 12px 12px;
+  border-color: var(--primary-2, #02506b); background: #fff;
+  box-shadow: 0 0 0 3px rgba(78, 158, 232, .18);
+}
+.pnl-perfil-editor { margin-top: 4px; }
+.pnl-perfil-editor-error { margin: 6px 0 0; font-size: 11px; font-weight: 600; color: #be3c42; }
+.pnl-perfil-editor-botones {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;
+}
+.pnl-perfil-editor-botones .pnl-btn,
+.pnl-perfil-editor-botones .pnl-btn-cta { height: 36px; padding: 0 14px; }
+.pnl-perfil-editor-botones button:disabled { opacity: .55; cursor: default; transform: none; }
+@media (max-width: 420px) {
+  .pnl-perfil-editor-botones > * { flex: 1 1 0; justify-content: center; }
+}
+
+/* ── Pagos: la acción de pagar en la propia cuota ──────────────────────── */
+.pnl-pagos-acciones .pnl-pagos-pagar { height: 42px; padding: 0 16px; font-size: 13px; }
+.pnl-pagos-via { font-size: 10.5px; font-weight: 700; opacity: .85; }
+@media (max-width: 520px) {
+  /* En el teléfono «Pagar» ocupa la fila: es lo primero que se busca. */
+  .pnl-pagos-acciones .pnl-pagos-pagar { flex: 1 1 100%; justify-content: center; }
+  .pnl-pagos-acciones .pnl-btn { flex: 1 1 auto; justify-content: center; }
+}
+
+.pnl-pagos-datos {
+  display: grid; gap: 8px; padding: 10px 12px; border-radius: 13px;
+  border: 1px solid var(--line, #d8e7f5); background: var(--surface, #f4f9fe);
+  animation: pnlPagosAbre .3s var(--salida, ease) both;
+}
+.pnl-pagos-datos > p { margin: 0; font-size: 12.5px; font-weight: 650; color: var(--primary, #013446); }
+@keyframes pnlPagosAbre { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* Barra fija con la próxima cuota: solo en el teléfono, encima de las pestañas. */
+.pnl-pagos-barra { display: none; }
+@media (max-width: 767px) {
+  .pnl-pagos-barra {
+    position: sticky; z-index: 20;
+    bottom: calc(var(--tabbar-alto, 64px) + 16px + env(safe-area-inset-bottom, 0px));
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 9px 9px 9px 14px; border-radius: 18px;
+    border: 1px solid rgba(216, 231, 245, .9);
+    background: rgba(255, 255, 255, .92);
+    backdrop-filter: saturate(1.6) blur(16px); -webkit-backdrop-filter: saturate(1.6) blur(16px);
+    box-shadow: 0 16px 36px -16px rgba(1, 41, 56, .38);
+  }
+  .pnl-pagos-barra[data-tono="alto"] { border-color: rgba(190, 60, 66, .35); }
+  .pnl-pagos-barra-texto { min-width: 0; }
+  .pnl-pagos-barra-texto strong {
+    display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 12.5px; font-weight: 750; color: var(--ink, #0d2c3a);
+  }
+  .pnl-pagos-barra-texto small { display: block; font-size: 11px; font-weight: 600; color: var(--muted, #62808f); }
+  .pnl-pagos-barra[data-tono="alto"] .pnl-pagos-barra-texto small { color: #be3c42; }
+  .pnl-pagos-barra .pnl-btn-cta { flex-shrink: 0; height: 40px; padding: 0 16px; white-space: nowrap; }
+  .pnl-pagos-barra .pnl-btn-cta:disabled { opacity: .6; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pnl-perfil-dato, .pnl-perfil-dato-ok, .pnl-pagos-datos { animation: none !important; transition: none; }
+  .pnl-perfil-dato:active:not([data-editando]) { transform: none; }
+}

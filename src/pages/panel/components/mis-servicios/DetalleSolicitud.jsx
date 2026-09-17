@@ -21,7 +21,8 @@ import QueMeFalta from "../QueMeFalta";
 import { queMeFaltaMaster } from "../../queMeFalta";
 import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
-import { usePublicarCabecera } from "../../cabeceraExpediente";
+import { usePublicarCabecera } from "../../cabeceraExpediente";
+import NovedadesExpediente from "../NovedadesExpediente";
 
 // Nombre corto de cada paso para la fila de iconos del móvil.
 const CORTO = { docs: "Documentos", form: "Formulario", informe: "Informe", eleccion: "Elección", post: "Postular", cierre: "Cierre" };
@@ -453,6 +454,8 @@ export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, on
               onIr={leToca.seccion && leToca.seccion !== activeSection ? () => setActiveSection(leToca.seccion) : null}
             />
             <QueMeFalta resumen={falta.resumen} filas={falta.filas} />
+            {/* Qué ha cambiado desde su última visita. */}
+            <NovedadesExpediente idSolicitud={idSolicitud} />
           </div>
 
           {/* ── Contenido de la sección activa. La clave por sección hace que

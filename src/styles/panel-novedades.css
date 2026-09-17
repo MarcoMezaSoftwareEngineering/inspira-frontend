@@ -1,0 +1,326 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO — Novedades y línea de plazos (17/09/2026)
+
+   Dos piezas de Inicio y del expediente:
+   · .pnl-nov-*     NovedadesExpediente.jsx — lo que cambió desde tu visita
+   · .pnl-plazos-*  PlazosLinea.jsx — tus próximas fechas en una línea
+
+   Mismas reglas que panel-app.css: todo con prefijo, solo se animan
+   transform y opacity, y prefers-reduced-motion lo apaga al final.
+   Los colores salen de los tokens de .pnl; el único valor suelto es el
+   blanco de las tarjetas, que no tiene token propio.
+   ========================================================================== */
+
+/* ── Novedades ───────────────────────────────────────────────────────── */
+
+.pnl-nov {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--sombra-1);
+}
+
+.pnl-nov-cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pnl-nov-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.pnl-nov-cuenta {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.pnl-nov-sub { font-size: 11px; color: var(--muted); }
+
+.pnl-nov-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.pnl-nov-lista > li { animation: pnlNovEntra .4s var(--salida) both; animation-delay: calc(var(--i, 0) * 40ms); }
+
+@keyframes pnlNovEntra {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.pnl-nov-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 10px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform .25s var(--muelle), border-color .2s;
+}
+.pnl-nov-item:hover { border-color: var(--line); }
+.pnl-nov-item:active { transform: scale(.985); }
+.pnl-nov-item:focus-visible { outline: 2px solid var(--sky-2); outline-offset: 2px; }
+.pnl-nov-item[data-nueva] { background: var(--sky-soft); }
+
+.pnl-nov-icono {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--primary-2);
+}
+.pnl-nov-item[data-tono="ok"] .pnl-nov-icono { color: var(--green); }
+.pnl-nov-item[data-tono="alto"] .pnl-nov-icono { color: var(--accent); }
+
+.pnl-nov-texto { display: grid; gap: 2px; min-width: 0; }
+
+.pnl-nov-linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.pnl-nov-linea b { font-weight: 700; overflow-wrap: anywhere; }
+
+.pnl-nov-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: var(--sky);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.pnl-nov-detalle {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.pnl-nov-fecha {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+.pnl-nov-vacio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--surface);
+  border-radius: 12px;
+}
+
+.pnl-nov-esqueleto {
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--surface), var(--sky-soft), var(--surface));
+  background-size: 200% 100%;
+  animation: pnlNovBrillo 1.2s linear infinite;
+}
+@keyframes pnlNovBrillo {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.pnl-nov-mas { margin-top: 10px; width: 100%; justify-content: center; }
+
+@media (max-width: 420px) {
+  /* En pantallas estrechas la fecha baja bajo el texto: si no, el título
+     se parte en tres líneas para dejarle sitio. */
+  .pnl-nov-item { grid-template-columns: 32px minmax(0, 1fr); }
+  .pnl-nov-fecha { grid-column: 2; padding-top: 0; }
+}
+
+/* ── Línea de plazos ─────────────────────────────────────────────────── */
+
+.pnl-plazos { min-width: 0; }
+
+.pnl-plazos-cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pnl-plazos-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.pnl-plazos-sub { font-size: 11px; color: var(--muted); }
+
+/* En el móvil, una tira que se desliza con el dedo y encaja en cada fecha;
+   la sangría negativa deja que la tira llegue al borde de la pantalla sin
+   que la página entera se desplace de lado. */
+.pnl-plazos-linea {
+  list-style: none;
+  margin: 0 -16px;
+  padding: 2px 16px 10px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 16px;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.pnl-plazos-linea::-webkit-scrollbar { display: none; }
+
+.pnl-plazos-paso {
+  flex: 0 0 min(78%, 260px);
+  scroll-snap-align: start;
+  animation: pnlPlazosEntra .45s var(--salida) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes pnlPlazosEntra {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.pnl-plazos-item {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  text-align: left;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--sky-2);
+  border-radius: 14px;
+  box-shadow: var(--sombra-1);
+  cursor: pointer;
+  transition: transform .3s var(--muelle), border-color .2s;
+}
+.pnl-plazos-item:hover { transform: translateY(-2px); }
+.pnl-plazos-item:active { transform: scale(.98); }
+.pnl-plazos-item:focus-visible { outline: 2px solid var(--sky-2); outline-offset: 2px; }
+.pnl-plazos-item[data-tono="aviso"] { border-left-color: var(--accent-2); }
+.pnl-plazos-item[data-tono="alto"] { border-left-color: var(--accent); }
+
+.pnl-plazos-chip {
+  flex: 0 0 auto;
+  width: 46px;
+  display: grid;
+  justify-items: center;
+  padding: 6px 0;
+  border-radius: 10px;
+  background: var(--sky-soft);
+  color: var(--primary);
+  line-height: 1;
+}
+.pnl-plazos-chip b { font-size: 18px; font-weight: 800; }
+.pnl-plazos-chip span { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 3px; }
+.pnl-plazos-item[data-tono="aviso"] .pnl-plazos-chip { background: color-mix(in srgb, var(--accent-2) 22%, #fff); }
+.pnl-plazos-item[data-tono="alto"] .pnl-plazos-chip { background: var(--accent); color: #fff; }
+
+.pnl-plazos-cuerpo { display: grid; gap: 3px; min-width: 0; }
+
+.pnl-plazos-cuenta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: var(--sky-2);
+}
+.pnl-plazos-item[data-tono="aviso"] .pnl-plazos-cuenta { color: var(--primary-2); }
+.pnl-plazos-item[data-tono="alto"] .pnl-plazos-cuenta { color: var(--accent); }
+
+.pnl-plazos-texto {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pnl-plazos-servicio {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* En el ordenador caben en fila: se reparten el ancho y, si son muchas,
+   bajan a la siguiente en vez de esconderse a la derecha. */
+@media (min-width: 900px) {
+  .pnl-plazos-linea {
+    margin: 0;
+    padding: 2px 0 4px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+  .pnl-plazos-paso { flex: none; }
+}
+
+/* ── Movimiento reducido ─────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pnl-nov-lista > li,
+  .pnl-plazos-paso,
+  .pnl-nov-esqueleto { animation: none; }
+  .pnl-nov-item,
+  .pnl-plazos-item { transition: none; }
+  .pnl-nov-item:active,
+  .pnl-plazos-item:hover,
+  .pnl-plazos-item:active { transform: none; }
+  .pnl-plazos-linea { scroll-behavior: auto; }
+}
+
+/* Versión plegada (visado en el teléfono): cabecera en una línea. */
+.pnl-nov-plegar { margin-left: auto; border: 0; background: var(--sky-soft); color: var(--primary-2); font: inherit; font-size: 12px; font-weight: 750; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.pnl-nov-plegar:active { transform: scale(.95); }

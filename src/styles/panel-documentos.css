@@ -1,0 +1,167 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO — subir documentos y ayudas plegables (17/09/2026)
+
+   Dos piezas pequeñas que se repiten en todas las tarjetas de documentos y en
+   los bloques de datos:
+   · pnl-arch-*  → «Hacer foto», los avisos antes de subir y el «Recibido».
+   · pnl-ayuda-* → la explicación plegable (AyudaPlegable.jsx).
+
+   Todo cuelga de .pnl para usar sus tokens de marca; nada de hex sueltos salvo
+   los tonos de aviso, que no tienen token. Se importa desde PanelCliente.
+   ========================================================================== */
+
+/* ── Pie de subida: el botón de siempre y «Hacer foto» al lado ─────────── */
+.pnl .pnl-arch-pie {
+  display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap;
+}
+.pnl .pnl-arch-pie > p { flex: 1 1 200px; margin: 0; }
+/* En la lista del checklist (máster y visado) cada tarjeta es una rejilla de
+   dos columnas: lo nuevo va en la del texto, como el botón de subir. */
+.pnl .ex-doc > .pnl-arch-pie,
+.pnl .ex-doc > .pnl-arch-aviso,
+.pnl .ex-doc > .pnl-arch-estado { grid-column: 2; }
+.pnl .pnl-arch-pie > .ex-subir { flex: 1 1 200px; }
+
+.pnl .pnl-arch-oculto {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0; padding: 0; margin: -1px;
+}
+
+.pnl .pnl-arch-foto {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: #fff; color: var(--primary);
+  font-size: 12.5px; font-weight: 700; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .3s var(--muelle, ease), border-color .2s;
+}
+.pnl .pnl-arch-foto:hover { border-color: var(--sky-2); }
+.pnl .pnl-arch-foto:active { transform: scale(.96); transition-duration: .08s; }
+.pnl .pnl-arch-foto:focus-within { outline: 2px solid var(--sky-2); outline-offset: 2px; }
+.pnl .pnl-arch-foto[data-off="1"] { opacity: .5; pointer-events: none; }
+
+/* En el ordenador `capture` no abre la cámara: sería otro botón para el mismo
+   selector. Solo se enseña con pantalla táctil. */
+@media (hover: hover) and (pointer: fine) {
+  .pnl .pnl-arch-foto { display: none; }
+}
+
+/* ── Preparando ────────────────────────────────────────────────────────── */
+.pnl .pnl-arch-estado {
+  display: flex; align-items: center; gap: 8px;
+  margin: 2px 0 0; font-size: 12.5px; font-weight: 600; color: var(--muted);
+}
+.pnl .pnl-arch-giro {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--line); border-top-color: var(--primary-2);
+  animation: pnlArchGiro .8s linear infinite;
+}
+@keyframes pnlArchGiro { to { transform: rotate(360deg); } }
+
+/* ── Avisos: antes de subir, error y recibido ──────────────────────────── */
+.pnl .pnl-arch-aviso {
+  position: relative;
+  margin-top: 6px; padding: 10px 12px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-size: 12.5px; line-height: 1.5; color: var(--ink);
+  animation: pnlArchEntra .35s var(--salida, ease) both;
+}
+.pnl .pnl-arch-aviso p { margin: 0; }
+.pnl .pnl-arch-aviso ul { margin: 0; padding-left: 18px; }
+.pnl .pnl-arch-aviso li + li { margin-top: 4px; }
+
+.pnl .pnl-arch-aviso[data-tono="aviso"] { background: #fff8ec; border-color: #f6cf9a; color: #7a4308; }
+.pnl .pnl-arch-aviso[data-tono="error"] { background: #fdf0ef; border-color: #f2b8b3; color: #8a1f17; }
+.pnl .pnl-arch-aviso[data-tono="ok"] {
+  background: #e8f5ee; border-color: color-mix(in srgb, var(--green) 35%, transparent);
+  color: var(--green); padding-right: 34px;
+}
+
+.pnl .pnl-arch-botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pnl .pnl-arch-botones .pnl-btn,
+.pnl .pnl-arch-botones .pnl-btn-cta { height: 36px; padding: 0 14px; font-size: 12.5px; }
+
+.pnl .pnl-arch-cerrar {
+  position: absolute; top: 6px; right: 8px;
+  width: 24px; height: 24px; border: 0; border-radius: 50%;
+  background: none; color: inherit; font-size: 16px; line-height: 1; cursor: pointer; opacity: .7;
+}
+.pnl .pnl-arch-cerrar:hover { opacity: 1; background: rgba(0, 0, 0, .05); }
+
+@keyframes pnlArchEntra {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Ayuda plegable ────────────────────────────────────────────────────── */
+.pnl .pnl-ayuda {
+  margin-bottom: 12px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--sky-soft);
+  color: var(--primary);
+}
+.pnl .pnl-ayuda[data-tono="aviso"] { background: #fff8ec; border-color: #f6cf9a; color: #7a4308; }
+/* Lo que es responsabilidad del asesorado: el borde de acento a la izquierda,
+   como el recuadro naranja al que sustituye. */
+.pnl .pnl-ayuda[data-tono="importante"] {
+  background: #fff4e8; border-color: #f6cf9a; color: #7a3d06;
+  border-left: 3px solid var(--accent);
+}
+
+.pnl .pnl-ayuda-cab {
+  width: 100%; display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border: 0; background: none; color: inherit;
+  font: inherit; text-align: left; cursor: pointer; border-radius: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.pnl .pnl-ayuda-cab:focus-visible { outline: 2px solid var(--sky-2); outline-offset: 2px; }
+
+.pnl .pnl-ayuda-ico {
+  flex: 0 0 auto; width: 20px; height: 20px; margin-top: 1px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 11.5px; font-weight: 800; font-style: normal;
+  background: var(--primary); color: #fff;
+}
+.pnl .pnl-ayuda[data-tono="aviso"] .pnl-ayuda-ico { background: #d97a17; }
+.pnl .pnl-ayuda[data-tono="importante"] .pnl-ayuda-ico { background: var(--accent); }
+
+.pnl .pnl-ayuda-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pnl .pnl-ayuda-titulo {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .85;
+}
+.pnl .pnl-ayuda-resumen { font-size: 12.5px; line-height: 1.45; }
+
+.pnl .pnl-ayuda-mas {
+  flex: 0 0 auto; margin-top: 2px; font-size: 11.5px; font-weight: 700; opacity: .75; white-space: nowrap;
+}
+.pnl .pnl-ayuda-chev {
+  flex: 0 0 auto; margin-top: 2px; opacity: .6;
+  transition: transform .3s var(--salida, ease);
+}
+.pnl .pnl-ayuda[data-abierta="1"] .pnl-ayuda-chev { transform: rotate(180deg); }
+
+.pnl .pnl-ayuda-cuerpo {
+  padding: 0 12px 12px 42px;
+  font-size: 12.5px; line-height: 1.55;
+  animation: pnlArchEntra .3s var(--salida, ease) both;
+}
+.pnl .pnl-ayuda-cuerpo p { margin: 0; }
+.pnl .pnl-ayuda-cuerpo p + p { margin-top: 6px; }
+
+@media (max-width: 480px) {
+  /* En el móvil el «Ver más» se come el ancho del resumen: basta la flecha. */
+  .pnl .pnl-ayuda-mas { display: none; }
+  .pnl .pnl-ayuda-cuerpo { padding-left: 12px; }
+}
+
+/* ── Menos movimiento ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pnl .pnl-arch-aviso,
+  .pnl .pnl-ayuda-cuerpo { animation: none; }
+  .pnl .pnl-arch-foto,
+  .pnl .pnl-ayuda-chev { transition: none; }
+  .pnl .pnl-arch-foto:active { transform: none; }
+  /* El giro sí informa (está trabajando), pero lento y sin marear. */
+  .pnl .pnl-arch-giro { animation-duration: 2.4s; }
+}

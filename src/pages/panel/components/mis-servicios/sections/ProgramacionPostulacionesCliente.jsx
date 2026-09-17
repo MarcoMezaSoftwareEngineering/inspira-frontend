@@ -5,6 +5,7 @@ import SeccionPanel from "./SeccionPanel";
 import IconoPaso from "../../../../../components/common/IconoPaso";
 import { agruparPorPortal, estadoPortal, fechasPortal, unirCampo } from "../../../../../lib/portales";
 import { comprobarRespuesta } from "../../../../../services/sesion";
+import { prepararArchivos } from "../../../lib/prepararArchivo";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -185,21 +186,36 @@ function TabPortal({ post, onSave }) {
 
 function TabDocs({ post, idSolicitud, onSave }) {
   const [uploading, setUploading] = useState({});
+  // Por fila: por qué no se subió, o que ya llegó. Antes un fallo solo iba a
+  // la consola y el asesorado no sabía si su archivo estaba o no.
+  const [resultado, setResultado] = useState({});
 
   async function handleUpload(idx, file) {
     setUploading((v) => ({ ...v, [idx]: true }));
+    setResultado((v) => ({ ...v, [idx]: null }));
     try {
+      // Una foto se pasa a PDF y se achica; lo que el servidor iba a rechazar
+      // por peso se para aquí, con la explicación. Aquí no hay avisos de
+      // borrosa ni de caras: son resguardos y constancias, no documentos
+      // de identidad.
+      const prep = await prepararArchivos([file], { varios: false });
+      if (prep.bloqueo) {
+        setResultado((v) => ({ ...v, [idx]: { error: prep.bloqueo } }));
+        return;
+      }
       const form = new FormData();
-      form.append("archivo", file);
+      form.append("archivo", prep.archivos[0] || file);
       const data = await apiUpload(`/solicitudes/${idSolicitud}/upload-justificante`, form);
       if (data.ok) {
         const docs = (post.documentos || []).map((d, i) =>
           i === idx ? { ...d, estado: "pendiente", url_archivo: data.path, nombre_archivo: data.nombre } : d
         );
         onSave("documentos", docs);
+        setResultado((v) => ({ ...v, [idx]: { ok: true } }));
       }
     } catch (e) {
       console.error("Error subiendo justificante:", e);
+      setResultado((v) => ({ ...v, [idx]: { error: e?.message || "No se pudo subir. Inténtalo de nuevo." } }));
     } finally {
       setUploading((v) => ({ ...v, [idx]: false }));
     }
@@ -235,7 +251,8 @@ function TabDocs({ post, idSolicitud, onSave }) {
         <p className="text-xs text-neutral-400 italic text-center py-2">Sin resguardo todavía: se guarda al presentar la solicitud.</p>
       )}
       {(post.documentos || []).map((doc, idx) => (
-        <div key={idx} className="flex items-center gap-2 bg-neutral-50 rounded-lg px-3 py-2">
+        <div key={idx}>
+        <div className="flex items-center gap-2 bg-neutral-50 rounded-lg px-3 py-2">
           <span className="text-sm shrink-0">📄</span>
           <span className="flex-1 min-w-0 text-xs text-neutral-700 truncate">{doc.nombre}</span>
           {doc.url_archivo && (
@@ -251,8 +268,17 @@ function TabDocs({ post, idSolicitud, onSave }) {
           <label className="shrink-0 cursor-pointer text-[10px] border border-neutral-200 rounded-lg px-2 py-0.5 hover:bg-neutral-100 text-neutral-500">
             {uploading[idx] ? "⏳" : "↑ Subir"}
             <input type="file" className="hidden"
-              onChange={(e) => e.target.files[0] && handleUpload(idx, e.target.files[0])} />
+              onChange={(e) => { if (e.target.files[0]) handleUpload(idx, e.target.files[0]); e.target.value = ""; }} />
           </label>
+        </div>
+        {resultado[idx]?.error && (
+          <div className="pnl-arch-aviso" data-tono="error" role="alert"><p>{resultado[idx].error}</p></div>
+        )}
+        {resultado[idx]?.ok && (
+          <div className="pnl-arch-aviso" data-tono="ok" role="status">
+            <p><b>Recibido.</b> Tu asesor lo revisa y te avisaremos aquí y por correo.</p>
+          </div>
+        )}
         </div>
       ))}
     </div>

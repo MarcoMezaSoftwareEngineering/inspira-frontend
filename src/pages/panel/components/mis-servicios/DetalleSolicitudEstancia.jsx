@@ -17,12 +17,14 @@ import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
 import { Campo, Selector, Guardado } from "./campos";
 import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
+import AyudaPlegable from "../AyudaPlegable";
 import AcompanantesCliente from "./AcompanantesCliente";
 import { abrirArchivo } from "../../../../services/archivos";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 
 import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
-import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
+import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
+import NovedadesExpediente from "../NovedadesExpediente";
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
   azul:    "bg-[#EEF2F8] text-primary border-primary/20",
@@ -392,6 +394,13 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
         <EstadoProceso revision={rev} />
 
+        {/* Qué ha cambiado desde su última visita. Aquí las secciones son
+            bloques plegables: se abre el que corresponde. */}
+        <NovedadesExpediente
+          idSolicitud={solicitudBase?.id_solicitud}
+          onIrSeccion={(sec) => { const n = ({ docs: 3, estado: 5, mensajes: 6 })[sec]; if (n) setBloque(n); }}
+        />
+
         <QueMeFalta
           {...queMeFaltaEstancia({
             revision: rev, docs, extranjeria: ext, faltanPerfil,
@@ -407,20 +416,21 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
           subtitulo={datosCompletos ? "Completos" : `${hechos} de ${totalCampos} completados`}
           abierto={bloque === 1} onToggle={() => setBloque(bloque === 1 ? 0 : 1)}>
 
-          <div className="rounded-xl border-l-[3px] border-orange-400 bg-orange-50 px-3.5 py-3 mb-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-orange-800 mb-1">
-              Antes de empezar
-            </p>
-            <p className="text-[12.5px] text-orange-900 leading-relaxed">
+          {/* Plegado para no tapar el formulario, pero la frase de la
+              responsabilidad va en el resumen: esa no puede quedar escondida. */}
+          <AyudaPlegable clave="estancia-datos-antes" tono="importante"
+            titulo="Antes de empezar"
+            resumen={<>Se copian tal cual al formulario oficial: <b>es tu responsabilidad que sean correctos</b>.</>}>
+            <p>
               Estos datos se copian <b>tal cual</b> al formulario oficial que presentamos ante
               Extranjería. Escríbelos exactamente como figuran en tu pasaporte y en tu carta de
               admisión: <b>es tu responsabilidad que sean correctos</b>. Un apellido mal escrito
               puede costar el expediente.
             </p>
-            <p className="text-[12px] text-orange-800 leading-relaxed mt-1.5">
+            <p>
               Si dudas de algún campo, pulsa la <b>ⓘ</b> que hay junto a su nombre.
             </p>
-          </div>
+          </AyudaPlegable>
 
           <div className="flex items-center gap-2.5 mb-3">
             <div className="flex-1 h-2 rounded-full bg-neutral-100 overflow-hidden">

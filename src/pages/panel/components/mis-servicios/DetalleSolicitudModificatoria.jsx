@@ -12,8 +12,10 @@ import { apiGET, apiPUT, apiPOST, apiUpload, apiDELETE } from "../../../../servi
 import { abrirArchivo } from "../../../../services/archivos";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 import VisorArchivo from "../../../../components/common/VisorArchivo";
-
+
+
 import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
+import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
 const TONOS = {
   neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
   azul:    "bg-[#EEF2F8] text-primary border-primary/20",
@@ -389,6 +391,13 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
   }, [exp, tocado, id]);
 
   const rev = exp?.revision;
+
+  // La barra de arriba del panel dice qué expediente es y cuánto lleva.
+  usePublicarCabecera({
+    eyebrow: solicitudBase?.id_solicitud ? `Solicitud #${solicitudBase.id_solicitud}` : null,
+    titulo: "Modificación a residencia por trabajo",
+    pct: avanceDeRevision(rev),
+  });
   const faltaSet = useMemo(() => new Set(rev?.faltan || []), [rev]);
   const falta = (l) => faltaSet.has(l);
   const cuenta = useCallback((ls) => ls.filter((l) => faltaSet.has(l)).length, [faltaSet]);
@@ -422,11 +431,11 @@ export default function DetalleSolicitudModificatoria({ solicitudBase, onVolver,
     <div className="flex-1 min-h-0 overflow-auto">
       <div className="max-w-4xl mx-auto p-4 sm:p-5 space-y-3">
         <button type="button" onClick={onVolver}
-          className="text-[12px] font-semibold text-neutral-500 hover:text-primary">
+          className="pnl-sin-volver text-[12px] font-semibold text-neutral-500 hover:text-primary">
           ← Mis servicios
         </button>
 
-        <div>
+        <div className="pnl-solo-grande">
           <p className="text-[10px] font-bold uppercase tracking-[.2em] font-mono text-[#1D6A4A]">
             Modificación a residencia por trabajo
           </p>

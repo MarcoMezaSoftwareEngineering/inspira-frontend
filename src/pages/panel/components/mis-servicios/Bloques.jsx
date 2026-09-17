@@ -14,92 +14,83 @@ const TONOS = {
   verde:   "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/30",
 };
 
-export function Bloque({ numero, titulo, subtitulo, abierto, onToggle, children }) {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden">
-      <button type="button" onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-neutral-50/60">
-        <span className="shrink-0 w-8 h-8 rounded-xl grid place-items-center text-[13px]
-          font-bold text-white font-serif" style={{ background: "#013446" }}>{numero}</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-bold text-primary">{titulo}</span>
-          {subtitulo && <span className="block text-[11.5px] text-neutral-500 mt-0.5">{subtitulo}</span>}
-        </span>
-        <span className="shrink-0 text-neutral-300 text-[13px]">{abierto ? "▲" : "▼"}</span>
-      </button>
-      {abierto && <div className="px-4 pb-5 pt-1 border-t border-neutral-100">{children}</div>}
-    </div>
-  );
+function Chevron({ className }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
 }
 
-export function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, onSiguiente, children }) {
-  const completo = faltan === 0;
-  return (
-    <div className={`rounded-xl border overflow-hidden ${
-      completo ? "border-[#1D6A4A]/25" : "border-neutral-200"
-    }`}>
-      <button type="button" onClick={onToggle}
-        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-neutral-50/60">
-        <span className={`shrink-0 w-6 h-6 rounded-lg grid place-items-center text-[11px] font-bold ${
-          completo ? "bg-[#1D6A4A] text-white" : "bg-neutral-200 text-neutral-500"
-        }`}>{completo ? "✓" : numero}</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-semibold text-neutral-800">{titulo}</span>
-          {subtitulo && <span className="block text-[11px] text-neutral-400">{subtitulo}</span>}
-        </span>
-        {!completo && (
-          <span className="shrink-0 text-[10.5px] font-bold text-amber-600">faltan {faltan}</span>
-        )}
-        <span className="shrink-0 text-neutral-300 text-[11px]">{abierto ? "▲" : "▼"}</span>
-      </button>
-      {abierto && (
-        <div className="px-3.5 pb-4 pt-1 border-t border-neutral-100">
-          {children}
-          {onSiguiente && (
-            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-neutral-100">
-              <button type="button" onClick={onSiguiente}
-                className="text-[12.5px] font-semibold px-4 py-2 rounded-lg
-                  bg-neutral-900 text-white hover:opacity-90">
-                Continuar
-              </button>
-              <span className="text-[11.5px] text-neutral-400">
-                {completo ? "Este paso está completo" : "Puedes volver luego a lo que falta"}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+// Estilos en styles/panel-app.css (pnl-bloque, pnl-paso, pnl-estado): el
+// bloque abierto se ilumina y su contenido se despliega en vez de aparecer.
+export function Bloque({ numero, titulo, subtitulo, abierto, onToggle, children }) {
+  return (
+    <div className="pnl-bloque" data-abierto={abierto ? "1" : "0"}>
+      <button type="button" onClick={onToggle} className="pnl-bloque-cab" aria-expanded={abierto}>
+        <span className="pnl-bloque-num">{numero}</span>
+        <span className="pnl-bloque-txt">
+          <b>{titulo}</b>
+          {subtitulo && <span>{subtitulo}</span>}
+        </span>
+        <Chevron className="pnl-bloque-chev" />
+      </button>
+      {abierto && <div className="pnl-bloque-cuerpo">{children}</div>}
+    </div>
+  );
 }
 
-export function EstadoProceso({ revision }) {
-  const etapa = revision?.etapa;
-  const recorrido = revision?.recorrido || [];
-  if (!etapa) return null;
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl px-4 py-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">
-        En qué va tu expediente
-      </p>
-      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border mb-3 ${TONOS[etapa.tono]}`}>
-        <span className="text-[14px] font-bold">{etapa.cliente}</span>
-      </div>
-      <p className="text-[13px] text-neutral-600 leading-relaxed mb-4">{etapa.explica_cliente}</p>
-      <div className="flex items-center gap-1">
-        {recorrido.map((e) => (
-          <div key={e.clave} className="flex-1 min-w-0" title={e.cliente}>
-            <div className={`h-1.5 rounded-full ${
-              e.actual ? "bg-primary" : e.pasada ? "bg-[#1D6A4A]" : "bg-neutral-200"
-            }`} />
-            <p className={`text-[9px] mt-1 truncate ${
-              e.actual ? "text-primary font-bold" : "text-neutral-400"
-            }`}>{e.cliente}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+export function Paso({ numero, titulo, subtitulo, faltan, abierto, onToggle, onSiguiente, children }) {
+  const completo = faltan === 0;
+  return (
+    <div className="pnl-paso" data-ok={completo ? "1" : "0"} data-abierto={abierto ? "1" : "0"}>
+      <button type="button" onClick={onToggle} className="pnl-paso-cab" aria-expanded={abierto}>
+        <span className="pnl-paso-num">{completo ? "✓" : numero}</span>
+        <span className="pnl-paso-txt">
+          <b>{titulo}</b>
+          {subtitulo && <span>{subtitulo}</span>}
+        </span>
+        {!completo && <span className="pnl-paso-faltan">faltan {faltan}</span>}
+        <Chevron className="pnl-bloque-chev" />
+      </button>
+      {abierto && (
+        <div className="pnl-paso-cuerpo">
+          {children}
+          {onSiguiente && (
+            <div className="pnl-paso-pie">
+              <button type="button" onClick={onSiguiente} className="pnl-btn-cta ux-tap">
+                Continuar
+              </button>
+              <small>{completo ? "Este paso está completo" : "Puedes volver luego a lo que falta"}</small>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function EstadoProceso({ revision }) {
+  const etapa = revision?.etapa;
+  const recorrido = revision?.recorrido || [];
+  if (!etapa) return null;
+  return (
+    <div className="pnl-estado">
+      <p className="pnl-estado-eyebrow">En qué va tu expediente</p>
+      <span className={`pnl-estado-etapa ${TONOS[etapa.tono] || TONOS.neutral}`}>{etapa.cliente}</span>
+      <p className="pnl-estado-texto">{etapa.explica_cliente}</p>
+      <div className="pnl-estado-riel">
+        {recorrido.map((e) => (
+          <div key={e.clave} className="pnl-estado-tramo" title={e.cliente}
+            data-e={e.actual ? "actual" : e.pasada ? "pasada" : "futura"}>
+            <i />
+            <small>{e.cliente}</small>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export /**

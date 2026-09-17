@@ -139,7 +139,7 @@ export default function BecasEspana() {
     <div className="flex-1 overflow-y-auto">
       {/* Header */}
       <div className="px-5 py-8 text-center relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #312e81 0%, #013446 45%, #1D6A4A 100%)" }}>
+        style={{ background: "linear-gradient(135deg, #012938 0%, #013446 45%, #1D6A4A 100%)" }}>
         <div className="text-3xl mb-2">🎓</div>
         <h1 className="font-serif text-2xl font-bold text-white mb-1">Becas para Latinos · España</h1>
         <p className="text-white/60 text-xs mb-4">Historial 2024–2026 · AUIP · TalentUnileon · Luis Vives · USAL · F. Carolina · MAEC · Santander · Erasmus Mundus</p>

@@ -405,3 +405,151 @@ html.pnl-vt .pnl-vista > .pnl-entra { animation: none; }
 .pnl-lista-cab .pnl-btn { height: 36px; padding: 0 13px; }
 .pnl-lista-cab .pnl-btn svg { transition: transform .5s var(--salida); }
 .pnl-lista-cab .pnl-btn:active svg { transform: rotate(180deg); }
+
+/* ==========================================================================
+   FASE 2 · DENTRO DEL EXPEDIENTE (17/09/2026)
+   ========================================================================== */
+
+/* ── Barra de arriba de un expediente: volver, nombre y avance ────────── */
+.pnl-atras {
+  display: grid; place-items: center; flex: 0 0 auto; width: 40px; height: 40px; margin-left: -4px;
+  border: 1px solid var(--line); border-radius: 13px; background: #fff; color: var(--primary); cursor: pointer;
+  transition: transform .3s var(--muelle), background-color .2s;
+}
+.pnl-atras:hover { background: var(--sky-soft); }
+.pnl-atras:active { transform: scale(.9); }
+.pnl-atras:focus-visible { outline: 3px solid rgba(78, 158, 232, .45); outline-offset: 2px; }
+.pnl-top-pct {
+  flex: 0 0 auto; margin-left: auto; padding: 4px 9px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 800; font-variant-numeric: tabular-nums;
+  color: var(--green); background: #e7f5ed; border: 1px solid rgba(29, 106, 74, .22);
+}
+.pnl-top-pct + .pnl-top-user { margin-left: 8px !important; }
+.pnl-top-progreso {
+  position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; pointer-events: none;
+  background: linear-gradient(90deg, var(--green), #34a877) 0 0 / calc(var(--p, 0) * 1%) 100% no-repeat;
+  transition: background-size .8s var(--salida);
+}
+
+/* Las cabeceras propias de cada expediente sobran en el teléfono: ya lo
+   dice la barra. En pantalla grande se quedan (van en su columna). */
+@media (max-width: 767px) {
+  .pnl .pnl-solo-grande { display: none !important; }
+}
+.pnl .pnl-sin-volver { display: none !important; }
+
+/* ── Título del paso: que no se parta ─────────────────────────────────── */
+.pnl .rp-tit { flex-wrap: wrap; row-gap: 6px; }
+.pnl .rp-tit-txt { flex: 1 1 180px; }
+.pnl .rp-tit h2 { font-size: clamp(18px, 5vw, 22px); letter-spacing: -.015em; }
+@media (max-width: 520px) {
+  .pnl .rp-estado { margin-left: 51px; white-space: normal; line-height: 1.35; }
+}
+
+/* ── La fila de pasos: el paso actual respira ─────────────────────────── */
+.pnl .rp-caja { border-radius: 20px; box-shadow: var(--sombra-1); }
+.pnl .rp-ruta button[aria-current="step"] .rp-ico { animation: pnlPasoActivo 2.6s ease-in-out infinite; }
+@keyframes pnlPasoActivo { 0%, 100% { box-shadow: 0 0 0 4px #e8f2fd; } 50% { box-shadow: 0 0 0 7px rgba(78, 158, 232, .16); } }
+
+/* ── Le toca: con acento y botón claro ────────────────────────────────── */
+.pnl .rp-letoca { position: relative; overflow: hidden; border-radius: 16px; padding: 11px 12px 11px 15px; }
+.pnl .rp-letoca::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--sky-2); }
+.pnl .rp-letoca[data-k="warn"]::before { background: var(--accent); }
+.pnl .rp-letoca[data-k="ok"]::before { background: var(--green); }
+.pnl .rp-letoca button { background: #fff; border-color: transparent; box-shadow: 0 2px 8px -3px rgba(1, 52, 70, .25); transition: transform .3s var(--muelle); }
+.pnl .rp-letoca button:active { transform: scale(.94); }
+
+/* ── Tarjetas de sección y documentos ─────────────────────────────────── */
+.pnl .ex-sec { border-radius: 20px; box-shadow: var(--sombra-1); }
+.pnl .ex-doc { animation: pnlSube .45s var(--salida) both; }
+.pnl .ex-doc:nth-child(2) { animation-delay: 40ms; }
+.pnl .ex-doc:nth-child(3) { animation-delay: 80ms; }
+.pnl .ex-doc:nth-child(4) { animation-delay: 120ms; }
+.pnl .ex-doc:nth-child(n+5) { animation-delay: 160ms; }
+.pnl .ex-subir { border-radius: 14px; transition: border-color .2s, color .2s, background-color .2s, transform .3s var(--muelle); }
+.pnl .ex-subir:active { transform: scale(.98); }
+.pnl .ex-btn { border-radius: 12px; }
+.pnl .ex-secc { border-radius: 16px; }
+
+/* ── Bloques de estancia y modificatoria ──────────────────────────────── */
+.pnl-bloque {
+  border: 1px solid var(--line); border-radius: 20px; background: #fff; overflow: hidden;
+  box-shadow: var(--sombra-1); transition: border-color .25s, box-shadow .3s var(--salida);
+}
+.pnl-bloque[data-abierto="1"] { border-color: rgba(78, 158, 232, .55); box-shadow: 0 0 0 3px #e8f2fd, var(--sombra-2); }
+.pnl-bloque-cab {
+  width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-align: left;
+  border: 0; background: none; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.pnl-bloque-cab:active { background: var(--surface); }
+.pnl-bloque-cab:focus-visible { outline: 3px solid rgba(78, 158, 232, .45); outline-offset: -3px; border-radius: 20px; }
+.pnl-bloque-num {
+  display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 auto; border-radius: 12px;
+  font-family: Merriweather, Georgia, serif; font-size: 14px; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  transition: transform .4s var(--muelle);
+}
+.pnl-bloque[data-abierto="1"] .pnl-bloque-num { transform: scale(1.06) rotate(-4deg); }
+.pnl-bloque-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pnl-bloque-txt b { font-size: 14.5px; font-weight: 750; color: var(--primary); line-height: 1.3; }
+.pnl-bloque-txt span { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.pnl-bloque-chev { flex: 0 0 auto; color: #9db0ba; transition: transform .35s var(--salida); }
+.pnl-bloque[data-abierto="1"] .pnl-bloque-chev { transform: rotate(180deg); color: var(--primary-2); }
+.pnl-bloque-cuerpo { padding: 4px 16px 18px; border-top: 1px solid #eef3f7; animation: pnlDespliega .38s var(--salida) both; }
+@keyframes pnlDespliega { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+.pnl-paso { border: 1px solid var(--line); border-radius: 15px; overflow: hidden; background: #fff; transition: border-color .2s; }
+.pnl-paso[data-ok="1"] { border-color: rgba(29, 106, 74, .28); }
+.pnl-paso[data-abierto="1"] { border-color: rgba(78, 158, 232, .5); }
+.pnl-paso-cab { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 13px; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pnl-paso-cab:active { background: var(--surface); }
+.pnl-paso-num { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 auto; border-radius: 9px; font-size: 11.5px; font-weight: 800; background: #eef3f7; color: var(--muted); transition: background-color .3s, color .3s; }
+.pnl-paso[data-ok="1"] .pnl-paso-num { background: var(--green); color: #fff; }
+.pnl-paso-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pnl-paso-txt b { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.pnl-paso-txt span { font-size: 11.5px; color: #8ba6b4; }
+.pnl-paso-faltan { flex: 0 0 auto; font-size: 11px; font-weight: 800; color: #b8730c; background: #fff3e0; padding: 3px 8px; border-radius: 999px; }
+.pnl-paso-cuerpo { padding: 2px 13px 14px; border-top: 1px solid #eef3f7; animation: pnlDespliega .32s var(--salida) both; }
+.pnl-paso-pie { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef3f7; }
+.pnl-paso-pie small { font-size: 11.5px; color: #8ba6b4; }
+
+/* Estado del proceso (estancia y modificatoria) */
+.pnl-estado { border: 1px solid var(--line); border-radius: 20px; background: #fff; padding: 16px; box-shadow: var(--sombra-1); }
+.pnl-estado-eyebrow { margin: 0 0 8px; font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+.pnl-estado-etapa { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 12px; border: 1px solid; font-size: 14.5px; font-weight: 800; }
+.pnl-estado-etapa::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: currentColor; animation: pnlLatePunto 2s ease-in-out infinite; }
+@keyframes pnlLatePunto { 50% { opacity: .35; } }
+.pnl-estado-texto { margin: 10px 0 14px; font-size: 13px; line-height: 1.6; color: #4d6775; }
+.pnl-estado-riel { display: flex; gap: 4px; }
+.pnl-estado-tramo { flex: 1; min-width: 0; }
+.pnl-estado-tramo i { display: block; height: 6px; border-radius: 999px; background: #e7eff6; overflow: hidden; position: relative; }
+.pnl-estado-tramo[data-e="pasada"] i { background: var(--green); }
+.pnl-estado-tramo[data-e="actual"] i { background: linear-gradient(90deg, var(--primary-2), var(--sky-2)); }
+.pnl-estado-tramo[data-e="actual"] i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); transform: translateX(-100%); animation: pnlBarre 2.2s ease-in-out infinite; }
+@keyframes pnlBarre { to { transform: translateX(100%); } }
+.pnl-estado-tramo small { display: block; margin-top: 5px; font-size: 9.5px; color: #9db0ba; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pnl-estado-tramo[data-e="actual"] small { color: var(--primary); font-weight: 800; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pnl .rp-ruta button[aria-current="step"] .rp-ico, .pnl .ex-doc, .pnl-bloque-cuerpo, .pnl-paso-cuerpo,
+  .pnl-estado-etapa::before, .pnl-estado-tramo[data-e="actual"] i::after { animation: none !important; }
+  .pnl-top-progreso, .pnl-bloque-num, .pnl-bloque-chev { transition: none; }
+}
+
+/* Menú dentro de un expediente (teléfono) y línea de contacto del saludo. */
+.pnl-top-menu {
+  position: relative; display: grid; place-items: center; flex: 0 0 auto; width: 38px; height: 38px; margin-left: 6px;
+  border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--primary); cursor: pointer;
+  transition: transform .3s var(--muelle);
+}
+.pnl-top-menu:active { transform: scale(.9); }
+.pnl-top-pct { margin-left: auto; }
+.pnl-top-menu { margin-left: auto; }
+.pnl-top-pct + .pnl-top-menu { margin-left: 6px; }
+.pnl-top-menu + .pnl-top-user { margin-left: 8px !important; }
+.pnl-top-eyebrow { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.pnl-hero-asesor-datos .pnl-hero-asesor-linea { font-size: 10.5px; color: rgba(255, 255, 255, .5); margin-top: 1px; }
+@media (max-width: 767px) {
+  .pnl-top { gap: 10px; }
+  .pnl-top-pct { padding: 3px 7px; font-size: 11px; }
+}

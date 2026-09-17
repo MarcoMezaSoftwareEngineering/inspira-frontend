@@ -16,11 +16,12 @@ import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente"
 import { EsqueletoExpediente } from "../Esqueleto";
 import CercoErrores from "../../../../components/common/CercoErrores";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
-import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../../components/common/RutaPasos";
+import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, tonoDeEstado } from "../../../../components/common/RutaPasos";
 import QueMeFalta from "../QueMeFalta";
 import { queMeFaltaMaster } from "../../queMeFalta";
 import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
+import { usePublicarCabecera } from "../../cabeceraExpediente";
 
 // Nombre corto de cada paso para la fila de iconos del móvil.
 const CORTO = { docs: "Documentos", form: "Formulario", informe: "Informe", eleccion: "Elección", post: "Postular", cierre: "Cierre" };
@@ -138,7 +139,7 @@ function MensajesFlotante({ abierto, onAbrir, onCerrar, sinLeer, idSolicitud }) 
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, seccion, onSeccion, perfil, faltanPerfil = 0 }) {
+export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, onSeccion, perfil, faltanPerfil = 0 }) {
   const [detalle,           setDetalle]           = useState(null);
   const [checklist,         setChecklist]         = useState([]);
   const [formData,          setFormData]          = useState({});
@@ -382,6 +383,16 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
   const pctPasos = navSections.length
     ? Math.round((navSections.filter((s) => s.estado === "completado").length / navSections.length) * 100)
     : 0;
+
+  // La barra de arriba del panel dice qué expediente es y cuánto lleva.
+  usePublicarCabecera({
+    // El curso va en la barra: en el teléfono la tarjeta que lo decía no sale.
+    eyebrow: detalle
+      ? `Solicitud #${detalle.id_solicitud}${detalle.datos_panel?.curso_objetivo ? ` · Curso ${detalle.datos_panel.curso_objetivo}` : ""}`
+      : null,
+    titulo: detalle?.tipo?.nombre || solicitudBase?.titulo || null,
+    pct: detalle ? pctPasos : null,
+  });
   const lineaExp = detalle?.datos_panel?.curso_objetivo
     ? `Curso ${detalle.datos_panel.curso_objetivo} · tu expediente, paso a paso`
     : "Tu expediente, paso a paso";
@@ -397,8 +408,8 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
     <div className="flex flex-col lg:h-full lg:min-h-0">
 
       {/* Fila superior: volver y, si lo hay, el error. */}
-      <div className="shrink-0 flex items-center gap-3 mb-3">
-        <BotonVolver onClick={onVolver}>Mis servicios</BotonVolver>
+      {/* Volver vive en la barra de arriba del panel. */}
+      <div className="shrink-0 flex items-center gap-3 mb-3 empty:hidden">
         {error && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
             <span className="text-red-500 text-sm">⚠</span>
@@ -411,7 +422,9 @@ export default function DetalleSolicitud({ solicitudBase, onVolver, onIrAGuia, s
           En pantalla grande van en la columna de la izquierda. */}
       {!loading && !error && detalle && (
         <div className="lg:hidden shrink-0 mb-3 space-y-3">
-          <ExpedienteCabecera iniciales={inicialesDe(perfil?.nombre)} eyebrow={`Solicitud #${detalle.id_solicitud}`} titulo={detalle.tipo?.nombre || "—"} linea={lineaExp} pct={pctPasos} />
+          <div className="pnl-solo-grande">
+            <ExpedienteCabecera iniciales={inicialesDe(perfil?.nombre)} eyebrow={`Solicitud #${detalle.id_solicitud}`} titulo={detalle.tipo?.nombre || "—"} linea={lineaExp} pct={pctPasos} />
+          </div>
           <RutaPasos pasos={pasosRuta} activo={activeSection} onIr={setActiveSection} />
         </div>
       )}

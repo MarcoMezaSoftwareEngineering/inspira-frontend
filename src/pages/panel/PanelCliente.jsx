@@ -35,6 +35,8 @@ import AvisoSesion from "./components/AvisoSesion";
 import SeguridadSesion from "./components/SeguridadSesion";
 import { alTerminarSesion, borrarSesionLocal, caducado, leerToken, vigilarSesion } from "../../services/sesion";
 import { useTirarParaRecargar } from "./hooks/useMovimiento";
+import { CabeceraExpedienteCtx } from "./cabeceraExpediente";
+import { recorta } from "./pendientes";
 
 // Las guías (GuiaMaster, GuiaApostilla…) las descarga MisGuias al abrirlas.
 const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
@@ -151,6 +153,8 @@ export default function PanelCliente({ path }) {
   // La sesión terminó con el panel abierto (caducó, se cerró en otra pestaña o
   // dispositivo, se desactivó la cuenta). Se avisa encima, sin expulsar.
   const [finSesion, setFinSesion] = useState(null);
+  // Nombre y avance que publica el expediente abierto para la barra de arriba.
+  const [cabExp, setCabExp] = useState(null);
   // /cliente/me no respondió (red, servidor). Antes se mandaba a la portada.
   const [errorMe, setErrorMe] = useState("");
 
@@ -280,7 +284,13 @@ export default function PanelCliente({ path }) {
   // En el teléfono se navega con la barra de abajo; dentro de un expediente
   // no, que allí mandan sus secciones y sus botones de guardar.
   const conTabbar = !ruta.idServicio;
-  const tituloBarra = titles[tab] || "Mi panel";
+  // Dentro de un expediente la barra dice cuál es, con su avance y la flecha
+  // de volver (ver cabeceraExpediente.js).
+  const servicioAbierto = ruta.idServicio ? lista.find((s) => Number(s.id_solicitud) === ruta.idServicio) : null;
+  const tituloBarra = ruta.idServicio
+    ? recorta(cabExp?.titulo || servicioAbierto?.titulo || "Tu expediente", 44)
+    : titles[tab] || "Mi panel";
+  const eyebrowBarra = ruta.idServicio ? (cabExp?.eyebrow || "Tu expediente") : null;
   const enPortada = tab === "inicio" && !ruta.idServicio;
 
   // La zona que se desplaza: para la barra de arriba (sombra al bajar, título
@@ -357,36 +367,55 @@ export default function PanelCliente({ path }) {
       <main className={`flex-1 min-w-0 flex flex-col overflow-y-auto ${esScrollInterno ? "lg:min-h-0 lg:overflow-hidden" : ""}`}>
         {/* Barra superior */}
         <div ref={barraRef} className="pnl-top sticky top-0 z-10 shrink-0">
-          {/* El ☰ solo hace falta donde no hay barra de pestañas. */}
-          <button
-            className={`pnl-burger${conTabbar ? " !hidden" : ""}`}
-            data-tour={conTabbar ? undefined : "menu"}
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Abrir menú"
-          >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-            {nPendientes > 0 && <span className="pnl-burger-punto" aria-hidden="true">{nPendientes}</span>}
-          </button>
+          {/* Dentro de un expediente, la flecha de volver. Fuera no hace falta
+              botón: en el teléfono navega la barra de pestañas y en pantalla
+              grande está el menú lateral. */}
+          {ruta.idServicio && (
+            <button className="pnl-atras" onClick={() => navigate("/panel")} aria-label="Volver a Inicio">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+          )}
 
           <div className="min-w-0 pnl-top-titulo">
             <p className="pnl-top-eyebrow">
               <span className="punto" />
-              Expediente Digital<span className="hidden sm:inline">&nbsp;Inspira</span>
+              {eyebrowBarra || <>Expediente Digital<span className="hidden sm:inline">&nbsp;Inspira</span></>}
             </p>
-            <h1>{tituloBarra}</h1>
+            <h1 title={ruta.idServicio ? (cabExp?.titulo || servicioAbierto?.titulo || "") : undefined}>{tituloBarra}</h1>
           </div>
+
+          {ruta.idServicio && cabExp?.pct != null && (
+            <span className="pnl-top-pct" aria-label={`Avance del expediente: ${cabExp.pct} %`}>{cabExp.pct}%</span>
+          )}
+
+          {/* El menú, también dentro de un expediente (en el teléfono no hay
+              barra de pestañas ahí), con lo pendiente encima. */}
+          {ruta.idServicio && (
+            <button className="pnl-top-menu md:hidden" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+              {nPendientes > 0 && <span className="pnl-burger-punto" aria-hidden="true">{nPendientes}</span>}
+            </button>
+          )}
 
           {/* Tocar la foto abre el perfil, como en cualquier app. */}
           {user && (
-            <div className="pnl-top-user ml-auto">
+            <div className={`pnl-top-user ml-auto${ruta.idServicio ? " max-md:!hidden" : ""}`}>
               <span className="pnl-top-nombre hidden sm:block" title={nombre}>{datosUsuario(user).corto}</span>
               <button type="button" className="pnl-top-avatar" onClick={() => handleChangeTab("perfil")} aria-label="Abrir mi perfil">
                 <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={34} />
               </button>
             </div>
+          )}
+
+          {/* Avance del expediente abierto: una línea bajo la barra. */}
+          {ruta.idServicio && cabExp?.pct != null && (
+            <span className="pnl-top-progreso" aria-hidden="true" style={{ "--p": cabExp.pct }} />
           )}
         </div>
 
@@ -416,6 +445,7 @@ export default function PanelCliente({ path }) {
           {/* Servicios: scroll interno */}
           {esServicios && (
             <div className="flex-1 min-h-0 flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-6 py-5">
+              <CabeceraExpedienteCtx.Provider value={setCabExp}>
               <MisServicios
                 ruta={ruta}
                 perfil={user}
@@ -430,6 +460,7 @@ export default function PanelCliente({ path }) {
                 faltanPerfil={faltanPerfil}
                 pagos={planesPago}
               />
+              </CabeceraExpedienteCtx.Provider>
             </div>
           )}
 

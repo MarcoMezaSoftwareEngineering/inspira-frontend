@@ -16,6 +16,7 @@ import { queMeFaltaVisado } from "../../queMeFalta";
 import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
 import { comprobarRespuesta } from "../../../../services/sesion";
+import { usePublicarCabecera } from "../../cabeceraExpediente";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -321,6 +322,15 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
   const bloquesDone = navSections.filter((s) => s.estado === "completado").length;
   const pct = Math.round((bloquesDone / navSections.length) * 100);
 
+  // La barra de arriba del panel dice qué expediente es y cuánto lleva.
+  usePublicarCabecera({
+    eyebrow: detalle ? `Solicitud #${detalle.id_solicitud}` : null,
+    // Con el nombre del titular, como decía la tarjeta que en el teléfono ya
+    // no sale: quien entra invitado tiene que saber de quién es.
+    titulo: `${detalle?.tipo?.nombre || "Visado de estudios"}${cli.nombre ? ` · ${cli.nombre}` : ""}`,
+    pct: detalle ? pct : null,
+  });
+
   const FORM_LABEL = { EN_PREPARACION: "En preparación", ENVIADO: "Enviado para tu revisión", FIRMADO: "Firmado" };
 
   function renderBody(key) {
@@ -527,11 +537,11 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
     <div className="flex flex-col h-full min-h-0">
 
       {/* Fila superior: botón volver + encabezado compacto */}
-      <div className="shrink-0 flex items-center gap-3 mb-3">
+      <div className="shrink-0 flex items-center gap-3 mb-3 max-md:mb-0">
         <button
           onClick={onVolver}
           aria-label="Volver a mis servicios"
-          className="shrink-0 inline-flex items-center gap-2 min-h-[40px] min-w-[44px] justify-center px-3 sm:px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary-light active:scale-95 transition-all shadow-sm group"
+          className="pnl-sin-volver shrink-0 inline-flex items-center gap-2 min-h-[40px] min-w-[44px] justify-center px-3 sm:px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary-light active:scale-95 transition-all shadow-sm group"
         >
           <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -549,7 +559,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
         )}
 
         {!loading && !error && detalle && (
-          <div className="flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-3 sm:px-4 py-2.5 flex items-center gap-3 sm:gap-4">
+          <div className="pnl-solo-grande flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-3 sm:px-4 py-2.5 flex items-center gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-bold text-primary-light uppercase tracking-widest leading-none">
                 Solicitud #{detalle.id_solicitud}

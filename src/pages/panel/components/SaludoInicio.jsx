@@ -4,7 +4,7 @@
 // para decir un nombre y un botón. Ahora esa misma franja dice además cómo va
 // todo —pendientes, servicios, mensajes— y cada cifra lleva a donde se mira.
 import Icono from "../../../components/common/Icono";
-import { whatsappDesde } from "../../../config/contacto";
+import { lineaDe, whatsappDesde } from "../../../config/contacto";
 import { datosUsuario } from "../../../components/common/usuario";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
@@ -30,6 +30,7 @@ export default function SaludoInicio({ perfil, servicios, pendientes = 0, onVerP
   const { corto } = datosUsuario(perfil);
   const propio = lista.find((s) => !s.invitado && s.asesor);
   const asesor = propio?.asesor || null;
+  const linea = lineaDe("inspira");
   const sinLeer = lista.reduce((t, s) => t + (s.resumen?.mensajes_sin_leer || 0), 0);
   const conMensajes = lista.find((s) => s.resumen?.mensajes_sin_leer > 0);
 
@@ -75,6 +76,8 @@ export default function SaludoInicio({ perfil, servicios, pendientes = 0, onVerP
           <small>Te atiende</small>
           <strong>{asesor ? asesor.nombre : "El equipo de Inspira"}</strong>
           <span>{asesor?.cargo || "Tu expediente está en buenas manos"}</span>
+          {/* El número escrito: desde un ordenador sin WhatsApp también se lee. */}
+          <span className="pnl-hero-asesor-linea">{linea.para} · {linea.numero}</span>
         </span>
         <a
           className="pnl-hero-wa"

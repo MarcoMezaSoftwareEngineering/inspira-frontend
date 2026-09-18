@@ -32,6 +32,7 @@ export const IMG_MASTER = "/og/master-2027-2028.jpg";
 export const IMG_CALCULADORA = "/og/calculadora-master.jpg";
 export const IMG_PORTAL = "/og/expediente-digital.jpg";
 export const IMG_GRADO = "/og/grado-en-espana.jpg";
+export const IMG_DOCTORADO = "/og/doctorado-en-espana.jpg";
 export const IMG_BICENTENARIO = "/og/beca-generacion-bicentenario-2026.jpg";
 export const IMG_MAPA = "/og/mapa-estudiar-en-espana.jpg";
 
@@ -146,6 +147,13 @@ export const RUTAS_COMPARTIR = {
       "Si aún no migras pero quieres avanzar: homologa tu bachillerato o tu título universitario y prepárate para postular a tiempo a la universidad española.",
   },
   // Guía para familias. Textos alineados con SEO_PAGES de src/App.jsx.
+  "/doctorado-en-espana": {
+    title: "Doctorado en España con residencia: costes, programas y nacionalidad | Inspira Legal",
+    description:
+      "El doctorado ya es residencia para investigación: cuenta para la nacionalidad y puedes venir con tu familia. Mapa de costes por comunidad, programas y paquetes desde 300 €.",
+    image: IMG_DOCTORADO,
+    imageAlt: "Doctorado en España con residencia desde el primer día",
+  },
   "/grado-en-espana": {
     title: "¿Cuánto cuesta estudiar un grado en España? Guía para familias | Inspira Legal",
     description:

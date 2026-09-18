@@ -1,14 +1,15 @@
-// Doctorado en Inspira Core (18/09/2026): la guía del servicio para asesores
-// y el catálogo INTERNO de doctorados (buscador, mapa, universidades con
-// plazos y precios). La pestaña va en la URL (?vista=) para poder enlazarla.
+// Doctorado en Inspira Core (18/09/2026): la guía del servicio para asesores,
+// el catálogo INTERNO de doctorados (buscador, mapa, universidades con plazos
+// y precios) y las plantillas que se rellenan con los datos del caso. La pestaña va en la URL (?vista=) para poder enlazarla.
 import { useCallback, useEffect, useState } from "react";
-import { BookOpen, Map as MapaIcono, Search, CalendarClock, Wallet } from "lucide-react";
+import { BookOpen, Map as MapaIcono, Search, CalendarClock, Wallet, FileText } from "lucide-react";
 import { boGET } from "../../../services/backofficeApi";
 import { Pagina, Cabecera, Cuerpo, Esqueleto } from "../ui";
 import GuiaDoctorado from "./GuiaDoctorado";
 import MapaDoctorados from "./MapaDoctorados";
 import CatalogoDoctorados from "./CatalogoDoctorados";
 import { UniversidadesDoctorado, PreciosDoctorado } from "./TablasDoctorado";
+import PlantillasDoctorado from "./PlantillasDoctorado";
 import "../../../styles/doctorado-core.css";
 
 const VISTAS = [
@@ -17,6 +18,7 @@ const VISTAS = [
   { k: "mapa", t: "Mapa", icono: <MapaIcono size={15} /> },
   { k: "universidades", t: "Universidades y plazos", icono: <CalendarClock size={15} /> },
   { k: "precios", t: "Precios", icono: <Wallet size={15} /> },
+  { k: "plantillas", t: "Plantillas", icono: <FileText size={15} /> },
 ];
 
 function leerVista() {
@@ -80,6 +82,7 @@ export default function DoctoradoCore() {
         {vista === "catalogo" && <CatalogoDoctorados key={version} opciones={opciones} filtroInicial={filtro} />}
         {vista === "mapa" && (resumen ? <MapaDoctorados resumen={resumen} onVerCatalogo={verCatalogo} /> : <Esqueleto filas={4} alto={90} />)}
         {vista === "universidades" && (unis ? <UniversidadesDoctorado universidades={unis} onVerCatalogo={verCatalogo} /> : <Esqueleto filas={6} alto={48} />)}
+        {vista === "plantillas" && <PlantillasDoctorado />}
         {vista === "precios" && (precios ? <PreciosDoctorado precios={precios} comunidades={opciones?.comunidades} /> : <Esqueleto filas={6} alto={48} />)}
       </Cuerpo>
     </Pagina>

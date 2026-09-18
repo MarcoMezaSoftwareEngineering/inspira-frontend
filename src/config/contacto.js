@@ -80,6 +80,7 @@ export const ORIGENES_WHATSAPP = {
   asistente: "el diagnóstico gratuito de la web",
   "visa-o-estancia": "el test «¿Visa o estancia?»",
   "grado-espana": "la guía «Grado en España» para familias",
+  "doctorado-espana": "la página «Doctorado en España»",
   "extranjeria-fechas": "la página «¿Por qué fecha va Extranjería?»",
   "bicentenario-2026": "la página de la Beca Generación del Bicentenario 2026",
   enlaces: "la página de enlaces de Inspira",
@@ -114,6 +115,7 @@ export function origenDeRuta(path = "") {
   if (p.startsWith("/asistente")) return "asistente";
   if (p.startsWith("/visa-o-estancia")) return "visa-o-estancia";
   if (p.startsWith("/grado-en-espana")) return "grado-espana";
+  if (p.startsWith("/doctorado-en-espana")) return "doctorado-espana";
   if (p.startsWith("/por-que-fecha-va-extranjeria")) return "extranjeria-fechas";
   return "web";
 }

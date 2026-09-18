@@ -38,6 +38,7 @@ const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"
 const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/MasterAds2027"));
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const GradoEspana = lazyConRecarga(() => import("./pages/grado/GradoEspana"));
+const DoctoradoEspana = lazyConRecarga(() => import("./pages/doctorado/DoctoradoEspana"));
 const FechasExtranjeria = lazyConRecarga(() => import("./pages/extranjeria/FechasExtranjeria"));
 const BecaBicentenario2026 = lazyConRecarga(() => import("./pages/bicentenario/BecaBicentenario2026"));
 const Enlaces = lazyConRecarga(() => import("./pages/enlaces/Enlaces"));
@@ -131,6 +132,14 @@ const SEO_PAGES = {
       "Matrícula en universidades públicas y privadas, acceso, visado o estancia y becas: simula la inversión de tu hijo o hija año a año y conoce el Paquete Grado de Inspira.",
     path: "/grado-en-espana",
     imagen: "/og/grado-en-espana.jpg",
+  },
+  // Venta del servicio de Doctorado (18/09/2026): el doctorado ya es residencia.
+  "/doctorado-en-espana": {
+    title: "Doctorado en España con residencia: costes, programas y nacionalidad",
+    description:
+      "El doctorado ya es residencia para investigación: cuenta para la nacionalidad y puedes venir con tu familia. Mapa de costes por comunidad, programas y paquetes desde 300 €.",
+    path: "/doctorado-en-espana",
+    imagen: "/og/doctorado-en-espana.jpg",
   },
   // Las fechas que publican las oficinas de Extranjeria. El titulo nombra
   // las tres ciudades que hoy publican porque es lo que se busca en Google;
@@ -381,6 +390,7 @@ const PUBLIC_PATHS = [
   "/master-2027-2028",
   "/visa-o-estancia",
   "/grado-en-espana",
+  "/doctorado-en-espana",
   "/por-que-fecha-va-extranjeria",
   // Sin enlace en menús; su SEO lo declara la propia página.
   "/beca-generacion-bicentenario-2026",
@@ -537,6 +547,7 @@ export default function App() {
       {path === "/master-2027-2028" && <MasterAds2027 />}
       {path === "/visa-o-estancia" && <VisaOEstancia />}
       {path === "/grado-en-espana" && <GradoEspana />}
+      {path === "/doctorado-en-espana" && <DoctoradoEspana />}
       {path === "/por-que-fecha-va-extranjeria" && <FechasExtranjeria />}
       {path === "/beca-generacion-bicentenario-2026" && <BecaBicentenario2026 />}
       {path === "/enlaces" && <Enlaces />}

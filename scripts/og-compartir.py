@@ -253,6 +253,24 @@ def grado():
     return guardar(img, "grado-en-espana.jpg")
 
 
+# (e2) Doctorado en España --------------------------------------------------
+def doctorado():
+    img = fondo_marca()
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, 12, H], fill=NARANJA)
+    x = 72
+    pastilla(d, x, 64, "Doctorado en España", fuente(32, "Bold"), AMARILLO, PETROLEO, pad_x=22, pad_y=10)
+    ft = fuente(78, "Bold")
+    y = 150
+    for ln in ["Residencia desde", "el primer día"]:
+        d.text((x, y), ln, font=ft, fill=BLANCO)
+        y += 92
+    d.text((x, y + 20), "Cuenta para la nacionalidad · desde 300 €", font=fuente(34, "Regular"), fill=CELESTE)
+    _, alto = pegar_logo(img, x, H - 60 - 92, alto=64)
+    dominio(ImageDraw.Draw(img), H - 60 - 92 + (alto - 34) // 2)
+    return guardar(img, "doctorado-en-espana.jpg")
+
+
 # (f) Mapa de costos de máster ------------------------------------------------
 # Silueta real del mapa de la web (pages/landing/master2027/mapaEspana.data.js,
 # trazados solo con M y Z) coloreada por lista, con la paleta del kit de marca
@@ -449,6 +467,6 @@ def bicentenario():
 
 if __name__ == "__main__":
     # Sin argumentos genera todas; con nombres, solo esas (p. ej. «portal»).
-    FUNCIONES = {"general": general, "master": master, "calculadora": calculadora, "portal": portal, "grado": grado, "mapa": mapa, "bicentenario": bicentenario}
+    FUNCIONES = {"general": general, "master": master, "calculadora": calculadora, "portal": portal, "grado": grado, "doctorado": doctorado, "mapa": mapa, "bicentenario": bicentenario}
     for nombre in sys.argv[1:] or FUNCIONES:
         FUNCIONES[nombre]()

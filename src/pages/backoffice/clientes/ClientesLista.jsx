@@ -11,7 +11,7 @@ import { dialog } from "../../../services/dialogService";
 import RevisionRapida from "../comun/RevisionRapida";
 import { cambiarEtapa as patchEtapa } from "../comun/cambiarEtapa";
 
-const NOMBRE_SERVICIO = { master: "postulación a máster", visa: "visado de estudios", ee: "estancia por estudios", mod: "modificatoria", fp: "formación profesional", legal: "extranjería" };
+const NOMBRE_SERVICIO = { master: "postulación a máster", visa: "visado de estudios", ee: "estancia por estudios", mod: "modificatoria", fp: "formación profesional", legal: "extranjería", doc: "doctorado" };
 
 /* Mensaje de WhatsApp ya redactado, de usted, según lo que le toca. */
 function plantillaWhatsApp(c) {
@@ -37,11 +37,12 @@ const SERVICIO = {
   mod:    { corto: "Modificatoria", tono: "bg-[#FEF3E7] text-[#B9770E]" },
   fp:     { corto: "FP",            tono: "bg-[#E8F5EE] text-[#1D6A4A]" },
   legal:  { corto: "Extranjería",   tono: "bg-[#FDEDEC] text-[#C0392B]" },
+  doc:    { corto: "Doctorado",     tono: "bg-[#E6F4F6] text-[#0E5E6B]" },
 };
 
 /* Color del servicio principal, para el avatar, la franja y la barra. */
 const ACENTO = {
-  master: "#1A3557", visa: "#B9770E", ee: "#7D3C98", mod: "#B9770E", fp: "#1D6A4A", legal: "#C0392B",
+  master: "#1A3557", visa: "#B9770E", ee: "#7D3C98", mod: "#B9770E", fp: "#1D6A4A", legal: "#C0392B", doc: "#0E5E6B",
 };
 
 // Quién tiene que mover. Mismo código de color que la pantalla Flujos.

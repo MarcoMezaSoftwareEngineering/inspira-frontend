@@ -32,7 +32,7 @@ const FILTROS = [
   ["nota,pago", "Notas y pagos"],
 ];
 
-const SERVICIO = { master: "Máster", visa: "Visado", ee: "Estancia", mod: "Modificatoria", fp: "FP", legal: "Extranjería" };
+const SERVICIO = { master: "Máster", visa: "Visado", ee: "Estancia", mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado" };
 
 function cuando(iso) {
   const d = new Date(iso);

@@ -9,6 +9,8 @@ import Redactar from "../correo/Redactar";
 const DESDE_SERVICIO = {
   master: "asesorados.master", visa: "asesorados.visados", ee: "asesorados.estancia.estudios",
   fp: "asesorados.fp", legal: "asesorados.extranjeria",
+  // Doctorado aún no tiene buzón propio: sale del genérico.
+  doc: "asesorados",
 };
 
 export default function CorreosCliente({ idCliente, correo, procesos = [] }) {

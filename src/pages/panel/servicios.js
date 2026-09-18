@@ -13,6 +13,7 @@ export const SERVICIO = {
   ESTANCIA: "estancia",
   MODIFICATORIA: "modificatoria",
   FP: "fp",
+  DOCTORADO: "doctorado",
   OTRO: "otro",
 };
 
@@ -54,6 +55,10 @@ export function servicioDe(s) {
   const propia = POR_CLAVE_PROPIA[s?.resumen?.servicio_propio];
   if (propia) return propia;
 
+  // Doctorado (18/09/2026): su tipo puede ser uno genérico de máster, así que
+  // se mira el título («Doctorado en España · …») antes que el tipo.
+  if (s?.panel_servicio === "doc" || /doctorado/i.test(String(s?.titulo || ""))) return SERVICIO.DOCTORADO;
+
   const txt = textoDe(s);
   if (/modificatoria|modificaci/.test(txt)) return SERVICIO.MODIFICATORIA;
   if (txt.includes("estancia")) return SERVICIO.ESTANCIA;
@@ -88,6 +93,8 @@ const ACCESOS = {
   [SERVICIO.ESTANCIA]: ["portal", "estancia", "apostilla"],
   [SERVICIO.MODIFICATORIA]: ["modificatoria", "apostilla"],
   [SERVICIO.FP]: ["portal", "becas", "apostilla"],
+  // Sin guía propia todavía: recorrido genérico, como OTRO.
+  [SERVICIO.DOCTORADO]: ["apostilla"],
   [SERVICIO.OTRO]: ["apostilla"],
 };
 

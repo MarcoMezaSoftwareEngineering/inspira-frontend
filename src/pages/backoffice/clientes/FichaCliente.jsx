@@ -49,6 +49,7 @@ const TONO_SERVICIO = {
   ee:     "bg-[#F5EEF8] text-[#7D3C98]",
   fp:     "bg-[#E8F5EE] text-[#1D6A4A]",
   legal:  "bg-[#FDEDEC] text-[#C0392B]",
+  doc:    "bg-[#E6F4F6] text-[#0E5E6B]",
 };
 
 function fecha(v) {

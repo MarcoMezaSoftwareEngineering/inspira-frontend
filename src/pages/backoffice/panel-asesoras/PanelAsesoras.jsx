@@ -6,9 +6,9 @@ import { DriveIcon, DriveToast, useDriveToast, openDriveFolder } from "../driveT
 import { Search, Copy, MoreVertical, ChevronDown, ChevronLeft, ChevronRight, Pencil, Trash2, Eye } from "lucide-react";
 
 /* ─── Constantes ─────────────────────────────────────────────────────────── */
-const SVC_KEYS = ["master", "visa", "ee", "fp", "legal"];
+const SVC_KEYS = ["master", "visa", "ee", "fp", "legal", "doc"];
 const SVC_LABELS = { master: "Máster", visa: "Visa estudios", ee: "Estancia est.",
-  mod: "Modificatoria", fp: "FP / Grado", legal: "Legal / RR" };
+  mod: "Modificatoria", fp: "FP / Grado", legal: "Legal / RR", doc: "Doctorado" };
 const TABS = [{ id: "all", label: "Todos" }, ...SVC_KEYS.map(s => ({ id: s, label: SVC_LABELS[s] }))];
 const FASES_VE = ["Estrategia realizada", "Preparación documentaria", "Cita programada", "Documentos listos"];
 const UNI_EST = ["ADMITIDO","LISTA DE ESPERA ALTA","LISTA DE ESPERA MEDIA","LISTA DE ESPERA BAJA","POSTULADO","POSTULAR","NO POSTULAR AUN","PROCESO PREVIO","PENDIENTE","EXCLUIDO","FINALIZADO"];
@@ -74,6 +74,7 @@ const SVC_COLORS = {
   ee:     { bg: "#E1F5EE", text: "#085041" },
   fp:     { bg: "#FAEEDA", text: "#633806" },
   legal:  { bg: "#FBEAF0", text: "#72243E" },
+  doc:    { bg: "#E6F4F6", text: "#0E5E6B" },
 };
 
 function estadoBadgeCls(e) {
@@ -102,7 +103,7 @@ function exportJSON(data) {
    COMPONENTE PRINCIPAL
 ═══════════════════════════════════════════════════════════════════════════ */
 export default function PanelAsesoras() {
-  const [data, setData]               = useState({ master:[], visa:[], ee:[], fp:[], legal:[] });
+  const [data, setData]               = useState({ master:[], visa:[], ee:[], fp:[], legal:[], doc:[] });
   const [loading, setLoading]         = useState(true);
   const [curTab, setCurTab]           = useState("all");
   const [expandedKey, setExpandedKey] = useState(null);
@@ -547,6 +548,7 @@ function ClienteDetail({ c }) {
               {(svc === "visa" || svc === "ee") && <VisaEeResumen c={c} />}
               {svc === "fp"               && <FpResumen c={c} />}
               {svc === "legal"            && <LegalResumen c={c} />}
+              {svc === "doc"              && <DocResumen c={c} />}
             </>
           )}
           {tab === "uni" && hasUnis && <UnisTab c={c} />}
@@ -795,6 +797,21 @@ function FpResumen({ c }) {
       <FieldGrid fields={[
         ["Paquete", c.paquete, false, true], ["Carpeta", c.carpeta, false, true],
         ["Centro", c.centro, miss(c.centro), true],  ["Estado admisión", c.estadoAdm, miss(c.estadoAdm)],
+        ["NIE", c.nie, miss(c.nie), true], ["Nº expediente", c.expediente, miss(c.expediente), true],
+      ]} />
+      <CarpetaLinks c={c} />
+    </InfoCard>
+  );
+}
+
+// Doctorado: ficha genérica hasta que tenga panel propio.
+function DocResumen({ c }) {
+  return (
+    <InfoCard title="Doctorado">
+      <FieldGrid fields={[
+        ["Paquete", c.paquete, false, true], ["Carpeta", c.carpeta, false, true],
+        ["Universidad / programa", c.centro, miss(c.centro), true], ["Estado admisión", c.estadoAdm, miss(c.estadoAdm)],
+        ["Resultado", c.resultado, miss(c.resultado)],
         ["NIE", c.nie, miss(c.nie), true], ["Nº expediente", c.expediente, miss(c.expediente), true],
       ]} />
       <CarpetaLinks c={c} />
@@ -1137,6 +1154,15 @@ function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
       {svc === "fp" && (
         <div className="grid grid-cols-2 gap-3">
           {[["centro","Centro"],["estadoAdm","Estado admisión"],["nie","NIE"],["expediente","Nº expediente"]].map(([k,l]) => (
+            <label key={k}><span className={lab}>{l}</span><input className={inp} value={form[k]} onChange={e => set(k, e.target.value)} /></label>
+          ))}
+        </div>
+      )}
+
+      {/* ── DOCTORADO ── */}
+      {svc === "doc" && (
+        <div className="grid grid-cols-2 gap-3">
+          {[["centro","Universidad / programa"],["estadoAdm","Estado admisión"],["resultado","Resultado"],["nie","NIE"],["expediente","Nº expediente"]].map(([k,l]) => (
             <label key={k}><span className={lab}>{l}</span><input className={inp} value={form[k]} onChange={e => set(k, e.target.value)} /></label>
           ))}
         </div>

@@ -1,6 +1,6 @@
 // Ficha de una tarea en panel lateral: el estado con un toque, responsable,
-// fecha y prioridad, qué hay que hacer, área y vínculo, comentarios e
-// historia. Se abre con ?tarea=ID, que es el enlace de los correos.
+// fecha y prioridad, qué hay que hacer, área y vínculo, archivos y enlaces,
+// comentarios e historia. Se abre con ?tarea=ID, que es el enlace de los correos.
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Trash2, ExternalLink, Check, Play, RotateCcw } from "lucide-react";
@@ -9,6 +9,7 @@ import { dialog } from "../../../services/dialogService";
 import { navigate } from "../../../services/navigate";
 import { Boton, Chip, Campo, Esqueleto, Pill } from "../ui";
 import BuscarVinculo from "./BuscarVinculo";
+import AdjuntosTarea from "./AdjuntosTarea";
 import RevisionRapida from "../comun/RevisionRapida";
 import {
   CATEGORIAS, CATEGORIA, CON_SERVICIO, ESTADO, PRIORIDADES, PRIORIDAD,
@@ -17,9 +18,9 @@ import {
 
 const TIPO_EVENTO = {
   CREADA: "Creada", COMENTARIO: "Comentario", ESTADO: "Estado", ASIGNACION: "Responsable",
-  FECHA: "Fecha límite", PRIORIDAD: "Prioridad", EDICION: "Edición",
+  FECHA: "Fecha límite", PRIORIDAD: "Prioridad", EDICION: "Edición", ADJUNTO: "Adjunto",
 };
-const COLOR_EVENTO = { COMENTARIO: "#1d6a4a", ESTADO: "#fa943a", ASIGNACION: "#7d3c98", CREADA: "#02506b" };
+const COLOR_EVENTO = { ADJUNTO: "#4e9ee8", COMENTARIO: "#1d6a4a", ESTADO: "#fa943a", ASIGNACION: "#7d3c98", CREADA: "#02506b" };
 
 function BotonesEstado({ estado, guardando, onCambiar }) {
   const hecha = (
@@ -443,6 +444,15 @@ export default function TareaDetalle({ id, opciones, onCerrar, onCambio }) {
                 </div>
               )}
             </div>
+          )}
+
+          {tarea && (
+            <AdjuntosTarea
+              tarea={tarea}
+              yo={opciones?.yo?.id_usuario}
+              puedeBorrarTarea={!!permisos.borrar}
+              onTarea={(t) => { setTarea(t); avisarFuera(); }}
+            />
           )}
 
           {tarea && (

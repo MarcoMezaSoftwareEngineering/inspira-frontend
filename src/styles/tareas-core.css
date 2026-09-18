@@ -122,3 +122,36 @@
 .ase-tr-estados { display: flex; gap: 6px; flex-wrap: wrap; }
 .ase-tr-completada { font-size: 11.5px; font-weight: 600; color: var(--green); margin: 8px 0 0; }
 .ase-tr-completada[data-estado="DESCARTADA"] { color: var(--muted); }
+
+/* Acciones rápidas encima de cada tarea (18/09/2026): hecha, priorizar,
+   descartar, eliminar. En escritorio aparecen al pasar; en táctil, siempre. */
+.ase-tr-acciones { display: flex; gap: 4px; justify-content: flex-end; margin: -2px -2px 4px; }
+.ase-tr-accion {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px;
+  border: 1px solid #e3ebf2; background: #fff; color: #62808f; cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+}
+.ase-tr-accion:hover, .ase-tr-accion:focus-visible { outline: none; border-color: var(--sky-2); color: var(--petrol, #013446); }
+.ase-tr-accion[data-accion="hecha"]:hover { background: #e8f5ee; color: #1d6a4a; border-color: #b9dcc9; }
+.ase-tr-accion[data-accion="priorizar"]:hover, .ase-tr-accion[data-activo="1"] { background: #fdedec; color: #c0392b; border-color: #f3c4bf; }
+.ase-tr-accion[data-accion="descartar"]:hover { background: #eef2f6; color: #0d2c3a; }
+.ase-tr-accion[data-accion="eliminar"]:hover { background: #fdedec; color: #c0392b; border-color: #f3c4bf; }
+@media (hover: hover) {
+  .ase-tr-card .ase-tr-acciones { opacity: 0; transition: opacity .15s; }
+  .ase-tr-card:hover .ase-tr-acciones, .ase-tr-card:focus-within .ase-tr-acciones { opacity: 1; }
+  .ase-tr-card .ase-tr-accion[data-activo="1"] { opacity: 1; }
+}
+.ase-ld-tabla .ase-tr-acciones { margin: 0; flex-wrap: nowrap; }
+
+/* Archivos y enlaces de la tarea */
+.ase-tr-adj { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ase-tr-adj li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 8px; padding: 8px 10px; border: 1px solid #e3ebf2; border-radius: 10px; background: #fbfdfe; }
+.ase-tr-adj-abrir { display: flex; align-items: center; gap: 7px; min-width: 0; background: none; border: 0; padding: 0; color: #013446; font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; }
+.ase-tr-adj-abrir:hover .ase-tr-adj-n { text-decoration: underline; }
+.ase-tr-adj-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ase-tr-adj-m { grid-column: 1; font-size: 11px; color: var(--muted); }
+.ase-tr-adj-x { grid-column: 2; grid-row: 1 / span 2; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; border: 0; background: none; color: #8aa0ad; cursor: pointer; }
+.ase-tr-adj-x:hover { background: #fdedec; color: #c0392b; }
+.ase-tr-adj-grupo { display: flex; align-items: center; gap: 4px; margin: 0 0 5px; font-size: 11px; font-weight: 700; color: #62808f; text-transform: uppercase; letter-spacing: .06em; }
+.ase-tr-adj-momento { display: inline-flex; background: #eef2f6; border-radius: 10px; padding: 3px; gap: 2px; }
+.ase-tr-adj-momento button { border: 0; background: none; font-size: 12px; font-weight: 600; color: #62808f; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+.ase-tr-adj-momento button[data-activo="1"] { background: #fff; color: #013446; box-shadow: 0 1px 2px rgba(1, 52, 70, .12); }

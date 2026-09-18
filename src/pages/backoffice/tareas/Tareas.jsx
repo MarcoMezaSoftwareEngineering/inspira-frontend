@@ -8,8 +8,8 @@
 // abre en un panel lateral con ?tarea=ID en la URL, que es el enlace que llega
 // en los correos.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LayoutGrid, List, Plus, RefreshCw, Search, CalendarClock } from "lucide-react";
-import { boGET, boPATCH } from "../../../services/backofficeApi";
+import { LayoutGrid, List, Plus, RefreshCw, Search, CalendarClock, Check, Flag, Ban, Trash2, RotateCcw, Paperclip } from "lucide-react";
+import { boGET, boPATCH, boDELETE } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import { useAuth } from "../context/AuthContext";
 import { Pagina, Cabecera, Cuerpo, Boton, Chip, Pill, Vacio, Esqueleto } from "../ui";
@@ -36,7 +36,29 @@ function escribirParam(nombre, valor) {
   window.history.replaceState(window.history.state, "", url.pathname + url.search);
 }
 
-function Tarjeta({ tarea, onAbrir, onArrastre, verResponsable }) {
+/**
+ * Hecha, priorizar, descartar y eliminar sin abrir la tarea. Cada cambio
+ * avisa por correo a quienes están en ella (lo hace la API).
+ */
+function AccionesRapidas({ tarea, puedeBorrar, onAccion }) {
+  const urgente = tarea.prioridad === "URGENTE";
+  const b = (accion, Icono, titulo, extra = {}) => (
+    <button type="button" className="ase-tr-accion" data-accion={accion} title={titulo} aria-label={titulo}
+      onClick={(e) => { e.stopPropagation(); onAccion(tarea, accion); }} {...extra}>
+      <Icono size={14} />
+    </button>
+  );
+  return (
+    <div className="ase-tr-acciones" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+      {tarea.abierta ? b("hecha", Check, "Marcar hecha") : b("reabrir", RotateCcw, "Reabrir")}
+      {tarea.abierta && b("priorizar", Flag, urgente ? "Quitar urgencia" : "Priorizar (urgente)", { "aria-pressed": urgente, "data-activo": urgente ? "1" : "0" })}
+      {tarea.abierta && b("descartar", Ban, "Descartar")}
+      {puedeBorrar && b("eliminar", Trash2, "Eliminar")}
+    </div>
+  );
+}
+
+function Tarjeta({ tarea, onAbrir, onArrastre, verResponsable, puedeBorrar, onAccion }) {
   const [arrastrando, setArrastrando] = useState(false);
   const cat = CATEGORIA[tarea.categoria] || CATEGORIAS[CATEGORIAS.length - 1];
   const pri = PRIORIDAD[tarea.prioridad];
@@ -44,8 +66,9 @@ function Tarjeta({ tarea, onAbrir, onArrastre, verResponsable }) {
   const detalleArea = tarea.subservicio || (tarea.servicio ? (SERVICIO_CORTO[tarea.servicio] || tarea.servicio) : "");
   const persona = tarea.solicitud?.cliente?.nombre || tarea.lead?.nombre || tarea.lead?.email;
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className="ase-ld-card ase-tr-card"
       style={{ "--tr-color": cat.color }}
       data-vencida={tarea.vencida ? "1" : "0"}
@@ -60,7 +83,9 @@ function Tarjeta({ tarea, onAbrir, onArrastre, verResponsable }) {
       }}
       onDragEnd={() => { setArrastrando(false); onArrastre?.(null); }}
       onClick={() => onAbrir(tarea.id_tarea)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onAbrir(tarea.id_tarea); } }}
     >
+      <AccionesRapidas tarea={tarea} puedeBorrar={puedeBorrar} onAccion={onAccion} />
       <div className="ase-tr-card-cat">{cat.corto}{detalleArea ? ` · ${detalleArea}` : ""}</div>
       <div className="ase-ld-card-n">{tarea.titulo}</div>
       {persona && <div className="ase-ld-card-s">{persona}</div>}
@@ -72,6 +97,11 @@ function Tarjeta({ tarea, onAbrir, onArrastre, verResponsable }) {
               <CalendarClock size={10} /> {vence}
             </span>
           )}
+          {tarea._count?.adjuntos > 0 && (
+            <span className="ase-tr-vence" title={`${tarea._count.adjuntos} adjunto(s)`}>
+              <Paperclip size={10} /> {tarea._count.adjuntos}
+            </span>
+          )}
         </span>
         {verResponsable && (
           <span className="ase-ld-card-f">
@@ -79,7 +109,7 @@ function Tarjeta({ tarea, onAbrir, onArrastre, verResponsable }) {
           </span>
         )}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -193,9 +223,40 @@ export default function Tareas() {
       dialog.toast(r?.msg || "No se pudo mover la tarea", "error");
       return;
     }
-    if (estado === "HECHA") dialog.toast("Tarea hecha", "success");
+    const avisos = { HECHA: "Tarea hecha", DESCARTADA: "Tarea descartada", PENDIENTE: "Tarea reabierta" };
+    if (avisos[estado]) dialog.toast(`${avisos[estado]} · el equipo recibe aviso`, "success");
     avisarCambioTareas();
     recargar();
+  }
+
+  const yo = opciones?.yo?.id_usuario;
+  const puedeBorrar = (t) => gestor || (yo && t.id_creador === yo);
+
+  async function accionRapida(t, accion) {
+    if (accion === "hecha") return soltarEn("HECHA", t.id_tarea);
+    if (accion === "reabrir") return soltarEn("PENDIENTE", t.id_tarea);
+    if (accion === "descartar") {
+      await soltarEn("DESCARTADA", t.id_tarea);
+      return;
+    }
+    if (accion === "priorizar") {
+      const prioridad = t.prioridad === "URGENTE" ? "MEDIA" : "URGENTE";
+      setTareas((ts) => ts.map((x) => (x.id_tarea === t.id_tarea ? { ...x, prioridad } : x)));
+      const r = await boPATCH(`/backoffice/tareas/${t.id_tarea}`, { prioridad });
+      if (!r?.ok) dialog.toast(r?.msg || "No se pudo cambiar la prioridad", "error");
+      else dialog.toast(prioridad === "URGENTE" ? "Marcada como urgente · el equipo recibe aviso" : "Ya no es urgente", "success");
+      recargar();
+      return;
+    }
+    if (accion === "eliminar") {
+      const ok = await dialog.confirm(`«${t.titulo}» se borra para todo el equipo, con su historia y adjuntos. No se puede deshacer.`, "¿Eliminar esta tarea?");
+      if (!ok) return;
+      const r = await boDELETE(`/backoffice/tareas/${t.id_tarea}`);
+      if (!r?.ok) { dialog.toast(r?.msg || "No se pudo eliminar", "error"); return; }
+      dialog.toast("Tarea eliminada · avisamos a quienes estaban en ella", "success");
+      avisarCambioTareas();
+      recargar();
+    }
   }
 
   const porEstado = useMemo(() => {
@@ -379,6 +440,8 @@ export default function Tareas() {
                         onAbrir={abrir}
                         onArrastre={(id) => { arrastrada.current = id; }}
                         verResponsable={verResponsable}
+                        puedeBorrar={puedeBorrar(t)}
+                        onAccion={accionRapida}
                       />
                     ))
                   )}
@@ -391,7 +454,7 @@ export default function Tareas() {
             <table className="ase-ld-tabla">
               <thead>
                 <tr>
-                  <th>Tarea</th><th>Área</th><th>Responsable</th><th>Fecha límite</th><th>Prioridad</th><th>Estado</th>
+                  <th>Tarea</th><th>Área</th><th>Responsable</th><th>Fecha límite</th><th>Prioridad</th><th>Estado</th><th aria-label="Acciones" />
                 </tr>
               </thead>
               <tbody>
@@ -424,6 +487,7 @@ export default function Tareas() {
                       </td>
                       <td><Chip tono={pri?.tono || "gris"}>{pri?.etiqueta || t.prioridad}</Chip></td>
                       <td><Chip tono={est?.tono || "gris"} punto>{est?.etiqueta || t.estado}</Chip></td>
+                      <td><AccionesRapidas tarea={t} puedeBorrar={puedeBorrar(t)} onAccion={accionRapida} /></td>
                     </tr>
                   );
                 })}

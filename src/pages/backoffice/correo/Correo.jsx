@@ -14,6 +14,10 @@ import { Plus } from "lucide-react";
 
 // Por defecto, no leídos: ningún correo es pendiente por sí solo (16/09/2026).
 const ESTADOS = [["no_leidos", "No leídos"], ["todos", "Todos"]];
+// Por defecto solo lo que escribe gente de fuera; lo que enviamos nosotros
+// queda como respaldo en las otras dos vistas (18/09/2026).
+const ORIGENES = [["externo", "Externos"], ["a_clientes", "Enviados a clientes"], ["interno", "Internos"], ["todos", "Todos"]];
+const ETIQUETA_ORIGEN = { a_clientes: ["Enviado a cliente", "bg-[#e8f5ee] text-[#1d6a4a]"], interno: ["Interno", "bg-[#f3eefe] text-[#5b3fa0]"] };
 
 function espera(h, ahora) {
   const desde = h.espera_desde || h.fecha;
@@ -27,6 +31,7 @@ export default function Correo() {
   const [info, setInfo] = useState(null);
   const [buzon, setBuzon] = useState("");
   const [estado, setEstado] = useState("no_leidos");
+  const [origen, setOrigen] = useState("externo");
   const [q, setQ] = useState("");
   const [busca, setBusca] = useState("");
   const [mios, setMios] = useState(false);
@@ -49,7 +54,7 @@ export default function Correo() {
   }, []);
 
   const cargar = useCallback(() => {
-    const p = new URLSearchParams({ estado });
+    const p = new URLSearchParams({ estado, origen });
     if (buzon) p.set("buzon", buzon);
     if (busca) p.set("q", busca);
     if (mios) p.set("mios", "1");
@@ -57,7 +62,7 @@ export default function Correo() {
       setAhora(Date.now());
       if (r.ok) { setHilos(r.hilos || []); setError(""); } else { setHilos([]); setError(r.msg || "No se pudieron cargar"); }
     });
-  }, [buzon, estado, busca, mios]);
+  }, [buzon, estado, origen, busca, mios]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
@@ -95,6 +100,12 @@ export default function Correo() {
                     buzon === b.k ? "bg-[#013446] border-[#013446] text-white" : "bg-white border-[#d8e4ef] text-[#0d2c3a]"}`}>
                   {b.t}{b.no_leidos ? <span className={`ml-1.5 text-[10.5px] font-bold px-1.5 rounded-full ${buzon === b.k ? "bg-white/20" : "bg-[#fa943a] text-white"}`}>{b.no_leidos}</span> : null}
                 </button>
+              ))}
+            </div>
+            <div className="flex gap-1 bg-[#eef2f6] rounded-xl p-1 overflow-x-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
+              {ORIGENES.map(([k, t]) => (
+                <button key={k} type="button" onClick={() => setOrigen(k)} aria-pressed={origen === k}
+                  className={`shrink-0 flex-1 text-[12.5px] font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap ${origen === k ? "bg-white text-[#013446] shadow-sm" : "text-[#62808f]"}`}>{t}</button>
               ))}
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -138,6 +149,7 @@ export default function Correo() {
                     <span className="block text-[12px] text-[#62808f] truncate">{h.fragmento}</span>
                     <span className="flex flex-wrap gap-1 mt-1">
                       {h.cliente && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#e8f5ee] text-[#1d6a4a]">Cliente{h.cliente.proceso?.responsable ? ` · ${h.cliente.proceso.responsable.split(" ")[0]}` : ""}</span>}
+                      {ETIQUETA_ORIGEN[h.origen] && origen === "todos" && <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${ETIQUETA_ORIGEN[h.origen][1]}`}>{ETIQUETA_ORIGEN[h.origen][0]}</span>}
                       {h.lead && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#e3f0fe] text-[#013446]">Lead</span>}
                       {h.buzon && !buzon && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#eef2f6] text-[#62808f]">{info?.buzones?.find((b) => b.k === h.buzon)?.t}</span>}
                       {h.asignado && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#fef3e7] text-[#92400E]">→ {h.asignado.split(" ")[0]}</span>}

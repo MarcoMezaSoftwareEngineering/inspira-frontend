@@ -1,4 +1,4 @@
-// Qué hacer con un correo: convertirlo en tarea, crear el lead o dejarlo como
+// Qué hacer con un correo: convertirlo en tarea, crear el lead, descartarlo o dejarlo como
 // no leído para luego. Ningún correo es pendiente por sí solo: lo decide quien
 // lo lee.
 import { useState } from "react";
@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 
-export default function AccionesHilo({ hilo, equipo, onHecho, onNoLeido }) {
+export default function AccionesHilo({ hilo, equipo, onHecho, onNoLeido, onDescartar }) {
   const [tarea, setTarea] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const asunto = hilo.mensajes[0]?.asunto || "(sin asunto)";
@@ -58,6 +58,10 @@ export default function AccionesHilo({ hilo, equipo, onHecho, onNoLeido }) {
         <button type="button" className={boton} onClick={crearLead}>Crear lead</button>
       )}
       <button type="button" className={boton} onClick={onNoLeido}>Marcar no leído</button>
+      <button type="button" className={boton} onClick={onDescartar}
+        title={hilo.descartado ? "Vuelve a la bandeja" : "Relleno o ya resuelto: sale de la bandeja (no se borra)"}>
+        {hilo.descartado ? "Recuperar" : "Descartar"}
+      </button>
 
       {tarea && createPortal(
         <div className="fixed inset-0 z-[90] bg-[#011c26]/60 grid place-items-end sm:place-items-center sm:p-4" onClick={() => setTarea(null)} role="presentation">

@@ -4,16 +4,18 @@
 // lo más antiguo arriba. Cada correo dice de qué cliente o lead es. Es la
 // misma cuenta que Gmail: lo que se responde aquí se ve allí y al revés.
 import { useCallback, useEffect, useState } from "react";
-import { boGET } from "../../../services/backofficeApi";
+import { boGET, boPOST } from "../../../services/backofficeApi";
+import { dialog } from "../../../services/dialogService";
 import { Pagina, Cabecera, Cuerpo } from "../ui";
 import VistaHilo from "./VistaHilo";
 import Redactar from "./Redactar";
 import { DESDE_BUZON } from "./desdeBuzon";
 import { Boton } from "../ui";
-import { Plus } from "lucide-react";
+import { Plus, Archive, ArchiveRestore } from "lucide-react";
 
 // Por defecto, no leídos: ningún correo es pendiente por sí solo (16/09/2026).
-const ESTADOS = [["no_leidos", "No leídos"], ["todos", "Todos"]];
+// «Descartados»: relleno o ya resuelto; se recuperan desde aquí (18/09/2026).
+const ESTADOS = [["no_leidos", "No leídos"], ["todos", "Todos"], ["descartados", "Descartados"]];
 // Por defecto solo lo que escribe gente de fuera; lo que enviamos nosotros
 // queda como respaldo en las otras dos vistas (18/09/2026).
 const ORIGENES = [["externo", "Externos"], ["a_clientes", "Enviados a clientes"], ["interno", "Internos"], ["todos", "Todos"]];
@@ -65,6 +67,16 @@ export default function Correo() {
   }, [buzon, estado, origen, busca, mios]);
 
   useEffect(() => { cargar(); }, [cargar]);
+
+  // Descartar quita el hilo de la vista al momento; si falla, vuelve.
+  async function descartar(h, recuperar = false) {
+    const antes = hilos;
+    setHilos((hs) => hs.filter((x) => x.id !== h.id));
+    if (abierto === h.id) setAbierto(null);
+    const r = await boPOST(`/backoffice/correo/hilo/${h.id}/descartar`, recuperar ? { quitar: true } : {});
+    if (!r?.ok) { setHilos(antes); dialog.toast(r?.msg || "No se pudo", "error"); return; }
+    dialog.toast(recuperar ? "Correo recuperado: vuelve a la bandeja" : "Correo descartado · lo encuentras en «Descartados»", "success");
+  }
 
   const dividida = ancho >= 1100;
   const lista = hilos ? [...hilos].sort((a, b) => (estado === "sin_responder" ? (a.espera_desde || a.fecha) - (b.espera_desde || b.fecha) : b.fecha - a.fecha)) : null;
@@ -131,11 +143,17 @@ export default function Correo() {
               {lista === null ? (
                 <div className="p-3 space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="ase-esq" style={{ height: 64 }} />)}</div>
               ) : !lista.length ? (
-                <div className="ase-vacio"><p className="ase-vacio-t">{estado === "no_leidos" ? "Todo leído" : "Nada por aquí"}</p><p className="ase-vacio-p">No hay correos en esta vista.</p></div>
+                <div className="ase-vacio"><p className="ase-vacio-t">{estado === "no_leidos" ? "Todo leído" : estado === "descartados" ? "Nada descartado" : "Nada por aquí"}</p><p className="ase-vacio-p">No hay correos en esta vista.</p></div>
               ) : lista.map((h) => {
                 return (
-                  <button key={h.id} type="button" onClick={() => setAbierto(h.id)}
-                    className={`w-full text-left px-4 py-3 border-b border-[#eef2f6] last:border-b-0 hover:bg-[#f7fafc] ${abierto === h.id ? "bg-[#e3f0fe]" : ""}`}>
+                  <div key={h.id} role="button" tabIndex={0} onClick={() => setAbierto(h.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter") setAbierto(h.id); }}
+                    className={`group relative w-full text-left px-4 py-3 pr-12 cursor-pointer border-b border-[#eef2f6] last:border-b-0 hover:bg-[#f7fafc] ${abierto === h.id ? "bg-[#e3f0fe]" : ""}`}>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); descartar(h, estado === "descartados"); }}
+                      title={estado === "descartados" ? "Recuperar" : "Descartar"} aria-label={estado === "descartados" ? "Recuperar" : "Descartar"}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 grid place-items-center rounded-lg text-[#8aa0ad] hover:bg-[#eef2f6] hover:text-[#013446] md:opacity-0 md:group-hover:opacity-100 focus:opacity-100">
+                      {estado === "descartados" ? <ArchiveRestore size={17} /> : <Archive size={17} />}
+                    </button>
                     <span className="flex items-center gap-2">
                       {h.no_leido && <span className="w-2 h-2 rounded-full bg-[#fa943a] shrink-0" />}
                       <span className={`text-[13.5px] truncate flex-1 ${h.no_leido ? "font-bold text-[#0d2c3a]" : "font-semibold text-[#0d2c3a]"}`}>
@@ -156,7 +174,7 @@ export default function Correo() {
                       {h.atendiendo && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#fdedec] text-[#c0392b]">{h.atendiendo.nombre.split(" ")[0]} lo está respondiendo</span>}
                       {h.mensajes > 1 && <span className="text-[10px] text-[#62808f]">{h.mensajes} mensajes</span>}
                     </span>
-                  </button>
+                  </div>
                 );
               })}
             </div>

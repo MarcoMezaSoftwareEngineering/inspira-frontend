@@ -106,7 +106,13 @@ export default function VistaHilo({ id, direcciones: dirs = [], onVolver, onResp
           )}
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
           <AccionesHilo hilo={h} equipo={equipo} onHecho={onRespondido}
-            onNoLeido={async () => { await boPOST(`/backoffice/correo/hilo/${id}/leido`, { leido: false }); onRespondido?.(); onVolver?.(); }} />
+            onNoLeido={async () => { await boPOST(`/backoffice/correo/hilo/${id}/leido`, { leido: false }); onRespondido?.(); onVolver?.(); }}
+            onDescartar={async () => {
+              const r = await boPOST(`/backoffice/correo/hilo/${id}/descartar`, h.descartado ? { quitar: true } : {});
+              if (!r?.ok) { dialog.toast(r?.msg || "No se pudo", "error"); return; }
+              dialog.toast(h.descartado ? "Correo recuperado" : "Correo descartado · está en «Descartados»", "success");
+              onRespondido?.(); onVolver?.();
+            }} />
           <label className="inline-flex items-center gap-1.5 text-[11.5px] text-[#62808f]">
             Asignado a
             <select value={equipo.find((u) => u.nombre === h.asignado)?.id_usuario || ""} onChange={(e) => asignar(e.target.value)}

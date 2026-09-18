@@ -1,11 +1,12 @@
 // El detalle de un plan de pagos: sus datos, cómo va y sus cuotas.
 //
-// Con pagos.planes se reprograma o se anula una cuota pendiente, se corrigen
+// Con pagos.planes se reprograma o se anula una cuota pendiente, se cambia su
+// importe o concepto, se añaden cuotas (el total se recalcula), se corrigen
 // concepto, notas y fecha límite, o se anula el plan entero (con motivo). Lo
 // cobrado no se toca. Las acciones de cada cuota (marcar pagada, voucher,
 // validar, recordatorio) son las mismas de la lista.
 import { useCallback, useEffect, useState } from "react";
-import { Ban, ExternalLink, Pencil } from "lucide-react";
+import { Ban, ExternalLink, Pencil, Plus, X } from "lucide-react";
 import { boGET, boPATCH } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import { navigate } from "../../../services/navigate";
@@ -19,7 +20,8 @@ import {
 export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
-  const [borrador, setBorrador] = useState({}); // id_pago → { fecha?, anular? }
+  const [borrador, setBorrador] = useState({}); // id_pago → { fecha?, monto?, concepto?, anular? }
+  const [nuevas, setNuevas] = useState([]); // [{ monto, fecha, concepto }]
   const [editando, setEditando] = useState(false);
   const [datos, setDatos] = useState({ concepto: "", fecha: "", notas: "" });
   const [guardando, setGuardando] = useState(false);
@@ -50,6 +52,7 @@ export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
   function aplicar(nuevo, texto) {
     setPlan(nuevo);
     setBorrador({});
+    setNuevas([]);
     setEditando(false);
     dialog.toast(texto, "success");
     onCambio?.();
@@ -61,17 +64,25 @@ export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
         const c = plan.cuotas.find((x) => String(x.id_pago) === id);
         const cambio = { id_pago: Number(id) };
         if (v.fecha && v.fecha !== c?.fecha_vencimiento) cambio.fecha_vencimiento = v.fecha;
+        if (v.monto !== undefined && v.monto !== "" && Number(String(v.monto).replace(",", ".")) !== Number(c?.monto)) cambio.monto = v.monto;
+        if (v.concepto !== undefined && v.concepto.trim() && v.concepto.trim() !== (c?.concepto || "")) cambio.concepto = v.concepto.trim();
         if (v.anular) cambio.anular = true;
         return cambio;
       })
-      .filter((c) => c.fecha_vencimiento || c.anular);
-    if (!cuotas.length) { setBorrador({}); return; }
+      .filter((c) => c.fecha_vencimiento || c.anular || c.monto !== undefined || c.concepto);
+    const altas = nuevas.filter((n) => n.monto || n.fecha)
+      .map((n) => ({ monto: n.monto, fecha_vencimiento: n.fecha, concepto: n.concepto.trim() || undefined }));
+    if (altas.some((n) => !n.monto || !n.fecha_vencimiento)) {
+      dialog.toast("Cada cuota nueva necesita importe y fecha", "error");
+      return;
+    }
+    if (!cuotas.length && !altas.length) { setBorrador({}); setNuevas([]); return; }
     if (cuotas.some((c) => c.anular)) {
       const ok = await dialog.confirm("Las cuotas marcadas quedan anuladas y ya no se cobran. No se puede deshacer.", "¿Anular cuotas?");
       if (!ok) return;
     }
     setGuardando(true);
-    const r = await boPATCH(`/backoffice/pagos/planes/${idPlan}`, { cuotas });
+    const r = await boPATCH(`/backoffice/pagos/planes/${idPlan}`, { cuotas, nuevas: altas });
     setGuardando(false);
     if (!r?.ok) { dialog.toast(r?.msg || "No se pudieron guardar las cuotas", "error"); return; }
     aplicar(r.plan, "Cuotas actualizadas");
@@ -109,7 +120,15 @@ export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
     setEditando(true);
   }
 
-  const cambiosPendientes = Object.values(borrador).some((v) => v.fecha || v.anular);
+  const cambiosPendientes = nuevas.length > 0
+    || Object.values(borrador).some((v) => v.fecha || v.anular || v.monto !== undefined || v.concepto !== undefined);
+  // Lo que quedaría de total con los cambios a medio escribir (pagado + pendiente).
+  const aNumero = (v) => Number(String(v ?? "").replace(",", ".")) || 0;
+  const totalPrevisto = plan ? plan.cuotas.reduce((acc, c) => {
+    const b = borrador[c.id_pago] || {};
+    if (c.estado === "ANULADO" || b.anular) return acc;
+    return acc + (b.monto !== undefined && b.monto !== "" ? aNumero(b.monto) : Number(c.monto));
+  }, 0) + nuevas.reduce((acc, n) => acc + aNumero(n.monto), 0) : 0;
   const r = plan?.resumen;
   const est = plan ? (ESTADO_PLAN[plan.estado] || ESTADO_PLAN.ACTIVO) : null;
 
@@ -129,7 +148,7 @@ export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
               </Boton>
             )}
             <span style={{ flex: "1 1 auto" }} />
-            {cambiosPendientes && <Boton tono="fantasma" onClick={() => setBorrador({})}>Descartar</Boton>}
+            {cambiosPendientes && <Boton tono="fantasma" onClick={() => { setBorrador({}); setNuevas([]); }}>Descartar</Boton>}
             {cambiosPendientes
               ? <Boton cargando={guardando} onClick={guardarCuotas}>Guardar cuotas</Boton>
               : <Boton tono="secundario" onClick={onCerrar}>Cerrar</Boton>}
@@ -213,6 +232,7 @@ export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
                         <span className="ase-pg-nro">{c.nro_cuota || "·"}</span>
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div className="ase-pg-cobro-n">{dinero(c.monto, c.moneda)}</div>
+                          {c.concepto && c.concepto !== plan.concepto && <div className="ase-pg-cobro-s">{c.concepto}</div>}
                           <div className="ase-pg-cobro-s">
                             {c.estado === "PAGADO" ? `pagado ${diaDe(c.fecha_pago)}${c.metodo ? ` · ${c.metodo.nombre}` : ""}` : textoVence(c)}
                           </div>
@@ -229,6 +249,18 @@ export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
                             <input className="ase-campo" type="date" value={b.fecha ?? c.fecha_vencimiento ?? ""}
                               onChange={(ev) => setBorrador((x) => ({ ...x, [c.id_pago]: { ...b, fecha: ev.target.value } }))} />
                           </label>
+                          {c.estado === "PENDIENTE" && (
+                            <label>
+                              <span>Importe ({plan.moneda})</span>
+                              <input className="ase-campo" inputMode="decimal" style={{ width: 110 }} value={b.monto ?? String(c.monto)}
+                                onChange={(ev) => setBorrador((x) => ({ ...x, [c.id_pago]: { ...b, monto: ev.target.value } }))} />
+                            </label>
+                          )}
+                          <label>
+                            <span>Concepto</span>
+                            <input className="ase-campo" maxLength={200} value={b.concepto ?? c.concepto ?? ""}
+                              onChange={(ev) => setBorrador((x) => ({ ...x, [c.id_pago]: { ...b, concepto: ev.target.value } }))} />
+                          </label>
                           <label className="ase-pg-check">
                             <input type="checkbox" checked={Boolean(b.anular)}
                               onChange={(ev) => setBorrador((x) => ({ ...x, [c.id_pago]: { ...b, anular: ev.target.checked } }))} />
@@ -244,7 +276,41 @@ export default function PlanDetalle({ idPlan, opciones, onCerrar, onCambio }) {
                     </li>
                   );
                 })}
+                {nuevas.map((n, i) => (
+                  <li key={`nueva-${i}`} data-tono="cielo">
+                    <div className="ase-pg-reprogramar">
+                      <label>
+                        <span>Importe ({plan.moneda})</span>
+                        <input className="ase-campo" inputMode="decimal" style={{ width: 110 }} value={n.monto} autoFocus={i === nuevas.length - 1}
+                          onChange={(ev) => setNuevas((xs) => xs.map((x, k) => (k === i ? { ...x, monto: ev.target.value } : x)))} />
+                      </label>
+                      <label>
+                        <span>Vence</span>
+                        <input className="ase-campo" type="date" value={n.fecha}
+                          onChange={(ev) => setNuevas((xs) => xs.map((x, k) => (k === i ? { ...x, fecha: ev.target.value } : x)))} />
+                      </label>
+                      <label>
+                        <span>Concepto (opcional)</span>
+                        <input className="ase-campo" maxLength={200} value={n.concepto} placeholder={plan.concepto}
+                          onChange={(ev) => setNuevas((xs) => xs.map((x, k) => (k === i ? { ...x, concepto: ev.target.value } : x)))} />
+                      </label>
+                      <button type="button" className="ase-pg-quitar" aria-label="Quitar cuota nueva"
+                        onClick={() => setNuevas((xs) => xs.filter((_, k) => k !== i))}><X size={14} /></button>
+                    </div>
+                  </li>
+                ))}
               </ul>
+              {editable && (
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
+                  <Boton tam="xs" tono="secundario" icono={Plus}
+                    onClick={() => setNuevas((xs) => [...xs, { monto: "", fecha: "", concepto: "" }])}>Añadir cuota</Boton>
+                  {cambiosPendientes && Math.abs(totalPrevisto - Number(plan.total)) > 0.004 && (
+                    <span className="ase-pg-cobro-s">
+                      El total pasará de <b>{dinero(plan.total, plan.moneda)}</b> a <b>{dinero(totalPrevisto, plan.moneda)}</b> al guardar
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Copy, Download, RotateCcw } from "lucide-react";
 import { dialog } from "../../../services/dialogService";
 import { useAuth } from "../context/AuthContext";
-import { PLANTILLAS, VACIO, mediosNecesarios } from "./plantillasDoctorado";
+import { PLANTILLAS, VACIO, mediosNecesarios } from "./plantillas.datos";
 
 const CLAVE = "bo_doctorado_plantillas";
 

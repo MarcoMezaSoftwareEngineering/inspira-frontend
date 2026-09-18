@@ -112,6 +112,7 @@ const GUIAS_PORTAL = [
   { servicio: SERVICIO.VISADO, tipo: "portal", titulo: "Guía del Expediente Digital · Visado", descripcion: "Tus datos, medios económicos, documentos, cita y seguimiento del visado.", href: "/guias/guia-portal-visado.pdf", peso: "2,3 MB" },
   { servicio: SERVICIO.ESTANCIA, tipo: "servicio", titulo: "Guía de la Estancia por estudios", descripcion: "EX-00, tasa, empadronamiento, documentos y plazos ante Extranjería.", href: "/guias/guia-servicio-estancia.pdf", peso: null },
   { servicio: SERVICIO.ESTANCIA, tipo: "portal", titulo: "Guía del Expediente Digital · Estancia", descripcion: "Datos, plazos, documentos, acompañantes y seguimiento en Extranjería.", href: "/guias/guia-portal-estancia.pdf", peso: "2,2 MB" },
+  { servicio: SERVICIO.DOCTORADO, tipo: "servicio", titulo: "Guía del servicio de Doctorado en España", descripcion: "Programa y director, candidatura, admisión, residencia para investigación y cómo usar tu portal.", href: "/guias/guia-servicio-doctorado.pdf", peso: null },
   { servicio: SERVICIO.FP, tipo: "servicio", titulo: "Guía del servicio de Formación Profesional", descripcion: "Homologación, centros, postulación, matrícula y cómo usar tu portal.", href: "/guias/guia-servicio-fp.pdf", peso: null },
 ];
 

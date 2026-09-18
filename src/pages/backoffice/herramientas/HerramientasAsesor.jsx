@@ -16,7 +16,7 @@
 // no se abre. Debajo, las herramientas agrupadas por lo que se hace con ellas:
 // atender a una persona, o mantener el catálogo del que salen sus informes.
 import { useEffect, useState } from "react";
-import {
+import { GraduationCap,
   BookOpen, Building2, CalendarClock, Receipt, Search, Settings2, Upload, ArrowRight,
 } from "lucide-react";
 import { boGET } from "../../../services/backofficeApi";
@@ -260,6 +260,11 @@ export default function HerramientasAsesor() {
               icono={<Search />} tono="verde" titulo="Buscador de másteres" href="/backoffice/masteres"
               descripcion="El catálogo final: cada máster con su universidad, su precio real y su plazo ya resueltos."
               dato={r ? `${r.cargados.toLocaleString("es-ES")} másteres buscables` : null}
+            />
+            <TarjetaEnlace
+              icono={<GraduationCap />} tono="petrol" titulo="Doctorado" href="/backoffice/doctorado"
+              chip={<Chip tono="verde">nuevo</Chip>}
+              descripcion="Guía del servicio (residencia UGE, acceso, proceso, paquetes) y catálogo interno: 1.234 programas oficiales con mapa, plazos y precios."
             />
             <TarjetaEnlace
               icono={<Building2 />} tono="morado" titulo="Universidades" href="/backoffice/universidades"

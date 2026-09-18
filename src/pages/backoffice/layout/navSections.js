@@ -81,7 +81,7 @@ export const NAV_SECTIONS = [
         alsoActive: [
           "/backoffice/presupuesto", "/backoffice/guias", "/backoffice/masteres",
           "/backoffice/universidades", "/backoffice/sistematizador",
-          "/backoffice/tracker-universidades", "/backoffice/catalogo-masters",
+          "/backoffice/tracker-universidades", "/backoffice/catalogo-masters", "/backoffice/doctorado",
         ],
         icon: Wrench,
       },

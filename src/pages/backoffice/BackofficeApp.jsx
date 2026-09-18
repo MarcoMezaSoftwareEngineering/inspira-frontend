@@ -39,6 +39,7 @@ import GuiasAsesor from "./guias/GuiasAsesor";
 import UniversidadesLista from "./universidades/UniversidadesLista";
 import SistematizadorMasteres from "./sistematizador/SistematizadorMasteres";
 import BuscadorMasteres from "./catalogo-masteres/BuscadorMasteres";
+import DoctoradoCore from "./doctorado/DoctoradoCore";
 import ConfiguracionPanel from "./configuracion/ConfiguracionPanel";
 
 // Módulo unificado de Configuración: cada ruta abre el panel en su pestaña y
@@ -253,6 +254,8 @@ export default function BackofficeApp() {
 
             {/* El catalogo final: de aqui sale el informe de masteres. */}
             {path === "/backoffice/masteres" && <BuscadorMasteres />}
+            {/* Doctorado: guía del servicio y catálogo interno (18/09/2026). */}
+            {path === "/backoffice/doctorado" && <DoctoradoCore />}
 
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
 

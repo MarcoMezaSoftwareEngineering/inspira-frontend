@@ -29,7 +29,54 @@ export function guardarVisto(id) {
 /** Desde cuándo algo es «nuevo»: la última visita o, sin ella, hace una semana. */
 export const desdeVisto = (id) => leerVisto(id) ?? Date.now() - SEMANA;
 
-export const cargarNovedades = (idSolicitud) => apiGET(`/solicitudes/${idSolicitud}/novedades`);
+// Las novedades las piden a la vez el expediente, su línea de tiempo y el
+// centro de avisos de la barra de arriba. Un minuto de memoria evita pedir
+// tres veces lo mismo al abrir un expediente; un fallo no se recuerda.
+const MEMORIA_MS = 60 * 1000;
+const memoria = new Map(); // id → { t, promesa }
+
+export function cargarNovedades(idSolicitud) {
+  const previa = memoria.get(idSolicitud);
+  if (previa && Date.now() - previa.t < MEMORIA_MS) return previa.promesa;
+  const promesa = apiGET(`/solicitudes/${idSolicitud}/novedades`).then((r) => {
+    if (!r?.ok) memoria.delete(idSolicitud);
+    return r;
+  }, (e) => {
+    memoria.delete(idSolicitud);
+    throw e;
+  });
+  memoria.set(idSolicitud, { t: Date.now(), promesa });
+  return promesa;
+}
+
+/** Olvida lo guardado (tirar para recargar, «Actualizar»). */
+export function olvidarNovedades() {
+  memoria.clear();
+}
+
+/** El icono de cada tipo de novedad (nombres de components/common/Icono). */
+export const ICONO_NOVEDAD = {
+  documento_recibido: "documento",
+  documento_inspira: "documento",
+  documento_aprobado: "escudo",
+  documento_observado: "documento",
+  documento_proceso: "birrete",
+  mensaje: "chat",
+  etapa: "brujula",
+  requerimiento: "balanza",
+  extranjeria: "balanza",
+  pago: "euro",
+  plazo: "calendario",
+};
+
+/** El tono con que se pinta: lo que pide algo, en naranja; lo bueno, en verde. */
+export const TONO_NOVEDAD = {
+  documento_aprobado: "ok",
+  documento_observado: "alto",
+  requerimiento: "alto",
+  pago: "ok",
+  plazo: "aviso",
+};
 
 /**
  * Cuántas novedades hay desde la última visita, sin marcar nada como visto.

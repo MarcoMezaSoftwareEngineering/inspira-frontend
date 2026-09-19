@@ -142,7 +142,7 @@ export const estadoDe = (c) => ESTADO[c?.estado_visible] || ESTADO[c?.estado] ||
 
 /* ── La URL de la pantalla ─────────────────────────────────────────────── */
 
-const VISTAS = ["pendientes", "por-validar", "cobrados", "planes"];
+const VISTAS = ["pendientes", "por-validar", "cobrados", "planes", "caja"];
 
 export function leerUrl() {
   const p = new URLSearchParams(window.location.search);

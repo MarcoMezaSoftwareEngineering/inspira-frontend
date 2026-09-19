@@ -62,6 +62,7 @@ function Tarjeta({ lead, onAbrir, arrastrable, onArrastre }) {
       )}
       <div className="ase-ld-card-pie">
         <Chip tono="gris">{ORIGENES[lead.origen] || lead.origen}</Chip>
+        {lead.prueba && <Chip tono="morado">prueba</Chip>}
         <span className="ase-ld-card-f">
           {lead.sin_responder && <Clock size={10} style={{ verticalAlign: "-1px", marginRight: 3, color: "var(--accent)" }} />}
           {lead.asesor?.nombre ? `${lead.asesor.nombre.split(" ")[0]} · ` : ""}{haceCuanto(lead.created_at)}
@@ -92,6 +93,9 @@ export default function Leads() {
   });
   const [asesor, setAsesor] = useState("");
   const [sinResponder, setSinResponder] = useState(false);
+  // Los leads de prueba (Test Usuario, cuentas del equipo, marcados en la
+  // ficha) no salen ni cuentan salvo que se pida.
+  const [conPruebas, setConPruebas] = useState(false);
   const [etapaFiltro, setEtapaFiltro] = useState("");
 
   const [abierto, setAbierto] = useState(leerLeadDeUrl);
@@ -111,8 +115,9 @@ export default function Leads() {
     if (origen) p.set("origen", origen);
     if (asesor) p.set("asesor", asesor);
     if (sinResponder) p.set("sin_responder", "1");
+    if (conPruebas) p.set("incluir_pruebas", "1");
     return p.toString();
-  }, [textoAplicado, origen, asesor, sinResponder]);
+  }, [textoAplicado, origen, asesor, sinResponder, conPruebas]);
 
   const pedir = useCallback(() => Promise.all([
     boGET(`/backoffice/leads?${query}`),
@@ -293,6 +298,10 @@ export default function Leads() {
             <input type="checkbox" checked={sinResponder} onChange={(e) => setSinResponder(e.target.checked)} />
             <i /> Sin responder
           </label>
+          <label className="ase-toggle">
+            <input type="checkbox" checked={conPruebas} onChange={(e) => setConPruebas(e.target.checked)} />
+            <i /> Incluir pruebas
+          </label>
           <div className="ase-vista" role="group" aria-label="Cómo ver los leads">
             <button type="button" aria-pressed={vista === "tablero"} onClick={() => cambiarVista("tablero")}>
               <LayoutGrid size={13} style={{ verticalAlign: "-2px" }} /> Tablero
@@ -379,6 +388,7 @@ export default function Leads() {
                       <td style={{ fontWeight: 700, minWidth: 140 }}>
                         {nombreDe(l)}
                         {l.sin_responder && <div style={{ fontSize: 10.5, color: "var(--accent-2)", fontWeight: 700 }}>sin responder</div>}
+                        {l.prueba && <div style={{ fontSize: 10.5, color: "#7d3c98", fontWeight: 700 }}>prueba</div>}
                       </td>
                       <td style={{ minWidth: 160 }}>
                         <div>{l.email || "—"}</div>

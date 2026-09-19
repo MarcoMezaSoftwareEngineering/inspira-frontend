@@ -254,7 +254,11 @@ function Cuota({ c, destacada, medios, mp, datosAbiertos, onVerDatos, onSubir, o
         <div className="ex-pg-cuota-fila">
           <div className="min-w-0">
             <strong>{nombreCuota(c)} · {importe(c.monto, c.moneda)}</strong>
-            <small>{c.estado === "PAGADO" && e.texto ? e.texto : `Vence el ${diaPago(c.fecha_vencimiento)}`}</small>
+            <small>
+              {c.estado === "PAGADO" && e.texto
+                ? `${e.texto}${c.fecha_vencimiento ? ` · vencía el ${diaPago(c.fecha_vencimiento)}` : ""}`
+                : c.fecha_vencimiento ? `${c.vencido ? "Venció" : "Vence"} el ${diaPago(c.fecha_vencimiento)}` : "Sin fecha de vencimiento"}
+            </small>
           </div>
           <span className={`pnl-chip pnl-chip-${e.tono}`}><span className="punto" />{e.etiqueta}</span>
         </div>
@@ -341,6 +345,34 @@ function Cuota({ c, destacada, medios, mp, datosAbiertos, onVerDatos, onSubir, o
   );
 }
 
+/**
+ * Cómo van las cuotas del plan, de un vistazo: «2 pagadas · 1 en revisión ·
+ * 1 vencida · 1 pendiente». Solo lo que hay; con una sola cuota no hace falta.
+ */
+function EstadosPlan({ cuotas }) {
+  if ((cuotas || []).length < 2) return null;
+  const n = { pagada: 0, revision: 0, vencida: 0, pendiente: 0 };
+  for (const c of cuotas) {
+    if (c.estado === "PAGADO") n.pagada += 1;
+    else if (c.estado === "EN_REVISION") n.revision += 1;
+    else if (c.estado === "PENDIENTE" && c.vencido) n.vencida += 1;
+    else if (c.estado === "PENDIENTE") n.pendiente += 1;
+  }
+  const partes = [
+    n.pagada && { t: `${n.pagada} ${n.pagada === 1 ? "pagada" : "pagadas"}`, tono: "ok" },
+    n.revision && { t: `${n.revision} en revisión`, tono: "info" },
+    n.vencida && { t: `${n.vencida} ${n.vencida === 1 ? "vencida" : "vencidas"}`, tono: "alto" },
+    n.pendiente && { t: `${n.pendiente} ${n.pendiente === 1 ? "pendiente" : "pendientes"}`, tono: "tipo" },
+  ].filter(Boolean);
+  return (
+    <ul className="pnl-pagos-estados" aria-label="Estado de las cuotas">
+      {partes.map((p) => (
+        <li key={p.t} className={`pnl-chip pnl-chip-${p.tono}`}><span className="punto" />{p.t}</li>
+      ))}
+    </ul>
+  );
+}
+
 function Plan({ plan, destacada, medios, mp, verDatos, onVerDatos, onSubir, onPagarLinea }) {
   const pct = plan.total > 0 ? Math.min(100, Math.round((plan.pagado / plan.total) * 100)) : 0;
   return (
@@ -364,6 +396,7 @@ function Plan({ plan, destacada, medios, mp, verDatos, onVerDatos, onSubir, onPa
           ? ` · todo pagado antes del ${diaPago(plan.fecha_limite_postulacion)}, fecha límite de tu postulación`
           : ""}
       </p>
+      <EstadosPlan cuotas={plan.cuotas} />
       <ol className="ex-pg-cuotas">
         {(plan.cuotas || []).map((c) => (
           <Cuota

@@ -47,29 +47,42 @@ const CAMPOS_FECHA = [
   "viaje_fecha_prevista", "centro_inicio", "centro_fin",
 ];
 
+// Los datos que comparte con su perfil. El perfil es la fuente única
+// (backend: perfil.campos.js): se leen de allí primero y, al guardar, lo que
+// cambie aquí sube al perfil (perfilSync.js, el último dato guardado gana).
+// Antes mandaba lo guardado en el expediente, y quien corregía su pasaporte
+// en «Mi perfil» seguía viendo aquí el viejo.
+function primero(perfil, expediente) {
+  return String(perfil ?? "").trim() ? perfil : (expediente || "");
+}
+
 function estadoInicial(exp, cli, extra) {
   const e = exp || {};
   const c = cli || {};
   const x = extra || {};
-  // Prioridad: lo ya guardado en el expediente; si está vacío, lo que se conozca
-  // del perfil del cliente. Así no se le pide dos veces lo mismo.
+  // Firmado, el formulario es el impreso presentado: se enseña tal cual se
+  // firmó, aunque luego el perfil haya cambiado.
+  const firmado = e.formulario_estado === "FIRMADO";
+  const comun = (perfil, expediente) => (firmado ? (expediente || perfil || "") : primero(perfil, expediente));
   const base = {
     // Van separados porque el impreso oficial los pide en dos líneas: los dos
     // apellidos juntos en la primera, los nombres en la segunda.
     apellidos:        e.apellidos        || "",
     nombres:          e.nombres          || "",
-    dni:              e.dni              || c.dni            || "",
-    num_pasaporte:    e.num_pasaporte    || c.pasaporte      || "",
-    exp_pasaporte:    e.exp_pasaporte    || x.pasaporte_emision     || "",
-    venc_pasaporte:   e.venc_pasaporte   || x.pasaporte_vencimiento || "",
-    pais_nacimiento:  e.pais_nacimiento  || c.pais_origen    || "",
+    dni:              comun(c.dni, e.dni),
+    num_pasaporte:    comun(c.pasaporte, e.num_pasaporte),
+    exp_pasaporte:    comun(x.pasaporte_emision, e.exp_pasaporte),
+    venc_pasaporte:   comun(x.pasaporte_vencimiento, e.venc_pasaporte),
+    pais_nacimiento:  comun(c.pais_origen, e.pais_nacimiento),
     lugar_nacimiento: e.lugar_nacimiento || "",
-    fecha_nacimiento: e.fecha_nacimiento || x.fecha_nacimiento || "",
+    fecha_nacimiento: comun(x.fecha_nacimiento, e.fecha_nacimiento),
     estado_civil:     e.estado_civil     || "",
     profesion:        e.profesion        || "",
     domicilio:        e.domicilio        || "",
+    // El correo NO sigue al perfil: el de su cuenta es su acceso con Google,
+    // y aquí puede poner otro de contacto para este trámite.
     correo:           e.correo           || c.email_contacto || "",
-    telefono:         e.telefono         || c.telefono       || "",
+    telefono:         comun(c.telefono, e.telefono),
     viaje_fecha_prevista: e.viaje_fecha_prevista || "",
     domicilio_espana:     e.domicilio_espana     || "",
     centro_direccion: e.centro_direccion || "",

@@ -21,6 +21,7 @@ import LeadsCalculadora from "./calculadora/LeadsCalculadora";
 import Leads from "./leads/Leads";
 import InteresMapa from "./leads/InteresMapa";
 import EnlacesVisitas from "./leads/EnlacesVisitas";
+import EmbudoVentas from "./leads/EmbudoVentas";
 import Pagos from "./pagos/Pagos";
 import Tareas from "./tareas/Tareas";
 import PanelAsesoras from "./panel-asesoras/PanelAsesoras";
@@ -265,6 +266,7 @@ export default function BackofficeApp() {
             {path === "/backoffice/leads" && <ModuleGate perm="leads.ver"><Leads /></ModuleGate>}
             {path === "/backoffice/leads/mapa" && <ModuleGate perm="leads.ver"><InteresMapa /></ModuleGate>}
             {path === "/backoffice/leads/enlaces" && <ModuleGate perm="leads.ver"><EnlacesVisitas /></ModuleGate>}
+            {path === "/backoffice/leads/embudo" && <ModuleGate perm="leads.ver"><EmbudoVentas /></ModuleGate>}
 
             {/* PAGOS — caja del mes, comprobantes y planes. ?cliente=, ?pago= y ?plan= abren lo suyo. */}
             {path === "/backoffice/pagos" && <ModuleGate perm="pagos.ver"><Pagos /></ModuleGate>}

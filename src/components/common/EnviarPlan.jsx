@@ -4,6 +4,7 @@
 import { useState } from "react";
 import Icono from "./Icono";
 import { registrarEvento, registrarLead, utmGuardados } from "../../lib/analytics";
+import { RUTAS_LEGALES, VERSIONES } from "../../config/legal";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -13,6 +14,8 @@ export default function EnviarPlan({ resultado, respuestas }) {
   const [abierto, setAbierto] = useState(false);
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
+  // Obligatoria: sin aceptar la política no se envía el plan ni se guarda el contacto.
+  const [aceptaPolitica, setAceptaPolitica] = useState(false);
   const [estado, setEstado] = useState("idle"); // idle | enviando | ok | error
   const [error, setError] = useState(null);
 
@@ -22,6 +25,10 @@ export default function EnviarPlan({ resultado, respuestas }) {
 
     if (!EMAIL_RE.test(email.trim())) {
       setError("Escribe un correo válido para poder enviártelo.");
+      return;
+    }
+    if (!aceptaPolitica) {
+      setError("Para enviarte el plan necesitamos que aceptes la política de privacidad.");
       return;
     }
 
@@ -40,6 +47,9 @@ export default function EnviarPlan({ resultado, respuestas }) {
           empezar: resultado.empezar,
           documentos: resultado.documentos,
           respuestas: respuestas.map((h) => ({ p: h.pregunta, r: h.resp })),
+          // El servidor guarda que se aceptó, cuándo y qué versión.
+          acepta_politica: true,
+          politica_version: VERSIONES.privacidad.version,
           // Para saber de qué anuncio llega el lead en Inspira Core.
           pagina: window.location.pathname,
           ...utmGuardados(),
@@ -124,6 +134,29 @@ export default function EnviarPlan({ resultado, respuestas }) {
             />
           </div>
 
+          <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-[12px] leading-relaxed text-neutral-700">
+            <input
+              type="checkbox"
+              required
+              checked={aceptaPolitica}
+              onChange={(ev) => setAceptaPolitica(ev.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[#013446]"
+            />
+            <span>
+              He leído y acepto la{" "}
+              <a
+                href={RUTAS_LEGALES.privacidad}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(ev) => ev.stopPropagation()}
+                className="font-semibold text-primary underline underline-offset-2"
+              >
+                política de privacidad
+              </a>
+              . <span className="text-red-600">*</span>
+            </span>
+          </label>
+
           {error && (
             <p className="mt-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
               {error}
@@ -133,7 +166,7 @@ export default function EnviarPlan({ resultado, respuestas }) {
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
               type="submit"
-              disabled={estado === "enviando"}
+              disabled={estado === "enviando" || !aceptaPolitica}
               className="rounded-xl bg-primary px-5 py-3 text-sm font-extrabold text-white transition hover:bg-primary-light disabled:opacity-60"
             >
               {estado === "enviando" ? "Enviando…" : "Enviarme el plan"}

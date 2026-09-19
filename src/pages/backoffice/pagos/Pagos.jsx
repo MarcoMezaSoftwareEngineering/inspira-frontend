@@ -6,7 +6,9 @@
 // mes y los planes. Cada cobro lleva las acciones que permite el rol.
 //
 // La URL dice qué se ve, para poder mandar el enlace:
-//   ?vista=por-validar | cobrados | planes   (pendientes por defecto)
+//   ?vista=por-validar | cobrados | planes | caja   (pendientes por defecto)
+//                 «caja» es la caja mensual (CajaMes.jsx): cobrado, pendiente,
+//                 vencido y en revisión del mes elegido, con desglose y CSV.
 //   ?cliente=ID   filtra por cliente y enseña sus planes arriba (barra «Hoy»)
 //   ?pago=ID      abre ese cobro; si espera validación, la ventana de validar
 //                 (el correo interno de «comprobante subido» enlaza aquí)
@@ -21,6 +23,7 @@ import BotonesCobro from "./BotonesCobro";
 import PlanNuevo from "./PlanNuevo";
 import PlanDetalle from "./PlanDetalle";
 import PlanesCliente from "./PlanesCliente";
+import CajaMes from "./CajaMes";
 import {
   ESTADO_PLAN, MODALIDAD, dinero, bolsaTexto, cobrosDe, diaDe, textoVence, textoCuota, estadoDe,
   mesLima, sumarMes, limitesMes, nombreMes, leerUrl, escribirUrl,
@@ -32,6 +35,7 @@ const PESTANAS = [
   { id: "por-validar", label: "Por validar" },
   { id: "cobrados", label: "Cobrados" },
   { id: "planes", label: "Planes" },
+  { id: "caja", label: "Caja" },
 ];
 
 const VACIOS = {
@@ -39,6 +43,7 @@ const VACIOS = {
   "por-validar": ["Ningún comprobante por validar", "Cuando un asesorado suba su voucher desde el panel, aparecerá aquí."],
   cobrados: ["Sin cobros este mes", "Cambia de mes arriba o quita filtros."],
   planes: ["Sin planes de pago", "Crea el primero: fija las cuotas y el asesorado las verá en su panel."],
+  caja: ["", ""],
 };
 
 const centimos = (v) => Math.round(Number(v || 0) * 100);
@@ -296,6 +301,7 @@ export default function Pagos() {
     "por-validar": resumen ? nPorValidar : null,
     cobrados: resumen ? cobrosDe(resumen.cobrado_mes) : null,
     planes: resumen ? resumen.planes?.ACTIVO || 0 : null,
+    caja: null,
   };
 
   const stats = [
@@ -351,6 +357,7 @@ export default function Pagos() {
           ))}
         </div>
 
+        {vista === "caja" ? <CajaMes mes={mes} /> : (<>
         <div className="ase-pg-filtros">
           <label className="ase-buscar">
             <Search />
@@ -432,6 +439,7 @@ export default function Pagos() {
             )}
           </div>
         )}
+        </>)}
       </Cuerpo>
 
       {nuevoAbierto && (

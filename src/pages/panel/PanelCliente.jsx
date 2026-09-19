@@ -17,6 +17,9 @@ import "../../styles/pasos-core.css";
 // la estancia. Antes solo lo importaban RutaPasos y TarjetaMaster, del máster:
 // quien solo tenía visado y entraba directo veía los documentos sin estilos.
 import "../../styles/pasos.css";
+// Centro de avisos, línea de tiempo, instalar la app, doctorado y encuesta
+// de cierre (18/09/2026).
+import "../../styles/panel-centro.css";
 import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";
@@ -46,6 +49,10 @@ import { alTerminarSesion, borrarSesionLocal, caducado, leerToken, vigilarSesion
 import { useTirarParaRecargar } from "./hooks/useMovimiento";
 import { CabeceraExpedienteCtx } from "./cabeceraExpediente";
 import { recorta } from "./pendientes";
+import CentroAvisos from "./components/CentroAvisos";
+import InstalarAppModal from "./components/InstalarAppModal";
+import { ServiciosPanelCtx } from "./serviciosCtx";
+import { olvidarNovedades } from "./novedades";
 
 // Las guías (GuiaMaster, GuiaApostilla…) las descarga MisGuias al abrirlas.
 const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
@@ -103,6 +110,8 @@ export default function PanelCliente({ path }) {
   // El recorrido: sale solo la primera vez que entra con servicios —se apunta
   // en su perfil, no en el teléfono— y se repite desde «¿Cómo funciona?».
   const [tour, setTour] = useState(false);
+  // «Instalar la app», desde el menú: los pasos del sistema que toque.
+  const [instalarAbierto, setInstalarAbierto] = useState(false);
   // La lista de servicios se pide una sola vez y se reparte: el menú decide
   // con ella qué recursos abrir y «Mis servicios» la pinta. Antes cada uno
   // hacía su propia petición al mismo sitio.
@@ -204,7 +213,10 @@ export default function PanelCliente({ path }) {
 
   // Tirar para recargar: lo mismo que entrar, sin esqueletos ni saltos.
   const recargarTodo = useCallback(
-    () => Promise.all([cargarMe({ silencioso: true }), cargarServicios({ silencioso: true }), cargarPagos()]),
+    () => {
+      olvidarNovedades(); // que la campana y las novedades pidan lo último
+      return Promise.all([cargarMe({ silencioso: true }), cargarServicios({ silencioso: true }), cargarPagos()]);
+    },
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
@@ -308,6 +320,8 @@ export default function PanelCliente({ path }) {
     : titles[tab] || "Mi panel";
   const eyebrowBarra = ruta.idServicio ? (cabExp?.eyebrow || "Tu expediente") : null;
   const enPortada = tab === "inicio" && !ruta.idServicio;
+  // La campana de avisos, en cuanto tiene algún servicio.
+  const conCampana = Boolean(user) && lista.length > 0;
 
   // La zona que se desplaza: para la barra de arriba (sombra al bajar, título
   // que aparece cuando el saludo se va) y para tirar y recargar. Se escribe
@@ -374,12 +388,14 @@ export default function PanelCliente({ path }) {
         onTour={verTour}
         guias={pestanasGuia}
         conPagos={conPagos}
+        onInstalarApp={() => { setSidebarOpen(false); setInstalarAbierto(true); }}
       />
 
       {/* En el móvil manda el scroll de la página: un expediente dentro de una
           caja con scroll propio se siente atrapado y cuesta bajar. La columna
           con scroll interno se queda solo en pantalla grande, donde la barra
           de pasos tiene que permanecer a la vista. */}
+      <ServiciosPanelCtx.Provider value={lista}>
       <main className={`flex-1 min-w-0 flex flex-col overflow-y-auto ${esScrollInterno ? "lg:min-h-0 lg:overflow-hidden" : ""}`}>
         {/* Barra superior */}
         <div ref={barraRef} className="pnl-top sticky top-0 z-10 shrink-0">
@@ -419,9 +435,17 @@ export default function PanelCliente({ path }) {
             </button>
           )}
 
+          {/* La campana: lo nuevo en sus expedientes, plazos y cuotas desde la
+              última visita. */}
+          {conCampana && (
+            <div className={ruta.idServicio && cabExp?.pct != null ? "" : "ml-auto"}>
+              <CentroAvisos servicios={lista} pagos={planesPago} />
+            </div>
+          )}
+
           {/* Tocar la foto abre el perfil, como en cualquier app. */}
           {user && (
-            <div className={`pnl-top-user ml-auto${ruta.idServicio ? " max-md:!hidden" : ""}`}>
+            <div className={`pnl-top-user${conCampana ? "" : " ml-auto"}${ruta.idServicio ? " max-md:!hidden" : ""}`}>
               <span className="pnl-top-nombre hidden sm:block" title={nombre}>{datosUsuario(user).corto}</span>
               <button type="button" className="pnl-top-avatar" onClick={() => handleChangeTab("perfil")} aria-label="Abrir mi perfil">
                 <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={34} />
@@ -465,6 +489,7 @@ export default function PanelCliente({ path }) {
               <MisServicios
                 ruta={ruta}
                 perfil={user}
+                onPerfilCambiado={() => cargarMe({ silencioso: true })}
                 conAcademico={conAcademico}
                 conCompleto={conCompleto}
                 servicios={lista}
@@ -519,6 +544,7 @@ export default function PanelCliente({ path }) {
         </div>
         </div>
       </main>
+      </ServiciosPanelCtx.Provider>
 
       {conTabbar && user && (
         <BarraPestanas
@@ -537,6 +563,8 @@ export default function PanelCliente({ path }) {
       <AvisoVersionNueva producto="Inspira" />
 
       {tour && <Tour pasos={PASOS_INICIO} onFin={terminarTour} />}
+
+      {instalarAbierto && <InstalarAppModal onCerrar={() => setInstalarAbierto(false)} />}
 
       {mostrarWizard && !finSesion && (
         <WizardPerfilCliente

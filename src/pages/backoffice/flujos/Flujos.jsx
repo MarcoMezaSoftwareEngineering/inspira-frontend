@@ -3,10 +3,15 @@
 // Para que el asesor sepa, de un vistazo, en qué paso está cada cliente, a
 // quién le toca mover y qué tiene que hacer él. Los pasos salen de
 // flujos.config.js; los clientes de cada paso, de Procesos en vivo.
-import { useEffect, useMemo, useState } from "react";
+//
+// Acciones en lote (AccionesLote.jsx): se marcan clientes de un paso —o todos
+// los del paso— y la barra de abajo aprueba, devuelve o recuerda de una vez.
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import { ACTORES, FLUJOS } from "./flujos.config";
 import { Pagina, Cabecera, Cuerpo } from "../ui";
+import RevisionRapida from "../comun/RevisionRapida";
+import { BarraLote, VentanaAprobar, AvisoDeshacer, VentanaDevolver, VentanaRecordar } from "./AccionesLote";
 
 function pasoDe(flujo, p) {
   // Estancia manda por su propio expediente; el resto, por la etapa.
@@ -17,9 +22,11 @@ function pasoDe(flujo, p) {
   return flujo.pasos.findIndex((x) => x.etapas.includes(p.etapa));
 }
 
-function Paso({ paso, i, total, clientes, abierto, onAlternar, onAbrirProceso }) {
+function Paso({ paso, i, total, clientes, abierto, onAlternar, onAbrirProceso, seleccion, onMarcar, onMarcarPaso, onRevisar }) {
   const a = ACTORES[paso.actor];
   const ultimo = i === total - 1;
+  const marcadosAqui = clientes.filter((p) => seleccion.has(p.id_solicitud)).length;
+  const todosAqui = clientes.length > 0 && marcadosAqui === clientes.length;
   return (
     <li className="relative flex gap-3">
       {/* Línea y nodo */}
@@ -78,21 +85,41 @@ function Paso({ paso, i, total, clientes, abierto, onAlternar, onAbrirProceso })
             {paso.donde && <p className="text-[11px] text-neutral-500">Dónde: {paso.donde}</p>}
           </div>
 
+          {clientes.length > 0 && (
+            <div className="border-t border-neutral-100 px-3.5 py-1.5 flex items-center gap-2 bg-neutral-50/60">
+              <label className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-neutral-600 cursor-pointer">
+                <input type="checkbox" checked={todosAqui}
+                  ref={(el) => { if (el) el.indeterminate = marcadosAqui > 0 && !todosAqui; }}
+                  onChange={() => onMarcarPaso(clientes.map((p) => p.id_solicitud), !todosAqui)} />
+                Seleccionar los {clientes.length} de este paso
+              </label>
+              {marcadosAqui > 0 && <span className="text-[11px] text-[#1D6A4A] font-semibold">{marcadosAqui} marcado{marcadosAqui === 1 ? "" : "s"}</span>}
+            </div>
+          )}
+
           {abierto && clientes.length > 0 && (
             <div className="border-t border-neutral-100 divide-y divide-neutral-100">
               {clientes.map((p) => (
-                <button key={p.id_solicitud} type="button" onClick={() => onAbrirProceso(p.id_solicitud)}
-                  className="w-full text-left px-3.5 py-2 hover:bg-neutral-50 flex items-center gap-2">
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[12.5px] font-semibold text-neutral-800 truncate">{p.cliente}</span>
-                    <span className="block text-[10.5px] text-neutral-500 truncate">
-                      {p.responsable || "sin responsable"}
-                      {p.proximo ? ` · ${p.proximo.etiqueta} ${p.proximo.vencido ? `hace ${-p.proximo.dias}d` : `en ${p.proximo.dias}d`}` : ""}
+                <div key={p.id_solicitud} className={`flex items-center gap-2 pl-3.5 pr-2 ${seleccion.has(p.id_solicitud) ? "bg-[#E8F5EE]/60" : ""}`}>
+                  <input type="checkbox" aria-label={`Seleccionar a ${p.cliente}`}
+                    checked={seleccion.has(p.id_solicitud)} onChange={() => onMarcar(p.id_solicitud)} />
+                  <button type="button" onClick={() => onAbrirProceso(p.id_solicitud)}
+                    className="min-w-0 flex-1 text-left py-2 hover:bg-neutral-50 flex items-center gap-2 rounded-lg px-1">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[12.5px] font-semibold text-neutral-800 truncate">{p.cliente}</span>
+                      <span className="block text-[10.5px] text-neutral-500 truncate">
+                        {p.responsable || "sin responsable"}
+                        {p.proximo ? ` · ${p.proximo.etiqueta} ${p.proximo.vencido ? `hace ${-p.proximo.dias}d` : `en ${p.proximo.dias}d`}` : ""}
+                      </span>
                     </span>
-                  </span>
-                  {p.proximo?.vencido && <span className="text-[10px] font-bold text-red-700 bg-red-50 rounded-full px-2 py-0.5">vencido</span>}
-                  <span className="text-[11.5px] font-semibold text-[#1D6A4A]">Abrir →</span>
-                </button>
+                    {p.proximo?.vencido && <span className="text-[10px] font-bold text-red-700 bg-red-50 rounded-full px-2 py-0.5">vencido</span>}
+                    <span className="text-[11.5px] font-semibold text-[#1D6A4A]">Abrir →</span>
+                  </button>
+                  <button type="button" onClick={() => onRevisar(p.id_solicitud)} title="Revisar sus documentos uno a uno"
+                    className="shrink-0 text-[11px] font-semibold text-[#046C8C] hover:underline px-1">
+                    Revisar
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -115,9 +142,19 @@ export default function Flujos() {
     } catch { return null; }
   });
 
-  useEffect(() => {
-    boGET("/backoffice/procesos").then((r) => r.ok && setProcesos(r.procesos || []));
-  }, []);
+  const cargar = useCallback(() => boGET("/backoffice/procesos").then((r) => r.ok && setProcesos(r.procesos || [])), []);
+  useEffect(() => { cargar(); }, [cargar]);
+
+  // Selección para las acciones en lote (ids de proceso).
+  const [seleccion, setSeleccion] = useState(new Set());
+  const [ventana, setVentana] = useState(null); // "aprobar" | "devolver" | "recordar"
+  const [deshacer, setDeshacer] = useState(null); // { lote, aprobados }
+  const [revisando, setRevisando] = useState(null);
+  const ids = useMemo(() => [...seleccion], [seleccion]);
+  const marcar = (id) => setSeleccion((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const marcarPaso = (lista, si) => setSeleccion((s) => { const n = new Set(s); lista.forEach((id) => (si ? n.add(id) : n.delete(id))); return n; });
+  const cerrarVentana = useCallback(() => setVentana(null), []);
+  const finDeshacer = useCallback(() => setDeshacer(null), []);
 
   const flujo = FLUJOS.find((f) => f.servicio === servicio);
 
@@ -152,7 +189,7 @@ export default function Flujos() {
             return (
               <button key={f.servicio} type="button" className="ase-tab"
                 data-on={servicio === f.servicio ? "1" : "0"} aria-pressed={servicio === f.servicio}
-                onClick={() => { setServicio(f.servicio); setAbiertos(new Set()); }}>
+                onClick={() => { setServicio(f.servicio); setAbiertos(new Set()); setSeleccion(new Set()); }}>
                 {f.titulo}<span className="ase-tab-n">{n}</span>
               </button>
             );
@@ -182,14 +219,30 @@ export default function Flujos() {
           <Paso key={paso.titulo} paso={paso} i={i} total={flujo.pasos.length}
             clientes={porPaso[i]} abierto={abiertos.has(i)}
             onAlternar={() => setAbiertos((s) => { const n = new Set(s); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
-            onAbrirProceso={abrir} />
+            onAbrirProceso={abrir}
+            seleccion={seleccion} onMarcar={marcar} onRevisar={setRevisando}
+            onMarcarPaso={(lista, si) => { marcarPaso(lista, si); if (si) setAbiertos((x) => new Set(x).add(i)); }} />
         ))}
       </ol>
 
       <p className="text-[11px] text-neutral-400 leading-relaxed">
         Los pasos 2 y 4 de Máster no tienen etapa propia en Procesos todavía: sus clientes aparecen en el paso anterior.
       </p>
+      {/* Hueco para que la barra fija no tape el último paso. */}
+      {seleccion.size > 0 && <div className="h-20" />}
       </Cuerpo>
+
+      <BarraLote n={seleccion.size} onLimpiar={() => setSeleccion(new Set())}
+        onAprobar={() => setVentana("aprobar")} onDevolver={() => setVentana("devolver")} onRecordar={() => setVentana("recordar")} />
+      <VentanaAprobar abierta={ventana === "aprobar"} ids={ids} onCerrar={cerrarVentana}
+        onHecho={(r) => { setVentana(null); cargar(); if (r.lote) setDeshacer({ lote: r.lote, aprobados: r.aprobados }); }} />
+      <VentanaDevolver abierta={ventana === "devolver"} ids={ids} onCerrar={cerrarVentana} onHecho={() => cargar()} />
+      <VentanaRecordar abierta={ventana === "recordar"} ids={ids} onCerrar={cerrarVentana} onHecho={() => cargar()} />
+      {deshacer && (
+        <AvisoDeshacer key={deshacer.lote} lote={deshacer.lote} aprobados={deshacer.aprobados}
+          onFin={finDeshacer} onDeshecho={() => { setDeshacer(null); cargar(); }} />
+      )}
+      {revisando && <RevisionRapida idSolicitud={revisando} onCerrar={(cambio) => { setRevisando(null); if (cambio) cargar(); }} />}
     </Pagina>
   );
 }

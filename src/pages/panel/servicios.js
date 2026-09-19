@@ -93,8 +93,9 @@ const ACCESOS = {
   [SERVICIO.ESTANCIA]: ["portal", "estancia", "apostilla"],
   [SERVICIO.MODIFICATORIA]: ["modificatoria", "apostilla"],
   [SERVICIO.FP]: ["portal", "becas", "apostilla"],
-  // Sin guía propia todavía: recorrido genérico, como OTRO.
-  [SERVICIO.DOCTORADO]: ["apostilla"],
+  // Recorrido propio (DetalleSolicitudDoctorado) y su guía en PDF en
+  // «Mis guías» (GUIAS_PORTAL): sin "portal" la pestaña no se abría.
+  [SERVICIO.DOCTORADO]: ["portal", "apostilla"],
   [SERVICIO.OTRO]: ["apostilla"],
 };
 
@@ -150,8 +151,12 @@ export function pestanasGuiasDe(accesos, guiasPortal = []) {
  * años de estudio, inicio previsto, presupuesto): los que buscan programa por
  * él. Visado, estancia y modificatoria no lo piden (12/09/2026): la estancia
  * ya pregunta sus estudios en España dentro de su propio expediente.
+ *
+ * Máster, FP (que incluye el grado: servicioDe manda «grado» a FP) y
+ * doctorado (18/09/2026): el doctorado no tiene formulario académico propio,
+ * pero su candidatura parte de la carrera y la universidad de origen.
  */
-const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.FP];
+const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.FP, SERVICIO.DOCTORADO];
 
 /**
  * Recursos que abren los servicios PROPIOS de la lista. Los expedientes a los

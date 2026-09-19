@@ -16,7 +16,7 @@ import { queMeFaltaVisado } from "../../queMeFalta";
 import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
 import { comprobarRespuesta } from "../../../../services/sesion";
-import { usePublicarCabecera } from "../../cabeceraExpediente";
+import { usePublicarCabecera } from "../../cabeceraExpediente";
 import NovedadesExpediente from "../NovedadesExpediente";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
@@ -171,7 +171,7 @@ function DescargaDoc({ slot, doc, idSolicitud }) {
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
-export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion, faltanPerfil = 0 }) {
+export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion, faltanPerfil = 0, onPerfilCambiado }) {
   const [detalle, setDetalle] = useState(null);
   const [checklist, setChecklist] = useState([]);
   const [visaExp, setVisaExp] = useState(null);
@@ -648,7 +648,9 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
                     expediente={visaExp}
                     cliente={cli}
                     extra={extra}
-                    onGuardado={() => cargarTodo({ silent: true })}
+                    // Lo que cambió aquí sube a su perfil (perfilSync): el
+                    // panel lo vuelve a leer para «Mi perfil».
+                    onGuardado={() => { cargarTodo({ silent: true }); onPerfilCambiado?.(); }}
                   />
                 </SeccionPanel>
               ) : activeSection === "docs" ? (

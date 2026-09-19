@@ -103,3 +103,38 @@
 .ase-ld-datos dt { color: var(--muted); font-weight: 600; }
 .ase-ld-datos dd { margin: 0; overflow-wrap: anywhere; }
 .ase-ld-pie { position: sticky; bottom: 0; }
+
+/* ── Embudo de ventas (EmbudoVentas.jsx) ─────────────────────────────── */
+.ase-ld-emb-filtros { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; align-items: end; margin-bottom: 14px; }
+.ase-ld-emb-filtros select, .ase-ld-emb-filtros .ase-toggle { grid-column: 1 / -1; }
+@media (min-width: 900px) {
+  .ase-ld-emb-filtros { grid-template-columns: repeat(5, minmax(0, 1fr)) auto; }
+  .ase-ld-emb-filtros select, .ase-ld-emb-filtros .ase-toggle { grid-column: auto; }
+}
+.ase-ld-emb-campo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ase-ld-emb-campo > span { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.ase-ld-emb-pasos, .ase-ld-emb-caja {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--sombra);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0;
+}
+.ase-ld-emb-paso {
+  display: grid; gap: 4px 10px; align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "l n" "bar bar" "t t";
+}
+@media (min-width: 720px) {
+  .ase-ld-emb-paso { grid-template-columns: 9.5rem minmax(0, 1fr) 3.5rem 11rem; grid-template-areas: "l bar n t"; }
+}
+.ase-ld-emb-paso-l { grid-area: l; font-size: 12.5px; font-weight: 700; color: var(--primary); }
+.ase-ld-emb-paso-bar { grid-area: bar; display: block; height: 12px; border-radius: 6px; background: #e4ecf3; overflow: hidden; }
+.ase-ld-emb-paso-bar > i { display: block; height: 100%; min-width: 2px; background: var(--ld-color, var(--sky-2)); border-radius: 6px; transition: width .5s ease; }
+.ase-ld-emb-paso-n { grid-area: n; font-size: 16px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; text-align: right; }
+.ase-ld-emb-paso-t { grid-area: t; font-size: 11px; color: var(--muted); }
+.ase-ld-emb-nota { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.5; }
+.ase-ld-emb-tabla { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 12.5px; }
+.ase-ld-emb-tabla th {
+  text-align: left; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.ase-ld-emb-tabla td { padding: 8px 10px; border-bottom: 1px solid #eef3f7; font-variant-numeric: tabular-nums; }
+.ase-ld-emb-etq { font-weight: 700; color: var(--primary); white-space: nowrap; text-transform: capitalize; }
+@media (prefers-reduced-motion: reduce) { .ase-ld-emb-paso-bar > i { transition: none; } }

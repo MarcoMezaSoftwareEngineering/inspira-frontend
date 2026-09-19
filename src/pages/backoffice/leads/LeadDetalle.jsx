@@ -13,7 +13,7 @@ import {
   ETAPAS, ETAPA, ORIGENES, TIPO_EVENTO, fechaHora, aInputLocal, enlaceWhatsapp, nombreDe,
 } from "./leadsComun";
 
-const OCULTOS = new Set(["_capturas", "_origenes", "backfill", "respuestas"]);
+const OCULTOS = new Set(["_capturas", "_origenes", "backfill", "respuestas", "prueba"]);
 
 function valorLegible(v) {
   if (v === null || v === undefined || v === "") return "—";
@@ -169,6 +169,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
               {lead && <Chip tono={et.tono} punto>{et.etiqueta}</Chip>}
               {lead && <Chip tono="gris">{ORIGENES[lead.origen] || lead.origen}</Chip>}
+              {lead?.prueba && <Chip tono="morado">prueba</Chip>}
               {lead && <span style={{ fontSize: 11, color: "rgba(255,255,255,.6)" }}>#{lead.id_lead} · {fechaHora(lead.created_at)}</span>}
             </div>
             <button type="button" className="ase-ld-panel-x" onClick={onCerrar} aria-label="Cerrar">
@@ -328,6 +329,24 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
           )}
 
           {lead && !lead.anonimizado_en && <Datos datos={lead.datos} />}
+
+          {/* Marca de prueba: fuera del tablero y de las cifras (como la de clientes). */}
+          {editable && (
+            <label className="ase-toggle" style={{ alignSelf: "flex-start" }}>
+              <input
+                type="checkbox"
+                checked={!!lead.prueba}
+                disabled={guardando === "prueba"}
+                onChange={async (e) => {
+                  const valor = e.target.checked;
+                  if (await patch({ prueba: valor }, "prueba")) {
+                    dialog.toast(valor ? "Marcado como lead de prueba" : "Ya no es un lead de prueba", "success");
+                  }
+                }}
+              />
+              <i /> Lead de prueba (no cuenta en el tablero ni en las cifras)
+            </label>
+          )}
 
           {lead && !lead.anonimizado_en && (puedeEditar || puedeEliminar) && (
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "space-between" }}>

@@ -16,7 +16,8 @@ import Icono from "../../../components/common/Icono";
 import { navigate } from "../../../services/navigate";
 import { fechaCorta, fechaHoraDoble } from "../../../lib/horas";
 import { rutaDe } from "../ruta";
-import { cargarNovedades, desdeVisto, guardarVisto } from "../novedades";
+import { cargarNovedades, desdeVisto, guardarVisto, ICONO_NOVEDAD, TONO_NOVEDAD } from "../novedades";
+import LineaTiempoExpediente from "./LineaTiempoExpediente";
 
 const VISIBLES = 3;
 
@@ -37,25 +38,9 @@ function haceCuanto(iso) {
   return fechaCorta(iso);
 }
 
-const ICONO = {
-  documento_recibido: "documento",
-  documento_inspira: "documento",
-  documento_aprobado: "escudo",
-  documento_observado: "documento",
-  documento_proceso: "birrete",
-  mensaje: "chat",
-  etapa: "brujula",
-  requerimiento: "balanza",
-  extranjeria: "balanza",
-  pago: "euro",
-};
-
-const TONO = {
-  documento_aprobado: "ok",
-  documento_observado: "alto",
-  requerimiento: "alto",
-  pago: "ok",
-};
+// Iconos y tonos, compartidos con la línea de tiempo y el centro de avisos.
+const ICONO = ICONO_NOVEDAD;
+const TONO = TONO_NOVEDAD;
 
 /**
  * @param {{ idSolicitud: number, onIrSeccion?: (seccion: string|null) => void, plegable?: boolean }} props
@@ -73,6 +58,9 @@ export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, p
   const vigente = datos.id === idSolicitud;
   const estado = vigente ? { ...datos, cargando: false } : { cargando: true, error: false, items: [] };
   const abierto = abiertoEn === idSolicitud;
+  // La línea de tiempo entera (qué pasó y cuándo, y lo que viene), en una hoja.
+  const [historialEn, setHistorialEn] = useState(null);
+  const conHistorial = historialEn === idSolicitud;
   // La marca se lee una vez por expediente: si se leyera en cada render, a los
   // dos segundos se guardaría la visita y los «Nuevo» desaparecerían delante de ti.
   const desde = useMemo(() => desdeVisto(idSolicitud), [idSolicitud]);
@@ -125,7 +113,10 @@ export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, p
             {desplegada ? "Ocultar" : "Ver"}
           </button>
         ) : (
-          <span className="pnl-nov-sub">Últimos 60 días</span>
+          <button type="button" className="pnl-nov-historial ux-tap" onClick={() => setHistorialEn(idSolicitud)}>
+            <Icono nombre="reloj" size={13} />
+            Historial
+          </button>
         )}
       </header>
 
@@ -176,6 +167,24 @@ export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, p
             </button>
           )}
         </>
+      )}
+
+      {/* En la versión plegable el botón del historial va abajo, con la lista abierta. */}
+      {plegable && desplegada && !estado.cargando && (
+        <button type="button" className="pnl-nov-historial ux-tap pnl-nov-historial-pie" onClick={() => setHistorialEn(idSolicitud)}>
+          <Icono nombre="reloj" size={13} />
+          Ver el historial del expediente
+        </button>
+      )}
+
+      {conHistorial && (
+        <LineaTiempoExpediente
+          idSolicitud={idSolicitud}
+          items={estado.items}
+          desde={desde}
+          onIr={(n) => { setHistorialEn(null); ir(n); }}
+          onCerrar={() => setHistorialEn(null)}
+        />
       )}
     </section>
   );

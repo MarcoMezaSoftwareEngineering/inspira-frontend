@@ -15,17 +15,32 @@ import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CierreServicioMasterCliente from "./sections/CierreServicioMasterCliente";
 import { EsqueletoExpediente } from "../Esqueleto";
 import CercoErrores from "../../../../components/common/CercoErrores";
-import HiloMensajes from "../../../../components/common/HiloMensajes";
+import MensajesFlotante from "./MensajesFlotante";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, tonoDeEstado } from "../../../../components/common/RutaPasos";
 import QueMeFalta from "../QueMeFalta";
 import { queMeFaltaMaster } from "../../queMeFalta";
 import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
-import { usePublicarCabecera } from "../../cabeceraExpediente";
+import { usePublicarCabecera } from "../../cabeceraExpediente";
 import NovedadesExpediente from "../NovedadesExpediente";
 
 // Nombre corto de cada paso para la fila de iconos del móvil.
 const CORTO = { docs: "Documentos", form: "Formulario", informe: "Informe", eleccion: "Elección", post: "Postular", cierre: "Cierre" };
+
+// «Inicio previsto» del perfil («Septiembre 2027») en el formato del
+// formulario académico (`sep_2027`). Es el espejo de perfilAFormulario en el
+// backend (perfil.campos.js). Los meses sin opción en el formulario devuelven
+// "" y el formulario se queda con lo suyo.
+function inicioParaFormulario(valor) {
+  const s = String(valor || "").trim();
+  if (!s) return "";
+  if (/^(sep|ene)_\d{4}$|^flexible$/.test(s)) return s;
+  const [mes, anio] = s.split(/\s+/);
+  if (!/^\d{4}$/.test(anio || "")) return "";
+  if (mes === "Septiembre") return `sep_${anio}`;
+  if (mes === "Enero") return `ene_${anio}`;
+  return "";
+}
 
 function inicialesDe(nombre) {
   return String(nombre || "").trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "•";
@@ -69,78 +84,12 @@ function formCompleto(datos) {
 }
 
 // ── Mensajes, siempre a mano ─────────────────────────────────────────────────
-//
-// Un botón flotante con los mensajes sin leer y, al abrirlo, el hilo con el
-// asesor en una hoja: en el móvil sube desde abajo; en pantalla grande es una
-// ventana a la derecha. El hilo es el mismo de siempre, con hora de Perú y
-// de España en cada mensaje.
-
-function MensajesFlotante({ abierto, onAbrir, onCerrar, sinLeer, idSolicitud }) {
-  useEffect(() => {
-    if (!abierto) return undefined;
-    function onKey(e) { if (e.key === "Escape") onCerrar(); }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [abierto, onCerrar]);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={onAbrir}
-        aria-label="Mensajes con tu asesor"
-        className="ux-tap fixed z-40 right-4 bottom-[calc(76px+env(safe-area-inset-bottom))] md:right-6 md:bottom-6 inline-flex items-center gap-2 pl-3.5 pr-4 py-3 rounded-full bg-primary text-white text-[13px] font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all"
-      >
-        <IconoPaso nombre="message" className="w-4 h-4" />
-        Mensajes
-        {sinLeer > 0 && (
-          <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-accent text-white text-[11px] font-black grid place-items-center">
-            {sinLeer}
-          </span>
-        )}
-      </button>
-
-      {abierto && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-end bg-black/45" onClick={onCerrar}>
-          <div
-            className="pnl-entra w-full md:w-[520px] md:mr-6 max-h-[88vh] bg-white rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Mensajes con tu asesor"
-          >
-            <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-neutral-100 shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-primary-light/10 text-primary-light grid place-items-center">
-                <IconoPaso nombre="message" className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-bold text-primary leading-tight">Mensajes con tu asesor</p>
-                <p className="text-[11.5px] text-neutral-500">Queda en tu expediente, con hora y constancia de lectura.</p>
-              </div>
-              <button type="button" onClick={onCerrar} aria-label="Cerrar"
-                className="w-9 h-9 rounded-full grid place-items-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors">
-                <IconoPaso nombre="x" className="w-4 h-4" strokeWidth={2.4} />
-              </button>
-            </div>
-            <div className="px-4 pb-4 pt-2 flex-1 min-h-0 flex flex-col">
-              <HiloMensajes
-                lado="cliente"
-                idSolicitud={idSolicitud}
-                aviso="Lo que se escribe aquí forma parte de tu expediente: queda con fecha, con quién lo escribió y con constancia de cuándo lo leyó tu asesor. Para lo que importa, mejor aquí que por WhatsApp."
-                cargar={() => apiGET(`/solicitudes/${idSolicitud}/mensajes`)}
-                enviar={(texto) => apiPOST(`/solicitudes/${idSolicitud}/mensajes`, { texto })}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
+// El botón flotante y la hoja con el hilo viven en MensajesFlotante.jsx
+// (18/09/2026): el doctorado los usa también.
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, onSeccion, perfil, faltanPerfil = 0 }) {
+export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, onSeccion, perfil, faltanPerfil = 0, onPerfilCambiado }) {
   const [detalle,           setDetalle]           = useState(null);
   const [checklist,         setChecklist]         = useState([]);
   const [formData,          setFormData]          = useState({});
@@ -201,12 +150,25 @@ export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, on
 
       const datosPerfil = rPerfil.ok ? (rPerfil.cliente?.datos_extra || {}) : {};
       const datosForm   = (rForm.ok && rForm.datos) ? rForm.datos : {};
-      const merged = {
-        carrera_titulo:     datosForm.carrera_titulo     || datosPerfil.carrera_titulo     || "",
-        area_carrera:       datosForm.area_carrera       || datosPerfil.area_carrera       || "",
-        universidad_origen: datosForm.universidad_origen || datosPerfil.universidad_origen || "",
-        ...datosForm,
+      // El perfil es la fuente única de lo que comparten (backend:
+      // perfil.campos.js): se lee de allí primero y, al guardar, lo que cambie
+      // aquí sube al perfil (perfilSync.js, el último dato guardado gana).
+      // Antes mandaba el formulario, y quien corregía su carrera en «Mi
+      // perfil» seguía viéndola vieja aquí.
+      const delPerfil = (clave) => {
+        const v = datosPerfil[clave];
+        return v !== undefined && v !== null && String(v).trim() !== "" ? String(v) : "";
       };
+      const merged = {
+        ...datosForm,
+        carrera_titulo:     delPerfil("carrera_titulo")     || datosForm.carrera_titulo     || "",
+        area_carrera:       delPerfil("area_carrera")       || datosForm.area_carrera       || "",
+        universidad_origen: delPerfil("universidad_origen") || datosForm.universidad_origen || "",
+        presupuesto_hasta:  delPerfil("presupuesto_hasta")  || datosForm.presupuesto_hasta  || "",
+        // El perfil guarda «Septiembre 2027» y el formulario «sep_2027».
+        inicio_previsto:    inicioParaFormulario(datosPerfil.inicio_previsto) || datosForm.inicio_previsto || "",
+      };
+      for (const k of ["presupuesto_hasta", "inicio_previsto"]) if (!merged[k]) delete merged[k];
       setFormData(merged);
 
       if (formCompleto(merged)) setFormGuardado(true);
@@ -252,6 +214,9 @@ export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, on
       setFormGuardado(true);
       setSeleccionKey((k) => k + 1);
       cargarCompatibilidad();
+      // Lo que cambió aquí ya está en su perfil (perfilSync): el panel lo
+      // vuelve a leer para que «Mi perfil» y el próximo formulario lo vean.
+      onPerfilCambiado?.();
     } catch {
       dialog.toast("Error al guardar.", "error");
     } finally {
@@ -260,8 +225,10 @@ export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, on
   }
 
   async function guardarFormularioSilencioso() {
-    try { await apiPOST(`/solicitudes/${idSolicitud}/formulario`, formData); }
-    catch { /* silencioso */ }
+    try {
+      const r = await apiPOST(`/solicitudes/${idSolicitud}/formulario`, formData);
+      if (r?.ok) onPerfilCambiado?.();
+    } catch { /* silencioso */ }
   }
 
   async function handleGuardarElecciones(data) {

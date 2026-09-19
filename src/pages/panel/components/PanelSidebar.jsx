@@ -19,6 +19,7 @@ import { navigate } from "../../../services/navigate";
 import logo from "../../../assets/images/logo.png";
 import { recorta } from "../pendientes";
 import { CLAVES_GUIAS } from "../servicios";
+import { yaInstalada } from "../instalarApp";
 
 // Tope de entradas del menú, contando los expedientes que cuelgan de «Mis servicios».
 const MAX_ENTRADAS = 8;
@@ -26,6 +27,7 @@ const MAX_ENTRADAS = 8;
 export default function PanelSidebar({
   user, activeTab, onChangeTab, isOpen, onClose, accesos,
   pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour, guias = [], conPagos = false,
+  onInstalarApp = null,
 }) {
   // Qué recursos le corresponden lo decide servicios.js; aquí solo se pintan.
   // A quien no tiene nada contratado no le sale ninguno, y a quien entra
@@ -189,6 +191,14 @@ export default function PanelSidebar({
           <button type="button" onClick={onTour} className="pnl-item">
             <Icono nombre="brujula" size={16} />
             ¿Cómo funciona?
+          </button>
+        )}
+        {/* Siempre a mano, también después de «Ahora no» en la tarjeta de
+            Inicio. Dentro de la app instalada no hace falta. */}
+        {onInstalarApp && !yaInstalada() && (
+          <button type="button" onClick={onInstalarApp} className="pnl-item">
+            <Icono nombre="movil" size={16} />
+            Instalar la app
           </button>
         )}
         <button type="button" onClick={() => navigate("/")} className="pnl-item">

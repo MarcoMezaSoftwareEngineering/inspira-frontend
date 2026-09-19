@@ -8,6 +8,8 @@ import PestanasEnlace from "../layout/PestanasEnlace";
 
 const PESTANAS = [
   { id: "leads", label: "Bandeja de leads", href: "/backoffice/leads", perm: "leads.ver" },
+  // Lead → contactado → sesión → contrato → primer pago, por mes (18/09/2026).
+  { id: "embudo", label: "Embudo de ventas", href: "/backoffice/leads/embudo", perm: "leads.ver" },
   // Lo que se mira y se compara en el mapa público (desde el 14/09/2026).
   { id: "mapa-interes", label: "Interés del mapa", href: "/backoffice/leads/mapa", perm: "leads.ver" },
   // Visitas a /enlaces, beca, mapa y grado; clics por botón y contactos (15/09/2026).

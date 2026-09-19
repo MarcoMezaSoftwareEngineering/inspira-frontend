@@ -15,6 +15,8 @@ const DetalleSolicitud = lazyConRecarga(() => import("./mis-servicios/DetalleSol
 const DetalleSolicitudVisado = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudVisado"));
 const DetalleSolicitudEstancia = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudEstancia"));
 const DetalleSolicitudModificatoria = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudModificatoria"));
+// El doctorado tiene su recorrido propio desde el 18/09/2026 (antes abría el del máster).
+const DetalleSolicitudDoctorado = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudDoctorado"));
 
 /**
  * La lista, o el expediente que diga la URL.
@@ -23,7 +25,7 @@ const DetalleSolicitudModificatoria = lazyConRecarga(() => import("./mis-servici
  * (`/panel/servicios/155/post`). Recargar conserva el sitio, «atrás» vuelve a
  * la lista, y un correo puede enlazar a una sección concreta.
  */
-export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia, avisoAppBloqueado = false, faltanPerfil = 0, pagos = null, avisoPerfil = null }) {
+export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia, avisoAppBloqueado = false, faltanPerfil = 0, pagos = null, avisoPerfil = null, onPerfilCambiado }) {
   const { idServicio, seccion, tab } = ruta;
   const seleccionada = idServicio
     ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
@@ -49,7 +51,9 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
   if (seleccionada) {
     const tipo = servicioDe(seleccionada);
     // El perfil ya lo tiene el panel: el expediente lo recibe en vez de volver a pedirlo.
-    const comunes = { solicitudBase: seleccionada, onVolver: volver, onIrAGuia, perfil, faltanPerfil };
+    // Guardar un formulario del expediente también cambia el perfil (el
+    // backend lo sube: perfilSync); `onPerfilCambiado` lo vuelve a leer.
+    const comunes = { solicitudBase: seleccionada, onVolver: volver, onIrAGuia, perfil, faltanPerfil, onPerfilCambiado };
     return (
       <div className="flex-1 min-h-0 flex flex-col">
         <Suspense fallback={<EsqueletoExpediente />}>
@@ -57,6 +61,8 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
             <DetalleSolicitudModificatoria {...comunes} />
           ) : tipo === SERVICIO.ESTANCIA ? (
             <DetalleSolicitudEstancia {...comunes} />
+          ) : tipo === SERVICIO.DOCTORADO ? (
+            <DetalleSolicitudDoctorado {...comunes} seccion={seccion} onSeccion={irSeccion} />
           ) : tipo === SERVICIO.VISADO ? (
             <DetalleSolicitudVisado {...comunes} seccion={seccion} onSeccion={irSeccion} />
           ) : (

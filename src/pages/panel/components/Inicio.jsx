@@ -17,6 +17,7 @@ import SaludoInicio from "./SaludoInicio";
 import PlazosLinea from "./PlazosLinea";
 import AvisosMovil from "./AvisosMovil";
 import { EsqueletoTarjetas } from "./Esqueleto";
+import { EncuestasPendientes } from "./EncuestaCierre";
 
 // Cinco a la vista y el resto tras «ver más»: el resumen va debajo y tiene
 // que seguir viéndose sin bajar media pantalla.
@@ -102,6 +103,10 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
           <ProximoPaso items={items} servicios={lista} />
         </div>
       )}
+
+      {/* «Cuéntanos cómo te fue»: los procesos cerrados con buen resultado
+          cuya encuesta falta. El correo de cierre enlaza aquí (?encuesta=ID). */}
+      {!loading && <EncuestasPendientes servicios={lista} />}
 
       {/* Solo en el teléfono, fuera de la app instalada, y nunca a la vez que
           el recorrido guiado o el asistente de perfil. Va después del

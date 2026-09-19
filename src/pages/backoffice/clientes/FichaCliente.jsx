@@ -9,6 +9,8 @@ import CorreosCliente from "./CorreosCliente";
 import { useCallback, useEffect, useState } from "react";
 import { boGET, boPOST, boPATCH, boDELETE, boFetch } from "../../../services/backofficeApi";
 import AltaRapida from "./AltaRapida";
+// Semáforo, resumen, llamada, plantillas y plazos de estancia del caso.
+import HerramientasFicha from "./HerramientasFicha";
 // Se oculta sola a quien no tiene pagos.ver.
 import PlanesCliente from "../pagos/PlanesCliente";
 
@@ -523,6 +525,7 @@ export default function FichaCliente({ idCliente, onVolver, onAbrirProceso }) {
 
       {pestana === "resumen" && (
         <div className="space-y-3">
+          <HerramientasFicha procesos={procesos} onCambio={cargar} />
           <CoherenciaDatos idCliente={idCliente} />
           {servicios}
           {finanzas.pendiente > 0 && bloqueFinanzas}

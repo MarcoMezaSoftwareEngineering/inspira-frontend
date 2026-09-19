@@ -35,6 +35,7 @@ export const TIPO_EVENTO = {
   PROXIMA_ACCION: "Próxima acción",
   CONVERSION: "Conversión",
   ANONIMIZADO: "Anonimizado",
+  PRUEBA: "Prueba",
 };
 
 export function fechaHora(iso) {

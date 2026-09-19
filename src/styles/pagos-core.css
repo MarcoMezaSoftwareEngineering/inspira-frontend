@@ -233,3 +233,39 @@
 @media (prefers-reduced-motion: reduce) {
   .ase-pg-fila-main, .ase-pg-plan-boton { transition: none; }
 }
+
+/* ── Caja del mes (CajaMes.jsx) ──────────────────────────────────────── */
+.ase-pg-caja { display: flex; flex-direction: column; gap: 14px; }
+.ase-pg-caja-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ase-pg-caja-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .ase-pg-caja-grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .ase-pg-caja-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ase-pg-caja-tarjeta {
+  background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 14px;
+  box-shadow: var(--sombra); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+}
+.ase-pg-caja-tarjeta[data-tono="verde"] { border-left-color: var(--green); }
+.ase-pg-caja-tarjeta[data-tono="ambar"] { border-left-color: var(--accent); }
+.ase-pg-caja-tarjeta[data-tono="rojo"] { border-left-color: var(--red); }
+.ase-pg-caja-tarjeta[data-tono="cielo"] { border-left-color: var(--sky-2); }
+.ase-pg-caja-t { margin: 0; font-size: 13px; font-weight: 800; color: var(--primary); }
+.ase-pg-caja-nota { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.4; }
+.ase-pg-caja-importes { display: flex; flex-direction: column; gap: 2px; }
+.ase-pg-caja-importe { font-size: 19px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.ase-pg-caja-importe small { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+.ase-pg-caja-comp { margin: 2px 0 0; font-size: 11.5px; font-weight: 600; color: #34505e; line-height: 1.45; overflow-wrap: anywhere; }
+.ase-pg-caja-comp small { display: block; font-weight: 500; color: var(--muted); }
+.ase-pg-caja-desglose {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--sombra);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+.ase-pg-caja-tabla { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 12.5px; }
+.ase-pg-caja-tabla th {
+  text-align: left; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.ase-pg-caja-tabla td { padding: 9px 10px; border-bottom: 1px solid #eef3f7; font-variant-numeric: tabular-nums; vertical-align: top; }
+.ase-pg-caja-tabla td[data-rojo="1"] { color: var(--red); font-weight: 700; }
+.ase-pg-caja-etq { font-weight: 700; color: var(--primary); }
+.ase-pg-caja-etq .ase-chip { margin-left: 6px; }
+.ase-pg-caja-pie { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.5; }

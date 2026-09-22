@@ -45,6 +45,7 @@ const Enlaces = lazyConRecarga(() => import("./pages/enlaces/Enlaces"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
+const PaginaLugar = lazyConRecarga(() => import("./pages/mapa/PaginaLugar"));
 const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
 const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
 const Plataforma = lazyConRecarga(() => import("./pages/plataforma/Plataforma"));
@@ -542,6 +543,11 @@ export default function App() {
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}
       {path === "/mapa-estudiar-en-espana" && <MapaEspana />}
+      {/* Una página por comunidad y por universidad, con los datos del mapa:
+          son las direcciones que busca la gente («máster en Galicia») y las
+          que puede posicionar un buscador. Ver pages/mapa/PaginaLugar.jsx. */}
+      {path.startsWith("/master/") && <PaginaLugar tipo="comunidad" id={path.slice("/master/".length)} />}
+      {path.startsWith("/universidad/") && <PaginaLugar tipo="universidad" id={path.slice("/universidad/".length)} />}
       {isPanel && <PanelCliente path={path} />}
       {path === "/reservar" && <ReservarCita />}
       {path === "/master-2027-2028" && <MasterAds2027 />}

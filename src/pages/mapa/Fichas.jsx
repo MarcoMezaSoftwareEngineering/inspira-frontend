@@ -28,6 +28,7 @@ import { cursoCorto, leerPlazos, plazoMasTemprano, rangoFechas } from "./plazos"
 import TarjetaPrecio from "./TarjetaPrecio";
 import IlustracionCiudad from "./IlustracionesMapa";
 import IconoMapa from "./IconosMapa";
+import { rutaComunidad, rutaUniversidad } from "./rutasLugar";
 import PrimerAnio from "./PrimerAnio";
 import AvisoPlazo from "./AvisoPlazo";
 import { presupuestoEnCiudad } from "./vida";
@@ -62,6 +63,26 @@ const irA = (href) => (e) => {
 };
 
 const FOCO = "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]";
+
+/**
+ * Enlace a la página propia del sitio (/master/galicia, /universidad/udc).
+ * Desde el mapa lleva a una dirección que se puede compartir y que Google
+ * puede posicionar; dentro de esa misma página no se pinta, para no ofrecer
+ * un enlace a donde ya se está.
+ */
+function EnlacePagina({ href, texto }) {
+  if (typeof window !== "undefined" && window.location.pathname === href) return null;
+  return (
+    <a
+      href={href}
+      onClick={irA(href)}
+      className={`mapa-boton mov-toque mt-3 inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-2xl border border-[#CFE6FD] bg-white px-4 py-2.5 text-sm font-bold text-[#0A5873] hover:bg-[#F6FBFF] ${FOCO}`}
+    >
+      <Icono nombre="documento" size={16} />
+      {texto}
+    </a>
+  );
+}
 
 /**
  * Sello de título oficial. Es la pregunta que más repiten en los comentarios
@@ -696,6 +717,7 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden
       >
         <BotonComparar tipo="comunidad" id={c.id} comparador={comparador} />
       </Acciones>
+      <EnlacePagina href={rutaComunidad(c.id)} texto={`Ver la página de ${c.nombre}`} />
       <Descargo />
     </article>
   );
@@ -931,6 +953,7 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
       >
         <BotonComparar tipo="universidad" id={u.id} comparador={comparador} />
       </Acciones>
+      <EnlacePagina href={rutaUniversidad(u.id)} texto={`Ver la página de ${u.sigla}`} />
       <Descargo />
     </article>
   );

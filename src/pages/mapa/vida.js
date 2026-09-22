@@ -95,7 +95,22 @@ export function presupuestoAnual(c, sinPublicar = false) {
   if (!conGasto.length) return null;
   const barata = conGasto.sort((a, b) => a.r[1] - b.r[1])[0];
   const vidaAnual = Math.round(barata.r[1] * 12);
-  return { matricula: Math.round(matricula), vida: vidaAnual, total: Math.round(matricula) + vidaAnual, ciudad: barata.x.nombre };
+  return {
+    matricula: Math.round(matricula),
+    vida: vidaAnual,
+    mes: Math.round(barata.r[1]),
+    // Lo que de verdad pregunta la gente: cuánto cuesta el piso.
+    habitacion: mensual(barata.x.habitacion_mes),
+    estudio: mensual(barata.x.estudio_mes),
+    total: Math.round(matricula) + vidaAnual,
+    ciudad: barata.x.nombre,
+  };
+}
+
+/** El extremo alto de un importe mensual, redondeado; null si no hay dato. */
+function mensual(v) {
+  const r = rangoImporte(v);
+  return r ? Math.round(r[1]) : null;
 }
 
 /**
@@ -109,5 +124,14 @@ export function presupuestoEnCiudad(c, nombreCiudad, sinPublicar = false) {
   const g = gastoMensual(c, nombreCiudad);
   if (!g || !mismaCiudad(g.detalle, nombreCiudad)) return base;
   const vida = Math.round(g.medio * 12);
-  return { matricula: base.matricula, vida, total: base.matricula + vida, ciudad: nombreCiudad };
+  const ficha = leerVida(c)?.ciudades.find((x) => mismaCiudad(x.nombre, nombreCiudad));
+  return {
+    matricula: base.matricula,
+    vida,
+    mes: Math.round(g.medio),
+    habitacion: mensual(ficha?.habitacion_mes),
+    estudio: mensual(ficha?.estudio_mes),
+    total: base.matricula + vida,
+    ciudad: nombreCiudad,
+  };
 }

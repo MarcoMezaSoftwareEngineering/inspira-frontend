@@ -29,8 +29,12 @@ export const ALCANZA = {
   carta: {
     rotulo: "Tu primer año costaría",
     matricula: "Matrícula del máster",
+    porMes: (importe) => `≈ ${importe}/mes`,
     vida: "Vivir un año",
-    nota: "La matrícula la cobra la universidad. El dinero de vivir no lo pagas: lo demuestras para la visa.",
+    habitacion: (importe) => `Habitación ≈ ${importe}/mes`,
+    // Dos cosas que no se pueden confundir: el gasto de vida se paga; los
+    // 7.200 € de la visa se demuestran y son iguales en toda España.
+    nota: "Matrícula a la universidad y vida de verdad: piso, comida y transporte. Aparte, la visa te pide demostrar 7.200 € en tu cuenta.",
   },
 
   resultado: {
@@ -52,5 +56,5 @@ export const ALCANZA = {
   },
 
   descargo:
-    "Cifras aproximadas del curso 2027/2028: matrícula habitual de un máster oficial en cada comunidad más el gasto de vida de su ciudad más económica. Para la visa tienes que demostrar 7.200 € al año. El paquete de Inspira se paga aparte.",
+    "Cifras aproximadas del curso 2027/2028: matrícula habitual de un máster oficial en cada comunidad más el gasto de vivir un año en su ciudad más económica. Para el visado, además, tienes que demostrar 7.200 € al año (600 € al mes): eso no se gasta, se acredita. El paquete de Inspira se paga aparte.",
 };

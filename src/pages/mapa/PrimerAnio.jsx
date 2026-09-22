@@ -25,9 +25,9 @@ import { PRIMER_ANIO, eur } from "./mapaTextos";
 
 const FOCO = "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]";
 
-function Fila({ icono, etiqueta, nota, importe, acento = false }) {
+function Fila({ icono, etiqueta, nota, importe, acento = false, ultima = false }) {
   return (
-    <li className={`flex items-start gap-3 py-2.5 ${acento ? "" : "border-b border-white/10"}`}>
+    <li className={`flex items-start gap-3 py-2.5 ${ultima ? "" : "border-b border-white/10"}`}>
       <span className={`mt-0.5 shrink-0 ${acento ? "text-[#F09C48]" : "text-[#96CCFC]"}`}>
         <Icono nombre={icono} size={17} />
       </span>
@@ -68,6 +68,12 @@ export default function PrimerAnio({ comunidad, presupuesto, paquete, lugar }) {
       </p>
       <p className="mapa-titular relative mt-1 text-[40px] font-bold leading-none text-[#F09C48]">≈ {eur(total)}</p>
       <p className="relative mt-1.5 text-[13px] leading-snug text-white/80">{PRIMER_ANIO.subtitulo(donde)}</p>
+      {presupuesto.matricula > 0 && (
+        <p className="mapa-por-mes relative mt-2.5">
+          <Icono nombre="destello" size={14} />
+          {PRIMER_ANIO.porMes(eur(Math.round(presupuesto.matricula / 12)))}
+        </p>
+      )}
 
       <ul className="relative mt-3">
         <Fila
@@ -79,12 +85,19 @@ export default function PrimerAnio({ comunidad, presupuesto, paquete, lugar }) {
         <Fila
           icono="casa"
           etiqueta={PRIMER_ANIO.vida(presupuesto.ciudad)}
-          nota={PRIMER_ANIO.vidaNota}
+          nota={
+            Number.isFinite(presupuesto.habitacion)
+              ? `${PRIMER_ANIO.vidaNota} ${PRIMER_ANIO.habitacion(eur(presupuesto.habitacion))}.`
+              : PRIMER_ANIO.vidaNota
+          }
           importe={eur(presupuesto.vida)}
         />
         {Number.isFinite(paquete) && (
-          <Fila acento icono="avion" etiqueta={PRIMER_ANIO.inspira} nota={PRIMER_ANIO.inspiraNota} importe={`desde ${eur(paquete)}`} />
+          <Fila icono="avion" etiqueta={PRIMER_ANIO.inspira} nota={PRIMER_ANIO.inspiraNota} importe={`desde ${eur(paquete)}`} acento />
         )}
+        {/* El saldo de la visa no es un gasto y no suma en el total: se
+            demuestra, y es el mismo en toda España. Por eso va aparte. */}
+        <Fila ultima icono="pasaporte" etiqueta={PRIMER_ANIO.visa} nota={PRIMER_ANIO.visaNota} importe="7.200 €" />
       </ul>
 
       <a

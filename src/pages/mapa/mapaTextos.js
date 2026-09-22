@@ -218,14 +218,25 @@ export const PRIMER_ANIO = {
   rotulo: "Lo que cuesta tu primer año",
   subtitulo: (donde) => `Matrícula y vida en ${donde}, durante un año.`,
   matricula: "Matrícula del máster",
-  matriculaNota: "La cobra la universidad.",
+  matriculaNota: "La cobra la universidad, una vez al año.",
+  // La cifra al mes es la misma verdad dicha de otra manera, y es la que hace
+  // caer la mandíbula: 739 € al año son 62 € al mes. No hace falta compararla
+  // con nada para que se entienda que es poco (clienta, 22/09/2026).
+  porMes: (importe) => `La matrícula sale a ${importe} al mes`,
   vida: (ciudad) => `Vivir un año en ${ciudad}`,
-  vidaNota: "No los pagas. Solo demuestras que los tienes.",
+  // El gasto de vida SÍ se paga: es el piso, la comida y el transporte. No
+  // confundirlo nunca con los 7.200 € de la visa, que son un saldo que se
+  // demuestra (clienta, 22/09/2026: «la visa es siempre 7.200; lo que quieren
+  // saber es el tema del piso»).
+  vidaNota: "Piso, comida y transporte. Esto sí lo gastas.",
+  habitacion: (importe) => `Habitación compartida ≈ ${importe} al mes`,
+  visa: "Para la visa: 7.200 € en tu cuenta",
+  visaNota: "No es un gasto: es el saldo que tienes que demostrar. Es igual en toda España.",
   inspira: "Paquete de Inspira",
   inspiraNota: "Es lo único que nos pagas. Va aparte.",
   boton: (donde) => `Quiero postular en ${donde}`,
   whatsapp: (donde) => `Hola, vi en el mapa cuánto cuesta un máster en ${donde}. Quiero postular, ¿me ayudan?`,
-  nota: "Son cifras aproximadas. La matrícula es la habitual de la comunidad; la vida, la de su ciudad más barata. Para la visa tienes que demostrar 7.200 € al año, o sea 600 € al mes.",
+  nota: "Son cifras aproximadas. La matrícula es la habitual de la comunidad y el gasto de vida, el de su ciudad más económica con dato.",
 };
 
 // Llamada del final de la lista: llevarse los costos sin tener que apuntarlos.

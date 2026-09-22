@@ -918,3 +918,22 @@
     display: none;
   }
 }
+
+/* «La matrícula sale a 62 € al mes»: la misma cifra dicha de la manera en que
+   se entiende sin pensar. Va destacada dentro de la tarjeta oscura. */
+.mapa-por-mes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  background: rgba(240, 156, 72, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(240, 156, 72, 0.5);
+  padding: 0.4rem 0.85rem;
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffd9b0;
+}
+.mapa-por-mes > svg {
+  color: var(--mapa-sol, #f09c48);
+  flex: none;
+}

@@ -463,3 +463,12 @@
     opacity: 0;
   }
 }
+
+/* Lo que de verdad preguntan: cuánto cuesta el piso. Va bajo «vivir un año»,
+   en pequeño, porque es el detalle que hace creíble la cifra de arriba. */
+.alc-carta-piso {
+  display: block;
+  font-size: 12px;
+  font-style: normal;
+  color: #8496a2;
+}

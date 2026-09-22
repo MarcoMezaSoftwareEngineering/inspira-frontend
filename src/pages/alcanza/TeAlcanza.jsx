@@ -85,11 +85,19 @@ function Carta({ item, arrastre, alSoltar, fondo = false }) {
         <p className="alc-carta-cifra">{eur(item.total)}</p>
         <ul className="alc-carta-desglose">
           <li>
-            <span>{ALCANZA.carta.matricula}</span>
+            <span>
+              {ALCANZA.carta.matricula}
+              <em className="alc-carta-piso">{ALCANZA.carta.porMes(eur(Math.round(item.matricula / 12)))}</em>
+            </span>
             <strong>{eur(item.matricula)}</strong>
           </li>
           <li>
-            <span>{ALCANZA.carta.vida}</span>
+            <span>
+              {ALCANZA.carta.vida}
+              {Number.isFinite(item.habitacion) && (
+                <em className="alc-carta-piso">{ALCANZA.carta.habitacion(eur(item.habitacion))}</em>
+              )}
+            </span>
             <strong>{eur(item.vida)}</strong>
           </li>
         </ul>

@@ -890,3 +890,31 @@
     linear-gradient(150deg, #00485f, #003648 60%, #0a5873);
   box-shadow: var(--mapa-sombra-alta);
 }
+
+/* ── Comparador en el teléfono ─────────────────────────────────────────────
+   La tabla se desplaza a los lados, y al hacerlo se perdía de vista de qué
+   dato era cada fila: quedaban tres números sin etiqueta. La primera columna
+   se queda pegada al borde, que es como se leen las tablas anchas. */
+.mapa-tabla th[scope="row"],
+.mapa-tabla thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #f6fbff;
+}
+.mapa-tabla th[scope="row"]::after,
+.mapa-tabla thead th:first-child::after {
+  /* Una sombra fina marca el corte mientras se desplaza. */
+  content: "";
+  position: absolute;
+  inset: 0 -10px 0 auto;
+  width: 10px;
+  background: linear-gradient(to right, rgba(0, 54, 72, 0.08), transparent);
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .mapa-tabla th[scope="row"]::after,
+  .mapa-tabla thead th:first-child::after {
+    display: none;
+  }
+}

@@ -45,6 +45,7 @@ import ListaComunidades from "./ListaComunidades";
 import IlustracionCiudad from "./IlustracionesMapa";
 import CompartirMapa from "./compartirMapa";
 import TarjetaMini from "./TarjetaMini";
+import EmblemaSeccion from "./EmblemasMapa";
 import { useInteres } from "./useInteres";
 import "../../styles/movimiento.css";
 import "./mapa.css";
@@ -278,7 +279,7 @@ function Leyenda({ indice, ranking }) {
   return (
     <div className="mt-3 rounded-3xl border border-[#E1EFFD] bg-white/70 px-4 py-3" data-revelar="suave">
       <p className="mapa-rotulo mb-2">
-        <Icono nombre="brujula" size={14} />
+        <EmblemaSeccion nombre="leyenda" size={26} className="-my-1" />
         Cómo leer el mapa
       </p>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-neutral-700">
@@ -345,7 +346,7 @@ function PieFuentes({ fuentes = {} }) {
   return (
     <footer className="mt-14 border-t border-[#E1EFFD] pt-5 text-xs leading-relaxed text-neutral-700" data-revelar="suave">
       <p className="mapa-rotulo mb-2">
-        <Icono nombre="documento" size={14} />
+        <EmblemaSeccion nombre="fuentes" size={26} className="-my-1" />
         De dónde salen estas cifras
       </p>
       <p>
@@ -416,6 +417,25 @@ function CtaFinal() {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Cabecera de sección: emblema, rótulo y titular. Antes cada bloque repetía
+ * la misma escalera de tres elementos con clases sueltas; ahora es una pieza.
+ */
+function TituloSeccion({ emblema, rotulo, titulo, id, children }) {
+  return (
+    <div className="flex items-start gap-3.5">
+      <EmblemaSeccion nombre={emblema} className="mt-0.5 shrink-0" />
+      <div className="min-w-0">
+        <p className="mapa-rotulo">{rotulo}</p>
+        <h2 id={id} className="mapa-titular mt-0.5 text-[24px] font-bold leading-tight text-[#003648] sm:text-[27px]">
+          {titulo}
+        </h2>
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -497,14 +517,13 @@ function CiudadesDestacadas({ indice, foco, onElegir }) {
 
   return (
     <section id="mapa-ciudades" aria-labelledby="mapa-ciudades-titulo" className="mt-14 scroll-mt-24" data-revelar>
-      <p className="mapa-rotulo">
-        <Icono nombre="ubicacion" size={14} />
-        Dónde se estudia
-      </p>
-      <h2 id="mapa-ciudades-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
-        Las ciudades con más másteres oficiales
-      </h2>
-      <p className="mt-1 text-sm text-neutral-700">
+      <TituloSeccion
+        emblema="ciudades"
+        rotulo="Dónde se estudia"
+        titulo="Las ciudades con más másteres oficiales"
+        id="mapa-ciudades-titulo"
+      />
+      <p className="mt-2 text-sm text-neutral-700">
         Toca una y el mapa vuela hasta ella. Verás sus universidades, cuánto cuesta la matrícula al año y su puesto en el ranking QS.
       </p>
       {/* Lo que más se confunde: la matrícula la cobra la universidad, el

@@ -9,6 +9,7 @@
 // al mayor de la fila.
 import Icono from "../../components/common/Icono";
 import IconoMapa from "./IconosMapa";
+import EmblemaSeccion from "./EmblemasMapa";
 import { precioDeUniversidad, ramaPrincipal } from "./indice";
 import { tonoDe } from "./tonosMapa";
 import { gastoMensual } from "./vida";
@@ -215,15 +216,15 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
   return (
     <section id="mapa-comparador" aria-labelledby="mapa-comparador-titulo" className="mt-14 scroll-mt-28" data-revelar>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="mapa-rotulo">
-            <Icono nombre="balanza" size={14} />
-            Comparador
-          </p>
-          <h2 id="mapa-comparador-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
-            Compara lado a lado
-          </h2>
-          <p className="mt-1 text-sm text-neutral-700">Hasta 3 comunidades o 3 universidades. Añádelas con el botón «Comparar» de su ficha.</p>
+        <div className="flex items-start gap-3.5">
+          <EmblemaSeccion nombre="comparar" className="mt-0.5 shrink-0" />
+          <div className="min-w-0">
+            <p className="mapa-rotulo">Comparador</p>
+            <h2 id="mapa-comparador-titulo" className="mapa-titular mt-0.5 text-[24px] font-bold leading-tight text-[#003648] sm:text-[27px]">
+              Compara lado a lado
+            </h2>
+            <p className="mt-1 text-sm text-neutral-700">Hasta 3 comunidades o 3 universidades. Añádelas con el botón «Comparar» de su ficha.</p>
+          </div>
         </div>
         {items.length > 0 && (
           <div className="flex flex-wrap items-center gap-3">
@@ -272,20 +273,20 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
               adivina, así que se dice. Desaparece en cuanto hay sitio. */}
           <p className="mt-4 flex items-center gap-1.5 text-[12px] font-semibold text-neutral-700 sm:hidden">
             <Icono nombre="toque" size={14} className="text-[#F09C48]" />
-            Desliza la tabla a los lados para ver todas las columnas.
+            Desliza la tabla a los lados. El nombre del dato se queda a la vista.
           </p>
           <div className="mt-2 overflow-x-auto rounded-3xl border border-neutral-200 bg-white sm:mt-4">
-            <table className="w-full min-w-[600px] border-collapse text-left text-sm">
+            <table className="mapa-tabla w-full min-w-[520px] border-collapse text-left text-sm sm:min-w-[600px]">
               <caption className="sr-only">Comparación de {comparar.tipo === "comunidad" ? "comunidades" : "universidades"}</caption>
               <thead>
                 <tr>
-                  <th scope="col" className="w-44 bg-[#F6FBFF] px-4 py-3 text-xs font-bold text-[#003648]">
+                  <th scope="col" className="w-28 bg-[#F6FBFF] px-3 py-3 text-xs font-bold text-[#003648] sm:w-44 sm:px-4">
                     <span className="sr-only">Dato</span>
                   </th>
                   {items.map((it) => {
                     const lista = indice.listas.get(it.lista);
                     return (
-                      <th key={it.id} scope="col" className="min-w-[190px] border-l border-neutral-200 px-4 py-3 align-top">
+                      <th key={it.id} scope="col" className="min-w-[164px] border-l border-neutral-200 px-3 py-3 align-top sm:min-w-[190px] sm:px-4">
                         <span className="flex items-start justify-between gap-2">
                           <span className="min-w-0">
                             <span className="flex items-center gap-2">
@@ -322,7 +323,7 @@ export default function Comparador({ indice, comparar, aviso, ejemplo, onQuitar,
               <tbody>
                 {filas.map((f) => (
                   <tr key={f.id} className="border-t border-neutral-200">
-                    <th scope="row" className="bg-[#F6FBFF] px-4 py-3 align-top text-xs font-bold text-[#003648]">
+                    <th scope="row" className="bg-[#F6FBFF] px-3 py-3 align-top text-xs font-bold text-[#003648] sm:px-4">
                       {f.etiqueta}
                     </th>
                     {items.map((it) => (

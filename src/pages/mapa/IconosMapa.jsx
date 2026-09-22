@@ -26,6 +26,16 @@ const TRAZOS = {
       <circle cx="10" cy="17" r="2.3" />
     </>
   ),
+  // Sello: la insignia de «título oficial». Una roseta con el visto dentro,
+  // dibujada aquí para no usar el escudo de ningún organismo (que son marcas
+  // y no se pueden reproducir sin permiso).
+  sello: (
+    <>
+      <path d="M12 2.6 14 4.4l2.7-.3 1 2.5 2.4 1.2-.6 2.6.6 2.6-2.4 1.2-1 2.5-2.7-.3L12 18.2l-2-1.8-2.7.3-1-2.5-2.4-1.2.6-2.6-.6-2.6 2.4-1.2 1-2.5 2.7.3z" />
+      <path d="m9 10.3 2.1 2.1L15.2 8.3" />
+      <path d="M8.6 17.6 7 22l3.4-1.4L12 22l1.6-1.4L17 22l-1.6-4.4" />
+    </>
+  ),
   // Capas: los interruptores de ciudades y casos sobre el mapa.
   capas: (
     <>

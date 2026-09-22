@@ -7,6 +7,7 @@
 // cuya mejor universidad tiene mejor puesto en QS, y se dice cuál es.
 import Icono from "../../components/common/Icono";
 import { cascada } from "../../lib/revelar";
+import EmblemaSeccion from "./EmblemasMapa";
 import { mejorRanking } from "./indice";
 import { tonoDe } from "./tonosMapa";
 import { LLEVATELO, PAQUETE, eur, etiquetaListaLarga, importeMatricula, mayus, plural } from "./mapaTextos";
@@ -39,13 +40,15 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
 
   return (
     <section id="mapa-listas" aria-labelledby="mapa-lista-titulo" className="mt-14 scroll-mt-24" data-revelar>
-      <p className="mapa-rotulo">
-        <Icono nombre="libro" size={14} />
-        En texto
-      </p>
-      <h2 id="mapa-lista-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
-        Cuánto cuesta un máster en cada comunidad
-      </h2>
+      <div className="flex items-start gap-3.5">
+        <EmblemaSeccion nombre="listas" className="mt-0.5 shrink-0" />
+        <div className="min-w-0">
+          <p className="mapa-rotulo">En texto</p>
+          <h2 id="mapa-lista-titulo" className="mapa-titular mt-0.5 text-[24px] font-bold leading-tight text-[#003648] sm:text-[27px]">
+            Cuánto cuesta un máster en cada comunidad
+          </h2>
+        </div>
+      </div>
       <p className="mt-1 text-sm text-neutral-700">
         {porRanking ? "Ordenadas por su universidad mejor situada en el ranking QS" : "Ordenadas por matrícula orientativa"} dentro de cada lista. Toca
         una para abrir su ficha en el mapa.

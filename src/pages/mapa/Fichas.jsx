@@ -27,7 +27,9 @@ import {
 import { cursoCorto, leerPlazos, plazoMasTemprano, rangoFechas } from "./plazos";
 import TarjetaPrecio from "./TarjetaPrecio";
 import IlustracionCiudad from "./IlustracionesMapa";
+import IconoMapa from "./IconosMapa";
 import PrimerAnio from "./PrimerAnio";
+import AvisoPlazo from "./AvisoPlazo";
 import { presupuestoEnCiudad } from "./vida";
 import VivirAqui from "./VivirAqui";
 import { SelectorOrden } from "./ResultadosUniversidades";
@@ -60,6 +62,26 @@ const irA = (href) => (e) => {
 };
 
 const FOCO = "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]";
+
+/**
+ * Sello de título oficial. Es la pregunta que más repiten en los comentarios
+ * de los vídeos («¿son de título oficial?») y la respuesta que separa a
+ * Inspira de quien vende programas sin validez en España.
+ *
+ * El dibujo es propio: los escudos del Ministerio y del RUCT son marcas y no
+ * se reproducen sin permiso.
+ */
+function SelloOficial({ className = "" }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full bg-[#EAF6EE] px-3 py-1.5 text-[12px] font-extrabold text-[#1B5E35] ring-1 ring-[#BFE3CC] ${className}`}
+      title="Inscrito en el Registro de Universidades, Centros y Títulos del Ministerio"
+    >
+      <IconoMapa nombre="sello" size={15} strokeWidth={1.6} />
+      Título oficial · RUCT
+    </span>
+  );
+}
 
 /**
  * Prueba social donde se decide: junto a la cifra, no al final de la ficha.
@@ -430,7 +452,7 @@ function Acciones({ whatsapp, guardar = null, children }) {
 const Descargo = () => <p className="mt-4 text-[11px] leading-snug text-neutral-700">{T.descargo}</p>;
 
 /** «Próximo plazo de postulación: 13–29 ene 2027 (Fase 1 — extranjeros)», con sus fases. Siempre estimadas. */
-function Plazo({ rotulo, fase, curso, detalle = null, fases = [] }) {
+function Plazo({ rotulo, fase, curso, detalle = null, fases = [], sitio = null, sitioId = null }) {
   return (
     <section className="mt-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-[#96CCFC]">
       <p className="mapa-rotulo">
@@ -462,6 +484,9 @@ function Plazo({ rotulo, fase, curso, detalle = null, fases = [] }) {
         </ul>
       )}
       <p className="mt-1.5 text-[11px] text-neutral-700">{PLAZOS.estimadas(cursoCorto(curso) || "2027/28")}</p>
+      {sitio && (
+        <AvisoPlazo sitio={sitio} sitioId={sitioId} curso={cursoCorto(curso)} fecha={fase ? rangoFechas(fase.inicio, fase.fin) : null} />
+      )}
     </section>
   );
 }
@@ -629,7 +654,9 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden
       </dl>
       <NotasMatricula m={m} />
 
-      {temprano && <Plazo rotulo={PLAZOS.temprano} fase={temprano.fase} curso={temprano.curso} detalle={temprano.u.sigla} />}
+      {temprano && (
+        <Plazo rotulo={PLAZOS.temprano} fase={temprano.fase} curso={temprano.curso} detalle={temprano.u.sigla} sitio={c.nombre} sitioId={c.id} />
+      )}
 
       <VivirAqui comunidad={c} presupuesto={indice.presupuestos?.get(c.id) || null} />
 
@@ -835,6 +862,7 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
           {u.sigla} · {u.sedes.join(", ")}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
+          <SelloOficial />
           <ChipLista lista={lista} />
           <ChipTitularidad valor={u.titularidad} />
           <ChipComunidad com={com} onElegir={onElegir} />
@@ -875,7 +903,9 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
         </div>
       )}
 
-      {plazos && <Plazo rotulo={PLAZOS.proximo} fase={plazos.proxima} curso={plazos.curso} fases={plazos.fases} />}
+      {plazos && (
+        <Plazo rotulo={PLAZOS.proximo} fase={plazos.proxima} curso={plazos.curso} fases={plazos.fases} sitio={u.sigla} sitioId={u.id} />
+      )}
 
       <BecasUniversidad becas={leerBecas(u)} />
 

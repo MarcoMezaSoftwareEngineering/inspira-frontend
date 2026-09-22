@@ -237,6 +237,22 @@ export const LLEVATELO = {
   boton: "Sí, envíamelo",
 };
 
+// «Avísame cuando abra». Ver AvisoPlazo.jsx: el aviso lo escribe una persona
+// desde Core, así que aquí no se promete un mensaje automático.
+export const AVISO = {
+  boton: "Avísame cuando abra el plazo",
+  titulo: (sitio) => `Te avisamos cuando abra ${sitio}`,
+  texto: "Te escribimos por WhatsApp unos días antes. Nada más: ni spam ni llamadas.",
+  nombre: "Tu nombre",
+  whatsapp: "Tu WhatsApp (con código de país)",
+  email: "Tu correo (opcional)",
+  politica: ["He leído y acepto la ", "política de privacidad", "."],
+  enviar: "Avísame",
+  enviando: "Guardando…",
+  listo: (sitio) => `Listo. Te escribimos cuando abra el plazo en ${sitio}.`,
+  error: "No pudimos guardarlo. Prueba otra vez o escríbenos por WhatsApp.",
+};
+
 export const RECOMENDAR = {
   boton: "Recomiéndame",
   rotulo: "Recomiéndame",

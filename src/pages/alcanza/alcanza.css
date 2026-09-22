@@ -1,0 +1,465 @@
+/* src/pages/alcanza/alcanza.css
+   «¿Te alcanza?» (/te-alcanza): la puerta que se abre desde un vídeo.
+
+   Es la página más llamativa del sitio y a la vez la que más cuida lo que
+   dice. El tono visual puede ser de juego —fondo oscuro, cartas grandes,
+   colores plenos—; las cifras, no: son las mismas de /api/mapa.
+
+   Prefijo alc- en todo, como manda la casa. Con prefers-reduced-motion no se
+   mueve nada, y el juego se puede jugar entero con los dos botones, sin
+   arrastrar: quien no puede hacer el gesto no se queda fuera. */
+
+.alc {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #fff;
+  font-family: Montserrat, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Fondo: Noche con dos luces, una cálida y otra fría, y la trama de puntos
+   del mapa para que se reconozca la casa. */
+.alc-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(60% 45% at 85% 6%, rgba(240, 156, 72, 0.3), transparent 60%),
+    radial-gradient(70% 50% at 8% 92%, rgba(150, 204, 252, 0.26), transparent 62%),
+    linear-gradient(160deg, #00485f 0%, #003648 55%, #001f2b 100%);
+}
+.alc-fondo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(150, 204, 252, 0.16) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+.alc-dentro {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  max-width: 560px;
+  padding: 2rem 1.1rem 4rem;
+}
+
+/* ── Cabecera ────────────────────────────────────────────────────────── */
+
+.alc-cabecera {
+  text-align: center;
+}
+.alc-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  background: rgba(240, 156, 72, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(240, 156, 72, 0.5);
+  padding: 0.4rem 0.9rem;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f09c48;
+}
+.alc-titulo {
+  font-family: Merriweather, Georgia, serif;
+  font-size: clamp(30px, 8vw, 42px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0.8rem 0 0;
+  text-wrap: balance;
+}
+.alc-lead {
+  margin: 0.7rem auto 0;
+  max-width: 34ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+.alc-cargando {
+  margin-top: 3rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+.alc-enlace {
+  color: #96ccfc;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── El mazo ─────────────────────────────────────────────────────────── */
+
+.alc-juego {
+  margin-top: 1.6rem;
+}
+.alc-progreso {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0 0 0.9rem;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(150, 204, 252, 0.9);
+}
+.alc-barra {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.alc-barra > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #96ccfc, #f09c48);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.alc-mazo {
+  position: relative;
+  display: grid;
+}
+.alc-mazo > * {
+  grid-area: 1 / 1;
+}
+
+.alc-carta {
+  position: relative;
+  border-radius: 28px;
+  background: #fff;
+  color: #003648;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.7);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+}
+.alc-carta:active {
+  cursor: grabbing;
+}
+.alc-carta-fondo {
+  pointer-events: none;
+}
+.alc-carta-lienzo {
+  position: relative;
+  aspect-ratio: 25 / 11;
+  overflow: hidden;
+}
+.alc-carta-lugar {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  background: rgba(0, 54, 72, 0.9);
+  padding: 0.3rem 0.75rem;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.alc-carta-cuerpo {
+  padding: 1.1rem 1.2rem 1.3rem;
+}
+.alc-carta-rotulo {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0a5873;
+}
+.alc-carta-cifra {
+  font-family: Merriweather, Georgia, serif;
+  font-size: clamp(40px, 11vw, 54px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0.3rem 0 0;
+  font-variant-numeric: tabular-nums;
+}
+.alc-carta-desglose {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 0 0;
+  border-top: 1px solid #e8f0f8;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 14px;
+}
+.alc-carta-desglose li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #4a5b66;
+}
+.alc-carta-desglose strong {
+  color: #003648;
+  font-variant-numeric: tabular-nums;
+}
+.alc-carta-nota {
+  margin: 0.8rem 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7a85;
+}
+
+/* El sello que aparece al arrastrar: dice qué va a pasar al soltar. */
+.alc-sello {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  transform: rotate(9deg);
+  border-radius: 12px;
+  padding: 0.35rem 0.8rem;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.alc-sello-si {
+  background: rgba(27, 94, 53, 0.92);
+  color: #fff;
+}
+.alc-sello-no {
+  left: 18px;
+  right: auto;
+  transform: rotate(-9deg);
+  background: rgba(155, 34, 34, 0.92);
+  color: #fff;
+}
+
+.alc-sale-si .alc-carta:not(.alc-carta-fondo) {
+  transform: translateX(130%) rotate(16deg);
+  opacity: 0;
+}
+.alc-sale-no .alc-carta:not(.alc-carta-fondo) {
+  transform: translateX(-130%) rotate(-16deg);
+  opacity: 0;
+}
+
+/* ── Botones ─────────────────────────────────────────────────────────── */
+
+.alc-botones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  margin-top: 1.1rem;
+}
+.alc-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 58px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background-color 0.18s ease;
+}
+.alc-boton-no {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+.alc-boton-si {
+  background: #f09c48;
+  color: #003648;
+  box-shadow: 0 14px 28px -12px rgba(240, 156, 72, 0.8);
+}
+.alc-boton:active {
+  transform: scale(0.97);
+}
+.alc-flecha-izq {
+  transform: rotate(180deg);
+}
+.alc-pista {
+  margin: 0.8rem 0 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Resultado ───────────────────────────────────────────────────────── */
+
+.alc-resultado {
+  margin-top: 1.4rem;
+  animation: alc-entra 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes alc-entra {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+.alc-res-rotulo {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f09c48;
+}
+.alc-res-titulo {
+  font-family: Merriweather, Georgia, serif;
+  font-size: clamp(26px, 7vw, 34px);
+  font-weight: 700;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  margin: 0.5rem 0 0;
+  text-wrap: balance;
+}
+.alc-res-texto {
+  margin: 0.7rem 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+.alc-lista {
+  list-style: none;
+  margin: 1.3rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.alc-fila {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  align-items: center;
+  gap: 0.9rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(150, 204, 252, 0.2);
+  padding: 0.6rem 1rem 0.6rem 0.6rem;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease;
+}
+.alc-fila-ilu {
+  display: block;
+  aspect-ratio: 25 / 14;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.alc-fila-txt strong {
+  display: block;
+  font-size: 15px;
+}
+.alc-fila-txt span {
+  display: block;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.62);
+}
+.alc-fila-cifra {
+  font-family: Merriweather, Georgia, serif;
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #96ccfc;
+}
+.alc-cerca {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+  border-radius: 16px;
+  background: rgba(240, 156, 72, 0.14);
+  padding: 0.75rem 0.9rem;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ffd9b0;
+}
+.alc-acciones {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+.alc-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 56px;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease;
+}
+.alc-cta-sol {
+  background: #f09c48;
+  color: #003648;
+  box-shadow: 0 16px 30px -14px rgba(240, 156, 72, 0.8);
+}
+.alc-cta-linea {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+.alc-repetir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 46px;
+  background: none;
+  border: 0;
+  color: rgba(150, 204, 252, 0.9);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.alc-descargo {
+  margin: 1.6rem 0 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .alc-boton:hover,
+  .alc-cta:hover {
+    transform: translateY(-2px);
+  }
+  .alc-fila:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+:where(.alc) :is(a, button):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #003648, 0 0 0 6px #f09c48;
+  border-radius: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alc-carta,
+  .alc-boton,
+  .alc-cta,
+  .alc-fila,
+  .alc-barra > span {
+    transition: none;
+  }
+  .alc-resultado {
+    animation: none;
+  }
+  .alc-sale-si .alc-carta:not(.alc-carta-fondo),
+  .alc-sale-no .alc-carta:not(.alc-carta-fondo) {
+    transform: none;
+    opacity: 0;
+  }
+}

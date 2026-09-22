@@ -45,6 +45,7 @@ const Enlaces = lazyConRecarga(() => import("./pages/enlaces/Enlaces"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
+const TeAlcanza = lazyConRecarga(() => import("./pages/alcanza/TeAlcanza"));
 const PaginaLugar = lazyConRecarga(() => import("./pages/mapa/PaginaLugar"));
 const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
 const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
@@ -388,6 +389,7 @@ const PUBLIC_PATHS = [
   "/ruta/tramites",
   "/calculadora-master",
   "/mapa-estudiar-en-espana",
+  "/te-alcanza",
   "/master-2027-2028",
   "/visa-o-estancia",
   "/grado-en-espana",
@@ -495,6 +497,10 @@ export default function App() {
 
   const isPanel = path.startsWith("/panel");
   const isLandingAds = LANDING_ADS_PATHS.includes(path);
+  // El juego ocupa la pantalla entera: sin cabecera, pie ni barras. A
+  // diferencia de las landings de anuncios, esta sí se indexa.
+  const isJuego = path === "/te-alcanza";
+  const sinChrome = isLandingAds || isJuego;
   // Optimista: cualquier /blog/<algo> monta la entrada, y es ella quien decide
   // si existe. Comprobarlo aquí obligaba a meter el blog entero en el paquete
   // inicial de la web pública.
@@ -509,16 +515,16 @@ export default function App() {
     !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle && !isPanel;
 
   return (
-    <div className={`min-h-screen w-full bg-white${path === "/enlaces" ? " sin-relleno-barra" : ""}`}>
+    <div className={`min-h-screen w-full bg-white${path === "/enlaces" || isJuego ? " sin-relleno-barra" : ""}`}>
       <RouteSEO path={path} />
-      {!isPanel && !isLandingAds && <BarraProgreso />}
+      {!isPanel && !sinChrome && <BarraProgreso />}
 
       {/* Schema.org según ruta */}
       {path === "/" && <SEOSchema schema={SCHEMA_ORG} id="org" />}
       {path === "/servicios/master" && <SEOSchema schema={SCHEMA_MASTER} id="master" />}
       {path === "/servicios/estancia" && <SEOSchema schema={SCHEMA_ESTANCIA} id="estancia" />}
 
-      {!isPanel && !isLandingAds && !isNotFound && <Header />}
+      {!isPanel && !sinChrome && !isNotFound && <Header />}
 
       {/* `key` fuerza el remontaje al navegar: cada página entra con animación.
           El panel NO: sus rutas internas cambian a cada clic y remontarlo
@@ -543,6 +549,7 @@ export default function App() {
       {isBlogPost && <BlogPost slug={path.slice("/blog/".length)} />}
       {path === "/calculadora-master" && <CalculadoraMaster />}
       {path === "/mapa-estudiar-en-espana" && <MapaEspana />}
+      {path === "/te-alcanza" && <TeAlcanza />}
       {/* Una página por comunidad y por universidad, con los datos del mapa:
           son las direcciones que busca la gente («máster en Galicia») y las
           que puede posicionar un buscador. Ver pages/mapa/PaginaLugar.jsx. */}
@@ -579,18 +586,19 @@ export default function App() {
       </div>
 
       {/* El footer identifica al proveedor en todas las páginas públicas */}
-      {!isPanel && !isLandingAds && <Footer />}
+      {!isPanel && !sinChrome && <Footer />}
 
       {/* Invitación permanente a la primera asesoría (no en el panel privado) */}
-      {!isPanel && !isLandingAds && <AsesoriaCTA />}
+      {!isPanel && !sinChrome && <AsesoriaCTA />}
 
       {/* Navegación inferior tipo app (móvil y tablet). «Reservar» abre Calendly. */}
-      {!isPanel && !isLandingAds && <BarraInferior />}
+      {!isPanel && !sinChrome && <BarraInferior />}
 
       {/* WhatsApp siempre a mano. Decide él dónde no debe salir (panel,
           backoffice, /auth y las landings con su propia barra de acción), así
           que la regla vive en un solo sitio. */}
-      <WhatsAppFlotante path={path} />
+      {/* En el juego no: el flotante tapa el botón «No me alcanza». */}
+      {!isJuego && <WhatsAppFlotante path={path} />}
 
       {/* Banner de cookies: siempre montado, decide él si se muestra */}
       <CookieConsent />

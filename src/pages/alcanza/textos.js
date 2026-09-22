@@ -27,7 +27,9 @@ export const ALCANZA = {
   progreso: (n, total) => `Carta ${n} de ${total}`,
 
   carta: {
-    rotulo: "Tu primer año costaría",
+    rotuloMaster: "El máster cuesta",
+    alAnio: "al año",
+    rotulo: "Y para irte, todo el año",
     matricula: "Matrícula del máster",
     porMes: (importe) => `≈ ${importe}/mes`,
     vida: "Vivir un año",

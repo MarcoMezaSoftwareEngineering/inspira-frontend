@@ -81,16 +81,15 @@ function Carta({ item, arrastre, alSoltar, fondo = false }) {
         </span>
       </div>
       <div className="alc-carta-cuerpo">
-        <p className="alc-carta-rotulo">{ALCANZA.carta.rotulo}</p>
-        <p className="alc-carta-cifra">{eur(item.total)}</p>
+        <p className="alc-carta-rotulo">{ALCANZA.carta.rotuloMaster}</p>
+        <p className="alc-carta-cifra">
+          {eur(item.matricula)} <span className="alc-carta-anio">{ALCANZA.carta.alAnio}</span>
+        </p>
+        <p className="alc-carta-mes">{ALCANZA.carta.porMes(eur(Math.round(item.matricula / 12)))}</p>
+
+        <p className="alc-carta-rotulo alc-carta-rotulo-2">{ALCANZA.carta.rotulo}</p>
+        <p className="alc-carta-total">{eur(item.total)}</p>
         <ul className="alc-carta-desglose">
-          <li>
-            <span>
-              {ALCANZA.carta.matricula}
-              <em className="alc-carta-piso">{ALCANZA.carta.porMes(eur(Math.round(item.matricula / 12)))}</em>
-            </span>
-            <strong>{eur(item.matricula)}</strong>
-          </li>
           <li>
             <span>
               {ALCANZA.carta.vida}

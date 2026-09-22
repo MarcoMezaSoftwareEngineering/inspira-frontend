@@ -472,3 +472,37 @@
   font-style: normal;
   color: #8496a2;
 }
+
+/* Orden de la carta: primero lo que cuesta el máster —que es poco y engancha—
+   y después lo que hace falta para irse, que es sobre lo que se decide. */
+.alc-carta-anio {
+  font-family: Montserrat, ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #6b7a85;
+}
+.alc-carta-mes {
+  display: inline-flex;
+  align-items: center;
+  margin: 0.45rem 0 0;
+  border-radius: 999px;
+  background: rgba(240, 156, 72, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(240, 156, 72, 0.55);
+  padding: 0.25rem 0.7rem;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #a05a12;
+}
+.alc-carta-rotulo-2 {
+  margin-top: 1rem;
+  color: #6b7a85;
+}
+.alc-carta-total {
+  font-family: Merriweather, Georgia, serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0.15rem 0 0;
+  color: #003648;
+  font-variant-numeric: tabular-nums;
+}

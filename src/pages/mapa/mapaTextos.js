@@ -215,8 +215,17 @@ export const PRESUPUESTO = {
 // «Lo que cuesta tu primer año»: la cifra que viene a buscar la gente. El
 // paquete de Inspira se nombra aparte a propósito; ver PrimerAnio.jsx.
 export const PRIMER_ANIO = {
-  rotulo: "Lo que cuesta tu primer año",
-  subtitulo: (donde) => `Matrícula y vida en ${donde}, durante un año.`,
+  // Jerarquía, decidida el 22/09/2026 por la clienta: la cifra grande es la
+  // del máster, no la del total. «El monto de inversión al año puede
+  // espantar; está bien, pero cuando busque detalles». Quien llega quiere
+  // saber que un máster oficial cuesta 739 € al año; lo que necesita para
+  // irse lo pregunta después, y lo tiene a un toque.
+  rotulo: "Lo que cuesta el máster",
+  subtitulo: (donde) => `Matrícula de un máster oficial en ${donde}, al año.`,
+  desplegar: "¿Y cuánto necesito para irme?",
+  plegar: "Ocultar el detalle",
+  totalRotulo: "Todo el primer año",
+  totalNota: "Matrícula y vida, sin contar lo nuestro.",
   matricula: "Matrícula del máster",
   matriculaNota: "La cobra la universidad, una vez al año.",
   // La cifra al mes es la misma verdad dicha de otra manera, y es la que hace

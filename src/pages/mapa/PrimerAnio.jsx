@@ -49,56 +49,69 @@ function Fila({ icono, etiqueta, nota, importe, acento = false, ultima = false }
 export default function PrimerAnio({ comunidad, presupuesto, paquete, lugar }) {
   // La cifra sube hasta su valor al abrirse la ficha: el número es el
   // protagonista y conviene que se vea llegar.
-  const total = useContador(presupuesto?.total || 0, 850);
+  const matricula = useContador(presupuesto?.matricula || 0, 850);
   if (!presupuesto) return null;
   const donde = lugar || comunidad.nombre;
+  const total = presupuesto.total;
 
   return (
     <section
-      aria-label={`Lo que cuesta el primer año en ${donde}`}
+      aria-label={`Lo que cuesta un máster en ${donde}`}
       className="mapa-primer-anio relative mt-4 overflow-hidden rounded-3xl bg-[#003648] p-4 text-white"
     >
       <span aria-hidden="true" className="pointer-events-none absolute -right-4 -top-5 text-white/[0.07]">
-        <Icono nombre="euro" size={110} />
+        <Icono nombre="birrete" size={110} />
       </span>
 
       <p className="mapa-rotulo mapa-rotulo-claro relative">
-        <Icono nombre="euro" size={14} />
+        <Icono nombre="birrete" size={14} />
         {PRIMER_ANIO.rotulo}
       </p>
-      <p className="mapa-titular relative mt-1 text-[40px] font-bold leading-none text-[#F09C48]">≈ {eur(total)}</p>
+      {/* La cifra que engancha es la del máster. El total de irse está justo
+          debajo, a un toque: no se esconde, se ordena. */}
+      <p className="mapa-titular relative mt-1 text-[40px] font-bold leading-none text-[#F09C48]">
+        ≈ {eur(matricula)} <span className="text-[19px] font-semibold text-white/70">al año</span>
+      </p>
       <p className="relative mt-1.5 text-[13px] leading-snug text-white/80">{PRIMER_ANIO.subtitulo(donde)}</p>
-      {presupuesto.matricula > 0 && (
+      {matricula > 0 && (
         <p className="mapa-por-mes relative mt-2.5">
           <Icono nombre="destello" size={14} />
-          {PRIMER_ANIO.porMes(eur(Math.round(presupuesto.matricula / 12)))}
+          {PRIMER_ANIO.porMes(eur(Math.round(matricula / 12)))}
         </p>
       )}
 
-      <ul className="relative mt-3">
-        <Fila
-          icono="birrete"
-          etiqueta={PRIMER_ANIO.matricula}
-          nota={PRIMER_ANIO.matriculaNota}
-          importe={eur(presupuesto.matricula)}
-        />
-        <Fila
-          icono="casa"
-          etiqueta={PRIMER_ANIO.vida(presupuesto.ciudad)}
-          nota={
-            Number.isFinite(presupuesto.habitacion)
-              ? `${PRIMER_ANIO.vidaNota} ${PRIMER_ANIO.habitacion(eur(presupuesto.habitacion))}.`
-              : PRIMER_ANIO.vidaNota
-          }
-          importe={eur(presupuesto.vida)}
-        />
-        {Number.isFinite(paquete) && (
-          <Fila icono="avion" etiqueta={PRIMER_ANIO.inspira} nota={PRIMER_ANIO.inspiraNota} importe={`desde ${eur(paquete)}`} acento />
-        )}
-        {/* El saldo de la visa no es un gasto y no suma en el total: se
-            demuestra, y es el mismo en toda España. Por eso va aparte. */}
-        <Fila ultima icono="pasaporte" etiqueta={PRIMER_ANIO.visa} nota={PRIMER_ANIO.visaNota} importe="7.200 €" />
-      </ul>
+      <details className="mapa-detalle relative mt-3">
+        <summary>
+          <span>{PRIMER_ANIO.desplegar}</span>
+          <Icono nombre="flecha" size={15} className="mapa-detalle-flecha" />
+        </summary>
+
+        <p className="mapa-total">
+          <span className="mapa-total-rotulo">{PRIMER_ANIO.totalRotulo}</span>
+          <strong>≈ {eur(total)}</strong>
+          <span className="mapa-total-nota">{PRIMER_ANIO.totalNota}</span>
+        </p>
+
+        <ul>
+          <Fila icono="birrete" etiqueta={PRIMER_ANIO.matricula} nota={PRIMER_ANIO.matriculaNota} importe={eur(matricula)} />
+          <Fila
+            icono="casa"
+            etiqueta={PRIMER_ANIO.vida(presupuesto.ciudad)}
+            nota={
+              Number.isFinite(presupuesto.habitacion)
+                ? `${PRIMER_ANIO.vidaNota} ${PRIMER_ANIO.habitacion(eur(presupuesto.habitacion))}.`
+                : PRIMER_ANIO.vidaNota
+            }
+            importe={eur(presupuesto.vida)}
+          />
+          {Number.isFinite(paquete) && (
+            <Fila icono="avion" etiqueta={PRIMER_ANIO.inspira} nota={PRIMER_ANIO.inspiraNota} importe={`desde ${eur(paquete)}`} acento />
+          )}
+          {/* El saldo de la visa no es un gasto y no suma: se demuestra, y es
+              el mismo en toda España. */}
+          <Fila ultima icono="pasaporte" etiqueta={PRIMER_ANIO.visa} nota={PRIMER_ANIO.visaNota} importe="7.200 €" />
+        </ul>
+      </details>
 
       <a
         href={whatsappDesde("mapa", PRIMER_ANIO.whatsapp(donde))}

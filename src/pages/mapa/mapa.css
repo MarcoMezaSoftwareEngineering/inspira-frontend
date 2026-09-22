@@ -937,3 +937,62 @@
   color: var(--mapa-sol, #f09c48);
   flex: none;
 }
+
+/* «¿Y cuánto necesito para irme?»: el detalle que se abre. El total de la
+   inversión vive aquí y no en el titular, porque de entrada asusta y hace
+   que se cierre la página antes de saber que la matrícula son 62 € al mes
+   (decisión de la clienta, 22/09/2026). No se esconde: está a un toque. */
+.mapa-detalle > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  cursor: pointer;
+  list-style: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.65rem 0.9rem;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+}
+.mapa-detalle > summary::-webkit-details-marker {
+  display: none;
+}
+.mapa-detalle-flecha {
+  transform: rotate(90deg);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  color: #f09c48;
+  flex: none;
+}
+.mapa-detalle[open] .mapa-detalle-flecha {
+  transform: rotate(-90deg);
+}
+.mapa-total {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0.9rem 0 0.2rem;
+}
+.mapa-total-rotulo {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #96ccfc;
+}
+.mapa-total > strong {
+  font-family: Merriweather, Georgia, serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.mapa-total-nota {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-detalle-flecha { transition: none; }
+}

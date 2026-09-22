@@ -13,7 +13,10 @@
 
 /* Mar: degradado del cielo de la marca, bajo el patrón de puntos del SVG. */
 .mapa-mar {
-  background: radial-gradient(120% 90% at 18% 8%, #f6fbff 0%, #e6f2fe 45%, #d2e8fd 100%);
+  /* Mar casi neutro: en cuanto el agua era celeste, España (que también es
+     azul) dejaba de recortarse contra ella. Ahora el color lo lleva la
+     tierra y el mar solo la sostiene. */
+  background: radial-gradient(120% 90% at 18% 8%, #fdfefe 0%, #f2f6fa 45%, #e7eef5 100%);
 }
 
 /* Comunidades: suben un poco al pasar por encima; el canto del relieve queda debajo. */
@@ -647,4 +650,229 @@
   padding: 0.75rem 0.9rem;
   color: #4b3a2a;
   max-width: 62ch;
+}
+
+/* ── Sistema de diseño de la página (22/09/2026) ───────────────────────────
+   «Se ve tosco; tiene que verse moderno, jurídico pero educativo» (clienta).
+   Lo que lo hacía tosco no era el color sino el ritmo: cajas dentro de cajas,
+   bordes duros y cuerpo de 11-12 px por todas partes. Aquí se arregla eso con
+   tres reglas, a la manera de las webs de producto que envejecen bien:
+
+   1. Aire antes que líneas: se separa con espacio, no con bordes.
+   2. Una sola escala de texto, con el cuerpo a 14 px y 1,6 de interlínea.
+   3. Un solo elemento naranja por pantalla: el que hay que pulsar.        */
+
+.mapa-premium {
+  --mapa-radio: 20px;
+  --mapa-radio-grande: 26px;
+  --mapa-linea: #e8f0f8;
+  --mapa-sombra: 0 1px 2px rgba(0, 54, 72, 0.04), 0 12px 32px -20px rgba(0, 54, 72, 0.28);
+  --mapa-sombra-alta: 0 1px 2px rgba(0, 54, 72, 0.05), 0 28px 60px -34px rgba(0, 54, 72, 0.4);
+}
+
+/* Fondo: un azul casi blanco. El blanco puro deja las tarjetas sin relieve y
+   es lo que hacía que la página pareciera un documento sin maquetar. */
+#mapa-explorador {
+  background-color: #f7fafd;
+}
+
+/* Tarjetas: menos borde, más aire, misma curva en todas. */
+.mapa-premium .mapa-tarjeta,
+.mapa-premium .mapa-panel {
+  border-radius: var(--mapa-radio-grande);
+  box-shadow: var(--mapa-sombra);
+}
+.mapa-premium .mapa-tarjeta {
+  border-color: var(--mapa-linea);
+}
+.mapa-premium .mapa-marco {
+  border-radius: var(--mapa-radio-grande);
+  box-shadow: var(--mapa-sombra-alta), 0 0 0 1px rgba(150, 204, 252, 0.4);
+}
+
+/* Cuerpo de texto: 14 px y 1,6. Las clases sueltas de 11-12 px del explorador
+   suben un punto; por debajo de 12 px nada se lee con comodidad en un móvil. */
+.mapa-premium .mapa-tarjeta p,
+.mapa-premium .mapa-tarjeta li,
+.mapa-premium aside p,
+.mapa-premium aside li {
+  line-height: 1.6;
+}
+.mapa-premium [class*="text-[11px]"] {
+  font-size: 12px;
+}
+.mapa-premium [class*="text-[12px]"] {
+  font-size: 13px;
+}
+.mapa-premium [class*="text-[13px]"] {
+  font-size: 14px;
+}
+
+/* Las cifras, con tipografía tabular: las columnas de euros dejan de bailar. */
+.mapa-premium .mapa-cifra,
+.mapa-premium .mapa-primer-anio,
+.mapa-premium .mapa-ciudad {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ritmo entre secciones: más separación en escritorio, donde sobra alto. */
+@media (min-width: 1024px) {
+  .mapa-premium section[aria-labelledby],
+  .mapa-premium #mapa-comparador,
+  .mapa-premium #mapa-resultados {
+    margin-top: 5.5rem;
+  }
+}
+
+/* El panel de detalle respira: era el bloque más apretado de la página. */
+.mapa-premium aside[aria-label="Detalle del mapa"] {
+  border-radius: var(--mapa-radio-grande);
+  border-color: var(--mapa-linea);
+  box-shadow: var(--mapa-sombra);
+  padding: 1.5rem;
+}
+
+/* La tarjeta del primer año es la pieza principal de la ficha: se le da el
+   tamaño que merece y se le quita el ruido de alrededor. */
+.mapa-premium .mapa-primer-anio {
+  border-radius: var(--mapa-radio-grande);
+  padding: 1.35rem;
+  background: linear-gradient(150deg, #00485f 0%, #003648 55%, #0a5873 100%);
+  box-shadow: var(--mapa-sombra-alta);
+}
+.mapa-premium .mapa-primer-anio li {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Bloques de la ficha: separados por aire y una línea finísima, no por cajas
+   con borde. Es lo que más cambiaba la sensación de «tosco». */
+.mapa-premium aside[aria-label="Detalle del mapa"] section,
+.mapa-premium [aria-label="Detalle del mapa"] section {
+  margin-top: 1.6rem;
+}
+
+/* Rótulos de sección: un punto más de aire entre letras y color más sobrio. */
+.mapa-premium .mapa-rotulo {
+  letter-spacing: 0.14em;
+  font-size: 11.5px;
+}
+
+/* Chips y botones secundarios: sin borde duro, con fondo tenue. */
+.mapa-premium button[class*="border-neutral-200"],
+.mapa-premium a[class*="border-neutral-200"] {
+  border-color: var(--mapa-linea);
+}
+
+/* Titulares: un pelo más grandes y con menos interlínea, como en las webs de
+   producto que se leen de un vistazo. */
+.mapa-premium h2.mapa-titular {
+  letter-spacing: -0.02em;
+}
+.mapa-premium h3 {
+  letter-spacing: -0.01em;
+}
+
+/* ── Que den ganas de quedarse (22/09/2026) ────────────────────────────────
+   Encargo de la clienta. Son respuestas al gesto: cada cosa que se puede
+   tocar contesta al puntero y al dedo. Todo con transform y opacity, que no
+   obligan al navegador a recalcular la página, y todo apagado cuando el
+   sistema pide quietud. */
+
+/* Botón principal: se levanta, la sombra se tiñe de su color y al pulsar se
+   hunde. Es el gesto que hace que un botón parezca un botón. */
+.mapa-premium :is(a, button)[class*="bg-[#F09C48]"] {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mapa-premium :is(a, button)[class*="bg-[#F09C48]"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -12px rgba(240, 156, 72, 0.75);
+  }
+}
+.mapa-premium :is(a, button)[class*="bg-[#F09C48]"]:active {
+  transform: translateY(0) scale(0.985);
+}
+
+/* Botón oscuro: el mismo gesto con su propia sombra. */
+@media (hover: hover) and (pointer: fine) {
+  .mapa-premium :is(a, button)[class*="bg-[#003648]"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -14px rgba(0, 54, 72, 0.8);
+  }
+}
+
+/* Burbujas del mapa: crecen bajo el puntero, así se nota que son tocables. */
+@media (hover: hover) and (pointer: fine) {
+  .mapa-burbuja .mapa-burbuja-borde {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .mapa-burbuja:hover .mapa-burbuja-borde {
+    transform: scale(1.22);
+    stroke-width: 2.6;
+  }
+}
+
+/* Filas del desglose del primer año: se iluminan al pasar por encima. */
+.mapa-primer-anio li {
+  border-radius: 12px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mapa-primer-anio li:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Tarjetas de sección: se levantan un punto, lo justo para que se note. */
+@media (hover: hover) and (pointer: fine) {
+  .mapa-premium .mapa-tarjeta {
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+  }
+  .mapa-premium .mapa-tarjeta:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--mapa-sombra-alta);
+  }
+}
+
+/* Chips de la ficha: responden al dedo sin moverse de sitio. */
+.mapa-premium [class*="rounded-full"][class*="min-h-[44px]"] {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease, border-color 0.18s ease;
+}
+.mapa-premium [class*="rounded-full"][class*="min-h-[44px]"]:active {
+  transform: scale(0.96);
+}
+
+/* Foco: un anillo de la marca, también para quien navega con el teclado. */
+.mapa-premium :is(a, button, input, select):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px rgba(240, 156, 72, 0.75);
+  border-radius: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-premium :is(a, button)[class*="bg-[#F09C48]"],
+  .mapa-premium .mapa-tarjeta,
+  .mapa-primer-anio li,
+  .mapa-burbuja .mapa-burbuja-borde,
+  .mapa-premium [class*="rounded-full"][class*="min-h-[44px]"] {
+    transition: none;
+  }
+  .mapa-premium :is(a, button)[class*="bg-[#F09C48]"]:hover,
+  .mapa-premium :is(a, button)[class*="bg-[#003648]"]:hover,
+  .mapa-premium .mapa-tarjeta:hover,
+  .mapa-burbuja:hover .mapa-burbuja-borde {
+    transform: none;
+  }
+}
+
+/* Bloque de confianza: fondo Noche con una luz cálida arriba a la derecha.
+   Es el único bloque oscuro entre el mapa y las ciudades, y sirve de pausa. */
+.mapa-confianza {
+  background:
+    radial-gradient(90% 120% at 88% -10%, rgba(240, 156, 72, 0.22), transparent 55%),
+    linear-gradient(150deg, #00485f, #003648 60%, #0a5873);
+  box-shadow: var(--mapa-sombra-alta);
 }

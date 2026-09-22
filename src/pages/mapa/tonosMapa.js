@@ -11,33 +11,39 @@ export const NOCHE = "#003648";
 export const CIELO = "#96CCFC";
 export const SOL = "#F09C48";
 
+// Rampa de precio, no tres colores sueltos (22/09/2026). Antes cada tramo
+// tenía un color distinto —petróleo, cielo y naranja— y el mapa se leía como
+// tres categorías sin orden; encima el naranja del tramo caro competía con el
+// naranja de los botones y de lo elegido. Ahora es una sola escala: cuanto
+// más oscura la comunidad, más cara la matrícula. Se entiende sin leyenda, y
+// el Sol queda libre para una sola cosa: lo que está elegido.
 export const TONO = {
   economicas: {
+    relleno: "#CFE6FD",
+    canto: "#9EC7EC",
+    chip: "bg-[#CFE6FD] text-[#003648]",
+    muestra: "bg-[#CFE6FD]",
+    anillo: "ring-[#9EC7EC]",
+  },
+  intermedias: {
+    relleno: "#5B9BD5",
+    canto: "#3C7AB0",
+    chip: "bg-[#5B9BD5] text-white",
+    muestra: "bg-[#5B9BD5]",
+    anillo: "ring-[#3C7AB0]",
+  },
+  premium: {
     relleno: "#0A5873",
     canto: "#003648",
     chip: "bg-[#0A5873] text-white",
     muestra: "bg-[#0A5873]",
     anillo: "ring-[#0A5873]",
   },
-  intermedias: {
-    relleno: "#96CCFC",
-    canto: "#5B9BD5",
-    chip: "bg-[#96CCFC] text-[#003648]",
-    muestra: "bg-[#96CCFC]",
-    anillo: "ring-[#5B9BD5]",
-  },
-  premium: {
-    relleno: "#F09C48",
-    canto: "#B8661F",
-    chip: "bg-[#F09C48] text-[#003648]",
-    muestra: "bg-[#F09C48]",
-    anillo: "ring-[#F09C48]",
-  },
   fuera: {
-    relleno: "#E3E9EF",
-    canto: "#BFC9D2",
+    relleno: "#E7ECF1",
+    canto: "#C7D0D9",
     chip: "bg-neutral-200 text-neutral-700",
-    muestra: "bg-[#E3E9EF]",
+    muestra: "bg-[#E7ECF1]",
     anillo: "ring-neutral-400",
   },
 };

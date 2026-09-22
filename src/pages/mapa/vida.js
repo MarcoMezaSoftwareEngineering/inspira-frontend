@@ -97,3 +97,17 @@ export function presupuestoAnual(c, sinPublicar = false) {
   const vidaAnual = Math.round(barata.r[1] * 12);
   return { matricula: Math.round(matricula), vida: vidaAnual, total: Math.round(matricula) + vidaAnual, ciudad: barata.x.nombre };
 }
+
+/**
+ * El mismo presupuesto, pero con el gasto de vida de una ciudad concreta
+ * cuando esa ciudad trae dato propio. En la ficha de una ciudad, hablar del
+ * gasto de otra (la más barata de la comunidad) despistaba.
+ */
+export function presupuestoEnCiudad(c, nombreCiudad, sinPublicar = false) {
+  const base = presupuestoAnual(c, sinPublicar);
+  if (!base || !nombreCiudad) return base;
+  const g = gastoMensual(c, nombreCiudad);
+  if (!g || !mismaCiudad(g.detalle, nombreCiudad)) return base;
+  const vida = Math.round(g.medio * 12);
+  return { matricula: base.matricula, vida, total: base.matricula + vida, ciudad: nombreCiudad };
+}

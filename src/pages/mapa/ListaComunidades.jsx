@@ -9,9 +9,15 @@ import Icono from "../../components/common/Icono";
 import { cascada } from "../../lib/revelar";
 import { mejorRanking } from "./indice";
 import { tonoDe } from "./tonosMapa";
-import { PAQUETE, eur, etiquetaLista, importeMatricula, mayus, plural } from "./mapaTextos";
+import { LLEVATELO, PAQUETE, eur, etiquetaListaLarga, importeMatricula, mayus, plural } from "./mapaTextos";
 
-export default function ListaComunidades({ indice, geoPorId, filtros, foco, orden = "masteres", onElegir, onResaltar = null }) {
+export default function ListaComunidades({ indice, geoPorId, filtros, foco, orden = "masteres", onElegir, onResaltar = null, onEnviar = null }) {
+  // Las tres más baratas con dato: es lo que se ofrece mandar por WhatsApp.
+  const masEconomicas = indice.datos.comunidades
+    .filter((c) => c.precioAnual && !indice.datos.precios?.sinPublicar?.includes(c.id))
+    .sort((a, b) => a.precioAnual.tipico - b.precioAnual.tipico)
+    .slice(0, 3)
+    .map((c) => c.id);
   // Señalar una fila contornea su comunidad en el mapa, sin abrirla: la lista
   // y el mapa dejan de ser dos cosas separadas.
   const senalar = (id) => (onResaltar ? () => onResaltar(id) : undefined);
@@ -53,7 +59,7 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
           <div key={lista.id} data-revelar="suave" style={paso()} className="mapa-tarjeta p-4">
             <h3 className="flex flex-wrap items-center gap-2 text-sm font-extrabold text-[#003648]">
               <span aria-hidden="true" className={`h-3.5 w-3.5 rounded ${tonoDe(lista.id).muestra}`} />
-              <span className="mapa-titular text-base">{etiquetaLista(lista)}</span>
+              <span className="mapa-titular text-base">{etiquetaListaLarga(lista)}</span>
               <span className="font-semibold text-neutral-700">· {PAQUETE.desdeCorto(lista.desde)}</span>
             </h3>
             <ul className="mt-3 space-y-2">
@@ -101,6 +107,27 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
           </div>
         ))}
       </div>
+
+      {onEnviar && masEconomicas.length > 0 && (
+        <div className="mapa-tarjeta mt-8 flex flex-wrap items-center gap-5 p-6" data-revelar="suave">
+          <div className="min-w-[260px] flex-1">
+            <p className="mapa-rotulo">
+              <Icono nombre="chat" size={14} />
+              {LLEVATELO.rotulo}
+            </p>
+            <h3 className="mapa-titular mt-1 text-xl font-bold text-[#003648]">{LLEVATELO.titulo}</h3>
+            <p className="mt-1.5 max-w-xl text-sm text-neutral-700">{LLEVATELO.texto}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onEnviar(masEconomicas)}
+            className="mapa-boton mov-toque inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-[#F09C48] px-6 py-3 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648]"
+          >
+            <Icono nombre="whatsapp" size={18} />
+            {LLEVATELO.boton}
+          </button>
+        </div>
+      )}
 
       {fuera.length > 0 && (
         <p className="mt-5 flex flex-wrap items-center gap-2 text-sm text-neutral-700">

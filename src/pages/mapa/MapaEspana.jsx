@@ -30,7 +30,7 @@ import { cascada, revelarTodo, useRevelar } from "../../lib/revelar";
 import { ABRE_MESES, RANKING_TOPES, aplicarFiltros, casosEnMapa, crearIndice, hayRanking, hayTitularidad, prefiereMenosMovimiento } from "./indice";
 import { useEstadoMapa } from "./useEstadoMapa";
 import { useEsEscritorio } from "./useEsEscritorio";
-import { CTA, HERO, PAQUETE, PIE, RANKING, RECOMENDAR, SEO, SESION, T, etiquetaLista, eur, plural } from "./mapaTextos";
+import { CONFIANZA, CTA, HERO, PAQUETE, PIE, RANKING, RECOMENDAR, SEO, SESION, T, etiquetaListaLarga, eur, plural } from "./mapaTextos";
 import ResultadosUniversidades from "./ResultadosUniversidades";
 import Recomendador from "./Recomendador";
 import GuardarComparativa from "./GuardarComparativa";
@@ -44,6 +44,8 @@ import Comparador from "./Comparador";
 import ListaComunidades from "./ListaComunidades";
 import IlustracionCiudad from "./IlustracionesMapa";
 import CompartirMapa from "./compartirMapa";
+import TarjetaMini from "./TarjetaMini";
+import { useInteres } from "./useInteres";
 import "../../styles/movimiento.css";
 import "./mapa.css";
 
@@ -306,7 +308,7 @@ function Leyenda({ indice, ranking }) {
         {indice.datos.listas.map((l) => (
           <span key={l.id} className="inline-flex items-center gap-1.5">
             <span aria-hidden="true" className={`h-3 w-3 rounded ${tonoDe(l.id).muestra}`} />
-            {etiquetaLista(l)}
+            {etiquetaListaLarga(l)}
           </span>
         ))}
         <span className="inline-flex items-center gap-1.5">
@@ -582,6 +584,74 @@ function CiudadesDestacadas({ indice, foco, onElegir }) {
   );
 }
 
+/**
+ * Bloque de confianza: por qué fiarse de lo que se ve aquí. Va después del
+ * mapa, cuando ya se han visto las cifras y toca la pregunta «¿y esto de
+ * dónde sale?».
+ */
+function Confianza() {
+  const paso = cascada(80);
+  return (
+    <section aria-labelledby="mapa-confianza-titulo" className="mt-14 scroll-mt-24" data-revelar>
+      <div className="mapa-confianza overflow-hidden rounded-[26px] p-6 sm:p-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-10">
+          <div className="min-w-0">
+            <p className="mapa-rotulo mapa-rotulo-claro">
+              <Icono nombre="escudo" size={14} />
+              {CONFIANZA.rotulo}
+            </p>
+            <h2 id="mapa-confianza-titulo" className="mapa-titular mt-1.5 text-[26px] font-bold leading-tight text-white sm:text-[30px]">
+              {CONFIANZA.titulo}
+            </h2>
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/80">{CONFIANZA.texto}</p>
+          </div>
+          <ul className="grid min-w-0 gap-3 self-center">
+            {CONFIANZA.puntos.map((p) => (
+              <li
+                key={p.titulo}
+                data-revelar="suave"
+                style={paso()}
+                className="flex items-start gap-3 rounded-2xl bg-white/[0.07] p-3.5 ring-1 ring-white/10"
+              >
+                <span className="mt-0.5 shrink-0 text-[#F09C48]">
+                  <Icono nombre={p.icono} size={18} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-extrabold text-white">{p.titulo}</span>
+                  <span className="block text-[13px] leading-snug text-white/70">{p.texto}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** El nombre de algo marcado como interesante, sea del tipo que sea. */
+function nombreDe(indice, { tipo, id }) {
+  if (tipo === "universidad") return indice.universidades.get(id)?.sigla || null;
+  if (tipo === "ciudad") return indice.ciudades.get(id)?.nombre || null;
+  return indice.comunidades.get(id)?.nombre || null;
+}
+
+/**
+ * La lista de interés, en lo que acepta el formulario de envío: o tres
+ * universidades o tres comunidades. Una ciudad marcada viaja como su
+ * comunidad, que es de lo que hay precio publicado.
+ */
+function paraGuardar(indice, interes) {
+  const unis = interes.filter((x) => x.tipo === "universidad").map((x) => x.id);
+  if (unis.length === interes.length && unis.length) return { tipo: "universidad", ids: unis.slice(0, MAX_COMPARAR) };
+  const comunidades = interes
+    .map((x) =>
+      x.tipo === "comunidad" ? x.id : x.tipo === "ciudad" ? indice.ciudades.get(x.id)?.comunidad : indice.universidades.get(x.id)?.comunidad
+    )
+    .filter(Boolean);
+  return { tipo: "comunidad", ids: [...new Set(comunidades)].slice(0, MAX_COMPARAR) };
+}
+
 /* ── Explorador ──────────────────────────────────────────────────────── */
 
 function Explorador({ datos, geo }) {
@@ -598,6 +668,11 @@ function Explorador({ datos, geo }) {
   // Comunidad señalada desde la lista en texto: el mapa la contornea sin
   // abrirla, para que se vea de qué sitio se está hablando.
   const [resaltada, setResaltada] = useState(null);
+  // En el teléfono, tocar el mapa enseña primero el cuadrito; la ficha entera
+  // se abre desde él. Desde fuera del mapa (buscador, lista, ciudades) se abre
+  // la ficha directamente, que es lo que se espera al pulsar.
+  const [vista, setVista] = useState("hoja");
+  const { interes, alternar: alternarInteres, vaciar: vaciarInteres } = useInteres();
   const esEscritorio = useEsEscritorio();
   const mapaRef = useRef(null);
   const zonaRef = useRef(null);
@@ -681,9 +756,19 @@ function Explorador({ datos, geo }) {
     [actualizar, indice, casos]
   );
 
+  // Desde el propio mapa: primero el cuadrito.
+  const elegirEnMapa = useCallback(
+    (tipo, id) => {
+      setVista(tipo ? "mini" : "hoja");
+      elegir(tipo, id);
+    },
+    [elegir]
+  );
+
   // Desde fuera del mapa (buscador, lista, comparador): elegir y llevar el mapa a la vista.
   const verEnMapa = useCallback(
     (tipo, id) => {
+      setVista("hoja");
       elegir(tipo, id);
       requestAnimationFrame(() => {
         const caja = mapaRef.current?.getBoundingClientRect();
@@ -857,17 +942,57 @@ function Explorador({ datos, geo }) {
               filtros={filtros}
               capas={capas}
               casos={casos}
-              onElegir={elegir}
+              onElegir={elegirEnMapa}
               onToda={() => elegir(null)}
               recomendadas={recomendador.abierto ? recomendador.ids : []}
               resaltada={resaltada}
             />
+            {!esEscritorio && foco.tipo && vista === "mini" && (
+              <TarjetaMini
+                indice={indice}
+                foco={foco}
+                marcado={interes.some((x) => x.id === (foco.universidad || foco.ciudad || foco.comunidad))}
+                onVerTodo={() => setVista("hoja")}
+                onInteres={(tipo, id) => {
+                  alternarInteres(tipo, id);
+                  registrarEvento("mapa_interes", { tipo, id });
+                }}
+                onCerrar={() => elegir(null)}
+              />
+            )}
           </div>
           <Leyenda indice={indice} ranking={filtros.ranking} />
-          <CompartirMapa geo={geo} indice={indice} foco={foco} casos={casos} />
+          <CompartirMapa geo={geo} indice={indice} foco={foco} />
+
+          {interes.length > 0 && (
+            <div className="mapa-tarjeta mt-3 flex flex-wrap items-center gap-3 p-4">
+              <p className="min-w-0 flex-1 text-sm text-neutral-700">
+                <strong className="text-[#003648]">
+                  {interes.length === 1 ? "Has marcado 1 sitio" : `Has marcado ${interes.length} sitios`}
+                </strong>{" "}
+                · {interes.map((x) => nombreDe(indice, x)).filter(Boolean).join(", ")}
+              </p>
+              <button
+                type="button"
+                onClick={() => setGuardar(paraGuardar(indice, interes))}
+                className="mapa-boton mov-toque inline-flex min-h-[44px] items-center gap-2 rounded-full bg-[#F09C48] px-4 py-2 text-xs font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648]"
+              >
+                <Icono nombre="whatsapp" size={15} />
+                Envíamelos
+              </button>
+              <button
+                type="button"
+                onClick={vaciarInteres}
+                className="mov-toque inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3 text-xs font-bold text-[#0A5873] underline underline-offset-2"
+              >
+                <Icono nombre="huella" size={13} />
+                Vaciar
+              </button>
+            </div>
+          )}
         </div>
 
-        <HojaDetalle esEscritorio={esEscritorio} abierta={!!foco.tipo} clave={clave} titulo={titulo} onCerrar={() => elegir(null)}>
+        <HojaDetalle esEscritorio={esEscritorio} abierta={!!foco.tipo && (esEscritorio || vista === "hoja")} clave={clave} titulo={titulo} onCerrar={() => elegir(null)}>
           <div key={clave} className="mapa-ficha-entra">
             {ficha}
           </div>
@@ -881,6 +1006,7 @@ function Explorador({ datos, geo }) {
       )}
 
       <div className="order-8">
+        <Confianza />
         <CiudadesDestacadas indice={indice} foco={foco} onElegir={verEnMapa} />
       </div>
 
@@ -918,6 +1044,7 @@ function Explorador({ datos, geo }) {
         orden={entrada.orden}
         onElegir={verEnMapa}
         onResaltar={setResaltada}
+        onEnviar={(ids) => setGuardar({ tipo: "comunidad", ids })}
       />
 
       </div>

@@ -27,7 +27,7 @@ export const SEO = {
 };
 
 export const HERO = {
-  etiqueta: "Mapa de costos de máster",
+  etiqueta: "El primer mapa gratuito de másteres en España",
   icono: "mapa",
   titulo: "Descubre cuánto cuesta estudiar un máster",
   destacado: "en cada ciudad de España",
@@ -40,11 +40,45 @@ export const HERO = {
   ],
 };
 
+// Bloque de confianza. La clienta lo pidió así: «no te dejes engañar por
+// programas sin validez académica», pero en registro formal. Se afirma lo que
+// se puede sostener —que aquí solo hay títulos del registro del Ministerio— y
+// se advierte sin señalar a nadie ni prometer admisiones.
+export const CONFIANZA = {
+  rotulo: "Aquí partimos contigo",
+  titulo: "Solo másteres con validez académica en España",
+  texto:
+    "En este mapa no hay otra cosa: todos los programas constan en el Registro de Universidades, Centros y Títulos del Ministerio. Antes de pagar por cualquier programa, comprueba que está inscrito ahí. Ningún paquete, por integral que se anuncie, sustituye esa condición ni puede garantizar por sí solo una admisión.",
+  puntos: [
+    { icono: "escudo", titulo: "Títulos oficiales", texto: "Inscritos en el registro del Ministerio de Universidades (RUCT)." },
+    { icono: "documento", titulo: "Precios con su norma", texto: "La matrícula sale de la norma de precios públicos de cada comunidad." },
+    { icono: "balanza", titulo: "Lo que no prometemos", texto: "Nadie puede garantizar una admisión: la decide la universidad." },
+  ],
+};
+
 export const SESION = `Reservar sesión diagnóstico · ${eur(SESION_PRECIOS.eur)}`;
 
 export const plural = (n, uno, varios) => `${numero(n)} ${n === 1 ? uno : varios}`;
 export const mayus = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-export const etiquetaLista = (lista) => (lista ? `Lista ${lista.numero} · ${lista.nombre}` : "Fuera de las listas");
+// Los tramos de matrícula, dichos como los entiende quien llega de fuera.
+// Antes se publicaban como «Lista 3 · Premium», que es la jerga con la que
+// Inspira tarifica sus paquetes: el cliente leía «Premium» como «mejor
+// universidad» y acababa sin saber si el tramo hablaba de la universidad o de
+// nosotros (decisión del 22/09/2026). El número de lista sigue existiendo en
+// el brochure y en los paquetes; aquí se describe lo que mide.
+export const NOMBRE_TRAMO = {
+  economicas: "Matrícula económica",
+  intermedias: "Matrícula media",
+  premium: "Matrícula alta",
+};
+
+export const etiquetaLista = (lista) => (lista ? NOMBRE_TRAMO[lista.id] || lista.nombre : "Fuera de las listas");
+
+/** «desde 739 €/año» con la matrícula más baja del tramo, si la hay. */
+export const rangoLista = (lista) => (Number.isFinite(lista?.desdeMatricula) ? `desde ${eur(lista.desdeMatricula)}/año` : null);
+
+/** «Matrícula económica · desde 739 €/año», donde haya sitio para todo. */
+export const etiquetaListaLarga = (lista) => [etiquetaLista(lista), rangoLista(lista)].filter(Boolean).join(" · ");
 
 /** «821 €», «591–836 €*», «desde 2.227 €*» o «lo fija cada universidad». */
 export function importeMatricula(m) {
@@ -179,6 +213,31 @@ export const PRESUPUESTO = {
   sinDato: (nombres) => `${nombres}: sin coste de vida o matrícula con los que sumar, queda fuera mientras uses el presupuesto.`,
 };
 
+// «Lo que cuesta tu primer año»: la cifra que viene a buscar la gente. El
+// paquete de Inspira se nombra aparte a propósito; ver PrimerAnio.jsx.
+export const PRIMER_ANIO = {
+  rotulo: "Lo que cuesta tu primer año",
+  subtitulo: (donde) => `Matrícula del máster y vida en ${donde}, para un año.`,
+  matricula: "Matrícula del máster",
+  matriculaNota: "Se la pagas a la universidad, no a nosotros.",
+  vida: (ciudad) => `Vivir un año en ${ciudad}`,
+  vidaNota: "No se pagan a nadie: hay que demostrar que los tienes para la visa.",
+  inspira: "Paquete de Inspira",
+  inspiraNota: "Aparte del total. Es lo único que nos pagas a nosotros.",
+  boton: (donde) => `Quiero postular en ${donde}`,
+  whatsapp: (donde) => `Hola, vi en el mapa lo que cuesta un máster en ${donde} y quiero postular. ¿Me orientan?`,
+  nota: "Cifras aproximadas: matrícula típica de un máster de la comunidad y el gasto de vida más bajo con dato. Extranjería exige demostrar al menos 7.200 € al año (IPREM 2026: 600 €/mes).",
+};
+
+// Llamada del final de la lista: llevarse los costos sin tener que apuntarlos.
+export const LLEVATELO = {
+  rotulo: "Llévatelo",
+  titulo: "¿Te mando lo que cuesta cada comunidad?",
+  texto:
+    "Te enviamos las tres comunidades más económicas con su matrícula, lo que hace falta para vivir un año y lo que cobramos nosotros. En un mensaje, para pensarlo con calma.",
+  boton: "Sí, envíamelo",
+};
+
 export const RECOMENDAR = {
   boton: "Recomiéndame",
   rotulo: "Recomiéndame",
@@ -210,10 +269,11 @@ export const RECOMENDAR = {
 };
 
 export const GUARDAR = {
-  boton: "Guárdala y te la enviamos",
+  boton: "Te lo mando por WhatsApp",
   rotulo: "Tu comparativa",
-  titulo: "Guárdala y te la enviamos",
-  texto: "Te la enviamos por WhatsApp (y por correo, si lo dejas) para revisarla con calma.",
+  titulo: "¿Te mando los costos por WhatsApp?",
+  texto:
+    "Te enviamos lo que cuesta cada sitio que has marcado —matrícula, vida y nuestro paquete— por WhatsApp, y también por correo si lo dejas.",
   seleccion: "Tu selección",
   nombre: "Nombre",
   whatsapp: "WhatsApp",

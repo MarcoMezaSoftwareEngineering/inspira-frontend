@@ -107,7 +107,7 @@ function filasComunidad(indice, items, extremos) {
   const maxUnis = maximo(items.map((c) => c.universidades));
   const maxMasteres = maximo(items.map((c) => c.masteres));
   return [
-    { id: "lista", etiqueta: "Lista", valor: (c) => etiquetaLista(indice.listas.get(c.lista)) },
+    { id: "lista", etiqueta: "Tramo de matrícula", valor: (c) => etiquetaLista(indice.listas.get(c.lista)) },
     filaPrecio((c) => c.precioAnual, items, extremos),
     {
       id: "matricula",
@@ -142,7 +142,7 @@ function filasUniversidad(indice, items, extremos) {
   const maxMatricula = maximo(items.map((u) => com(u)?.matricula?.min));
   return [
     { id: "donde", etiqueta: "Ciudad y comunidad", valor: (u) => `${indice.ciudades.get(u.ciudad)?.nombre || u.sedes[0]} · ${com(u)?.nombre || ""}` },
-    { id: "lista", etiqueta: "Lista", valor: (u) => etiquetaLista(indice.listas.get(u.lista)) },
+    { id: "lista", etiqueta: "Tramo de matrícula", valor: (u) => etiquetaLista(indice.listas.get(u.lista)) },
     { id: "titularidad", etiqueta: "Titularidad", opcional: (u) => !!u.titularidad, valor: (u) => u.titularidad || "—" },
     filaPrecio((u) => precioDeUniversidad(indice, u), items, extremos),
     {

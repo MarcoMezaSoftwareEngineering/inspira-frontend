@@ -363,8 +363,6 @@ const CIUDADES = {
   },
 };
 
-export const hayIlustracion = (id) => Object.hasOwn(CIUDADES, id);
-
 /**
  * Ilustración de una ciudad en el lienzo de 200 × 112.
  *

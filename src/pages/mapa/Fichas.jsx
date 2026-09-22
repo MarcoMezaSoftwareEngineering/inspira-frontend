@@ -27,6 +27,8 @@ import {
 import { cursoCorto, leerPlazos, plazoMasTemprano, rangoFechas } from "./plazos";
 import TarjetaPrecio from "./TarjetaPrecio";
 import IlustracionCiudad from "./IlustracionesMapa";
+import PrimerAnio from "./PrimerAnio";
+import { presupuestoEnCiudad } from "./vida";
 import VivirAqui from "./VivirAqui";
 import { SelectorOrden } from "./ResultadosUniversidades";
 import { BotonGuardar } from "./GuardarComparativa";
@@ -42,6 +44,7 @@ import {
   T,
   eur,
   etiquetaLista,
+  etiquetaListaLarga,
   importeMatricula,
   mayus,
   notasMatricula,
@@ -57,6 +60,36 @@ const irA = (href) => (e) => {
 };
 
 const FOCO = "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]";
+
+/**
+ * Prueba social donde se decide: junto a la cifra, no al final de la ficha.
+ * Quien acaba de ver lo que cuesta Valencia quiere saber quién lo ha hecho ya.
+ */
+function PruebaSocial({ casos, onElegir }) {
+  if (!casos?.length) return null;
+  return (
+    <div className="mt-2.5 rounded-2xl border border-[#E1EFFD] bg-[#F6FBFF] px-3.5 py-2.5">
+      <p className="mapa-rotulo mb-1.5">
+        <Icono nombre="trofeo" size={13} />
+        Ya lo lograron
+      </p>
+      <ul className="space-y-1.5">
+        {casos.slice(0, 3).map((k) => (
+          <li key={k.id}>
+            <button
+              type="button"
+              onClick={() => onElegir("caso", k.id)}
+              className={`mov-toque w-full rounded-xl px-1 py-0.5 text-left text-[13px] leading-snug text-neutral-800 hover:bg-white ${FOCO}`}
+            >
+              <strong className="text-[#003648]">{k.nombre}</strong> · {k.destacado}
+              <span className="block text-[12px] text-neutral-700">{k.universidad}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 /**
  * Cabecera ilustrada de la ficha: la silueta de la ciudad de la que se está
@@ -99,10 +132,15 @@ function Titulo({ children }) {
   return <h2 className="mapa-titular mt-1 text-[24px] font-bold leading-tight text-[#003648]">{children}</h2>;
 }
 
+/**
+ * Tramo de matrícula. El color va en el punto, no en todo el chip: el naranja
+ * pleno se guarda para el botón que hay que pulsar, que si no compite con él.
+ */
 function ChipLista({ lista }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${tonoDe(lista?.id).chip}`}>
-      {etiquetaLista(lista)}
+    <span className="inline-flex items-center gap-2 rounded-full bg-[#F2F7FC] px-3 py-1.5 text-[12px] font-bold text-[#003648] ring-1 ring-[#E1EFFD]">
+      <span aria-hidden="true" className={`h-2.5 w-2.5 shrink-0 rounded-full ${tonoDe(lista?.id).muestra}`} />
+      {etiquetaListaLarga(lista)}
     </span>
   );
 }
@@ -541,7 +579,7 @@ export function FichaInicio({ indice, casos, onElegir, onRecomendar = null }) {
   );
 }
 
-export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden, comparador, onElegir, onGuardar }) {
+export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden, casos = [], comparador, onElegir, onGuardar }) {
   const lista = indice.listas.get(c.lista) || null;
   const m = c.matricula;
   const ciudades = c.ciudades
@@ -566,6 +604,13 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden
           <ChipLista lista={lista} />
         </div>
       </div>
+      <PrimerAnio
+        comunidad={c}
+        presupuesto={indice.presupuestos?.get(c.id) || null}
+        paquete={lista?.desde}
+        lugar={c.nombre}
+      />
+      <PruebaSocial casos={casos.filter((k) => k.comunidadId === c.id)} onElegir={onElegir} />
       <TarjetaPrecio
         precio={c.precioAnual}
         ejemplos={ejemplosDeComunidad(indice, c)}
@@ -694,6 +739,15 @@ export function FichaCiudad({ c, indice, foco, geoPorId, rama, orden, onOrden, c
           <ChipComunidad com={com} onElegir={onElegir} />
         </div>
       </div>
+      {com && (
+        <PrimerAnio
+          comunidad={com}
+          presupuesto={presupuestoEnCiudad(com, c.nombre, !!indice.datos.precios?.sinPublicar?.includes(com.id))}
+          paquete={lista?.desde}
+          lugar={c.nombre}
+        />
+      )}
+      <PruebaSocial casos={casosAqui} onElegir={onElegir} />
       <dl className="mt-4 grid grid-cols-2 gap-2">
         <Dato
           etiqueta="Universidades"

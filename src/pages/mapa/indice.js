@@ -144,6 +144,13 @@ export function crearIndice(datosApi) {
   const comunidades = new Map(datos.comunidades.map((c) => [c.id, c]));
   const ciudades = new Map(datos.ciudades.map((c) => [c.id, c]));
   const universidades = new Map(datos.universidades.map((u) => [u.id, u]));
+  // Cada tramo lleva su matrícula más baja: es lo que se publica como nombre
+  // («Matrícula económica · desde 739 €/año») en vez de «Lista 1».
+  const matriculaDe = (c) => c?.precioAnual?.tipico ?? (c?.matricula && !c.matricula.cadaUniversidad ? c.matricula.min : null);
+  datos.listas = datos.listas.map((l) => {
+    const precios = (l.comunidades || []).map((id) => matriculaDe(comunidades.get(id))).filter((n) => Number.isFinite(n));
+    return { ...l, desdeMatricula: precios.length ? Math.round(Math.min(...precios)) : null };
+  });
   const listas = new Map(datos.listas.map((l) => [l.id, l]));
 
   const busqueda = [

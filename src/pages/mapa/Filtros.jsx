@@ -25,7 +25,7 @@ import {
   TITULARIDAD,
   VACIO,
   eur,
-  etiquetaLista,
+  etiquetaListaLarga,
   plural,
 } from "./mapaTextos";
 
@@ -371,7 +371,7 @@ export default function Filtros({
                   }`}
                 >
                   <span aria-hidden="true" className={`h-3 w-3 shrink-0 rounded ${tono.muestra}`} />
-                  {etiquetaLista(l)}
+                  {etiquetaListaLarga(l)}
                   {activa && <Icono nombre="check" size={13} strokeWidth={2.6} className="text-[#0A5873]" />}
                 </button>
               );

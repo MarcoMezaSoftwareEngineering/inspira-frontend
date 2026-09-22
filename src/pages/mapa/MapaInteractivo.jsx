@@ -460,6 +460,13 @@ export default function MapaInteractivo({
     [indice, rama]
   );
   const puntoPorId = useMemo(() => new Map(puntos.map((p) => [p.c.id, p])), [puntos]);
+  // Varios casos de éxito en la misma ciudad se repartían en el mismo punto y
+  // solo se veía uno: se abren en abanico alrededor de su burbuja.
+  const casosPorCiudad = useMemo(() => {
+    const m = new Map();
+    for (const k of casos) m.set(k.ciudadId, [...(m.get(k.ciudadId) || []), k.id]);
+    return m;
+  }, [casos]);
 
   const destinoRuta = foco.ciudad ? puntoPorId.get(foco.ciudad) : null;
   const rutas = destinoRuta
@@ -642,11 +649,11 @@ export default function MapaInteractivo({
       >
         <defs>
           <pattern id={`${PREFIJO}-puntos`} width={16} height={16} patternUnits="userSpaceOnUse">
-            <circle cx={2} cy={2} r={1.15} fill={NOCHE} fillOpacity={0.13} />
+            <circle cx={2} cy={2} r={1.1} fill={NOCHE} fillOpacity={0.07} />
           </pattern>
           {/* Olas del mar: el patrón entero corre despacio hacia la derecha. */}
           <pattern id={`${PREFIJO}-olas`} width={44} height={30} patternUnits="userSpaceOnUse">
-            <path d="M0 14q11 -7 22 0t22 0" fill="none" stroke={NOCHE} strokeOpacity={0.07} strokeWidth={1.6} strokeLinecap="round" />
+            <path d="M0 14q11 -7 22 0t22 0" fill="none" stroke={NOCHE} strokeOpacity={0.05} strokeWidth={1.6} strokeLinecap="round" />
             <path d="M-22 29q11 -7 22 0t22 0t22 0" fill="none" stroke={NOCHE} strokeOpacity={0.05} strokeWidth={1.4} strokeLinecap="round" />
             {!reducir && (
               <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="44 0" dur="14s" repeatCount="indefinite" />
@@ -1015,9 +1022,12 @@ export default function MapaInteractivo({
             if (!p) return null;
             const rc = capas.ciudades ? px(radioPx(p.n)) : 0;
             const rm = px(9.5 * Math.sqrt(escalaPantalla));
-            const d = (rc + rm * 0.35) * 0.72;
-            const mx = p.x + d;
-            const my = p.y - d;
+            const hermanos = casosPorCiudad.get(k.ciudadId) || [k.id];
+            const orden = Math.max(0, hermanos.indexOf(k.id));
+            const angulo = ((-45 + orden * 58) * Math.PI) / 180;
+            const d = (rc + rm * 0.35) * 1.02;
+            const mx = p.x + Math.cos(angulo) * d;
+            const my = p.y + Math.sin(angulo) * d;
             const elegido = foco.caso === k.id;
             return (
               <g

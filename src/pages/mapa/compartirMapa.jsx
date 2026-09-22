@@ -21,7 +21,7 @@ import Icono from "../../components/common/Icono";
 import { registrarEvento } from "../../lib/analytics";
 import { masteresDe } from "./indice";
 import { cursoCorto, plazoMasTemprano, rangoFechas } from "./plazos";
-import { NOCHE, SOL, tonoDe } from "./tonosMapa";
+import { NOCHE, SOL } from "./tonosMapa";
 import { eur, etiquetaLista, importeMatricula, numero, plural } from "./mapaTextos";
 
 const W = 1080;
@@ -241,7 +241,7 @@ function textoPlazo(unis) {
 }
 
 /** Qué se escribe en la imagen según lo que haya abierto en el mapa. */
-function datosDe({ indice, foco, casos }) {
+function datosDe({ indice, foco }) {
   const totales = indice.datos.totales;
   const uni = (id) => indice.universidades.get(id);
   const desdeLista = (id) => indice.listas.get(id)?.desde;
@@ -303,12 +303,12 @@ function datosDe({ indice, foco, casos }) {
   };
 }
 
-export default function CompartirMapa({ geo, indice, foco, casos = [] }) {
+export default function CompartirMapa({ geo, indice, foco }) {
   const [estado, setEstado] = useState("");
 
   async function compartir() {
     setEstado("preparando");
-    const datos = datosDe({ indice, foco, casos });
+    const datos = datosDe({ indice, foco });
     const url = enlaceActual();
     const texto = `${datos.titulo} — ${datos.matricula} de matrícula al año. Mira el mapa: ${url}`;
     registrarEvento("mapa_compartir", { tipo: foco.tipo || "espana", id: foco.comunidad || "" });

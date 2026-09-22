@@ -46,13 +46,13 @@ export const HERO = {
 // se advierte sin señalar a nadie ni prometer admisiones.
 export const CONFIANZA = {
   rotulo: "Aquí partimos contigo",
-  titulo: "Solo másteres con validez académica en España",
+  titulo: "Solo másteres oficiales. Sin excepciones.",
   texto:
-    "En este mapa no hay otra cosa: todos los programas constan en el Registro de Universidades, Centros y Títulos del Ministerio. Antes de pagar por cualquier programa, comprueba que está inscrito ahí. Ningún paquete, por integral que se anuncie, sustituye esa condición ni puede garantizar por sí solo una admisión.",
+    "Todos los másteres de este mapa están en el registro oficial del Ministerio de España. Antes de pagarle a alguien por un programa, búscalo ahí. Si no aparece, ese título no vale en España. Y que un paquete se anuncie como completo no hace que una universidad te admita.",
   puntos: [
-    { icono: "escudo", titulo: "Títulos oficiales", texto: "Inscritos en el registro del Ministerio de Universidades (RUCT)." },
-    { icono: "documento", titulo: "Precios con su norma", texto: "La matrícula sale de la norma de precios públicos de cada comunidad." },
-    { icono: "balanza", titulo: "Lo que no prometemos", texto: "Nadie puede garantizar una admisión: la decide la universidad." },
+    { icono: "escudo", titulo: "Títulos oficiales", texto: "Están en el registro del Ministerio de España (RUCT)." },
+    { icono: "documento", titulo: "Precios con su fuente", texto: "La matrícula sale de la norma de precios de cada comunidad." },
+    { icono: "balanza", titulo: "Lo que no prometemos", texto: "Nadie te puede garantizar una admisión. La decide la universidad." },
   ],
 };
 
@@ -140,7 +140,7 @@ export const PAQUETE = {
   rotulo: "Paquete de postulación de Inspira",
   desde: (n) => `Paquete de postulación desde ${eur(n)}`,
   desdeCorto: (n) => `paquete de postulación desde ${eur(n)}`,
-  leyenda: "Precio de Inspira por la postulación; la matrícula de la universidad se paga aparte.",
+  leyenda: "Es lo que cobra Inspira por la postulación. La matrícula la pagas aparte, a la universidad.",
   fila: "Paquete de postulación de Inspira",
 };
 
@@ -151,8 +151,7 @@ export const INICIO = {
   texto:
     "Toca una comunidad o una ciudad del mapa y descubre cuánto cuesta un máster al año en sus universidades, con ejemplos, su ranking QS y cómo se postula. Cada burbuja es una ciudad: cuanto más grande, más másteres oficiales.",
   precios: "Matrícula de la universidad, comunidad a comunidad",
-  preciosNota:
-    "Es lo que cobra la universidad por el máster en un año (lo habitual), no lo que cobra Inspira: nuestro paquete de postulación se paga aparte. Toca una para ver ejemplos.",
+  preciosNota: "Es lo que cobra la universidad por un año de máster. No es lo que cobra Inspira. Toca una y verás ejemplos.",
 };
 
 export const VACIO = {
@@ -206,8 +205,8 @@ export const PRESUPUESTO = {
   etiqueta: "Tengo hasta",
   sufijo: "al año",
   sinLimite: "Sin tope",
-  explicacion: "Suma matrícula típica + gasto de vida medio × 12 en cada comunidad.",
-  iprem: "Extranjería exige al menos 7.200 € al año (IPREM 2026: 600 €/mes).",
+  explicacion: "Suma la matrícula habitual y doce meses de gastos en cada comunidad.",
+  iprem: "Para la visa tienes que demostrar 7.200 € al año, o sea 600 € al mes.",
   ficha: "Presupuesto anual orientativo",
   desglose: (p) => `Matrícula ≈ ${eur(p.matricula)} + vida ≈ ${eur(p.vida)} (gasto medio × 12 en ${p.ciudad})`,
   sinDato: (nombres) => `${nombres}: sin coste de vida o matrícula con los que sumar, queda fuera mientras uses el presupuesto.`,
@@ -217,16 +216,16 @@ export const PRESUPUESTO = {
 // paquete de Inspira se nombra aparte a propósito; ver PrimerAnio.jsx.
 export const PRIMER_ANIO = {
   rotulo: "Lo que cuesta tu primer año",
-  subtitulo: (donde) => `Matrícula del máster y vida en ${donde}, para un año.`,
+  subtitulo: (donde) => `Matrícula y vida en ${donde}, durante un año.`,
   matricula: "Matrícula del máster",
-  matriculaNota: "Se la pagas a la universidad, no a nosotros.",
+  matriculaNota: "La cobra la universidad.",
   vida: (ciudad) => `Vivir un año en ${ciudad}`,
-  vidaNota: "No se pagan a nadie: hay que demostrar que los tienes para la visa.",
+  vidaNota: "No los pagas. Solo demuestras que los tienes.",
   inspira: "Paquete de Inspira",
-  inspiraNota: "Aparte del total. Es lo único que nos pagas a nosotros.",
+  inspiraNota: "Es lo único que nos pagas. Va aparte.",
   boton: (donde) => `Quiero postular en ${donde}`,
-  whatsapp: (donde) => `Hola, vi en el mapa lo que cuesta un máster en ${donde} y quiero postular. ¿Me orientan?`,
-  nota: "Cifras aproximadas: matrícula típica de un máster de la comunidad y el gasto de vida más bajo con dato. Extranjería exige demostrar al menos 7.200 € al año (IPREM 2026: 600 €/mes).",
+  whatsapp: (donde) => `Hola, vi en el mapa cuánto cuesta un máster en ${donde}. Quiero postular, ¿me ayudan?`,
+  nota: "Son cifras aproximadas. La matrícula es la habitual de la comunidad; la vida, la de su ciudad más barata. Para la visa tienes que demostrar 7.200 € al año, o sea 600 € al mes.",
 };
 
 // Llamada del final de la lista: llevarse los costos sin tener que apuntarlos.
@@ -234,7 +233,7 @@ export const LLEVATELO = {
   rotulo: "Llévatelo",
   titulo: "¿Te mando lo que cuesta cada comunidad?",
   texto:
-    "Te enviamos las tres comunidades más económicas con su matrícula, lo que hace falta para vivir un año y lo que cobramos nosotros. En un mensaje, para pensarlo con calma.",
+    "Te mandamos las tres comunidades más baratas: cuánto cuesta la matrícula, cuánto necesitas para vivir un año y cuánto cobramos nosotros. En un solo mensaje.",
   boton: "Sí, envíamelo",
 };
 
@@ -272,8 +271,7 @@ export const GUARDAR = {
   boton: "Te lo mando por WhatsApp",
   rotulo: "Tu comparativa",
   titulo: "¿Te mando los costos por WhatsApp?",
-  texto:
-    "Te enviamos lo que cuesta cada sitio que has marcado —matrícula, vida y nuestro paquete— por WhatsApp, y también por correo si lo dejas.",
+  texto: "Te mandamos por WhatsApp lo que cuesta cada sitio que marcaste: matrícula, vida y lo que cobramos. También por correo, si lo dejas.",
   seleccion: "Tu selección",
   nombre: "Nombre",
   whatsapp: "WhatsApp",

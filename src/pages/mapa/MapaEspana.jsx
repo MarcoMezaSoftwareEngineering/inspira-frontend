@@ -505,7 +505,7 @@ function CiudadesDestacadas({ indice, foco, onElegir }) {
         Las ciudades con más másteres oficiales
       </h2>
       <p className="mt-1 text-sm text-neutral-700">
-        Toca una y el mapa vuela hasta ella: verás sus universidades, su matrícula al año y su ranking QS.
+        Toca una y el mapa vuela hasta ella. Verás sus universidades, cuánto cuesta la matrícula al año y su puesto en el ranking QS.
       </p>
       {/* Lo que más se confunde: la matrícula la cobra la universidad, el
           paquete lo cobra Inspira. Se dice antes de enseñar ninguna cifra. */}
@@ -514,9 +514,8 @@ function CiudadesDestacadas({ indice, foco, onElegir }) {
           <Icono nombre="euro" size={16} />
         </span>
         <span>
-          <strong className="text-[#003648]">Son dos pagos distintos.</strong> La <strong>matrícula</strong> es lo que cobra la universidad
-          española por el máster. El <strong>paquete de Inspira</strong> es lo que nos pagas a nosotros por preparar y presentar tu
-          postulación: son cosas aparte y no se suman en la misma factura.
+          <strong className="text-[#003648]">Son dos pagos distintos.</strong> La universidad cobra la <strong>matrícula</strong> del máster.
+          Inspira cobra por <strong>prepararte y presentar tu postulación</strong>. Ni se suman ni se pagan en el mismo sitio.
         </span>
       </p>
 

@@ -152,7 +152,7 @@ export default function TarjetaMini({ indice, foco, marcado, onVerTodo, onIntere
 
       <div className="mt-2 space-y-1.5">
         <Linea icono="euro">
-          <strong className="text-[#003648]">{d.matricula}</strong> de matrícula · el paquete de Inspira va aparte
+          <strong className="text-[#003648]">{d.matricula}</strong> de matrícula. La cobra la universidad.
         </Linea>
         {d.plazo && (
           <Linea icono="calendario">

@@ -26,7 +26,7 @@ import { useSEO } from "../../hooks/useSEO";
 import { CASOS } from "../../config/casos";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
-import { cascada, useRevelar } from "../../lib/revelar";
+import { cascada, revelarTodo, useRevelar } from "../../lib/revelar";
 import { ABRE_MESES, RANKING_TOPES, aplicarFiltros, casosEnMapa, crearIndice, hayRanking, hayTitularidad, prefiereMenosMovimiento } from "./indice";
 import { useEstadoMapa } from "./useEstadoMapa";
 import { useEsEscritorio } from "./useEsEscritorio";
@@ -43,6 +43,7 @@ import { Cifra, FichaCaso, FichaCiudad, FichaComunidad, FichaFuera, FichaInicio,
 import Comparador from "./Comparador";
 import ListaComunidades from "./ListaComunidades";
 import IlustracionCiudad from "./IlustracionesMapa";
+import CompartirMapa from "./compartirMapa";
 import "../../styles/movimiento.css";
 import "./mapa.css";
 
@@ -78,7 +79,10 @@ function useFuenteTitulares() {
   }, []);
 }
 
-const irSuave = (el) => el?.scrollIntoView({ behavior: prefiereMenosMovimiento() ? "auto" : "smooth", block: "start" });
+const irSuave = (el) => {
+  revelarTodo(document);
+  el?.scrollIntoView({ behavior: prefiereMenosMovimiento() ? "auto" : "smooth", block: "start" });
+};
 
 /* ── Estados de carga ────────────────────────────────────────────────── */
 
@@ -466,6 +470,7 @@ function BarraSecciones({ className = "" }) {
           <li key={s.id}>
             <a
               href={`#${s.id}`}
+              onClick={() => revelarTodo(document)}
               aria-current={activa === s.id ? "true" : undefined}
               className={`mov-toque inline-flex min-h-[40px] items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-extrabold ${
                 activa === s.id ? "border-transparent bg-[#003648] text-white" : "border-[#CFE6FD] bg-white/90 text-[#003648]"
@@ -514,11 +519,25 @@ function CiudadesDestacadas({ indice, foco, onElegir }) {
       <p className="mt-1 text-sm text-neutral-700">
         Toca una y el mapa vuela hasta ella: verás sus universidades, su matrícula al año y su ranking QS.
       </p>
+      {/* Lo que más se confunde: la matrícula la cobra la universidad, el
+          paquete lo cobra Inspira. Se dice antes de enseñar ninguna cifra. */}
+      <p className="mapa-aviso-precio mt-3 flex items-start gap-2.5 text-[13px] leading-snug">
+        <span className="mt-0.5 shrink-0 text-[#B8661F]">
+          <Icono nombre="euro" size={16} />
+        </span>
+        <span>
+          <strong className="text-[#003648]">Son dos pagos distintos.</strong> La <strong>matrícula</strong> es lo que cobra la universidad
+          española por el máster. El <strong>paquete de Inspira</strong> es lo que nos pagas a nosotros por preparar y presentar tu
+          postulación: son cosas aparte y no se suman en la misma factura.
+        </span>
+      </p>
 
       <div className="mapa-carril mt-5">
         {ciudades.map((c) => {
           const com = indice.comunidades.get(c.comunidad);
           const precio = c.precioAnual || com?.precioAnual;
+          // El paquete de la lista a la que pertenece su comunidad.
+          const desde = com ? indice.listas.get(com.lista)?.desde : null;
           return (
             <button
               key={c.id}
@@ -544,8 +563,15 @@ function CiudadesDestacadas({ indice, foco, onElegir }) {
                 <span className="mt-1 block text-[13px] font-bold text-[#003648]">
                   {plural(c.universidades.length, "universidad", "universidades")}
                 </span>
-                <span className="mt-1 block text-[12px] text-neutral-700">
-                  {precio ? `Matrícula ≈ ${eur(Math.round(precio.tipico))} al año` : "Matrícula según la universidad"}
+                <span className="mt-2 block border-t border-[#E1EFFD] pt-2 text-[12px] leading-snug">
+                  <span className="flex items-baseline justify-between gap-2">
+                    <span className="text-neutral-700">Matrícula universidad</span>
+                    <strong className="shrink-0 text-[#003648]">{precio ? `≈ ${eur(Math.round(precio.tipico))}/año` : "según la universidad"}</strong>
+                  </span>
+                  <span className="mt-1 flex items-baseline justify-between gap-2">
+                    <span className="text-neutral-700">Paquete de Inspira</span>
+                    <strong className="shrink-0 text-[#B8661F]">{Number.isFinite(desde) ? `desde ${eur(desde)}` : "a medida"}</strong>
+                  </span>
                 </span>
               </span>
             </button>
@@ -838,6 +864,7 @@ function Explorador({ datos, geo }) {
             />
           </div>
           <Leyenda indice={indice} ranking={filtros.ranking} />
+          <CompartirMapa geo={geo} indice={indice} foco={foco} casos={casos} />
         </div>
 
         <HojaDetalle esEscritorio={esEscritorio} abierta={!!foco.tipo} clave={clave} titulo={titulo} onCerrar={() => elegir(null)}>

@@ -116,8 +116,9 @@ export const INICIO = {
   titulo: "¿Cuánto cuesta un máster en España?",
   texto:
     "Toca una comunidad o una ciudad del mapa y descubre cuánto cuesta un máster al año en sus universidades, con ejemplos, su ranking QS y cómo se postula. Cada burbuja es una ciudad: cuanto más grande, más másteres oficiales.",
-  precios: "Máster por año, comunidad a comunidad",
-  preciosNota: "Matrícula aproximada de un máster al año (lo habitual). Toca una para ver ejemplos.",
+  precios: "Matrícula de la universidad, comunidad a comunidad",
+  preciosNota:
+    "Es lo que cobra la universidad por el máster en un año (lo habitual), no lo que cobra Inspira: nuestro paquete de postulación se paga aparte. Toca una para ver ejemplos.",
 };
 
 export const VACIO = {

@@ -65,11 +65,37 @@ export function revelar(raiz) {
   // Sin observador (navegador antiguo) o con el sistema pidiendo quietud, no se
   // arma nada: los bloques se quedan como están, a la vista.
   if (!obs || sinMovimiento()) return () => {};
+  const alto = window.innerHeight || 0;
   nodos.forEach((n) => {
     n.setAttribute("data-armado", "1");
+    // Lo que ya está en pantalla se da por visto sin esperar al observador.
+    // En algunos navegadores (Safari, sobre todo tras un salto de ancla) la
+    // primera emisión no llega y el bloque se quedaba invisible para siempre.
+    const caja = n.getBoundingClientRect();
+    if (caja.top < alto && caja.bottom > 0) {
+      n.setAttribute("data-visto", "1");
+      return;
+    }
     obs.observe(n);
   });
   return () => nodos.forEach((n) => obs.unobserve(n));
+}
+
+/**
+ * Enseña de golpe todo lo que haya escondido dentro de `raiz`.
+ *
+ * Se usa antes de cualquier salto dentro de la página (el índice del móvil,
+ * «ver el comparador», el recomendador): al saltar, los bloques por los que
+ * no pasa el dedo nunca llegan a asomar y se quedaban en blanco. Una página
+ * con un índice no puede depender de que se recorra entera.
+ */
+export function revelarTodo(raiz = document) {
+  if (!raiz?.querySelectorAll) return;
+  raiz.querySelectorAll("[data-revelar]:not([data-visto])").forEach((n) => {
+    n.setAttribute("data-armado", "1");
+    n.setAttribute("data-visto", "1");
+    if (observador) observador.unobserve(n);
+  });
 }
 
 /**

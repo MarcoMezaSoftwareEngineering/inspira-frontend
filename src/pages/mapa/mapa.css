@@ -637,3 +637,14 @@
   }
   .mapa-premium .page-hero-quick { display: none; }
 }
+
+/* Aviso de los dos pagos: la matrícula la cobra la universidad, el paquete lo
+   cobra Inspira. La clienta pidió (22/09/2026) que no se puedan confundir. */
+.mapa-aviso-precio {
+  border: 1px solid rgba(240, 156, 72, 0.45);
+  border-radius: 18px;
+  background: linear-gradient(140deg, #fff6ec, #ffffff 70%);
+  padding: 0.75rem 0.9rem;
+  color: #4b3a2a;
+  max-width: 62ch;
+}

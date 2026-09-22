@@ -26,6 +26,7 @@ import {
 } from "./indice";
 import { cursoCorto, leerPlazos, plazoMasTemprano, rangoFechas } from "./plazos";
 import TarjetaPrecio from "./TarjetaPrecio";
+import IlustracionCiudad from "./IlustracionesMapa";
 import VivirAqui from "./VivirAqui";
 import { SelectorOrden } from "./ResultadosUniversidades";
 import { BotonGuardar } from "./GuardarComparativa";
@@ -56,6 +57,26 @@ const irA = (href) => (e) => {
 };
 
 const FOCO = "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]";
+
+/**
+ * Cabecera ilustrada de la ficha: la silueta de la ciudad de la que se está
+ * hablando (IlustracionesMapa.jsx). Una ciudad sin dibujo propio enseña el
+ * edificio universitario genérico, así que la ficha nunca se queda coja.
+ */
+function Postal({ ciudad, pie = null }) {
+  if (!ciudad) return null;
+  return (
+    <div className="mapa-ciudad-lienzo mb-3 overflow-hidden rounded-2xl ring-1 ring-[#CFE6FD]">
+      <IlustracionCiudad ciudad={ciudad} />
+      {pie && (
+        <span className="absolute bottom-2 left-3 right-3 z-[2] flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white">
+          <Icono nombre="ubicacion" size={12} className="text-[#F09C48]" />
+          {pie}
+        </span>
+      )}
+    </div>
+  );
+}
 
 /* ── Piezas ──────────────────────────────────────────────────────────── */
 
@@ -538,6 +559,7 @@ export function FichaComunidad({ c, indice, foco, geoPorId, rama, orden, onOrden
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
       <div className="mt-3">
+        <Postal ciudad={ciudades[0]?.id} pie={ciudades[0]?.nombre} />
         <Rotulo icono="mapa">Comunidad autónoma</Rotulo>
         <Titulo>{c.nombre}</Titulo>
         <div className="mt-2">
@@ -664,6 +686,7 @@ export function FichaCiudad({ c, indice, foco, geoPorId, rama, orden, onOrden, c
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
       <div className="mt-3">
+        <Postal ciudad={c.id} pie={com?.nombre} />
         <Rotulo icono="ubicacion">Ciudad</Rotulo>
         <Titulo>{c.nombre}</Titulo>
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -751,6 +774,7 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
       <div className="mt-3">
+        <Postal ciudad={ciudad?.id || u.ciudad} pie={ciudad?.nombre} />
         <Rotulo icono="casa">Universidad</Rotulo>
         <Titulo>{u.nombre}</Titulo>
         <p className="mt-1 text-sm font-semibold text-[#0A5873]">
@@ -840,7 +864,8 @@ export function FichaCaso({ k, indice, foco, geoPorId, onElegir }) {
   return (
     <article>
       <Migas foco={foco} indice={indice} geoPorId={geoPorId} onElegir={onElegir} />
-      <div className="relative mt-3 overflow-hidden rounded-3xl bg-[#003648] p-4 text-white">
+      <Postal ciudad={k.ciudadId} pie={`Lima → ${k.ciudad}`} />
+      <div className="relative overflow-hidden rounded-3xl bg-[#003648] p-4 text-white">
         <span aria-hidden="true" className="pointer-events-none absolute -right-2 -top-2 text-white/10">
           <Icono nombre="avion" size={84} />
         </span>

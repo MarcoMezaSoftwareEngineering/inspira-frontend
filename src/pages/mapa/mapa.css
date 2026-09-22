@@ -306,3 +306,334 @@
     animation: none;
   }
 }
+
+/* ── Mapa vivo (22/09/2026) ────────────────────────────────────────────────
+   Encargo de la clienta: «hazlo más dinámico aún». Lo de aquí abajo es el
+   movimiento del propio mapa —gestos, ondas, mar— y las ilustraciones de
+   ciudad. Nada de esto cambia dónde está ningún control. */
+
+/* El lienzo se arrastra: el cursor lo dice y el navegador no intenta
+   seleccionar ni hacer sus propios gestos encima (touch-action va en el
+   componente, porque depende del zoom). */
+.mapa-lienzo {
+  -webkit-tap-highlight-color: transparent;
+}
+.mapa-lienzo:active { cursor: grabbing; }
+
+/* Burbujas de ciudad: al cambiar de rama el radio se mueve en vez de saltar.
+   El radio como propiedad animable de CSS funciona en los navegadores al día;
+   donde no, el cambio es instantáneo, que es como estaba antes. */
+.mapa-burbuja-borde {
+  transition: r 0.42s cubic-bezier(0.22, 1, 0.36, 1), stroke-width 0.42s ease;
+}
+.mapa-canto {
+  transition: fill 0.35s ease, fill-opacity 0.3s ease;
+}
+
+/* Onda del toque: dos círculos que se abren desde el punto elegido. */
+@keyframes mapa-onda {
+  from { transform: scale(0.35); opacity: 0.9; }
+  to   { transform: scale(3.4);  opacity: 0; }
+}
+.mapa-onda {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mapa-onda 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Contorno de la comunidad señalada o recomendada: la línea discontinua corre. */
+@keyframes mapa-contorno {
+  to { stroke-dashoffset: -60; }
+}
+.mapa-contorno-vivo {
+  animation: mapa-contorno 2.4s linear infinite;
+}
+
+/* Destello del sol sobre el mar: respira muy despacio. */
+@keyframes mapa-destello {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50%      { opacity: 0.85; transform: translateY(1.5%); }
+}
+.mapa-destello {
+  animation: mapa-destello 11s ease-in-out infinite;
+  transform-box: view-box;
+  transform-origin: center;
+}
+
+/* Tooltip: entra creciendo desde el puntero en vez de encenderse de golpe. */
+.mapa-globo {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.mapa-globo-visible {
+  opacity: 1;
+  animation: mapa-globo 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes mapa-globo {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Mandos de zoom sobre el mapa. */
+.mapa-mando {
+  box-shadow: 0 10px 22px -14px rgba(0, 54, 72, 0.9);
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease;
+}
+.mapa-mando:not(:disabled):hover { transform: translateY(-2px); }
+.mapa-mando-vivo { color: #b8661f; }
+
+/* ── Ilustraciones de ciudad ───────────────────────────────────────────────
+   IlustracionesMapa.jsx dibuja cada ciudad en tres capas. Aquí se les da el
+   movimiento: el sol flota, las luces titilan y, al pasar el puntero por la
+   tarjeta, las capas se separan un poco (parallax de pobre, sin JavaScript). */
+.mapa-ilustracion {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.mapa-ilus-sol,
+.mapa-ilus-nubes,
+.mapa-ilus-lejos,
+.mapa-ilus-silueta {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mapa-ilus-sol {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+@keyframes mapa-ilus-nubes {
+  0%   { transform: translateX(-6px); }
+  100% { transform: translateX(10px); }
+}
+@keyframes mapa-ilus-luz {
+  0%, 100% { opacity: 1; }
+  45%      { opacity: 0.25; }
+}
+.mapa-ilustracion-viva .mapa-ilus-sol {
+  animation: mapa-ilus-sol 6s ease-in-out infinite;
+}
+.mapa-ilustracion-viva .mapa-ilus-nubes {
+  animation: mapa-ilus-nubes 26s ease-in-out infinite alternate;
+}
+.mapa-ilustracion-viva .mapa-ilus-luces circle {
+  animation: mapa-ilus-luz 3.4s ease-in-out infinite;
+}
+
+/* Tarjeta de ciudad: la ilustración es la cabecera y se acerca al pasar por
+   encima; el texto se queda quieto para que se siga leyendo. */
+.mapa-ciudad {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--mapa-borde);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 22px 44px -38px rgba(0, 54, 72, 0.55);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+}
+/* La ilustración se dibuja en 200 × 112: el lienzo guarda esa proporción para
+   que no se recorten ni las agujas ni el sol (con `slice` se comía la parte
+   de arriba y la Sagrada Familia salía desmochada). */
+.mapa-ciudad-lienzo {
+  position: relative;
+  aspect-ratio: 25 / 14;
+  overflow: hidden;
+}
+.mapa-ciudad-lienzo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40px;
+  background: linear-gradient(to top, rgba(0, 54, 72, 0.78), rgba(0, 54, 72, 0.15) 60%, transparent);
+  pointer-events: none;
+}
+/* Brillo de vidrio que cruza la ilustración: el acabado de las piezas caras. */
+.mapa-ciudad-lienzo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.5) 50%, transparent 62%);
+  transform: translateX(-130%);
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mapa-ciudad:hover {
+    transform: translateY(-4px);
+    border-color: var(--mapa-cielo);
+    box-shadow: 0 30px 54px -34px rgba(0, 54, 72, 0.6);
+  }
+  .mapa-ciudad:hover .mapa-ilus-silueta { transform: translateY(2px) scale(1.035); }
+  .mapa-ciudad:hover .mapa-ilus-lejos   { transform: translateX(-4px); }
+  .mapa-ciudad:hover .mapa-ilus-nubes   { transform: translateX(8px); }
+  .mapa-ciudad:hover .mapa-ilus-sol     { transform: translateY(-3px) scale(1.08); }
+  .mapa-ciudad:hover .mapa-ciudad-lienzo::before { transform: translateX(130%); }
+}
+.mapa-ciudad:focus-visible {
+  outline: none;
+  border-color: var(--mapa-sol);
+  box-shadow: 0 0 0 4px rgba(240, 156, 72, 0.45);
+}
+.mapa-ciudad[aria-pressed="true"] {
+  border-color: var(--mapa-petroleo);
+  box-shadow: 0 0 0 3px rgba(10, 88, 115, 0.25), 0 26px 48px -34px rgba(0, 54, 72, 0.6);
+}
+
+/* Carrusel de ciudades en el teléfono: se desliza con el dedo y cada tarjeta
+   se queda encajada donde toca. */
+.mapa-carril {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78%;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+.mapa-carril::-webkit-scrollbar { display: none; }
+.mapa-carril > * { scroll-snap-align: center; }
+@media (min-width: 640px) {
+  .mapa-carril {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+  }
+}
+@media (min-width: 1024px) {
+  .mapa-carril { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-onda,
+  .mapa-contorno-vivo,
+  .mapa-destello,
+  .mapa-globo-visible,
+  .mapa-ilustracion-viva .mapa-ilus-sol,
+  .mapa-ilustracion-viva .mapa-ilus-nubes,
+  .mapa-ilustracion-viva .mapa-ilus-luces circle {
+    animation: none;
+  }
+  .mapa-onda { display: none; }
+  .mapa-burbuja-borde,
+  .mapa-canto,
+  .mapa-ciudad,
+  .mapa-mando,
+  .mapa-ilus-sol,
+  .mapa-ilus-nubes,
+  .mapa-ilus-lejos,
+  .mapa-ilus-silueta {
+    transition: none;
+  }
+  .mapa-ciudad:hover,
+  .mapa-mando:not(:disabled):hover { transform: none; }
+}
+
+/* ── Acabado premium (22/09/2026) ──────────────────────────────────────────
+   «Súper premium», pedido de la clienta. Son capas de luz y profundidad sobre
+   lo que ya había: nada de esto cambia ni mueve un control. */
+
+/* Postales del cierre: mismas ilustraciones, proporción entera. */
+.mapa-postal {
+  display: block;
+  aspect-ratio: 25 / 14;
+}
+
+/* Marco del mapa: vidrio, viñeta y un halo de luz que lo separa del fondo. */
+.mapa-premium .mapa-marco {
+  position: relative;
+  isolation: isolate;
+}
+.mapa-premium .mapa-marco::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  /* Viñeta muy suave: el centro del mapa queda más claro que los bordes. */
+  box-shadow: inset 0 0 90px -40px rgba(0, 54, 72, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Cifras de la cabecera: el número en Quicksand con un filo de luz encima. */
+.mapa-premium .mapa-cifra {
+  position: relative;
+  overflow: hidden;
+}
+.mapa-premium .mapa-cifra::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 15% 0%, rgba(150, 204, 252, 0.3), transparent 60%);
+}
+
+/* Tarjeta de ciudad: borde degradado como el del panel de filtros. */
+.mapa-ciudad {
+  border-color: transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(140deg, #cfe6fd, #ffffff 45%, rgba(240, 156, 72, 0.4)) border-box;
+}
+.mapa-ciudad[aria-pressed="true"] {
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(140deg, #0a5873, #96ccfc 55%, #f09c48) border-box;
+}
+
+/* Rótulo de sección con filete dorado a la izquierda: marca el arranque de
+   cada bloque sin añadir una línea más a la página. */
+.mapa-rotulo::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--mapa-sol), rgba(240, 156, 72, 0));
+  flex: none;
+}
+
+/* Mandos del mapa: vidrio esmerilado en vez de blanco plano. */
+.mapa-mandos {
+  border-radius: 14px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 16px 30px -22px rgba(0, 54, 72, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-ciudad-lienzo::before { display: none; }
+}
+
+/* Índice pegajoso del teléfono: vidrio para que el contenido se intuya por
+   debajo mientras se desplaza. */
+.mapa-indice {
+  background: linear-gradient(to bottom, rgba(246, 251, 255, 0.96), rgba(246, 251, 255, 0.82));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--mapa-borde);
+}
+.mapa-indice ul {
+  scrollbar-width: none;
+}
+.mapa-indice ul::-webkit-scrollbar { display: none; }
+
+/* ── El mapa, cuanto antes en el teléfono ─────────────────────────────────
+   «Desde el celular debería verse el mapa primero para poder interactuar»
+   (clienta, 22/09/2026). El explorador ya pone el mapa por delante de los
+   filtros; aquí se recorta la cabecera para que asome media pantalla antes.
+   Nada se quita: la descripción entera vuelve en cuanto hay sitio, y los
+   accesos rápidos siguen en el menú y al final de la página. */
+@media (max-width: 639px) {
+  .mapa-premium .page-hero-lead {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mapa-premium .page-hero-quick { display: none; }
+}

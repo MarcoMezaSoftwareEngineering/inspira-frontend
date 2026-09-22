@@ -222,6 +222,10 @@ export default function Filtros({
   onVerResultados,
 }) {
   const id = useId();
+  // En el teléfono el panel entero ocupaba dos pantallas antes de llegar al
+  // mapa: se pliega y deja fuera lo que más se usa (buscar y rama). En
+  // escritorio no cambia nada, siempre está abierto.
+  const [abierto, setAbierto] = useState(false);
   const { listas, rama, max, titularidad, ranking, orden, abre, becas, presupuesto } = entrada;
   const totales = indice.datos.totales;
   const conTitularidad = hayTitularidad(indice);
@@ -236,6 +240,8 @@ export default function Filtros({
     onCambiar({ listas: listas.includes(lista) ? listas.filter((x) => x !== lista) : [...listas, lista] });
 
   const matices = [ranking && RANKING.resumen[ranking], abre && PLAZOS.resumen[abre], becas && BECAS.resumen].filter(Boolean).join(", ");
+  const cuantosFiltros =
+    listas.length + [titularidad, ranking, abre, max, presupuesto].filter((v) => v != null).length + (becas ? 1 : 0);
 
   return (
     <div className="mapa-panel rounded-[28px] border border-[#E1EFFD] bg-white p-4 shadow-[0_22px_48px_-36px_rgba(0,54,72,0.5)] sm:p-5" data-revelar="suave">
@@ -270,6 +276,27 @@ export default function Filtros({
         </div>
       </div>
 
+      <button
+        type="button"
+        onClick={() => setAbierto((v) => !v)}
+        aria-expanded={abierto}
+        className={`mapa-boton mov-toque mt-3 flex min-h-[46px] w-full items-center justify-between gap-2 rounded-2xl border border-[#CFE6FD] bg-[#F6FBFF] px-4 py-2.5 text-sm font-extrabold text-[#003648] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] md:hidden`}
+      >
+        <span className="inline-flex items-center gap-2">
+          <IconoMapa nombre="ajustes" size={16} className="text-[#0A5873]" />
+          {abierto ? "Ocultar filtros" : "Más filtros"}
+          {cuantosFiltros > 0 && (
+            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#F09C48] px-1.5 text-[11px] font-extrabold text-[#003648]">
+              {cuantosFiltros}
+            </span>
+          )}
+        </span>
+        <span aria-hidden="true" className={`transition-transform ${abierto ? "rotate-180" : ""}`}>
+          <Icono nombre="flecha" size={14} className="rotate-90 text-[#0A5873]" />
+        </span>
+      </button>
+
+      <div className={abierto ? "" : "hidden md:block"}>
       {hayFila2 && (
         <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
           {conTitularidad && (
@@ -382,6 +409,8 @@ export default function Filtros({
             </>
           )}
         </div>
+      </div>
+
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#E1EFFD] pt-3">

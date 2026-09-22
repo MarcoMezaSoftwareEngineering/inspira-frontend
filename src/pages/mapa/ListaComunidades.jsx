@@ -11,7 +11,10 @@ import { mejorRanking } from "./indice";
 import { tonoDe } from "./tonosMapa";
 import { PAQUETE, eur, etiquetaLista, importeMatricula, mayus, plural } from "./mapaTextos";
 
-export default function ListaComunidades({ indice, geoPorId, filtros, foco, orden = "masteres", onElegir }) {
+export default function ListaComunidades({ indice, geoPorId, filtros, foco, orden = "masteres", onElegir, onResaltar = null }) {
+  // Señalar una fila contornea su comunidad en el mapa, sin abrirla: la lista
+  // y el mapa dejan de ser dos cosas separadas.
+  const senalar = (id) => (onResaltar ? () => onResaltar(id) : undefined);
   const porRanking = orden === "ranking";
   const mejorDe = (c) => mejorRanking(indice, c.universidadesIds);
   const grupos = indice.datos.listas.map((l) => ({
@@ -29,7 +32,7 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
   const paso = cascada(90);
 
   return (
-    <section aria-labelledby="mapa-lista-titulo" className="mt-14" data-revelar>
+    <section id="mapa-listas" aria-labelledby="mapa-lista-titulo" className="mt-14 scroll-mt-24" data-revelar>
       <p className="mapa-rotulo">
         <Icono nombre="libro" size={14} />
         En texto
@@ -64,6 +67,10 @@ export default function ListaComunidades({ indice, geoPorId, filtros, foco, orde
                       type="button"
                       aria-pressed={activa}
                       onClick={() => onElegir("comunidad", c.id)}
+                      onMouseEnter={senalar(c.id)}
+                      onMouseLeave={senalar(null)}
+                      onFocus={senalar(c.id)}
+                      onBlur={senalar(null)}
                       className={`mapa-boton mov-toque flex w-full items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-left hover:bg-[#F6FBFF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] ${
                         activa ? "border-[#0A5873] bg-[#E6F2FE]" : "border-neutral-200 bg-white"
                       } ${noCumple ? "opacity-55" : ""}`}

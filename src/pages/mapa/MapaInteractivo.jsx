@@ -2,28 +2,33 @@
 // El mapa, con identidad propia de Inspira:
 // - Relieve plano por capas: sombra sobre el mar, canto del color de la lista
 //   y cara superior; la comunidad sube al pasar por encima y al elegirla.
-// - Mar en el cielo de la marca con patrón de puntos de carta náutica.
+// - Mar en el cielo de la marca con patrón de puntos de carta náutica y olas
+//   que corren despacio.
 // - Burbujas de ciudades (área proporcional a sus másteres oficiales) que
-//   crecen al entrar.
+//   crecen al entrar y cambian de tamaño con transición al filtrar por rama.
 // - Ruta punteada con el avión de la marca desde Lima hasta la ciudad elegida
 //   o, sin nada elegido, hasta las ciudades de los casos de éxito.
-// - Zoom suave a la comunidad elegida.
+// - Zoom suave a la comunidad elegida y onda al elegirla.
 //
 // Interacción:
-// - Ratón: pasar por encima levanta la comunidad y enseña el tooltip; clic elige.
+// - Ratón: pasar por encima levanta la comunidad y enseña el tooltip; clic
+//   elige; la rueda acerca y aleja sobre el puntero; arrastrar desplaza; el
+//   doble clic acerca.
 // - Toque: las comunidades pequeñas tienen una zona de 22 px alrededor de su
-//   centro, como en el mapa de la landing.
+//   centro, como en el mapa de la landing. El pellizco acerca y aleja. Con el
+//   mapa acercado, un dedo lo desplaza; sin acercar, un dedo hace scroll de la
+//   página, que es lo que se espera al leer.
 // - Teclado: cada comunidad es un botón (Tab, Enter o espacio). Las burbujas
 //   de una comunidad entran en la tabulación cuando está abierta; la lista
-//   textual de la página cubre el resto.
-// - prefers-reduced-motion: sin zoom animado, sin burbujas que crecen y con el
-//   avión quieto a mitad de ruta.
+//   textual de la página cubre el resto. Los mandos de zoom son botones.
+// - prefers-reduced-motion: sin zoom animado, sin burbujas que crecen, sin
+//   olas, sin ondas y con el avión quieto a mitad de ruta.
 //
 // La geometría (pages/landing/master2027/mapaEspana.data.js) la carga la
 // página con import dinámico y llega aquí ya resuelta. Cada comunidad se
 // define una vez en <defs> y se pinta con <use>: tres capas sin triplicar el
 // trazado.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
 import IconoMapa from "./IconosMapa";
 import { proyectar } from "./proyeccion";
@@ -36,12 +41,20 @@ const PEQUENAS = ["la-rioja", "cantabria", "asturias", "navarra", "pais-vasco", 
 const DURACION_ZOOM = 560;
 const RADIO_TOQUE_PX = 22;
 const PREFIJO = "mapa-geo";
+// Cuánto se puede acercar y alejar a mano, medido sobre el encuadre de España.
+const ZOOM_MIN = 0.92;
+const ZOOM_MAX = 9;
+// A partir de aquí el dedo desplaza el mapa en vez de hacer scroll de página.
+const ZOOM_PAN_TACTIL = 1.08;
+// Un gesto que mueve menos de esto sigue contando como clic.
+const UMBRAL_CLIC_PX = 7;
 // Avión del set de iconos de la marca (components/common/Icono.jsx), en 24×24.
 const AVION =
   "M10.2 13.8 3 12V9.5l2 .6 1.5 1.2 3-.6L6 4.5l2.5.5 4 5 4.6-1c1.3-.3 2.4.3 2.6 1.2.2.9-.5 1.8-1.8 2.2l-4.6 1.3-2 6.3-2.4.5 1.3-6.7Z";
 
 const suavizar = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 const f1 = (n) => n.toFixed(1);
+const acotar = (n, min, max) => Math.min(max, Math.max(min, n));
 
 /** viewBox que enmarca una caja con margen y la proporción del mapa. */
 function encuadre(caja, aspecto, minAncho) {
@@ -83,6 +96,10 @@ function puntoEnRuta({ o, c, fin }, t) {
   return { x, y, angulo: (Math.atan2(dy, dx) * 180) / Math.PI };
 }
 
+/**
+ * El avión y, detrás, tres puntos de estela que recorren la misma curva un
+ * poco más tarde: se lee el sentido del viaje sin dibujar nada más.
+ */
 function Avion({ ruta, escala, reducir, espera }) {
   const cuerpo = (
     <g transform={`scale(${escala.toFixed(4)}) translate(-12 -12)`}>
@@ -95,18 +112,25 @@ function Avion({ ruta, escala, reducir, espera }) {
   }
   // Espera en Lima (fuera de la vista), vuela y se queda un momento en destino.
   const salida = Math.min(espera, 0.3);
+  const tiempos = `0;${salida.toFixed(2)};${(salida + 0.6).toFixed(2)};1`;
   return (
     <g>
+      {[0.14, 0.09, 0.05].map((r, i) => (
+        <g key={r}>
+          <circle r={escala * 12 * r * 2.6} fill={SOL} opacity={0.55 - i * 0.14} />
+          <animateMotion
+            dur="3.6s"
+            repeatCount="indefinite"
+            calcMode="linear"
+            keyPoints="0;0;1;1"
+            keyTimes={tiempos}
+            begin={`${-(i + 1) * 0.12}s`}
+            path={ruta.d}
+          />
+        </g>
+      ))}
       {cuerpo}
-      <animateMotion
-        dur="3.6s"
-        repeatCount="indefinite"
-        rotate="auto"
-        calcMode="linear"
-        keyPoints="0;0;1;1"
-        keyTimes={`0;${salida.toFixed(2)};${(salida + 0.6).toFixed(2)};1`}
-        path={ruta.d}
-      />
+      <animateMotion dur="3.6s" repeatCount="indefinite" rotate="auto" calcMode="linear" keyPoints="0;0;1;1" keyTimes={tiempos} path={ruta.d} />
     </g>
   );
 }
@@ -194,7 +218,50 @@ function Tooltip({ hover, indice, geoPorId, casos, filtros }) {
   return null;
 }
 
-export default function MapaInteractivo({ geo, indice, foco, filtros, capas, casos, onElegir, onToda, recomendadas = [] }) {
+/** Mandos de zoom: acercar, alejar y volver al encuadre que toca. */
+function Mandos({ zoom, manual, onZoom, onCentrar }) {
+  const boton =
+    "mapa-mando mov-toque flex h-10 w-10 items-center justify-center rounded-xl bg-white/95 text-[#003648] ring-1 ring-[#CFE6FD] hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] disabled:opacity-40";
+  return (
+    <div className="mapa-mandos absolute right-3 top-3 z-[2] flex flex-col gap-1.5 sm:top-[3.25rem]">
+      <button type="button" className={boton} onClick={() => onZoom(1.55)} disabled={zoom >= ZOOM_MAX - 0.01} aria-label="Acercar el mapa">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
+      <button type="button" className={boton} onClick={() => onZoom(1 / 1.55)} disabled={zoom <= ZOOM_MIN + 0.01} aria-label="Alejar el mapa">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+          <path d="M5 12h14" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        className={`${boton} ${manual ? "mapa-mando-vivo" : ""}`}
+        onClick={onCentrar}
+        disabled={!manual}
+        aria-label="Centrar el mapa"
+      >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.4" />
+          <path d="M12 3v3.2M12 17.8V21M3 12h3.2M17.8 12H21" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+export default function MapaInteractivo({
+  geo,
+  indice,
+  foco,
+  filtros,
+  capas,
+  casos,
+  onElegir,
+  onToda,
+  recomendadas = [],
+  resaltada = null,
+}) {
   const base = useMemo(() => geo.viewBox.split(/\s+/).map(Number), [geo.viewBox]);
   const aspecto = base[2] / base[3];
   const geoPorId = useMemo(() => new Map(geo.comunidades.map((g) => [g.id, g])), [geo]);
@@ -206,9 +273,17 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
   const caminos = useRef(new Map());
   const vbRef = useRef(base);
   const tipoPuntero = useRef("mouse");
+  const animacion = useRef(0);
+  // Punteros vivos sobre el mapa: uno desplaza, dos pellizcan.
+  const punteros = useRef(new Map());
+  const gesto = useRef(null);
   const [vb, setVb] = useState(base);
   const [ancho, setAncho] = useState(640);
   const [hover, setHover] = useState(null);
+  // Vista movida a mano: hasta que se centre, el foco no vuelve a encuadrar.
+  const [manual, setManual] = useState(false);
+  // Onda al elegir: { x, y, n } — n hace que cada elección vuelva a animar.
+  const [onda, setOnda] = useState(null);
   const reducir = prefiereMenosMovimiento();
 
   // Ancho real en píxeles: burbujas, trazos y textos se dibujan a tamaño de pantalla.
@@ -226,45 +301,77 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
     return () => ro.disconnect();
   }, []);
 
-  // Zoom a la comunidad elegida (o vuelta a toda España).
-  useEffect(() => {
+  /** Deja la vista donde se le diga, sin animar, y corta cualquier animación. */
+  const fijarVista = useCallback((v) => {
+    cancelAnimationFrame(animacion.current);
+    vbRef.current = v;
+    setVb(v);
+  }, []);
+
+  /** Lleva la vista hasta `destino` con la curva de siempre. */
+  const animarHasta = useCallback(
+    (destino) => {
+      const inicio = vbRef.current;
+      if (inicio.every((v, i) => Math.abs(v - destino[i]) < 0.5)) return;
+      if (prefiereMenosMovimiento()) {
+        fijarVista(destino);
+        return;
+      }
+      cancelAnimationFrame(animacion.current);
+      const t0 = performance.now();
+      const paso = (t) => {
+        const k = Math.min(1, (t - t0) / DURACION_ZOOM);
+        const e = suavizar(k);
+        const v = inicio.map((a, i) => a + (destino[i] - a) * e);
+        vbRef.current = v;
+        setVb(v);
+        if (k < 1) animacion.current = requestAnimationFrame(paso);
+      };
+      animacion.current = requestAnimationFrame(paso);
+    },
+    [fijarVista]
+  );
+
+  /** Encuadre que le toca al foco actual (o a toda España). */
+  const encuadreDelFoco = useCallback(() => {
     const id = foco.comunidad;
-    let destino = base;
-    if (id === "canarias") {
-      destino = encuadre(geo.recuadroCanarias, aspecto, 300);
-    } else if (id && CIUDADES_AUTONOMAS.has(id)) {
+    if (id === "canarias") return encuadre(geo.recuadroCanarias, aspecto, 300);
+    if (id && CIUDADES_AUTONOMAS.has(id)) {
       const g = geoPorId.get(id);
-      if (g) destino = encuadre({ x: g.etiqueta[0], y: g.etiqueta[1], width: 0, height: 0 }, aspecto, 160);
-    } else if (id) {
+      if (g) return encuadre({ x: g.etiqueta[0], y: g.etiqueta[1], width: 0, height: 0 }, aspecto, 160);
+      return base;
+    }
+    if (id) {
       const el = caminos.current.get(id);
       if (el) {
         try {
-          destino = encuadre(el.getBBox(), aspecto, 170);
+          return encuadre(el.getBBox(), aspecto, 170);
         } catch {
-          destino = base;
+          return base;
         }
       }
     }
-    const inicio = vbRef.current;
-    if (inicio.every((v, i) => Math.abs(v - destino[i]) < 0.5)) return undefined;
-    if (prefiereMenosMovimiento()) {
-      vbRef.current = destino;
-      setVb(destino);
-      return undefined;
-    }
-    let raf = 0;
-    const t0 = performance.now();
-    const paso = (t) => {
-      const k = Math.min(1, (t - t0) / DURACION_ZOOM);
-      const e = suavizar(k);
-      const v = inicio.map((a, i) => a + (destino[i] - a) * e);
-      vbRef.current = v;
-      setVb(v);
-      if (k < 1) raf = requestAnimationFrame(paso);
-    };
-    raf = requestAnimationFrame(paso);
-    return () => cancelAnimationFrame(raf);
-  }, [foco.comunidad, base, aspecto, geo, geoPorId]);
+    return base;
+  }, [foco.comunidad, geo, aspecto, geoPorId, base]);
+
+  // Zoom a la comunidad elegida (o vuelta a toda España). Un zoom hecho a
+  // mano manda hasta que se toque «centrar»: si no, el mapa se le escapaba de
+  // las manos a quien lo estaba mirando de cerca.
+  useEffect(() => {
+    if (manual) return undefined;
+    animarHasta(encuadreDelFoco());
+    return () => cancelAnimationFrame(animacion.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [foco.comunidad, base, aspecto, geo, geoPorId, manual]);
+
+  // Elegir algo deja una onda en su sitio, como el toque en el agua.
+  const marcarOnda = useCallback(
+    (x, y) => {
+      if (prefiereMenosMovimiento() || !Number.isFinite(x)) return;
+      setOnda((o) => ({ x, y, n: (o?.n || 0) + 1 }));
+    },
+    [setOnda]
+  );
 
   const ppu = ancho / vb[2];
   const px = (n) => n / Math.max(ppu, 0.0001);
@@ -275,6 +382,70 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
   const rama = filtros.rama;
   const activa = foco.comunidad;
   const listaDe = (id) => indice.comunidades.get(id)?.lista;
+
+  /** Coordenadas del mapa bajo un evento de puntero. */
+  const aCoordenadas = useCallback((cliente) => {
+    const ctm = svgRef.current?.getScreenCTM?.();
+    if (!ctm) return null;
+    return new DOMPoint(cliente.x, cliente.y).matrixTransform(ctm.inverse());
+  }, []);
+
+  /**
+   * Acerca o aleja dejando quieto el punto `centro` (coordenadas del mapa).
+   * El encuadre no se puede ir más allá de media España fuera de la vista.
+   */
+  const zoomEn = useCallback(
+    (centro, factor) => {
+      const v = vbRef.current;
+      const anchoMin = base[2] / ZOOM_MAX;
+      const anchoMax = base[2] / ZOOM_MIN;
+      const w = acotar(v[2] / factor, anchoMin, anchoMax);
+      if (Math.abs(w - v[2]) < 0.01) return;
+      const h = w / aspecto;
+      const k = w / v[2];
+      const p = centro || { x: v[0] + v[2] / 2, y: v[1] + v[3] / 2 };
+      const holgura = base[2] * 0.5;
+      const x = acotar(p.x - (p.x - v[0]) * k, base[0] - holgura, base[0] + base[2] + holgura - w);
+      const y = acotar(p.y - (p.y - v[1]) * k, base[1] - holgura, base[1] + base[3] + holgura - h);
+      fijarVista([x, y, w, h]);
+      setManual(w < anchoMax - 0.5 || Math.abs(x - base[0]) > 1);
+    },
+    [base, aspecto, fijarVista]
+  );
+
+  /** Desplaza la vista en píxeles de pantalla. */
+  const mover = useCallback(
+    (dxPx, dyPx) => {
+      const v = vbRef.current;
+      const k = v[2] / Math.max(ancho, 1);
+      const holgura = base[2] * 0.5;
+      const x = acotar(v[0] - dxPx * k, base[0] - holgura, base[0] + base[2] + holgura - v[2]);
+      const y = acotar(v[1] - dyPx * k, base[1] - holgura, base[1] + base[3] + holgura - v[3]);
+      fijarVista([x, y, v[2], v[3]]);
+      setManual(true);
+    },
+    [ancho, base, fijarVista]
+  );
+
+  const centrar = useCallback(() => {
+    setManual(false);
+    animarHasta(encuadreDelFoco());
+  }, [animarHasta, encuadreDelFoco]);
+
+  // La rueda acerca y aleja: hay que registrarlo a mano porque React lo pone
+  // como pasivo y entonces no se puede evitar el scroll de la página.
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return undefined;
+    const alaRueda = (e) => {
+      if (tipoPuntero.current === "touch") return;
+      e.preventDefault();
+      const paso = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      zoomEn(aCoordenadas({ x: e.clientX, y: e.clientY }), Math.exp(-acotar(paso, -240, 240) * 0.0022));
+    };
+    el.addEventListener("wheel", alaRueda, { passive: false });
+    return () => el.removeEventListener("wheel", alaRueda);
+  }, [zoomEn, aCoordenadas]);
 
   const puntos = useMemo(
     () =>
@@ -301,10 +472,12 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
     if (filtros.activos && !filtros.comunidades.has(id)) return 0.3;
     if (recomendadas.length && !recomendadas.includes(id)) return 0.45;
     if (activa && activa !== id) return 0.55;
+    if (resaltada && resaltada !== id) return 0.62;
     return 1;
   };
 
   function alMover(e) {
+    if (gesto.current) return;
     if (e.pointerType === "touch") return;
     const destino = e.target instanceof Element ? e.target.closest("[data-tipo]") : null;
     const tipo = destino?.getAttribute("data-tipo") || null;
@@ -322,10 +495,8 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
     }, ${arriba ? "-100%" : "0"})`;
   }
 
-  function pequenaCercana(e) {
-    const ctm = svgRef.current?.getScreenCTM?.();
-    if (!ctm) return null;
-    const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+  function pequenaCercana(p) {
+    if (!p) return null;
     const radio = RADIO_TOQUE_PX / Math.max(ppu, 0.01);
     let mejor = null;
     let distancia = Infinity;
@@ -341,22 +512,108 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
     return mejor;
   }
 
-  function alPulsar(e) {
+  /* ── Gestos: arrastrar y pellizcar ─────────────────────────────────── */
+
+  const centroPunteros = () => {
+    const vivos = [...punteros.current.values()];
+    const x = vivos.reduce((s, p) => s + p.x, 0) / vivos.length;
+    const y = vivos.reduce((s, p) => s + p.y, 0) / vivos.length;
+    const d = vivos.length > 1 ? Math.hypot(vivos[0].x - vivos[1].x, vivos[0].y - vivos[1].y) : 0;
+    return { x, y, d };
+  };
+
+  function alBajar(e) {
+    tipoPuntero.current = e.pointerType || "mouse";
+    punteros.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const tactil = e.pointerType === "touch";
+    // Con un dedo y el mapa sin acercar se deja hacer scroll de la página: el
+    // gesto se sigue anotando, porque ese mismo toque puede ser una elección.
+    const arrastrable = !(tactil && punteros.current.size === 1 && zoom < ZOOM_PAN_TACTIL);
+    if (arrastrable) e.currentTarget.setPointerCapture?.(e.pointerId);
+    const c = centroPunteros();
     const destino = e.target instanceof Element ? e.target.closest("[data-tipo]") : null;
-    let tipo = destino?.getAttribute("data-tipo") || null;
-    let id = destino?.getAttribute("data-id") || null;
+    gesto.current = {
+      x: c.x,
+      y: c.y,
+      d: c.d,
+      recorrido: 0,
+      arrastrable,
+      cancelado: false,
+      tipo: destino?.getAttribute("data-tipo") || null,
+      id: destino?.getAttribute("data-id") || null,
+      cliente: { x: e.clientX, y: e.clientY },
+    };
+    if (tactil) setHover(null);
+  }
+
+  function alArrastrar(e) {
+    if (!punteros.current.has(e.pointerId)) return;
+    punteros.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const g = gesto.current;
+    if (!g) return;
+    const c = centroPunteros();
+    const dx = c.x - g.x;
+    const dy = c.y - g.y;
+    g.recorrido += Math.hypot(dx, dy);
+    if (g.arrastrable) {
+      if (punteros.current.size > 1 && g.d > 12 && c.d > 12) {
+        zoomEn(aCoordenadas({ x: c.x, y: c.y }), c.d / g.d);
+      } else if (dx || dy) {
+        mover(dx, dy);
+      }
+    }
+    g.x = c.x;
+    g.y = c.y;
+    g.d = c.d;
+  }
+
+  /**
+   * Elegir al soltar, no en el `click`: al capturar el puntero para poder
+   * arrastrar, el navegador manda el clic al propio lienzo y ya no se sabe
+   * sobre qué comunidad se soltó. El destino se guarda al pulsar.
+   */
+  function alSoltar(e) {
+    punteros.current.delete(e.pointerId);
+    if (punteros.current.size > 0) {
+      const c = centroPunteros();
+      if (gesto.current) {
+        gesto.current.x = c.x;
+        gesto.current.y = c.y;
+        gesto.current.d = c.d;
+      }
+      return;
+    }
+    const g = gesto.current;
+    gesto.current = null;
+    if (!g || g.cancelado || g.recorrido > UMBRAL_CLIC_PX) return;
+    let { tipo, id } = g;
+    const p = aCoordenadas(g.cliente);
     if (tipoPuntero.current !== "mouse" && zoom < 1.6 && tipo !== "ciudad" && tipo !== "caso") {
-      const cercana = pequenaCercana(e);
+      const cercana = pequenaCercana(p);
       if (cercana) {
         tipo = "comunidad";
         id = cercana;
       }
     }
-    if (tipo && id) onElegir(tipo, id);
+    if (!tipo || !id) return;
+    if (p) marcarOnda(p.x, p.y);
+    onElegir(tipo, id);
+  }
+
+  function alCancelar(e) {
+    if (gesto.current) gesto.current.cancelado = true;
+    alSoltar(e);
+  }
+
+  function alDobleClic(e) {
+    if (tipoPuntero.current === "touch") return;
+    zoomEn(aCoordenadas({ x: e.clientX, y: e.clientY }), 1.9);
   }
 
   const canarias = geoPorId.get("canarias");
   const alzaActiva = `translate(0 ${f1(-px(4))})`;
+  // Con el mapa acercado el dedo lo desplaza; sin acercar, hace scroll.
+  const tactoCss = zoom >= ZOOM_PAN_TACTIL ? "none" : "pan-y";
 
   return (
     <div ref={envoltorio} className="relative">
@@ -365,29 +622,57 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
         viewBox={vb.map((n) => n.toFixed(2)).join(" ")}
         role="group"
         aria-label={T.ariaMapa}
-        className="block h-auto w-full touch-manipulation select-none"
+        className="mapa-lienzo block h-auto w-full select-none"
         style={{
           aspectRatio: `${base[2]} / ${base[3]}`,
+          touchAction: tactoCss,
+          cursor: gesto.current ? "grabbing" : "grab",
           "--mapa-alza": `${(-px(3)).toFixed(2)}px`,
           "--mapa-trazo-foco": `${px(3).toFixed(2)}px`,
         }}
-        onPointerDown={(e) => {
-          tipoPuntero.current = e.pointerType || "mouse";
+        onPointerDown={alBajar}
+        onPointerMove={(e) => {
+          alArrastrar(e);
+          alMover(e);
         }}
-        onPointerMove={alMover}
+        onPointerUp={alSoltar}
+        onPointerCancel={alCancelar}
         onPointerLeave={() => setHover(null)}
-        onClick={alPulsar}
+        onDoubleClick={alDobleClic}
       >
         <defs>
           <pattern id={`${PREFIJO}-puntos`} width={16} height={16} patternUnits="userSpaceOnUse">
             <circle cx={2} cy={2} r={1.15} fill={NOCHE} fillOpacity={0.13} />
           </pattern>
+          {/* Olas del mar: el patrón entero corre despacio hacia la derecha. */}
+          <pattern id={`${PREFIJO}-olas`} width={44} height={30} patternUnits="userSpaceOnUse">
+            <path d="M0 14q11 -7 22 0t22 0" fill="none" stroke={NOCHE} strokeOpacity={0.07} strokeWidth={1.6} strokeLinecap="round" />
+            <path d="M-22 29q11 -7 22 0t22 0t22 0" fill="none" stroke={NOCHE} strokeOpacity={0.05} strokeWidth={1.4} strokeLinecap="round" />
+            {!reducir && (
+              <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="44 0" dur="14s" repeatCount="indefinite" />
+            )}
+          </pattern>
+          <radialGradient id={`${PREFIJO}-brillo`} cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          </radialGradient>
           {conRelieve.map((g) => (
             <path key={g.id} id={`${PREFIJO}-${g.id}`} d={g.d} />
           ))}
         </defs>
 
+        <rect x={-900} y={-900} width={2800} height={2600} fill={`url(#${PREFIJO}-olas)`} pointerEvents="none" />
         <rect x={-900} y={-900} width={2800} height={2600} fill={`url(#${PREFIJO}-puntos)`} pointerEvents="none" />
+        {/* Destello sobre el mar, arriba a la derecha, donde está el sol de la marca */}
+        <ellipse
+          className="mapa-destello"
+          cx={base[0] + base[2] * 0.82}
+          cy={base[1] + base[3] * 0.12}
+          rx={base[2] * 0.34}
+          ry={base[3] * 0.26}
+          fill={`url(#${PREFIJO}-brillo)`}
+          pointerEvents="none"
+        />
         <rect
           x={geo.recuadroCanarias.x}
           y={geo.recuadroCanarias.y}
@@ -420,6 +705,7 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
             <use
               key={`canto-${g.id}`}
               href={`#${PREFIJO}-${g.id}`}
+              className="mapa-canto"
               fill={tonoDe(listaDe(g.id)).canto}
               fillOpacity={opacidadComunidad(g.id)}
               transform={`translate(0 ${f1(px(5))})`}
@@ -477,6 +763,20 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
           })}
         </g>
 
+        {/* La comunidad señalada desde la lista de texto: mismo trazo que la elegida, sin elegirla */}
+        {resaltada && resaltada !== activa && geoPorId.get(resaltada) && !CIUDADES_AUTONOMAS.has(resaltada) && (
+          <use
+            href={`#${PREFIJO}-${resaltada}`}
+            fill="none"
+            stroke={SOL}
+            strokeWidth={px(2.6)}
+            strokeLinejoin="round"
+            strokeDasharray={`${f1(px(7))} ${f1(px(4))}`}
+            className="mapa-contorno-vivo"
+            pointerEvents="none"
+          />
+        )}
+
         {activa && geoPorId.get(activa) && !CIUDADES_AUTONOMAS.has(activa) && (
           <use
             href={`#${PREFIJO}-${activa}`}
@@ -487,6 +787,23 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
             transform={alzaActiva}
             pointerEvents="none"
           />
+        )}
+
+        {/* Onda del toque: se dibuja donde se ha elegido y se apaga sola */}
+        {onda && !reducir && (
+          <g key={onda.n} pointerEvents="none" aria-hidden="true">
+            <circle className="mapa-onda" cx={onda.x} cy={onda.y} r={px(10)} fill="none" stroke={SOL} strokeWidth={px(3)} />
+            <circle
+              className="mapa-onda"
+              style={{ animationDelay: "160ms" }}
+              cx={onda.x}
+              cy={onda.y}
+              r={px(10)}
+              fill="none"
+              stroke={SOL}
+              strokeWidth={px(2)}
+            />
+          </g>
         )}
 
         {canarias && (
@@ -529,13 +846,13 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
 
         {/* Ciudades */}
         {capas.ciudades && (
-          <g key={`burbujas-${activa || "espana"}-${rama || "todas"}`}>
+          <g>
             {puntos.map(({ c, x, y, n }, i) => {
               const rpx = radioPx(n);
               const r = px(rpx);
               const fuera = filtros.activos && !filtros.ciudades.has(c.id);
               // Con el filtro de ranking, las ciudades que cumplen llevan un anillo Sol.
-              const resaltada = !!filtros.ranking && !fuera;
+              const resaltadaQS = !!filtros.ranking && !fuera;
               const soloCampus = c.masteres === 0;
               return (
                 <g
@@ -552,7 +869,7 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
                 >
                   <g opacity={fuera ? 0.25 : 1}>
                     <circle cx={x} cy={y} r={Math.max(r, px(11))} fill="transparent" />
-                    {resaltada && (
+                    {resaltadaQS && (
                       <circle cx={x} cy={y} r={r + px(3.2)} fill="none" stroke={SOL} strokeWidth={px(3.2)} className="pointer-events-none" />
                     )}
                     <circle
@@ -672,6 +989,7 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
                   strokeWidth={px(3)}
                   strokeLinejoin="round"
                   strokeDasharray={`${f1(px(8))} ${f1(px(4))}`}
+                  className="mapa-contorno-vivo"
                 />
               )}
               <circle cx={g.etiqueta[0]} cy={g.etiqueta[1]} r={px(13)} fill={SOL} stroke="#ffffff" strokeWidth={px(2.5)} />
@@ -723,6 +1041,8 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
           })}
       </svg>
 
+      <Mandos zoom={zoom} manual={manual} onZoom={(f) => zoomEn(null, f)} onCentrar={centrar} />
+
       {activa && (
         <button
           type="button"
@@ -747,8 +1067,8 @@ export default function MapaInteractivo({ geo, indice, foco, filtros, capas, cas
       <div
         ref={tooltipRef}
         aria-hidden="true"
-        className={`mapa-globo pointer-events-none absolute left-0 top-0 z-10 w-max max-w-[240px] rounded-xl bg-[#003648] px-3.5 py-2.5 text-xs leading-snug text-white transition-opacity duration-100 ${
-          hover ? "opacity-100" : "opacity-0"
+        className={`mapa-globo pointer-events-none absolute left-0 top-0 z-10 w-max max-w-[240px] rounded-xl bg-[#003648] px-3.5 py-2.5 text-xs leading-snug text-white ${
+          hover ? "mapa-globo-visible" : "opacity-0"
         }`}
       >
         <Tooltip hover={hover} indice={indice} geoPorId={geoPorId} casos={casos} filtros={filtros} />

@@ -30,7 +30,7 @@ import { cascada, useRevelar } from "../../lib/revelar";
 import { ABRE_MESES, RANKING_TOPES, aplicarFiltros, casosEnMapa, crearIndice, hayRanking, hayTitularidad, prefiereMenosMovimiento } from "./indice";
 import { useEstadoMapa } from "./useEstadoMapa";
 import { useEsEscritorio } from "./useEsEscritorio";
-import { CTA, HERO, PAQUETE, PIE, RANKING, RECOMENDAR, SEO, SESION, T, etiquetaLista } from "./mapaTextos";
+import { CTA, HERO, PAQUETE, PIE, RANKING, RECOMENDAR, SEO, SESION, T, etiquetaLista, eur, plural } from "./mapaTextos";
 import ResultadosUniversidades from "./ResultadosUniversidades";
 import Recomendador from "./Recomendador";
 import GuardarComparativa from "./GuardarComparativa";
@@ -42,6 +42,7 @@ import HojaDetalle from "./HojaDetalle";
 import { Cifra, FichaCaso, FichaCiudad, FichaComunidad, FichaFuera, FichaInicio, FichaUniversidad } from "./Fichas";
 import Comparador from "./Comparador";
 import ListaComunidades from "./ListaComunidades";
+import IlustracionCiudad from "./IlustracionesMapa";
 import "../../styles/movimiento.css";
 import "./mapa.css";
 
@@ -201,10 +202,10 @@ const PASOS = [
   { icono: "calendario", titulo: "Reserva tu sesión", texto: "y sales con un plan escrito para postular." },
 ];
 
-function Pasos() {
+function Pasos({ className = "" }) {
   const paso = cascada(80);
   return (
-    <ol className="mt-4 grid gap-2 sm:grid-cols-3">
+    <ol className={`mt-4 grid gap-2 sm:grid-cols-3 ${className}`}>
       {PASOS.map((p, i) => (
         <li
           key={p.titulo}
@@ -226,47 +227,57 @@ function Pasos() {
   );
 }
 
-function Cabecera({ totales, onRecomendar }) {
+/**
+ * Titular del explorador. Se deja solo: las cifras y el botón de la
+ * recomendación se pintan aparte para poder bajarlos del mapa en el teléfono
+ * (el DOM no cambia de orden, solo el sitio donde se dibujan).
+ */
+function Cabecera({ className = "" }) {
   return (
-    <div className="mb-5" data-revelar>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="min-w-0">
-          <p className="mapa-rotulo">
-            <Icono nombre="mapa" size={14} />
-            Explora · listas 2027/2028
-          </p>
-          <h2 className="mapa-titular mt-1.5 text-[28px] font-bold leading-tight text-[#003648] sm:text-[34px]">
-            ¿Cuánto cuesta un máster aquí? Tócalo en el mapa
-          </h2>
-          <p className="mt-1.5 text-sm text-neutral-700">Matrícula de un máster al año en cada comunidad, ciudad y universidad, con su ranking QS.</p>
-          <button
-            type="button"
-            onClick={onRecomendar}
-            className="mapa-boton mov-toque mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-[#F09C48] px-5 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648]"
-          >
-            <Icono nombre="brujula" size={17} />
-            {RECOMENDAR.boton}
-          </button>
-        </div>
-        <dl className="flex flex-wrap gap-2" data-revelar="escala">
-          {[
-            { n: totales.masteres, t: "másteres oficiales", icono: "birrete" },
-            { n: totales.universidades, t: "universidades", icono: "casa" },
-            { n: totales.comunidades, t: "comunidades", icono: "mapa" },
-          ].map((d) => (
-            <div key={d.t} className="mapa-cifra rounded-2xl bg-[#003648] px-4 py-2.5 text-white">
-              <dd className="mapa-titular flex items-center gap-2 text-xl font-bold leading-none">
-                <span className="text-[#F09C48]">
-                  <Icono nombre={d.icono} size={19} />
-                </span>
-                <Cifra n={d.n} />
-              </dd>
-              <dt className="mt-1.5 text-[12px] font-semibold text-[#96CCFC]">{d.t}</dt>
-            </div>
-          ))}
-        </dl>
-      </div>
-      <Pasos />
+    <div className={`min-w-0 ${className}`} data-revelar>
+      <p className="mapa-rotulo">
+        <Icono nombre="mapa" size={14} />
+        Explora · listas 2027/2028
+      </p>
+      <h2 className="mapa-titular mt-1.5 text-[26px] font-bold leading-tight text-[#003648] sm:text-[34px]">
+        ¿Cuánto cuesta un máster aquí? Tócalo en el mapa
+      </h2>
+      <p className="mt-1.5 hidden text-sm text-neutral-700 sm:block">
+        Matrícula de un máster al año en cada comunidad, ciudad y universidad, con su ranking QS.
+      </p>
+    </div>
+  );
+}
+
+/** Las tres cifras y el botón que abre el recomendador. */
+function CifrasAccion({ totales, onRecomendar, className = "" }) {
+  return (
+    <div className={`mb-5 mt-3 flex flex-wrap items-center gap-2 ${className}`} data-revelar="escala">
+      <dl className="grid w-full min-w-0 grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-1 sm:flex-wrap">
+        {[
+          { n: totales.masteres, t: "másteres oficiales", icono: "birrete" },
+          { n: totales.universidades, t: "universidades", icono: "casa" },
+          { n: totales.comunidades, t: "comunidades", icono: "mapa" },
+        ].map((d) => (
+          <div key={d.t} className="mapa-cifra rounded-2xl bg-[#003648] px-3 py-2.5 text-white sm:px-4">
+            <dd className="mapa-titular flex items-center gap-2 text-xl font-bold leading-none">
+              <span className="text-[#F09C48]">
+                <Icono nombre={d.icono} size={19} />
+              </span>
+              <Cifra n={d.n} />
+            </dd>
+            <dt className="mt-1.5 text-[11px] font-semibold leading-tight text-[#96CCFC] sm:text-[12px]">{d.t}</dt>
+          </div>
+        ))}
+      </dl>
+      <button
+        type="button"
+        onClick={onRecomendar}
+        className="mapa-boton mov-toque inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#F09C48] px-5 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648] sm:w-auto"
+      >
+        <Icono nombre="brujula" size={17} />
+        {RECOMENDAR.boton}
+      </button>
     </div>
   );
 }
@@ -318,6 +329,21 @@ function Leyenda({ indice, ranking }) {
           Ruta desde Lima
         </span>
       </div>
+      {/* El mapa se mueve: si no se dice, casi nadie lo prueba. */}
+      <p className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[#E1EFFD] pt-2.5 text-[11px] font-semibold text-[#0A5873]">
+        <span className="inline-flex items-center gap-1.5">
+          <Icono nombre="toque" size={13} className="text-[#F09C48]" />
+          Arrastra el mapa para moverlo
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Icono nombre="lupa" size={13} className="text-[#F09C48]" />
+          Rueda, pellizco o los botones + y − para acercar
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Icono nombre="brujula" size={13} className="text-[#F09C48]" />
+          La diana vuelve al encuadre
+        </span>
+      </p>
     </div>
   );
 }
@@ -352,7 +378,9 @@ function CtaFinal() {
         style={{ backgroundImage: "radial-gradient(rgba(150,204,252,0.35) 1px, transparent 1px)", backgroundSize: "18px 18px" }}
       />
       <svg aria-hidden="true" className="pointer-events-none absolute -bottom-6 right-0 hidden h-40 w-[520px] md:block" viewBox="0 0 520 160">
-        <path d="M10 150 Q260 -40 510 70" fill="none" stroke={SOL} strokeWidth="2.5" strokeDasharray="8 8" strokeLinecap="round" opacity="0.8" />
+        <path d="M10 150 Q260 -40 510 70" fill="none" stroke={SOL} strokeWidth="2.5" strokeDasharray="8 8" strokeLinecap="round" opacity="0.8">
+          <animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.6s" repeatCount="indefinite" />
+        </path>
       </svg>
       <div className="relative mx-auto flex max-w-[1180px] flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-2xl" data-revelar="izquierda">
@@ -364,7 +392,15 @@ function CtaFinal() {
           <h2 className="mapa-titular mt-2 text-3xl font-bold leading-tight sm:text-4xl">{CTA.titulo}</h2>
           <p className="mt-3 leading-relaxed text-white/80">{CTA.texto}</p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row" data-revelar="derecha">
+        <div className="flex flex-col gap-4" data-revelar="derecha">
+          <div aria-hidden="true" className="hidden gap-2 sm:grid sm:grid-cols-3">
+            {["barcelona", "madrid", "valencia"].map((id) => (
+              <span key={id} className="mapa-postal overflow-hidden rounded-2xl ring-1 ring-white/25">
+                <IlustracionCiudad ciudad={id} />
+              </span>
+            ))}
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
           <a
             href={CALENDLY_URL}
             target="_blank"
@@ -384,7 +420,137 @@ function CtaFinal() {
             <Icono nombre="chat" size={18} />
             {CTA.whatsapp}
           </a>
+          </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Índice de la página para el teléfono. La página mide más de nueve mil
+ * píxeles de alto: sin esto, volver al mapa desde el comparador eran diez
+ * pasadas de dedo. Se pega bajo la cabecera y marca en qué bloque estás.
+ *
+ * Son anclas de toda la vida (#id), así que funcionan aunque el observador no
+ * exista; lo único que se pierde entonces es el resaltado.
+ */
+const SECCIONES = [
+  { id: "mapa-zona", icono: "mapa", texto: "Mapa" },
+  { id: "mapa-ciudades", icono: "ubicacion", texto: "Ciudades" },
+  { id: "mapa-comparador", icono: "balanza", texto: "Comparar" },
+  { id: "mapa-listas", icono: "libro", texto: "Listas" },
+];
+
+function BarraSecciones({ className = "" }) {
+  const [activa, setActiva] = useState(SECCIONES[0].id);
+
+  useEffect(() => {
+    const nodos = SECCIONES.map((s) => document.getElementById(s.id)).filter(Boolean);
+    if (!nodos.length || typeof IntersectionObserver !== "function") return undefined;
+    const obs = new IntersectionObserver(
+      (entradas) => {
+        const visible = entradas.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible?.target?.id) setActiva(visible.target.id);
+      },
+      { rootMargin: "-25% 0px -60% 0px", threshold: 0 }
+    );
+    nodos.forEach((n) => obs.observe(n));
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <nav aria-label="Secciones del mapa" className={`mapa-indice sticky top-[60px] z-30 -mx-4 mb-3 px-4 py-2 lg:hidden ${className}`}>
+      <ul className="flex gap-2 overflow-x-auto">
+        {SECCIONES.map((s) => (
+          <li key={s.id}>
+            <a
+              href={`#${s.id}`}
+              aria-current={activa === s.id ? "true" : undefined}
+              className={`mov-toque inline-flex min-h-[40px] items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-extrabold ${
+                activa === s.id ? "border-transparent bg-[#003648] text-white" : "border-[#CFE6FD] bg-white/90 text-[#003648]"
+              }`}
+            >
+              <Icono nombre={s.icono} size={13} className={activa === s.id ? "text-[#F09C48]" : "text-[#0A5873]"} />
+              {s.texto}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+/**
+ * Las ciudades con más másteres oficiales, cada una con su ilustración de
+ * marca. Es la puerta de entrada para quien no sabe por dónde empezar: en el
+ * teléfono se deslizan como un carrusel y al tocar una se abre en el mapa.
+ *
+ * Las siluetas son dibujo propio (IlustracionesMapa.jsx), no fotos: la web no
+ * tiene fotos con licencia de ninguna ciudad española.
+ */
+function CiudadesDestacadas({ indice, foco, onElegir }) {
+  const paso = cascada(70);
+  const ciudades = useMemo(
+    () =>
+      indice.datos.ciudades
+        .filter((c) => c.masteres > 0)
+        .slice()
+        .sort((a, b) => b.masteres - a.masteres)
+        .slice(0, 8),
+    [indice]
+  );
+  if (!ciudades.length) return null;
+
+  return (
+    <section id="mapa-ciudades" aria-labelledby="mapa-ciudades-titulo" className="mt-14 scroll-mt-24" data-revelar>
+      <p className="mapa-rotulo">
+        <Icono nombre="ubicacion" size={14} />
+        Dónde se estudia
+      </p>
+      <h2 id="mapa-ciudades-titulo" className="mapa-titular mt-1 text-[26px] font-bold leading-tight text-[#003648]">
+        Las ciudades con más másteres oficiales
+      </h2>
+      <p className="mt-1 text-sm text-neutral-700">
+        Toca una y el mapa vuela hasta ella: verás sus universidades, su matrícula al año y su ranking QS.
+      </p>
+
+      <div className="mapa-carril mt-5">
+        {ciudades.map((c) => {
+          const com = indice.comunidades.get(c.comunidad);
+          const precio = c.precioAnual || com?.precioAnual;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              aria-pressed={foco.ciudad === c.id}
+              onClick={() => onElegir("ciudad", c.id)}
+              className="mapa-ciudad mov-toque"
+              data-revelar="escala"
+              style={paso()}
+            >
+              <span className="mapa-ciudad-lienzo block">
+                <IlustracionCiudad ciudad={c.id} />
+                <span className="absolute bottom-2 left-3 right-3 flex items-end justify-between gap-2">
+                  <span className="mapa-titular text-base font-bold leading-tight text-white drop-shadow-sm">{c.nombre}</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#F09C48] px-2 py-0.5 text-[11px] font-extrabold text-[#003648]">
+                    <Icono nombre="birrete" size={12} />
+                    {c.masteres}
+                  </span>
+                </span>
+              </span>
+              <span className="block px-3.5 py-3">
+                <span className="block text-[12px] font-semibold text-neutral-700">{com?.nombre || ""}</span>
+                <span className="mt-1 block text-[13px] font-bold text-[#003648]">
+                  {plural(c.universidades.length, "universidad", "universidades")}
+                </span>
+                <span className="mt-1 block text-[12px] text-neutral-700">
+                  {precio ? `Matrícula ≈ ${eur(Math.round(precio.tipico))} al año` : "Matrícula según la universidad"}
+                </span>
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -403,6 +569,9 @@ function Explorador({ datos, geo }) {
   const [guardar, setGuardar] = useState(null);
   // Recomendador: abierto y las comunidades que resalta en el mapa.
   const [recomendador, setRecomendador] = useState({ abierto: false, ids: [] });
+  // Comunidad señalada desde la lista en texto: el mapa la contornea sin
+  // abrirla, para que se vea de qué sitio se está hablando.
+  const [resaltada, setResaltada] = useState(null);
   const esEscritorio = useEsEscritorio();
   const mapaRef = useRef(null);
   const zonaRef = useRef(null);
@@ -553,7 +722,7 @@ function Explorador({ datos, geo }) {
 
   // Los bloques que aparecen después (recomendador, resultados, comparador)
   // también tienen que entrar al asomar: se vuelve a barrer cuando cambian.
-  useRevelar(zonaRef, [recomendador.abierto, filtros.activos, comparar.ids.length, foco.tipo, esEscritorio]);
+  useRevelar(zonaRef, [recomendador.abierto, filtros.activos, comparar.ids.length, foco.tipo, esEscritorio, indice]);
 
   const comparador = { tipo: comparar.tipo, ids: comparar.ids, maximo: MAX_COMPARAR, alternar: alternarComparar };
   const comunes = {
@@ -595,9 +764,18 @@ function Explorador({ datos, geo }) {
   }
 
   return (
-    <div ref={zonaRef}>
-      <Cabecera totales={indice.datos.totales} onRecomendar={abrirRecomendador} />
+    <div ref={zonaRef} className="flex flex-col">
+      {/* En el teléfono el mapa va antes que los filtros: se entra a tocarlo,
+          no a configurarlo. En escritorio se mantiene el orden de siempre. */}
+      <Cabecera className="order-1" />
 
+      <BarraSecciones className="order-2" />
+
+      <CifrasAccion totales={indice.datos.totales} onRecomendar={abrirRecomendador} className="order-5 lg:order-1" />
+
+      <Pasos className="order-6 lg:order-2" />
+
+      <div className="order-5 lg:order-3">
       <Filtros
         indice={indice}
         entrada={entrada}
@@ -610,7 +788,9 @@ function Explorador({ datos, geo }) {
         onVerComparador={() => irSuave(document.getElementById("mapa-comparador"))}
         onVerResultados={() => irSuave(document.getElementById("mapa-resultados"))}
       />
+      </div>
 
+      <div className="order-3">
       {recomendador.abierto && (
         <Recomendador
           indice={indice}
@@ -628,9 +808,10 @@ function Explorador({ datos, geo }) {
           }}
         />
       )}
+      </div>
 
-      <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
-        <div ref={mapaRef} className="scroll-mt-24" data-revelar="escala">
+      <div className="order-4 mt-5 grid items-start gap-6 lg:order-5 lg:grid-cols-[minmax(0,1fr)_390px]">
+        <div id="mapa-zona" ref={mapaRef} className="scroll-mt-24" data-revelar="escala">
           <div className="mapa-mar mapa-marco relative overflow-hidden rounded-[28px] border border-[#CFE6FD] p-2 shadow-[0_30px_60px_-44px_rgba(0,54,72,0.55)] sm:p-4">
             <span className="pointer-events-none absolute right-3 top-3 z-[1] hidden items-center gap-1.5 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold text-[#003648] ring-1 ring-[#CFE6FD] sm:inline-flex">
               <Icono nombre="calendario" size={12} className="text-[#F09C48]" />
@@ -638,7 +819,7 @@ function Explorador({ datos, geo }) {
             </span>
             {/* En el teléfono el mapa no se ve como algo que se toca: se dice. */}
             {!esEscritorio && !foco.tipo && (
-              <span className="mapa-pista pointer-events-none absolute bottom-4 left-1/2 z-[1] inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#003648] px-3.5 py-1.5 text-[12px] font-bold text-white shadow-lg">
+              <span className="mapa-pista pointer-events-none absolute left-1/2 top-3 z-[1] inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#003648] px-3.5 py-1.5 text-[12px] font-bold text-white shadow-lg">
                 <Icono nombre="toque" size={14} className="text-[#F09C48]" />
                 Toca una comunidad
               </span>
@@ -653,6 +834,7 @@ function Explorador({ datos, geo }) {
               onElegir={elegir}
               onToda={() => elegir(null)}
               recomendadas={recomendador.abierto ? recomendador.ids : []}
+              resaltada={resaltada}
             />
           </div>
           <Leyenda indice={indice} ranking={filtros.ranking} />
@@ -666,13 +848,20 @@ function Explorador({ datos, geo }) {
       </div>
 
       {!esEscritorio && !foco.tipo && (
-        <div className="mapa-tarjeta mt-6 p-5" data-revelar>
+        <div className="mapa-tarjeta order-7 mt-6 p-5" data-revelar>
           <FichaInicio indice={indice} casos={casos} onElegir={verEnMapa} onRecomendar={abrirRecomendador} />
         </div>
       )}
 
-      <ResultadosUniversidades indice={indice} filtros={filtros} orden={entrada.orden} onOrden={cambiarOrden} onElegir={verEnMapa} />
+      <div className="order-8">
+        <CiudadesDestacadas indice={indice} foco={foco} onElegir={verEnMapa} />
+      </div>
 
+      <div className="order-9">
+        <ResultadosUniversidades indice={indice} filtros={filtros} orden={entrada.orden} onOrden={cambiarOrden} onElegir={verEnMapa} />
+      </div>
+
+      <div className="order-10">
       <Comparador
         indice={indice}
         comparar={comparar}
@@ -691,14 +880,30 @@ function Explorador({ datos, geo }) {
         }}
       />
 
-      <ListaComunidades indice={indice} geoPorId={geoPorId} filtros={filtros} foco={foco} orden={entrada.orden} onElegir={verEnMapa} />
+      </div>
 
+      <div className="order-11">
+      <ListaComunidades
+        indice={indice}
+        geoPorId={geoPorId}
+        filtros={filtros}
+        foco={foco}
+        orden={entrada.orden}
+        onElegir={verEnMapa}
+        onResaltar={setResaltada}
+      />
+
+      </div>
+
+      <div className="order-12">
       <PieFuentes fuentes={datos.fuentes} />
+
+      </div>
 
       <GuardarComparativa seleccion={guardar} indice={indice} filtros={entrada} onCerrar={() => setGuardar(null)} />
 
       {/* En móvil la hoja tapa la mitad inferior: hueco para poder leer el final. */}
-      {!esEscritorio && foco.tipo && <div aria-hidden="true" className="h-[50vh]" />}
+      {!esEscritorio && foco.tipo && <div aria-hidden="true" className="order-last h-[50vh]" />}
     </div>
   );
 }

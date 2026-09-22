@@ -6,8 +6,8 @@
 // con la petición, para que ni la página ni el mapa pesen en el paquete de la
 // portada. Si la API no responde, estado de error con reintento.
 //
-// Identidad propia con el kit de marca (Noche, Cielo, Sol y Quicksand en los
-// titulares): relieve por capas, ruta con avión desde Lima, cifras que suben y
+// Identidad propia con el kit de marca (Noche, Cielo, Sol y Merriweather en
+// los titulares): relieve por capas, ruta con avión desde Lima, cifras que suben y
 // fichas que entran con suavidad. Todo se apaga con prefers-reduced-motion.
 //
 // Rediseño del 17/09/2026: iconos de trazo propios en lugar de caracteres
@@ -52,9 +52,6 @@ import "./mapa.css";
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 const MAX_COMPARAR = 3;
 const EJEMPLO_COMPARAR = ["andalucia", "madrid", "cataluna"];
-// Quicksand solo la necesita esta página: se pide al entrar, no en index.html.
-const FUENTE_TITULARES = "https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap";
-
 async function pedirMapa() {
   const control = new AbortController();
   const tope = setTimeout(() => control.abort(), 15000);
@@ -69,17 +66,6 @@ async function pedirMapa() {
 }
 
 const cargarGeografia = () => import("../landing/master2027/mapaEspana.data");
-
-function useFuenteTitulares() {
-  useEffect(() => {
-    if (document.querySelector('link[data-fuente="quicksand"]')) return;
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = FUENTE_TITULARES;
-    link.dataset.fuente = "quicksand";
-    document.head.appendChild(link);
-  }, []);
-}
 
 const irSuave = (el) => {
   revelarTodo(document);
@@ -1066,7 +1052,6 @@ function Explorador({ datos, geo }) {
 
 export default function MapaEspana() {
   useSEO(SEO);
-  useFuenteTitulares();
   const [carga, setCarga] = useState({ estado: "cargando" });
   const [intento, setIntento] = useState(0);
   const pagina = useRef(null);

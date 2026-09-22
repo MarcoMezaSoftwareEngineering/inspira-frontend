@@ -1,14 +1,28 @@
 /* src/pages/mapa/mapa.css
-   Identidad visual del «Mapa para estudiar en España»: titulares en Quicksand
-   (kit de marca), relieve del mapa y microanimaciones.
+   Identidad visual del «Mapa para estudiar en España»: titulares en la serif
+   de la marca, relieve del mapa y microanimaciones.
 
    Todas las clases llevan el prefijo mapa- para no chocar con otras hojas
    (una clase corta ya descuadró el panel del asesorado). Con
    prefers-reduced-motion no se anima nada. */
 
+/* Titulares con la serif de la marca (22/09/2026). El mapa cargaba Quicksand
+   solo para esta página: una redondeada geométrica que, al lado del resto del
+   sitio, hacía que la página pareciera de otra empresa y restaba seriedad a
+   una web que habla de trámites y de dinero. Merriweather ya es la voz de los
+   titulares de Inspira, lee bien en pantalla y es lo que se espera de algo
+   académico. De paso, una petición de fuente menos. */
 .mapa-titular {
-  font-family: "Quicksand", "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  font-family: Merriweather, Georgia, "Times New Roman", serif;
   letter-spacing: -0.015em;
+  /* Evita que un titular deje una palabra suelta en la última línea. */
+  text-wrap: balance;
+}
+
+/* Las cifras grandes piden algo menos de peso óptico que el texto corrido. */
+.mapa-titular.font-bold,
+.mapa-titular.font-extrabold {
+  letter-spacing: -0.025em;
 }
 
 /* Mar: degradado del cielo de la marca, bajo el patrón de puntos del SVG. */
@@ -295,7 +309,7 @@
   position: absolute;
   right: 0.35rem;
   top: -0.65rem;
-  font-family: "Quicksand", "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  font-family: Montserrat, ui-sans-serif, system-ui, sans-serif;
   font-size: 66px;
   font-weight: 700;
   line-height: 1;
@@ -563,7 +577,7 @@
   box-shadow: inset 0 0 90px -40px rgba(0, 54, 72, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-/* Cifras de la cabecera: el número en Quicksand con un filo de luz encima. */
+/* Cifras de la cabecera: el número con un filo de luz encima. */
 .mapa-premium .mapa-cifra {
   position: relative;
   overflow: hidden;

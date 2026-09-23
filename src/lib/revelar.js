@@ -56,11 +56,52 @@ function obtener() {
 }
 
 /**
+ * Red de seguridad. El escondite lo pone el JavaScript para que un fallo deje
+ * la página sin animación en vez de en blanco, pero esa promesa solo cubre lo
+ * que pasa ANTES de armar: si un bloque ya está armado y el observador no
+ * llega a avisar —webviews embebidas, motores con IntersectionObserver
+ * caprichoso tras un salto de ancla—, se queda a opacity 0 para siempre.
+ *
+ * Esto barre cada poco lo que esté armado, sin ver y a la vista, y lo enseña
+ * sin esperar al observador. Se detiene solo cuando no queda nada pendiente,
+ * así que no hay temporizador vivo en una página ya recorrida.
+ */
+let vigilante = null;
+
+function vigilar() {
+  if (vigilante) return;
+  const paso = () => {
+    const pendientes = document.querySelectorAll("[data-revelar][data-armado]:not([data-visto])");
+    if (!pendientes.length) {
+      clearInterval(vigilante);
+      vigilante = null;
+      return;
+    }
+    const alto = window.innerHeight || 0;
+    pendientes.forEach((n) => {
+      const caja = n.getBoundingClientRect();
+      // A la vista (con un margen de cortesía) y todavía escondido: se enseña.
+      if (caja.top < alto + 80 && caja.bottom > -80 && (caja.width > 0 || caja.height > 0)) {
+        n.setAttribute("data-visto", "1");
+        if (observador) observador.unobserve(n);
+      }
+    });
+  };
+  vigilante = setInterval(paso, 700);
+}
+
+/**
  * Pone a la escucha todo lo que haya marcado con data-revelar dentro de `raiz`.
  * Devuelve una función para dejar de escuchar.
  */
 export function revelar(raiz) {
-  const nodos = raiz ? Array.from(raiz.querySelectorAll("[data-revelar]:not([data-armado])")) : [];
+  // Todo lo que aún no se ha visto, esté armado o no. Antes se pedía
+  // `:not([data-armado])`, y como la limpieza del efecto deja de observar
+  // todos los nodos al cambiar las dependencias, los ya armados quedaban
+  // fuera de esta consulta y nadie volvía a observarlos: se quedaban a
+  // opacity 0 para siempre. Basta con tocar el mapa —`foco.tipo` es una de
+  // las dependencias— para que el resto de la página desapareciera.
+  const nodos = raiz ? Array.from(raiz.querySelectorAll("[data-revelar]:not([data-visto])")) : [];
   const obs = obtener();
   // Sin observador (navegador antiguo) o con el sistema pidiendo quietud, no se
   // arma nada: los bloques se quedan como están, a la vista.
@@ -78,6 +119,7 @@ export function revelar(raiz) {
     }
     obs.observe(n);
   });
+  vigilar();
   return () => nodos.forEach((n) => obs.unobserve(n));
 }
 

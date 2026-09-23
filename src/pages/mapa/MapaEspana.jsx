@@ -1070,8 +1070,12 @@ function Explorador({ datos, geo }) {
 
       <GuardarComparativa seleccion={guardar} indice={indice} filtros={entrada} onCerrar={() => setGuardar(null)} />
 
-      {/* En móvil la hoja tapa la mitad inferior: hueco para poder leer el final. */}
-      {!esEscritorio && foco.tipo && <div aria-hidden="true" className="order-last h-[50vh]" />}
+      {/* En móvil la hoja tapa la mitad inferior: hueco para poder leer el final.
+          Solo cuando la hoja está abierta de verdad. Tocar algo en el mapa deja
+          la vista en «mini» (elegirEnMapa), que enseña una tarjeta pequeña y no
+          la hoja: el hueco se quedaba ahí igual y dejaba media pantalla en
+          blanco debajo del mapa. La condición es la misma que abre la hoja. */}
+      {!esEscritorio && foco.tipo && vista === "hoja" && <div aria-hidden="true" className="order-last h-[50vh]" />}
     </div>
   );
 }

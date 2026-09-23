@@ -367,6 +367,28 @@ export const ramaPrincipal = (conteo, ramas) => ramasOrdenadas(conteo, ramas).fi
 export const nombreRama = (indice, id) => indice.ramas.find((r) => r.id === id)?.nombre || "";
 
 /** Casos de éxito de config/casos.js con la ciudad del mapa en la que se pintan. */
+/**
+ * La universidad del catálogo que corresponde a un nombre escrito a mano en
+ * config/casos.js, para poder enlazar un caso con su página (/universidad/:id).
+ * Compara sin tildes ni mayúsculas y acepta que el nombre del caso lleve cola
+ * («… San Vicente Mártir») o cabeza («Zaragoza Logistics Center · …»), que es
+ * como vienen de las fichas de admisión. Si no hay coincidencia devuelve null
+ * y quien llama no pinta el enlace: mejor sin enlace que con uno equivocado.
+ */
+export function universidadPorNombre(indice, nombre) {
+  const n = normalizar(nombre);
+  if (!n) return null;
+  for (const u of indice.datos.universidades) {
+    const m = normalizar(u.nombre);
+    if (m === n) return u;
+  }
+  for (const u of indice.datos.universidades) {
+    const m = normalizar(u.nombre);
+    if (n.startsWith(`${m} `) || n.endsWith(` ${m}`)) return u;
+  }
+  return null;
+}
+
 export function casosEnMapa(indice, casos) {
   const porNombre = new Map(indice.datos.ciudades.map((c) => [normalizar(c.nombre), c]));
   return casos

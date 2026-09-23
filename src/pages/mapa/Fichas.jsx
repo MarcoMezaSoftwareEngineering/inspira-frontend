@@ -23,6 +23,7 @@ import {
   ordenarUniversidades,
   precioDeUniversidad,
   ramasOrdenadas,
+  universidadPorNombre,
 } from "./indice";
 import { cursoCorto, leerPlazos, plazoMasTemprano, rangoFechas } from "./plazos";
 import TarjetaPrecio from "./TarjetaPrecio";
@@ -124,7 +125,8 @@ function PruebaSocial({ casos, onElegir }) {
               onClick={() => onElegir("caso", k.id)}
               className={`mov-toque w-full rounded-xl px-1 py-0.5 text-left text-[13px] leading-snug text-neutral-800 hover:bg-white ${FOCO}`}
             >
-              <strong className="text-[#003648]">{k.nombre}</strong> · {k.destacado}
+              <strong className="text-[#003648]">{k.nombre}</strong>
+              {k.destacado ? ` · ${k.destacado}` : ""}
               <span className="block text-[12px] text-neutral-700">{k.universidad}</span>
             </button>
           </li>
@@ -961,10 +963,18 @@ export function FichaUniversidad({ u, indice, foco, geoPorId, rama, comparador, 
 
 export function FichaCaso({ k, indice, foco, geoPorId, onElegir }) {
   const ciudad = indice.ciudades.get(k.ciudadId);
+  // El catálogo de la universidad principal, para enlazar el caso con su
+  // página. Un nombre que no esté en el catálogo (un centro privado, por
+  // ejemplo) devuelve null y el botón no se pinta.
+  const uni = universidadPorNombre(indice, k.universidad);
+  // Las demás admisiones de la misma persona. La principal ya está en la
+  // tabla de arriba, así que no se repite.
+  const otras = (k.destinos || []).filter(
+    (d) => !(d.universidad === k.universidad && d.programa === k.programa)
+  );
   const filas = [
     { icono: "casa", etiqueta: "Universidad", valor: k.universidad },
     { icono: "birrete", etiqueta: "Máster", valor: k.programa },
-    { icono: "documento", etiqueta: "Carrera de origen", valor: k.origen },
     { icono: "euro", etiqueta: "Costo del máster", valor: k.costo },
   ].filter((f) => f.valor);
 
@@ -981,10 +991,12 @@ export function FichaCaso({ k, indice, foco, geoPorId, onElegir }) {
           Caso de éxito real
         </p>
         <h2 className="mapa-titular relative mt-1 text-[26px] font-bold leading-tight">{k.nombre}</h2>
-        <span className="relative mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#F09C48] px-3 py-1 text-[11px] font-extrabold text-[#003648]">
-          <Icono nombre="estrella" size={12} />
-          {k.destacado}
-        </span>
+        {k.destacado && (
+          <span className="relative mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#F09C48] px-3 py-1 text-[11px] font-extrabold text-[#003648]">
+            <Icono nombre="estrella" size={12} />
+            {k.destacado}
+          </span>
+        )}
         <p className="relative mt-3 text-xs text-white/75">Lima → {k.ciudad}</p>
       </div>
       <dl className="mt-4 space-y-3">
@@ -1000,6 +1012,25 @@ export function FichaCaso({ k, indice, foco, geoPorId, onElegir }) {
           </div>
         ))}
       </dl>
+      {otras.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-[#E1EFFD] bg-[#F6FBFF] px-3.5 py-3">
+          <p className="mapa-rotulo mb-1.5">
+            <Icono nombre="trofeo" size={13} />
+            Otras admisiones
+          </p>
+          <ul className="space-y-1.5">
+            {otras.map((d, i) => (
+              <li key={`${d.universidad}-${i}`} className="text-[13px] leading-snug text-neutral-800">
+                <strong className="text-[#003648]">{d.universidad}</strong>
+                <span className="block text-[12px] text-neutral-700">
+                  {d.programa}
+                  {d.ciudad ? ` · ${d.ciudad}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {k.texto && <p className="mt-4 border-l-2 border-[#F09C48] pl-3 text-[13px] italic leading-relaxed text-neutral-700">{k.texto}</p>}
       <div className="mt-5 grid gap-2">
         {ciudad && (
@@ -1011,6 +1042,16 @@ export function FichaCaso({ k, indice, foco, geoPorId, onElegir }) {
             <Icono nombre="mapa" size={17} />
             Ver {ciudad.nombre} en el mapa
           </button>
+        )}
+        {uni && (
+          <a
+            href={rutaUniversidad(uni.id)}
+            onClick={irA(rutaUniversidad(uni.id))}
+            className={`mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-[#003648] px-3 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F6FBFF] ${FOCO}`}
+          >
+            <Icono nombre="casa" size={17} />
+            Ver {uni.sigla} en el catálogo
+          </a>
         )}
         <a
           href="/casos-de-exito"

@@ -39,6 +39,13 @@ import { T, etiquetaLista, importeMatricula, numero, plural, textoRanking } from
 const CIUDADES_AUTONOMAS = new Set(["ceuta", "melilla"]);
 const PEQUENAS = ["la-rioja", "cantabria", "asturias", "navarra", "pais-vasco", "murcia", "baleares", "ceuta", "melilla"];
 const DURACION_ZOOM = 560;
+// Sin nada elegido el avión vuela a las ciudades con más casos. Una ruta por
+// caso cruzaba España de líneas en cuanto pasaron de cinco: el avión es un
+// gesto de marca, no un dato, y tres bastan para contar de dónde a dónde.
+const RUTAS_SIN_FOCO = 3;
+// Arriba a la derecha de la burbuja de la ciudad: no tapa el nombre, que se
+// dibuja debajo, ni el borde de la comunidad, que queda a la izquierda.
+const ANGULO_CUMULO = (-45 * Math.PI) / 180;
 const RADIO_TOQUE_PX = 22;
 const PREFIJO = "mapa-geo";
 // Cuánto se puede acercar y alejar a mano, medido sobre el encuadre de España.
@@ -460,19 +467,30 @@ export default function MapaInteractivo({
     [indice, rama]
   );
   const puntoPorId = useMemo(() => new Map(puntos.map((p) => [p.c.id, p])), [puntos]);
-  // Varios casos de éxito en la misma ciudad se repartían en el mismo punto y
-  // solo se veía uno: se abren en abanico alrededor de su burbuja.
-  const casosPorCiudad = useMemo(() => {
+  // Los casos de éxito se agrupan por ciudad: un cúmulo por ciudad con su
+  // cuenta dentro. Antes se abrían en abanico alrededor de la burbuja, y el
+  // abanico da la vuelta completa al séptimo hermano: con doce en Valencia las
+  // estrellas se pisaban unas a otras y la prueba social quedaba en un borrón.
+  // La cuenta dice lo mismo de un vistazo y no crece con la lista; los nombres
+  // salen en el panel al elegir la ciudad (Fichas.jsx, FichaCiudad).
+  // Ordenados de más a menos para que las rutas desde Lima tomen las de arriba.
+  const cumulos = useMemo(() => {
     const m = new Map();
-    for (const k of casos) m.set(k.ciudadId, [...(m.get(k.ciudadId) || []), k.id]);
-    return m;
-  }, [casos]);
+    for (const k of casos) {
+      const punto = puntoPorId.get(k.ciudadId);
+      if (!punto) continue;
+      const c = m.get(k.ciudadId);
+      if (c) c.casos.push(k);
+      else m.set(k.ciudadId, { ciudadId: k.ciudadId, punto, casos: [k] });
+    }
+    return [...m.values()].sort((a, b) => b.casos.length - a.casos.length);
+  }, [casos, puntoPorId]);
 
   const destinoRuta = foco.ciudad ? puntoPorId.get(foco.ciudad) : null;
   const rutas = destinoRuta
     ? [{ id: "foco", punto: destinoRuta, principal: true }]
     : !foco.tipo && capas.casos
-      ? casos.map((k) => ({ id: k.id, punto: puntoPorId.get(k.ciudadId), principal: false })).filter((r) => r.punto)
+      ? cumulos.slice(0, RUTAS_SIN_FOCO).map((c) => ({ id: c.ciudadId, punto: c.punto, principal: false }))
       : [];
 
   const opacidadComunidad = (id) => {
@@ -1015,36 +1033,64 @@ export default function MapaInteractivo({
           );
         })}
 
-        {/* Casos de éxito */}
+        {/* Casos de éxito: un cúmulo por ciudad, con su cuenta dentro. */}
         {capas.casos &&
-          casos.map((k) => {
-            const p = puntoPorId.get(k.ciudadId);
-            if (!p) return null;
+          cumulos.map((c) => {
+            const n = c.casos.length;
+            const solo = n === 1 ? c.casos[0] : null;
+            const p = c.punto;
             const rc = capas.ciudades ? px(radioPx(p.n)) : 0;
-            const rm = px(9.5 * Math.sqrt(escalaPantalla));
-            const hermanos = casosPorCiudad.get(k.ciudadId) || [k.id];
-            const orden = Math.max(0, hermanos.indexOf(k.id));
-            const angulo = ((-45 + orden * 58) * Math.PI) / 180;
+            // El cúmulo es un pelo mayor que la estrella suelta: tiene que
+            // caber un número de dos cifras sin que el círculo lo apriete.
+            const rm = px((solo ? 9.5 : 11.5) * Math.sqrt(escalaPantalla));
             const d = (rc + rm * 0.35) * 1.02;
-            const mx = p.x + Math.cos(angulo) * d;
-            const my = p.y + Math.sin(angulo) * d;
-            const elegido = foco.caso === k.id;
+            const mx = p.x + Math.cos(ANGULO_CUMULO) * d;
+            const my = p.y + Math.sin(ANGULO_CUMULO) * d;
+            const elegido = solo
+              ? foco.caso === solo.id
+              : foco.ciudad === c.ciudadId || c.casos.some((k) => k.id === foco.caso);
+            const ciudad = indice.ciudades.get(c.ciudadId);
+            const nombreCiudad = ciudad?.nombre || "";
+            // Un solo caso abre su ficha; un cúmulo abre la de la ciudad, que
+            // ya lista a toda su gente. Se marca como "ciudad" para que el
+            // manejador de clics del mapa lo despache sin caso especial.
+            const tipo = solo ? "caso" : "ciudad";
+            const idDestino = solo ? solo.id : c.ciudadId;
             return (
               <g
-                key={k.id}
-                data-tipo="caso"
-                data-id={k.id}
+                key={c.ciudadId}
+                data-tipo={tipo}
+                data-id={idDestino}
                 role="button"
                 tabIndex={0}
-                aria-label={`Caso de éxito: ${k.nombre}, ${k.universidad}`}
+                aria-label={
+                  solo
+                    ? `Caso de éxito: ${solo.nombre}, ${solo.universidad}`
+                    : `${n} casos de éxito en ${nombreCiudad}`
+                }
                 aria-pressed={elegido}
-                onKeyDown={alTeclado(onElegir, "caso", k.id)}
+                onKeyDown={alTeclado(onElegir, tipo, idDestino)}
                 className="mapa-burbuja cursor-pointer"
                 style={{ animationDelay: "480ms" }}
               >
                 <circle cx={mx} cy={my} r={Math.max(rm, px(12))} fill="transparent" />
                 <circle cx={mx} cy={my} r={rm} className="mapa-burbuja-borde" fill={NOCHE} stroke="#ffffff" strokeWidth={px(2)} />
-                <path d={estrella(mx, my, rm * 0.62, rm * 0.27)} fill={SOL} className="pointer-events-none" />
+                {solo ? (
+                  <path d={estrella(mx, my, rm * 0.62, rm * 0.27)} fill={SOL} className="pointer-events-none" />
+                ) : (
+                  <text
+                    x={mx}
+                    y={my}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill={SOL}
+                    fontSize={px(12.5 * Math.sqrt(escalaPantalla))}
+                    fontWeight="800"
+                    className="pointer-events-none select-none"
+                  >
+                    {n}
+                  </text>
+                )}
                 {elegido && <circle cx={mx} cy={my} r={rm + px(4)} fill="none" stroke={SOL} strokeWidth={px(3)} />}
               </g>
             );

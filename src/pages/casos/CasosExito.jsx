@@ -17,10 +17,12 @@ function FichaCaso({ caso }) {
         <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-sky/20 blur-2xl" />
         <div className="relative flex items-start justify-between gap-4">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white">
-              <Icono nombre="estrella" size={12} />
-              {caso.destacado}
-            </span>
+            {caso.destacado && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white">
+                <Icono nombre="estrella" size={12} />
+                {caso.destacado}
+              </span>
+            )}
             <h3 className="mt-3 font-display text-2xl font-black leading-tight">
               {caso.nombre}
             </h3>
@@ -41,9 +43,10 @@ function FichaCaso({ caso }) {
           {[
             { i: "birrete", k: "Máster", v: caso.programa },
             { i: "casa", k: "Universidad", v: caso.universidad },
-            { i: "documento", k: "Carrera de origen", v: caso.origen },
             { i: "euro", k: "Costo del máster", v: caso.costo, destacado: true },
-          ].map((d) => (
+          ]
+            .filter((d) => d.v)
+            .map((d) => (
             <div key={d.k} className="flex gap-3">
               <span
                 className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
@@ -72,9 +75,33 @@ function FichaCaso({ caso }) {
           ))}
         </dl>
 
-        <p className="mt-5 border-l-2 border-accent pl-4 text-[13.5px] italic leading-relaxed text-neutral-700">
-          {caso.texto}
-        </p>
+        {caso.texto && (
+          <p className="mt-5 border-l-2 border-accent pl-4 text-[13.5px] italic leading-relaxed text-neutral-700">
+            {caso.texto}
+          </p>
+        )}
+
+        {/* Las demás admisiones de la misma persona, como en la ficha del mapa. */}
+        {(caso.destinos || []).length > 1 && (
+          <div className="mt-5 rounded-2xl border border-neutral-200 p-4">
+            <p className="mb-2 font-display text-sm font-bold text-primary">
+              Otras admisiones
+            </p>
+            <ul className="space-y-1.5">
+              {caso.destinos
+                .filter((d) => !(d.universidad === caso.universidad && d.programa === caso.programa))
+                .map((d, i) => (
+                  <li key={`${d.universidad}-${i}`} className="text-[12.5px] leading-relaxed text-neutral-700">
+                    <strong className="text-primary">{d.universidad}</strong>
+                    <span className="block text-[12px] text-neutral-600">
+                      {d.programa}
+                      {d.ciudad ? ` · ${d.ciudad}` : ""}
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
 
         {caso.porQue && (
           <div className="mt-5 rounded-2xl bg-secondary-light p-4">

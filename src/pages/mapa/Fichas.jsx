@@ -838,7 +838,8 @@ export function FichaCiudad({ c, indice, foco, geoPorId, rama, orden, onOrden, c
           <div className="flex flex-wrap gap-2">
             {casosAqui.map((k) => (
               <BotonChip key={k.id} icono="estrella" onClick={() => onElegir("caso", k.id)}>
-                {k.nombre} · {k.destacado}
+                {k.nombre}
+                {k.destacado ? ` · ${k.destacado}` : ""}
               </BotonChip>
             ))}
           </div>

@@ -216,7 +216,8 @@ function Tooltip({ hover, indice, geoPorId, casos, filtros }) {
       <>
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#F09C48]">{T.leyendaCaso}</p>
         <p className="mapa-titular text-sm font-bold">
-          {k.nombre} · {k.destacado}
+          {k.nombre}
+          {k.destacado ? ` · ${k.destacado}` : ""}
         </p>
         <p>{k.universidad}</p>
       </>

@@ -942,10 +942,12 @@ function Explorador({ datos, geo }) {
             </span>
             {/* En el teléfono el mapa no se ve como algo que se toca: se dice. */}
             {!esEscritorio && !foco.tipo && (
-              <span className="mapa-pista pointer-events-none absolute left-1/2 top-3 z-[1] inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#003648] px-3.5 py-1.5 text-[12px] font-bold text-white shadow-lg">
-                <Icono nombre="toque" size={14} className="text-[#F09C48]" />
-                Toca una comunidad
-              </span>
+              <p className="mapa-pista pointer-events-none mb-2 flex justify-center">
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#003648] px-3.5 py-1.5 text-[12px] font-bold text-white shadow-lg">
+                  <Icono nombre="toque" size={14} className="text-[#F09C48]" />
+                  Toca una comunidad
+                </span>
+              </p>
             )}
             <MapaInteractivo
               geo={geo}

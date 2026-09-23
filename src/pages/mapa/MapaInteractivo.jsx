@@ -247,7 +247,7 @@ function Mandos({ zoom, manual, onZoom, onCentrar }) {
   const boton =
     "mapa-mando mov-toque flex h-10 w-10 items-center justify-center rounded-xl bg-white/95 text-[#003648] ring-1 ring-[#CFE6FD] hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48] disabled:opacity-40";
   return (
-    <div className="mapa-mandos absolute right-3 top-3 z-[2] flex flex-col gap-1.5 sm:top-[3.25rem]">
+    <div className="mapa-mandos z-[2] mt-2 flex flex-row justify-end gap-1.5 sm:absolute sm:right-3 sm:top-[3.25rem] sm:mt-0 sm:flex-col">
       <button type="button" className={boton} onClick={() => onZoom(1.55)} disabled={zoom >= ZOOM_MAX - 0.01} aria-label="Acercar el mapa">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14" />
@@ -1217,8 +1217,7 @@ export default function MapaInteractivo({
 
       {rutas.length > 0 && (
         <span
-          className="pointer-events-none absolute left-2 inline-flex items-center gap-1.5 rounded-full bg-[#003648] px-2.5 py-1 text-[11px] font-bold text-white shadow-md"
-          style={{ top: "calc(80% - 13px)" }}
+          className="pointer-events-none absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-[#003648] px-2.5 py-1 text-[11px] font-bold text-white shadow-md"
         >
           <Icono nombre="avion" size={13} className="mov-flota text-[#F09C48]" />
           Desde Lima

@@ -48,6 +48,10 @@ const RUTAS_SIN_FOCO = 3;
 // sitio preferido; si ya está ocupado se prueban los demás en este orden.
 const ANGULOS_CUMULO = [-45, -135, 45, 135, -90, 90, 0, 180].map((g) => (g * Math.PI) / 180);
 const RADIO_TOQUE_PX = 22;
+// Lo que mide un dedo. La marca dibujada es pequeña a propósito —el lienzo del
+// teléfono es de 342 px y España lo llena— pero la zona que responde al toque
+// no tiene por qué serlo: se agranda por debajo sin tocar el dibujo.
+const LADO_TOQUE_PX = 44;
 const PREFIJO = "mapa-geo";
 // Cuánto se puede acercar y alejar a mano, medido sobre el encuadre de España.
 const ZOOM_MIN = 0.92;
@@ -548,6 +552,24 @@ export default function MapaInteractivo({
       }
       puestas.push(elegido);
       salida.set(c.ciudadId, elegido);
+    }
+    // La marca dibujada es pequeña —el lienzo del teléfono no da para más—
+    // pero la zona que responde al toque no tiene por qué serlo. Crece hasta
+    // el ancho de un dedo, con un tope: nunca puede alcanzar el centro de la
+    // marca vecina, o esa quedaría imposible de tocar. Donde hay sitio son
+    // 44 px; donde dos ciudades caen juntas, lo que quepa.
+    const lado = aVb(LADO_TOQUE_PX);
+    for (const m of puestas) {
+      let cerca = Infinity;
+      for (const o of puestas) {
+        if (o === m) continue;
+        cerca = Math.min(cerca, Math.hypot(o.mx - m.mx, o.my - m.my));
+      }
+      const tope = Math.min(lado, cerca * 0.9);
+      // Suelo: el holgura que ya tenía antes. Aunque la vecina esté encima,
+      // ninguna marca acaba con menos zona de la que tenía.
+      m.toqueAncho = Math.max(m.ancho + aVb(6), tope);
+      m.toqueAlto = Math.max(m.alto + aVb(6), tope);
     }
     return salida;
   }, [cumulos, capas.ciudades, escalaPantalla, factorZoom, ppu]);
@@ -1115,7 +1137,8 @@ export default function MapaInteractivo({
             const solo = n === 1 ? c.casos[0] : null;
             const p = c.punto;
             const rm = px(9.5 * Math.sqrt(escalaPantalla));
-            const { mx, my } = marcas.get(c.ciudadId) || { mx: p.x, my: p.y };
+            const marca = marcas.get(c.ciudadId) || { mx: p.x, my: p.y, toqueAncho: rm * 2, toqueAlto: rm * 2 };
+            const { mx, my, toqueAncho, toqueAlto } = marca;
             const elegido = solo
               ? foco.caso === solo.id
               : foco.ciudad === c.ciudadId || c.casos.some((k) => k.id === foco.caso);
@@ -1151,14 +1174,21 @@ export default function MapaInteractivo({
               >
                 {solo ? (
                   <>
-                    <circle cx={mx} cy={my} r={Math.max(rm, px(12))} fill="transparent" />
+                    <circle cx={mx} cy={my} r={Math.max(rm, Math.min(toqueAncho, toqueAlto) / 2)} fill="transparent" />
                     <circle cx={mx} cy={my} r={rm} className="mapa-burbuja-borde" fill={NOCHE} stroke="#ffffff" strokeWidth={px(2)} />
                     <path d={estrella(mx, my, rm * 0.62, rm * 0.27)} fill={SOL} className="pointer-events-none" />
                     {elegido && <circle cx={mx} cy={my} r={rm + px(4)} fill="none" stroke={SOL} strokeWidth={px(3)} />}
                   </>
                 ) : (
                   <>
-                    <rect x={x0 - px(3)} y={y0 - px(3)} width={ancho + px(6)} height={alto + px(6)} rx={(alto + px(6)) / 2} fill="transparent" />
+                    <rect
+                      x={mx - toqueAncho / 2}
+                      y={my - toqueAlto / 2}
+                      width={toqueAncho}
+                      height={toqueAlto}
+                      rx={toqueAlto / 2}
+                      fill="transparent"
+                    />
                     <rect
                       x={x0}
                       y={y0}

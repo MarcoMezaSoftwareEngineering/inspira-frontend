@@ -128,10 +128,52 @@ function FichaCaso({ caso }) {
   );
 }
 
+/**
+ * La fila de una admisión sin historia detrás. No es una tarjeta a medias:
+ * es otra forma. Una rejilla de tarjetas con tres datos y los huecos de la
+ * cita y del «universidad ideal si…» se lee como fichas incompletas; la misma
+ * información en una lista densa se lee como volumen, que es lo que estos
+ * casos aportan. Una fila sube a tarjeta en cuanto tiene `texto`.
+ */
+function FilaCaso({ caso }) {
+  const otras = (caso.destinos || []).filter(
+    (d) => !(d.universidad === caso.universidad && d.programa === caso.programa)
+  );
+  return (
+    <li className="flex break-inside-avoid gap-3 border-b border-neutral-200 py-3 last:border-0">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+        <Icono nombre="estrella" size={15} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[14px] font-extrabold leading-snug text-primary">
+          {caso.nombre}
+          <span className="ml-2 text-[12px] font-semibold text-neutral-500">
+            {caso.ciudad}
+          </span>
+        </p>
+        <p className="text-[12.5px] font-semibold leading-snug text-neutral-800">
+          {caso.universidad}
+        </p>
+        <p className="text-[12.5px] leading-snug text-neutral-600">{caso.programa}</p>
+        {otras.length > 0 && (
+          <p className="mt-1 text-[11.5px] font-bold text-sky-dark">
+            +{otras.length} {otras.length === 1 ? "admisión más" : "admisiones más"}
+          </p>
+        )}
+      </div>
+    </li>
+  );
+}
+
 export default function CasosExito() {
   const [filtro, setFiltro] = useState("todos");
   const visibles =
     filtro === "todos" ? CASOS : CASOS.filter((c) => c.categoria === filtro);
+  // Dos niveles: la que tiene historia va en tarjeta; la que solo consta, en
+  // lista. El criterio es el dato, no una marca a mano, así que una ficha
+  // sube de nivel sola en cuanto alguien le escribe el texto.
+  const conHistoria = visibles.filter((c) => c.texto);
+  const breves = visibles.filter((c) => !c.texto);
 
   return (
     <main className="w-full">
@@ -214,11 +256,32 @@ export default function CasosExito() {
         </div>
 
         {visibles.length > 0 ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            {visibles.map((c) => (
-              <FichaCaso key={c.id} caso={c} />
-            ))}
-          </div>
+          <>
+            {conHistoria.length > 0 && (
+              <div className="grid gap-6 lg:grid-cols-2">
+                {conHistoria.map((c) => (
+                  <FichaCaso key={c.id} caso={c} />
+                ))}
+              </div>
+            )}
+            {breves.length > 0 && (
+              <div className={conHistoria.length > 0 ? "mt-10" : ""}>
+                <h3 className="font-display text-lg font-bold text-primary">
+                  {breves.length} admisiones más
+                </h3>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-neutral-600">
+                  Expedientes de la promoción 2026-2027. Publicamos el nombre de
+                  pila, la universidad y el máster; el resto del expediente es
+                  privado.
+                </p>
+                <ul className="mt-4 sm:columns-2 sm:gap-8">
+                  {breves.map((c) => (
+                    <FilaCaso key={c.id} caso={c} />
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
         ) : (
           <div className="rounded-2xl border border-dashed border-neutral-300 bg-secondary-light p-10 text-center">
             <p className="font-semibold text-primary">

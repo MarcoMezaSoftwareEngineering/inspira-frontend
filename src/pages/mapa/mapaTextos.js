@@ -388,6 +388,7 @@ export const T = {
   leyendaBurbuja: "Ciudad: el tamaño es su número de másteres oficiales",
   leyendaCampus: "Campus (los másteres se cuentan en la sede principal)",
   leyendaCaso: "Caso de éxito real",
+  leyendaCumulo: "Varios casos en la misma ciudad (el número es cuántos)",
 
   comparar: "Comparar",
   quitarComparar: "Quitar",

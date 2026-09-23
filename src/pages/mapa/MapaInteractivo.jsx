@@ -209,6 +209,21 @@ function Tooltip({ hover, indice, geoPorId, casos, filtros }) {
     );
   }
 
+  if (hover.tipo === "cumulo") {
+    const dentro = casos.filter((k) => k.ciudadId === hover.id);
+    if (!dentro.length) return null;
+    const c = indice.ciudades.get(hover.id);
+    return (
+      <>
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#F09C48]">{T.leyendaCumulo}</p>
+        <p className="mapa-titular text-sm font-bold">
+          {plural(dentro.length, "caso de éxito", "casos de éxito")} en {c?.nombre || ""}
+        </p>
+        <p>{dentro.slice(0, 4).map((k) => k.nombre).join(", ")}{dentro.length > 4 ? "…" : ""}</p>
+      </>
+    );
+  }
+
   if (hover.tipo === "caso") {
     const k = casos.find((x) => x.id === hover.id);
     if (!k) return null;
@@ -614,6 +629,10 @@ export default function MapaInteractivo({
     if (!g || g.cancelado || g.recorrido > UMBRAL_CLIC_PX) return;
     let { tipo, id } = g;
     const p = aCoordenadas(g.cliente);
+    // Un cúmulo abre la ficha de su ciudad: agrupa a su gente, no es un lugar
+    // aparte. Se despacha aquí y no en el marcador para que el toque y el
+    // teclado sigan el mismo camino que el ratón.
+    if (tipo === "cumulo") tipo = "ciudad";
     if (tipoPuntero.current !== "mouse" && zoom < 1.6 && tipo !== "ciudad" && tipo !== "caso") {
       const cercana = pequenaCercana(p);
       if (cercana) {
@@ -1034,16 +1053,19 @@ export default function MapaInteractivo({
           );
         })}
 
-        {/* Casos de éxito: un cúmulo por ciudad, con su cuenta dentro. */}
+        {/* Casos de éxito. Una ciudad con un caso enseña su estrella de
+            siempre; con varios, una píldora con la estrella y la cuenta.
+            La forma importa: las burbujas de ciudad ya llevan su cifra de
+            másteres dentro de un círculo, así que un segundo círculo con
+            número se leería como más de lo mismo. La píldora se distingue
+            de lejos y la estrella dice de qué va sin necesidad de leyenda. */}
         {capas.casos &&
           cumulos.map((c) => {
             const n = c.casos.length;
             const solo = n === 1 ? c.casos[0] : null;
             const p = c.punto;
             const rc = capas.ciudades ? px(radioPx(p.n)) : 0;
-            // El cúmulo es un pelo mayor que la estrella suelta: tiene que
-            // caber un número de dos cifras sin que el círculo lo apriete.
-            const rm = px((solo ? 9.5 : 11.5) * Math.sqrt(escalaPantalla));
+            const rm = px(9.5 * Math.sqrt(escalaPantalla));
             const d = (rc + rm * 0.35) * 1.02;
             const mx = p.x + Math.cos(ANGULO_CUMULO) * d;
             const my = p.y + Math.sin(ANGULO_CUMULO) * d;
@@ -1052,11 +1074,17 @@ export default function MapaInteractivo({
               : foco.ciudad === c.ciudadId || c.casos.some((k) => k.id === foco.caso);
             const ciudad = indice.ciudades.get(c.ciudadId);
             const nombreCiudad = ciudad?.nombre || "";
-            // Un solo caso abre su ficha; un cúmulo abre la de la ciudad, que
-            // ya lista a toda su gente. Se marca como "ciudad" para que el
-            // manejador de clics del mapa lo despache sin caso especial.
-            const tipo = solo ? "caso" : "ciudad";
+            const tipo = solo ? "caso" : "cumulo";
             const idDestino = solo ? solo.id : c.ciudadId;
+
+            // Píldora: la estrella a la izquierda y la cuenta a su derecha.
+            const alto = rm * 2;
+            const tipografia = alto * 0.56;
+            const ancho = alto * 1.06 + String(n).length * tipografia * 0.66;
+            const x0 = mx - ancho / 2;
+            const y0 = my - alto / 2;
+            const cxEstrella = x0 + alto * 0.52;
+
             return (
               <g
                 key={c.ciudadId}
@@ -1070,29 +1098,58 @@ export default function MapaInteractivo({
                     : `${n} casos de éxito en ${nombreCiudad}`
                 }
                 aria-pressed={elegido}
-                onKeyDown={alTeclado(onElegir, tipo, idDestino)}
+                onKeyDown={alTeclado(onElegir, solo ? "caso" : "ciudad", idDestino)}
                 className="mapa-burbuja cursor-pointer"
                 style={{ animationDelay: "480ms" }}
               >
-                <circle cx={mx} cy={my} r={Math.max(rm, px(12))} fill="transparent" />
-                <circle cx={mx} cy={my} r={rm} className="mapa-burbuja-borde" fill={NOCHE} stroke="#ffffff" strokeWidth={px(2)} />
                 {solo ? (
-                  <path d={estrella(mx, my, rm * 0.62, rm * 0.27)} fill={SOL} className="pointer-events-none" />
+                  <>
+                    <circle cx={mx} cy={my} r={Math.max(rm, px(12))} fill="transparent" />
+                    <circle cx={mx} cy={my} r={rm} className="mapa-burbuja-borde" fill={NOCHE} stroke="#ffffff" strokeWidth={px(2)} />
+                    <path d={estrella(mx, my, rm * 0.62, rm * 0.27)} fill={SOL} className="pointer-events-none" />
+                    {elegido && <circle cx={mx} cy={my} r={rm + px(4)} fill="none" stroke={SOL} strokeWidth={px(3)} />}
+                  </>
                 ) : (
-                  <text
-                    x={mx}
-                    y={my}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fill={SOL}
-                    fontSize={px(12.5 * Math.sqrt(escalaPantalla))}
-                    fontWeight="800"
-                    className="pointer-events-none select-none"
-                  >
-                    {n}
-                  </text>
+                  <>
+                    <rect x={x0 - px(3)} y={y0 - px(3)} width={ancho + px(6)} height={alto + px(6)} rx={(alto + px(6)) / 2} fill="transparent" />
+                    <rect
+                      x={x0}
+                      y={y0}
+                      width={ancho}
+                      height={alto}
+                      rx={alto / 2}
+                      className="mapa-burbuja-borde"
+                      fill={NOCHE}
+                      stroke="#ffffff"
+                      strokeWidth={px(2)}
+                    />
+                    <path d={estrella(cxEstrella, my, rm * 0.56, rm * 0.24)} fill={SOL} className="pointer-events-none" />
+                    <text
+                      x={x0 + alto * 0.92}
+                      y={my}
+                      textAnchor="start"
+                      dominantBaseline="central"
+                      fill="#ffffff"
+                      fontSize={tipografia}
+                      fontWeight="800"
+                      className="pointer-events-none select-none"
+                    >
+                      {n}
+                    </text>
+                    {elegido && (
+                      <rect
+                        x={x0 - px(4)}
+                        y={y0 - px(4)}
+                        width={ancho + px(8)}
+                        height={alto + px(8)}
+                        rx={(alto + px(8)) / 2}
+                        fill="none"
+                        stroke={SOL}
+                        strokeWidth={px(3)}
+                      />
+                    )}
+                  </>
                 )}
-                {elegido && <circle cx={mx} cy={my} r={rm + px(4)} fill="none" stroke={SOL} strokeWidth={px(3)} />}
               </g>
             );
           })}

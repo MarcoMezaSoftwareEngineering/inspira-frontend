@@ -316,6 +316,14 @@ function Leyenda({ indice, ranking }) {
           {T.leyendaCaso}
         </span>
         <span className="inline-flex items-center gap-1.5">
+          <svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true">
+            <rect x="0.8" y="0.8" width="28.4" height="14.4" rx="7.2" fill={NOCHE} stroke="#fff" strokeWidth="1.5" />
+            <path d="M9 4.2 10 6.7 12.7 6.8 10.6 8.4 11.3 11 9 9.5 6.7 11 7.4 8.4 5.3 6.8 8 6.7Z" fill={SOL} />
+            <text x="16.4" y="8" dominantBaseline="central" fill="#fff" fontSize="8.4" fontWeight="800">3</text>
+          </svg>
+          {T.leyendaCumulo}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
           <svg width="26" height="10" viewBox="0 0 26 10" aria-hidden="true">
             <path d="M1 8 Q13 -2 25 5" fill="none" stroke={SOL} strokeWidth="2" strokeDasharray="3 3" strokeLinecap="round" />
           </svg>

@@ -1112,7 +1112,14 @@ export default function MapaEspana() {
       >
         <AccionesHero />
       </PageHero>
-      <section id="mapa-explorador" aria-label="Explorador del mapa" className="px-4 pb-16 pt-10 sm:px-6 sm:pt-12">
+      <section
+        id="mapa-explorador"
+        aria-label="Explorador del mapa"
+        /* La cabecera fija (barra superior 32 px + navegación 60 px) se comía el
+           tercio de arriba del mapa al saltar aquí desde «Ver el mapa»: en móvil
+           el mapa mide 300 px de alto, así que tapaba España hasta Madrid. */
+        className="scroll-mt-28 px-4 pb-16 pt-10 sm:px-6 sm:pt-12"
+      >
         <div className="mx-auto max-w-[1180px]">
           {carga.estado === "cargando" && <Esqueleto />}
           {carga.estado === "error" && (

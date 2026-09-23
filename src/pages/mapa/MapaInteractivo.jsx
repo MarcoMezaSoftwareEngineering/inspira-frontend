@@ -44,8 +44,9 @@ const DURACION_ZOOM = 560;
 // gesto de marca, no un dato, y tres bastan para contar de dónde a dónde.
 const RUTAS_SIN_FOCO = 3;
 // Arriba a la derecha de la burbuja de la ciudad: no tapa el nombre, que se
-// dibuja debajo, ni el borde de la comunidad, que queda a la izquierda.
-const ANGULO_CUMULO = (-45 * Math.PI) / 180;
+// dibuja debajo, ni el borde de la comunidad, que queda a la izquierda. Es el
+// sitio preferido; si ya está ocupado se prueban los demás en este orden.
+const ANGULOS_CUMULO = [-45, -135, 45, 135, -90, 90, 0, 180].map((g) => (g * Math.PI) / 180);
 const RADIO_TOQUE_PX = 22;
 const PREFIJO = "mapa-geo";
 // Cuánto se puede acercar y alejar a mano, medido sobre el encuadre de España.
@@ -501,6 +502,55 @@ export default function MapaInteractivo({
     }
     return [...m.values()].sort((a, b) => b.casos.length - a.casos.length);
   }, [casos, puntoPorId]);
+
+  // Dónde va la marca de cada cúmulo. Se recorren de mayor a menor y cada uno
+  // se queda con el primer ángulo que no choque con los ya colocados: en
+  // Galicia, Santiago y A Coruña caen tan juntos que con un ángulo fijo sus
+  // píldoras se montaban una encima de otra. Es una colocación voraz, no la
+  // óptima, pero es estable —el orden no depende de la vista— y basta para
+  // que no se toquen.
+  const marcas = useMemo(() => {
+    // Las mismas fórmulas que px() y radioPx(), aquí dentro: esas se rehacen
+    // en cada pintado y como dependencia obligarían a recalcular siempre.
+    const aVb = (n) => n / Math.max(ppu, 0.0001);
+    const radio = (n) => (n > 0 ? 3.5 + Math.sqrt(n) * 1.05 : 3.5) * escalaPantalla * factorZoom;
+    const puestas = [];
+    const salida = new Map();
+    for (const c of cumulos) {
+      const p = c.punto;
+      // Todo en unidades del viewBox, que es donde viven p.x y p.y: las
+      // medidas de pantalla se convierten con px() o las distancias no
+      // significarían lo mismo a un zoom que a otro.
+      const rc = capas.ciudades ? aVb(radio(p.n)) : 0;
+      const rm = aVb(9.5 * Math.sqrt(escalaPantalla));
+      const solo = c.casos.length === 1;
+      const alto = rm * 2;
+      const ancho = solo ? alto : alto * 1.06 + String(c.casos.length).length * alto * 0.56 * 0.66;
+      const d = (rc + rm * 0.35) * 1.02;
+      let elegido = null;
+      for (const a of ANGULOS_CUMULO) {
+        const mx = p.x + Math.cos(a) * d;
+        const my = p.y + Math.sin(a) * d;
+        const choca = puestas.some(
+          (q) =>
+            Math.abs(q.mx - mx) < (q.ancho + ancho) / 2 + aVb(2) &&
+            Math.abs(q.my - my) < (q.alto + alto) / 2 + aVb(2)
+        );
+        if (!choca) {
+          elegido = { mx, my, ancho, alto };
+          break;
+        }
+      }
+      // Si todo está ocupado se queda en su sitio preferido: tapar algo es
+      // mejor que desplazar la marca lejos de la ciudad a la que pertenece.
+      if (!elegido) {
+        elegido = { mx: p.x + Math.cos(ANGULOS_CUMULO[0]) * d, my: p.y + Math.sin(ANGULOS_CUMULO[0]) * d, ancho, alto };
+      }
+      puestas.push(elegido);
+      salida.set(c.ciudadId, elegido);
+    }
+    return salida;
+  }, [cumulos, capas.ciudades, escalaPantalla, factorZoom, ppu]);
 
   const destinoRuta = foco.ciudad ? puntoPorId.get(foco.ciudad) : null;
   const rutas = destinoRuta
@@ -1064,11 +1114,8 @@ export default function MapaInteractivo({
             const n = c.casos.length;
             const solo = n === 1 ? c.casos[0] : null;
             const p = c.punto;
-            const rc = capas.ciudades ? px(radioPx(p.n)) : 0;
             const rm = px(9.5 * Math.sqrt(escalaPantalla));
-            const d = (rc + rm * 0.35) * 1.02;
-            const mx = p.x + Math.cos(ANGULO_CUMULO) * d;
-            const my = p.y + Math.sin(ANGULO_CUMULO) * d;
+            const { mx, my } = marcas.get(c.ciudadId) || { mx: p.x, my: p.y };
             const elegido = solo
               ? foco.caso === solo.id
               : foco.ciudad === c.ciudadId || c.casos.some((k) => k.id === foco.caso);

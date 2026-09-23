@@ -62,8 +62,12 @@
   pointer-events: none;
 }
 
-/* Pantallas muy estrechas: solo el icono, para no comerse la mitad del ancho. */
-@media (max-width: 359px) {
+/* En el teléfono, solo el icono. Con la palabra al lado el botón mide 150 px:
+   el 38 % del ancho de una pantalla de 390, y tapa el contenido que tenga
+   debajo —en el mapa se comía la leyenda—. El icono de WhatsApp se reconoce
+   solo, así que el texto se guarda para el escritorio, donde no estorba.
+   El umbral estaba en 359 px, por debajo de casi cualquier teléfono actual. */
+@media (max-width: 767px) {
   .wa-flotante { padding: 0 13px; }
   .wa-flotante-txt { display: none; }
 }

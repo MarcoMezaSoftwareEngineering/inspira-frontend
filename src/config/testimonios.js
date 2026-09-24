@@ -7,11 +7,24 @@
 // publicar reseñas inventadas infringe la normativa de INDECOPI sobre
 // publicidad (ver inspira-backend/docs/legal/09-claims-publicitarios.md).
 //
-// Transcripción literal de las fichas (11/09/2026): no se corrigen tildes,
-// mayúsculas ni puntuación ni se recorta; solo se omiten los emojis finales.
-// Nombre de pila más inicial del apellido. Todas son del servicio de visado:
-// no presentarlas como de máster. Orden: primero las que más cuentan.
+// Transcripción literal de las fichas: no se corrigen tildes, mayúsculas ni
+// puntuación ni se recorta; solo se omiten los emojis finales. Nombre de pila
+// más inicial del apellido. Orden: primero las que más cuentan.
+//
+// Hasta el 23/09/2026 todas eran del servicio de visado y había que decirlo
+// para no presentarlas como de máster. La de Elias G. es la primera que habla
+// de una admisión, así que ese aviso deja de aplicar en bloque: cada ficha
+// dice su servicio en `servicio` y es ahí donde hay que mirarlo.
 export const TESTIMONIOS = [
+  {
+    nombre: "Elias G.",
+    servicio: "Máster y visado",
+    fuente: "Google",
+    fecha: "septiembre de 2026",
+    estrellas: 5,
+    texto:
+      "Excelente servicio y acompañamiento en todo el proceso, me ayudo con los tramites para ingresar a un master en Andalucia y tambien con la obtencion de la Visa",
+  },
   {
     nombre: "Maria Belen A.",
     servicio: "Visado de estudios",
@@ -76,11 +89,18 @@ export const TESTIMONIOS = [
   },
 ];
 
-// Ficha de Google (leída el 11/09/2026). Sin logos de Google ni de Facebook;
-// la de Facebook no lleva enlace porque no hay URL verificada.
+// Ficha de Google. Sin logos de Google ni de Facebook; la de Facebook no lleva
+// enlace porque no hay URL verificada.
+
+/** Las de Google, que son las que cuenta la ficha. */
+const DE_GOOGLE = TESTIMONIOS.filter((t) => t.fuente === "Google").length;
+
 export const RESENAS_GOOGLE = {
-  cabecera: "5,0 de 5 en Google · 6 reseñas (septiembre de 2026)",
-  subtitulo: "Opiniones publicadas por clientes de nuestro servicio de visado.",
+  // La cuenta sale de la lista y no de un número escrito a mano: antes decía
+  // «6 reseñas (septiembre de 2026)» y se quedaba desfasada en cuanto entraba
+  // una nueva o pasaba el mes. La fecha se retira por lo mismo.
+  cabecera: `5,0 de 5 en Google · ${DE_GOOGLE} ${DE_GOOGLE === 1 ? "reseña" : "reseñas"}`,
+  subtitulo: "Opiniones publicadas por nuestros clientes.",
   enlace: "Ver todas las opiniones en Google",
   url: "https://maps.app.goo.gl/f3oL2qQdmheT4Dnr6",
   estrellas: 5,

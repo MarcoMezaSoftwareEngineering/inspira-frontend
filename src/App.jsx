@@ -46,6 +46,7 @@ const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
 const TeAlcanza = lazyConRecarga(() => import("./pages/alcanza/TeAlcanza"));
+const Carina = lazyConRecarga(() => import("./pages/carina/Carina"));
 const PaginaLugar = lazyConRecarga(() => import("./pages/mapa/PaginaLugar"));
 const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
 const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
@@ -550,6 +551,7 @@ export default function App() {
       {path === "/calculadora-master" && <CalculadoraMaster />}
       {path === "/mapa-estudiar-en-espana" && <MapaEspana />}
       {path === "/te-alcanza" && <TeAlcanza />}
+      {path === "/carina" && <Carina />}
       {/* Una página por comunidad y por universidad, con los datos del mapa:
           son las direcciones que busca la gente («máster en Galicia») y las
           que puede posicionar un buscador. Ver pages/mapa/PaginaLugar.jsx. */}

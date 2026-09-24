@@ -1,0 +1,287 @@
+/* /carina — la página de Carina. Móvil primero: el 100% de quien llega viene
+   de TikTok o Instagram. Colores de marca: Noche #003648, Cielo #96CCFC,
+   Sol #F09C48. Tipografías del kit: Merriweather (titulares), Montserrat. */
+
+.car {
+  --noche: #003648;
+  --cielo: #96ccfc;
+  --sol: #f09c48;
+  --tinta: #0a2a38;
+  --niebla: #f6fbff;
+  background: #fff;
+  color: var(--tinta);
+  font-family: Montserrat, system-ui, -apple-system, sans-serif;
+}
+
+/* ── Cabecera ─────────────────────────────────────────────────────────── */
+.car-hero {
+  position: relative;
+  background: radial-gradient(120% 90% at 50% 0%, #0a5873 0%, var(--noche) 60%, #01222f 100%);
+  color: #fff;
+  padding: 0 0 2rem;
+  overflow: hidden;
+}
+.car-hero-foto {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 0;
+}
+.car-hero-foto img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 28px;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
+}
+.car-hero-texto {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 0;
+  text-align: center;
+}
+.car-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sol);
+}
+.car-nombre {
+  margin: 0;
+  font-family: Merriweather, Georgia, serif;
+  font-size: clamp(2rem, 8vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.car-cargo {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cielo);
+}
+.car-promesa {
+  margin: 1rem auto 0;
+  max-width: 34ch;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86);
+}
+.car-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+/* ── Botones ──────────────────────────────────────────────────────────── */
+.car-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 52px;
+  padding: 0 1.4rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.98rem;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.car-btn:active { transform: scale(0.97); }
+.car-btn-wa {
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 14px 30px -14px rgba(37, 211, 102, 0.8);
+}
+.car-btn-sesion {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+.car-cierre .car-btn-wa { margin-top: 1.25rem; }
+
+/* ── Cifras ───────────────────────────────────────────────────────────── */
+.car-cifras {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  max-width: 560px;
+  margin: -1.25rem auto 0;
+  padding: 0 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+.car-cifra {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.9rem 1rem;
+  background: #fff;
+  border: 1px solid #e1effd;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px -28px rgba(0, 54, 72, 0.5);
+}
+.car-cifra-icono {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #e6f2fe;
+  color: #0a5873;
+  margin-bottom: 0.25rem;
+}
+.car-cifra strong {
+  font-family: Merriweather, Georgia, serif;
+  font-size: 1.55rem;
+  line-height: 1;
+  color: var(--noche);
+}
+.car-cifra span:last-child {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #4b6b78;
+}
+
+/* ── Secciones ────────────────────────────────────────────────────────── */
+.car-h2 {
+  margin: 0;
+  font-family: Merriweather, Georgia, serif;
+  font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+  line-height: 1.15;
+  color: var(--noche);
+}
+.car-lead {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #4b6b78;
+}
+.car-videos {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.25rem 1.25rem 0;
+  text-align: center;
+}
+.car-videos-rejilla {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+@media (max-width: 480px) {
+  /* En el teléfono, uno grande y dos pequeños debajo: el primero se ve
+     entero sin hacer scroll, que es lo que invita a tocar. */
+  .car-videos-rejilla { grid-template-columns: repeat(2, 1fr); }
+  .car-videos-rejilla > :first-child { grid-column: 1 / -1; max-width: 300px; margin: 0 auto; }
+}
+.car-video { margin: 0; }
+.car-video-boton {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--noche);
+  cursor: pointer;
+  box-shadow: 0 18px 40px -26px rgba(0, 54, 72, 0.7);
+}
+.car-video-boton:focus-visible { outline: 4px solid var(--sol); outline-offset: 3px; }
+.car-video-lienzo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.car-video-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.car-video-play::before {
+  content: "";
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  position: absolute;
+}
+.car-video-play svg { position: relative; color: var(--noche); }
+.car-video-pie {
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #4b6b78;
+}
+.car-enlace-tiktok {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 800;
+  color: var(--noche);
+  text-decoration: none;
+  border-bottom: 2px solid var(--sol);
+}
+
+/* ── El juego ─────────────────────────────────────────────────────────── */
+.car-juego { max-width: 560px; margin: 0 auto; padding: 2rem 1.25rem 0; }
+.car-juego-tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  background: #fff6e8;
+  border: 2px solid var(--sol);
+  color: var(--noche);
+  text-decoration: none;
+}
+.car-juego-icono {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--sol);
+  color: var(--noche);
+}
+.car-juego-tarjeta strong { display: block; font-size: 1rem; }
+.car-juego-texto { display: block; font-size: 0.82rem; color: #4b6b78; margin-top: 0.15rem; }
+.car-juego-flecha { flex: 0 0 auto; margin-left: auto; color: var(--sol); }
+
+/* ── Opiniones y cierre ───────────────────────────────────────────────── */
+.car-opiniones { padding: 2rem 0 0; }
+.car-cierre {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3.5rem;
+  text-align: center;
+}
+.car-cierre-foto {
+  width: 180px;
+  height: auto;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: 50% 20%;
+  margin: 0 auto 1rem;
+  display: block;
+  box-shadow: 0 20px 40px -24px rgba(0, 54, 72, 0.6);
+}

@@ -94,6 +94,13 @@ const hrefDe = (id) => {
 
 const RECURSOS = [
   {
+    clave: "recurso:carina",
+    icono: "usuario",
+    titulo: "Conoce a Carina",
+    texto: "Quién te va a acompañar, en sus propios vídeos",
+    href: interno("/carina"),
+  },
+  {
     // Primero porque es el gancho: seis cartas y treinta segundos. Estuvo
     // publicado meses sin un solo enlace que llevara a él.
     clave: "recurso:alcanza",

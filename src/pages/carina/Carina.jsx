@@ -1,0 +1,180 @@
+// src/pages/carina/Carina.jsx
+//
+// La página de Carina: el destino del «link in bio» de TikTok e Instagram.
+//
+// Quien llega aquí viene de un vídeo de treinta segundos y tiene el pulgar en
+// el aire. No busca un catálogo: quiere saber quién es la persona que acaba de
+// ver, si es de fiar, y qué hace ahora. Por eso la página es corta y va en
+// este orden: la cara, la prueba, los vídeos, la puerta.
+//
+//  - Cara: el retrato de marca, nombre y cargo. Que sea ella, sin rodeos.
+//  - Prueba: las cuatro cifras de CATEGORIAS_CASOS, que son las únicas que la
+//    empresa puede sustanciar (INDECOPI): ni una más.
+//  - Vídeos: los TikToks servidos desde /media, no incrustados de TikTok. El
+//    embed de TikTok pesa, pide cookies y no funciona dentro del propio
+//    navegador de TikTok, que es justo desde donde llega el 40% del tráfico.
+//    Vertical, con póster, y sin sonido hasta que se toca: un vídeo que
+//    arranca solo con audio en el bus es un cierre de pestaña.
+//  - Puerta: WhatsApp primero (es como escribe esta gente), la sesión después,
+//    y el juego para quien todavía no quiere hablar con nadie.
+//
+// Los vídeos viven en /var/www/inspira-media (fuera del repositorio; nginx
+// sirve /media/). Cambiarlos no requiere desplegar.
+import { useEffect, useRef, useState } from "react";
+import Icono from "../../components/common/Icono";
+import SEOSchema from "../../components/SEOSchema";
+import { useSEO } from "../../hooks/useSEO";
+import { navigate } from "../../services/navigate";
+import { CATEGORIAS_CASOS } from "../../config/casos";
+import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { registrarEvento } from "../../lib/analytics";
+import Opiniones from "../landing/master2027/Opiniones";
+import { CARINA } from "./textos";
+import "./carina.css";
+
+const irA = (href) => (e) => {
+  e.preventDefault();
+  navigate(href);
+  window.scrollTo({ top: 0, behavior: "instant" });
+};
+
+/** Un TikTok en vertical: póster hasta que se toca, y solo uno sonando a la vez. */
+function Video({ v, activo, onActivar }) {
+  const ref = useRef(null);
+  const [sonando, setSonando] = useState(false);
+
+  const alternar = () => {
+    const el = ref.current;
+    if (!el) return;
+    if (el.paused) {
+      onActivar(v.id);
+      el.play().then(() => setSonando(true)).catch(() => {});
+      registrarEvento("carina_video", { id: v.id });
+    } else {
+      el.pause();
+      setSonando(false);
+    }
+  };
+
+  // Si otro vídeo arranca, este se para: dos voces a la vez no se entienden.
+  // En un efecto y no en el render: los refs no se leen mientras se pinta.
+  useEffect(() => {
+    if (activo) return;
+    const el = ref.current;
+    if (el && !el.paused) el.pause();
+  }, [activo]);
+
+  return (
+    <figure className="car-video">
+      <button type="button" className="car-video-boton" onClick={alternar} aria-label={sonando ? `Pausar: ${v.titulo}` : `Reproducir: ${v.titulo}`}>
+        <video
+          ref={ref}
+          src={v.src}
+          poster={v.poster}
+          playsInline
+          preload="none"
+          onPause={() => setSonando(false)}
+          onEnded={() => setSonando(false)}
+          className="car-video-lienzo"
+        />
+        {!sonando && (
+          <span className="car-video-play" aria-hidden="true">
+            <Icono nombre="video" size={26} />
+          </span>
+        )}
+      </button>
+      <figcaption className="car-video-pie">{v.titulo}</figcaption>
+    </figure>
+  );
+}
+
+export default function Carina() {
+  useSEO(CARINA.seo);
+  const [activo, setActivo] = useState(null);
+  const wa = whatsappDesde("carina");
+
+  return (
+    <main className="car">
+      <SEOSchema schema={CARINA.schema} id="carina" />
+
+      {/* La cara */}
+      <header className="car-hero">
+        <div className="car-hero-foto">
+          <img src={CARINA.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
+        </div>
+        <div className="car-hero-texto">
+          <p className="car-rotulo">
+            <Icono nombre="avion" size={14} />
+            {CARINA.rotulo}
+          </p>
+          <h1 className="car-nombre">{CARINA.nombre}</h1>
+          <p className="car-cargo">{CARINA.cargo}</p>
+          <p className="car-promesa">{CARINA.promesa}</p>
+          <div className="car-acciones">
+            <a href={wa} target="_blank" rel="noopener" className="car-btn car-btn-wa" onClick={() => registrarEvento("carina_whatsapp", {})}>
+              <Icono nombre="whatsapp" size={20} />
+              {CARINA.cta.whatsapp}
+            </a>
+            <a href={CALENDLY_URL} target="_blank" rel="noopener" className="car-btn car-btn-sesion" onClick={() => registrarEvento("carina_sesion", {})}>
+              <Icono nombre="calendario" size={18} />
+              {CARINA.cta.sesion}
+            </a>
+          </div>
+        </div>
+      </header>
+
+      {/* La prueba: solo lo que se puede sustanciar */}
+      <section className="car-cifras" aria-label="Resultados de Inspira Legal">
+        {CATEGORIAS_CASOS.map((c) => (
+          <div key={c.id} className="car-cifra">
+            <span className="car-cifra-icono"><Icono nombre={c.icono} size={18} /></span>
+            <strong>{c.cifra}</strong>
+            <span>{c.titulo}</span>
+          </div>
+        ))}
+      </section>
+
+      {/* Los vídeos */}
+      <section className="car-videos" aria-labelledby="car-videos-t">
+        <h2 id="car-videos-t" className="car-h2">{CARINA.videos.titulo}</h2>
+        <p className="car-lead">{CARINA.videos.lead}</p>
+        <div className="car-videos-rejilla">
+          {CARINA.videos.lista.map((v) => (
+            <Video key={v.id} v={v} activo={activo === v.id} onActivar={setActivo} />
+          ))}
+        </div>
+        <a href={CARINA.tiktok} target="_blank" rel="noopener" className="car-enlace-tiktok">
+          {CARINA.videos.masEn}
+        </a>
+      </section>
+
+      {/* El juego, para quien aún no quiere hablar con nadie */}
+      <section className="car-juego">
+        <a href="/te-alcanza" onClick={irA("/te-alcanza")} className="car-juego-tarjeta">
+          <span className="car-juego-icono"><Icono nombre="euro" size={22} /></span>
+          <span>
+            <strong>{CARINA.juego.titulo}</strong>
+            <span className="car-juego-texto">{CARINA.juego.texto}</span>
+          </span>
+          <Icono nombre="flecha" size={18} className="car-juego-flecha" />
+        </a>
+      </section>
+
+      {/* Lo que dicen los clientes */}
+      <section className="car-opiniones">
+        <Opiniones />
+      </section>
+
+      {/* La puerta, otra vez, para quien llegó abajo */}
+      <section className="car-cierre">
+        <img src={CARINA.graduacion} alt="" width="480" height="308" loading="lazy" className="car-cierre-foto" />
+        <h2 className="car-h2">{CARINA.cierre.titulo}</h2>
+        <p className="car-lead">{CARINA.cierre.texto}</p>
+        <a href={wa} target="_blank" rel="noopener" className="car-btn car-btn-wa" onClick={() => registrarEvento("carina_whatsapp", { donde: "cierre" })}>
+          <Icono nombre="whatsapp" size={20} />
+          {CARINA.cta.whatsapp}
+        </a>
+      </section>
+    </main>
+  );
+}

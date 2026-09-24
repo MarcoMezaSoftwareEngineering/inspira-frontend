@@ -10,7 +10,7 @@
 import { useMemo, useState } from "react";
 import { Check, Copy, ExternalLink, MessageCircle } from "lucide-react";
 import { SESION_DIAGNOSTICO, PLANES_VISADO } from "../../../config/metodo";
-import { PRECIO_DESDE, eur } from "../../../config/paqueteMaster2027Resumen";
+import { eur } from "../../../config/paqueteMaster2027Resumen";
 import { Pagina, Cabecera, Cuerpo, Seccion, Boton, Chip, Campo } from "../ui";
 
 const BASE = "https://www.inspira-legal.cloud";
@@ -43,7 +43,7 @@ const LANDINGS = [
     ruta: "/master",
     grupo: "Vender",
     nombre: "Máster en España · todo lo que hacemos",
-    para: "Quien escribe «quiero hacer un máster». Listas y precios, método, expediente digital, mapa, juego, calculadora, becas, vídeos, equipo y preguntas.",
+    para: "Quien escribe «quiero hacer un máster». Por qué España, por qué oficial, cuánto cuesta el máster, qué hacemos y cómo, expediente digital, vídeos; el paquete se cotiza.",
     plantilla: (n, a, url) =>
       `¡Hola${n ? ` ${n}` : ""}! 😊 Gracias por contactar a Inspira; te saluda ${a}.\n\n` +
       `Desde Inspira te acompañamos en todo tu proceso hacia España 🇪🇸 con asesoría personalizada en:\n\n` +
@@ -51,7 +51,7 @@ const LANDINGS = [
       `Para orientarte mejor, cuéntame un poquito sobre ti:\n\n` +
       `📝 ¿Cuál es tu nombre completo?\n🎓 ¿Qué carrera o estudios realizaste? (grado, universidad)\n🛃 ¿Tienes pasaporte vigente?\n📖 ¿Te interesa hacer un máster en España? Si es así, ¿en qué especialidad?\n📦 ¿Estás pensando en migrar pronto?\n\n` +
       `Mientras tanto:\n` +
-      `👉 Todo nuestro servicio completo, con planes desde ${eur(PRECIO_DESDE)}: ${url}\n` +
+      `👉 Todo lo que hacemos por ti (por qué España, cuánto cuesta el máster y cómo trabajamos): ${url}\n` +
       `🗺️ ¿Qué ciudad te conviene más? Juega aquí: ${enlace("/te-alcanza")}\n` +
       `💶 ¿Realmente vale tu inversión? Calcúlalo aquí: ${enlace("/master#calculadora")}\n` +
       `🎓 ¿No sabes si calificas a una beca? Mira aquí: ${enlace("/beca-generacion-bicentenario-2026")}\n\n` +

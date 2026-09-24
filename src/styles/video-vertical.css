@@ -35,3 +35,46 @@
   .vv-rejilla { grid-template-columns: repeat(2, 1fr); }
   .vv-rejilla > :first-child { grid-column: 1 / -1; max-width: 300px; margin: 0 auto; }
 }
+
+/* ── Carrusel deslizable ─────────────────────────────────────────────── */
+/* En móvil se desliza con el dedo (scroll-snap); en escritorio, con las
+   flechas o la rueda. Cada vídeo ocupa el 62% del ancho para que asome el
+   siguiente: es la señal de que hay más. */
+.vv-carrusel { position: relative; }
+.vv-pista {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 1.25rem;
+  padding: 0.25rem 1.25rem 0.75rem;
+  margin: 0 -1.25rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.vv-pista::-webkit-scrollbar { display: none; }
+.vv-pista > .vv { flex: 0 0 62%; max-width: 280px; scroll-snap-align: start; }
+@media (min-width: 640px) { .vv-pista > .vv { flex-basis: 240px; } }
+.vv-flechas { display: none; }
+@media (min-width: 768px) {
+  .vv-flechas { display: flex; justify-content: center; gap: 0.5rem; margin-top: 0.25rem; }
+}
+.vv-flecha {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #dbe9f5;
+  border-radius: 50%;
+  background: #fff;
+  color: #003648;
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.vv-flecha:hover { transform: scale(1.06); border-color: #f09c48; }
+.vv-puntos { display: flex; justify-content: center; gap: 6px; margin-top: 0.4rem; }
+.vv-punto { width: 6px; height: 6px; border-radius: 50%; background: #c9dced; transition: width 0.25s ease, background 0.25s ease; }
+.vv-punto-on { width: 18px; border-radius: 3px; background: #f09c48; }

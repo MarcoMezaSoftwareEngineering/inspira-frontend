@@ -12,9 +12,10 @@
 // /visa-o-estancia (la regla de negocio vive en config/visaOEstancia.js) y el
 // checklist reutiliza los nueve documentos de /expediente. Todo lo que se
 // afirma sale de config: precios de metodo.js, cifras de CATEGORIAS_CASOS.
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
-import { RejillaVideos } from "../../components/common/VideoVertical";
+import { CarruselVideos } from "../../components/common/VideoVertical";
+import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
@@ -37,6 +38,24 @@ const irA = (href) => (e) => {
 };
 
 const P_DONDE = PREGUNTAS.find((p) => p.id === "donde");
+const irASeccion = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+/** La palabra del titular que va cambiando. */
+function PalabraRotante({ palabras }) {
+  const [i, setI] = useState(0);
+  const [saliendo, setSaliendo] = useState(false);
+  useEffect(() => {
+    const t = setInterval(() => {
+      setSaliendo(true);
+      setTimeout(() => {
+        setI((x) => (x + 1) % palabras.length);
+        setSaliendo(false);
+      }, 320);
+    }, 2200);
+    return () => clearInterval(t);
+  }, [palabras.length]);
+  return <span className={`vis-palabra${saliendo ? " vis-palabra-sale" : ""}`}>{palabras[i]}</span>;
+}
 const P_DINERO = PREGUNTAS.find((p) => p.id === "dinero");
 
 /** Las opciones de una pregunta, como botones de radio. */
@@ -238,6 +257,7 @@ export default function Visado() {
 
   return (
     <main className="vis" ref={raiz}>
+      <ProgresoLectura />
       {/* La cara y la promesa */}
       <header className="vis-hero">
         <span className="vis-orbe vis-orbe-a" aria-hidden="true" />
@@ -247,7 +267,11 @@ export default function Visado() {
             <Icono nombre="pasaporte" size={14} />
             {T.hero.rotulo}
           </p>
-          <h1>{T.hero.titulo}</h1>
+          <h1>
+            {T.hero.tituloInicio} <PalabraRotante palabras={T.hero.palabras} />?
+            <br />
+            {T.hero.tituloFin}
+          </h1>
           <p className="vis-lead">{T.hero.lead}</p>
           <div className="vis-acciones">
             <a href={wa(T.cierre.whatsappDetalle)} target="_blank" rel="noopener" className="vis-btn vis-btn-wa mov-brillo" onClick={() => registrarEvento("visado_whatsapp", { donde: "hero" })}>
@@ -259,6 +283,11 @@ export default function Visado() {
               {T.hero.sesion}
             </a>
           </div>
+          <nav className="vis-atajos" aria-label="Secciones">
+            {[["test", "¿Visa o estancia?"], ["videos", "Vídeos"], ["paquetes", "Paquetes"], ["como", "Cómo empezamos"], ["checklist", "Tu expediente"]].map(([id, t]) => (
+              <button type="button" key={id} onClick={() => irASeccion(id)}>{t}</button>
+            ))}
+          </nav>
         </div>
         <figure className="vis-hero-foto" data-revelar="escala">
           <img src={T.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
@@ -294,13 +323,13 @@ export default function Visado() {
       </section>
 
       {/* Los vídeos */}
-      <section className="vis-seccion vis-videos">
+      <section className="vis-seccion vis-videos" id="videos">
         <div data-revelar>
           <h2 className="vis-h2">{T.videos.titulo}</h2>
           <p className="vis-lead">{T.videos.lead}</p>
         </div>
         <div className="vis-videos-rejilla" data-revelar="escala">
-          <RejillaVideos lista={T.videos.lista} evento="visado_video" />
+          <CarruselVideos lista={T.videos.lista} evento="visado_video" />
         </div>
       </section>
 
@@ -354,7 +383,7 @@ export default function Visado() {
       </section>
 
       {/* Cómo empezamos */}
-      <section className="vis-seccion vis-como">
+      <section className="vis-seccion vis-como" id="como">
         <div data-revelar>
           <p className="vis-rotulo">{T.como.rotulo}</p>
           <h2 className="vis-h2">{T.como.titulo}</h2>
@@ -432,6 +461,15 @@ export default function Visado() {
         </div>
         <p className="vis-descargo">{T.descargo}</p>
       </section>
+
+      <BarraCta
+        whatsapp={wa(T.cierre.whatsappDetalle)}
+        sesion={CALENDLY_URL}
+        textoWhatsapp="WhatsApp"
+        textoSesion={T.hero.sesionCorta}
+        onWhatsapp={() => registrarEvento("visado_whatsapp", { donde: "barra" })}
+        onSesion={() => registrarEvento("visado_sesion", { donde: "barra" })}
+      />
     </main>
   );
 }

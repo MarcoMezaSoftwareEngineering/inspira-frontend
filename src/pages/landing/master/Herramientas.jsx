@@ -4,11 +4,8 @@
 // test visa/estancia. Aquí van como puertas; la calculadora va incrustada en
 // su propia sección.
 import Icono from "../../../components/common/Icono";
-import { RejillaVideos } from "../../../components/common/VideoVertical";
 import { TituloSeccion } from "../master2027/comunes";
 import { evento } from "../master2027/medicion";
-
-const MEDIA = "https://www.inspira-legal.cloud/media";
 
 const HERRAMIENTAS = [
   {
@@ -44,28 +41,6 @@ const HERRAMIENTAS = [
     accion: "Ver el expediente",
   },
 ];
-
-const VIDEOS = [
-  { id: "1", src: `${MEDIA}/video/carina-1.mp4`, poster: `${MEDIA}/video/carina-1.jpg`, titulo: "¿Quieres estudiar un máster en España?" },
-  { id: "3", src: `${MEDIA}/video/carina-3.mp4`, poster: `${MEDIA}/video/carina-3.jpg`, titulo: "Me rechazaron en la Complutense… y qué hicimos" },
-  { id: "4", src: `${MEDIA}/video/carina-4.mp4`, poster: `${MEDIA}/video/carina-4.jpg`, titulo: "Admitida a un máster en Andalucía" },
-  { id: "7", src: `${MEDIA}/video/carina-7.mp4`, poster: `${MEDIA}/video/carina-7.jpg`, titulo: "Beca AUIP para un máster en Valencia" },
-  { id: "2", src: `${MEDIA}/video/carina-2.mp4`, poster: `${MEDIA}/video/carina-2.jpg`, titulo: "Máster + trabajo de 30 h a la semana" },
-  { id: "8", src: `${MEDIA}/video/carina-8.mp4`, poster: `${MEDIA}/video/carina-8.jpg`, titulo: "Cuándo postular: las fechas que importan" },
-];
-
-export function VideosCarina() {
-  return (
-    <section id="videos" className="scroll-mt-4 bg-white px-4 py-14 sm:px-6 sm:py-20">
-      <div className="mx-auto max-w-[900px] text-center">
-        <TituloSeccion eyebrow="Carina te lo cuenta" titulo="Un minuto por vídeo, sin humo" intro="Casos reales de admisión, una beca conseguida y lo que pasa cuando una universidad dice que no." />
-        <div className="mt-8 md:grid md:grid-cols-3 md:gap-4 [&>.vv-rejilla]:md:contents">
-          <RejillaVideos lista={VIDEOS} evento="master_todo_video" />
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export default function Herramientas() {
   return (

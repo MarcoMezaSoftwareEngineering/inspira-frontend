@@ -60,3 +60,41 @@ export function RejillaVideos({ lista, evento }) {
     </div>
   );
 }
+
+/** Un carrusel deslizable con puntos y flechas; un solo vídeo sonando. */
+export function CarruselVideos({ lista, evento }) {
+  const [activo, setActivo] = useState(null);
+  const [indice, setIndice] = useState(0);
+  const pista = useRef(null);
+
+  const alDesplazar = () => {
+    const el = pista.current;
+    if (!el || !el.children.length) return;
+    const paso = el.children[0].offsetWidth + 12;
+    setIndice(Math.min(lista.length - 1, Math.max(0, Math.round(el.scrollLeft / paso))));
+  };
+  const ir = (i) => {
+    const el = pista.current;
+    const hijo = el?.children[i];
+    if (el && hijo) el.scrollTo({ left: hijo.offsetLeft - el.offsetLeft - 20, behavior: "smooth" });
+  };
+
+  return (
+    <div className="vv-carrusel">
+      <div ref={pista} className="vv-pista" onScroll={alDesplazar}>
+        {lista.map((v) => (
+          <VideoVertical key={v.id} v={v} activo={activo === v.id} onActivar={setActivo} evento={evento} />
+        ))}
+      </div>
+      <div className="vv-puntos" aria-hidden="true">
+        {lista.map((v, i) => (
+          <span key={v.id} className={`vv-punto${i === indice ? " vv-punto-on" : ""}`} />
+        ))}
+      </div>
+      <div className="vv-flechas">
+        <button type="button" className="vv-flecha" aria-label="Anterior" onClick={() => ir(Math.max(0, indice - 1))}>‹</button>
+        <button type="button" className="vv-flecha" aria-label="Siguiente" onClick={() => ir(Math.min(lista.length - 1, indice + 1))}>›</button>
+      </div>
+    </div>
+  );
+}

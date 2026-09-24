@@ -28,12 +28,15 @@ export const VISADO = {
 
   hero: {
     rotulo: "Visado de estudios · desde tu país",
-    titulo: "¿Ya tienes la carta de admisión? Lo que falta es el visado.",
+    tituloInicio: "¿Ya tienes la carta de admisión para",
+    palabras: ["Madrid", "Valencia", "Sevilla", "Granada", "Salamanca", "tu universidad"],
+    tituloFin: "Lo que falta es el visado.",
     lead:
       "Y es justo donde más se deniega: el dinero, el seguro, una frase en el certificado. Aquí ves en dos minutos qué vía te toca, qué incluye cada paquete y cómo empezamos.",
     quien: "Carina Meza · CEO y consultora legal",
     whatsapp: "Escríbeme por WhatsApp",
     sesion: `Sesión diagnóstico · ${eur(SESION_DIAGNOSTICO.precio)}`,
+    sesionCorta: `Sesión · ${eur(SESION_DIAGNOSTICO.precio)}`,
   },
 
   test: {

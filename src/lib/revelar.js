@@ -48,9 +48,15 @@ function obtener() {
         observador.unobserve(e.target);
       });
     },
-    // Se dispara un poco antes de asomar del todo, para que el movimiento
-    // acompañe al scroll en vez de ir por detrás.
-    { rootMargin: "0px 0px -12% 0px", threshold: 0.01 }
+    // Se dispara ANTES de que el bloque asome, no despues. El margen era
+    // -12%, que ENCOGE la zona de disparo: el bloque tenia que entrar un 12%
+    // en pantalla para empezar a aparecer, y con el dedo rapido siempre
+    // llegaba tarde. Quien baja deprisa veia el hueco en blanco antes que el
+    // contenido. En positivo la zona se agranda: lo que viene justo debajo ya
+    // esta revelado cuando llega a la vista. Un 60% de pantalla por delante
+    // da margen al dedo mas rapido sin adelantar tanto como para que la
+    // entrada se anime fuera de la vista y no la vea nadie.
+    { rootMargin: "0px 0px 60% 0px", threshold: 0.01 }
   );
   return observador;
 }
@@ -67,27 +73,52 @@ function obtener() {
  * así que no hay temporizador vivo en una página ya recorrida.
  */
 let vigilante = null;
+let barriendo = false;
+
+/** Enseña lo que esté armado, sin ver y a la vista. Devuelve cuánto queda. */
+function barrer() {
+  const pendientes = document.querySelectorAll("[data-revelar][data-armado]:not([data-visto])");
+  if (!pendientes.length) return 0;
+  const alto = window.innerHeight || 0;
+  pendientes.forEach((n) => {
+    const caja = n.getBoundingClientRect();
+    // A la vista (con un margen de cortesía) y todavía escondido: se enseña.
+    if (caja.top < alto + 80 && caja.bottom > -80 && (caja.width > 0 || caja.height > 0)) {
+      n.setAttribute("data-visto", "1");
+      if (observador) observador.unobserve(n);
+    }
+  });
+  return document.querySelectorAll("[data-revelar][data-armado]:not([data-visto])").length;
+}
+
+/** Un barrido por fotograma como mucho, para no pelearse con el scroll. */
+function barrerPronto() {
+  if (barriendo) return;
+  barriendo = true;
+  requestAnimationFrame(() => {
+    barriendo = false;
+    barrer();
+  });
+}
 
 function vigilar() {
   if (vigilante) return;
-  const paso = () => {
-    const pendientes = document.querySelectorAll("[data-revelar][data-armado]:not([data-visto])");
-    if (!pendientes.length) {
+  // Al scroll, en el acto. En WebKit el observador puede tardar en avisar —o
+  // no avisar— y el bloque del mapa se veía en blanco hasta el siguiente tic
+  // del temporizador: casi un segundo de nada en mitad de la página.
+  window.addEventListener("scroll", barrerPronto, { passive: true });
+  window.addEventListener("resize", barrerPronto, { passive: true });
+  // Y un tic de fondo por si nadie hace scroll: lo que ya está a la vista al
+  // cargar tiene que salir igual.
+  vigilante = setInterval(() => {
+    if (barrer() === 0) {
       clearInterval(vigilante);
       vigilante = null;
-      return;
+      window.removeEventListener("scroll", barrerPronto);
+      window.removeEventListener("resize", barrerPronto);
     }
-    const alto = window.innerHeight || 0;
-    pendientes.forEach((n) => {
-      const caja = n.getBoundingClientRect();
-      // A la vista (con un margen de cortesía) y todavía escondido: se enseña.
-      if (caja.top < alto + 80 && caja.bottom > -80 && (caja.width > 0 || caja.height > 0)) {
-        n.setAttribute("data-visto", "1");
-        if (observador) observador.unobserve(n);
-      }
-    });
-  };
-  vigilante = setInterval(paso, 700);
+  }, 400);
+  barrerPronto();
 }
 
 /**

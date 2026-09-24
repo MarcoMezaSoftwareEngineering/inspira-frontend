@@ -533,3 +533,85 @@
     transition: font-size 0.28s ease, opacity 0.28s ease, margin-bottom 0.28s ease;
   }
 }
+
+/* ── Cartas por ciudad (rediseño 24/09/2026) ─────────────────────────────
+   La carta enseña la ciudad, lo que la hace distinta, sus universidades y UN
+   máster de ejemplo con su matrícula. Jerarquía: nombre → rasgo → ejemplo con
+   cifra → «y N más». La cifra grande es la matrícula, no el gasto anual. */
+.alc-carta-com {
+  font-style: normal;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-left: 0.3rem;
+}
+.alc-carta-rasgo {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin: 0 0 0.7rem;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #0a5873;
+  font-style: italic;
+}
+.alc-carta-rasgo svg { flex: 0 0 auto; margin-top: 2px; color: #F09C48; }
+.alc-carta-unis {
+  margin: 0 0 0.85rem;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #374151;
+}
+.alc-carta-unis strong { color: #003648; }
+.alc-carta-ranking {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #E6F2FE;
+  color: #0A5873;
+  font-size: 11px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+.alc-carta-ejemplo {
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: #F6FBFF;
+  border: 1px solid #E1EFFD;
+}
+.alc-carta-ejemplo .alc-carta-rotulo { margin-bottom: 0.25rem; }
+.alc-carta-master {
+  margin: 0 0 0.35rem;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #003648;
+}
+.alc-carta-master em { font-style: normal; font-weight: 600; color: #6b7280; }
+.alc-carta-campo {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #003648;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.alc-carta-ejemplo .alc-carta-cifra { font-size: clamp(30px, 8.5vw, 40px); margin-top: 0.1rem; }
+.alc-carta-ymas {
+  margin: 0.35rem 0 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #F09C48;
+}
+.alc-carta-vivir {
+  margin: 0.7rem 0 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4b5563;
+}
+.alc-boton-si svg { color: #003648; }

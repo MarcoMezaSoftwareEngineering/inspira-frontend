@@ -1,0 +1,358 @@
+{
+ "ehu": {
+  "proyectos": {
+   "nombre": "Dirección de Proyectos",
+   "url": "https://www.ehu.eus/es/web/master/master-direccion-proyectos"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial Aplicada a la Industria e Ingeniería Asistida ",
+   "url": "https://www.ehu.eus/es/web/master/master-inteligencia-artificial-industrial-ingenieria-asistida-ordenador"
+  }
+ },
+ "ua": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas",
+   "url": "https://web.ua.es/es/masteres/administracion-y-direccion-de-empresas/"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": "https://web.ua.es/es/masteres/inteligencia-artificial/"
+  }
+ },
+ "uah": {
+  "proyectos": {
+   "nombre": "Dirección de Proyectos Informáticos",
+   "url": "https://posgrado.uah.es/es/oferta/Direccion-de-Proyectos-Informaticos"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial para el Sector de la Energía y las Infraestruc",
+   "url": "https://posgrado.uah.es/es/oferta/Inteligencia-Artificial-para-el-Sector-de-la-Energia-y-las-Infraestructuras"
+  }
+ },
+ "uam": {
+  "mba": {
+   "nombre": "Administración de Empresas (MBA)",
+   "url": "https://www.uam.es/uam/master-universitario-administracion-empresas"
+  },
+  "ia": {
+   "nombre": "Aprendizaje Profundo para Inteligencia Artificial de Audio y Visual",
+   "url": "https://www.uam.es/uam/master-universitario-aprendizaje-profundo-tratamiento-senales-audio-video"
+  }
+ },
+ "ub": {
+  "mba": {
+   "nombre": "Dirección de Empresas del Deporte",
+   "url": null
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": null
+  }
+ },
+ "ubu": {
+  "mba": {
+   "nombre": "Administración de Empresas (MBA)",
+   "url": "https://www.ubu.es/master-universitario-en-administracion-de-empresas-mba-semipresencial"
+  }
+ },
+ "uc3m": {
+  "mba": {
+   "nombre": "Administración de Empresas",
+   "url": "https://www.uc3m.es/master/mba-es"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial Aplicada",
+   "url": "https://www.uc3m.es/master/inteligencia-artificial-aplicada"
+  }
+ },
+ "uca": {
+  "mba": {
+   "nombre": "Dirección de Empresas",
+   "url": "https://oficinadeposgrado.uca.es/informacion-basica-masteres-oficiales/master-universitario-en-direccion-de-empresas/"
+  }
+ },
+ "uclm": {
+  "mba": {
+   "nombre": "Dirección de Empresas Turísticas",
+   "url": null
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": null
+  }
+ },
+ "ucm": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas",
+   "url": "https://www.ucm.es/estudios/master-administracionydirecciondeempresas"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": "https://www.ucm.es/estudios/master-inteligenciaartificial"
+  }
+ },
+ "uco": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas (MBA)",
+   "url": "https://www.uco.es/estudios/idep/administracion-y-direccion-de-empresas-mba"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial Aplicada a Entornos Empresariales y Financiero",
+   "url": null
+  }
+ },
+ "udc": {
+  "ia": {
+   "nombre": "Derecho Digital y de la Inteligencia Artificial",
+   "url": "https://estudos.udc.es/es/study/start/4544V01#"
+  },
+  "mba": {
+   "nombre": "Dirección y Administración de Empresas (MBA)",
+   "url": "https://fee.udc.es/masteres/mudae/?lang=es"
+  }
+ },
+ "uex": {
+  "proyectos": {
+   "nombre": "Dirección y Gestión de Proyectos",
+   "url": "https://eii.unex.es/titulaciones/0830"
+  }
+ },
+ "ugr": {
+  "ia": {
+   "nombre": "Derecho y Ética de la Inteligencia Artificial",
+   "url": "https://masteres.ugr.es/informacion/titulaciones/master-universitario-derecho-etica-inteligencia-artificial"
+  }
+ },
+ "uhu": {
+  "mba": {
+   "nombre": "Turismo: Dirección de Empresas Turísticas y Gestión de Recursos Turíst",
+   "url": null
+  }
+ },
+ "uimp": {
+  "mba": {
+   "nombre": "Gestión Internacional de la Empresa",
+   "url": "https://www.uimp.es/postgrado/estudios/fichaestudio.php?plan=P04Q&any=2026-27&verasi=N&lan=es"
+  },
+  "ia": {
+   "nombre": "Investigación en Inteligencia Artificial",
+   "url": "https://www.uimp.es/postgrado/estudios/fichaestudio.php?plan=P04C&any=2026-27&verasi=N&lan=es"
+  }
+ },
+ "uja": {
+  "mba": {
+   "nombre": "Administración de Empresas (MBA)",
+   "url": "https://www.ujaen.es/estudios/oferta-academica/masteres/master-universitario-en-administracion-de-empresas-mba"
+  }
+ },
+ "uji": {
+  "mba": {
+   "nombre": "Dirección de Empresas",
+   "url": null
+  }
+ },
+ "ule": {
+  "mba": {
+   "nombre": "Europeo en Dirección de Empresas",
+   "url": "https://www.unileon.es/estudiantes/oferta-academica/masteres/mu-europeo-direccion-empresas"
+  },
+  "ia": {
+   "nombre": "Robótica e Inteligencia Artificial",
+   "url": "https://www.unileon.es/estudiantes/oferta-academica/masteres/mu-robotica-e-inteligencia-artificial"
+  }
+ },
+ "um": {
+  "mba": {
+   "nombre": "Dirección de Empresas (MBA)",
+   "url": "https://www.um.es/web/estudios/grados/ade"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": "https://www.um.es/web/estudios/masteres/inteligencia-artificial"
+  }
+ },
+ "uma": {
+  "mba": {
+   "nombre": "Dirección y Administración de Empresas - MBA",
+   "url": "https://www.uma.es/masteres-oficiales/master-en-direccion-y-administracion-de-empresas-mba/"
+  },
+  "ia": {
+   "nombre": "Ingeniería del Software e Inteligencia Artificial",
+   "url": "https://www.uma.es/masteres-oficiales/master-en-ingenieria-del-software-e-inteligencia-artificial/"
+  },
+  "proyectos": {
+   "nombre": "Diseño, Arte y Nuevas Tecnologías: Gestión de Proyectos y Estrategias ",
+   "url": "https://www.uma.es/master-universitario-en-diseno-arte-y-nuevas-tecnologias-gestion-de-proyectos-y-estrategias-culturales-por-la-universidad-de-malaga-y-la-universidad-de-sevilla/info/159830/informacion-general/"
+  }
+ },
+ "unia": {
+  "ia": {
+   "nombre": "Derecho y Ética de la Inteligencia Artificial",
+   "url": "https://www.unia.es/estudios-y-acceso/oferta-academica/masteres-oficiales/master-universitario-en-derecho-y-etica-de-la-inteligencia-artificial"
+  }
+ },
+ "unican": {
+  "mba": {
+   "nombre": "Dirección de Empresas (MBA)",
+   "url": "https://www.unican.es/estudios/detalle-estudio?p=272"
+  }
+ },
+ "uniovi": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas",
+   "url": "https://www.uniovi.es/estudia/grados/socialesyjuridicas/ade"
+  },
+  "proyectos": {
+   "nombre": "Dirección de Proyectos",
+   "url": "https://www.uniovi.es/estudia/masteres/ingenieriayarquitectura/proyectos"
+  }
+ },
+ "unirioja": {
+  "proyectos": {
+   "nombre": "Dirección de Proyectos",
+   "url": "https://www.unirioja.es/masteres-universitarios/master-en-direccion-de-proyectos/"
+  },
+  "ia": {
+   "nombre": "Procesamiento del Lenguaje y Aplicaciones de la Inteligencia Artificia",
+   "url": "https://www.unirioja.es/masteres-universitarios/master-en-procesamiento-del-lenguaje-y-aplicaciones-de-a-inteligencia-artificial-a-la-linguistica/"
+  }
+ },
+ "upc-c": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas",
+   "url": "https://upc.edu/ca/masters/administracio-i-direccio-dempreses"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial para Industrias Conectadas (AI4CI)",
+   "url": null
+  }
+ },
+ "upct": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas (MBA)",
+   "url": null
+  }
+ },
+ "upf": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas/ Master in Business Administrat",
+   "url": null
+  },
+  "proyectos": {
+   "nombre": "Gestión de Proyectos e Innovación",
+   "url": null
+  }
+ },
+ "upm": {
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": "https://www.upm.es/Estudiantes/Estudios_Titulaciones/Estudios_Master/Programas?id=10.9&fmt=detail"
+  }
+ },
+ "upna": {
+  "mba": {
+   "nombre": "Dirección de Empresas",
+   "url": "https://www.unavarra.es/sites/masteres/economia-y-empresa/direccion-de-empresas.html"
+  },
+  "proyectos": {
+   "nombre": "Dirección de Proyectos",
+   "url": "https://www.unavarra.es/sites/masteres/industriales/direccion-de-proyectos.html"
+  }
+ },
+ "upo": {
+  "mba": {
+   "nombre": "Dirección de Empresas",
+   "url": "https://www.upo.es/master/Master-Oficial-Direccion-de-Empresas/"
+  }
+ },
+ "upv-v": {
+  "mba": {
+   "nombre": "Dirección de Empresas (MBA)",
+   "url": "https://www.upv.es/estudios/master/mba/"
+  },
+  "proyectos": {
+   "nombre": "Dirección y Gestión de Proyectos",
+   "url": "https://www.upv.es/estudios/master/mudgp/"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial, Reconocimiento de Formas e Imagen Digital",
+   "url": "https://www.upv.es/estudios/master/muiarfid/"
+  }
+ },
+ "urjc": {
+  "ia": {
+   "nombre": "Inteligencia Artificial para el Sector de la Energía y las Infraestruc",
+   "url": null
+  }
+ },
+ "urv": {
+  "mba": {
+   "nombre": "Dirección de Empresas",
+   "url": "https://www.urv.cat/es/estudios/masteres/oferta/direccion-empresas/"
+  },
+  "ia": {
+   "nombre": "Ingeniería de la Seguridad Informática e Inteligencia Artificial",
+   "url": "https://www.urv.cat/es/estudios/masteres/oferta/ingenieria-seguridad-informatica/"
+  }
+ },
+ "us": {
+  "ia": {
+   "nombre": "Administración de Empresas, Inteligencia Artificial para la Transforma",
+   "url": null
+  },
+  "mba": {
+   "nombre": "Estudios Avanzados en Dirección de Empresas",
+   "url": "https://www.us.es/estudiar/que-estudiar/oferta-de-masteres/master-universitario-en-estudios-avanzados-en-direccion-de"
+  },
+  "proyectos": {
+   "nombre": "Diseño, Arte y Nuevas Tecnologías: Gestión de Proyectos y Estrategias ",
+   "url": "https://www.us.es/estudiar/que-estudiar/oferta-de-masteres/master-universitario-en-diseno-arte-y-nuevas-tecnologias"
+  }
+ },
+ "usc": {
+  "mba": {
+   "nombre": "Dirección de Empresas",
+   "url": "https://www.usc.gal/gl/estudos/masteres/ciencias-sociais-xuridicas/master-universitario-direccion-empresas-2aed"
+  },
+  "proyectos": {
+   "nombre": "Dirección de Proyectos",
+   "url": "https://www.usc.gal/es/estudios/masteres/ingenieria-arquitectura/master-universitario-direccion-proyectos-2a-edicion"
+  },
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": "https://www.usc.gal/gl/estudos/masteres/enxenaria-arquitectura/master-universitario-intelixencia-artificial"
+  }
+ },
+ "uv": {
+  "mba": {
+   "nombre": "Dirección de Empresas - MBA",
+   "url": "http://www.uv.es/mba"
+  }
+ },
+ "uva": {
+  "mba": {
+   "nombre": "Administración de Empresas (MBA)",
+   "url": "https://www.uva.es/export/sites/uva/2.estudios/2.04.master/2.03.01.oferta/estudio/Master-Universitario-en-Administracion-de-Empresas-MBA/"
+  },
+  "proyectos": {
+   "nombre": "Dirección de Proyectos",
+   "url": "https://www.uva.es/export/sites/uva/2.estudios/2.04.master/2.03.01.oferta/estudio/Master-Universitario-en-Direccion-de-proyectos/"
+  }
+ },
+ "uvigo": {
+  "ia": {
+   "nombre": "Inteligencia Artificial",
+   "url": "https://www.uvigo.gal/estudar/que-estudar/mestrados/master-universitario-intelixencia-artificial-o06m193v01"
+  }
+ },
+ "udl": {
+  "mba": {
+   "nombre": "Administración y Dirección de Empresas",
+   "url": "https://www.eaebarcelona.com/es/masters-universitario-en-administracion-y-direccion-de-empresas"
+  },
+  "proyectos": {
+   "nombre": "Dirección y Gestión de Proyectos",
+   "url": "https://www.eaebarcelona.com/es/masters-universitario-en-direccion-y-gestion-de-proyectos"
+  }
+ }
+}

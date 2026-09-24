@@ -1,22 +1,26 @@
 // src/pages/alcanza/TeAlcanza.jsx
 //
-// «¿Te alcanza?»: el gancho de TikTok. Salen comunidades españolas con lo que
-// cuesta de verdad su primer año y la persona desliza —me alcanza / no me
-// alcanza— hasta que sabemos por dónde anda su presupuesto. Al final se lleva
-// una lista de sitios a los que sí puede ir.
+// El juego de cartas (/te-alcanza): el gancho de TikTok.
 //
-// Por qué así y no un test de los de siempre:
-//  - No se pide un número. Nadie escribe cuánto dinero tiene en un formulario
-//    de una web que acaba de conocer, pero todo el mundo dice «esto sí, esto
-//    no» mirando una cifra.
-//  - Las cartas se eligen partiendo en dos el rango que queda (búsqueda
-//    binaria): con cinco o seis gestos ya sabemos su techo.
-//  - Cada carta enseña un dato real de GET /api/mapa, no un adorno. Un juego
-//    que dice la verdad puede ser llamativo sin dejar de ser serio, que es la
-//    línea que no podemos cruzar: vendemos trámites, no entretenimiento.
+// Seis ciudades españolas, una por carta: lo que la hace distinta, sus
+// universidades, UN máster de ejemplo con lo que cuesta la matrícula, y
+// cuántos más hay. Se desliza «me interesa / siguiente» y al final la persona
+// se lleva sus ciudades, un enlace al mapa con cada una, y una puerta para
+// hablar con el mensaje ya escrito.
 //
-// Quien no llega ni a la comunidad más barata no se queda sin salida: se le
-// dice cuánto falta y se le ofrece la vía de las becas.
+// Es un gancho, no una calculadora (rediseño del 24/09/2026). Antes cada carta
+// enseñaba el gasto de un año entero y se deslizaba «me alcanza / no me
+// alcanza»; el total asustaba antes de tiempo y no dejaba con ganas de nada.
+// La matrícula sí se enseña, porque es la cifra que sorprende.
+//
+// Por qué así y no un formulario: nadie escribe lo que busca en una web que
+// acaba de conocer, pero todo el mundo dice «esta sí, esta no» mirando una
+// ciudad. Cada carta enseña datos reales de GET /api/mapa y del censo, no un
+// adorno: un juego que dice la verdad puede ser llamativo sin dejar de ser
+// serio, que es la línea que no se cruza.
+//
+// Las cartas las construye ciudades.js (funciones puras, con prueba). Aquí
+// solo hay gesto, estado y pantalla.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CercoErrores from "../../components/common/CercoErrores";
 import Icono from "../../components/common/Icono";
@@ -25,9 +29,9 @@ import { navigate } from "../../services/navigate";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { crearIndice, prefiereMenosMovimiento } from "../mapa/indice";
-import { rutaComunidad } from "../mapa/rutasLugar";
 import IlustracionCiudad from "../mapa/IlustracionesMapa";
-import { eur, plural } from "../mapa/mapaTextos";
+import { eur } from "../mapa/mapaTextos";
+import { cartasCiudad, partida } from "./ciudades";
 import { ALCANZA } from "./textos";
 import "../../styles/movimiento.css";
 import "../mapa/mapa.css";
@@ -38,30 +42,13 @@ const MAX_CARTAS = 6;
 // Cuánto hay que arrastrar para que la carta se vaya.
 const UMBRAL = 90;
 
-async function pedirMapa() {
-  const r = await fetch(`${API_URL}/api/mapa`, { headers: { Accept: "application/json" } });
-  const j = await r.json().catch(() => null);
-  if (!r.ok || !j?.ok || !Array.isArray(j.comunidades)) throw new Error(j?.msg || `HTTP ${r.status}`);
-  return j;
-}
-
 const irA = (href) => (e) => {
   e.preventDefault();
   navigate(href);
   window.scrollTo({ top: 0, behavior: "instant" });
 };
 
-/* ── El juego ────────────────────────────────────────────────────────── */
-
-/**
- * La siguiente carta es la que parte en dos el rango que aún no conocemos:
- * así cada gesto sirve para algo y en cinco o seis se acaba.
- */
-function siguienteCarta(lista, vistas, min, max) {
-  const libres = lista.filter((c) => !vistas.includes(c.id) && c.total > min && c.total < max);
-  if (!libres.length) return null;
-  return libres[Math.floor(libres.length / 2)];
-}
+/* ── La carta ────────────────────────────────────────────────────────── */
 
 function Carta({ item, arrastre, alSoltar, fondo = false }) {
   const grados = arrastre ? arrastre.dx / 18 : 0;
@@ -70,36 +57,56 @@ function Carta({ item, arrastre, alSoltar, fondo = false }) {
     : arrastre
       ? { transform: `translate(${arrastre.dx}px, ${arrastre.dy * 0.25}px) rotate(${grados}deg)`, transition: "none" }
       : undefined;
+  const otros = Math.max(0, item.masteres - 1);
 
   return (
     <article className={`alc-carta ${fondo ? "alc-carta-fondo" : ""}`} style={estilo} {...(fondo ? {} : alSoltar)}>
       <div className="alc-carta-lienzo">
-        <IlustracionCiudad ciudad={item.ciudad} />
+        <IlustracionCiudad ciudad={item.dibujo} />
         <span className="alc-carta-lugar">
           <Icono nombre="ubicacion" size={13} />
           {item.nombre}
+          <em className="alc-carta-com">· {item.comunidad}</em>
         </span>
       </div>
       <div className="alc-carta-cuerpo">
-        <p className="alc-carta-rotulo">{ALCANZA.carta.rotuloMaster}</p>
-        <p className="alc-carta-cifra">
-          {eur(item.matricula)} <span className="alc-carta-anio">{ALCANZA.carta.alAnio}</span>
-        </p>
-        <p className="alc-carta-mes">{ALCANZA.carta.porMes(eur(Math.round(item.matricula / 12)))}</p>
+        {item.rasgo && (
+          <p className="alc-carta-rasgo">
+            <Icono nombre="destello" size={13} />
+            {item.rasgo}
+          </p>
+        )}
 
-        <p className="alc-carta-rotulo alc-carta-rotulo-2">{ALCANZA.carta.rotulo}</p>
-        <p className="alc-carta-total">{eur(item.total)}</p>
-        <ul className="alc-carta-desglose">
-          <li>
-            <span>
-              {ALCANZA.carta.vida}
-              {Number.isFinite(item.habitacion) && (
-                <em className="alc-carta-piso">{ALCANZA.carta.habitacion(eur(item.habitacion))}</em>
-              )}
+        <p className="alc-carta-unis">
+          <strong>{ALCANZA.carta.masteres(item.masteres)}</strong>
+          {" · "}
+          {item.universidades.length} {ALCANZA.carta.universidades(item.universidades.length)}:{" "}
+          {item.universidades.map((u) => u.sigla).join(", ")}
+          {item.principal.ranking && (
+            <span className="alc-carta-ranking">
+              {item.principal.sigla} · {ALCANZA.carta.ranking(item.principal.ranking)}
             </span>
-            <strong>{eur(item.vida)}</strong>
-          </li>
-        </ul>
+          )}
+        </p>
+
+        {item.ejemplo && (
+          <div className="alc-carta-ejemplo">
+            <p className="alc-carta-rotulo">{ALCANZA.carta.ejemplo}</p>
+            <p className="alc-carta-master">
+              <span className="alc-carta-campo">{item.ejemplo.campo}</span>
+              {item.ejemplo.nombre}
+              <em> · {item.ejemplo.universidad.sigla}</em>
+            </p>
+            {item.matricula && (
+              <p className="alc-carta-cifra">
+                {eur(item.matricula)} <span className="alc-carta-anio">{ALCANZA.carta.matricula}</span>
+              </p>
+            )}
+            {otros > 0 && <p className="alc-carta-ymas">{ALCANZA.carta.yMas(otros)}</p>}
+          </div>
+        )}
+
+        {item.vidaMes && <p className="alc-carta-vivir">{ALCANZA.carta.vivir(eur(item.vidaMes))}</p>}
         <p className="alc-carta-nota">{ALCANZA.carta.nota}</p>
       </div>
       {!fondo && arrastre && Math.abs(arrastre.dx) > 30 && (
@@ -111,19 +118,17 @@ function Carta({ item, arrastre, alSoltar, fondo = false }) {
   );
 }
 
-function Juego({ lista, onFin, onJugando }) {
-  const [min, setMin] = useState(0);
-  const [max, setMax] = useState(Infinity);
-  const [vistas, setVistas] = useState([]);
+/* ── La partida ──────────────────────────────────────────────────────── */
+
+function Juego({ cartas, onFin, onJugando }) {
+  const [i, setI] = useState(0);
+  const [elegidas, setElegidas] = useState([]);
   const [arrastre, setArrastre] = useState(null);
   const [saliendo, setSaliendo] = useState(null);
   const inicio = useRef(null);
 
-  const carta = useMemo(() => siguienteCarta(lista, vistas, min, max), [lista, vistas, min, max]);
-  const siguiente = useMemo(
-    () => siguienteCarta(lista, carta ? [...vistas, carta.id] : vistas, min, max),
-    [lista, vistas, carta, min, max]
-  );
+  const carta = cartas[i] || null;
+  const siguiente = cartas[i + 1] || null;
 
   // Una sola vez por partida: sin esto se sabe quién llega al final pero no
   // cuántos empezaron, que es la mitad que falta para medir el abandono.
@@ -131,33 +136,28 @@ function Juego({ lista, onFin, onJugando }) {
   useEffect(() => {
     if (arrancada.current || !carta) return;
     arrancada.current = true;
-    registrarEvento("alcanza_inicio", { cartas: lista.length });
-  }, [carta, lista.length]);
+    registrarEvento("alcanza_inicio", { cartas: cartas.length });
+  }, [carta, cartas.length]);
 
   const responder = useCallback(
-    (alcanza) => {
+    (interesa) => {
       if (!carta) return;
-      setSaliendo(alcanza ? "si" : "no");
+      setSaliendo(interesa ? "si" : "no");
       // A partir del primer gesto la cabecera se encoge: el título y el lead
       // ya se han leído y estaban robándole 250 px a la carta en cada ronda.
       onJugando?.(true);
-      registrarEvento("alcanza_respuesta", { comunidad: carta.id, alcanza });
+      registrarEvento("alcanza_respuesta", { ciudad: carta.id, interesa });
       const espera = prefiereMenosMovimiento() ? 0 : 260;
       setTimeout(() => {
         setSaliendo(null);
         setArrastre(null);
-        const nuevasVistas = [...vistas, carta.id];
-        const nMin = alcanza ? Math.max(min, carta.total) : min;
-        const nMax = alcanza ? max : Math.min(max, carta.total);
-        setMin(nMin);
-        setMax(nMax);
-        setVistas(nuevasVistas);
-        if (nuevasVistas.length >= MAX_CARTAS || !siguienteCarta(lista, nuevasVistas, nMin, nMax)) {
-          onFin({ min: nMin, max: nMax, respondidas: nuevasVistas.length });
-        }
+        const nuevas = interesa ? [...elegidas, carta] : elegidas;
+        setElegidas(nuevas);
+        if (i + 1 >= cartas.length) onFin({ elegidas: nuevas, vistas: cartas.length });
+        else setI(i + 1);
       }, espera);
     },
-    [carta, lista, max, min, onFin, onJugando, vistas]
+    [carta, cartas.length, elegidas, i, onFin, onJugando]
   );
 
   function empezar(e) {
@@ -179,19 +179,14 @@ function Juego({ lista, onFin, onJugando }) {
   }
 
   if (!carta) return null;
-  const gestos = {
-    onPointerDown: empezar,
-    onPointerMove: mover,
-    onPointerUp: soltar,
-    onPointerCancel: soltar,
-  };
+  const gestos = { onPointerDown: empezar, onPointerMove: mover, onPointerUp: soltar, onPointerCancel: soltar };
 
   return (
     <div className="alc-juego">
       <p className="alc-progreso">
-        {ALCANZA.progreso(vistas.length + 1, MAX_CARTAS)}
+        {ALCANZA.progreso(i + 1, cartas.length)}
         <span className="alc-barra">
-          <span style={{ width: `${((vistas.length + 1) / MAX_CARTAS) * 100}%` }} />
+          <span style={{ width: `${((i + 1) / cartas.length) * 100}%` }} />
         </span>
       </p>
 
@@ -206,8 +201,8 @@ function Juego({ lista, onFin, onJugando }) {
           {ALCANZA.no}
         </button>
         <button type="button" className="alc-boton alc-boton-si" onClick={() => responder(true)}>
+          <Icono nombre="estrella" size={18} />
           {ALCANZA.si}
-          <Icono nombre="flecha" size={20} />
         </button>
       </div>
       <p className="alc-pista">{ALCANZA.pista}</p>
@@ -217,15 +212,14 @@ function Juego({ lista, onFin, onJugando }) {
 
 /* ── El resultado ────────────────────────────────────────────────────── */
 
-function Resultado({ lista, rango, onOtraVez }) {
-  const alcanzan = lista.filter((c) => c.total <= rango.min);
-  const cerca = lista.filter((c) => c.total > rango.min && c.total < rango.max);
-  const masBarata = lista[0];
-  const nada = alcanzan.length === 0;
+function Resultado({ elegidas, totalCiudades, onOtraVez }) {
+  const nada = elegidas.length === 0;
+  const nombres = elegidas.map((c) => c.nombre);
+  const wa = whatsappDesde("te-alcanza", ALCANZA.resultado.whatsappDetalle(nombres));
 
   useEffect(() => {
-    registrarEvento("alcanza_resultado", { alcanzan: alcanzan.length, techo: rango.min });
-  }, [alcanzan.length, rango.min]);
+    registrarEvento("alcanza_resultado", { elegidas: elegidas.length, ciudades: elegidas.map((c) => c.id).join(",") });
+  }, [elegidas]);
 
   return (
     <section className="alc-resultado" aria-live="polite">
@@ -233,99 +227,77 @@ function Resultado({ lista, rango, onOtraVez }) {
       {nada ? (
         <>
           <h2 className="alc-res-titulo">{ALCANZA.resultado.ningunaTitulo}</h2>
-          <p className="alc-res-texto">{ALCANZA.resultado.ningunaTexto(eur(masBarata.total), masBarata.nombre)}</p>
+          <p className="alc-res-texto">{ALCANZA.resultado.ningunaTexto(totalCiudades)}</p>
         </>
       ) : (
         <>
-          <h2 className="alc-res-titulo">
-            {ALCANZA.resultado.titulo(alcanzan.length, lista.length)}
-          </h2>
+          <h2 className="alc-res-titulo">{ALCANZA.resultado.titulo(elegidas.length)}</h2>
           <p className="alc-res-texto">{ALCANZA.resultado.texto}</p>
+          <ul className="alc-lista">
+            {elegidas.map((c) => (
+              <li key={c.id}>
+                <a
+                  href={`/mapa-estudiar-en-espana?ciudad=${c.id}`}
+                  onClick={irA(`/mapa-estudiar-en-espana?ciudad=${c.id}`)}
+                  className="alc-fila"
+                >
+                  <span className="alc-fila-ilu"><IlustracionCiudad ciudad={c.dibujo} quieta /></span>
+                  <span className="alc-fila-txt">
+                    <strong>{c.nombre}</strong>
+                    <span>
+                      {c.universidades.map((u) => u.sigla).join(", ")}
+                      {c.ejemplo ? ` · ${c.ejemplo.campo}` : ""}
+                    </span>
+                  </span>
+                  {c.matricula && <span className="alc-fila-cifra">{eur(c.matricula)}</span>}
+                </a>
+              </li>
+            ))}
+          </ul>
         </>
       )}
 
-      {alcanzan.length > 0 && (
-        <ul className="alc-lista">
-          {alcanzan.slice(0, 8).map((c) => (
-            <li key={c.id}>
-              <a href={rutaComunidad(c.id)} onClick={irA(rutaComunidad(c.id))} className="alc-fila">
-                <span className="alc-fila-ilu">
-                  <IlustracionCiudad ciudad={c.ciudad} quieta />
-                </span>
-                <span className="alc-fila-txt">
-                  <strong>{c.nombre}</strong>
-                  <span>{plural(c.universidades, "universidad", "universidades")}</span>
-                </span>
-                <span className="alc-fila-cifra">{eur(c.total)}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {cerca.length > 0 && (
-        <p className="alc-cerca">
-          <Icono nombre="destello" size={15} />
-          {ALCANZA.resultado.cerca(cerca.length, cerca.map((c) => c.nombre).slice(0, 3).join(", "))}
-        </p>
-      )}
-
-      <div className="alc-acciones">
-        <a
-          href={whatsappDesde("alcanza", ALCANZA.resultado.whatsapp(alcanzan.length))}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => registrarEvento("alcanza_whatsapp", {})}
-          className="alc-cta alc-cta-sol"
-        >
+      <div className="alc-cta">
+        <a href={wa} target="_blank" rel="noopener" className="alc-cta-sol" onClick={() => registrarEvento("alcanza_whatsapp", { elegidas: elegidas.length })}>
           <Icono nombre="whatsapp" size={19} />
-          {ALCANZA.resultado.botonWhatsapp}
+          {ALCANZA.resultado.whatsapp}
         </a>
-        <a href="/mapa-estudiar-en-espana" onClick={irA("/mapa-estudiar-en-espana")} className="alc-cta alc-cta-linea">
+        <a href="/mapa-estudiar-en-espana" onClick={irA("/mapa-estudiar-en-espana")} className="alc-cta-linea">
           <Icono nombre="mapa" size={18} />
-          {ALCANZA.resultado.botonMapa}
+          {ALCANZA.resultado.verMapa}
         </a>
-        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="alc-cta alc-cta-linea">
+        <a href={CALENDLY_URL} target="_blank" rel="noopener" className="alc-cta-linea">
           <Icono nombre="calendario" size={18} />
-          {ALCANZA.resultado.botonSesion}
+          {ALCANZA.resultado.sesion}
         </a>
-        <button type="button" onClick={onOtraVez} className="alc-repetir">
-          <Icono nombre="rayo" size={15} />
-          {ALCANZA.resultado.otraVez}
-        </button>
       </div>
+      <button type="button" className="alc-repetir" onClick={onOtraVez}>
+        {ALCANZA.resultado.otraVez}
+      </button>
       <p className="alc-descargo">{ALCANZA.descargo}</p>
     </section>
   );
 }
 
-/* ── La página ───────────────────────────────────────────────────────── */
+/* ── Contenido: datos → partida → resultado ──────────────────────────── */
 
 function Contenido({ datos, onJugando }) {
-  const [rango, setRango] = useState(null);
+  const [fin, setFin] = useState(null);
   const [ronda, setRonda] = useState(0);
 
-  const lista = useMemo(() => {
-    const indice = crearIndice(datos);
-    return [...indice.presupuestos.entries()]
-      .map(([id, p]) => {
-        const c = indice.comunidades.get(id);
-        if (!c) return null;
-        const ciudad = c.ciudades?.[0] || "CAMPUS";
-        return { id, nombre: c.nombre, ciudad, universidades: c.universidades, ...p };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.total - b.total);
+  const { cartas, total } = useMemo(() => {
+    const todas = cartasCiudad(crearIndice(datos));
+    return { cartas: partida(todas, MAX_CARTAS), total: todas.length };
   }, [datos]);
 
-  if (lista.length < 3) return null;
+  if (cartas.length < 3) return null;
 
-  return rango ? (
+  return fin ? (
     <Resultado
-      lista={lista}
-      rango={rango}
+      elegidas={fin.elegidas}
+      totalCiudades={total}
       onOtraVez={() => {
-        setRango(null);
+        setFin(null);
         setRonda((n) => n + 1);
         onJugando?.(false);
       }}
@@ -333,15 +305,17 @@ function Contenido({ datos, onJugando }) {
   ) : (
     <Juego
       key={ronda}
-      lista={lista}
+      cartas={cartas}
       onJugando={onJugando}
       onFin={(r) => {
         onJugando?.(false);
-        setRango(r);
+        setFin(r);
       }}
     />
   );
 }
+
+/* ── La página ───────────────────────────────────────────────────────── */
 
 export default function TeAlcanza() {
   const [carga, setCarga] = useState({ estado: "cargando" });
@@ -350,8 +324,9 @@ export default function TeAlcanza() {
 
   useEffect(() => {
     let vivo = true;
-    pedirMapa()
-      .then((datos) => vivo && setCarga({ estado: "listo", datos }))
+    fetch(`${API_URL}/api/mapa`, { headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((datos) => vivo && setCarga({ estado: "ok", datos }))
       .catch((e) => {
         console.error("[te-alcanza] no se pudo cargar:", e);
         if (vivo) setCarga({ estado: "error" });
@@ -383,8 +358,8 @@ export default function TeAlcanza() {
             </a>
           </p>
         )}
-        {carga.estado === "listo" && (
-          <CercoErrores donde="te-alcanza" titulo="No se pudo mostrar el juego">
+        {carga.estado === "ok" && (
+          <CercoErrores donde="te-alcanza">
             <Contenido datos={carga.datos} onJugando={setJugando} />
           </CercoErrores>
         )}

@@ -1,62 +1,68 @@
 // src/pages/alcanza/textos.js
-// Los textos de «¿Te alcanza?» (/te-alcanza).
+// Textos del juego de cartas (/te-alcanza). Sin importes escritos: todos
+// llegan de GET /api/mapa y del censo de másteres.
 //
 // Registro: aquí sí se tutea y se habla corto, porque es la puerta que se
 // abre desde un vídeo. Lo que no cambia, venga de donde venga: las cifras son
 // reales y se dice de dónde salen. Un gancho que miente no es un gancho, es
 // un problema.
+//
+// Rediseño del 24/09/2026: de calculadora a gancho. Antes cada carta era una
+// comunidad con su gasto anual y se deslizaba «me alcanza / no me alcanza».
+// El total asustaba antes de tiempo. Ahora cada carta es una ciudad: lo que la
+// hace distinta, sus universidades, UN máster de ejemplo con su matrícula, y
+// cuántos más hay. Se desliza «me interesa / siguiente» y al final se llevan
+// sus ciudades y una puerta para hablar. Que se queden con ganas de más.
+
 export const ALCANZA = {
   seo: {
-    title: "¿Te alcanza para estudiar un máster en España? | Inspira Legal",
+    title: "¿Dónde estudiar en España? Seis ciudades en 30 segundos | Inspira Legal",
     description:
-      "Desliza y descubre en qué comunidades españolas te alcanza para el primer año de un máster oficial: matrícula más el dinero que te exigen para la visa. Gratis y con cifras reales.",
+      "Seis cartas, seis ciudades españolas: sus universidades, un máster de ejemplo con lo que cuesta la matrícula y cuántos más hay. Desliza y quédate con las que te llamen. Gratis y sin registro.",
     path: "/te-alcanza",
     imagen: "/og/mapa-estudiar-en-espana.jpg",
   },
 
-  etiqueta: "6 cartas · 30 segundos",
-  titulo: "¿Te alcanza para estudiar en España?",
-  lead: "Cada carta es una comunidad de verdad, con lo que cuesta su primer año. Desliza y te decimos dónde sí puedes.",
-  cargando: "Preparando las cartas…",
+  etiqueta: "6 ciudades · 30 segundos",
+  titulo: "¿Dónde te ves estudiando en España?",
+  lead: "Cada carta es una ciudad de verdad: sus universidades, un máster de ejemplo y lo que cuesta. Desliza y quédate con las que te llamen.",
+
+  cargando: "Buscando ciudades…",
   error: "No pudimos cargar las cifras.",
   errorEnlace: "Mira el mapa",
 
-  si: "Me alcanza",
-  no: "No me alcanza",
+  progreso: (n, total) => `Ciudad ${n} de ${total}`,
+  si: "Me interesa",
+  no: "Siguiente",
   pista: "Arrastra la carta o usa los botones",
-  progreso: (n, total) => `Carta ${n} de ${total}`,
 
   carta: {
-    rotuloMaster: "El máster cuesta",
-    alAnio: "al año",
-    rotulo: "¿Te alcanza el primer año?",
-    matricula: "Matrícula del máster",
-    porMes: (importe) => `≈ ${importe}/mes`,
-    vida: "Vivir un año",
-    habitacion: (importe) => `Habitación ≈ ${importe}/mes`,
-    // Dos cosas que no se pueden confundir: el gasto de vida se paga; los
-    // 7.200 € de la visa se demuestran y son iguales en toda España.
-    nota: "Matrícula a la universidad y vida de verdad: piso, comida y transporte. Aparte, la visa te pide demostrar 7.200 € en tu cuenta.",
+    masteres: (n) => (n === 1 ? "1 máster oficial" : `${n} másteres oficiales`),
+    universidades: (n) => (n === 1 ? "universidad" : "universidades"),
+    ejemplo: "Por ejemplo",
+    matricula: "de matrícula al año",
+    yMas: (n) => (n <= 0 ? "" : n === 1 ? "…y 1 máster más" : `…y ${n} másteres más`),
+    vivir: (importe) => `Vivir ≈ ${importe}/mes`,
+    ranking: (pos) => `QS ${pos}`,
+    // Lo que no se puede confundir: es la matrícula de la universidad pública
+    // para un año de máster oficial, no el coste total de irse.
+    nota: "Matrícula de máster oficial en universidad pública, curso 2026-27. Aparte va vivir, y la visa pide demostrar 7.200 € en tu cuenta.",
   },
 
   resultado: {
-    rotulo: "Tu resultado",
-    titulo: (n, total) => (n === 1 ? `Te alcanza para 1 de ${total} comunidades` : `Te alcanza para ${n} de ${total} comunidades`),
-    texto: "Estas son, de la más barata a la más cara. Toca cualquiera para ver sus universidades y sus plazos.",
-    ningunaTitulo: "Todavía no llegas, y conviene decirlo",
-    ningunaTexto: (importe, donde) =>
-      `La comunidad más económica, ${donde}, pide ${importe} para el primer año. No es un no: es la cifra con la que hay que trabajar. Con una beca la cosa cambia, y ahí sí podemos ayudarte.`,
-    cerca: (n, nombres) => `Estás a un paso de ${n === 1 ? "otra" : `otras ${n}`}: ${nombres}.`,
-    whatsapp: (n) =>
-      n > 0
-        ? `Hola, hice el test del mapa y me alcanza para ${n} comunidades. ¿Me ayudan a elegir?`
-        : "Hola, hice el test del mapa y todavía no me alcanza. ¿Qué opciones de beca tengo?",
-    botonWhatsapp: "Que me ayuden a elegir",
-    botonMapa: "Ver el mapa completo",
-    botonSesion: "Reservar sesión",
+    rotulo: "Tus ciudades",
+    titulo: (n) => (n === 1 ? "Te quedaste con 1 ciudad" : `Te quedaste con ${n} ciudades`),
+    texto: "Toca cualquiera para verla en el mapa, con todos sus másteres y plazos. O cuéntanos cuál te llama y te decimos cómo se entra.",
+    ningunaTitulo: "Ninguna te convenció, y está bien",
+    ningunaTexto: (total) => `Solo viste seis. Hay ${total} ciudades con universidad en el mapa: alguna es la tuya.`,
+    verMapa: "Ver el mapa completo",
+    whatsapp: "Cuéntame cuál te llama",
+    whatsappDetalle: (nombres) =>
+      nombres.length ? `Jugué a las cartas y me interesan: ${nombres.join(", ")}. ¿Cómo se entra?` : "Jugué a las cartas y quiero saber más.",
+    sesion: "Reservar sesión",
     otraVez: "Jugar otra vez",
   },
 
   descargo:
-    "Cifras aproximadas del curso 2027/2028: matrícula habitual de un máster oficial en cada comunidad más el gasto de vivir un año en su ciudad más económica. Para el visado, además, tienes que demostrar 7.200 € al año (600 € al mes): eso no se gasta, se acredita. El paquete de Inspira se paga aparte.",
+    "Cifras aproximadas del curso 2026-27: matrícula de un año de máster oficial según las normas de precios públicos de cada comunidad (o el precio típico de la universidad donde la comunidad no fija uno) y el registro oficial de másteres (RUCT). Cada universidad fija su matrícula exacta. El paquete de Inspira se paga aparte.",
 };

@@ -37,6 +37,7 @@ import TrackerUniversidades from "./tracker/TrackerUniversidades";
 import HerramientasAsesor from "./herramientas/HerramientasAsesor";
 import PresupuestoAsesor from "./presupuesto/PresupuestoAsesor";
 import GuiasAsesor from "./guias/GuiasAsesor";
+import Landings from "./landings/Landings";
 import UniversidadesLista from "./universidades/UniversidadesLista";
 import SistematizadorMasteres from "./sistematizador/SistematizadorMasteres";
 import BuscadorMasteres from "./catalogo-masteres/BuscadorMasteres";
@@ -248,6 +249,7 @@ export default function BackofficeApp() {
             {path === "/backoffice/presupuesto" && <PresupuestoAsesor />}
 
             {path === "/backoffice/guias" && <GuiasAsesor />}
+            {path === "/backoffice/landings" && <Landings />}
 
             {path === "/backoffice/universidades" && <UniversidadesLista />}
 

@@ -48,6 +48,8 @@ const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
 const TeAlcanza = lazyConRecarga(() => import("./pages/alcanza/TeAlcanza"));
 const Carina = lazyConRecarga(() => import("./pages/carina/Carina"));
 const Expediente = lazyConRecarga(() => import("./pages/expediente/Expediente"));
+const Visado = lazyConRecarga(() => import("./pages/visado/Visado"));
+const MasterTodo = lazyConRecarga(() => import("./pages/landing/master/MasterTodo"));
 const PaginaLugar = lazyConRecarga(() => import("./pages/mapa/PaginaLugar"));
 const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
 const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
@@ -154,6 +156,20 @@ const SEO_PAGES = {
       "Hasta qué fecha de presentación están grabando, instruyendo y resolviendo las oficinas de Extranjería que publican sus datos, trámite a trámite y también en los recursos. Con calculadora para situar tu expediente.",
     path: "/por-que-fecha-va-extranjeria",
     imagen: "/og/servicios.jpg",
+  },
+  "/visado": {
+    title: "Visado de estudios para España: ya tienes la carta de admisión",
+    description:
+      "Tienes la carta de admisión y ahora toca el visado de estudios. En dos minutos sabes si te conviene visado o estancia, qué incluye cada paquete de Inspira Legal y por qué empezamos con una sesión diagnóstico.",
+    path: "/visado",
+    imagen: "/og/servicios.jpg",
+  },
+  "/master": {
+    title: "Máster en España 2027/2028: todo lo que hacemos por ti",
+    description:
+      "El Paquete Máster de Inspira Legal completo: listas y precios por comunidad, el método en etapas, tu expediente digital, el mapa, el juego de ciudades, la calculadora y los vídeos de Carina.",
+    path: "/master",
+    imagen: "/og/mapa-estudiar-en-espana.jpg",
   },
   "/visa-o-estancia": {
     title: "¿Visa o estancia por estudios? Test rápido",
@@ -396,6 +412,9 @@ const PUBLIC_PATHS = [
   // Sin estar aquí, se pintaba el 404 debajo de la página (24/09/2026).
   "/carina",
   "/expediente",
+  // Las landings de venta que se mandan por WhatsApp (24/09/2026).
+  "/visado",
+  "/master",
   "/master-2027-2028",
   "/visa-o-estancia",
   "/grado-en-espana",
@@ -506,7 +525,10 @@ export default function App() {
   // El juego ocupa la pantalla entera: sin cabecera, pie ni barras. A
   // diferencia de las landings de anuncios, esta sí se indexa.
   const isJuego = path === "/te-alcanza";
-  const sinChrome = isLandingAds || isJuego;
+  // /master es la landing completa del máster: standalone como la de Ads
+  // (un solo objetivo) pero indexable.
+  const isMasterTodo = path === "/master";
+  const sinChrome = isLandingAds || isJuego || isMasterTodo;
   // Optimista: cualquier /blog/<algo> monta la entrada, y es ella quien decide
   // si existe. Comprobarlo aquí obligaba a meter el blog entero en el paquete
   // inicial de la web pública.
@@ -521,7 +543,7 @@ export default function App() {
     !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle && !isPanel;
 
   return (
-    <div className={`min-h-screen w-full bg-white${path === "/enlaces" || isJuego ? " sin-relleno-barra" : ""}`}>
+    <div className={`min-h-screen w-full bg-white${path === "/enlaces" || isJuego || isMasterTodo ? " sin-relleno-barra" : ""}`}>
       <RouteSEO path={path} />
       {!isPanel && !sinChrome && <BarraProgreso />}
 
@@ -558,6 +580,8 @@ export default function App() {
       {path === "/te-alcanza" && <TeAlcanza />}
       {path === "/carina" && <Carina />}
       {path === "/expediente" && <Expediente />}
+      {path === "/visado" && <Visado />}
+      {path === "/master" && <MasterTodo />}
       {/* Una página por comunidad y por universidad, con los datos del mapa:
           son las direcciones que busca la gente («máster en Galicia») y las
           que puede posicionar un buscador. Ver pages/mapa/PaginaLugar.jsx. */}

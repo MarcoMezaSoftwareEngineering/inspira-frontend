@@ -101,11 +101,18 @@ const RECURSOS = [
     href: interno("/carina"),
   },
   {
-    clave: "recurso:expediente",
-    icono: "maletin",
-    titulo: "Un expediente de visado, papel por papel",
-    texto: "Los 9 documentos tal como tienen que quedar, y por qué se rechazan",
-    href: interno("/expediente"),
+    clave: "recurso:visado",
+    icono: "pasaporte",
+    titulo: "¿Ya tienes carta de admisión? El visado",
+    texto: "Visado o estancia en 2 minutos, los tres paquetes y cómo empezamos",
+    href: interno("/visado"),
+  },
+  {
+    clave: "recurso:master",
+    icono: "birrete",
+    titulo: "Máster en España: todo lo que hacemos",
+    texto: "Listas, precios, método, tu expediente digital y herramientas",
+    href: interno("/master"),
   },
   {
     // Primero porque es el gancho: seis cartas y treinta segundos. Estuvo

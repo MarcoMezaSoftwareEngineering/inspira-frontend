@@ -1,0 +1,37 @@
+/* Vídeo vertical (TikTok servido desde /media): póster hasta que se toca. Lo
+   usan /carina, /visado y /master. Colores de marca: Noche #003648, Sol #F09C48. */
+.vv { margin: 0; }
+.vv-boton {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #003648;
+  cursor: pointer;
+  box-shadow: 0 18px 40px -26px rgba(0, 54, 72, 0.7);
+}
+.vv-boton:focus-visible { outline: 4px solid #f09c48; outline-offset: 3px; }
+.vv-lienzo { display: block; width: 100%; height: 100%; object-fit: cover; }
+.vv-play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.vv-play::before {
+  content: "";
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+}
+.vv-play svg { position: relative; color: #003648; }
+.vv-pie { margin-top: 0.4rem; font-size: 0.72rem; font-weight: 600; color: #4b6b78; }
+.vv-rejilla { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+@media (max-width: 480px) {
+  /* En el teléfono, uno grande y dos pequeños debajo: el primero se ve entero
+     sin hacer scroll, que es lo que invita a tocar. */
+  .vv-rejilla { grid-template-columns: repeat(2, 1fr); }
+  .vv-rejilla > :first-child { grid-column: 1 / -1; max-width: 300px; margin: 0 auto; }
+}

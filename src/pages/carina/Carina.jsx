@@ -20,7 +20,7 @@
 //
 // Los vídeos viven en /var/www/inspira-media (fuera del repositorio; nginx
 // sirve /media/). Cambiarlos no requiere desplegar.
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Icono from "../../components/common/Icono";
 import SEOSchema from "../../components/SEOSchema";
 import { useSEO } from "../../hooks/useSEO";
@@ -28,6 +28,7 @@ import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
+import VideoVertical from "../../components/common/VideoVertical";
 import Opiniones from "../landing/master2027/Opiniones";
 import { CARINA } from "./textos";
 import "./carina.css";
@@ -37,56 +38,6 @@ const irA = (href) => (e) => {
   navigate(href);
   window.scrollTo({ top: 0, behavior: "instant" });
 };
-
-/** Un TikTok en vertical: póster hasta que se toca, y solo uno sonando a la vez. */
-function Video({ v, activo, onActivar }) {
-  const ref = useRef(null);
-  const [sonando, setSonando] = useState(false);
-
-  const alternar = () => {
-    const el = ref.current;
-    if (!el) return;
-    if (el.paused) {
-      onActivar(v.id);
-      el.play().then(() => setSonando(true)).catch(() => {});
-      registrarEvento("carina_video", { id: v.id });
-    } else {
-      el.pause();
-      setSonando(false);
-    }
-  };
-
-  // Si otro vídeo arranca, este se para: dos voces a la vez no se entienden.
-  // En un efecto y no en el render: los refs no se leen mientras se pinta.
-  useEffect(() => {
-    if (activo) return;
-    const el = ref.current;
-    if (el && !el.paused) el.pause();
-  }, [activo]);
-
-  return (
-    <figure className="car-video">
-      <button type="button" className="car-video-boton" onClick={alternar} aria-label={sonando ? `Pausar: ${v.titulo}` : `Reproducir: ${v.titulo}`}>
-        <video
-          ref={ref}
-          src={v.src}
-          poster={v.poster}
-          playsInline
-          preload="none"
-          onPause={() => setSonando(false)}
-          onEnded={() => setSonando(false)}
-          className="car-video-lienzo"
-        />
-        {!sonando && (
-          <span className="car-video-play" aria-hidden="true">
-            <Icono nombre="video" size={26} />
-          </span>
-        )}
-      </button>
-      <figcaption className="car-video-pie">{v.titulo}</figcaption>
-    </figure>
-  );
-}
 
 export default function Carina() {
   useSEO(CARINA.seo);
@@ -138,9 +89,9 @@ export default function Carina() {
       <section className="car-videos" aria-labelledby="car-videos-t">
         <h2 id="car-videos-t" className="car-h2">{CARINA.videos.titulo}</h2>
         <p className="car-lead">{CARINA.videos.lead}</p>
-        <div className="car-videos-rejilla">
+        <div className="vv-rejilla">
           {CARINA.videos.lista.map((v) => (
-            <Video key={v.id} v={v} activo={activo === v.id} onActivar={setActivo} />
+            <VideoVertical key={v.id} v={v} activo={activo === v.id} onActivar={setActivo} evento="carina_video" />
           ))}
         </div>
         <a href={CARINA.tiktok} target="_blank" rel="noopener" className="car-enlace-tiktok">

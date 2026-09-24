@@ -17,7 +17,7 @@
 // atender a una persona, o mantener el catálogo del que salen sus informes.
 import { useEffect, useState } from "react";
 import { GraduationCap,
-  BookOpen, Building2, CalendarClock, Receipt, Search, Settings2, Upload, ArrowRight,
+  BookOpen, MessageCircle, Building2, CalendarClock, Receipt, Search, Settings2, Upload, ArrowRight,
 } from "lucide-react";
 import { boGET } from "../../../services/backofficeApi";
 import { navigate } from "../../../services/navigate";
@@ -250,6 +250,11 @@ export default function HerramientasAsesor() {
               icono={<BookOpen />} tono="petrol" titulo="Guías" href="/backoffice/guias"
               chip={<Chip tono="verde">listo</Chip>}
               descripcion="Las mismas que ve él en su portal, interactivas: máster, estancia, modificatoria y apostilla."
+            />
+            <TarjetaEnlace
+              icono={<MessageCircle />} tono="ambar" titulo="Landings y mensajes" href="/backoffice/landings"
+              chip={<Chip tono="verde">nuevo</Chip>}
+              descripcion="Cada landing pública con su para quién, el enlace con utm y el mensaje de WhatsApp listo para copiar con el nombre de la persona."
             />
           </div>
         </Seccion>

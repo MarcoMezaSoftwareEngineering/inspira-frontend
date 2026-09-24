@@ -34,7 +34,10 @@
 }
 .vis-lead { margin: 0.6rem 0 0; font-size: 0.96rem; line-height: 1.55; color: var(--gris); }
 .vis-h5 { margin: 0.9rem 0 0.3rem; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--noche); }
-.vis-seccion { max-width: 640px; margin: 0 auto; padding: 2.25rem 1.25rem 0; }
+.vis-seccion { position: relative; max-width: 640px; margin: 0 auto; padding: 2.25rem 1.25rem 0; }
+.vis-seccion.lfx-banda, .vis-seccion.lfx-puntos { margin-top: 2rem; padding-bottom: 2.25rem; }
+.vis { overflow-x: clip; }
+.vis-cinta { margin-top: 1.5rem; }
 .vis-seccion-ancha { max-width: 1040px; }
 
 /* ── Cabecera ─────────────────────────────────────────────────────────── */
@@ -57,11 +60,10 @@
 }
 .vis-hero .vis-lead { color: rgba(255, 255, 255, 0.86); max-width: 48ch; }
 .vis-hero-foto { margin: 0; text-align: center; }
+.vis-hero-foto .lfx-parallax { max-width: 340px; margin: 0 auto; }
 .vis-hero-foto img {
   display: block;
   width: 100%;
-  max-width: 340px;
-  margin: 0 auto;
   border-radius: 28px;
   box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
 }
@@ -405,7 +407,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: vis-brilla 3s linear infinite;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 .vis-palabra-sale { opacity: 0; transform: translateY(-10px); }
 @keyframes vis-brilla { to { background-position: -200% 0; } }
@@ -425,3 +427,6 @@
 .vis-atajos button:hover { background: rgba(255, 255, 255, 0.18); transform: translateY(-1px); }
 .vis-cierre { padding-bottom: 6rem; }
 @media (prefers-reduced-motion: reduce) { .vis-palabra { animation: none; } }
+
+.vis-pasos li[data-visto] .vis-paso-num { background: var(--sol); color: var(--noche); }
+.vis-paso-num { transition: background 0.5s ease 0.3s, color 0.5s ease 0.3s, transform 0.2s ease; }

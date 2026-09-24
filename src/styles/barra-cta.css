@@ -60,4 +60,4 @@ body.sin-barra-sitio { --barra-sitio: 0px; }
 @media (prefers-reduced-motion: reduce) { .bcta { transition: none; } .bcta-progreso span { transition: none; } }
 
 /* Con la barra a la vista, el botón flotante de WhatsApp del sitio se aparta. */
-body.con-barra-cta .wa-flotante { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+body.con-barra-cta .wa-flotante { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; transition: opacity 0.2s ease, visibility 0s linear 0.2s; }

@@ -26,7 +26,12 @@ import { registrarEvento } from "../../lib/analytics";
 import { cascada, useRevelar } from "../../lib/revelar";
 import { CifraAnimada } from "../landing/master2027/comunes";
 import Opiniones from "../landing/master2027/Opiniones";
-import { DOCUMENTOS } from "../expediente/textos";
+import { DOCUMENTOS, IPREM_ANIO } from "../expediente/textos";
+import { Cinta, Numeral, Stickers } from "../../components/common/EfectosLanding";
+import { useParallax } from "../../lib/parallax";
+import ilusAsesora from "../../assets/images/landing/master-2027/ilus-asesora-auriculares.webp";
+import ilusCarpeta from "../../assets/images/landing/master-2027/ilus-carpeta-archivos.webp";
+import ilusLupa from "../../assets/images/landing/master-2027/ilus-documentos-lupa.webp";
 import { ESTANCIA_ESTUDIOS, PLANES_VISADO, VISADO as T } from "./textos";
 import "../../styles/movimiento.css";
 import "./visado.css";
@@ -50,11 +55,15 @@ function PalabraRotante({ palabras }) {
       setTimeout(() => {
         setI((x) => (x + 1) % palabras.length);
         setSaliendo(false);
-      }, 320);
-    }, 2200);
+      }, 220);
+    }, 2400);
     return () => clearInterval(t);
   }, [palabras.length]);
-  return <span className={`vis-palabra${saliendo ? " vis-palabra-sale" : ""}`}>{palabras[i]}</span>;
+  return (
+    <span key={i} className={`vis-palabra lfx-palabra-entra${saliendo ? " vis-palabra-sale" : ""}`}>
+      {palabras[i]}
+    </span>
+  );
 }
 const P_DINERO = PREGUNTAS.find((p) => p.id === "dinero");
 
@@ -251,6 +260,8 @@ export default function Visado() {
   const wa = (detalle) => whatsappDesde("visado", detalle);
   const raiz = useRef(null);
   useRevelar(raiz);
+  const foto = useRef(null);
+  useParallax(foto);
   const pasoCifra = cascada();
   const pasoPunto = cascada();
   const pasoPaso = cascada();
@@ -274,7 +285,7 @@ export default function Visado() {
           </h1>
           <p className="vis-lead">{T.hero.lead}</p>
           <div className="vis-acciones">
-            <a href={wa(T.cierre.whatsappDetalle)} target="_blank" rel="noopener" className="vis-btn vis-btn-wa mov-brillo" onClick={() => registrarEvento("visado_whatsapp", { donde: "hero" })}>
+            <a href={wa(T.cierre.whatsappDetalle)} target="_blank" rel="noopener" className="vis-btn vis-btn-wa mov-brillo lfx-latido" onClick={() => registrarEvento("visado_whatsapp", { donde: "hero" })}>
               <Icono nombre="whatsapp" size={20} />
               {T.hero.whatsapp}
             </a>
@@ -290,7 +301,16 @@ export default function Visado() {
           </nav>
         </div>
         <figure className="vis-hero-foto" data-revelar="escala">
-          <img src={T.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
+          <div className="lfx-parallax" ref={foto}>
+            <img src={T.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
+            <Stickers
+              lista={[
+                { texto: `${CATEGORIAS_CASOS[1].cifra} ${CATEGORIAS_CASOS[1].titulo.toLowerCase()}`, top: "7%", left: "-5%", rot: -7, tono: "sol" },
+                { texto: "Consulado de Lima", top: "46%", right: "-7%", rot: 5 },
+                { texto: `${IPREM_ANIO} · IPREM`, bottom: "12%", left: "-3%", rot: -4, tono: "noche" },
+              ]}
+            />
+          </div>
           <figcaption>{T.hero.quien}</figcaption>
         </figure>
       </header>
@@ -310,8 +330,11 @@ export default function Visado() {
         })}
       </section>
 
+      <div className="vis-cinta"><Cinta items={T.cinta} tono="noche" /></div>
+
       {/* La decisión */}
-      <section className="vis-seccion" id="test">
+      <section className="vis-seccion lfx-banda lfx-banda-cielo" id="test">
+        <Numeral n="01" />
         <div data-revelar>
           <p className="vis-rotulo">{T.test.rotulo}</p>
           <h2 className="vis-h2">{T.test.titulo}</h2>
@@ -324,6 +347,7 @@ export default function Visado() {
 
       {/* Los vídeos */}
       <section className="vis-seccion vis-videos" id="videos">
+        <Numeral n="02" />
         <div data-revelar>
           <h2 className="vis-h2">{T.videos.titulo}</h2>
           <p className="vis-lead">{T.videos.lead}</p>
@@ -339,7 +363,8 @@ export default function Visado() {
       </section>
 
       {/* Los paquetes */}
-      <section className="vis-seccion vis-seccion-ancha" id="paquetes">
+      <section className="vis-seccion vis-seccion-ancha lfx-puntos" id="paquetes">
+        <Numeral n="03" />
         <div data-revelar>
           <p className="vis-rotulo">{T.paquetes.rotulo}</p>
           <h2 className="vis-h2">{T.paquetes.titulo}</h2>
@@ -360,7 +385,10 @@ export default function Visado() {
         </div>
 
         <div className="vis-incluye" data-revelar>
-          <h3>{T.incluye.titulo}</h3>
+          <div className="lfx-cab-ilus">
+            <h3>{T.incluye.titulo}</h3>
+            <img src={ilusLupa} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
+          </div>
           <div className="vis-incluye-cols">
             <div>
               <p className="vis-h5">{T.incluye.si}</p>
@@ -383,11 +411,15 @@ export default function Visado() {
       </section>
 
       {/* Cómo empezamos */}
-      <section className="vis-seccion vis-como" id="como">
-        <div data-revelar>
-          <p className="vis-rotulo">{T.como.rotulo}</p>
-          <h2 className="vis-h2">{T.como.titulo}</h2>
-          <p className="vis-lead">{T.como.lead}</p>
+      <section className="vis-seccion vis-como lfx-banda lfx-banda-sol" id="como">
+        <Numeral n="04" />
+        <div className="lfx-cab-ilus" data-revelar>
+          <div>
+            <p className="vis-rotulo">{T.como.rotulo}</p>
+            <h2 className="vis-h2">{T.como.titulo}</h2>
+            <p className="vis-lead">{T.como.lead}</p>
+          </div>
+          <img src={ilusAsesora} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
         </div>
         <ol className="vis-pasos">
           {T.como.pasos.map((p, i) => (
@@ -410,6 +442,7 @@ export default function Visado() {
 
       {/* Tipos de acompañamiento */}
       <section className="vis-seccion">
+        <Numeral n="05" />
         <div data-revelar>
           <h2 className="vis-h2">{T.acompanamiento.titulo}</h2>
           <p className="vis-lead">{T.acompanamiento.lead}</p>
@@ -426,11 +459,15 @@ export default function Visado() {
       </section>
 
       {/* El checklist */}
-      <section className="vis-seccion" id="checklist">
-        <div data-revelar>
-          <p className="vis-rotulo">{T.checklist.rotulo}</p>
-          <h2 className="vis-h2">{T.checklist.titulo}</h2>
-          <p className="vis-lead">{T.checklist.lead}</p>
+      <section className="vis-seccion lfx-banda lfx-banda-cielo" id="checklist">
+        <Numeral n="06" />
+        <div className="lfx-cab-ilus" data-revelar>
+          <div>
+            <p className="vis-rotulo">{T.checklist.rotulo}</p>
+            <h2 className="vis-h2">{T.checklist.titulo}</h2>
+            <p className="vis-lead">{T.checklist.lead}</p>
+          </div>
+          <img src={ilusCarpeta} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
         </div>
         <div data-revelar="escala">
           <Checklist wa={wa} />
@@ -439,6 +476,7 @@ export default function Visado() {
 
       {/* Preguntas */}
       <section className="vis-seccion">
+        <Numeral n="07" />
         <div data-revelar>
           <h2 className="vis-h2">{T.faq.titulo}</h2>
           <Faq />
@@ -447,6 +485,7 @@ export default function Visado() {
 
       {/* La puerta */}
       <section className="vis-cierre" data-revelar="escala">
+        <img src={T.graduacion} alt="" className="lfx-foto-redonda" loading="lazy" width="480" height="308" />
         <h2 className="vis-h2">{T.cierre.titulo}</h2>
         <p className="vis-lead">{T.cierre.texto}</p>
         <div className="vis-acciones">

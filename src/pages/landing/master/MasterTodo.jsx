@@ -27,10 +27,19 @@ import Fechas from "../master2027/Fechas";
 import Equipo from "../master2027/Equipo";
 import ExpedienteDigital from "./ExpedienteDigital";
 import Herramientas from "./Herramientas";
+import { Cinta, Numeral, Stickers } from "../../../components/common/EfectosLanding";
+import { useParallax } from "../../../lib/parallax";
 import { MASTER as T } from "./textos";
 import logo from "../../../assets/images/logo.png";
+import fotoBandera from "../../../assets/images/landing/master-2027/foto-bandera-espana.webp";
+import ilusAsesora from "../../../assets/images/landing/master-2027/ilus-asesora-auriculares.webp";
+import ilusLupa from "../../../assets/images/landing/master-2027/ilus-documentos-lupa.webp";
+import capInforme from "../../../assets/images/portal/master-informe.webp";
+import capPostulaciones from "../../../assets/images/portal/master-postulaciones.webp";
 import "../../../styles/movimiento.css";
 import "./master.css";
+
+const CAPTURAS = { informe: capInforme, postulaciones: capPostulaciones };
 
 const irA = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -44,12 +53,12 @@ function PalabraRotante({ palabras }) {
       setTimeout(() => {
         setI((x) => (x + 1) % palabras.length);
         setSaliendo(false);
-      }, 320);
-    }, 2200);
+      }, 220);
+    }, 2400);
     return () => clearInterval(t);
   }, [palabras.length]);
   return (
-    <span className={`mst-palabra${saliendo ? " mst-palabra-sale" : ""}`} aria-live="off">
+    <span key={i} className={`mst-palabra lfx-palabra-entra${saliendo ? " mst-palabra-sale" : ""}`} aria-live="off">
       {palabras[i]}
     </span>
   );
@@ -78,6 +87,8 @@ export default function MasterTodo() {
   useSEO(T.seo);
   const raiz = useRef(null);
   useRevelar(raiz);
+  const foto = useRef(null);
+  useParallax(foto);
   const wa = (detalle) => whatsappDesde("master-todo", detalle);
   const [calculadoraEnPantalla, setCalculadoraEnPantalla] = useState(false);
 
@@ -122,7 +133,7 @@ export default function MasterTodo() {
           </h1>
           <p className="mst-lead">{T.hero.lead}</p>
           <div className="mst-acciones">
-            <a href={wa(T.hero.whatsappDetalle)} target="_blank" rel="noopener" className="mst-btn mst-btn-wa mov-brillo" onClick={() => registrarEvento("master_todo_whatsapp", { donde: "hero" })}>
+            <a href={wa(T.hero.whatsappDetalle)} target="_blank" rel="noopener" className="mst-btn mst-btn-wa mov-brillo lfx-latido" onClick={() => registrarEvento("master_todo_whatsapp", { donde: "hero" })}>
               <Icono nombre="whatsapp" size={20} />
               {T.hero.whatsapp}
             </a>
@@ -138,7 +149,16 @@ export default function MasterTodo() {
           </nav>
         </div>
         <figure className="mst-hero-foto" data-revelar="escala">
-          <img src={T.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
+          <div className="lfx-parallax" ref={foto}>
+            <img src={T.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
+            <Stickers
+              lista={[
+                { texto: `${CATEGORIAS_CASOS[0].cifra} ${CATEGORIAS_CASOS[0].titulo.toLowerCase()}`, top: "7%", left: "-5%", rot: -7, tono: "sol" },
+                { texto: "30 h de trabajo", top: "46%", right: "-7%", rot: 5 },
+                { texto: "Título oficial · UE", bottom: "12%", left: "-3%", rot: -4, tono: "noche" },
+              ]}
+            />
+          </div>
           <figcaption>{T.hero.quien}</figcaption>
         </figure>
       </section>
@@ -158,13 +178,19 @@ export default function MasterTodo() {
         })}
       </section>
 
+      <div className="mst-cinta"><Cinta items={T.cinta} tono="noche" /></div>
+
       {/* Por qué España */}
-      <section className="mst-seccion" id="porque-espana">
+      <section className="mst-seccion lfx-banda lfx-banda-cielo" id="porque-espana">
+        <Numeral n="01" />
         <div data-revelar>
           <p className="mst-rotulo">{T.porqueEspana.rotulo}</p>
           <h2 className="mst-h2">{T.porqueEspana.titulo}</h2>
           <p className="mst-lead">{T.porqueEspana.lead}</p>
         </div>
+        <figure className="lfx-foto" data-revelar="escala">
+          <img src={fotoBandera} alt="Bandera de España" loading="lazy" width="1200" height="675" />
+        </figure>
         <div className="mst-rejilla-2">
           {T.porqueEspana.puntos.map((p, i) => (
             <div key={p.titulo} className="mst-tarjeta" data-revelar="escala" style={pasoEspana()}>
@@ -178,6 +204,7 @@ export default function MasterTodo() {
 
       {/* Por qué oficial */}
       <section className="mst-seccion mst-seccion-noche" id="oficial">
+        <Numeral n="02" claro />
         <div data-revelar>
           <p className="mst-rotulo mst-rotulo-sol">{T.oficial.rotulo}</p>
           <h2 className="mst-h2">{T.oficial.titulo}</h2>
@@ -197,6 +224,7 @@ export default function MasterTodo() {
 
       {/* Cuánto cuesta */}
       <section className="mst-seccion mst-seccion-ancha" id="cuesta">
+        <Numeral n="03" />
         <div data-revelar>
           <p className="mst-rotulo">{T.cuesta.rotulo}</p>
           <h2 className="mst-h2">{T.cuesta.titulo}</h2>
@@ -209,11 +237,15 @@ export default function MasterTodo() {
       </div>
 
       {/* Qué hacemos */}
-      <section className="mst-seccion" id="hacemos">
-        <div data-revelar>
-          <p className="mst-rotulo">{T.hacemos.rotulo}</p>
-          <h2 className="mst-h2">{T.hacemos.titulo}</h2>
-          <p className="mst-lead">{T.hacemos.lead}</p>
+      <section className="mst-seccion lfx-puntos" id="hacemos">
+        <Numeral n="04" />
+        <div className="lfx-cab-ilus" data-revelar>
+          <div>
+            <p className="mst-rotulo">{T.hacemos.rotulo}</p>
+            <h2 className="mst-h2">{T.hacemos.titulo}</h2>
+            <p className="mst-lead">{T.hacemos.lead}</p>
+          </div>
+          <img src={ilusLupa} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
         </div>
         <ul className="mst-incluye">
           {INCLUYE.map((t) => (
@@ -237,11 +269,15 @@ export default function MasterTodo() {
       </section>
 
       {/* Cómo */}
-      <section className="mst-seccion" id="como">
-        <div data-revelar>
-          <p className="mst-rotulo">{T.como.rotulo}</p>
-          <h2 className="mst-h2">{T.como.titulo}</h2>
-          <p className="mst-lead">{T.como.lead}</p>
+      <section className="mst-seccion lfx-banda lfx-banda-sol" id="como">
+        <Numeral n="05" />
+        <div className="lfx-cab-ilus" data-revelar>
+          <div>
+            <p className="mst-rotulo">{T.como.rotulo}</p>
+            <h2 className="mst-h2">{T.como.titulo}</h2>
+            <p className="mst-lead">{T.como.lead}</p>
+          </div>
+          <img src={ilusAsesora} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
         </div>
         <ol className="mst-pasos">
           {T.como.pasos.map((p, i) => (
@@ -255,6 +291,7 @@ export default function MasterTodo() {
                   <p><b>{T.como.tuEtiqueta}</b> {p.tu}</p>
                   <p><b>{T.como.nosotrosEtiqueta}</b> {p.nosotros}</p>
                 </div>
+                {p.captura && <img src={CAPTURAS[p.captura]} alt="" className="lfx-captura" loading="lazy" width="840" height="560" />}
               </div>
             </li>
           ))}
@@ -263,6 +300,7 @@ export default function MasterTodo() {
 
       {/* Por qué nosotros */}
       <section className="mst-seccion mst-seccion-ancha" id="nosotros">
+        <Numeral n="06" />
         <div data-revelar>
           <p className="mst-rotulo">{T.nosotros.rotulo}</p>
           <h2 className="mst-h2">{T.nosotros.titulo}</h2>
@@ -275,6 +313,7 @@ export default function MasterTodo() {
 
       {/* Vídeos */}
       <section className="mst-seccion" id="videos">
+        <Numeral n="07" />
         <div data-revelar>
           <p className="mst-rotulo">{T.videos.rotulo}</p>
           <h2 className="mst-h2">{T.videos.titulo}</h2>
@@ -321,6 +360,7 @@ export default function MasterTodo() {
 
       {/* Cierre */}
       <section className="mst-cierre" data-revelar="escala">
+        <img src={T.graduacion} alt="" className="lfx-foto-redonda" loading="lazy" width="480" height="308" />
         <h2 className="mst-h2">{T.cierre.titulo}</h2>
         <p className="mst-lead">{T.cierre.texto}</p>
         <div className="mst-acciones">

@@ -10,6 +10,7 @@
 // config/visaOEstancia.js. Cifras institucionales: CATEGORIAS_CASOS.
 import { PLANES_VISADO, ESTANCIA_ESTUDIOS, SESION_DIAGNOSTICO } from "../../config/metodo";
 import { eur } from "../../config/paqueteMaster2027Resumen";
+import { IPREM_ANIO } from "../expediente/textos";
 
 const MEDIA = "https://www.inspira-legal.cloud/media";
 
@@ -25,6 +26,10 @@ export const VISADO = {
   },
 
   retrato: `${MEDIA}/foto/carina-retrato.jpg`,
+  graduacion: `${MEDIA}/foto/carina-graduacion.jpg`,
+
+  // La cinta que pasa bajo las cifras: lo que va en un expediente que se aprueba.
+  cinta: ["Visado tipo D", "90 días para entrar", "30 h de trabajo", `${IPREM_ANIO} en cuenta`, "Seguro sin copagos", "Certificado médico", "Antecedentes apostillados", "Cita consular", "Recurso incluido", "Consulado de Lima"],
 
   hero: {
     rotulo: "Visado de estudios · desde tu país",

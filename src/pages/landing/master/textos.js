@@ -27,6 +27,10 @@ export const MASTER = {
   },
 
   retrato: `${MEDIA}/foto/carina-retrato.jpg`,
+  graduacion: `${MEDIA}/foto/carina-graduacion.jpg`,
+
+  // La cinta que pasa bajo las cifras: ciudades y lo que más se pregunta.
+  cinta: ["Madrid", "Valencia", "Sevilla", "Granada", "Salamanca", "Bilbao", "Santiago", "Málaga", "Zaragoza", "Curso 2027/2028", "Títulos oficiales", "30 h de trabajo", "Desde Lima"],
 
   hero: {
     rotulo: "Máster oficial en España · curso 2027/2028",
@@ -85,9 +89,9 @@ export const MASTER = {
     pasos: [
       { icono: "balanza", titulo: "Sesión diagnóstico", tu: "Cuentas tu caso y tus objetivos.", nosotros: "Te decimos si es viable, qué vía te toca y salimos con un plan escrito." },
       { icono: "documento", titulo: "Documentos y formulario académico", tu: "Subes tus documentos al portal.", nosotros: "Los revisamos uno a uno, con observación en el mismo documento y modelos de cómo deben quedar." },
-      { icono: "libro", titulo: "Informe de másteres", tu: "Lees tus finalistas y tus alternativas.", nosotros: "Cruzamos tu perfil con más de 3.000 másteres oficiales: precio según la norma, becas posibles y plazos." },
+      { icono: "libro", titulo: "Informe de másteres", captura: "informe", tu: "Lees tus finalistas y tus alternativas.", nosotros: "Cruzamos tu perfil con más de 3.000 másteres oficiales: precio según la norma, becas posibles y plazos." },
       { icono: "diana", titulo: "Elección", tu: "Eliges y ordenas tus másteres.", nosotros: "Te respondemos máster por máster: notas de corte, requisitos y si el centro es apto para el visado." },
-      { icono: "rayo", titulo: "Postulaciones", tu: "Sigues cada plazo en tu portal.", nosotros: "Postulamos por ti en cada universidad y vigilamos los portales: requerimientos, listas, resultados." },
+      { icono: "rayo", titulo: "Postulaciones", captura: "postulaciones", tu: "Sigues cada plazo en tu portal.", nosotros: "Postulamos por ti en cada universidad y vigilamos los portales: requerimientos, listas, resultados." },
       { icono: "trofeo", titulo: "Carta de admisión y visado", tu: "Celebras.", nosotros: "Te guiamos en la matrícula y la carta, y abrimos la vía migratoria: visado o estancia por estudios." },
     ],
     tuEtiqueta: "Tú",

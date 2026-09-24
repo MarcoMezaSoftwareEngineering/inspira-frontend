@@ -49,7 +49,9 @@
 .mst-h5 { margin: 1.6rem 0 0.6rem; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--noche); }
 .mst-nota { margin: 1rem 0 0; font-size: 0.82rem; line-height: 1.5; color: var(--gris); }
 .mst-nota-clara { color: rgba(255, 255, 255, 0.75); }
-.mst-seccion { max-width: 720px; margin: 0 auto; padding: 2.75rem 1.25rem 0; }
+.mst-seccion { position: relative; max-width: 720px; margin: 0 auto; padding: 2.75rem 1.25rem 0; }
+.mst-seccion.lfx-banda, .mst-seccion.lfx-puntos { margin-top: 2.25rem; padding-bottom: 2.5rem; }
+.mst-cinta { margin-top: 1.5rem; }
 .mst-seccion-ancha { max-width: 1100px; }
 .mst-seccion-noche {
   max-width: none;
@@ -100,7 +102,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: mst-brilla 3s linear infinite;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 .mst-palabra-sale { opacity: 0; transform: translateY(-10px); }
 @keyframes mst-brilla { to { background-position: -200% 0; } }
@@ -121,7 +123,8 @@
 }
 .mst-atajos button:hover { background: rgba(255, 255, 255, 0.18); transform: translateY(-1px); }
 .mst-hero-foto { margin: 0; text-align: center; }
-.mst-hero-foto img { display: block; width: 100%; max-width: 320px; margin: 0 auto; border-radius: 28px; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7); }
+.mst-hero-foto .lfx-parallax { max-width: 320px; margin: 0 auto; }
+.mst-hero-foto img { display: block; width: 100%; border-radius: 28px; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7); }
 .mst-hero-foto figcaption { margin-top: 0.6rem; font-size: 0.78rem; font-weight: 700; color: var(--cielo); letter-spacing: 0.04em; }
 
 /* ── Botones ──────────────────────────────────────────────────────────── */
@@ -209,9 +212,14 @@
 
 /* ── Cómo ─────────────────────────────────────────────────────────────── */
 .mst-pasos { list-style: none; margin: 1.5rem 0 0; padding: 0; position: relative; }
-.mst-pasos::before { content: ""; position: absolute; left: 17px; top: 20px; bottom: 20px; width: 2px; background: linear-gradient(180deg, var(--sol), var(--cielo)); }
 .mst-pasos li { position: relative; display: flex; gap: 0.9rem; padding: 0 0 1.25rem; }
-.mst-paso-num { position: relative; z-index: 1; display: inline-flex; width: 36px; height: 36px; flex: 0 0 36px; align-items: center; justify-content: center; border-radius: 50%; background: var(--noche); color: #fff; font-weight: 800; font-size: 0.85rem; box-shadow: 0 0 0 4px #fff; transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease; }
+.mst-pasos li::before, .mst-pasos li::after { content: ""; position: absolute; left: 17px; top: 36px; bottom: 0; width: 2px; }
+.mst-pasos li::before { background: #e3d5c4; }
+.mst-pasos li::after { background: var(--sol); transform: scaleY(0); transform-origin: top; transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s; }
+.mst-pasos li[data-visto]::after { transform: scaleY(1); }
+.mst-pasos li:last-child::before, .mst-pasos li:last-child::after { display: none; }
+.mst-pasos li[data-visto] .mst-paso-num { background: var(--sol); color: var(--noche); }
+.mst-paso-num { position: relative; z-index: 1; display: inline-flex; width: 36px; height: 36px; flex: 0 0 36px; align-items: center; justify-content: center; border-radius: 50%; background: var(--noche); color: #fff; font-weight: 800; font-size: 0.85rem; box-shadow: 0 0 0 4px #fff8ef; transition: transform 0.2s ease, background 0.5s ease 0.3s, color 0.5s ease 0.3s; }
 .mst-pasos li:hover .mst-paso-num { transform: scale(1.12); background: var(--sol); color: var(--noche); }
 .mst-paso-cuerpo { flex: 1; padding: 0.9rem 1rem; border-radius: 18px; border: 1px solid var(--linea); background: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .mst-pasos li:hover .mst-paso-cuerpo { transform: translateX(4px); box-shadow: 0 20px 40px -30px rgba(0, 54, 72, 0.5); }

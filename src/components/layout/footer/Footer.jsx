@@ -18,6 +18,8 @@ const enlacesExplora = [
   { label: "Paquete Máster 2027/2028", href: "/servicios/master" },
   { label: "Estancia por estudios", href: "/servicios/estancia" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
+  { label: "Doctorado en España", href: "/doctorado-en-espana" },
+  { label: "Reservar sesión", href: "/reservar" },
   { label: "Eventos gratuitos", href: "/eventos" },
   { label: "Tienda", href: "/tienda" },
   { label: "Blog", href: "/blog" },

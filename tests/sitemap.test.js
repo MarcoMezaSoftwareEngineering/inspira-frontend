@@ -45,12 +45,10 @@ const FUERA_DEL_SITEMAP = new Set([
 // Instagram y TikTok— y que a propósito no se enlazan desde dentro.
 const ENTRADA_EXTERNA = new Set(["/enlaces", "/master-2027-2028"]);
 
-// Huérfanas que la prueba encontró el día que nació y que aún no se han
-// decidido: ¿se enlazan o se retiran? Están aquí para que el despliegue no se
-// bloquee por una decisión de producto pendiente, no porque estén bien.
-// TODO(Marco): /reservar no lo enlaza nadie (el sitio usa CALENDLY_URL);
-//              /doctorado-en-espana solo aparece en el contexto de WhatsApp.
-const HUERFANAS_CONOCIDAS = new Set(["/reservar", "/doctorado-en-espana"]);
+// Huérfanas conocidas: páginas públicas que aún no enlaza nadie y cuya suerte
+// no se ha decidido. Vacía desde el 24/09/2026 (/reservar y /doctorado se
+// enlazaron desde el pie y desde /enlaces). Si entra una, que sea con TODO.
+const HUERFANAS_CONOCIDAS = new Set([]);
 
 /** ¿App.jsx sabe pintar esta URL? */
 const laPinta = (url) =>

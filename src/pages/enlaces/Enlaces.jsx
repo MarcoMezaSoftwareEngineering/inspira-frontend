@@ -117,6 +117,13 @@ const RECURSOS = [
     href: interno("/grado-en-espana"),
   },
   {
+    clave: "recurso:doctorado",
+    icono: "birrete",
+    titulo: "Doctorado en España: cuánto cuesta y dónde",
+    texto: "Tutela por comunidad y programas presenciales",
+    href: interno("/doctorado-en-espana"),
+  },
+  {
     clave: "recurso:calculadora",
     img: "/og/calculadora-master.jpg",
     titulo: "Calculadora: encuentra gratis tu máster",

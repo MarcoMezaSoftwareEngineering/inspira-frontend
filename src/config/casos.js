@@ -413,7 +413,7 @@ export const CASOS = [
     nombre: "Kelly",
     ciudad: "Valencia",
     comunidad: "Comunidad Valenciana",
-    universidad: "Universidad Católica de Valencia San Vicente Mártir",
+    universidad: "Universidad Católica de Valencia",
     programa: "Máster Universitario en Dirección de Operaciones",
     anio: "2026-2027",
   },

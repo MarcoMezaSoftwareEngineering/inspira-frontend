@@ -94,6 +94,15 @@ const hrefDe = (id) => {
 
 const RECURSOS = [
   {
+    // Primero porque es el gancho: seis cartas y treinta segundos. Estuvo
+    // publicado meses sin un solo enlace que llevara a él.
+    clave: "recurso:alcanza",
+    icono: "euro",
+    titulo: "Juego: ¿te alcanza para estudiar en España?",
+    texto: "6 cartas, 30 segundos, y te decimos dónde sí puedes",
+    href: interno("/te-alcanza"),
+  },
+  {
     clave: "recurso:mapa",
     img: "/og/mapa-estudiar-en-espana.jpg",
     titulo: "Mapa de universidades y costos de máster",

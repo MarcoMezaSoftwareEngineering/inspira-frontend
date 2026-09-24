@@ -26,6 +26,7 @@ import { useSEO } from "../../hooks/useSEO";
 import { CASOS } from "../../config/casos";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
+import { navigate } from "../../services/navigate";
 import { cascada, revelarTodo, useRevelar } from "../../lib/revelar";
 import { ABRE_MESES, RANKING_TOPES, aplicarFiltros, casosEnMapa, crearIndice, hayRanking, hayTitularidad, prefiereMenosMovimiento } from "./indice";
 import { useEstadoMapa } from "./useEstadoMapa";
@@ -345,6 +346,25 @@ function Leyenda({ indice, ranking }) {
           La diana vuelve al encuadre
         </span>
       </p>
+      {/* Quien mira precios sin saber por dónde empezar tiene aquí la puerta
+          al juego: seis cartas y sabe su techo sin escribir una cifra. */}
+      <a
+        href="/te-alcanza"
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/te-alcanza");
+          window.scrollTo({ top: 0, behavior: "instant" });
+        }}
+        className="mapa-boton mov-toque mt-3 flex items-center gap-2.5 rounded-2xl border-2 border-[#F09C48] bg-[#FFF6E8] px-3.5 py-3 text-[13px] font-extrabold text-[#003648] hover:bg-[#FDE9D2] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F09C48]"
+      >
+        <Icono nombre="euro" size={18} className="shrink-0 text-[#F09C48]" />
+        <span>
+          ¿No sabes por dónde empezar?
+          <span className="block text-[12px] font-semibold text-[#0A5873]">
+            Juega a «¿Te alcanza?»: 6 cartas y te decimos dónde sí puedes
+          </span>
+        </span>
+      </a>
     </div>
   );
 }

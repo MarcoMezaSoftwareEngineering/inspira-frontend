@@ -29,7 +29,7 @@ export const ALCANZA = {
   carta: {
     rotuloMaster: "El máster cuesta",
     alAnio: "al año",
-    rotulo: "Y para irte, todo el año",
+    rotulo: "¿Te alcanza el primer año?",
     matricula: "Matrícula del máster",
     porMes: (importe) => `≈ ${importe}/mes`,
     vida: "Vivir un año",

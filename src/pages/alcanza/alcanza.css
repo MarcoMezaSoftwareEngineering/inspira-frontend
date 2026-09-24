@@ -499,10 +499,37 @@
 }
 .alc-carta-total {
   font-family: Merriweather, Georgia, serif;
-  font-size: 30px;
+  /* Casi tan grande como la matrícula: es la cifra sobre la que se desliza.
+     Antes la matrícula era enorme y el total pequeño, así que el ojo iba a
+     un número y la decisión a otro. */
+  font-size: clamp(34px, 9.5vw, 46px);
   font-weight: 700;
   line-height: 1.1;
   margin: 0.15rem 0 0;
   color: #003648;
   font-variant-numeric: tabular-nums;
+}
+
+
+/* ── Partida en marcha ───────────────────────────────────────────────────
+   Tras el primer gesto, la cabecera se aparta: el título y el lead ya se han
+   leído y en cada carta estaban ocupando el tercio de arriba de la pantalla.
+   Es lo que separa esto de sentirse una app: que la carta mande. */
+.alc-jugando .alc-cabecera {
+  margin-bottom: 0.35rem;
+}
+.alc-jugando .alc-etiqueta,
+.alc-jugando .alc-lead {
+  display: none;
+}
+.alc-jugando .alc-titulo {
+  font-size: clamp(17px, 4.6vw, 21px);
+  line-height: 1.2;
+  opacity: 0.72;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .alc-cabecera,
+  .alc-titulo {
+    transition: font-size 0.28s ease, opacity 0.28s ease, margin-bottom 0.28s ease;
+  }
 }

@@ -111,7 +111,7 @@ function Carta({ item, arrastre, alSoltar, fondo = false }) {
   );
 }
 
-function Juego({ lista, onFin }) {
+function Juego({ lista, onFin, onJugando }) {
   const [min, setMin] = useState(0);
   const [max, setMax] = useState(Infinity);
   const [vistas, setVistas] = useState([]);
@@ -125,10 +125,22 @@ function Juego({ lista, onFin }) {
     [lista, vistas, carta, min, max]
   );
 
+  // Una sola vez por partida: sin esto se sabe quién llega al final pero no
+  // cuántos empezaron, que es la mitad que falta para medir el abandono.
+  const arrancada = useRef(false);
+  useEffect(() => {
+    if (arrancada.current || !carta) return;
+    arrancada.current = true;
+    registrarEvento("alcanza_inicio", { cartas: lista.length });
+  }, [carta, lista.length]);
+
   const responder = useCallback(
     (alcanza) => {
       if (!carta) return;
       setSaliendo(alcanza ? "si" : "no");
+      // A partir del primer gesto la cabecera se encoge: el título y el lead
+      // ya se han leído y estaban robándole 250 px a la carta en cada ronda.
+      onJugando?.(true);
       registrarEvento("alcanza_respuesta", { comunidad: carta.id, alcanza });
       const espera = prefiereMenosMovimiento() ? 0 : 260;
       setTimeout(() => {
@@ -145,7 +157,7 @@ function Juego({ lista, onFin }) {
         }
       }, espera);
     },
-    [carta, lista, max, min, onFin, vistas]
+    [carta, lista, max, min, onFin, onJugando, vistas]
   );
 
   function empezar(e) {
@@ -289,7 +301,7 @@ function Resultado({ lista, rango, onOtraVez }) {
 
 /* ── La página ───────────────────────────────────────────────────────── */
 
-function Contenido({ datos }) {
+function Contenido({ datos, onJugando }) {
   const [rango, setRango] = useState(null);
   const [ronda, setRonda] = useState(0);
 
@@ -315,15 +327,25 @@ function Contenido({ datos }) {
       onOtraVez={() => {
         setRango(null);
         setRonda((n) => n + 1);
+        onJugando?.(false);
       }}
     />
   ) : (
-    <Juego key={ronda} lista={lista} onFin={setRango} />
+    <Juego
+      key={ronda}
+      lista={lista}
+      onJugando={onJugando}
+      onFin={(r) => {
+        onJugando?.(false);
+        setRango(r);
+      }}
+    />
   );
 }
 
 export default function TeAlcanza() {
   const [carga, setCarga] = useState({ estado: "cargando" });
+  const [jugando, setJugando] = useState(false);
   useSEO(ALCANZA.seo);
 
   useEffect(() => {
@@ -340,7 +362,7 @@ export default function TeAlcanza() {
   }, []);
 
   return (
-    <main className="alc">
+    <main className={`alc${jugando ? " alc-jugando" : ""}`}>
       <div className="alc-fondo" aria-hidden="true" />
       <div className="alc-dentro">
         <header className="alc-cabecera">
@@ -363,7 +385,7 @@ export default function TeAlcanza() {
         )}
         {carga.estado === "listo" && (
           <CercoErrores donde="te-alcanza" titulo="No se pudo mostrar el juego">
-            <Contenido datos={carga.datos} />
+            <Contenido datos={carga.datos} onJugando={setJugando} />
           </CercoErrores>
         )}
       </div>

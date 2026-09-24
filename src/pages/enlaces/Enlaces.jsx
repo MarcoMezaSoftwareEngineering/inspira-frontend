@@ -101,6 +101,13 @@ const RECURSOS = [
     href: interno("/carina"),
   },
   {
+    clave: "recurso:expediente",
+    icono: "maletin",
+    titulo: "Un expediente de visado, papel por papel",
+    texto: "Los 9 documentos tal como tienen que quedar, y por qué se rechazan",
+    href: interno("/expediente"),
+  },
+  {
     // Primero porque es el gancho: seis cartas y treinta segundos. Estuvo
     // publicado meses sin un solo enlace que llevara a él.
     clave: "recurso:alcanza",

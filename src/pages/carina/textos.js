@@ -7,7 +7,7 @@ const MEDIA = "https://www.inspira-legal.cloud/media";
 
 export const CARINA = {
   seo: {
-    title: "Carina Meza · Inspira Legal | Estudiar en España desde Perú",
+    title: "Carina Meza | Estudiar en España desde Perú",
     description:
       "Soy Carina Meza, CEO y consultora legal de Inspira. Acompaño a estudiantes peruanos hasta el aula en España: máster, visado y llegada. Mira mis vídeos y escríbeme.",
     path: "/carina",
@@ -44,16 +44,16 @@ export const CARINA = {
     titulo: "Mírame antes de escribirme",
     lead: "Así hablo, así trabajo. Toca un vídeo para escucharlo.",
     masEn: "Ver más en TikTok →",
-    // Los títulos los pone Carina: aquí solo la duración, que es verdad segura.
+    // Títulos sacados de los rótulos de cada vídeo (revisados fotograma a fotograma el 24/09/2026).
     lista: [
-      { id: "1", src: `${MEDIA}/video/carina-1.mp4`, poster: `${MEDIA}/video/carina-1.jpg`, titulo: "TikTok · 29 s" },
-      { id: "2", src: `${MEDIA}/video/carina-2.mp4`, poster: `${MEDIA}/video/carina-2.jpg`, titulo: "TikTok · 44 s" },
-      { id: "3", src: `${MEDIA}/video/carina-3.mp4`, poster: `${MEDIA}/video/carina-3.jpg`, titulo: "TikTok · 59 s" },
-      { id: "4", src: `${MEDIA}/video/carina-4.mp4`, poster: `${MEDIA}/video/carina-4.jpg`, titulo: "TikTok · 84 s" },
-      { id: "5", src: `${MEDIA}/video/carina-5.mp4`, poster: `${MEDIA}/video/carina-5.jpg`, titulo: "TikTok · 55 s" },
-      { id: "6", src: `${MEDIA}/video/carina-6.mp4`, poster: `${MEDIA}/video/carina-6.jpg`, titulo: "TikTok · 19 s" },
-      { id: "7", src: `${MEDIA}/video/carina-7.mp4`, poster: `${MEDIA}/video/carina-7.jpg`, titulo: "TikTok · 29 s" },
-      { id: "8", src: `${MEDIA}/video/carina-8.mp4`, poster: `${MEDIA}/video/carina-8.jpg`, titulo: "TikTok · 31 s" },
+      { id: "1", src: `${MEDIA}/video/carina-1.mp4`, poster: `${MEDIA}/video/carina-1.jpg`, titulo: "¿Quieres estudiar un máster en España?" },
+      { id: "2", src: `${MEDIA}/video/carina-2.mp4`, poster: `${MEDIA}/video/carina-2.jpg`, titulo: "Máster + trabajo de 30 h a la semana" },
+      { id: "3", src: `${MEDIA}/video/carina-3.mp4`, poster: `${MEDIA}/video/carina-3.jpg`, titulo: "Me rechazaron en la Complutense… y qué hicimos" },
+      { id: "4", src: `${MEDIA}/video/carina-4.mp4`, poster: `${MEDIA}/video/carina-4.jpg`, titulo: "Admitida a un máster en Andalucía" },
+      { id: "5", src: `${MEDIA}/video/carina-5.mp4`, poster: `${MEDIA}/video/carina-5.jpg`, titulo: "Visa de estudios vs. estancia por estudios" },
+      { id: "6", src: `${MEDIA}/video/carina-6.mp4`, poster: `${MEDIA}/video/carina-6.jpg`, titulo: "Carrera en España sin examen de admisión" },
+      { id: "7", src: `${MEDIA}/video/carina-7.mp4`, poster: `${MEDIA}/video/carina-7.jpg`, titulo: "Beca AUIP para un máster en Valencia" },
+      { id: "8", src: `${MEDIA}/video/carina-8.mp4`, poster: `${MEDIA}/video/carina-8.jpg`, titulo: "Cuándo postular: las fechas que importan" },
     ],
   },
 

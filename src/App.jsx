@@ -47,6 +47,7 @@ const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
 const TeAlcanza = lazyConRecarga(() => import("./pages/alcanza/TeAlcanza"));
 const Carina = lazyConRecarga(() => import("./pages/carina/Carina"));
+const Expediente = lazyConRecarga(() => import("./pages/expediente/Expediente"));
 const PaginaLugar = lazyConRecarga(() => import("./pages/mapa/PaginaLugar"));
 const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
 const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
@@ -391,6 +392,10 @@ const PUBLIC_PATHS = [
   "/calculadora-master",
   "/mapa-estudiar-en-espana",
   "/te-alcanza",
+  // Las landings de la bio de redes: /carina y el expediente de ejemplo.
+  // Sin estar aquí, se pintaba el 404 debajo de la página (24/09/2026).
+  "/carina",
+  "/expediente",
   "/master-2027-2028",
   "/visa-o-estancia",
   "/grado-en-espana",
@@ -552,6 +557,7 @@ export default function App() {
       {path === "/mapa-estudiar-en-espana" && <MapaEspana />}
       {path === "/te-alcanza" && <TeAlcanza />}
       {path === "/carina" && <Carina />}
+      {path === "/expediente" && <Expediente />}
       {/* Una página por comunidad y por universidad, con los datos del mapa:
           son las direcciones que busca la gente («máster en Galicia») y las
           que puede posicionar un buscador. Ver pages/mapa/PaginaLugar.jsx. */}

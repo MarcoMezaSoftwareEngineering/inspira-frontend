@@ -12,14 +12,16 @@
 // Los datos de los documentos están en textos.js; aquí solo se pintan. Las
 // reconstrucciones (Papel) son HTML, no imágenes: pesan nada, se leen con
 // lector de pantalla y se corrigen editando texto.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icono from "../../components/common/Icono";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
+import { cascada, useRevelar } from "../../lib/revelar";
 import { DOCUMENTOS, EXPEDIENTE, IPREM_ANIO, IPREM_MES, PASOS, TOTAL } from "./textos";
+import "../../styles/movimiento.css";
 import "./expediente.css";
 
 const CLAVE = "inspira:expediente:tengo";
@@ -473,9 +475,12 @@ export default function Expediente() {
   const faltan = DOCUMENTOS.filter((d) => !tengo.has(d.id)).map((d) => d.corto);
   const wa = whatsappDesde("expediente", EXPEDIENTE.cierre.whatsappDetalle(tengo.size, faltan));
   const doc = abierto && DOCUMENTOS.find((d) => d.id === abierto);
+  const raiz = useRef(null);
+  useRevelar(raiz);
+  const pasoDoc = cascada();
 
   return (
-    <main className="exp">
+    <main className="exp" ref={raiz}>
       {/* Qué es esto y de quién */}
       <header className="exp-hero">
         <p className="exp-rotulo">
@@ -519,7 +524,7 @@ export default function Expediente() {
         {PASOS.map((p, i) => {
           const docs = DOCUMENTOS.filter((d) => d.paso === i);
           return (
-            <li key={p.titulo} className="exp-paso">
+            <li key={p.titulo} className="exp-paso" data-revelar="izquierda">
               <div className="exp-paso-cab">
                 <span className="exp-paso-num">{i + 1}</span>
                 <div>
@@ -530,7 +535,9 @@ export default function Expediente() {
               {docs.length > 0 && (
                 <div className="exp-docs">
                   {docs.map((d) => (
-                    <Tarjeta key={d.id} d={d} tengo={tengo.has(d.id)} onAbrir={abrir} onMarcar={marcar} />
+                    <div key={d.id} data-revelar="escala" style={pasoDoc()}>
+                      <Tarjeta d={d} tengo={tengo.has(d.id)} onAbrir={abrir} onMarcar={marcar} />
+                    </div>
                   ))}
                 </div>
               )}
@@ -540,7 +547,7 @@ export default function Expediente() {
       </ol>
 
       {/* La puerta */}
-      <section className="exp-cierre">
+      <section className="exp-cierre" data-revelar="escala">
         <h2 className="exp-h2">{EXPEDIENTE.cierre.titulo}</h2>
         <p className="exp-lead">{EXPEDIENTE.cierre.texto}</p>
         <div className="exp-acciones">

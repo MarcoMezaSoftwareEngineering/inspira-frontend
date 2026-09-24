@@ -20,7 +20,7 @@
 //
 // Los vídeos viven en /var/www/inspira-media (fuera del repositorio; nginx
 // sirve /media/). Cambiarlos no requiere desplegar.
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
 import SEOSchema from "../../components/SEOSchema";
 import { useSEO } from "../../hooks/useSEO";
@@ -28,9 +28,11 @@ import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
+import { cascada, useRevelar } from "../../lib/revelar";
 import VideoVertical from "../../components/common/VideoVertical";
 import Opiniones from "../landing/master2027/Opiniones";
 import { CARINA } from "./textos";
+import "../../styles/movimiento.css";
 import "./carina.css";
 
 const irA = (href) => (e) => {
@@ -43,17 +45,21 @@ export default function Carina() {
   useSEO(CARINA.seo);
   const [activo, setActivo] = useState(null);
   const wa = whatsappDesde("carina");
+  const raiz = useRef(null);
+  useRevelar(raiz);
+  const pasoCifra = cascada();
+  const pasoVideo = cascada();
 
   return (
-    <main className="car">
+    <main className="car" ref={raiz}>
       <SEOSchema schema={CARINA.schema} id="carina" />
 
       {/* La cara */}
       <header className="car-hero">
-        <div className="car-hero-foto">
+        <div className="car-hero-foto" data-revelar="escala">
           <img src={CARINA.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
         </div>
-        <div className="car-hero-texto">
+        <div className="car-hero-texto" data-revelar>
           <p className="car-rotulo">
             <Icono nombre="avion" size={14} />
             {CARINA.rotulo}
@@ -62,7 +68,7 @@ export default function Carina() {
           <p className="car-cargo">{CARINA.cargo}</p>
           <p className="car-promesa">{CARINA.promesa}</p>
           <div className="car-acciones">
-            <a href={wa} target="_blank" rel="noopener" className="car-btn car-btn-wa" onClick={() => registrarEvento("carina_whatsapp", {})}>
+            <a href={wa} target="_blank" rel="noopener" className="car-btn car-btn-wa mov-brillo" onClick={() => registrarEvento("carina_whatsapp", {})}>
               <Icono nombre="whatsapp" size={20} />
               {CARINA.cta.whatsapp}
             </a>
@@ -77,7 +83,7 @@ export default function Carina() {
       {/* La prueba: solo lo que se puede sustanciar */}
       <section className="car-cifras" aria-label="Resultados de Inspira Legal">
         {CATEGORIAS_CASOS.map((c) => (
-          <div key={c.id} className="car-cifra">
+          <div key={c.id} className="car-cifra" data-revelar="escala" style={pasoCifra()}>
             <span className="car-cifra-icono"><Icono nombre={c.icono} size={18} /></span>
             <strong>{c.cifra}</strong>
             <span>{c.titulo}</span>
@@ -91,7 +97,9 @@ export default function Carina() {
         <p className="car-lead">{CARINA.videos.lead}</p>
         <div className="vv-rejilla">
           {CARINA.videos.lista.map((v) => (
-            <VideoVertical key={v.id} v={v} activo={activo === v.id} onActivar={setActivo} evento="carina_video" />
+            <div key={v.id} data-revelar="escala" style={pasoVideo()}>
+              <VideoVertical v={v} activo={activo === v.id} onActivar={setActivo} evento="carina_video" />
+            </div>
           ))}
         </div>
         <a href={CARINA.tiktok} target="_blank" rel="noopener" className="car-enlace-tiktok">
@@ -100,7 +108,7 @@ export default function Carina() {
       </section>
 
       {/* El juego, para quien aún no quiere hablar con nadie */}
-      <section className="car-juego">
+      <section className="car-juego" data-revelar>
         <a href="/te-alcanza" onClick={irA("/te-alcanza")} className="car-juego-tarjeta">
           <span className="car-juego-icono"><Icono nombre="euro" size={22} /></span>
           <span>
@@ -117,7 +125,7 @@ export default function Carina() {
       </section>
 
       {/* La puerta, otra vez, para quien llegó abajo */}
-      <section className="car-cierre">
+      <section className="car-cierre" data-revelar="escala">
         <img src={CARINA.graduacion} alt="" width="480" height="308" loading="lazy" className="car-cierre-foto" />
         <h2 className="car-h2">{CARINA.cierre.titulo}</h2>
         <p className="car-lead">{CARINA.cierre.texto}</p>

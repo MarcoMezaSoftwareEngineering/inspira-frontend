@@ -12,7 +12,7 @@
 // /visa-o-estancia (la regla de negocio vive en config/visaOEstancia.js) y el
 // checklist reutiliza los nueve documentos de /expediente. Todo lo que se
 // afirma sale de config: precios de metodo.js, cifras de CATEGORIAS_CASOS.
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
 import { RejillaVideos } from "../../components/common/VideoVertical";
 import { useSEO } from "../../hooks/useSEO";
@@ -22,9 +22,12 @@ import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { PREGUNTAS, evaluar } from "../../config/visaOEstancia";
 import { eur } from "../../config/paqueteMaster2027Resumen";
 import { registrarEvento } from "../../lib/analytics";
+import { cascada, useRevelar } from "../../lib/revelar";
+import { CifraAnimada } from "../landing/master2027/comunes";
 import Opiniones from "../landing/master2027/Opiniones";
 import { DOCUMENTOS } from "../expediente/textos";
 import { ESTANCIA_ESTUDIOS, PLANES_VISADO, VISADO as T } from "./textos";
+import "../../styles/movimiento.css";
 import "./visado.css";
 
 const irA = (href) => (e) => {
@@ -40,10 +43,11 @@ const P_DINERO = PREGUNTAS.find((p) => p.id === "dinero");
 function Opciones({ pregunta, valor, onElegir }) {
   return (
     <div className="vis-opciones" role="radiogroup" aria-label={pregunta.pregunta}>
-      {pregunta.opciones.map((o) => (
+      {pregunta.opciones.map((o, i) => (
         <button
           type="button"
           key={o.valor}
+          style={{ "--i": i }}
           role="radio"
           aria-checked={valor === o.valor}
           className={`vis-opcion${valor === o.valor ? " vis-opcion-on" : ""}`}
@@ -76,7 +80,7 @@ function MiniTest() {
     const { paquete, titular, porque, visa, estancia } = resultado;
     const via = paquete.id === "estancia" ? estancia : visa;
     return (
-      <div className="vis-resultado">
+      <div className="vis-resultado vis-entra">
         <p className="vis-rotulo">{T.test.paquete}</p>
         <h3>{titular}</h3>
         <p className="vis-resultado-porque">{porque}</p>
@@ -135,12 +139,13 @@ function MiniTest() {
 
 /** Los tres paquetes, de menos a más, con lo que incluye cada uno. */
 function Paquetes({ wa }) {
+  const paso = cascada();
   return (
     <div className="vis-paquetes">
       {PLANES_VISADO.map((p) => (
-        <article key={p.id} className={`vis-paquete${p.destacado ? " vis-paquete-destacado" : ""}`}>
+        <article key={p.id} data-revelar="escala" style={paso()} className={`vis-paquete${p.destacado ? " vis-paquete-destacado" : ""}`}>
           {p.destacado && <span className="vis-paquete-cinta">{T.paquetes.recomendado}</span>}
-          <span className="vis-paquete-icono"><Icono nombre={p.icono} size={20} /></span>
+          <span className="vis-paquete-icono mov-flota"><Icono nombre={p.icono} size={20} /></span>
           <h3>{p.nombre}</h3>
           <p className="vis-paquete-sub">{p.subtitulo}</p>
           <p className="vis-paquete-precio">{eur(p.precio)}</p>
@@ -190,9 +195,10 @@ function Checklist({ wa }) {
         ))}
       </div>
       <div className="vis-check-pie">
+        <div className="vis-barra" aria-hidden="true"><span style={{ width: `${(tengo.size / total) * 100}%` }} /></div>
         <strong>{T.checklist.de(tengo.size, total)}</strong>
         <span>{tengo.size === total ? T.checklist.completo : T.checklist.faltan(total - tengo.size)}</span>
-        <a href={wa(T.checklist.whatsappDetalle(tengo.size, faltan))} target="_blank" rel="noopener" className="vis-btn vis-btn-wa" onClick={() => registrarEvento("visado_whatsapp", { donde: "checklist", faltan: faltan.length })}>
+        <a href={wa(T.checklist.whatsappDetalle(tengo.size, faltan))} target="_blank" rel="noopener" className="vis-btn vis-btn-wa mov-brillo" onClick={() => registrarEvento("visado_whatsapp", { donde: "checklist", faltan: faltan.length })}>
           <Icono nombre="whatsapp" size={18} />
           {T.checklist.whatsapp}
         </a>
@@ -214,7 +220,7 @@ function Faq() {
             {f.q}
             <span aria-hidden="true">{abierta === i ? "−" : "+"}</span>
           </button>
-          {abierta === i && <p>{f.a}</p>}
+          {abierta === i && <p className="vis-entra">{f.a}</p>}
         </div>
       ))}
     </div>
@@ -224,12 +230,19 @@ function Faq() {
 export default function Visado() {
   useSEO(T.seo);
   const wa = (detalle) => whatsappDesde("visado", detalle);
+  const raiz = useRef(null);
+  useRevelar(raiz);
+  const pasoCifra = cascada();
+  const pasoPunto = cascada();
+  const pasoPaso = cascada();
 
   return (
-    <main className="vis">
+    <main className="vis" ref={raiz}>
       {/* La cara y la promesa */}
       <header className="vis-hero">
-        <div className="vis-hero-texto">
+        <span className="vis-orbe vis-orbe-a" aria-hidden="true" />
+        <span className="vis-orbe vis-orbe-b" aria-hidden="true" />
+        <div className="vis-hero-texto" data-revelar="izquierda">
           <p className="vis-rotulo vis-rotulo-sol">
             <Icono nombre="pasaporte" size={14} />
             {T.hero.rotulo}
@@ -237,7 +250,7 @@ export default function Visado() {
           <h1>{T.hero.titulo}</h1>
           <p className="vis-lead">{T.hero.lead}</p>
           <div className="vis-acciones">
-            <a href={wa(T.cierre.whatsappDetalle)} target="_blank" rel="noopener" className="vis-btn vis-btn-wa" onClick={() => registrarEvento("visado_whatsapp", { donde: "hero" })}>
+            <a href={wa(T.cierre.whatsappDetalle)} target="_blank" rel="noopener" className="vis-btn vis-btn-wa mov-brillo" onClick={() => registrarEvento("visado_whatsapp", { donde: "hero" })}>
               <Icono nombre="whatsapp" size={20} />
               {T.hero.whatsapp}
             </a>
@@ -247,7 +260,7 @@ export default function Visado() {
             </a>
           </div>
         </div>
-        <figure className="vis-hero-foto">
+        <figure className="vis-hero-foto" data-revelar="escala">
           <img src={T.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="eager" />
           <figcaption>{T.hero.quien}</figcaption>
         </figure>
@@ -255,27 +268,38 @@ export default function Visado() {
 
       {/* La prueba */}
       <section className="vis-cifras" aria-label="Resultados de Inspira Legal">
-        {CATEGORIAS_CASOS.map((c) => (
-          <div key={c.id} className="vis-cifra">
-            <strong>{c.cifra}</strong>
-            <span>{c.titulo}</span>
-          </div>
-        ))}
+        {CATEGORIAS_CASOS.map((c) => {
+          const n = Number(String(c.cifra).replace(/[^\d]/g, ""));
+          const prefijo = String(c.cifra).replace(/[\d.]/g, "");
+          return (
+            <div key={c.id} className="vis-cifra" data-revelar="escala" style={pasoCifra()}>
+              <span className="vis-cifra-icono"><Icono nombre={c.icono} size={16} /></span>
+              <strong>{n > 0 ? <CifraAnimada valor={n} prefijo={prefijo} /> : c.cifra}</strong>
+              <span>{c.titulo}</span>
+            </div>
+          );
+        })}
       </section>
 
       {/* La decisión */}
       <section className="vis-seccion" id="test">
-        <p className="vis-rotulo">{T.test.rotulo}</p>
-        <h2 className="vis-h2">{T.test.titulo}</h2>
-        <p className="vis-lead">{T.test.lead}</p>
-        <MiniTest />
+        <div data-revelar>
+          <p className="vis-rotulo">{T.test.rotulo}</p>
+          <h2 className="vis-h2">{T.test.titulo}</h2>
+          <p className="vis-lead">{T.test.lead}</p>
+        </div>
+        <div data-revelar="escala">
+          <MiniTest />
+        </div>
       </section>
 
       {/* Los vídeos */}
       <section className="vis-seccion vis-videos">
-        <h2 className="vis-h2">{T.videos.titulo}</h2>
-        <p className="vis-lead">{T.videos.lead}</p>
-        <div className="vis-videos-rejilla">
+        <div data-revelar>
+          <h2 className="vis-h2">{T.videos.titulo}</h2>
+          <p className="vis-lead">{T.videos.lead}</p>
+        </div>
+        <div className="vis-videos-rejilla" data-revelar="escala">
           <RejillaVideos lista={T.videos.lista} evento="visado_video" />
         </div>
       </section>
@@ -287,11 +311,13 @@ export default function Visado() {
 
       {/* Los paquetes */}
       <section className="vis-seccion vis-seccion-ancha" id="paquetes">
-        <p className="vis-rotulo">{T.paquetes.rotulo}</p>
-        <h2 className="vis-h2">{T.paquetes.titulo}</h2>
-        <p className="vis-lead">{T.paquetes.lead}</p>
+        <div data-revelar>
+          <p className="vis-rotulo">{T.paquetes.rotulo}</p>
+          <h2 className="vis-h2">{T.paquetes.titulo}</h2>
+          <p className="vis-lead">{T.paquetes.lead}</p>
+        </div>
         <Paquetes wa={wa} />
-        <div className="vis-estancia">
+        <div className="vis-estancia" data-revelar>
           <span className="vis-paquete-icono"><Icono nombre={ESTANCIA_ESTUDIOS.icono} size={20} /></span>
           <div>
             <strong>{T.paquetes.estanciaTitulo}</strong>
@@ -304,7 +330,7 @@ export default function Visado() {
           </div>
         </div>
 
-        <div className="vis-incluye">
+        <div className="vis-incluye" data-revelar>
           <h3>{T.incluye.titulo}</h3>
           <div className="vis-incluye-cols">
             <div>
@@ -329,12 +355,14 @@ export default function Visado() {
 
       {/* Cómo empezamos */}
       <section className="vis-seccion vis-como">
-        <p className="vis-rotulo">{T.como.rotulo}</p>
-        <h2 className="vis-h2">{T.como.titulo}</h2>
-        <p className="vis-lead">{T.como.lead}</p>
+        <div data-revelar>
+          <p className="vis-rotulo">{T.como.rotulo}</p>
+          <h2 className="vis-h2">{T.como.titulo}</h2>
+          <p className="vis-lead">{T.como.lead}</p>
+        </div>
         <ol className="vis-pasos">
           {T.como.pasos.map((p, i) => (
-            <li key={p.titulo}>
+            <li key={p.titulo} data-revelar="izquierda" style={pasoPaso()}>
               <span className="vis-paso-num">{i + 1}</span>
               <div>
                 <h3>
@@ -345,7 +373,7 @@ export default function Visado() {
             </li>
           ))}
         </ol>
-        <a href={CALENDLY_URL} target="_blank" rel="noopener" className="vis-btn vis-btn-sol" onClick={() => registrarEvento("visado_sesion", { donde: "como" })}>
+        <a href={CALENDLY_URL} target="_blank" rel="noopener" className="vis-btn vis-btn-sol mov-brillo" data-revelar onClick={() => registrarEvento("visado_sesion", { donde: "como" })}>
           <Icono nombre="calendario" size={18} />
           {T.hero.sesion}
         </a>
@@ -353,12 +381,14 @@ export default function Visado() {
 
       {/* Tipos de acompañamiento */}
       <section className="vis-seccion">
-        <h2 className="vis-h2">{T.acompanamiento.titulo}</h2>
-        <p className="vis-lead">{T.acompanamiento.lead}</p>
+        <div data-revelar>
+          <h2 className="vis-h2">{T.acompanamiento.titulo}</h2>
+          <p className="vis-lead">{T.acompanamiento.lead}</p>
+        </div>
         <div className="vis-puntos">
-          {T.acompanamiento.puntos.map((p) => (
-            <div key={p.titulo} className="vis-punto">
-              <span className="vis-paquete-icono"><Icono nombre={p.icono} size={18} /></span>
+          {T.acompanamiento.puntos.map((p, i) => (
+            <div key={p.titulo} className="vis-punto" data-revelar="escala" style={pasoPunto()}>
+              <span className="vis-paquete-icono mov-flota" style={{ "--r": `${i * 400}ms` }}><Icono nombre={p.icono} size={18} /></span>
               <strong>{p.titulo}</strong>
               <p>{p.texto}</p>
             </div>
@@ -368,24 +398,30 @@ export default function Visado() {
 
       {/* El checklist */}
       <section className="vis-seccion" id="checklist">
-        <p className="vis-rotulo">{T.checklist.rotulo}</p>
-        <h2 className="vis-h2">{T.checklist.titulo}</h2>
-        <p className="vis-lead">{T.checklist.lead}</p>
-        <Checklist wa={wa} />
+        <div data-revelar>
+          <p className="vis-rotulo">{T.checklist.rotulo}</p>
+          <h2 className="vis-h2">{T.checklist.titulo}</h2>
+          <p className="vis-lead">{T.checklist.lead}</p>
+        </div>
+        <div data-revelar="escala">
+          <Checklist wa={wa} />
+        </div>
       </section>
 
       {/* Preguntas */}
       <section className="vis-seccion">
-        <h2 className="vis-h2">{T.faq.titulo}</h2>
-        <Faq />
+        <div data-revelar>
+          <h2 className="vis-h2">{T.faq.titulo}</h2>
+          <Faq />
+        </div>
       </section>
 
       {/* La puerta */}
-      <section className="vis-cierre">
+      <section className="vis-cierre" data-revelar="escala">
         <h2 className="vis-h2">{T.cierre.titulo}</h2>
         <p className="vis-lead">{T.cierre.texto}</p>
         <div className="vis-acciones">
-          <a href={wa(T.cierre.whatsappDetalle)} target="_blank" rel="noopener" className="vis-btn vis-btn-wa" onClick={() => registrarEvento("visado_whatsapp", { donde: "cierre" })}>
+          <a href={wa(T.cierre.whatsappDetalle)} target="_blank" rel="noopener" className="vis-btn vis-btn-wa mov-brillo" onClick={() => registrarEvento("visado_whatsapp", { donde: "cierre" })}>
             <Icono nombre="whatsapp" size={20} />
             {T.cierre.whatsapp}
           </a>

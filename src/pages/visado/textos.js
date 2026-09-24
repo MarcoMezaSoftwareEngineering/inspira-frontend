@@ -54,11 +54,14 @@ export const VISADO = {
 
   videos: {
     titulo: "Te lo explico en un minuto",
-    lead: "La diferencia entre visado y estancia, las 30 horas de trabajo y las fechas que importan.",
+    lead: "Visado o estancia, la fórmula del dinero, qué pasa cuando deniegan y lo que cambió este año.",
     lista: [
       { id: "5", src: `${MEDIA}/video/carina-5.mp4`, poster: `${MEDIA}/video/carina-5.jpg`, titulo: "Visa de estudios vs. estancia por estudios" },
-      { id: "2", src: `${MEDIA}/video/carina-2.mp4`, poster: `${MEDIA}/video/carina-2.jpg`, titulo: "Máster + trabajo de 30 h a la semana" },
-      { id: "8", src: `${MEDIA}/video/carina-8.mp4`, poster: `${MEDIA}/video/carina-8.jpg`, titulo: "Cuándo postular: las fechas que importan" },
+      { id: "11", src: `${MEDIA}/video/carina-11.mp4`, poster: `${MEDIA}/video/carina-11.jpg`, titulo: "La fórmula mínima: 7.200 € + el máster + el pasaje" },
+      { id: "12", src: `${MEDIA}/video/carina-12.mp4`, poster: `${MEDIA}/video/carina-12.jpg`, titulo: "Medios económicos: cómo se demuestra el dinero" },
+      { id: "9", src: `${MEDIA}/video/carina-9.mp4`, poster: `${MEDIA}/video/carina-9.jpg`, titulo: "Requisitos del visado: plazo, documentos vigentes y carta de aceptación" },
+      { id: "10", src: `${MEDIA}/video/carina-10.mp4`, poster: `${MEDIA}/video/carina-10.jpg`, titulo: "Me denegaron el visado: qué dice la notificación y qué hacer" },
+      { id: "13", src: `${MEDIA}/video/carina-13.mp4`, poster: `${MEDIA}/video/carina-13.jpg`, titulo: "Actualización visa de estudios: antelación y títulos válidos" },
     ],
   },
 

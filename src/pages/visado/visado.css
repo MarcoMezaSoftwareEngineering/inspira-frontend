@@ -330,3 +330,67 @@
 .vis-cierre { max-width: 640px; margin: 0 auto; padding: 2.5rem 1.25rem 3.5rem; text-align: center; }
 .vis-cierre .vis-acciones { justify-content: center; }
 .vis-descargo { margin: 1.75rem 0 0; font-size: 0.72rem; line-height: 1.5; color: #7d95a1; }
+
+/* ── Movimiento ───────────────────────────────────────────────────────── */
+/* Solo opacity y transform. Con prefers-reduced-motion todo se ve quieto. */
+.vis-hero { position: relative; overflow: hidden; }
+.vis-hero > * { position: relative; z-index: 1; }
+.vis-orbe {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: vis-orbita 14s ease-in-out infinite alternate;
+}
+.vis-orbe-a { width: 320px; height: 320px; right: -80px; top: -60px; background: #96ccfc; }
+.vis-orbe-b { width: 260px; height: 260px; left: -90px; bottom: -80px; background: #f09c48; animation-delay: -6s; opacity: 0.35; }
+@keyframes vis-orbita {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-30px, 24px) scale(1.12); }
+}
+@keyframes vis-entra {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.vis-entra { animation: vis-entra 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.vis-btn { transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease; }
+.vis-btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
+.vis-btn-wa:hover { box-shadow: 0 18px 34px -12px rgba(37, 211, 102, 0.9); }
+.vis-btn-sol:hover { box-shadow: 0 18px 34px -12px rgba(240, 156, 72, 1); }
+.vis-btn:active { transform: scale(0.97); }
+.vis-cifra { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.vis-cifra:hover { transform: translateY(-3px); box-shadow: 0 22px 40px -24px rgba(0, 54, 72, 0.6); }
+.vis-cifra-icono { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 9px; background: #e6f2fe; color: #0a5873; margin-bottom: 0.2rem; }
+.vis-opcion {
+  animation: vis-entra 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.vis-opcion:hover { transform: translateX(3px); border-color: #b9d6ee; }
+.vis-opcion-on { transform: translateX(3px); box-shadow: 0 10px 24px -16px rgba(240, 156, 72, 0.9); }
+.vis-opcion-on svg { color: var(--sol); transform: scale(1.15); }
+.vis-opcion svg { transition: transform 0.18s ease, color 0.18s ease; }
+.vis-paquete { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+.vis-paquete:hover { transform: translateY(-4px); box-shadow: 0 26px 50px -28px rgba(0, 54, 72, 0.55); }
+.vis-paquete-destacado:hover { box-shadow: 0 30px 60px -28px rgba(240, 156, 72, 0.85); }
+.vis-paquete-cinta { animation: vis-entra 0.6s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.vis-punto { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.vis-punto:hover { transform: translateY(-3px); box-shadow: 0 22px 40px -26px rgba(0, 54, 72, 0.5); }
+.vis-check-item { transition: background 0.2s ease, color 0.2s ease; }
+.vis-check-item svg { transition: transform 0.2s ease, color 0.2s ease; }
+.vis-check-on svg { color: var(--ok); transform: scale(1.15) rotate(-6deg); }
+.vis-barra { height: 8px; margin-bottom: 0.4rem; border-radius: 999px; background: #e6f2fe; overflow: hidden; }
+.vis-barra span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--sol), #f7c58a); transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.vis-faq-item button span { transition: transform 0.2s ease; }
+.vis-faq-on button span { transform: rotate(180deg); }
+.vis-pasos li { transition: transform 0.2s ease; }
+.vis-pasos li:hover { transform: translateX(4px); }
+.vis-paso-num { transition: transform 0.2s ease, background 0.2s ease; }
+.vis-pasos li:hover .vis-paso-num { transform: scale(1.1); background: var(--sol); color: var(--noche); }
+@media (prefers-reduced-motion: reduce) {
+  .vis-orbe, .vis-entra, .vis-opcion, .vis-paquete-cinta { animation: none; }
+  .vis-btn, .vis-cifra, .vis-opcion, .vis-paquete, .vis-punto, .vis-pasos li, .vis-paso-num, .vis-barra span { transition: none; }
+  .vis-btn:hover, .vis-cifra:hover, .vis-opcion:hover, .vis-paquete:hover, .vis-punto:hover, .vis-pasos li:hover { transform: none; }
+}

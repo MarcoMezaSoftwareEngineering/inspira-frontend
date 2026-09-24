@@ -54,6 +54,11 @@ export const CARINA = {
       { id: "6", src: `${MEDIA}/video/carina-6.mp4`, poster: `${MEDIA}/video/carina-6.jpg`, titulo: "Carrera en España sin examen de admisión" },
       { id: "7", src: `${MEDIA}/video/carina-7.mp4`, poster: `${MEDIA}/video/carina-7.jpg`, titulo: "Beca AUIP para un máster en Valencia" },
       { id: "8", src: `${MEDIA}/video/carina-8.mp4`, poster: `${MEDIA}/video/carina-8.jpg`, titulo: "Cuándo postular: las fechas que importan" },
+      { id: "9", src: `${MEDIA}/video/carina-9.mp4`, poster: `${MEDIA}/video/carina-9.jpg`, titulo: "Requisitos del visado: plazo, documentos vigentes y carta de aceptación" },
+      { id: "10", src: `${MEDIA}/video/carina-10.mp4`, poster: `${MEDIA}/video/carina-10.jpg`, titulo: "Me denegaron el visado: qué dice la notificación y qué hacer" },
+      { id: "11", src: `${MEDIA}/video/carina-11.mp4`, poster: `${MEDIA}/video/carina-11.jpg`, titulo: "La fórmula mínima: 7.200 € + el máster + el pasaje" },
+      { id: "12", src: `${MEDIA}/video/carina-12.mp4`, poster: `${MEDIA}/video/carina-12.jpg`, titulo: "Medios económicos: cómo se demuestra el dinero" },
+      { id: "13", src: `${MEDIA}/video/carina-13.mp4`, poster: `${MEDIA}/video/carina-13.jpg`, titulo: "Actualización visa de estudios: antelación y títulos válidos" },
     ],
   },
 

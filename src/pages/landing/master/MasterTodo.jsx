@@ -16,7 +16,9 @@ import { CarruselVideos } from "../../../components/common/VideoVertical";
 import { useSEO } from "../../../hooks/useSEO";
 import { CATEGORIAS_CASOS } from "../../../config/casos";
 import { CALENDLY_URL, whatsappDesde } from "../../../config/contacto";
-import { ADEMAS, BENEFICIOS, FAQ, INCLUYE } from "../../../config/paqueteMaster2027";
+import { ADEMAS, BENEFICIOS, FAQ, INCLUYE, LISTAS, MATRICULA } from "../../../config/paqueteMaster2027";
+import { IPREM_REFERENCIA } from "../../../config/costeVida";
+import { eur } from "../../../config/paqueteMaster2027Resumen";
 import { registrarEvento } from "../../../lib/analytics";
 import { cascada, useRevelar } from "../../../lib/revelar";
 import { CifraAnimada, ESTILOS_M27 } from "../master2027/comunes";
@@ -34,12 +36,55 @@ import logo from "../../../assets/images/logo.png";
 import fotoBandera from "../../../assets/images/landing/master-2027/foto-bandera-espana.webp";
 import ilusAsesora from "../../../assets/images/landing/master-2027/ilus-asesora-auriculares.webp";
 import ilusLupa from "../../../assets/images/landing/master-2027/ilus-documentos-lupa.webp";
-import capInforme from "../../../assets/images/portal/master-informe.webp";
-import capPostulaciones from "../../../assets/images/portal/master-postulaciones.webp";
 import "../../../styles/movimiento.css";
 import "./master.css";
 
-const CAPTURAS = { informe: capInforme, postulaciones: capPostulaciones };
+// Los tres niveles de matrícula, calculados sobre la tabla oficial de la
+// landing del paquete: el mínimo de cada lista y cuántas comunidades tiene.
+const NIVELES = LISTAS.map((l) => {
+  const filas = MATRICULA.filas.filter((f) => f.lista === l.id);
+  const minimos = filas.filter((f) => f.min).map((f) => f.min);
+  return { id: l.id, nombre: l.nombre, n: filas.length, desde: minimos.length ? Math.min(...minimos) : null, cadaUni: filas.some((f) => f.cadaUniversidad) };
+});
+
+/** Dos tarjetas del portal reconstruidas con datos de muestra: nítidas, no
+ *  capturas desenfocadas. Lo que enseñan existe tal cual en el portal. */
+function PortalMock({ tipo }) {
+  const P = T.portal;
+  if (tipo === "informe") {
+    const d = P.informe;
+    return (
+      <div className="mst-portal" aria-label={`${P.ejemplo}: ${d.cab}`}>
+        <div className="mst-portal-cab"><span>{d.cab}</span><b>{d.pagina}</b></div>
+        <p className="mst-portal-titulo">{d.master}</p>
+        <p className="mst-portal-sub">{d.uni}</p>
+        <div className="mst-portal-datos">
+          {d.datos.map(([k, v]) => (
+            <span key={k}>{k} <b>{v}</b></span>
+          ))}
+        </div>
+        <span className="mst-portal-chip">{d.chip}</span>
+        <small>{P.ejemplo}</small>
+      </div>
+    );
+  }
+  const d = P.postulaciones;
+  return (
+    <div className="mst-portal" aria-label={`${P.ejemplo}: ${d.cab}`}>
+      <div className="mst-portal-cab"><span>{d.cab}</span><b>{d.portal}</b></div>
+      <ol className="mst-portal-linea">
+        {d.hitos.map(([k, v, estado]) => (
+          <li key={k} className={estado ? `mst-portal-${estado}` : ""}>
+            <span>{k}</span>
+            {v && <b>{v}</b>}
+          </li>
+        ))}
+      </ol>
+      <span className="mst-portal-chip mst-portal-chip-aviso">{d.chip}</span>
+      <small>{P.ejemplo}</small>
+    </div>
+  );
+}
 
 const irA = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -91,6 +136,8 @@ export default function MasterTodo() {
   useParallax(foto);
   const wa = (detalle) => whatsappDesde("master-todo", detalle);
   const [calculadoraEnPantalla, setCalculadoraEnPantalla] = useState(false);
+  const [verMatricula, setVerMatricula] = useState(false);
+  const [verCalculadora, setVerCalculadora] = useState(false);
 
   useEffect(() => {
     fijarPagina("master_todo");
@@ -106,6 +153,7 @@ export default function MasterTodo() {
   const pasoOficial = cascada();
   const pasoIncluye = cascada(40, 360);
   const pasoComo = cascada(80, 480);
+  const pasoError = cascada(60, 300);
 
   return (
     <div className="mst" ref={raiz}>
@@ -143,7 +191,7 @@ export default function MasterTodo() {
             </a>
           </div>
           <nav className="mst-atajos" aria-label="Secciones">
-            {[["porque-espana", "Por qué España"], ["oficial", "Máster oficial"], ["cuesta", "Cuánto cuesta"], ["hacemos", "Qué hacemos"], ["como", "Cómo"], ["videos", "Vídeos"]].map(([id, t]) => (
+            {[["porque-espana", "Por qué España"], ["oficial", "Máster oficial"], ["cuesta", "Cuánto cuesta"], ["errores", "Errores comunes"], ["hacemos", "Qué hacemos"], ["como", "Cómo"], ["videos", "Vídeos"]].map(([id, t]) => (
               <button type="button" key={id} onClick={() => irA(id)}>{t}</button>
             ))}
           </nav>
@@ -210,6 +258,14 @@ export default function MasterTodo() {
           <h2 className="mst-h2">{T.oficial.titulo}</h2>
           <p className="mst-lead">{T.oficial.lead}</p>
         </div>
+        <ul className="mst-sellos" data-revelar>
+          {T.oficial.sellos.map((s) => (
+            <li key={s.texto}>
+              <Icono nombre={s.icono} size={14} />
+              {s.texto}
+            </li>
+          ))}
+        </ul>
         <div className="mst-rejilla-3">
           {T.oficial.puntos.map((p) => (
             <div key={p.titulo} className="mst-tarjeta mst-tarjeta-vidrio" data-revelar="escala" style={pasoOficial()}>
@@ -223,22 +279,74 @@ export default function MasterTodo() {
       </section>
 
       {/* Cuánto cuesta */}
-      <section className="mst-seccion mst-seccion-ancha" id="cuesta">
+      <section className="mst-seccion" id="cuesta">
         <Numeral n="03" />
         <div data-revelar>
           <p className="mst-rotulo">{T.cuesta.rotulo}</p>
           <h2 className="mst-h2">{T.cuesta.titulo}</h2>
           <p className="mst-lead">{T.cuesta.lead}</p>
         </div>
+        <div className="mst-niveles">
+          {NIVELES.map((n, i) => (
+            <div key={n.id} className={`mst-nivel mst-nivel-${n.id}`} data-revelar="escala" style={{ "--r": `${i * 90}ms` }}>
+              <span className="mst-nivel-nombre">{n.nombre}</span>
+              <span className="mst-nivel-n">{T.cuesta.comunidades(n.n)}</span>
+              {n.desde && (
+                <strong>
+                  <small>{T.cuesta.desde}</small> {eur(n.desde)}
+                </strong>
+              )}
+              <span className="mst-nivel-pie">{T.cuesta.alAnio}{n.cadaUni ? ` · ${T.cuesta.cadaUni}` : ""}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mst-nota" data-revelar>{T.cuesta.vivir(eur(IPREM_REFERENCIA.mensual))} {T.cuesta.nota}</p>
+        <div className="mst-acciones mst-acciones-izq" data-revelar>
+          <button type="button" className={`mst-btn ${verMatricula ? "mst-btn-claro" : "mst-btn-noche"}`} aria-expanded={verMatricula} onClick={() => { setVerMatricula((v) => !v); registrarEvento("master_todo_matricula", { abrir: !verMatricula }); }}>
+            <Icono nombre="mapa" size={16} />
+            {verMatricula ? T.cuesta.ocultarMatricula : T.cuesta.verMatricula}
+          </button>
+          <button type="button" className={`mst-btn ${verCalculadora ? "mst-btn-claro" : "mst-btn-sol"}`} aria-expanded={verCalculadora} onClick={() => { setVerCalculadora((v) => !v); registrarEvento("master_todo_calculadora", { abrir: !verCalculadora }); }}>
+            <Icono nombre="euro" size={16} />
+            {verCalculadora ? T.cuesta.ocultarCalculadora : T.cuesta.calcular}
+          </button>
+        </div>
       </section>
-      <div className="mst-m27" data-revelar>
-        <MatriculaComunidades />
-        <Calculadora onEnPantalla={setCalculadoraEnPantalla} />
-      </div>
+      {verMatricula && (
+        <div className="mst-m27 mst-entra">
+          <MatriculaComunidades />
+        </div>
+      )}
+      {verCalculadora && (
+        <div className="mst-m27 mst-entra">
+          <Calculadora onEnPantalla={setCalculadoraEnPantalla} abiertaInicial />
+        </div>
+      )}
+
+      {/* Errores comunes */}
+      <section className="mst-seccion mst-seccion-noche" id="errores">
+        <Numeral n="04" claro />
+        <div data-revelar>
+          <p className="mst-rotulo mst-rotulo-sol">{T.errores.rotulo}</p>
+          <h2 className="mst-h2">{T.errores.titulo}</h2>
+          <p className="mst-lead">{T.errores.lead}</p>
+        </div>
+        <div className="mst-errores">
+          {T.errores.lista.map((e) => (
+            <article key={e.titulo} className="mst-error" data-revelar="escala" style={pasoError()}>
+              <span className="mst-icono mst-icono-sol"><Icono nombre={e.icono} size={20} /></span>
+              <h3>{e.titulo}</h3>
+              <p className="mst-error-mal"><b>{T.errores.error}</b> {e.error}</p>
+              <p className="mst-error-bien"><b>{T.errores.nosotros}</b> {e.solucion}</p>
+            </article>
+          ))}
+        </div>
+        <p className="mst-error-pista" aria-hidden="true">{T.errores.pista} →</p>
+      </section>
 
       {/* Qué hacemos */}
       <section className="mst-seccion lfx-puntos" id="hacemos">
-        <Numeral n="04" />
+        <Numeral n="05" />
         <div className="lfx-cab-ilus" data-revelar>
           <div>
             <p className="mst-rotulo">{T.hacemos.rotulo}</p>
@@ -270,7 +378,7 @@ export default function MasterTodo() {
 
       {/* Cómo */}
       <section className="mst-seccion lfx-banda lfx-banda-sol" id="como">
-        <Numeral n="05" />
+        <Numeral n="06" />
         <div className="lfx-cab-ilus" data-revelar>
           <div>
             <p className="mst-rotulo">{T.como.rotulo}</p>
@@ -291,7 +399,7 @@ export default function MasterTodo() {
                   <p><b>{T.como.tuEtiqueta}</b> {p.tu}</p>
                   <p><b>{T.como.nosotrosEtiqueta}</b> {p.nosotros}</p>
                 </div>
-                {p.captura && <img src={CAPTURAS[p.captura]} alt="" className="lfx-captura" loading="lazy" width="840" height="560" />}
+                {p.captura && <PortalMock tipo={p.captura} />}
               </div>
             </li>
           ))}
@@ -300,7 +408,7 @@ export default function MasterTodo() {
 
       {/* Por qué nosotros */}
       <section className="mst-seccion mst-seccion-ancha" id="nosotros">
-        <Numeral n="06" />
+        <Numeral n="07" />
         <div data-revelar>
           <p className="mst-rotulo">{T.nosotros.rotulo}</p>
           <h2 className="mst-h2">{T.nosotros.titulo}</h2>
@@ -313,7 +421,7 @@ export default function MasterTodo() {
 
       {/* Vídeos */}
       <section className="mst-seccion" id="videos">
-        <Numeral n="07" />
+        <Numeral n="08" />
         <div data-revelar>
           <p className="mst-rotulo">{T.videos.rotulo}</p>
           <h2 className="mst-h2">{T.videos.titulo}</h2>
@@ -347,6 +455,9 @@ export default function MasterTodo() {
             </a>
           </div>
           <p className="mst-nota mst-nota-clara">{T.precio.sesionTexto}</p>
+          <a href={T.precio.paquetesHref} className="mst-btn mst-btn-borde mst-btn-paquetes" onClick={() => registrarEvento("master_todo_paquetes", {})}>
+            {T.precio.paquetes} →
+          </a>
         </div>
       </section>
 

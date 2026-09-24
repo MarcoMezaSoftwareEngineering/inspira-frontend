@@ -36,7 +36,7 @@ const P = PRECIOS;
 
 // Cifras externas que citan los textos (hechos verificados).
 const MATRICULA_DESDE = 730;
-const TASA_PREVIA = [27, 219];
+export const TASA_PREVIA = [27, 219];
 
 const CITA = Object.fromEntries(CITAS_ESPANA.map((c) => [c.id, c.precio]));
 const TOTAL_CITAS = CITAS_ESPANA.reduce((s, c) => s + c.precio, 0);

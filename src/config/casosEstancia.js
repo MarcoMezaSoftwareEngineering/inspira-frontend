@@ -12,8 +12,15 @@
 // con `anio: 2025` cuando lleguen: la landing agrupa por año sola.
 //
 // `presentada` y `resuelta` solo cuando la resolución las dice: de ahí sale
-// «resuelta en N días», y un número inventado aquí sería una mentira en la
-// web. `resuelta` es la fecha de la resolución; `vigencia` la que autoriza.
+// «resuelta en N días». Cuando la resolución no trae la fecha de presentación,
+// `resueltaDias` es lo que Inspira sabe de su propio expediente (Marco,
+// 25/09/2026: Yuri y Liseth «un mes», Denisse 26 días). `resuelta` es la
+// fecha de la resolución; `vigencia` la que autoriza.
+//
+// `resolucion` es la foto de la resolución con los datos personales tapados
+// (apellidos, NIE, nº de expediente, dirección, CSV) y lo importante subrayado.
+// Viven en /var/www/inspira-media/resoluciones, fuera del repositorio.
+const RESOLUCIONES = "https://www.inspira-legal.cloud/media/resoluciones";
 export const CASOS_ESTANCIA = [
   {
     id: "brian-sevilla-2026",
@@ -26,6 +33,7 @@ export const CASOS_ESTANCIA = [
     presentada: "2026-09-08",
     resuelta: "2026-09-10",
     vigencia: { desde: "2026-10-01", hasta: "2027-11-30" },
+    resolucion: `${RESOLUCIONES}/brian-2026.jpg`,
   },
   {
     id: "yuri-valencia-2026",
@@ -37,7 +45,9 @@ export const CASOS_ESTANCIA = [
     universidad: "Universitat Politècnica de València",
     presentada: null,
     resuelta: "2026-07-23",
+    resueltaDias: 30,
     vigencia: { desde: "2026-08-01", hasta: "2028-09-15" },
+    resolucion: `${RESOLUCIONES}/yuri-2026.jpg`,
   },
   {
     id: "liseth-valencia-2026",
@@ -49,7 +59,9 @@ export const CASOS_ESTANCIA = [
     universidad: "Universitat Politècnica de València",
     presentada: null,
     resuelta: "2026-07-23",
+    resueltaDias: 30,
     vigencia: { desde: "2026-08-01", hasta: "2028-09-15" },
+    resolucion: `${RESOLUCIONES}/liseth-2026.jpg`,
   },
   {
     id: "denisse-madrid-2026",
@@ -61,7 +73,9 @@ export const CASOS_ESTANCIA = [
     universidad: "Universidad Rey Juan Carlos",
     presentada: "2026-06-10",
     resuelta: null,
+    resueltaDias: 26,
     vigencia: { desde: "2026-06-10", hasta: "2027-09-15" },
+    resolucion: `${RESOLUCIONES}/denisse-2026.jpg`,
   },
   {
     id: "jhonatan-alicante-2026",
@@ -75,6 +89,7 @@ export const CASOS_ESTANCIA = [
     presentada: "2026-07-09",
     resuelta: "2026-09-16",
     vigencia: { desde: "2026-07-16", hasta: "2027-07-15" },
+    resolucion: `${RESOLUCIONES}/jhonatan-2026.jpg`,
   },
 ];
 
@@ -86,12 +101,16 @@ export const TIPO_ESTANCIA = {
 const DIA = 86400000;
 const fecha = (iso) => (iso ? new Date(`${iso}T00:00:00`) : null);
 
-/** Días entre la presentación y la resolución, si la resolución dice las dos. */
+/**
+ * Días entre la presentación y la resolución: los que dicen las dos fechas de
+ * la resolución y, si falta una, los que Inspira sabe de su expediente
+ * (`resueltaDias`). Sin ninguno de los dos, nada: no se inventa.
+ */
 export function diasResolucion(c) {
   const a = fecha(c.presentada);
   const b = fecha(c.resuelta);
-  if (!a || !b || b < a) return null;
-  return Math.round((b - a) / DIA);
+  if (a && b && b >= a) return Math.round((b - a) / DIA);
+  return Number.isFinite(c.resueltaDias) && c.resueltaDias > 0 ? c.resueltaDias : null;
 }
 
 /** Meses de vigencia autorizados, redondeados. */

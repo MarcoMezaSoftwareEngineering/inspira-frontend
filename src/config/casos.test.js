@@ -78,6 +78,8 @@ describe("CASOS_ESTANCIA", () => {
       for (const clave of ["nie", "expediente", "pasaporte", "apellido", "apellidos", "registro"]) {
         expect(c, `${c.id} publica ${clave}`).not.toHaveProperty(clave);
       }
+      // La foto es la tapada, servida desde /media, nunca la subida original.
+      if (c.resolucion) expect(c.resolucion, c.id).toMatch(/^https:\/\/www\.inspira-legal\.cloud\/media\/resoluciones\/[a-z0-9-]+\.jpg$/);
     }
   });
   it("tipo, oficina y fechas con forma", () => {
@@ -96,8 +98,10 @@ describe("CASOS_ESTANCIA", () => {
   it("los días de resolución solo salen cuando constan las dos fechas", () => {
     const brian = CASOS_ESTANCIA.find((c) => c.id === "brian-sevilla-2026");
     expect(diasResolucion(brian)).toBe(2);
+    // Denisse: la resolución no trae la fecha de resolución; vale lo que sabe Inspira.
     const denisse = CASOS_ESTANCIA.find((c) => c.id === "denisse-madrid-2026");
-    expect(diasResolucion(denisse)).toBeNull();
+    expect(diasResolucion(denisse)).toBe(26);
+    expect(diasResolucion({ presentada: null, resuelta: "2026-07-23", vigencia: {} })).toBeNull();
     expect(etiquetaTipo(CASOS_ESTANCIA.find((c) => c.id === "jhonatan-alicante-2026"))).toBe("Prórroga n.º 1");
   });
 });

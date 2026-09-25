@@ -11,8 +11,8 @@
 // que ve la ficha de la solicitud): aquí solo se ven todos juntos y se editan
 // en línea. Los cambios quedan en el historial del expediente.
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, ExternalLink, RefreshCw, Search } from "lucide-react";
-import { boGET, boPATCH } from "../../../services/backofficeApi";
+import { Check, ExternalLink, FileText, RefreshCw, Search } from "lucide-react";
+import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
 import { navigate } from "../../../services/navigate";
 import { Pagina, Cabecera, Cuerpo, Seccion, Boton, Chip, Pill, Vacio, Esqueleto } from "../ui";
 
@@ -52,7 +52,7 @@ function Celda({ valor, campo, onGuardar, ancho = "w-32", tipo = "text", placeho
   );
 }
 
-function Fila({ e, onGuardar, onConsultado, guardando }) {
+function Fila({ e, onGuardar, onConsultado, onLeer, guardando }) {
   const toca = tocaRevisar(e);
   const d = dias(e.consulta_fecha);
   return (
@@ -104,6 +104,7 @@ function Fila({ e, onGuardar, onConsultado, guardando }) {
           <a href={SEDE} target="_blank" rel="noopener" className="ase-btn ase-btn-fantasma ase-btn-xs" style={{ textDecoration: "none" }} title="Abrir la sede (infoext2)">
             <ExternalLink strokeWidth={2.2} /> Sede
           </a>
+          <Boton tono="fantasma" tam="xs" icono={FileText} onClick={onLeer} title="Leer el nº I… y la fecha del justificante de MERCURIO">PDF</Boton>
         </div>
       </td>
     </tr>
@@ -146,6 +147,28 @@ export default function SeguimientoEstancias() {
     }
   };
 
+  // El justificante de MERCURIO trae el nº I… y la fecha de presentación: se
+  // leen del PDF (uno o todos) en vez de teclearlos.
+  const [leyendo, setLeyendo] = useState(false);
+  const leerJustificantes = async (id = null) => {
+    setLeyendo(true);
+    try {
+      const r = id
+        ? await boPOST(`/backoffice/solicitudes/estancias/seguimiento/${id}/leer-justificante`, {})
+        : await boPOST("/backoffice/solicitudes/estancias/seguimiento/leer-justificantes", {});
+      if (!r?.ok) throw new Error(r?.msg || "No se pudo leer");
+      const n = id ? (r.resultado?.guardado?.length ? 1 : 0) : r.leidos;
+      const fallo = id && !r.resultado?.ok ? ` · ${r.resultado.motivo}` : "";
+      setAviso({ tono: n ? "verde" : "gris", texto: id ? (n ? "Leído del justificante" : `Nada nuevo${fallo}`) : `${n} ${n === 1 ? "estancia rellenada" : "estancias rellenadas"} desde el justificante` });
+      await cargar();
+    } catch (e) {
+      setAviso({ tono: "rojo", texto: e.message });
+    } finally {
+      setLeyendo(false);
+      setTimeout(() => setAviso(null), 3500);
+    }
+  };
+
   const lista = useMemo(() => {
     if (!estancias) return [];
     const q = busca.trim().toLowerCase();
@@ -166,7 +189,7 @@ export default function SeguimientoEstancias() {
       <Cabecera
         eyebrow="Procesos · Estancia por estudios"
         titulo="Seguimiento en la sede"
-        subtitulo="Nombre, pasaporte, NIE, fecha de ingreso, nº de registro (I-…), nº de expediente y lo que dice la consulta en infoext2. Se edita en línea y queda en el historial del expediente. Repaso semanal: marca «Consultado hoy»."
+        subtitulo="Nombre, pasaporte, NIE, fecha de ingreso, nº de registro (I…), nº de expediente y lo que dice la consulta en infoext2. El nº I… y la fecha se leen solos del justificante de MERCURIO; el resto se edita en línea y queda en el historial. Repaso semanal: marca «Consultado hoy»."
         stats={[
           { n: n.revisar, l: "toca revisar", tono: n.revisar ? "ambar" : "verde" },
           { n: n.presentadas, l: "presentadas" },
@@ -178,6 +201,7 @@ export default function SeguimientoEstancias() {
             <a href={SEDE} target="_blank" rel="noopener" className="ase-btn ase-btn-secundario ase-btn-sm" style={{ textDecoration: "none" }}>
               <ExternalLink strokeWidth={2.2} /> Abrir la sede
             </a>
+            <Boton tono="fantasma" tam="sm" icono={FileText} cargando={leyendo} onClick={() => leerJustificantes()}>Leer de los justificantes</Boton>
             <Boton tono="fantasma" tam="sm" icono={RefreshCw} onClick={cargar}>Actualizar</Boton>
           </div>
         }
@@ -225,6 +249,7 @@ export default function SeguimientoEstancias() {
                       guardando={guardando === e.id_solicitud}
                       onGuardar={(datos) => guardar(e.id_solicitud, datos)}
                       onConsultado={() => guardar(e.id_solicitud, { consultado: true })}
+                      onLeer={() => leerJustificantes(e.id_solicitud)}
                     />
                   ))}
                 </tbody>

@@ -11,6 +11,7 @@
 // Reglas y textos en ./textos.js y en config (visaOEstancia, metodo,
 // serviciosProceso, casos, plataforma). Nada escrito aquí.
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Icono from "../../components/common/Icono";
 import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
 import { CarruselVideos } from "../../components/common/VideoVertical";
@@ -87,6 +88,39 @@ function AppMock() {
       </div>
       <small className="est-appmock-pie">{A.ejemplo}</small>
     </div>
+  );
+}
+
+/** La resolución a pantalla completa. Por portal a <body>: el envoltorio de
+ *  página lleva transformaciones y un position: fixed dentro se mide mal. */
+function VisorResolucion({ caso, onCerrar }) {
+  useEffect(() => {
+    const tecla = (e) => e.key === "Escape" && onCerrar();
+    window.addEventListener("keydown", tecla);
+    const antes = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", tecla);
+      document.body.style.overflow = antes;
+    };
+  }, [onCerrar]);
+  return createPortal(
+    <div className="est-visor" onClick={onCerrar} role="dialog" aria-modal="true" aria-label={T.resultados.resolucionDe(caso.nombre)}>
+      <div className="est-visor-caja" onClick={(e) => e.stopPropagation()}>
+        <header className="est-visor-cab">
+          <div>
+            <strong>{T.resultados.resolucionDe(caso.nombre)}</strong>
+            <small>{etiquetaTipo(caso)} · {T.resultados.oficina(caso.oficina)}</small>
+          </div>
+          <button type="button" className="est-visor-cerrar" onClick={onCerrar} aria-label={T.resultados.cerrar}>×</button>
+        </header>
+        <div className="est-visor-cuerpo">
+          <img src={caso.resolucion} alt={`${T.resultados.resolucionDe(caso.nombre)}, con los datos personales tapados`} loading="eager" />
+        </div>
+        <p className="est-visor-pie">{T.resultados.tapado}</p>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -196,6 +230,11 @@ export default function Estancia() {
   const numero = (c) => Number(String(c.cifra).replace(/[^\d]/g, ""));
   const prefijo = (c) => String(c.cifra).replace(/[\d.]/g, "");
   const precio = eur(ESTANCIA_ESTUDIOS.precio);
+  const [visor, setVisor] = useState(null);
+  const abrirVisor = (c) => {
+    setVisor(c);
+    registrarEvento("estancia_resolucion", { id: c.id });
+  };
 
   return (
     <main className="est" ref={raiz}>
@@ -426,6 +465,12 @@ export default function Estancia() {
                       {dias === null && c.presentada && <li><Icono nombre="documento" size={14} /> {T.resultados.presentada(fmtIso(c.presentada))}</li>}
                       <li><Icono nombre="maletin" size={14} /> {T.resultados.trabajo}</li>
                     </ul>
+                    {c.resolucion && (
+                      <button type="button" className="est-resolucion-foto" onClick={() => abrirVisor(c)} aria-label={`${T.resultados.verResolucion}: ${c.nombre}`}>
+                        <img src={c.resolucion} alt="" loading="lazy" width="1100" height="1519" />
+                        <span><Icono nombre="lupa" size={14} /> {T.resultados.verResolucion}</span>
+                      </button>
+                    )}
                   </article>
                 );
               })}
@@ -558,6 +603,8 @@ export default function Estancia() {
         </div>
         <p className="est-descargo">{T.descargo}</p>
       </section>
+
+      {visor && <VisorResolucion caso={visor} onCerrar={() => setVisor(null)} />}
 
       <BarraCta
         whatsapp={wa(T.hero.whatsappDetalle)}

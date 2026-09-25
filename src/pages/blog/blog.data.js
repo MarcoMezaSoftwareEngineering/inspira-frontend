@@ -13,6 +13,103 @@ export const AUTOR_POR_DEFECTO = {
 
 export const POSTS = [
   {
+    // La guía que Google no encontraba (Marco, 25/09/2026): la búsqueda
+    // «estancia por estudios abogados españa» citaba a otros despachos porque
+    // Inspira no tenía una página que respondiera, punto por punto, a lo que se
+    // pregunta. Cada cifra sale de config (IPREM, plazos, tasas) o de las
+    // resoluciones reales de 2026 (config/casosEstancia.js). Referencias
+    // legales: las que citan esas mismas resoluciones.
+    slug: "estancia-por-estudios-espana-requisitos-plazos",
+    titulo: "Estancia por estudios en España en 2026: requisitos, plazos, cuánto tarda y cómo se presenta",
+    extracto:
+      "La guía completa de la autorización de estancia por estudios: quién puede pedirla desde España, los documentos, el dinero (IPREM), los 90 días, cuánto tarda Extranjería, el permiso de trabajo de 30 horas, la TIE y la prórroga. Con datos de expedientes resueltos en 2026.",
+    fecha: "2026-09-25",
+    actualizado: "2026-09-25",
+    categoria: "Extranjería",
+    minutos: 9,
+    novedad: true,
+    content: [
+      { type: "p", text: "Si vas a estudiar en España más de 90 días necesitas una autorización de estancia por estudios. Se puede pedir de dos maneras: con un visado desde el consulado de tu país, o directamente en España, ante la Oficina de Extranjería, si has entrado como turista y todavía estás en plazo. Esta guía explica la segunda vía —la estancia por estudios presentada desde España— con lo que exige la normativa y con lo que vemos en los expedientes que presentamos cada semana." },
+      { type: "nota", text: "Normativa que la regula: Ley Orgánica 4/2000, de 11 de enero, y su Reglamento, el Real Decreto 1155/2024, de 19 de noviembre (artículos 35 y 53 para los requisitos, 57 para el trabajo, 193 para la competencia y 197.2.a para la prórroga). Son los artículos que citan las propias resoluciones de las Delegaciones del Gobierno." },
+
+      { type: "h2", text: "Qué es la estancia por estudios y para quién es" },
+      { type: "p", text: "Es la autorización que permite a un extranjero no comunitario permanecer en España para cursar estudios a tiempo completo en un centro autorizado: un máster oficial, un grado, formación profesional o un programa de investigación. No es una residencia —no computa para la nacionalidad— pero sí permite trabajar y, al terminar, pasar a residente." },
+      { type: "p", text: "Puede pedirla desde España quien ya está aquí en situación regular (normalmente como turista, con los 90 días del espacio Schengen) y tiene una carta de admisión de un centro reconocido. Si todavía estás en tu país, la vía es el visado de estudios en el consulado; el permiso es el mismo, cambia dónde se presenta y cómo se acredita el dinero." },
+
+      { type: "h2", text: "Requisitos principales" },
+      { type: "ul", items: [
+        "Admisión en un centro de enseñanza autorizado, a tiempo completo, en un programa oficial o reconocido (carta de admisión o matrícula reciente).",
+        "Medios económicos: el 100 % del IPREM por cada mes de estancia, es decir, 600 € al mes y 7.200 € para un curso completo, acreditados con un extracto sellado de una cuenta a tu nombre.",
+        "Seguro médico con cobertura equivalente a la sanidad pública española durante toda la estancia: sin copagos ni periodos de carencia.",
+        "Pasaporte en vigor y, si entraste como turista, estar todavía en plazo: la solicitud se presenta dentro de esos 90 días.",
+        "Certificado de antecedentes penales de los países donde hayas residido en los últimos cinco años, apostillado (para estancias de más de seis meses).",
+        "Certificado médico en impreso oficial, con la fórmula sobre el Reglamento Sanitario Internacional de 2005 (para estancias de más de seis meses).",
+        "Formulario oficial y pago de la tasa de la solicitud (11 €).",
+      ] },
+
+      { type: "h2", text: "Cuánto dinero hay que demostrar" },
+      { type: "p", text: "La regla es el 100 % del IPREM mensual por cada mes que dure la estancia: 600 € al mes en 2026, 7.200 € para un curso de doce meses. Extranjería no exige el historial de seis meses ni justificar el origen del dinero, que es lo que piden los consulados; lo que quiere ver es el saldo en una cuenta abierta en España a tu nombre, en un extracto emitido y sellado por la oficina, con fecha reciente. Una captura de la app del banco no vale." },
+
+      { type: "h2", text: "Cuánto tiempo dura la estancia por estudios" },
+      { type: "p", text: "La autorización se concede por la duración de los estudios: normalmente el curso académico completo y, en los másteres de dos años, hasta el final del segundo curso. Después se prorroga cada año mientras sigas matriculado y cumpliendo los requisitos. Ejemplos de resoluciones de 2026 de nuestros asesorados: una autorización inicial en Sevilla válida hasta el 30 de noviembre de 2027; dos en Valencia, para un máster de dos años en la Universitat Politècnica, válidas hasta el 15 de septiembre de 2028; una prórroga en Alicante por un año más, hasta el 15 de julio de 2027." },
+      { type: "p", text: "La prórroga se pide antes de que caduque la autorización, con la matrícula del curso siguiente y el aprovechamiento de los estudios, y solo puede presentarse por vía telemática (sede MERCURIO), como recuerdan las propias resoluciones al citar el artículo 197.2.a del Reglamento." },
+
+      { type: "h2", text: "Cuánto tarda Extranjería en resolver" },
+      { type: "p", text: "El plazo habitual va de uno a tres meses desde la presentación, y depende de la oficina y de la época. Con nuestros expedientes de 2026: dos días en Sevilla, veintiséis días en Madrid, alrededor de un mes en Valencia y sesenta y nueve días una prórroga en Alicante. Son datos de casos reales, no una promesa: cada oficina lleva su ritmo, y por eso conviene presentar con margen." },
+
+      { type: "h2", text: "Plazos: los 90 días y los dos meses de antelación" },
+      { type: "p", text: "Si entraste como turista tienes 90 días de estancia regular, y la solicitud tiene que presentarse dentro de ellos. Además, Extranjería la quiere con dos meses de antelación al inicio de las clases; con menos margen se presenta igual, pero acompañada de un escrito de excepcionalidad que explique por qué. La cuenta práctica es: fecha de llegada + 90 días − dos meses = tu último día para presentar con tranquilidad. Entre abrir la cuenta, empadronarte, reunir los documentos y presentar suelen pasar semanas, así que lo sensato es llegar con casi todo listo." },
+      { type: "enlace", href: "/estancia", texto: "Calcula tu último día para presentar con tu fecha de entrada" },
+
+      { type: "h2", text: "Cómo se presenta: paso a paso" },
+      { type: "ol", items: [
+        "Diagnóstico: comprobar que tu centro y tu carta sirven para la estancia y que llegas en plazo.",
+        "Cuenta bancaria en España a tu nombre con el importe del IPREM, y extracto sellado en la oficina.",
+        "Empadronamiento y seguro médico sin copagos ni carencias.",
+        "Antecedentes penales apostillados y certificado médico en impreso oficial.",
+        "Presentación telemática: si te representa un abogado, se presenta en la sede electrónica MERCURIO con su firma digital, sin cita ni colas. El sistema devuelve un justificante con el número de registro (empieza por I…) y la fecha de entrada.",
+        "Seguimiento: el estado se consulta en la sede electrónica con el número de registro, el año de nacimiento y la fecha de entrada; cuando la oficina asigna el número de expediente, se sigue con él. Si Extranjería pide algo (requerimiento), hay un plazo corto para contestar.",
+        "Resolución y TIE: concedida la estancia, hay que pedir la Tarjeta de Identidad de Extranjero en el plazo de un mes (artículo 4.2 de la LO 4/2000), con cita en la Policía Nacional, la tasa 790 código 012 (16,08 €), una fotografía y el certificado de empadronamiento.",
+      ] },
+
+      { type: "h2", text: "¿Se puede trabajar con la estancia por estudios?" },
+      { type: "p", text: "Sí. El artículo 57 del Reglamento permite trabajar por cuenta propia o ajena mientras la actividad sea compatible con los estudios, sin superar las treinta horas semanales y, durante el periodo lectivo, dentro de la provincia donde estudias. No hace falta pedir un permiso aparte: viene con la autorización, y las resoluciones lo dicen expresamente («Autoriza a trabajar»)." },
+
+      { type: "h2", text: "Por qué se deniega, y cómo se evita" },
+      { type: "ul", items: [
+        "Extracto que no vale: captura de pantalla, PDF sin sello, cuenta que no es española o saldo por debajo de 7.200 €.",
+        "Certificado médico en papel de la clínica, sin el impreso oficial ni la frase del Reglamento Sanitario Internacional.",
+        "Presentar fuera de los 90 días, o con menos de dos meses de antelación y sin escrito de excepcionalidad.",
+        "Carta de admisión condicional, antigua, de un título propio o de un centro no apto.",
+        "Seguro de viaje o con copagos.",
+        "Requerimiento sin contestar en plazo: el expediente se archiva.",
+      ] },
+      { type: "p", text: "Si la resolución es desfavorable, cabe recurso potestativo de reposición en el plazo de un mes ante el mismo órgano, o recurso contencioso-administrativo en dos meses ante el Juzgado de lo Contencioso-Administrativo de la provincia. El plazo se cuenta desde el día siguiente a la notificación." },
+
+      { type: "h2", text: "¿Hace falta un abogado?" },
+      { type: "p", text: "No es obligatorio: la solicitud puede presentarla la propia persona. Lo que aporta un abogado que te representa es presentar por vía telemática con su firma digital —sin cita, con registro de fecha y hora—, recibir las notificaciones de Extranjería en su casilla electrónica y contestar los requerimientos dentro del plazo, y sobre todo que el expediente entre completo y bien fundamentado a la primera. En un procedimiento donde los plazos son cortos y los errores de forma se pagan con una denegación, es la diferencia entre presentar y presentar bien." },
+      { type: "enlace", href: "/estancia", texto: "Cómo lo hacemos en Inspira: presentación con firma digital vía MERCURIO, 350 €" },
+
+      { type: "h2", text: "Estancia por estudios o visado de estudios: cuál te conviene" },
+      { type: "p", text: "Las dos vías llevan al mismo permiso. El visado se pide en el consulado de tu país, exige extractos de los últimos seis meses y el origen lícito del dinero, y llegas a España con todo resuelto. La estancia se pide desde España, dentro de tus 90 días, y Extranjería se conforma con el saldo en una cuenta española. Si aún estás en tu país y puedes acreditar el dinero como lo pide el consulado, el visado te ahorra vivir el trámite a contrarreloj; si ya estás aquí o tu dinero entró hace poco, la estancia encaja mejor." },
+      { type: "enlace", href: "/visa-o-estancia", texto: "Test de cinco preguntas: ¿visado o estancia?" },
+
+      { type: "h2", text: "Preguntas frecuentes" },
+      { type: "faq", items: [
+        { q: "¿Cuánto tiempo dura la estancia por estudios en España?", a: "Lo que duren los estudios: se concede por el curso (o por los dos cursos de un máster de dos años) y se prorroga cada año mientras sigas matriculado. En 2026 hemos visto autorizaciones iniciales válidas hasta noviembre de 2027 y hasta septiembre de 2028, y prórrogas de un año." },
+        { q: "¿Cómo conseguir la estancia por estudios en España?", a: "Con una carta de admisión de un centro autorizado, entrando a España en situación regular (por ejemplo como turista), abriendo una cuenta con el importe del IPREM y presentando la solicitud dentro de los 90 días y con dos meses de antelación al inicio de clases. Se presenta ante la Oficina de Extranjería de la provincia donde vas a estudiar; con un abogado, por vía telemática." },
+        { q: "¿Cuánto tarda Extranjería en resolver una estancia por estudios?", a: "Entre uno y tres meses, según la oficina y la época. En nuestros expedientes de 2026: dos días en Sevilla, veintiséis días en Madrid, alrededor de un mes en Valencia y sesenta y nueve días una prórroga en Alicante." },
+        { q: "¿Cuánto dinero hay que demostrar para la estancia por estudios?", a: "El 100 % del IPREM por mes de estancia: 600 € al mes, 7.200 € para un curso completo, en una cuenta española a tu nombre acreditada con un extracto sellado. No se exige el historial de seis meses ni el origen del dinero que piden los consulados." },
+        { q: "¿Puedo trabajar con la estancia por estudios?", a: "Sí: hasta treinta horas semanales, por cuenta propia o ajena, mientras sea compatible con los estudios (artículo 57 del Reglamento de Extranjería). Viene con la autorización, sin trámite aparte." },
+        { q: "¿Se puede pedir la estancia por estudios desde España sin visado?", a: "Sí, si has entrado en situación regular —como turista, con tus 90 días— y presentas la solicitud dentro de ese plazo con la carta de admisión y el resto de requisitos." },
+        { q: "¿Qué pasa si presento con menos de dos meses de antelación?", a: "Se puede presentar igual, adjuntando un escrito de excepcionalidad que explique por qué se hace con menos margen. Lo que no se puede es presentar fuera de los 90 días de estancia regular." },
+        { q: "¿Qué hago si me deniegan la estancia por estudios?", a: "Cabe recurso de reposición en un mes ante el mismo órgano o recurso contencioso-administrativo en dos meses. Conviene revisar el motivo concreto de la denegación: la mayoría son de forma (extracto, seguro, certificado médico) y se pueden corregir." },
+        { q: "¿La estancia por estudios cuenta para la nacionalidad española?", a: "No: la estancia por estudios no computa como residencia. Al terminar los estudios puedes pasar de estudiante a residente, y es desde ese momento cuando empieza a contar el tiempo para la nacionalidad. El doctorado es la excepción: desde 2025 se tramita como residencia." },
+        { q: "¿Necesito un abogado para la estancia por estudios?", a: "No es obligatorio. Con un abogado que te representa, la solicitud se presenta por vía telemática (MERCURIO) con su firma digital, sin cita, y las notificaciones y requerimientos llegan a su casilla electrónica para contestarlos en plazo." },
+      ] },
+    ],
+  },
+  {
     slug: "residencia-doctorado-espana-nacionalidad",
     titulo: "Nuevo: el doctorado en España ya es residencia — y cuenta para la nacionalidad",
     extracto:

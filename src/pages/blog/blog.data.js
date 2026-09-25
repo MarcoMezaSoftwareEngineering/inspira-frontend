@@ -28,6 +28,13 @@ export const POSTS = [
     categoria: "Extranjería",
     minutos: 6,
     novedad: true,
+    chips: [
+      { icono: "reloj", texto: "90 días para presentar" },
+      { icono: "euro", texto: "7.200 € en cuenta" },
+      { icono: "maletin", texto: "30 h de trabajo" },
+      { icono: "escudo", texto: "+350 Extranjería aprobada" },
+    ],
+    cinta: ["Sevilla · resuelta en 2 días", "Madrid · 26 días", "Valencia · un mes", "Prórroga en Alicante", "Firma digital · MERCURIO", "Sin citas ni colas", "+350 resoluciones favorables"],
     content: [
       { type: "p", text: "La estancia por estudios no se deniega por grandes motivos: se deniega por detalles. Un extracto sin sello, un seguro con copagos, un certificado médico sin la frase exacta, una solicitud presentada un día tarde. Y cuando se deniega, el curso no espera: pierdes meses, a veces la plaza, y el dinero que ya pagaste. Esta guía te dice lo que Extranjería exige y dónde se cae la gente. Si prefieres no jugártela, al final te contamos cómo lo llevamos nosotros." },
       { type: "nota", text: "Lo que aquí se dice sale de la Ley Orgánica 4/2000 y del Reglamento de Extranjería (Real Decreto 1155/2024, artículos 35, 53 y 57) y de las resoluciones que recibimos cada semana de las Delegaciones del Gobierno." },

@@ -110,6 +110,7 @@ function bloqueHtml(b) {
   if (b.type === "ol") return li(b.items, "ol");
   if (b.type === "faq") return b.items.map((f) => `<section><h3>${esc(f.q)}</h3><p>${esc(f.a)}</p></section>`).join("");
   if (b.type === "enlace") return `<p><a href="${esc(b.href)}">${esc(b.texto)}</a></p>`;
+  if (b.type === "cta") return `<aside><h3>${esc(b.titulo)}</h3><p>${esc(b.texto)}</p><p><a href="${esc(b.href)}">${esc(b.boton)}</a></p></aside>`;
   return `<p>${esc(b.text || "")}</p>`;
 }
 

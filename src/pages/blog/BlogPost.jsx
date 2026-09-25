@@ -78,6 +78,21 @@ function Bloque({ bloque }) {
       </p>
     );
   }
+  if (bloque.type === "cta") {
+    return (
+      <div className="mt-8 rounded-2xl border-2 border-accent bg-secondary-light p-6">
+        <h3 className="font-fraunces text-xl font-bold text-primary">{bloque.titulo}</h3>
+        <p className="mt-2 leading-relaxed text-neutral-700">{bloque.texto}</p>
+        <a
+          href={bloque.href}
+          onClick={(e) => go(e, bloque.href)}
+          className="mt-4 inline-flex min-h-[48px] items-center rounded-full bg-accent px-6 font-extrabold text-primary"
+        >
+          {bloque.boton}
+        </a>
+      </div>
+    );
+  }
   if (bloque.type === "enlace") {
     return (
       <p className="mt-4">

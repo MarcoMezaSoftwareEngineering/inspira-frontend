@@ -10,9 +10,10 @@
 //
 // Reglas y textos en ./textos.js y en config (visaOEstancia, metodo,
 // serviciosProceso, casos, plataforma). Nada escrito aquí.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icono from "../../components/common/Icono";
+import SEOSchema from "../../components/SEOSchema";
 import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
 import { CarruselVideos } from "../../components/common/VideoVertical";
 import { Cinta, Numeral, Stickers } from "../../components/common/EfectosLanding";
@@ -231,6 +232,12 @@ export default function Estancia() {
   const prefijo = (c) => String(c.cifra).replace(/[\d.]/g, "");
   const precio = eur(ESTANCIA_ESTUDIOS.precio);
   const [visor, setVisor] = useState(null);
+  // Las preguntas de la página, como ficha FAQPage para Google.
+  const schemaFaq = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: T.faq.lista.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  }), []);
   const abrirVisor = (c) => {
     setVisor(c);
     registrarEvento("estancia_resolucion", { id: c.id });
@@ -238,6 +245,7 @@ export default function Estancia() {
 
   return (
     <main className="est" ref={raiz}>
+      <SEOSchema schema={schemaFaq} id="estancia-faq" />
       <ProgresoLectura />
 
       {/* La cara y la promesa */}
@@ -583,6 +591,9 @@ export default function Estancia() {
         <div data-revelar>
           <h2 className="est-h2">{T.faq.titulo}</h2>
           <Faq />
+          <a href={T.faq.guiaHref} onClick={irA(T.faq.guiaHref)} className="est-enlace est-enlace-bloque">
+            {T.faq.guia} →
+          </a>
         </div>
       </section>
 

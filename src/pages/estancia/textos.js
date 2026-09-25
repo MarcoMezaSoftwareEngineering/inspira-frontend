@@ -197,6 +197,8 @@ export const ESTANCIA = {
 
   faq: {
     titulo: "Preguntas que nos hacen siempre",
+    guia: "Guía completa 2026: requisitos, plazos, cuánto tarda y cómo se presenta",
+    guiaHref: "/blog/estancia-por-estudios-espana-requisitos-plazos",
     lista: [
       { q: "¿Necesito estar en España para tramitarla?", a: "Sí. Se solicita estando en España en situación regular, dentro de tus días como turista. En la sesión planificamos las fechas exactas de tu viaje y de la presentación." },
       { q: "¿De verdad es todo en línea?", a: "Sí. Presentamos el expediente por vía telemática ante Extranjería con la firma digital del abogado, a través de MERCURIO. No pides cita ni vas a ninguna oficina para presentar." },

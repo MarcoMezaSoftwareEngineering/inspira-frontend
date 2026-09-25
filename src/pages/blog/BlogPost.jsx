@@ -42,6 +42,51 @@ function Bloque({ bloque }) {
       </ul>
     );
   }
+  if (bloque.type === "ol") {
+    return (
+      <ol className="mt-4 space-y-3 pl-1">
+        {bloque.items.map((item, i) => (
+          <li key={item} className="flex gap-3 leading-relaxed text-neutral-700">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-white" aria-hidden>
+              {i + 1}
+            </span>
+            {item}
+          </li>
+        ))}
+      </ol>
+    );
+  }
+  if (bloque.type === "faq") {
+    return (
+      <div className="mt-4 divide-y divide-neutral-200 rounded-2xl border border-neutral-200">
+        {bloque.items.map((f) => (
+          <details key={f.q} className="group p-4">
+            <summary className="cursor-pointer list-none font-bold text-neutral-900 marker:hidden">
+              <span className="mr-2 text-accent" aria-hidden>+</span>
+              {f.q}
+            </summary>
+            <p className="mt-2 leading-relaxed text-neutral-700">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    );
+  }
+  if (bloque.type === "nota") {
+    return (
+      <p className="mt-4 rounded-2xl border border-accent/40 bg-secondary-light p-4 text-sm leading-relaxed text-neutral-700">
+        {bloque.text}
+      </p>
+    );
+  }
+  if (bloque.type === "enlace") {
+    return (
+      <p className="mt-4">
+        <a href={bloque.href} onClick={(e) => go(e, bloque.href)} className="inline-block border-b-2 border-accent font-bold text-primary">
+          {bloque.texto} →
+        </a>
+      </p>
+    );
+  }
   return (
     <p className="mt-4 leading-relaxed text-neutral-700">{bloque.text}</p>
   );
@@ -78,11 +123,27 @@ export default function BlogPost({ slug }) {
       description: post.extracto,
       image: `https://www.inspira-legal.cloud${portadaDe(post)}`,
       datePublished: post.fecha,
-      dateModified: post.fecha,
+      dateModified: post.actualizado || post.fecha,
       inLanguage: "es",
       author: { "@type": "Person", name: autorPost.nombre, jobTitle: autorPost.cargo },
       publisher: { "@type": "Organization", name: "Inspira Legal" },
       mainEntityOfPage: `https://www.inspira-legal.cloud/blog/${post.slug}`,
+    };
+  }, [post]);
+
+  // Las preguntas frecuentes van también como ficha FAQPage: es lo que deja a
+  // Google enseñarlas desplegadas bajo el resultado y citarlas en sus resúmenes.
+  const schemaFaq = useMemo(() => {
+    const faq = post?.content?.find((b) => b.type === "faq");
+    if (!faq) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faq.items.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
     };
   }, [post]);
 
@@ -94,6 +155,7 @@ export default function BlogPost({ slug }) {
   return (
     <main className="w-full">
       <SEOSchema schema={schema} id="post" />
+      {schemaFaq && <SEOSchema schema={schemaFaq} id="post-faq" />}
       <article className="mx-auto max-w-3xl px-6 py-14">
         <a
           href="/blog"

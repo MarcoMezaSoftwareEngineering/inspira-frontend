@@ -62,11 +62,11 @@ function Fila({ e, onGuardar, onConsultado, onLeer, guardando }) {
           {e.nombre}
         </button>
         <div className="text-[11px] text-neutral-500 mt-0.5">
-          {e.asesor ? `${e.asesor} · ` : ""}{e.etapa || e.estado_proceso || "—"}
+          {e.asesor ? `${e.asesor} · ` : ""}{e.etapa || "—"}
           {e.anio_nacimiento ? ` · nac. ${e.anio_nacimiento}` : ""}
         </div>
         {toca && <Chip tono="ambar" className="mt-1">toca revisar</Chip>}
-        {!e.presentada && <Chip tono="gris" className="mt-1">sin presentar</Chip>}
+        {!e.presentada && <Chip tono="gris" className="mt-1">{e.sin_expediente ? "sin expediente aún" : "sin presentar"}</Chip>}
       </td>
       <td className="px-2 py-2"><Celda valor={e.pasaporte} campo="pasaporte_numero" onGuardar={onGuardar} ancho="w-32" /></td>
       <td className="px-2 py-2"><Celda valor={e.nie} campo="expediente_nie" onGuardar={onGuardar} ancho="w-28" /></td>
@@ -189,7 +189,7 @@ export default function SeguimientoEstancias() {
       <Cabecera
         eyebrow="Procesos · Estancia por estudios"
         titulo="Seguimiento en la sede"
-        subtitulo="Nombre, pasaporte, NIE, fecha de ingreso, nº de registro (I…), nº de expediente y lo que dice la consulta en infoext2. El nº I… y la fecha se leen solos del justificante de MERCURIO; el resto se edita en línea y queda en el historial. Repaso semanal: marca «Consultado hoy»."
+        subtitulo="Nombre, pasaporte, NIE, fecha de ingreso, nº de registro (I…), nº de expediente y lo que dice la consulta en infoext2. El nº I… y la fecha se leen solos del justificante de MERCURIO, y lo que aquí se consulta mueve el estado del expediente y la etapa de Procesos. Repaso semanal: marca «Consultado hoy»."
         stats={[
           { n: n.revisar, l: "toca revisar", tono: n.revisar ? "ambar" : "verde" },
           { n: n.presentadas, l: "presentadas" },

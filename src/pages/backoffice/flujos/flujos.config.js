@@ -139,9 +139,9 @@ export const FLUJOS = [
           "Presentar en sede y guardar el justificante",
           "Anotar nº de expediente",
         ],
-        hecho: "Estado «Presentado» con número de expediente.",
+        hecho: "Al subir el justificante de MERCURIO el expediente pasa solo a «En trámite», con el nº I… y la fecha leídos del PDF, y lo pendiente queda aprobado.",
         plazo: "Antes de la fecha recomendada (sale en Procesos)",
-        etapas: ["Presentado"],
+        etapas: ["En trámite"],
         clave: ["PRESENTADO"],
       },
       {
@@ -152,9 +152,9 @@ export const FLUJOS = [
           "Pedir al asesorado lo que falte",
           "Responder antes del plazo",
         ],
-        hecho: "Requerimiento respondido.",
+        hecho: "Requerimiento respondido (al registrarlo, el expediente pasa solo a «Requerimiento»).",
         plazo: "El que marque extranjería (suele ser 10 días)",
-        etapas: ["En trámite"],
+        etapas: ["Requerimiento"],
         clave: ["REQUERIDO"],
       },
       {

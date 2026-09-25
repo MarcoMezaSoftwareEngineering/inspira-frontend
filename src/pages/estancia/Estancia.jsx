@@ -18,6 +18,7 @@ import { Cinta, Numeral, Stickers } from "../../components/common/EfectosLanding
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
+import { ANIOS_ESTANCIA, CASOS_ESTANCIA, diasResolucion, etiquetaTipo, mesesVigencia } from "../../config/casosEstancia";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { DIAS_ANTELACION } from "../../config/visaOEstancia";
 import { PROCESOS } from "../../config/serviciosProceso";
@@ -45,6 +46,8 @@ const irASeccion = (id) => document.getElementById(id)?.scrollIntoView({ behavio
 const DIA = 86400000;
 const sumar = (fecha, dias) => new Date(fecha.getTime() + dias * DIA);
 const fmt = (fecha) => fecha.toLocaleDateString("es-ES", { day: "numeric", month: "long" });
+const fmtIso = (iso, conAnio = true) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString("es-ES", conAnio ? { day: "numeric", month: "short", year: "numeric" } : { day: "numeric", month: "long" });
 const hoy0 = () => {
   const h = new Date();
   h.setHours(0, 0, 0, 0);
@@ -186,6 +189,7 @@ export default function Estancia() {
   const pasoMotivo = cascada(60, 300);
   const pasoPaso = cascada();
   const pasoResultado = cascada();
+  const pasoResolucion = cascada(50, 350);
   const pasoGarantia = cascada();
   const clave = CATEGORIAS_CASOS.find((c) => c.id === T.resultados.clave);
   const otros = CATEGORIAS_CASOS.filter((c) => c.id !== T.resultados.clave);
@@ -393,6 +397,42 @@ export default function Estancia() {
             </div>
           ))}
         </div>
+        {/* Las resoluciones, por año: nombre de pila, oficina, centro y fechas */}
+        {ANIOS_ESTANCIA.map((anio) => (
+          <div key={anio} className="est-resoluciones-anio">
+            <div data-revelar>
+              <p className="est-rotulo">{T.resultados.resolucionesRotulo(anio)}</p>
+              <h3 className="est-h3">{T.resultados.resolucionesTitulo}</h3>
+              <p className="est-lead">{T.resultados.resolucionesLead}</p>
+            </div>
+            <div className="est-resoluciones">
+              {CASOS_ESTANCIA.filter((c) => c.anio === anio).map((c) => {
+                const dias = diasResolucion(c);
+                const meses = mesesVigencia(c);
+                return (
+                  <article key={c.id} className={`est-resolucion${c.tipo === "prorroga" ? " est-resolucion-prorroga" : ""}`} data-revelar="escala" style={pasoResolucion()}>
+                    <div className="est-resolucion-cab">
+                      <span className="est-resolucion-sello"><Icono nombre="check" size={12} /> {T.resultados.concedida}</span>
+                      <span className="est-resolucion-tipo">{etiquetaTipo(c)}</span>
+                    </div>
+                    <strong>{c.nombre}</strong>
+                    <p className="est-resolucion-donde">
+                      {T.resultados.oficina(c.oficina)}
+                      {c.universidad ? ` · ${c.universidad}` : ""}
+                    </p>
+                    <ul className="est-resolucion-datos">
+                      <li><Icono nombre="calendario" size={14} /> {T.resultados.vigencia(fmtIso(c.vigencia.hasta))}{meses ? ` · ${T.resultados.meses(meses)}` : ""}</li>
+                      {dias !== null && <li><Icono nombre="rayo" size={14} /> {T.resultados.dias(dias)}</li>}
+                      {dias === null && c.presentada && <li><Icono nombre="documento" size={14} /> {T.resultados.presentada(fmtIso(c.presentada))}</li>}
+                      <li><Icono nombre="maletin" size={14} /> {T.resultados.trabajo}</li>
+                    </ul>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        <p className="est-nota-chica" data-revelar>{T.resultados.nota}</p>
         <a href="/casos-de-exito" onClick={irA("/casos-de-exito")} className="est-enlace est-enlace-bloque">
           {T.resultados.casos}
         </a>

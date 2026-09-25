@@ -67,3 +67,37 @@ describe("casos de éxito", () => {
     expect(dobles).toEqual([]);
   });
 });
+
+// ── Resoluciones de estancia (casosEstancia.js) ──────────────────────────
+import { CASOS_ESTANCIA, diasResolucion, mesesVigencia, etiquetaTipo } from "./casosEstancia";
+
+describe("CASOS_ESTANCIA", () => {
+  it("solo nombre de pila, y nada que identifique a la persona", () => {
+    for (const c of CASOS_ESTANCIA) {
+      expect(c.nombre, c.id).toMatch(/^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+$/);
+      for (const clave of ["nie", "expediente", "pasaporte", "apellido", "apellidos", "registro"]) {
+        expect(c, `${c.id} publica ${clave}`).not.toHaveProperty(clave);
+      }
+    }
+  });
+  it("tipo, oficina y fechas con forma", () => {
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    for (const c of CASOS_ESTANCIA) {
+      expect(["inicial", "prorroga"], c.id).toContain(c.tipo);
+      expect(c.oficina, c.id).toBeTruthy();
+      expect(String(c.anio), c.id).toMatch(/^20\d{2}$/);
+      expect(c.vigencia.desde, c.id).toMatch(iso);
+      expect(c.vigencia.hasta, c.id).toMatch(iso);
+      if (c.presentada) expect(c.presentada, c.id).toMatch(iso);
+      if (c.resuelta) expect(c.resuelta, c.id).toMatch(iso);
+      expect(mesesVigencia(c), c.id).toBeGreaterThan(0);
+    }
+  });
+  it("los días de resolución solo salen cuando constan las dos fechas", () => {
+    const brian = CASOS_ESTANCIA.find((c) => c.id === "brian-sevilla-2026");
+    expect(diasResolucion(brian)).toBe(2);
+    const denisse = CASOS_ESTANCIA.find((c) => c.id === "denisse-madrid-2026");
+    expect(diasResolucion(denisse)).toBeNull();
+    expect(etiquetaTipo(CASOS_ESTANCIA.find((c) => c.id === "jhonatan-alicante-2026"))).toBe("Prórroga n.º 1");
+  });
+});

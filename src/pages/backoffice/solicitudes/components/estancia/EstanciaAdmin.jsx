@@ -470,6 +470,21 @@ function Datos({ exp, onGuardar }) {
           <input type="date" className={input} defaultValue={exp.expediente_fecha || ""}
             onBlur={(e) => onGuardar({ expediente_fecha: e.target.value })} />
         </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] text-neutral-500">
+            Estado en consulta</span>
+          <select className={`${input} w-44`} value={exp.consulta_estado || ""}
+            onChange={(e) => onGuardar({ consulta_estado: e.target.value })}>
+            {[["", "Sin consultar"], ["EN_TRAMITE", "En trámite"], ["REQUERIDO", "Requerimiento"], ["RESUELTO_FAVORABLE", "Resuelto · favorable"], ["RESUELTO_DESFAVORABLE", "Resuelto · desfavorable"], ["RECURSO", "En recurso"], ["ARCHIVADO", "Archivado"]].map(([k, t]) => (
+              <option key={k} value={k}>{t}</option>
+            ))}
+          </select>
+          {exp.consulta_fecha && (
+            <span className="text-[11px] text-neutral-500">
+              Última consulta: {new Date(exp.consulta_fecha).toLocaleDateString("es-ES")}{exp.consulta_por ? ` · ${exp.consulta_por}` : ""}
+            </span>
+          )}
+        </label>
         {/* El año no se pide: sale de la fecha de nacimiento, que ya está */}
         <div className="flex flex-col gap-1">
           <span className="text-[11px] text-neutral-500">

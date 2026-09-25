@@ -141,6 +141,17 @@ export const ESTANCIA = {
     lead: "Cifras de nuestros expedientes, las únicas que podemos sustanciar. Y las opiniones, en Google.",
     clave: "extranjeria-aprobada",
     casos: "Ver los casos de éxito →",
+    resolucionesRotulo: (anio) => `Resoluciones de ${anio}`,
+    resolucionesTitulo: "Estancias concedidas, con nombre y oficina",
+    resolucionesLead: "Autorizaciones iniciales y prórrogas resueltas por Extranjería a asesorados de Inspira. Solo el nombre de pila: el resto es suyo.",
+    concedida: "Concedida",
+    oficina: (o) => `Extranjería de ${o}`,
+    vigencia: (hasta) => `Válida hasta el ${hasta}`,
+    meses: (n) => `${n} meses de autorización`,
+    dias: (n) => (n === 0 ? "Resuelta el mismo día" : n === 1 ? "Resuelta en 1 día" : `Resuelta en ${n} días`),
+    presentada: (f) => `Presentada el ${f}`,
+    trabajo: "Con permiso de trabajo",
+    nota: "Fechas tal como constan en cada resolución. Los plazos de Extranjería varían por oficina y época: no son una promesa.",
   },
 
   paquete: {

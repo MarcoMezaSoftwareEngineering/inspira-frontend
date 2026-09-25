@@ -252,6 +252,11 @@ export default function HerramientasAsesor() {
               descripcion="Las mismas que ve él en su portal, interactivas: máster, estancia, modificatoria y apostilla."
             />
             <TarjetaEnlace
+              icono={<Building2 />} tono="cielo" titulo="Seguimiento de estancias en la sede" href="/backoffice/estancias"
+              chip={<Chip tono="verde">nuevo</Chip>}
+              descripcion="Nombre, pasaporte, NIE, fecha de ingreso, nº de registro y de expediente y lo que dice la consulta en infoext2. Repaso semanal con «Consultado hoy»."
+            />
+            <TarjetaEnlace
               icono={<MessageCircle />} tono="ambar" titulo="Landings y mensajes" href="/backoffice/landings"
               chip={<Chip tono="verde">nuevo</Chip>}
               descripcion="Cada landing pública con su para quién, el enlace con utm y el mensaje de WhatsApp listo para copiar con el nombre de la persona."

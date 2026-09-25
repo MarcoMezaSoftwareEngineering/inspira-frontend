@@ -47,7 +47,7 @@ export const NAV_SECTIONS = [
       },
       {
         id: "procesos", label: "Procesos", href: "/backoffice/procesos",
-        alsoActive: ["/backoffice/solicitudes", "/backoffice/panel-asesoras"],
+        alsoActive: ["/backoffice/solicitudes", "/backoffice/panel-asesoras", "/backoffice/estancias"],
         icon: FileText,
       },
       { id: "clientes", label: "Clientes", href: "/backoffice/clientes", icon: Users },

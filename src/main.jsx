@@ -53,6 +53,9 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 }
 
 
+// El HTML pre-renderizado de las entradas del blog (scripts/html-compartir.mjs)
+// es para los rastreadores: la aplicación pinta lo suyo en #root.
+document.getElementById("prerender")?.remove();
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>

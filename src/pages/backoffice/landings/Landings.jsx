@@ -3,13 +3,13 @@
 //
 // Quien atiende recibe «hola, ya tengo carta de admisión» o «quiero hacer un
 // máster» veinte veces al día y cada vez reescribe lo mismo. Aquí está cada
-// landing con para quién es, el enlace con su utm y una plantilla lista para
+// landing con para quién es, el enlace directo y una plantilla lista para
 // copiar, con el nombre de la persona y el de quien firma. Formato fijado por
 // Marco (24/09/2026): tres líneas, contexto con un dato, un solo enlace y una
 // pregunta. Los precios y las cifras salen de config, nunca escritos aquí.
 import { useMemo, useState } from "react";
 import { Check, Copy, ExternalLink, MessageCircle } from "lucide-react";
-import { SESION_DIAGNOSTICO } from "../../../config/metodo";
+import { SESION_DIAGNOSTICO, PLANES_VISADO } from "../../../config/metodo";
 import { CATEGORIAS_CASOS } from "../../../config/casos";
 import { IPREM_REFERENCIA } from "../../../config/costeVida";
 import { MATRICULA } from "../../../config/paqueteMaster2027";
@@ -17,8 +17,9 @@ import { eur } from "../../../config/paqueteMaster2027Resumen";
 import { Pagina, Cabecera, Cuerpo, Seccion, Boton, Chip, Campo } from "../ui";
 
 const BASE = "https://www.inspira-legal.cloud";
-const UTM = "utm_source=whatsapp&utm_medium=asesor&utm_campaign=landing";
-const enlace = (ruta) => `${BASE}${ruta}${ruta.includes("?") ? "&" : "?"}${UTM}`;
+// Enlace directo, sin utm: WhatsApp muestra la vista previa de la página
+// (título, descripción e imagen propias) y la URL queda limpia.
+const enlace = (ruta) => `${BASE}${ruta}`;
 
 const sesion = `${eur(SESION_DIAGNOSTICO.precio)} · ${SESION_DIAGNOSTICO.duracion}, por Google Meet`;
 
@@ -30,6 +31,8 @@ const admitidos = CATEGORIAS_CASOS.find((c) => c.id === "admitidos-master")?.cif
 const visas = CATEGORIAS_CASOS.find((c) => c.id === "visas-aprobadas")?.cifra || "+500";
 const desdeMatricula = eur(Math.min(...MATRICULA.filas.filter((f) => f.min).map((f) => f.min)));
 const ipremAnual = eur(IPREM_REFERENCIA.anual);
+const plan = (id) => PLANES_VISADO.find((p) => p.id === id);
+const integral = plan("visado-integral");
 
 /** Cada landing: para quién es, el enlace y la plantilla con {nombre} y {asesor}. */
 const LANDINGS = [
@@ -89,6 +92,39 @@ const LANDINGS = [
       `Ahí ves qué incluye y cómo se presenta. ¿Cuándo empiezan tus clases?`,
   },
   {
+    id: "paquetes-visado",
+    ruta: "/visado#paquetes",
+    grupo: "Vender",
+    nombre: "Conoce nuestros paquetes de visado",
+    para: "Cuando ya sabe que va por visado y pregunta «¿y cuánto cuesta con ustedes?».",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Tres formas de acompañarte con el visado: ${plan("visado-base").nombre} (${eur(plan("visado-base").precio)}), ${plan("visado-parcial").nombre} (${eur(plan("visado-parcial").precio)}) e ${integral.nombre} (${eur(integral.precio)}, con cita consular y recurso incluidos).\n` +
+      `👉 ${url}\n` +
+      `La ${integral.nombre} es la que recomendamos. ¿Cuál te encaja mejor?`,
+  },
+  {
+    id: "cotizacion-visado",
+    ruta: "/visado#como",
+    grupo: "Vender",
+    nombre: "Después de la sesión · cotización de visado",
+    para: "Tras la sesión diagnóstico, cuando toca cerrar el paquete de visado.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Como hablamos en la sesión, te mando por escrito lo que incluye tu paquete de visado y cómo se paga: al contado o en dos cuotas, la mitad al iniciar y la otra mitad al mes, siempre antes de la cita consular.\n` +
+      `👉 ${url}\n` +
+      `¿Confirmo y abrimos tu expediente en el portal?`,
+  },
+  {
+    id: "cotizacion-master",
+    ruta: "/master#precio",
+    grupo: "Vender",
+    nombre: "Después de la sesión · cotización de máster",
+    para: "Tras la sesión diagnóstico, cuando toca cerrar el paquete de máster.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Como hablamos en la sesión, te mando la cotización por escrito: a qué comunidades postulamos, qué incluye y las dos cuotas (la mitad al iniciar y la otra mitad a los dos meses). El plan queda pagado antes de la primera postulación.\n` +
+      `👉 ${url}\n` +
+      `¿Empezamos esta semana?`,
+  },
+  {
     id: "carina",
     ruta: "/carina",
     grupo: "Confianza",
@@ -111,15 +147,81 @@ const LANDINGS = [
       `Míralo con calma. ¿Qué es lo que más te preocupa del proceso?`,
   },
   {
-    id: "expediente",
-    ruta: "/expediente",
-    grupo: "Confianza",
-    nombre: "Expediente de ejemplo, papel por papel",
-    para: "Quien pregunta «¿y qué papeles son?». Nueve documentos reconstruidos y lo que hace que los rechacen.",
+    id: "seguimiento-visado",
+    ruta: "/visado#test",
+    grupo: "Seguimiento",
+    nombre: "No contestó · visado",
+    para: "Un día después de mandar la landing del visado y sin respuesta.",
     plantilla: (n, a, url) =>
-      `${hola(n, a)} Un expediente de visado aprobado lleva 9 documentos, y cada uno tiene su trampa: la frase exacta del certificado médico, el extracto sellado, la apostilla.\n` +
+      `${hola(n, a)} Te escribí ayer por lo del visado. Dato: el consulado tarda entre uno y dos meses desde la cita, así que cada semana cuenta.\n` +
       `👉 ${url}\n` +
-      `Marca los que ya tienes y me escribes con la lista. ¿Cuáles te faltan?`,
+      `Si quieres, hago el test de dos minutos contigo. ¿Cuándo empiezan tus clases?`,
+  },
+  {
+    id: "seguimiento-master",
+    ruta: "/master#cuesta",
+    grupo: "Seguimiento",
+    nombre: "No contestó · máster",
+    para: "Un día después de mandar la landing del máster y sin respuesta.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Te escribí por lo del máster. Dato: la primera ventana para postular a 2027/2028 abre en noviembre, y las fases solo para extranjeros cierran en enero y febrero.\n` +
+      `👉 ${url}\n` +
+      `¿Pudiste verlo? Dime qué carrera terminaste y te oriento.`,
+  },
+  {
+    id: "recordatorio-sesion",
+    ruta: "/visa-o-estancia",
+    grupo: "Seguimiento",
+    nombre: "Recordatorio · mañana es la sesión",
+    para: "El día antes de la sesión diagnóstico.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Mañana tenemos la sesión diagnóstico (${SESION_DIAGNOSTICO.duracion}, por videollamada). Ten a mano tu pasaporte, la carta de admisión si la tienes y cómo vas a acreditar el dinero.\n` +
+      `👉 ${url}\n` +
+      `Si haces antes este test de cinco preguntas, aprovechamos mejor el tiempo. ¿Confirmas la hora?`,
+  },
+  {
+    id: "documentos",
+    ruta: "/visado#checklist",
+    grupo: "Seguimiento",
+    nombre: "¿Qué documentos te faltan?",
+    para: "Quien pregunta «¿y qué papeles son?» o va a empezar a reunirlos.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Un expediente de visado lleva 9 documentos y cada uno tiene su trampa: el extracto sellado, la frase exacta del certificado médico, la apostilla.\n` +
+      `👉 ${url}\n` +
+      `Marca ahí los que ya tienes y me llega la lista. ¿Cuáles te faltan?`,
+  },
+  {
+    id: "denegado",
+    ruta: "/ruta/denegado",
+    grupo: "Seguimiento",
+    nombre: "Me denegaron el visado",
+    para: "Quien escribe con la resolución de denegación en la mano.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Si te denegaron el visado, hay un mes desde la notificación para el recurso de reposición, y muchas denegaciones por medios económicos se dan la vuelta con el expediente bien armado.\n` +
+      `👉 ${url}\n` +
+      `Mándame la foto de la resolución y te digo si conviene recurrir o ir por la estancia. ¿Qué fecha tiene?`,
+  },
+  {
+    id: "portal",
+    ruta: "/plataforma",
+    grupo: "Seguimiento",
+    nombre: "Bienvenida al portal",
+    para: "Cuando ya pagó y se le da acceso al Expediente Digital.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Ya tienes acceso a tu Expediente Digital: entras con tu correo de Google, subes tus documentos desde el teléfono y cada mensaje queda por escrito con constancia de lectura.\n` +
+      `👉 ${url}\n` +
+      `Instálalo como app y sube primero tu pasaporte. ¿Lo pudiste abrir?`,
+  },
+  {
+    id: "fechas",
+    ruta: "/master",
+    grupo: "Seguimiento",
+    nombre: "Las fechas para 2027/2028",
+    para: "Quien duda de cuándo empezar.",
+    plantilla: (n, a, url) =>
+      `${hola(n, a)} Para empezar en septiembre de 2027 lo fuerte es postular entre noviembre y febrero: la Fase 0 valenciana abre hacia el 17 de noviembre y la fase de extranjeros de Andalucía cierra hacia el 29 de enero.\n` +
+      `👉 ${url}\n` +
+      `Llegar a esa ventana con todo listo es la diferencia. ¿Ya tienes tu título y tus notas apostillados?`,
   },
   {
     id: "juego",
@@ -216,7 +318,7 @@ const LANDINGS = [
   },
 ];
 
-const GRUPOS = ["Vender", "Confianza", "Ganchos", "Otros públicos", "Campañas"];
+const GRUPOS = ["Vender", "Seguimiento", "Confianza", "Ganchos", "Otros públicos", "Campañas"];
 
 async function copiar(texto) {
   try {
@@ -284,7 +386,7 @@ export default function Landings() {
       <Cabecera
         eyebrow="Herramientas"
         titulo="Landings y mensajes"
-        subtitulo="Cada página pública con su para quién y un mensaje corto listo para copiar: contexto con un dato, un solo enlace y una pregunta. Escribe el nombre de la persona y sale ya puesto."
+        subtitulo="Cada página con su para quién y un mensaje corto listo para copiar: contexto con un dato, el enlace directo (WhatsApp muestra su vista previa) y una pregunta. Escribe el nombre de la persona y sale ya puesto."
         volver={{ href: "/backoffice/herramientas", texto: "Herramientas" }}
       />
       <Cuerpo>

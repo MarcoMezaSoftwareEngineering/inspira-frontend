@@ -465,6 +465,107 @@ def bicentenario():
     return guardar(img, "beca-generacion-bicentenario-2026.jpg")
 
 
+# (h) Landings de venta: /visado, /master, /carina, /te-alcanza --------------
+# Con la foto de Carina si está en el servidor (vive fuera del repo, en
+# /var/www/inspira-media); sin ella, la tarjeta sale igual de bien.
+FOTO_CARINA = os.environ.get("FOTO_CARINA", "/var/www/inspira-media/foto/carina-retrato.jpg")
+
+
+def foto_redonda(img, x, y, diametro):
+    if not os.path.exists(FOTO_CARINA):
+        return False
+    foto = Image.open(FOTO_CARINA).convert("RGB")
+    lado = min(foto.size)
+    izq, arr = (foto.width - lado) // 2, max(0, (foto.height - lado) // 2 - lado // 8)
+    foto = foto.crop((izq, arr, izq + lado, arr + lado)).resize((diametro, diametro), Image.LANCZOS)
+    mascara = Image.new("L", (diametro, diametro), 0)
+    ImageDraw.Draw(mascara).ellipse([0, 0, diametro - 1, diametro - 1], fill=255)
+    borde = Image.new("RGBA", (diametro + 16, diametro + 16), (0, 0, 0, 0))
+    ImageDraw.Draw(borde).ellipse([0, 0, diametro + 15, diametro + 15], fill=NARANJA + (255,))
+    img.alpha_composite(borde, (x - 8, y - 8))
+    img.paste(foto, (x, y), mascara)
+    return True
+
+
+def tarjeta_landing(nombre, eyebrow, titulo, subtitulo, chips, con_foto=True):
+    img = fondo_marca()
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, 12, H], fill=NARANJA)
+    x = 72
+    ancho_texto = W - 2 * x - (300 if con_foto else 0)
+    d.text((x, 62), eyebrow.upper(), font=fuente(26, "SemiBold"), fill=NARANJA)
+    # Título a dos líneas como máximo, subtítulo a dos, y los chips debajo de
+    # todo: nada se pisa. El logo va en la franja de abajo.
+    ft = fuente(60, "Bold")
+    y = 108
+    for ln in envolver(d, titulo, ft, ancho_texto)[:3]:
+        d.text((x, y), ln, font=ft, fill=BLANCO)
+        y += 68
+    fs = fuente(28, "Regular")
+    y += 12
+    for ln in envolver(d, subtitulo, fs, ancho_texto)[:2]:
+        d.text((x, y), ln, font=fs, fill=CELESTE)
+        y += 38
+    fc = fuente(24, "SemiBold")
+    cx, cy = x, y + 18
+    for i, chip in enumerate(chips):
+        w, h = pastilla(d, cx, cy, chip, fc, NARANJA if i == 0 else BLANCO, PETROLEO, pad_x=20, pad_y=9)
+        cx += w + 12
+        if cx > x + ancho_texto - 40:
+            break
+    if con_foto:
+        foto_redonda(img, W - 72 - 270, 118, 270)
+    fila = H - 60 - 92
+    _, alto = pegar_logo(img, x, fila, alto=56)
+    dominio(ImageDraw.Draw(img), fila + (alto - 34) // 2)
+    return guardar(img, nombre)
+
+
+DESDE_VISADO = min(v["eur"] for v in PRECIOS["visado"])
+SESION_EUR = PRECIOS["sesionDiagnostico"]["eur"]
+
+
+def visado():
+    return tarjeta_landing(
+        "visado-estudios.jpg",
+        "Visado de estudios · desde tu país",
+        "¿Ya tienes la carta de admisión?",
+        "Lo que falta es el visado: visado o estancia en 2 minutos, los tres paquetes y cómo empezamos.",
+        [f"Sesión {SESION_EUR} €", f"Paquetes desde {DESDE_VISADO} €", "30 h de trabajo"],
+    )
+
+
+def master_todo():
+    return tarjeta_landing(
+        "master-en-espana.jpg",
+        "Máster oficial en España · 2027/2028",
+        "Tu máster en España, de la búsqueda a la matrícula.",
+        "Por qué España, cuánto cuesta, qué hacemos por ti y cómo lo hacemos.",
+        ["Desde 591 €/año", "Universidades públicas", "+2.000 admitidos"],
+    )
+
+
+def carina():
+    return tarjeta_landing(
+        "carina.jpg",
+        "Inspira Legal · Lima y España",
+        "Carina Meza: te acompaño de Lima al aula.",
+        "CEO y consultora legal. Máster, visado y llegada, sin humo y con cifras reales.",
+        ["+2.000 admitidos", "+500 visas", "Vídeos y opiniones"],
+    )
+
+
+def juego():
+    return tarjeta_landing(
+        "te-alcanza.jpg",
+        "Juego · 6 cartas · 30 segundos",
+        "¿Dónde te ves estudiando en España?",
+        "Seis ciudades, sus universidades, un máster de ejemplo y lo que cuesta.",
+        ["Sin registro", "Gratis", "Desliza y elige"],
+        con_foto=False,
+    )
+
+
 if __name__ == "__main__":
     # Sin argumentos genera todas; con nombres, solo esas (p. ej. «portal»).
     FUNCIONES = {"general": general, "master": master, "calculadora": calculadora, "portal": portal, "grado": grado, "doctorado": doctorado, "mapa": mapa, "bicentenario": bicentenario}

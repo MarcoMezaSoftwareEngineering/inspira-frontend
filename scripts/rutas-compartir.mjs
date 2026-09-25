@@ -35,6 +35,10 @@ export const IMG_GRADO = "/og/grado-en-espana.jpg";
 export const IMG_DOCTORADO = "/og/doctorado-en-espana.jpg";
 export const IMG_BICENTENARIO = "/og/beca-generacion-bicentenario-2026.jpg";
 export const IMG_MAPA = "/og/mapa-estudiar-en-espana.jpg";
+export const IMG_VISADO = "/og/visado-estudios.jpg";
+export const IMG_MASTER_TODO = "/og/master-en-espana.jpg";
+export const IMG_CARINA = "/og/carina.jpg";
+export const IMG_JUEGO = "/og/te-alcanza.jpg";
 
 const MASTER = {
   title: "Paquete Máster 2027/2028 | Inspira Legal",
@@ -188,6 +192,36 @@ export const RUTAS_COMPARTIR = {
       "Beca Generación del Bicentenario 2026, mapa de costos de máster, guía de grado en España, calculadora de máster y reserva de tu asesoría con el equipo Perú · España.",
     image: "/og/inspira-general.jpg",
     imageAlt: "Inspira Legal: asesoría en extranjería, visas y estudios en España",
+  },
+  // Landings de venta que se mandan por WhatsApp (textos en pages/visado/textos.js,
+  // pages/landing/master/textos.js, pages/carina/textos.js y pages/alcanza/textos.js).
+  "/visado": {
+    title: "Visado de estudios para España: ya tienes la carta de admisión | Inspira Legal",
+    description:
+      `Tienes la carta de admisión y ahora toca el visado. En dos minutos sabes si te conviene visado o estancia, qué incluye cada paquete (desde ${DESDE_VISADO} €) y por qué empezamos con una sesión diagnóstico de ${SESION_EUR} €.`,
+    image: IMG_VISADO,
+    imageAlt: "¿Ya tienes la carta de admisión? Lo que falta es el visado. Inspira Legal",
+  },
+  "/master": {
+    title: "Máster oficial en España: por qué, cuánto cuesta y cómo te llevamos | Inspira Legal",
+    description:
+      "Por qué estudiar un máster oficial en España, cuánto cuesta la matrícula en cada comunidad, los errores comunes al postular y qué hace Inspira Legal por ti, paso a paso. Empieza con una sesión diagnóstico.",
+    image: IMG_MASTER_TODO,
+    imageAlt: "Tu máster en España, de la búsqueda a la matrícula. Inspira Legal",
+  },
+  "/carina": {
+    title: "Carina Meza | Estudiar en España desde Perú | Inspira Legal",
+    description:
+      "Soy Carina Meza, CEO y consultora legal de Inspira. Acompaño a estudiantes peruanos hasta el aula en España: máster, visado y llegada. Mira mis vídeos y escríbeme.",
+    image: IMG_CARINA,
+    imageAlt: "Carina Meza, CEO y consultora legal de Inspira Legal",
+  },
+  "/te-alcanza": {
+    title: "¿Dónde estudiar en España? Seis ciudades en 30 segundos | Inspira Legal",
+    description:
+      "Seis cartas, seis ciudades españolas: sus universidades, un máster de ejemplo con lo que cuesta la matrícula y cuántos más hay. Desliza y quédate con las que te llamen. Gratis y sin registro.",
+    image: IMG_JUEGO,
+    imageAlt: "¿Dónde te ves estudiando en España? Seis cartas, treinta segundos",
   },
   "/mapa-estudiar-en-espana": {
     title: "¿Cuánto cuesta un máster en España? Mapa por comunidad y universidad | Inspira Legal",

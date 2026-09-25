@@ -11,7 +11,7 @@ export const CARINA = {
     description:
       "Soy Carina Meza, CEO y consultora legal de Inspira. Acompaño a estudiantes peruanos hasta el aula en España: máster, visado y llegada. Mira mis vídeos y escríbeme.",
     path: "/carina",
-    imagen: `${MEDIA}/foto/carina-retrato.jpg`,
+    imagen: "/og/carina.jpg",
   },
 
   schema: {

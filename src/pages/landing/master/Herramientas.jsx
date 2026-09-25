@@ -1,7 +1,6 @@
 // src/pages/landing/master/Herramientas.jsx
 // Las herramientas gratuitas que Inspira publica y que ninguna otra
-// consultora tiene: el mapa, el juego de cartas, el expediente de ejemplo y el
-// test visa/estancia. Aquí van como puertas; la calculadora va incrustada en
+// consultora tiene: el mapa, el juego de cartas y el test visa/estancia. Aquí van como puertas; la calculadora va incrustada en
 // su propia sección.
 import Icono from "../../../components/common/Icono";
 import { TituloSeccion } from "../master2027/comunes";
@@ -31,14 +30,6 @@ const HERRAMIENTAS = [
     titulo: "¿Visa o estancia por estudios?",
     texto: "Cinco preguntas y te decimos qué vía te toca y cuánto dinero tienes que acreditar.",
     accion: "Hacer el test",
-  },
-  {
-    id: "expediente",
-    href: "/expediente",
-    icono: "maletin",
-    titulo: "Un expediente de visado, papel por papel",
-    texto: "Los nueve documentos reconstruidos con datos tapados, y lo que hace que rechacen cada uno.",
-    accion: "Ver el expediente",
   },
 ];
 

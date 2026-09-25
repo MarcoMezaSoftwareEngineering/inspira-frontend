@@ -27,6 +27,9 @@ export const EXPEDIENTE = {
       "Un expediente de visado de estudios reconstruido papel por papel: carta de admisión, extracto bancario, antecedentes apostillados, certificado médico, seguro, formulario y el visado concedido. Cómo tiene que quedar cada uno y por qué se rechazan.",
     path: "/expediente",
     imagen: "/og/mapa-estudiar-en-espana.jpg",
+    // Marco la retiró de los menús (25/09/2026): se mantiene para quien tenga
+    // el enlace, sin indexar.
+    noIndex: true,
   },
 
   rotulo: "Expediente de ejemplo · Visado de estudios",

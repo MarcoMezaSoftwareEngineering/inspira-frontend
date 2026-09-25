@@ -162,14 +162,14 @@ const SEO_PAGES = {
     description:
       "Tienes la carta de admisión y ahora toca el visado de estudios. En dos minutos sabes si te conviene visado o estancia, qué incluye cada paquete de Inspira Legal y por qué empezamos con una sesión diagnóstico.",
     path: "/visado",
-    imagen: "/og/servicios.jpg",
+    imagen: "/og/visado-estudios.jpg",
   },
   "/master": {
     title: "Máster en España 2027/2028: todo lo que hacemos por ti",
     description:
       "El Paquete Máster de Inspira Legal completo: listas y precios por comunidad, el método en etapas, tu expediente digital, el mapa, el juego de ciudades, la calculadora y los vídeos de Carina.",
     path: "/master",
-    imagen: "/og/mapa-estudiar-en-espana.jpg",
+    imagen: "/og/master-en-espana.jpg",
   },
   "/visa-o-estancia": {
     title: "¿Visa o estancia por estudios? Test rápido",

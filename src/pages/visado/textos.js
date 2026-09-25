@@ -22,7 +22,7 @@ export const VISADO = {
     description:
       "Tienes la carta de admisión y ahora toca el visado de estudios. En dos minutos sabes si te conviene visado o estancia, qué incluye cada paquete de Inspira Legal y por qué empezamos con una sesión diagnóstico.",
     path: "/visado",
-    imagen: "/og/servicios.jpg",
+    imagen: "/og/visado-estudios.jpg",
   },
 
   retrato: `${MEDIA}/foto/carina-retrato.jpg`,
@@ -71,6 +71,28 @@ export const VISADO = {
       { id: "10", src: `${MEDIA}/video/carina-10.mp4`, poster: `${MEDIA}/video/carina-10.jpg`, titulo: "Me denegaron el visado: qué dice la notificación y qué hacer" },
       { id: "13", src: `${MEDIA}/video/carina-13.mp4`, poster: `${MEDIA}/video/carina-13.jpg`, titulo: "Actualización visa de estudios: antelación y títulos válidos" },
     ],
+  },
+
+  denegaciones: {
+    rotulo: "Por qué deniegan",
+    titulo: "Los motivos de denegación más comunes",
+    lead: "Casi todas las denegaciones del visado de estudios caen en estos ocho. Los conocemos porque los recurrimos.",
+    motivo: "El motivo",
+    evitamos: "Cómo lo evitamos",
+    lista: [
+      { icono: "euro", titulo: "Dinero sin origen acreditado", motivo: "Un saldo que apareció de golpe, sin seis meses de extractos ni forma de justificar de dónde salió. Es la causa número uno.", evitamos: "Estrategia económica antes de la cita: extractos, origen del dinero y declaración jurada de solvencia." },
+      { icono: "usuarios", titulo: "El aval de un familiar, incompleto", motivo: "Carta aval sin notario ni apostilla, o sin toda la documentación económica del avalista: extractos, impuestos, origen de sus ingresos.", evitamos: "Preparamos la carta aval y la carpeta completa del avalista, tal como la pide el consulado." },
+      { icono: "salud", titulo: "Un seguro que no vale", motivo: "Un seguro de viaje o con copagos. El consulado exige asistencia sanitaria sin copagos, sin carencias, con repatriación y por toda la estancia.", evitamos: "Te decimos qué póliza contratar y revisamos el certificado antes de presentarlo." },
+      { icono: "documento", titulo: "Certificado médico sin la frase", motivo: "«Apto» o «goza de buena salud» no sirve: tiene que aparecer la fórmula del Reglamento Sanitario Internacional de 2005, palabra por palabra.", evitamos: "Modelo exacto para tu médico y revisión antes de visar y apostillar." },
+      { icono: "birrete", titulo: "Admisión condicional o centro no apto", motivo: "Una carta de preinscripción, un máster en línea o un título propio: el consulado quiere estudios oficiales, presenciales y con fechas cerradas.", evitamos: "Comprobamos el centro y la carta antes de abrir el expediente." },
+      { icono: "balanza", titulo: "Antecedentes caducados o sin apostilla", motivo: "Tienen tres meses de vigencia, contados hasta el día de la cita, y sin apostilla de La Haya no valen.", evitamos: "Los pedimos pensando en la fecha de la cita, no antes." },
+      { icono: "reloj", titulo: "Presentar tarde", motivo: "Con menos de dos meses para el inicio de clases el consulado no llega a resolver: se pide cita urgente y muchas veces no la hay.", evitamos: "Calendario desde la carta de admisión: cita, resolución y viaje con margen." },
+      { icono: "pasaporte", titulo: "Formulario y pasaporte con errores", motivo: "Nombres distintos a los del pasaporte, fechas que no cuadran con la carta o un pasaporte con menos de un año de vigencia.", evitamos: "Rellenamos el formulario y revisamos cada campo contra tu pasaporte." },
+    ],
+    denegadoTitulo: "¿Ya te lo denegaron?",
+    denegadoTexto: "Hay un mes desde la notificación para el recurso de reposición. La Asesoría Integral lo incluye; si el recurso no es la mejor vía, te reconducimos a la estancia por estudios.",
+    denegadoEnlace: "Qué hacer si te denegaron el visado",
+    denegadoHref: "/ruta/denegado",
   },
 
   paquetes: {

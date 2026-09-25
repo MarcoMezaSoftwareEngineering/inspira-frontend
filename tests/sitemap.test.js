@@ -29,6 +29,9 @@ const enSitemap = [...sitemap.matchAll(/<loc>https:\/\/www\.inspira-legal\.cloud
 // Páginas que existen a propósito fuera del sitemap: pantallas de proceso,
 // legales y de desarrollo. No son destinos, son pasos.
 const FUERA_DEL_SITEMAP = new Set([
+  // /expediente: Marco la retiró de menús y sitemap el 25/09/2026 («ese no»);
+  // sigue respondiendo para quien tenga el enlace, con noindex.
+  "/expediente",
   "/auth/success",
   "/dev/muestra",
   "/pago-exitoso",

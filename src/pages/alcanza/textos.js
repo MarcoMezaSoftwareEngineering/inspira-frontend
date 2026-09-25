@@ -20,7 +20,7 @@ export const ALCANZA = {
     description:
       "Seis cartas, seis ciudades españolas: sus universidades, un máster de ejemplo con lo que cuesta la matrícula y cuántos más hay. Desliza y quédate con las que te llamen. Gratis y sin registro.",
     path: "/te-alcanza",
-    imagen: "/og/mapa-estudiar-en-espana.jpg",
+    imagen: "/og/te-alcanza.jpg",
   },
 
   etiqueta: "6 ciudades · 30 segundos",

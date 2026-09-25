@@ -230,9 +230,6 @@ function Checklist({ wa }) {
           <Icono nombre="whatsapp" size={18} />
           {T.checklist.whatsapp}
         </a>
-        <a href="/expediente" onClick={irA("/expediente")} className="vis-enlace">
-          {T.checklist.ver}
-        </a>
       </div>
     </div>
   );
@@ -265,6 +262,7 @@ export default function Visado() {
   const pasoCifra = cascada();
   const pasoPunto = cascada();
   const pasoPaso = cascada();
+  const pasoMotivo = cascada(60, 300);
 
   return (
     <main className="vis" ref={raiz}>
@@ -295,7 +293,7 @@ export default function Visado() {
             </a>
           </div>
           <nav className="vis-atajos" aria-label="Secciones">
-            {[["test", "¿Visa o estancia?"], ["videos", "Vídeos"], ["paquetes", "Paquetes"], ["como", "Cómo empezamos"], ["checklist", "Tu expediente"]].map(([id, t]) => (
+            {[["test", "¿Visa o estancia?"], ["denegaciones", "Por qué deniegan"], ["paquetes", "Paquetes"], ["como", "Cómo empezamos"], ["checklist", "Tu expediente"]].map(([id, t]) => (
               <button type="button" key={id} onClick={() => irASeccion(id)}>{t}</button>
             ))}
           </nav>
@@ -357,6 +355,36 @@ export default function Visado() {
         </div>
       </section>
 
+      {/* Por qué deniegan */}
+      <section className="vis-seccion vis-seccion-ancha vis-seccion-noche" id="denegaciones">
+        <Numeral n="03" claro />
+        <div data-revelar>
+          <p className="vis-rotulo vis-rotulo-sol">{T.denegaciones.rotulo}</p>
+          <h2 className="vis-h2">{T.denegaciones.titulo}</h2>
+          <p className="vis-lead">{T.denegaciones.lead}</p>
+        </div>
+        <div className="vis-motivos">
+          {T.denegaciones.lista.map((m) => (
+            <article key={m.titulo} className="vis-motivo" data-revelar="escala" style={pasoMotivo()}>
+              <span className="vis-paquete-icono vis-icono-sol"><Icono nombre={m.icono} size={18} /></span>
+              <h3>{m.titulo}</h3>
+              <p className="vis-motivo-mal"><b>{T.denegaciones.motivo}</b> {m.motivo}</p>
+              <p className="vis-motivo-bien"><b>{T.denegaciones.evitamos}</b> {m.evitamos}</p>
+            </article>
+          ))}
+        </div>
+        <div className="vis-denegado" data-revelar="escala">
+          <span className="vis-paquete-icono vis-icono-sol"><Icono nombre="balanza" size={20} /></span>
+          <div>
+            <strong>{T.denegaciones.denegadoTitulo}</strong>
+            <p>{T.denegaciones.denegadoTexto}</p>
+            <a href={T.denegaciones.denegadoHref} onClick={irA(T.denegaciones.denegadoHref)} className="vis-enlace vis-enlace-claro">
+              {T.denegaciones.denegadoEnlace} →
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Lo que dicen */}
       <section className="vis-opiniones">
         <Opiniones ubicacion="visado" />
@@ -364,7 +392,7 @@ export default function Visado() {
 
       {/* Los paquetes */}
       <section className="vis-seccion vis-seccion-ancha lfx-puntos" id="paquetes">
-        <Numeral n="03" />
+        <Numeral n="04" />
         <div data-revelar>
           <p className="vis-rotulo">{T.paquetes.rotulo}</p>
           <h2 className="vis-h2">{T.paquetes.titulo}</h2>
@@ -412,7 +440,7 @@ export default function Visado() {
 
       {/* Cómo empezamos */}
       <section className="vis-seccion vis-como lfx-banda lfx-banda-sol" id="como">
-        <Numeral n="04" />
+        <Numeral n="05" />
         <div className="lfx-cab-ilus" data-revelar>
           <div>
             <p className="vis-rotulo">{T.como.rotulo}</p>
@@ -442,7 +470,7 @@ export default function Visado() {
 
       {/* Tipos de acompañamiento */}
       <section className="vis-seccion">
-        <Numeral n="05" />
+        <Numeral n="06" />
         <div data-revelar>
           <h2 className="vis-h2">{T.acompanamiento.titulo}</h2>
           <p className="vis-lead">{T.acompanamiento.lead}</p>
@@ -460,7 +488,7 @@ export default function Visado() {
 
       {/* El checklist */}
       <section className="vis-seccion lfx-banda lfx-banda-cielo" id="checklist">
-        <Numeral n="06" />
+        <Numeral n="07" />
         <div className="lfx-cab-ilus" data-revelar>
           <div>
             <p className="vis-rotulo">{T.checklist.rotulo}</p>
@@ -476,7 +504,7 @@ export default function Visado() {
 
       {/* Preguntas */}
       <section className="vis-seccion">
-        <Numeral n="07" />
+        <Numeral n="08" />
         <div data-revelar>
           <h2 className="vis-h2">{T.faq.titulo}</h2>
           <Faq />

@@ -26,7 +26,7 @@ export const MASTER = {
     description:
       "Por qué estudiar un máster oficial en España, cuánto cuesta la matrícula en cada comunidad, qué hace Inspira Legal por ti y cómo lo hace: informe de másteres, postulación, expediente digital y visado. Empieza con una sesión diagnóstico.",
     path: "/master",
-    imagen: "/og/mapa-estudiar-en-espana.jpg",
+    imagen: "/og/master-en-espana.jpg",
   },
 
   retrato: `${MEDIA}/foto/carina-retrato.jpg`,

@@ -39,6 +39,8 @@ export const IMG_VISADO = "/og/visado-estudios.jpg";
 export const IMG_MASTER_TODO = "/og/master-en-espana.jpg";
 export const IMG_CARINA = "/og/carina.jpg";
 export const IMG_JUEGO = "/og/te-alcanza.jpg";
+export const IMG_ESTANCIA = "/og/estancia-estudios.jpg";
+const ESTANCIA_EUR = PRECIOS.estancia.eur;
 
 const MASTER = {
   title: "Paquete Máster 2027/2028 | Inspira Legal",
@@ -201,6 +203,13 @@ export const RUTAS_COMPARTIR = {
       `Tienes la carta de admisión y ahora toca el visado. En dos minutos sabes si te conviene visado o estancia, qué incluye cada paquete (desde ${DESDE_VISADO} €) y por qué empezamos con una sesión diagnóstico de ${SESION_EUR} €.`,
     image: IMG_VISADO,
     imageAlt: "¿Ya tienes la carta de admisión? Lo que falta es el visado. Inspira Legal",
+  },
+  "/estancia": {
+    title: "Estancia por estudios en España: ya estás aquí, quédate a estudiar | Inspira Legal",
+    description:
+      `Si entraste como turista, la estancia por estudios se presenta desde España, 100 % telemática y con permiso de trabajo de 30 horas. Calcula tus plazos, revisa los documentos y los motivos de denegación. Paquete de ${ESTANCIA_EUR} € tras la sesión diagnóstico de ${SESION_EUR} €.`,
+    image: IMG_ESTANCIA,
+    imageAlt: "¿Ya estás en España? Tu vía es la estancia por estudios. Inspira Legal",
   },
   "/master": {
     title: "Máster oficial en España: por qué, cuánto cuesta y cómo te llevamos | Inspira Legal",

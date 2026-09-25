@@ -555,6 +555,16 @@ def carina():
     )
 
 
+def estancia():
+    return tarjeta_landing(
+        "estancia-estudios.jpg",
+        "Estancia por estudios · ya en España",
+        "¿Ya estás en España? Tu vía es la estancia por estudios.",
+        "100 % telemática, sin citas, con permiso de trabajo de 30 h. Tus plazos, los documentos y por qué deniegan.",
+        [f"Paquete {PRECIOS['estancia']['eur']} €", "+350 aprobadas", "30 h de trabajo"],
+    )
+
+
 def juego():
     return tarjeta_landing(
         "te-alcanza.jpg",

@@ -406,7 +406,7 @@ export default function Visado() {
             <p>
               {T.paquetes.estanciaTexto} {ESTANCIA_ESTUDIOS.nombre}: {eur(ESTANCIA_ESTUDIOS.precio)}.
             </p>
-            <a href="/servicios/estancia-estudios" onClick={irA("/servicios/estancia-estudios")} className="vis-enlace">
+            <a href="/estancia" onClick={irA("/estancia")} className="vis-enlace">
               {T.paquetes.estanciaEnlace} →
             </a>
           </div>

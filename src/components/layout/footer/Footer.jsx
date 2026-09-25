@@ -16,7 +16,7 @@ const ir = (e, href) => {
 const enlacesExplora = [
   { label: "Todos los servicios", href: "/servicios" },
   { label: "Paquete Máster 2027/2028", href: "/servicios/master" },
-  { label: "Estancia por estudios", href: "/servicios/estancia" },
+  { label: "Estancia por estudios", href: "/estancia" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
   { label: "Visado de estudios", href: "/visado" },
   { label: "Máster en España: todo lo que hacemos", href: "/master" },

@@ -141,7 +141,7 @@ export const POR_SERVICIO = [
       "Mensajes con tu asesor, con constancia de lectura",
     ],
     capturas: ["estanciaPlazos", "estanciaExtranjeria"],
-    enlace: { texto: "Ver la estancia por estudios", href: "/servicios/estancia-estudios" },
+    enlace: { texto: "Ver la estancia por estudios", href: "/estancia" },
   },
 ];
 

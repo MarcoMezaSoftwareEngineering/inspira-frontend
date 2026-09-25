@@ -82,14 +82,14 @@ const LANDINGS = [
   },
   {
     id: "estancia",
-    ruta: "/servicios/estancia-estudios",
+    ruta: "/estancia",
     grupo: "Vender",
-    nombre: "Estancia por estudios",
-    para: "Quien ya está en España o va a entrar como turista, o a quien le denegaron el visado.",
+    nombre: "Estancia por estudios · «Ya estoy en España»",
+    para: "Quien ya está en España o va a entrar como turista, o a quien le denegaron el visado. Calculadora de plazos, documentos, motivos de denegación, resultados y el paquete.",
     plantilla: (n, a, url) =>
-      `${hola(n, a)} Si ya estás en España o vas a entrar como turista, tu vía es la estancia por estudios: 100 % telemática y con permiso de trabajo de 30 horas.\n` +
+      `${hola(n, a)} Si ya estás en España o vas a entrar como turista, tu vía es la estancia por estudios: se presenta desde aquí, 100 % telemática, dentro de tus 90 días y con permiso de trabajo de 30 horas.\n` +
       `👉 ${url}\n` +
-      `Ahí ves qué incluye y cómo se presenta. ¿Cuándo empiezan tus clases?`,
+      `Pon ahí tu fecha de entrada y la de clases y te dice hasta cuándo puedes presentar. ¿Cuándo entraste?`,
   },
   {
     id: "paquetes-visado",

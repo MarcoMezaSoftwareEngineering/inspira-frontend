@@ -50,6 +50,7 @@ const Carina = lazyConRecarga(() => import("./pages/carina/Carina"));
 const Expediente = lazyConRecarga(() => import("./pages/expediente/Expediente"));
 const Visado = lazyConRecarga(() => import("./pages/visado/Visado"));
 const MasterTodo = lazyConRecarga(() => import("./pages/landing/master/MasterTodo"));
+const Estancia = lazyConRecarga(() => import("./pages/estancia/Estancia"));
 const PaginaLugar = lazyConRecarga(() => import("./pages/mapa/PaginaLugar"));
 const Asistente = lazyConRecarga(() => import("./pages/asistente/Asistente"));
 const RutaLanding = lazyConRecarga(() => import("./pages/rutas/RutaLanding"));
@@ -163,6 +164,13 @@ const SEO_PAGES = {
       "Tienes la carta de admisión y ahora toca el visado de estudios. En dos minutos sabes si te conviene visado o estancia, qué incluye cada paquete de Inspira Legal y por qué empezamos con una sesión diagnóstico.",
     path: "/visado",
     imagen: "/og/visado-estudios.jpg",
+  },
+  "/estancia": {
+    title: "Estancia por estudios en España: ya estás aquí, quédate a estudiar",
+    description:
+      "Si entraste como turista, la estancia por estudios se presenta desde España, 100 % telemática y con permiso de trabajo de 30 horas. Calcula tus plazos, revisa los documentos y los motivos de denegación más comunes.",
+    path: "/estancia",
+    imagen: "/og/estancia-estudios.jpg",
   },
   "/master": {
     title: "Máster en España 2027/2028: todo lo que hacemos por ti",
@@ -415,6 +423,7 @@ const PUBLIC_PATHS = [
   // Las landings de venta que se mandan por WhatsApp (24/09/2026).
   "/visado",
   "/master",
+  "/estancia",
   "/master-2027-2028",
   "/visa-o-estancia",
   "/grado-en-espana",
@@ -582,6 +591,7 @@ export default function App() {
       {path === "/expediente" && <Expediente />}
       {path === "/visado" && <Visado />}
       {path === "/master" && <MasterTodo />}
+      {path === "/estancia" && <Estancia />}
       {/* Una página por comunidad y por universidad, con los datos del mapa:
           son las direcciones que busca la gente («máster en Galicia») y las
           que puede posicionar un buscador. Ver pages/mapa/PaginaLugar.jsx. */}

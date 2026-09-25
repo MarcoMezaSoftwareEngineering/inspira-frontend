@@ -87,6 +87,7 @@ export const ORIGENES_WHATSAPP = {
   carina: "la página de Carina",
   expediente: "el expediente de ejemplo",
   visado: "la página del visado de estudios",
+  estancia: "la página de la estancia por estudios",
   "master-todo": "la página completa del máster",
   "asesoria-cta": "el botón «Agenda tu asesoría»",
   "panel-bienvenida": "la pantalla de acceso al panel",

@@ -108,6 +108,13 @@ const RECURSOS = [
     href: interno("/visado"),
   },
   {
+    clave: "recurso:estancia",
+    icono: "bandera",
+    titulo: "¿Ya estás en España? La estancia por estudios",
+    texto: "Tus plazos con dos fechas, los documentos y por qué deniegan",
+    href: interno("/estancia"),
+  },
+  {
     clave: "recurso:master",
     icono: "birrete",
     titulo: "Máster en España: todo lo que hacemos",

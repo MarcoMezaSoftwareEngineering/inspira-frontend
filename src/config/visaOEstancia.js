@@ -423,7 +423,7 @@ export const PAQUETES = {
     subtitulo: ESTANCIA_ESTUDIOS.subtitulo,
     precio: ESTANCIA_ESTUDIOS.precio,
     incluye: ESTANCIA_ESTUDIOS.incluye,
-    href: "/servicios/estancia-estudios",
+    href: "/estancia",
   },
   master: {
     id: "master",

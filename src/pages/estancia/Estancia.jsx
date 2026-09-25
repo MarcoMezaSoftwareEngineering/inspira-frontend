@@ -1,13 +1,15 @@
 // src/pages/estancia/Estancia.jsx
 //
 // /estancia: la landing de venta de la estancia por estudios, para quien ya
-// está en España (o va a entrar como turista). Misma estructura que /visado
-// con lo que aquí importa: los plazos (calculadora con las dos fechas), los
-// documentos (checklist que arma el WhatsApp), los motivos de denegación, los
-// resultados, la comparativa con el visado, el paquete único y los seis pasos.
+// está en España (o va a entrar como turista). Lo que Marco pidió que se
+// subraye (25/09/2026): que se presenta con la firma digital del abogado vía
+// MERCURIO y que nos encargamos de todo para que el cliente se ocupe de sus
+// clases; la casilla electrónica y las notificaciones en la app de Inspira; y
+// la seguridad que respalda los 350 €. Un solo plazo (llegada + 90 días − dos
+// meses), documentos en genérico, sin comparativa con el visado.
 //
 // Reglas y textos en ./textos.js y en config (visaOEstancia, metodo,
-// serviciosProceso, casos). Nada escrito aquí.
+// serviciosProceso, casos, plataforma). Nada escrito aquí.
 import { useEffect, useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
 import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
@@ -17,7 +19,7 @@ import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
-import { COMPARATIVA, DIAS_ANTELACION, DIAS_PROCESO_ESTANCIA } from "../../config/visaOEstancia";
+import { DIAS_ANTELACION } from "../../config/visaOEstancia";
 import { PROCESOS } from "../../config/serviciosProceso";
 import { eur } from "../../config/paqueteMaster2027Resumen";
 import { registrarEvento } from "../../lib/analytics";
@@ -49,6 +51,42 @@ const hoy0 = () => {
   return h;
 };
 
+/** La tarjeta de comunicaciones de Extranjería del portal, reconstruida con
+ *  datos de muestra: nítida, no una captura desenfocada. Lo que enseña existe
+ *  tal cual en el portal (config/plataforma.js, POR_SERVICIO estancia). */
+function AppMock() {
+  const A = T.app.mock;
+  return (
+    <div className="est-appmock" aria-label={`${A.ejemplo}: ${A.cab}`}>
+      <div className="est-appmock-cab">
+        <span className="est-appmock-num">{A.n}</span>
+        <span>
+          <strong>{A.cab}</strong>
+          <small>{A.sub}</small>
+        </span>
+      </div>
+      <ul className="est-appmock-lista">
+        {A.filas.map((f) => (
+          <li key={f.titulo} className={f.urgente ? "est-appmock-urgente" : ""}>
+            <Icono nombre={f.icono} size={16} />
+            <span>
+              <strong>{f.titulo}</strong>
+              <small>{f.detalle}</small>
+            </span>
+            <b>{f.plazo}</b>
+          </li>
+        ))}
+      </ul>
+      <div className="est-appmock-plazos">
+        {A.plazos.map(([k, v]) => (
+          <span key={k}>{k} <b>{v}</b></span>
+        ))}
+      </div>
+      <small className="est-appmock-pie">{A.ejemplo}</small>
+    </div>
+  );
+}
+
 /** La palabra del titular que va cambiando. */
 function PalabraRotante({ palabras }) {
   const [i, setI] = useState(0);
@@ -71,136 +109,48 @@ function PalabraRotante({ palabras }) {
 }
 
 /**
- * Los plazos con las dos fechas: el tope (los días como turista desde la
- * entrada), la recomendada (DIAS_ANTELACION antes de clases) y la resolución
- * estimada (DIAS_PROCESO_ESTANCIA desde la entrada). Los mismos números que
- * usa el test /visa-o-estancia.
+ * Un solo plazo, el que fija Marco: la llegada más los 90 días de turista,
+ * menos los dos meses de antelación que pide Extranjería (DIAS_ANTELACION,
+ * el mismo número que usa el test /visa-o-estancia).
  */
-function Plazos() {
+function Plazo() {
   const [entrada, setEntrada] = useState("");
-  const [clases, setClases] = useState("");
-  const P = T.plazos;
+  const P = T.plazo;
   const fe = entrada ? new Date(`${entrada}T00:00:00`) : null;
-  const fc = clases ? new Date(`${clases}T00:00:00`) : null;
   let salida = null;
-  if (fe && fc) {
+  if (fe && !Number.isNaN(fe.getTime())) {
     const hoy = hoy0();
-    const tope = sumar(fe, P.diasTurista - 1);
-    const recomendada = sumar(fc, -DIAS_ANTELACION);
-    const resolucion = sumar(fe, DIAS_PROCESO_ESTANCIA);
-    const diasClases = Math.round((fc - hoy) / DIA);
+    const tope = sumar(fe, P.diasTurista - DIAS_ANTELACION);
+    const dias = Math.round((tope - hoy) / DIA);
     let estado = "verde";
-    let aviso = P.verde(fmt(recomendada), fmt(tope));
-    if (diasClases < 0) {
-      estado = "rojo";
-      aviso = P.pasadas;
-    } else if (tope < hoy) {
+    let aviso = P.verde(dias, fmt(tope));
+    if (fe > hoy) aviso = P.futuro(fmt(tope));
+    else if (dias < 0) {
       estado = "rojo";
       aviso = P.rojo;
-    } else if (recomendada < hoy) {
-      estado = "ambar";
-      aviso = P.ambar(diasClases, fmt(tope));
     }
-    salida = { tope, recomendada, resolucion, estado, aviso };
+    salida = { tope, estado, aviso };
   }
-  const registrar = () => salida && registrarEvento("estancia_plazos", { estado: salida.estado });
-
   return (
     <div className="est-plazos">
-      <div className="est-plazos-campos">
+      <div className="est-plazos-campos est-plazos-uno">
         <label>
           {P.entrada}
-          <input type="date" value={entrada} onChange={(e) => setEntrada(e.target.value)} onBlur={registrar} />
+          <input type="date" value={entrada} onChange={(e) => setEntrada(e.target.value)} onBlur={() => salida && registrarEvento("estancia_plazo", { estado: salida.estado })} />
           <small>{P.entradaAyuda}</small>
-        </label>
-        <label>
-          {P.clases}
-          <input type="date" value={clases} onChange={(e) => setClases(e.target.value)} onBlur={registrar} />
-          <small>{P.clasesAyuda}</small>
         </label>
       </div>
       {salida && (
         <div className="est-entra">
-          <div className="est-plazos-res">
-            <div className={`est-plazo est-plazo-${salida.estado === "rojo" ? "rojo" : "verde"}`}>
-              <span>{P.tope}</span>
-              <strong>{fmt(salida.tope)}</strong>
-              <small>{P.topeNota(P.diasTurista)}</small>
-            </div>
-            <div className={`est-plazo est-plazo-${salida.estado}`}>
-              <span>{P.recomendada}</span>
-              <strong>{fmt(salida.recomendada)}</strong>
-              <small>{P.recomendadaNota(DIAS_ANTELACION)}</small>
-            </div>
-            <div className="est-plazo">
-              <span>{P.resolucion}</span>
-              <strong>{fmt(salida.resolucion)}</strong>
-              <small>{P.resolucionNota}</small>
-            </div>
+          <div className={`est-plazo est-plazo-grande est-plazo-${salida.estado}`}>
+            <span>{P.tope}</span>
+            <strong>{fmt(salida.tope)}</strong>
+            <small>{P.formula}</small>
           </div>
           <p className={`est-plazos-aviso est-plazos-aviso-${salida.estado}`}>{salida.aviso}</p>
         </div>
       )}
       <p className="est-descargo">{P.descargo}</p>
-    </div>
-  );
-}
-
-function Checklist({ wa }) {
-  const [tengo, setTengo] = useState(() => new Set());
-  const D = T.documentos;
-  const total = D.lista.length;
-  const faltan = D.lista.filter((d) => !tengo.has(d.id)).map((d) => d.corto);
-  const marcar = (id) =>
-    setTengo((prev) => {
-      const s = new Set(prev);
-      if (s.has(id)) s.delete(id);
-      else s.add(id);
-      return s;
-    });
-  return (
-    <div className="est-check">
-      <div className="est-check-lista">
-        {D.lista.map((d) => (
-          <label key={d.id} className={`est-check-item${tengo.has(d.id) ? " est-check-on" : ""}`}>
-            <input type="checkbox" checked={tengo.has(d.id)} onChange={() => marcar(d.id)} />
-            <Icono nombre={d.icono} size={16} />
-            <span>{d.nombre}</span>
-          </label>
-        ))}
-      </div>
-      <div className="est-check-pie">
-        <div className="est-barra" aria-hidden="true"><span style={{ width: `${(tengo.size / total) * 100}%` }} /></div>
-        <strong>{D.de(tengo.size, total)}</strong>
-        <span>{tengo.size === total ? D.completo : D.faltan(total - tengo.size)}</span>
-        <a href={wa(D.whatsappDetalle(tengo.size, faltan))} target="_blank" rel="noopener" className="est-btn est-btn-wa mov-brillo" onClick={() => registrarEvento("estancia_whatsapp", { donde: "checklist", faltan: faltan.length })}>
-          <Icono nombre="whatsapp" size={18} />
-          {D.whatsapp}
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function Compara() {
-  const [abierta, setAbierta] = useState(0);
-  return (
-    <div className="est-compara">
-      {COMPARATIVA.map((c, i) => (
-        <div key={c.criterio} className={`est-compara-fila${abierta === i ? " est-compara-on" : ""}`}>
-          <button type="button" onClick={() => setAbierta(abierta === i ? -1 : i)} aria-expanded={abierta === i}>
-            <Icono nombre={c.icono} size={18} />
-            {c.criterio}
-            <span aria-hidden="true">+</span>
-          </button>
-          {abierta === i && (
-            <div className="est-compara-cuerpo est-entra">
-              <p><b>{T.compara.visa}</b>{c.visa}</p>
-              <p className="est-compara-yo"><b>{T.compara.estancia}</b>{c.estancia}</p>
-            </div>
-          )}
-        </div>
-      ))}
     </div>
   );
 }
@@ -230,13 +180,18 @@ export default function Estancia() {
   const foto = useRef(null);
   useParallax(foto);
   const pasoCifra = cascada();
+  const pasoTodo = cascada(40, 320);
+  const pasoDoc = cascada(50, 350);
+  const pasoApp = cascada(60, 360);
   const pasoMotivo = cascada(60, 300);
   const pasoPaso = cascada();
   const pasoResultado = cascada();
+  const pasoGarantia = cascada();
   const clave = CATEGORIAS_CASOS.find((c) => c.id === T.resultados.clave);
   const otros = CATEGORIAS_CASOS.filter((c) => c.id !== T.resultados.clave);
   const numero = (c) => Number(String(c.cifra).replace(/[^\d]/g, ""));
   const prefijo = (c) => String(c.cifra).replace(/[\d.]/g, "");
+  const precio = eur(ESTANCIA_ESTUDIOS.precio);
 
   return (
     <main className="est" ref={raiz}>
@@ -268,7 +223,7 @@ export default function Estancia() {
             </a>
           </div>
           <nav className="est-atajos" aria-label="Secciones">
-            {[["plazos", "Tus plazos"], ["documentos", "Documentos"], ["denegaciones", "Por qué deniegan"], ["resultados", "Resultados"], ["paquete", "El paquete"]].map(([id, t]) => (
+            {[["plazo", "Tu plazo"], ["todo", "Nos encargamos"], ["app", "Tu expediente en la app"], ["denegaciones", "Por qué deniegan"], ["paquete", precio]].map(([id, t]) => (
               <button type="button" key={id} onClick={() => irASeccion(id)}>{t}</button>
             ))}
           </nav>
@@ -279,7 +234,7 @@ export default function Estancia() {
             <Stickers
               lista={[
                 { texto: `${clave.cifra} ${clave.titulo.toLowerCase()}`, top: "7%", left: "-5%", rot: -7, tono: "sol" },
-                { texto: "100 % telemática", top: "46%", right: "-7%", rot: 5 },
+                { texto: "Firma digital · MERCURIO", top: "46%", right: "-7%", rot: 5 },
                 { texto: "30 h de trabajo", bottom: "12%", left: "-3%", rot: -4, tono: "noche" },
               ]}
             />
@@ -301,25 +256,53 @@ export default function Estancia() {
 
       <div className="est-cinta"><Cinta items={T.cinta} tono="noche" /></div>
 
-      {/* Los plazos */}
-      <section className="est-seccion lfx-banda lfx-banda-cielo" id="plazos">
+      {/* El plazo */}
+      <section className="est-seccion lfx-banda lfx-banda-cielo" id="plazo">
         <Numeral n="01" />
         <div className="lfx-cab-ilus" data-revelar>
           <div>
-            <p className="est-rotulo">{T.plazos.rotulo}</p>
-            <h2 className="est-h2">{T.plazos.titulo}</h2>
-            <p className="est-lead">{T.plazos.lead}</p>
+            <p className="est-rotulo">{T.plazo.rotulo}</p>
+            <h2 className="est-h2">{T.plazo.titulo}</h2>
+            <p className="est-lead">{T.plazo.lead}</p>
           </div>
           <img src={ilusPortapapeles} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
         </div>
         <div data-revelar="escala">
-          <Plazos />
+          <Plazo />
         </div>
       </section>
 
-      {/* Los documentos */}
-      <section className="est-seccion" id="documentos">
+      {/* Nos encargamos de todo */}
+      <section className="est-seccion" id="todo">
         <Numeral n="02" />
+        <div className="lfx-cab-ilus" data-revelar>
+          <div>
+            <p className="est-rotulo">{T.todo.rotulo}</p>
+            <h2 className="est-h2">{T.todo.titulo}</h2>
+            <p className="est-lead">{T.todo.lead}</p>
+          </div>
+          <img src={ilusAsesora} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
+        </div>
+        <div className="est-firma" data-revelar="escala">
+          <span className="est-paquete-icono est-icono-sol"><Icono nombre="laptop" size={22} /></span>
+          <div>
+            <strong>{T.todo.firmaTitulo}</strong>
+            <p>{T.todo.firmaTexto}</p>
+          </div>
+        </div>
+        <ul className="est-todo">
+          {T.todo.lista.map((t) => (
+            <li key={t} data-revelar="izquierda" style={pasoTodo()}>
+              <span className="est-todo-check"><Icono nombre="check" size={14} /></span>
+              {t}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Los documentos, en genérico */}
+      <section className="est-seccion lfx-puntos" id="documentos">
+        <Numeral n="03" />
         <div className="lfx-cab-ilus" data-revelar>
           <div>
             <p className="est-rotulo">{T.documentos.rotulo}</p>
@@ -328,23 +311,58 @@ export default function Estancia() {
           </div>
           <img src={ilusCarpeta} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
         </div>
-        <div data-revelar="escala">
-          <Checklist wa={wa} />
+        <div className="est-docs">
+          {T.documentos.lista.map((d) => (
+            <div key={d.nombre} className="est-doc" data-revelar="escala" style={pasoDoc()}>
+              <span className="est-paquete-icono"><Icono nombre={d.icono} size={18} /></span>
+              <div>
+                <strong>{d.nombre}</strong>
+                <p>{d.nota}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Por qué deniegan */}
-      <section className="est-seccion est-seccion-ancha est-seccion-noche" id="denegaciones">
-        <Numeral n="03" claro />
+      {/* Tu expediente en la app */}
+      <section className="est-seccion est-seccion-ancha est-seccion-noche" id="app">
+        <Numeral n="04" claro />
         <div data-revelar>
-          <p className="est-rotulo est-rotulo-sol">{T.denegaciones.rotulo}</p>
+          <p className="est-rotulo est-rotulo-sol">{T.app.rotulo}</p>
+          <h2 className="est-h2">{T.app.titulo}</h2>
+          <p className="est-lead">{T.app.lead}</p>
+        </div>
+        <div className="est-app">
+          <div className="est-app-captura" data-revelar="escala">
+            <AppMock />
+          </div>
+          <div className="est-app-puntos">
+            {T.app.puntos.map((p) => (
+              <div key={p.titulo} className="est-motivo" data-revelar="escala" style={pasoApp()}>
+                <span className="est-paquete-icono est-icono-sol"><Icono nombre={p.icono} size={18} /></span>
+                <h3>{p.titulo}</h3>
+                <p>{p.texto}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <a href={T.app.href} onClick={irA(T.app.href)} className="est-enlace est-enlace-claro est-enlace-bloque">
+          {T.app.enlace} →
+        </a>
+      </section>
+
+      {/* Por qué deniegan */}
+      <section className="est-seccion est-seccion-ancha" id="denegaciones">
+        <Numeral n="05" />
+        <div data-revelar>
+          <p className="est-rotulo">{T.denegaciones.rotulo}</p>
           <h2 className="est-h2">{T.denegaciones.titulo}</h2>
           <p className="est-lead">{T.denegaciones.lead}</p>
         </div>
-        <div className="est-motivos">
+        <div className="est-motivos est-motivos-claros">
           {T.denegaciones.lista.map((m) => (
             <article key={m.titulo} className="est-motivo" data-revelar="escala" style={pasoMotivo()}>
-              <span className="est-paquete-icono est-icono-sol"><Icono nombre={m.icono} size={18} /></span>
+              <span className="est-paquete-icono"><Icono nombre={m.icono} size={18} /></span>
               <h3>{m.titulo}</h3>
               <p className="est-motivo-mal"><b>{T.denegaciones.motivo}</b> {m.motivo}</p>
               <p className="est-motivo-bien"><b>{T.denegaciones.evitamos}</b> {m.evitamos}</p>
@@ -355,7 +373,7 @@ export default function Estancia() {
 
       {/* Resultados */}
       <section className="est-seccion" id="resultados">
-        <Numeral n="04" />
+        <Numeral n="06" />
         <div data-revelar>
           <p className="est-rotulo">{T.resultados.rotulo}</p>
           <h2 className="est-h2">{T.resultados.titulo}</h2>
@@ -383,29 +401,22 @@ export default function Estancia() {
         <Opiniones ubicacion="estancia" />
       </section>
 
-      {/* Visado o estancia */}
-      <section className="est-seccion" id="compara">
-        <Numeral n="05" />
-        <div data-revelar>
-          <p className="est-rotulo">{T.compara.rotulo}</p>
-          <h2 className="est-h2">{T.compara.titulo}</h2>
-          <p className="est-lead">{T.compara.lead}</p>
-        </div>
-        <div data-revelar="escala">
-          <Compara />
-        </div>
-        <a href="/visa-o-estancia" onClick={irA("/visa-o-estancia")} className="est-enlace est-enlace-bloque">
-          {T.compara.test}
-        </a>
-      </section>
-
-      {/* El paquete */}
-      <section className="est-seccion est-seccion-ancha lfx-puntos" id="paquete">
-        <Numeral n="06" />
+      {/* Seguridad: lo que vale el paquete */}
+      <section className="est-seccion est-seccion-ancha lfx-banda lfx-banda-sol" id="paquete">
+        <Numeral n="07" />
         <div data-revelar>
           <p className="est-rotulo">{T.paquete.rotulo}</p>
-          <h2 className="est-h2">{T.paquete.titulo}</h2>
+          <h2 className="est-h2">{T.paquete.titulo(precio)}</h2>
           <p className="est-lead">{T.paquete.lead}</p>
+        </div>
+        <div className="est-garantias">
+          {T.paquete.garantias.map((g) => (
+            <div key={g.titulo} className="est-garantia" data-revelar="escala" style={pasoGarantia()}>
+              <span className="est-paquete-icono est-icono-sol"><Icono nombre={g.icono} size={18} /></span>
+              <strong>{g.titulo}</strong>
+              <p>{g.texto}</p>
+            </div>
+          ))}
         </div>
         <div className="est-paquetes">
           <article className="est-paquete est-paquete-destacado" data-revelar="escala">
@@ -413,7 +424,7 @@ export default function Estancia() {
             <span className="est-paquete-icono"><Icono nombre={ESTANCIA_ESTUDIOS.icono} size={20} /></span>
             <h3>{ESTANCIA_ESTUDIOS.nombre}</h3>
             <p className="est-paquete-sub">{ESTANCIA_ESTUDIOS.subtitulo}</p>
-            <p className="est-paquete-precio">{eur(ESTANCIA_ESTUDIOS.precio)}</p>
+            <p className="est-paquete-precio">{precio}</p>
             <p className="est-h5">{T.paquete.incluye}</p>
             <ul className="est-lista est-lista-ok">
               {ESTANCIA_ESTUDIOS.incluye.map((t) => (
@@ -429,7 +440,8 @@ export default function Estancia() {
             <p className="est-paquete-para">
               <strong>{T.paquete.para}</strong> {ESTANCIA_ESTUDIOS.para.join(" · ")}
             </p>
-            <a href={wa(`Me interesa el paquete ${ESTANCIA_ESTUDIOS.nombre} (${eur(ESTANCIA_ESTUDIOS.precio)}). Ya estoy en España o entro pronto como turista.`)} target="_blank" rel="noopener" className="est-btn est-btn-sol mov-brillo" onClick={() => registrarEvento("estancia_paquete", {})}>
+            <p className="est-paquete-para">{T.paquete.garantiaTexto}</p>
+            <a href={wa(`Me interesa el paquete ${ESTANCIA_ESTUDIOS.nombre} (${precio}). Ya estoy en España o entro pronto como turista.`)} target="_blank" rel="noopener" className="est-btn est-btn-sol mov-brillo" onClick={() => registrarEvento("estancia_paquete", {})}>
               {T.paquete.elegir}
             </a>
           </article>
@@ -447,15 +459,12 @@ export default function Estancia() {
       </section>
 
       {/* Cómo lo hacemos */}
-      <section className="est-seccion est-como lfx-banda lfx-banda-sol" id="como">
-        <Numeral n="07" />
-        <div className="lfx-cab-ilus" data-revelar>
-          <div>
-            <p className="est-rotulo">{T.como.rotulo}</p>
-            <h2 className="est-h2">{T.como.titulo}</h2>
-            <p className="est-lead">{T.como.lead}</p>
-          </div>
-          <img src={ilusAsesora} alt="" className="lfx-ilus" loading="lazy" width="150" height="150" />
+      <section className="est-seccion est-como" id="como">
+        <Numeral n="08" />
+        <div data-revelar>
+          <p className="est-rotulo">{T.como.rotulo}</p>
+          <h2 className="est-h2">{T.como.titulo}</h2>
+          <p className="est-lead">{T.como.lead}</p>
         </div>
         <ol className="est-pasos">
           {PASOS.map((p, i) => (
@@ -485,7 +494,7 @@ export default function Estancia() {
 
       {/* Preguntas */}
       <section className="est-seccion">
-        <Numeral n="08" />
+        <Numeral n="09" />
         <div data-revelar>
           <h2 className="est-h2">{T.faq.titulo}</h2>
           <Faq />

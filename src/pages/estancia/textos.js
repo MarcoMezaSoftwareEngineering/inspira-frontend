@@ -27,14 +27,14 @@ export const ESTANCIA = {
 
   retrato: `${MEDIA}/foto/carina-retrato.jpg`,
   graduacion: `${MEDIA}/foto/carina-graduacion.jpg`,
-  cinta: ["100 % telemática", "Sin citas ni colas", "Firma digital del abogado", "30 h de trabajo", `${eur(IPREM_ANUAL)} en cuenta española`, "Dentro de tus 90 días", "MERCURIO", `${extranjeria.cifra} ${extranjeria.titulo.toLowerCase()}`],
+  cinta: ["Firma digital del abogado", "Vía MERCURIO", "Sin citas ni colas", "Casilla electrónica", "Notificaciones en tu app", "30 h de trabajo", `${extranjeria.cifra} ${extranjeria.titulo.toLowerCase()}`, "Tú, a tus clases"],
 
   hero: {
     rotulo: "Estancia por estudios · ya en España",
     tituloInicio: "¿Ya estás en",
     palabras: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Málaga", "España"],
     tituloFin: "Tu vía es la estancia por estudios.",
-    lead: "Entraste como turista y quieres quedarte a estudiar: se presenta desde aquí, ante Extranjería, sin citas ni consulado, con firma digital del abogado. Y con permiso de trabajo de 30 horas.",
+    lead: "Se presenta desde España, con la firma digital de nuestro abogado, vía MERCURIO. Nosotros nos encargamos de todo el expediente; tú, de tus clases y de tus primeros días en España. Y con permiso de trabajo de 30 horas.",
     quien: "Carina Meza · CEO y consultora legal",
     whatsapp: "Escríbeme por WhatsApp",
     sesion: `Sesión diagnóstico · ${eur(SESION_DIAGNOSTICO.precio)}`,
@@ -42,49 +42,79 @@ export const ESTANCIA = {
     whatsappDetalle: "Ya estoy en España (o entro pronto como turista) y quiero tramitar la estancia por estudios. ¿Cómo empezamos?",
   },
 
-  plazos: {
-    rotulo: "Tus plazos",
+  plazo: {
+    rotulo: "Tu plazo",
     titulo: "¿Hasta cuándo puedes presentar?",
-    lead: "La estancia se presenta estando en España, dentro de tus días como turista, y Extranjería la quiere dos meses antes del inicio de clases. Pon tus dos fechas y te lo digo.",
+    lead: "Desde que llegas tienes 90 días como turista, y Extranjería pide presentar con dos meses de antelación. Pon tu fecha de entrada y te doy tu último día.",
     entrada: "¿Cuándo entraste (o entras) a España?",
     entradaAyuda: "La fecha del sello de entrada, o la del vuelo si aún no has viajado.",
-    clases: "¿Cuándo empiezan tus clases?",
-    clasesAyuda: "La que dice tu carta de admisión.",
-    tope: "Último día para presentar",
-    recomendada: "Fecha recomendada",
-    resolucion: "Resolución estimada",
+    tope: "Tu último día para presentar",
+    formula: "Tu llegada + 90 días − 2 meses",
     diasTurista: 90,
-    topeNota: (n) => `Tus ${n} días de estancia como turista`,
-    recomendadaNota: (n) => `${n} días antes de clases`,
-    resolucionNota: "Unos tres meses desde tu entrada",
-    verde: (rec, tope) => `Presenta entre hoy y el ${rec}, y nunca después del ${tope}. Con ese margen entras en los plazos que pide Extranjería.`,
-    ambar: (dias, tope) => `Quedan ${dias} días para clases: se presenta igual, adjuntando un escrito de excepcionalidad que explique por qué se hace con menos antelación. Pero antes del ${tope}, sin falta.`,
-    rojo: "Tus días como turista ya pasaron. No es un no: hay que mirar tu situación en la sesión antes de presentar nada.",
-    pasadas: "Tus clases ya empezaron: hay que replantear el calendario académico. Lo vemos en la sesión.",
-    descargo: "Cálculo orientativo con las reglas generales. La fecha exacta se confirma en la sesión, con tu pasaporte y tu carta delante.",
+    verde: (n, fecha) => `Tienes hasta el ${fecha}: ${n === 1 ? "queda 1 día" : `quedan ${n} días`}. Escríbenos hoy y llegamos con margen.`,
+    futuro: (fecha) => `Aún no has entrado. Desde tu llegada, tu último día para presentar será el ${fecha}: conviene traer el expediente casi listo.`,
+    rojo: "Ese día ya pasó. No es un no: hay que mirar tu situación en la sesión antes de presentar nada.",
+    descargo: "Cálculo orientativo con la regla general. La fecha exacta se confirma en la sesión, con tu pasaporte delante.",
+  },
+
+  todo: {
+    rotulo: "Nos encargamos de todo",
+    titulo: "Tú te ocupas de tus clases y de tus primeros días en España. Nosotros, del expediente.",
+    lead: "Un abogado colegiado prepara, firma y presenta tu estancia por vía telemática. No pides cita, no haces cola, no vas a ninguna oficina.",
+    firmaTitulo: "Presentación con firma digital del abogado, vía MERCURIO",
+    firmaTexto: "MERCURIO es la plataforma telemática de Extranjería. Tu expediente entra firmado digitalmente por nuestro abogado, con registro de fecha y hora, sin depender de una cita.",
+    lista: [
+      "Diagnóstico jurídico personalizado de tu caso.",
+      "Revisión integral de tu documentación.",
+      "Preparación y organización completa del expediente.",
+      "Presentación telemática mediante MERCURIO con firma digital de abogado.",
+      "Requerimientos y subsanaciones durante todo el procedimiento.",
+      "Seguimiento constante de tu expediente.",
+      "Acompañamiento hasta la resolución final.",
+      "Modelos oficiales y guía para abrir cuenta bancaria, empadronarte y contratar el seguro médico válido.",
+    ],
   },
 
   documentos: {
-    rotulo: "Tu expediente",
-    titulo: "Lo que lleva una estancia que se aprueba",
-    lead: "Marca lo que ya tienes. Con eso te digo por dónde empezamos.",
-    de: (n, total) => `${n} de ${total}`,
-    faltan: (n) => (n === 1 ? "Te falta 1 documento." : `Te faltan ${n} documentos.`),
-    completo: "Lo tienes todo: toca revisarlo y presentarlo.",
-    whatsapp: "Escríbeme con esta lista",
-    whatsappDetalle: (tengo, faltan) =>
-      faltan.length
-        ? `Estoy en España y quiero la estancia por estudios. Tengo ${tengo} documentos y me faltan: ${faltan.join(", ")}. ¿Cómo empezamos?`
-        : "Estoy en España, tengo todos los documentos de la estancia por estudios y quiero que revisen mi expediente.",
+    rotulo: "Los documentos",
+    titulo: "Lo que lleva una estancia por estudios",
+    lead: "Todos con modelo de cómo deben quedar y revisados por tu asesor antes de presentar.",
     lista: [
-      { id: "admision", icono: "birrete", nombre: "Carta de admisión oficial y reciente", corto: "Admisión" },
-      { id: "pasaporte", icono: "pasaporte", nombre: "Pasaporte completo, con el sello de entrada", corto: "Pasaporte" },
-      { id: "banco", icono: "euro", nombre: `Extracto sellado de cuenta española con ${eur(IPREM_ANUAL)}`, corto: "Extracto" },
-      { id: "medico", icono: "salud", nombre: "Certificado médico en impreso oficial, con la frase", corto: "Médico" },
-      { id: "seguro", icono: "escudo", nombre: "Seguro médico sin copagos ni carencias", corto: "Seguro" },
-      { id: "penales", icono: "balanza", nombre: "Antecedentes penales apostillados", corto: "Penales" },
-      { id: "formulario", icono: "documento", nombre: "Formulario oficial y tasa de Extranjería", corto: "Formulario" },
+      { icono: "birrete", nombre: "Carta de admisión oficial y reciente", nota: "De un centro apto para la estancia." },
+      { icono: "pasaporte", nombre: "Pasaporte completo", nota: "Con el sello de entrada a España." },
+      { icono: "euro", nombre: `Extracto sellado de cuenta española`, nota: `Con ${eur(IPREM_ANUAL)}: el 100 % del IPREM por mes.` },
+      { icono: "salud", nombre: "Certificado médico en impreso oficial", nota: "Con la frase del Reglamento Sanitario Internacional." },
+      { icono: "escudo", nombre: "Seguro médico", nota: "Sin copagos ni carencias, por toda la estancia." },
+      { icono: "balanza", nombre: "Antecedentes penales apostillados", nota: "De los países donde viviste los últimos cinco años." },
+      { icono: "documento", nombre: "Formulario oficial y tasa de Extranjería", nota: "Los preparamos nosotros; la tasa se paga aparte." },
     ],
+  },
+
+  app: {
+    rotulo: "Tu expediente en la app de Inspira",
+    titulo: "Casilla electrónica, notificaciones y cada plazo a la vista",
+    lead: "Las notificaciones de Extranjería llegan a la casilla electrónica del abogado: las recibimos, las anotamos en tu expediente con su plazo y las contestamos. Tú lo ves todo en tu app, por escrito.",
+    puntos: [
+      { icono: "campana", titulo: "Notificaciones de Extranjería", texto: "Cada comunicación queda en tu expediente con su plazo y su documento. Ninguna se pierde en un correo." },
+      { icono: "calendario", titulo: "Tus plazos calculados", texto: "«Presentar antes de» y «tope desde tu llegada», con tus fechas." },
+      { icono: "documento", titulo: "Documentos con ejemplo", texto: "Cada uno con su modelo, la observación de tu asesor y los que preparamos nosotros." },
+      { icono: "chat", titulo: "Mensajes con constancia de lectura", texto: "Lo que hablas con tu asesor queda por escrito, con fecha y lectura." },
+      { icono: "usuarios", titulo: "Tus acompañantes", texto: "Ficha de cada uno, con sus datos y sus documentos." },
+      { icono: "laptop", titulo: "En tu teléfono", texto: "Entras con tu correo de Google y lo instalas como app." },
+    ],
+    enlace: "Ver el portal por dentro",
+    href: "/plataforma",
+    mock: {
+      ejemplo: "Ejemplo con datos de muestra",
+      cab: "Extranjería",
+      sub: "2 comunicaciones en tu expediente",
+      n: "2",
+      filas: [
+        { icono: "campana", titulo: "Requerimiento de subsanación", detalle: "Aportar extracto bancario actualizado · PDF adjunto", plazo: "vence en 8 días", urgente: true },
+        { icono: "check", titulo: "Acuse de presentación · MERCURIO", detalle: "Firmado digitalmente por tu abogado", plazo: "13 oct · 10:32" },
+      ],
+      plazos: [["Presentar antes de", "13 de octubre"], ["Tope desde tu llegada", "13 de octubre"]],
+    },
   },
 
   denegaciones: {
@@ -113,24 +143,22 @@ export const ESTANCIA = {
     casos: "Ver los casos de éxito →",
   },
 
-  compara: {
-    rotulo: "Visado o estancia",
-    titulo: "En qué se diferencia de pedir el visado en Lima",
-    lead: "Mismo permiso, dos caminos. Toca cada criterio.",
-    visa: "Visado (desde tu país)",
-    estancia: "Estancia (desde España)",
-    test: "Hacer el test de 5 preguntas",
-  },
-
   paquete: {
-    rotulo: "El paquete",
-    titulo: "Lo que hacemos por ti, y lo que no",
-    lead: "Un solo paquete, todo incluido hasta la resolución. Antes, la sesión diagnóstico: te decimos si tu caso es viable y con qué fechas.",
+    rotulo: "Seguridad",
+    titulo: (precio) => `Lo que vale ${precio}: un abogado detrás de tu expediente hasta la resolución`,
+    lead: "No es un trámite que haces solo con un PDF de internet. Un abogado colegiado firma y presenta, contesta cada requerimiento en plazo y deja todo por escrito en tu app. Antes, la sesión diagnóstico: te decimos si tu caso es viable y con qué fechas.",
+    garantias: [
+      { icono: "escudo", titulo: "Firmado y presentado por un abogado", texto: "Con su firma digital, vía MERCURIO, y registro de fecha y hora." },
+      { icono: "campana", titulo: "Ni una notificación perdida", texto: "Casilla electrónica del abogado: recibimos, anotamos y contestamos cada comunicación de Extranjería." },
+      { icono: "rayo", titulo: "Requerimientos y subsanaciones incluidos", texto: "Si Extranjería pide algo más, lo resolvemos nosotros dentro del plazo." },
+      { icono: "check", titulo: "Solo casos viables", texto: "Si tu caso no es viable hoy, te lo decimos en la sesión, antes de cobrarte el paquete." },
+    ],
     incluye: "Incluye",
     noIncluye: "No incluye",
     para: "Para ti si…",
     elegir: "Quiero este paquete",
     permisoCorto: "Con permiso de trabajo · 30 h",
+    garantiaTexto: "No garantizamos la resolución, que depende de Extranjería. Sí garantizamos un expediente completo, bien fundamentado y presentado en plazo.",
     sesionTitulo: `Primero, la sesión diagnóstico · ${SESION_DIAGNOSTICO.duracion} · ${eur(SESION_DIAGNOSTICO.precio)}`,
     sesionTexto: "Por videollamada, con tu pasaporte y tu carta delante. Sales con tus fechas y la lista exacta de documentos. Si tu caso no es viable hoy, te lo decimos ahí.",
   },
@@ -138,7 +166,7 @@ export const ESTANCIA = {
   como: {
     rotulo: "Cómo lo hacemos",
     titulo: "Seis pasos, sin pisar una oficina",
-    lead: "Del diagnóstico a la TIE. Cada paso queda en tu portal, por escrito.",
+    lead: "Del diagnóstico a la TIE. Cada paso queda en tu app, por escrito, mientras tú empiezas tus clases.",
   },
 
   videos: {
@@ -159,7 +187,8 @@ export const ESTANCIA = {
       { q: "¿De verdad es todo en línea?", a: "Sí. Presentamos el expediente por vía telemática ante Extranjería con la firma digital del abogado, a través de MERCURIO. No pides cita ni vas a ninguna oficina para presentar." },
       { q: "¿Cuánto dinero tengo que tener?", a: `El 100 % del IPREM por mes de estancia: ${eur(IPREM_MES)} al mes, ${eur(IPREM_ANUAL)} para un curso completo, en una cuenta española a tu nombre. Extranjería no pide los seis meses de extractos ni el origen del dinero que exige el consulado.` },
       { q: "¿Puedo trabajar?", a: "Sí. La estancia por estudios incluye permiso para trabajar hasta 30 horas a la semana." },
-      { q: "¿Cuánto tarda?", a: `Unos ${Math.round(DIAS_PROCESO_ESTANCIA / 30)} meses desde que entras como turista hasta la resolución, entre abrir la cuenta, empadronarte, presentar y que Extranjería resuelva.` },
+      { q: "¿Cuánto tarda?", a: `Unos ${Math.round(DIAS_PROCESO_ESTANCIA / 30)} meses desde que entras como turista hasta la resolución, entre abrir la cuenta, empadronarte, presentar y que Extranjería resuelva. Mientras, tú ya estás en clase.` },
+    { q: "¿Cómo me entero de lo que dice Extranjería?", a: "Las notificaciones llegan a la casilla electrónica del abogado. Las recibimos nosotros, las anotamos en tu expediente con su plazo y su documento, y las contestamos. Tú lo ves en tu app, sin perseguir a nadie." },
       { q: "¿Y si me lo deniegan?", a: "La resolución final depende de Extranjería. El paquete no incluye el recurso de reposición ni el contencioso; si hiciera falta, lo cotizamos aparte. Lo que sí garantizamos es un expediente completo, bien fundamentado y presentado en plazo, y solo asumimos casos viables." },
       { q: "¿Y después de la resolución?", a: "Te guiamos con la TIE, el empadronamiento y el seguro médico. Y cuando termines, con el paso de estudiante a residente." },
     ],
@@ -167,11 +196,11 @@ export const ESTANCIA = {
 
   cierre: {
     titulo: "Ya estás aquí. Que quedarte no sea una apuesta.",
-    texto: "Escríbeme con tus dos fechas y te digo si llegas. O reserva la sesión y lo vemos con tu pasaporte delante.",
+    texto: "Escríbeme con tu fecha de entrada y te digo si llegas. O reserva la sesión y lo vemos con tu pasaporte delante.",
     whatsapp: "Escríbeme por WhatsApp",
     sesion: `Reservar sesión · ${eur(SESION_DIAGNOSTICO.precio)}`,
   },
 
   descargo:
-    `Orientación general: los plazos y la vía se confirman en la sesión diagnóstico con tus documentos delante. No garantizamos la concesión de la estancia, que resuelve Extranjería. La tasa de Extranjería se paga aparte. Reglas usadas: presentación con ${DIAS_ANTELACION} días de antelación al inicio de clases y dentro de la estancia como turista.`,
+    `Orientación general: el plazo y la vía se confirman en la sesión diagnóstico con tus documentos delante. No garantizamos la concesión de la estancia, que resuelve Extranjería. La tasa de Extranjería se paga aparte. Regla usada: presentar dentro de los 90 días de estancia como turista con ${DIAS_ANTELACION} días de antelación.`,
 };

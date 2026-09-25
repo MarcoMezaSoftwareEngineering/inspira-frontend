@@ -522,3 +522,92 @@
 .est-compara-cuerpo p b { display: block; margin-bottom: 0.2rem; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: #0a5873; }
 .est-compara-cuerpo p.est-compara-yo { border-color: var(--sol); background: #fff6e8; }
 .est-compara-cuerpo p.est-compara-yo b { color: #96591a; }
+
+/* ── Un solo plazo, en grande ─────────────────────────────────────────── */
+.est-plazos-uno { grid-template-columns: 1fr; }
+.est-plazo-grande { margin-top: 1rem; padding: 1.1rem 1.2rem; }
+.est-plazo-grande strong { font-size: 1.9rem; }
+.est-plazo-grande small { display: block; margin-top: 0.3rem; font-size: 0.74rem; font-weight: 700; color: var(--gris); }
+
+/* ── Nos encargamos de todo ───────────────────────────────────────────── */
+.est-firma {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: var(--noche);
+  color: #fff;
+}
+.est-firma strong { font-size: 1rem; line-height: 1.3; }
+.est-firma p { margin: 0.3rem 0 0; font-size: 0.84rem; line-height: 1.5; color: rgba(255, 255, 255, 0.82); }
+.est-todo { margin: 1rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+@media (min-width: 640px) { .est-todo { grid-template-columns: 1fr 1fr; } }
+.est-todo li { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.7rem 0.85rem; border-radius: 14px; background: #f6fbff; border: 1px solid var(--linea); font-size: 0.88rem; line-height: 1.4; font-weight: 600; transition: transform 0.18s ease, background 0.18s ease; }
+.est-todo li:hover { transform: translateX(4px); background: #eef7ff; }
+.est-todo-check { display: inline-flex; width: 22px; height: 22px; flex: 0 0 22px; align-items: center; justify-content: center; border-radius: 50%; background: var(--ok); color: #fff; margin-top: 0.05rem; }
+
+/* ── Documentos en genérico ───────────────────────────────────────────── */
+.est-docs { display: grid; gap: 0.6rem; margin-top: 1.25rem; }
+@media (min-width: 640px) { .est-docs { grid-template-columns: 1fr 1fr; } }
+.est-doc { display: flex; gap: 0.8rem; padding: 0.85rem 0.95rem; border-radius: 16px; background: #fff; border: 1px solid var(--linea); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.est-doc:hover { transform: translateY(-3px); box-shadow: 0 22px 40px -26px rgba(0, 54, 72, 0.5); }
+.est-doc strong { display: block; font-size: 0.9rem; color: var(--noche); }
+.est-doc p { margin: 0.2rem 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--gris); }
+
+/* ── La app: captura y puntos ─────────────────────────────────────────── */
+.est-app { display: grid; gap: 1rem; margin-top: 1.25rem; }
+@media (min-width: 860px) { .est-app { grid-template-columns: 300px 1fr; align-items: start; } }
+.est-app-captura { margin: 0; text-align: center; }
+.est-app-captura img { display: block; width: 100%; max-width: 280px; margin: 0 auto; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8); }
+.est-app-captura figcaption { margin-top: 0.5rem; font-size: 0.76rem; font-weight: 700; color: var(--cielo); }
+.est-app-puntos { display: grid; gap: 0.6rem; }
+@media (min-width: 640px) { .est-app-puntos { grid-template-columns: 1fr 1fr; } }
+.est-app-puntos .est-motivo h3 { font-size: 0.98rem; margin-top: 0.5rem; }
+.est-app-puntos .est-motivo p { margin-top: 0.25rem; }
+
+/* ── Motivos sobre fondo claro ────────────────────────────────────────── */
+.est-motivos-claros .est-motivo { background: #fff; border-color: var(--linea); color: var(--tinta); }
+.est-motivos-claros .est-motivo:hover { border-color: #b9d6ee; box-shadow: 0 22px 40px -26px rgba(0, 54, 72, 0.45); }
+.est-motivos-claros .est-motivo h3 { color: var(--noche); }
+.est-motivos-claros .est-motivo p { color: var(--gris); }
+
+/* ── Garantías ────────────────────────────────────────────────────────── */
+.est-garantias { display: grid; gap: 0.7rem; margin-top: 1.25rem; }
+@media (min-width: 640px) { .est-garantias { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1000px) { .est-garantias { grid-template-columns: repeat(4, 1fr); } }
+.est-garantia { padding: 0.95rem 1rem; border-radius: 18px; border: 1px solid rgba(240, 156, 72, 0.5); background: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.est-garantia:hover { transform: translateY(-3px); box-shadow: 0 22px 40px -26px rgba(240, 156, 72, 0.7); }
+.est-garantia strong { display: block; margin-top: 0.5rem; font-size: 0.92rem; color: var(--noche); }
+.est-garantia p { margin: 0.25rem 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--gris); }
+.est-paquetes { margin-top: 1rem; }
+
+/* ── La tarjeta de Extranjería del portal, reconstruida ───────────────── */
+.est-appmock {
+  max-width: 340px;
+  margin: 0 auto;
+  padding: 0.9rem 0.95rem 0.8rem;
+  border-radius: 18px;
+  background: #fff;
+  color: var(--tinta);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+  text-align: left;
+}
+.est-appmock-cab { display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--linea); }
+.est-appmock-cab strong { display: block; font-size: 0.92rem; color: var(--noche); }
+.est-appmock-cab small { font-size: 0.72rem; color: var(--gris); }
+.est-appmock-num { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border-radius: 9px; background: var(--noche); color: #fff; font-weight: 800; font-size: 0.8rem; }
+.est-appmock-lista { list-style: none; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.35rem; }
+.est-appmock-lista li { display: flex; align-items: center; gap: 0.55rem; padding: 0.55rem 0.6rem; border-radius: 12px; background: #f6fbff; border: 1px solid var(--linea); font-size: 0.76rem; }
+.est-appmock-lista li svg { flex: 0 0 auto; color: #0a5873; }
+.est-appmock-lista li > span { display: flex; flex-direction: column; min-width: 0; }
+.est-appmock-lista li strong { font-size: 0.78rem; color: var(--noche); }
+.est-appmock-lista li small { font-size: 0.68rem; color: var(--gris); }
+.est-appmock-lista li b { margin-left: auto; flex: 0 0 auto; padding: 0.15rem 0.45rem; border-radius: 999px; background: #e6f2fe; color: #0a5873; font-size: 0.64rem; font-weight: 800; white-space: nowrap; }
+.est-appmock-urgente { background: #fff6e8 !important; border-color: rgba(240, 156, 72, 0.6) !important; }
+.est-appmock-urgente svg { color: #96591a !important; }
+.est-appmock-urgente b { background: var(--sol) !important; color: var(--noche) !important; }
+.est-appmock-plazos { display: grid; gap: 0.25rem; margin-top: 0.6rem; font-size: 0.72rem; color: var(--gris); }
+.est-appmock-plazos b { color: var(--noche); }
+.est-appmock-pie { display: block; margin-top: 0.5rem; font-size: 0.62rem; color: #8aa0ad; }

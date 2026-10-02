@@ -16,6 +16,12 @@ import InspiraDialog from "./components/ui/InspiraDialog";
 import { BrowserRouter } from "react-router-dom";
 import { vigilarVersionNueva, marcarArranqueCorrecto } from "./lib/versionNueva";
 import { vigilarEnlacesWhatsApp } from "./lib/whatsapp";
+import { vigilarErroresGlobales } from "./lib/reportarError";
+import ErrorRaiz from "./components/common/ErrorRaiz";
+
+// Los errores que no pasan por ningún cerco (un clic, una promesa sin catch)
+// también llegan a Core → Configuración → Errores.
+vigilarErroresGlobales();
 
 // Si llegamos hasta aquí, la aplicación cargó: se limpia la marca de recarga
 // para que un fallo futuro pueda volver a intentarlo.
@@ -59,9 +65,11 @@ document.getElementById("prerender")?.remove();
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <ErrorRaiz>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ErrorRaiz>
       <InspiraDialog />
     </BrowserRouter>
   </StrictMode>

@@ -36,5 +36,12 @@
   display: inline-flex; align-items: center; height: 40px; padding: 0 18px;
   border-radius: 999px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.1);
   color: #fff; font: inherit; font-size: 12.5px; font-weight: 700; text-decoration: none;
+  cursor: pointer;
 }
+.acc-titulo { margin: 0 0 -8px; font-size: 18px; font-weight: 800; color: #fff; text-align: center; }
+.acc-btn--fuerte { background: #fff; border-color: #fff; color: #013446; }
+.acc-texto strong { color: #fff; word-break: break-all; }
+.acc-nota { margin: -6px 0 0; max-width: 340px; font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,.7); text-align: center; }
+.acc-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 360px; }
+.acc-caja { max-width: 440px; }
 @media (prefers-reduced-motion: reduce) { .acc-caja { animation: none; } .acc-spinner { animation-duration: 2s; } }

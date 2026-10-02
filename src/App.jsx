@@ -491,14 +491,9 @@ export default function App() {
         sessionStorage.removeItem("inspira:sesion-caducada");
         dialog.toast("Tu sesión caducó. Vuelve a entrar y seguirás donde estabas.", "info");
       }
-      // Google volvió pero la cuenta está desactivada: el servidor no da sesión.
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("acceso") === "desactivado") {
-        params.delete("acceso");
-        const resto = params.toString();
-        window.history.replaceState({}, "", window.location.pathname + (resto ? `?${resto}` : "") + window.location.hash);
-        dialog.toast("Esta cuenta no tiene acceso al Expediente Digital. Escríbenos si crees que es un error.", "error");
-      }
+      // (Hasta el 02/10/2026 aquí se avisaba de `?acceso=desactivado`. Ya no
+      // existe: una ficha desactivada se reactiva al entrar con Google, y
+      // cualquier fallo del login sale en la pantalla de error de /auth/success.)
     } catch { /* noop */ }
   }, []);
 

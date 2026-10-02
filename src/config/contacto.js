@@ -91,6 +91,7 @@ export const ORIGENES_WHATSAPP = {
   "master-todo": "la página completa del máster",
   "asesoria-cta": "el botón «Agenda tu asesoría»",
   "panel-bienvenida": "la pantalla de acceso al panel",
+  "pantalla-error": "la pantalla de «Tuvimos un inconveniente»",
   "panel-inicio": "mi panel de asesorado",
   "panel-mi-ruta": "«Mi ruta» en mi panel",
   "panel-pagos": "«Mis pagos» en mi panel",

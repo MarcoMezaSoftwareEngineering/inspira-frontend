@@ -5,26 +5,15 @@
 // El error se manda al servidor para poder leerlo en los registros, sin
 // datos personales: mensaje, pila, URL y versión del bundle.
 import { Component } from "react";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { reportarError } from "../../lib/reportarError";
 
 function avisarServidor(error, info, donde) {
-  try {
-    const cuerpo = JSON.stringify({
-      donde,
-      mensaje: String(error?.message || error),
-      pila: String(error?.stack || "").slice(0, 4000),
-      componente: String(info?.componentStack || "").slice(0, 2000),
-      url: window.location.href,
-      agente: navigator.userAgent,
-      version: document.querySelector('script[type="module"][src*="/assets/"]')?.getAttribute("src") || null,
-    });
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(`${API_URL}/api/errores-web`, new Blob([cuerpo], { type: "application/json" }));
-    } else {
-      fetch(`${API_URL}/api/errores-web`, { method: "POST", headers: { "Content-Type": "application/json" }, body: cuerpo, keepalive: true }).catch(() => {});
-    }
-  } catch { /* nada: avisar no puede fallar más que el error */ }
+  reportarError({
+    donde,
+    mensaje: String(error?.message || error),
+    pila: error?.stack,
+    componente: info?.componentStack,
+  });
 }
 
 export default class CercoErrores extends Component {

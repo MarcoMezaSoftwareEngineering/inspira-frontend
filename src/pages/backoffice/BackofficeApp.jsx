@@ -51,6 +51,7 @@ import ConfiguracionPanel from "./configuracion/ConfiguracionPanel";
 const CONFIG_TAB_BY_PATH = {
   "/backoffice/configuracion": "planes",
   "/backoffice/auditoria": "auditoria",
+  "/backoffice/errores": "errores",
   "/backoffice/planes": "planes",
   "/backoffice/precios": "precios",
   "/backoffice/documentos": "documentos",

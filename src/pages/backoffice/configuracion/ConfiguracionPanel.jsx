@@ -23,6 +23,7 @@ import MediaPanel from "../media/MediaPanel";
 import CumplimientoLegal from "../legal/CumplimientoLegal";
 import UsuariosSettings from "../settings/UsuariosSettings";
 import Auditoria from "../auditoria/Auditoria";
+import Errores from "../errores/Errores";
 
 const TABS = [
   { id: "planes",       label: "Planes",              href: "/backoffice/planes",              perm: "planes.ver",       Component: PlanesAdmin },
@@ -36,6 +37,8 @@ const TABS = [
   { id: "settings",     label: "Settings",            href: "/backoffice/settings",            adminOnly: true,          Component: UsuariosSettings },
   // Aquí y no en el menú principal: se consulta de vez en cuando.
   { id: "auditoria",    label: "Registro de cambios", href: "/backoffice/auditoria",           adminOnly: true,          Component: Auditoria },
+  // Fallos de la web, la API y el login: lo que antes solo estaba en pm2.
+  { id: "errores",      label: "Errores",             href: "/backoffice/errores",             adminOnly: true,          Component: Errores },
 ];
 
 export default function ConfiguracionPanel({ tabId = "planes" }) {

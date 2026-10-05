@@ -4,19 +4,27 @@
 // «BECA ESPAÑA 2027» en TikTok.
 //
 // Quien llega quiere la lista de becas, y se la damos entera: calendario por
-// meses, filtro por perfil y la web oficial de cada una. Pero la página tiene
-// un segundo acto, que es el que importa al negocio: una beca depende del
-// perfil, y para quien no encaja hay másteres oficiales económicos. El orden
-// es ese a propósito: primero cumplir lo prometido, luego la verdad, luego la
-// salida.
+// meses (con las fechas de 2026 como referencia), filtro y la web oficial de
+// cada una. Pero la página tiene un segundo acto, que es el que importa al
+// negocio: cada beca busca un perfil, y para quien no encaja hay másteres
+// oficiales económicos. El orden es ese a propósito:
+//   1. lo prometido (el calendario),
+//   2. la prueba (becas que ganaron asesorados),
+//   3. la verdad (el perfil que busca cada una),
+//   4. la salida (matrículas reales sin beca, desde 570 €),
+//   5. la puerta (WhatsApp y sesión).
 import { useMemo, useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
+import VideoVertical from "../../components/common/VideoVertical";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { cascada, useRevelar } from "../../lib/revelar";
-import { BECAS, BECAS2027 as T, ECONOMICOS, FILTROS, MESES, PLAN_B } from "./textos";
+import { CifraAnimada } from "../landing/master2027/comunes";
+import { BECAS, BECAS2027 as T, FILTROS, MESES } from "./textos";
+import { BECADOS, MATRICULAS } from "./casos";
+import { LOGOS } from "./logos";
 import "../../styles/movimiento.css";
 import "./becas2027.css";
 
@@ -27,6 +35,13 @@ const irA = (href) => (e) => {
   navigate(href);
   window.scrollTo({ top: 0, behavior: "instant" });
 };
+
+/** El logotipo de la entidad o, si no lo tenemos, su sigla. */
+function Sello({ logo, sigla, grande = false }) {
+  const clase = `bk-sello${grande ? " bk-sello-g" : ""}`;
+  if (logo && LOGOS[logo]) return <span className={clase}><img src={LOGOS[logo]} alt="" loading="lazy" decoding="async" /></span>;
+  return <span className={`${clase} bk-sello-sigla`} aria-hidden="true">{sigla}</span>;
+}
 
 function Beca({ b, abierta, onAbrir }) {
   return (
@@ -39,6 +54,7 @@ function Beca({ b, abierta, onAbrir }) {
         </span>
         <span className="bk-beca-cuerpo">
           <span className="bk-fila">
+            <Sello logo={b.logo} sigla={b.sigla} />
             <span className="bk-sigla">{b.sigla}</span>
             {b.red && <span className="bk-red">{b.red}</span>}
           </span>
@@ -49,6 +65,13 @@ function Beca({ b, abierta, onAbrir }) {
       </button>
       {abierta && (
         <div className="bk-beca-mas">
+          <p className="bk-beca-perfil">
+            <strong>
+              <Icono nombre="diana" size={14} />
+              {T.calendario.perfil}
+            </strong>
+            {b.perfil}
+          </p>
           <p>{b.clave}</p>
           <a href={b.url} target="_blank" rel="noopener nofollow" onClick={() => registrarEvento("becas2027_web_oficial", { beca: b.id })}>
             {T.calendario.web}
@@ -64,11 +87,13 @@ export default function Becas2027() {
   useSEO(T.seo);
   const [filtro, setFiltro] = useState("todas");
   const [abierta, setAbierta] = useState(null);
+  const [video, setVideo] = useState(null);
   const raiz = useRef(null);
   useRevelar(raiz);
   const wa = whatsappDesde("becas-2027");
   const pasoPunto = cascada();
-  const pasoPrecio = cascada();
+  const pasoBecado = cascada();
+  const pasoMatricula = cascada();
 
   const visibles = useMemo(
     () => (filtro === "todas" ? BECAS : BECAS.filter((b) => b.etiquetas.includes(filtro))),
@@ -88,13 +113,15 @@ export default function Becas2027() {
     e.preventDefault();
     document.getElementById("bk-calendario")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-  const maximo = Math.max(...ECONOMICOS.map((x) => x.precio));
+  const [estrella, ...otras] = MATRICULAS;
+  const tope = Math.max(...MATRICULAS.map((m) => m.total));
 
   return (
     <main className="bk" ref={raiz}>
       {/* Lo prometido en el mensaje */}
       <header className="bk-hero">
         <span className="bk-hero-sol" aria-hidden="true" />
+        <span className="bk-hero-avion" aria-hidden="true"><Icono nombre="avion" size={22} /></span>
         <div className="bk-hero-texto" data-revelar>
           <p className="bk-rotulo">
             <Icono nombre="birrete" size={15} />
@@ -123,11 +150,23 @@ export default function Becas2027() {
             </a>
           </div>
         </div>
+        {/* Cinta de logotipos: de quién son las becas */}
+        <div className="bk-cinta" aria-hidden="true">
+          <div className="bk-cinta-pista">
+            {[...Object.keys(LOGOS), ...Object.keys(LOGOS)].map((k, n) => (
+              <span key={`${k}-${n}`} className="bk-sello bk-sello-g"><img src={LOGOS[k]} alt="" /></span>
+            ))}
+          </div>
+        </div>
       </header>
 
       {/* El calendario */}
       <section id="bk-calendario" className="bk-seccion" aria-labelledby="bk-cal-t">
         <h2 id="bk-cal-t" className="bk-h2" data-revelar>{T.calendario.titulo}</h2>
+        <p className="bk-referencia" data-revelar>
+          <Icono nombre="calendario" size={14} />
+          {T.calendario.referencia}
+        </p>
         <p className="bk-lead" data-revelar>{T.calendario.lead}</p>
 
         <div className="bk-filtros" role="group" aria-label="Filtrar becas">
@@ -141,23 +180,26 @@ export default function Becas2027() {
 
         {visibles.length === 0 && <p className="bk-vacio">{T.calendario.vacio}</p>}
 
-        {MESES.map((m) => {
-          const delMes = visibles.filter((b) => b.mes === m.id);
-          if (!delMes.length) return null;
-          return (
-            <div key={m.id} className="bk-mes">
-              <div className="bk-mes-cab">
-                <h3>{m.titulo}</h3>
-                <span>{m.lema}</span>
+        {/* La clave cambia con el filtro para que la lista vuelva a entrar. */}
+        <div key={filtro} className="bk-meses">
+          {MESES.map((m) => {
+            const delMes = visibles.filter((b) => b.mes === m.id);
+            if (!delMes.length) return null;
+            return (
+              <div key={m.id} className="bk-mes">
+                <div className="bk-mes-cab">
+                  <h3>{m.titulo}</h3>
+                  <span>{m.lema}</span>
+                </div>
+                <ul className="bk-becas">
+                  {delMes.map((b) => (
+                    <Beca key={b.id} b={b} abierta={abierta === b.id} onAbrir={abrir} />
+                  ))}
+                </ul>
               </div>
-              <ul className="bk-becas">
-                {delMes.map((b) => (
-                  <Beca key={b.id} b={b} abierta={abierta === b.id} onAbrir={abrir} />
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
 
         <p className="bk-aviso">
           <Icono nombre="campana" size={15} />
@@ -165,7 +207,48 @@ export default function Becas2027() {
         </p>
       </section>
 
-      {/* La verdad: depende del perfil */}
+      {/* La prueba: becas que ganaron asesorados */}
+      <section className="bk-seccion" aria-labelledby="bk-becados-t">
+        <p className="bk-rotulo bk-rotulo-oscuro" data-revelar>
+          <Icono nombre="trofeo" size={15} />
+          {T.becados.rotulo}
+        </p>
+        <h2 id="bk-becados-t" className="bk-h2" data-revelar>{T.becados.titulo}</h2>
+        <p className="bk-lead" data-revelar>{T.becados.lead}</p>
+        <ul className="bk-becados">
+          {BECADOS.map((c) => (
+            <li key={c.id} data-revelar="escala" style={pasoBecado()}>
+              <div className="bk-becado-cab">
+                <Sello logo={c.logo} sigla={c.nombre[0]} grande />
+                <span>
+                  <strong>{c.nombre}</strong>
+                  <span className="bk-becado-beca">{c.beca}</span>
+                </span>
+              </div>
+              <p className="bk-becado-cifra">
+                <b>{c.cifra}</b>
+                <span>{c.cifraPie}</span>
+              </p>
+              {c.master && <p className="bk-becado-master">{c.master}</p>}
+              <p className="bk-becado-texto">{c.texto}</p>
+              {c.video && (
+                <div className="bk-becado-video">
+                  <span>{T.becados.video}</span>
+                  <VideoVertical v={c.video} activo={video === c.video.id} onActivar={setVideo} evento="becas2027_video" />
+                </div>
+              )}
+              {c.enlace && (
+                <a href={c.enlace.href} onClick={irA(c.enlace.href)} className="bk-becado-enlace">
+                  {c.enlace.texto}
+                  <Icono nombre="flecha" size={14} />
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* La verdad: cada beca busca un perfil */}
       <section className="bk-verdad" aria-labelledby="bk-verdad-t">
         <div className="bk-verdad-caja">
           <p className="bk-rotulo" data-revelar>
@@ -177,7 +260,7 @@ export default function Becas2027() {
           <ul className="bk-puntos">
             {T.verdad.puntos.map((p) => (
               <li key={p.titulo} data-revelar="escala" style={pasoPunto()}>
-                <span className="bk-punto-icono"><Icono nombre={p.icono} size={22} /></span>
+                <Sello logo={p.logo} sigla={p.sigla} grande />
                 <span>
                   <strong>{p.titulo}</strong>
                   {p.texto}
@@ -185,6 +268,10 @@ export default function Becas2027() {
               </li>
             ))}
           </ul>
+          <p className="bk-verdad-extra" data-revelar>
+            <Icono nombre="usuarios" size={16} />
+            {T.verdad.extra}
+          </p>
           <p className="bk-verdad-cierre" data-revelar>{T.verdad.cierre}</p>
         </div>
       </section>
@@ -205,32 +292,44 @@ export default function Becas2027() {
             <Icono nombre="estrella" size={13} />
             {T.planB.casoRotulo}
           </span>
-          <p className="bk-caso-cifra">{eur(PLAN_B.caso.matricula)}</p>
+          <Sello logo={estrella.logo} sigla="USC" grande />
+          <p className="bk-caso-cifra">
+            <CifraAnimada valor={Math.floor(estrella.total)} />
+            <small>,{String(Math.round((estrella.total % 1) * 100)).padStart(2, "0")} €</small>
+          </p>
           <p className="bk-caso-texto">
-            <strong>{PLAN_B.caso.nombre}</strong> {T.planB.casoTexto} <strong>{PLAN_B.caso.universidad}</strong>.
+            <strong>{estrella.nombre}</strong> {T.planB.casoTexto} <strong>{estrella.master}</strong> {T.planB.casoEn} <strong>{estrella.uni}</strong>.
           </p>
           <p className="bk-caso-pie">
-            <Icono nombre="ubicacion" size={14} />
-            {PLAN_B.caso.ciudad} · {T.planB.casoPie}
+            <Icono nombre="check" size={14} />
+            {T.planB.casoPie}
           </p>
         </div>
 
         <h3 className="bk-h3" data-revelar>{T.planB.tablaTitulo}</h3>
         <p className="bk-lead bk-lead-chico" data-revelar>{T.planB.tablaLead}</p>
-        <ul className="bk-precios">
-          {ECONOMICOS.map((x) => (
-            <li key={x.lugar} data-revelar style={pasoPrecio()}>
-              <div className="bk-precio-cab">
-                <strong>{x.lugar}</strong>
-                <b>{eur(x.precio)}</b>
-              </div>
-              <span className="bk-precio-barra" aria-hidden="true">
-                <span style={{ width: `${Math.round((x.precio / maximo) * 100)}%` }} />
+        <ul className="bk-matriculas">
+          {otras.map((m) => (
+            <li key={m.id} data-revelar style={pasoMatricula()}>
+              <Sello logo={m.logo} sigla={m.sigla} grande />
+              <span className="bk-matricula-cuerpo">
+                <span className="bk-matricula-cab">
+                  <strong>{m.nombre}</strong>
+                  <b>{eur(m.total)}</b>
+                </span>
+                <span className="bk-matricula-master">{m.master}</span>
+                <span className="bk-matricula-pie">{m.uni} · {m.curso}{m.nota ? ` · ${m.nota}` : ""}</span>
+                <span className="bk-precio-barra" aria-hidden="true">
+                  <span style={{ width: `${Math.round((m.total / tope) * 100)}%` }} />
+                </span>
               </span>
-              <span className="bk-precio-pie">{x.unis} · {x.cuantos} {T.planB.masteres}</span>
             </li>
           ))}
         </ul>
+        <p className="bk-dato" data-revelar>
+          <Icono nombre="rayo" size={16} />
+          {T.planB.dato}
+        </p>
         <p className="bk-nota">{T.planB.notaTabla}</p>
 
         <div className="bk-enlaces">
@@ -246,7 +345,6 @@ export default function Becas2027() {
 
       {/* La puerta */}
       <section className="bk-ayuda" data-revelar="escala">
-        <img src={T.retrato} alt="Carina Meza, CEO y consultora legal de Inspira Legal" width="640" height="619" loading="lazy" className="bk-ayuda-foto" />
         <h2 className="bk-h2">{T.ayuda.titulo}</h2>
         <p className="bk-lead">{T.ayuda.texto}</p>
         <div className="bk-acciones">

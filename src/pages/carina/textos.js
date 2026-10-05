@@ -50,7 +50,7 @@ export const CARINA = {
   // Tono: cercano, de tú, como habla en sus vídeos. Nada de lenguaje de CV.
   trayectoria: {
     titulo: "De dónde vengo",
-    lead: "No te hablo de oídas. Lo que te cuento en los vídeos lo estudié, lo trabajé y lo viví yo misma.",
+    lead: "Soy tarmeña, sanmarquina y bien terca cuando me propongo algo. No te hablo de oídas. Lo que te cuento en los vídeos lo estudié, lo trabajé y lo viví yo misma.",
     experiencia: {
       titulo: "En qué trabajo",
       lista: [
@@ -73,9 +73,15 @@ export const CARINA = {
       ayuda: "Toca cada parada",
       paradas: [
         {
+          id: "tarma", lugar: "Tarma", pais: "Perú", periodo: "Mi tierra", foto: "tarma",
+          titulo: "Tarmeña",
+          texto: "Soy de Tarma, en Junín: la Perla de los Andes. Ahí empezó todo, mucho antes de pensar en becas o en Europa.",
+          sirve: "Si yo pude salir desde Tarma, tú también puedes desde donde estés.",
+        },
+        {
           id: "lima", lugar: "Lima", pais: "Perú", periodo: "2015 – 2025", foto: "graduadaAncha",
           titulo: "Sanmarquina",
-          texto: "Estudié Derecho en San Marcos y después hice ahí mismo una maestría en Negocios Internacionales, en doble grado con la Université de Bordeaux.",
+          texto: "Me vine a Lima a estudiar Derecho en San Marcos. Ahí descubrí el debate y la oratoria, que me encantan, y después hice ahí mismo una maestría en Negocios Internacionales, en doble grado con la Université de Bordeaux.",
           sirve: "Vengo de la universidad pública, como muchos de los que me escriben.",
         },
         {
@@ -109,14 +115,17 @@ export const CARINA = {
   // La historia en formato «stories»: se ve como un vídeo, pero es la página.
   // Cada lámina dura lo que marca --car-his-dur en carina.css.
   historia: {
-    rotulo: "Mi historia en un ratito",
+    rotulo: "Mi historia en un minuto",
     titulo: "Yo también hice este camino",
     ayuda: "Toca para avanzar · mantén para pausar",
     repetir: "Ver de nuevo",
     cta: "Quiero que me acompañes",
     laminas: [
-      { id: "hola", foto: "retrato", modo: "llena", etiqueta: "¡Hola!", titulo: "Soy Carina", texto: "Soy de Lima y un día me propuse salir a estudiar fuera. Te cuento cómo me fue." },
-      { id: "sanmarcos", foto: "graduada", modo: "llena", etiqueta: "Lima · San Marcos", titulo: "Aquí empezó todo", texto: "Me gradué de Derecho en San Marcos. De ahí salieron las ganas de ver mundo." },
+      { id: "hola", foto: "retrato", modo: "llena", etiqueta: "¡Hola!", titulo: "Soy Carina", texto: "Soy de Tarma, en Junín, y un día me propuse salir a estudiar fuera. Te cuento cómo me fue." },
+      { id: "tarma", foto: "nina", foto2: "tarma", modo: "duo", etiqueta: "Tarma · Junín", titulo: "Yo de niña ✨", texto: "Esta soy yo, de chiquita, en mi Tarma. De la sierra del Perú al mundo." },
+      { id: "sanmarcos", foto: "graduada", modo: "llena", etiqueta: "Lima · San Marcos", titulo: "Sanmarquina", texto: "Me vine a Lima a estudiar Derecho en San Marcos. De ahí salieron las ganas de ver mundo." },
+      { id: "debate", foto: "delegada", foto2: "tadei", modo: "duo", etiqueta: "Lo que amo", titulo: "Debatir y hablar", texto: "Amo el debate y la oratoria. En 2017 fui Delegada Destacada en un Modelo de Naciones Unidas." },
+      { id: "baile", foto: "baileTraje", foto2: "bailePlaya", modo: "duo", etiqueta: "Y también", titulo: "Amo bailar", texto: "Las danzas de mi tierra van conmigo a donde vaya. Bailando soy feliz." },
       { id: "colombia", foto: "colombia", modo: "marco", etiqueta: "2020 · Colombia", titulo: "Mi primera beca", texto: "Me fui a Medellín con todo pagado, representando al Perú. Ahí supe que sí se podía." },
       { id: "alemania", foto: "alemania", modo: "marco", etiqueta: "2022 · Alemania", titulo: "Y luego, otra", texto: "Volví a postular y me la dieron: beca del DAAD en Stuttgart. Eso sí, ¡qué frío!" },
       { id: "burdeos", foto: "burdeos", modo: "llena", etiqueta: "2025 · Francia", titulo: "Mi máster en Francia", texto: "Un MBA en Burdeos, en inglés. Los trámites que te tocan a ti, yo ya los hice." },

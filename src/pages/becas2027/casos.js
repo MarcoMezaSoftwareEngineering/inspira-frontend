@@ -47,7 +47,6 @@ export const BECADOS = [
 // Matrículas reales de asesorados, sin beca. Ordenadas de menor a mayor.
 export const MATRICULAS = [
   { id: "luzmar", nombre: "Luzmar", logo: "usc", uni: "U. de Santiago de Compostela", master: "Investigación y Desarrollo de Medicamentos", total: 570.19, curso: "2025/26" },
-  { id: "marina", nombre: "Marina", logo: "usc", uni: "U. de Santiago de Compostela", master: "Salud Pública", total: 692.58, curso: "2026/27", nota: "Con 400 € de descuento por matricularse antes" },
   { id: "luis", nombre: "Luis", logo: "uvigo", uni: "U. de Vigo", master: "Administración Integrada de Empresas y RSC", total: 767.45, curso: "2025/26" },
   { id: "giandira", nombre: "Giandira", logo: "uvigo", uni: "U. de Vigo", master: "Economía", total: 767.45, curso: "2025/26" },
   { id: "marly", nombre: "Marly", logo: null, sigla: "UCO", uni: "U. de Córdoba", master: "Nutrición Humana", total: 885.6, curso: "2026/27" },
@@ -57,4 +56,6 @@ export const MATRICULAS = [
   { id: "alisson", nombre: "Alisson", logo: "ugr", uni: "U. de Granada", master: "Derecho de los Negocios", total: 886.72, curso: "2025/26", nota: "Pagado en dos partes" },
   { id: "marco", nombre: "Marco", logo: "uma", uni: "U. de Málaga", master: "Dirección Estratégica e Innovación en Comunicación", total: 889.5, curso: "2025/26" },
   { id: "luz", nombre: "Luz", logo: "uma", uni: "U. de Málaga", master: "Asesoría Jurídica de Empresas", total: 927.76, curso: "2025/26", nota: "63 créditos" },
+  // Los 400 € que la carta resta son la reserva de plaza que ya había pagado, no un descuento (Carina, 05/10/2026).
+  { id: "marina", nombre: "Marina", logo: "usc", uni: "U. de Santiago de Compostela", master: "Salud Pública", total: 1092.58, curso: "2026/27", nota: "Reserva de plaza incluida" },
 ];

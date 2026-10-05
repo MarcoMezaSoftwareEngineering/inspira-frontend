@@ -245,7 +245,6 @@ export const BECAS2027 = {
     casoPie: "Curso 2025/26 · Máster oficial de 60 créditos",
     tablaTitulo: "Más matrículas reales de nuestros asesorados",
     tablaLead: "Lo que pagaron por todo el año, con las tasas de secretaría incluidas. Todos másteres oficiales.",
-    dato: "Dato que casi nadie sabe: en la USC, si eres de fuera de la Unión Europea y te matriculas antes, te descuentan 400 € (curso 2026/27).",
     notaTabla: "Importes de las constancias y cartas de pago de cada universidad (cursos 2025/26 y 2026/27). Se muestra solo el nombre de pila. No incluyen visa, seguro ni gastos de vida, y los precios cambian cada curso.",
     enlaces: [
       { href: "/mapa-estudiar-en-espana", icono: "mapa", texto: "Mira el mapa de precios por ciudad" },
@@ -254,11 +253,39 @@ export const BECAS2027 = {
     ],
   },
 
+  sobreMi: {
+    rotulo: "Quién te lo cuenta",
+    titulo: "Yo también fui becaria",
+    texto: "Soy Carina Meza, de Tarma, y fundé Inspira. No te hablo de becas de oídas: postulé, esperé la respuesta con el corazón en la mano y me dijeron que sí. Dos veces.",
+    hitos: [
+      { anio: "2020", titulo: "Beca CAPAZ–DAAD", texto: "Medellín, Colombia. Beca integral, representando al Perú." },
+      { anio: "2022", titulo: "Beca DAAD", texto: "Stuttgart, Alemania. Otra postulación, otra beca completa." },
+      { anio: "2026", titulo: "MBA en Francia", texto: "Université de Bordeaux: mi máster europeo, en inglés." },
+    ],
+    cierre: "Por eso sé qué mira un jurado y dónde se cae una postulación. Eso es lo que hago contigo.",
+    enlace: "Conoce mi historia completa",
+  },
+
+  incluye: {
+    rotulo: "Con Inspira va todo junto",
+    titulo: "La asesoría de becas viene incluida",
+    lead: "No la cobramos aparte: todos nuestros paquetes de postulación al máster la traen. Y cuando te admiten, seguimos contigo con el visado.",
+    puntos: [
+      { icono: "birrete", titulo: "Postulación al máster", texto: "Elegimos tus opciones y postulamos contigo." },
+      { icono: "trofeo", titulo: "Asesoría de becas", texto: "Incluida en todos los paquetes de postulación.", sello: "Incluida" },
+      { icono: "pasaporte", titulo: "Visado de estudios", texto: "También te asesoramos con el visado, hasta que viajas." },
+    ],
+    enlaces: [
+      { href: "/master-2027-2028", texto: "Ver los paquetes de postulación" },
+      { href: "/visado", texto: "Ver la asesoría de visado" },
+    ],
+  },
+
   ayuda: {
     titulo: "¿Beca o plan B? Lo vemos juntos",
-    texto: "Soy Carina. Gané dos becas internacionales y sé lo que se siente esperar una respuesta. Cuéntame tu nota, tu carrera y tu presupuesto, y te digo con sinceridad a qué becas puedes postular y qué másteres económicos te convienen.",
+    texto: "Cuéntame tu nota, tu carrera y tu presupuesto, y te digo con sinceridad a qué becas puedes postular y qué másteres económicos te convienen.",
     whatsapp: "Escríbeme por WhatsApp",
     sesion: "Reservar sesión",
-    nota: "Inspira asesora y acompaña tu postulación. La beca y la admisión las decide cada entidad: no las garantizamos.",
+    nota: "Inspira asesora y acompaña tu postulación. La beca, la admisión y el visado los decide cada entidad: no los garantizamos.",
   },
 };

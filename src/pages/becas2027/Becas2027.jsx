@@ -25,6 +25,8 @@ import { CifraAnimada } from "../landing/master2027/comunes";
 import { BECAS, BECAS2027 as T, FILTROS, MESES } from "./textos";
 import { BECADOS, MATRICULAS } from "./casos";
 import { LOGOS } from "./logos";
+import fotoCarina from "../../assets/images/carina/retrato-espana.webp";
+import fotoBeca from "../../assets/images/carina/beca-alemania.webp";
 import "../../styles/movimiento.css";
 import "./becas2027.css";
 
@@ -326,10 +328,6 @@ export default function Becas2027() {
             </li>
           ))}
         </ul>
-        <p className="bk-dato" data-revelar>
-          <Icono nombre="rayo" size={16} />
-          {T.planB.dato}
-        </p>
         <p className="bk-nota">{T.planB.notaTabla}</p>
 
         <div className="bk-enlaces">
@@ -340,6 +338,68 @@ export default function Becas2027() {
               <Icono nombre="flecha" size={16} className="bk-enlace-flecha" />
             </a>
           ))}
+        </div>
+      </section>
+
+      {/* Lo que incluye trabajar con Inspira */}
+      <section className="bk-seccion" aria-labelledby="bk-incluye-t">
+        <p className="bk-rotulo bk-rotulo-oscuro" data-revelar>
+          <Icono nombre="paquete" size={15} />
+          {T.incluye.rotulo}
+        </p>
+        <h2 id="bk-incluye-t" className="bk-h2" data-revelar>{T.incluye.titulo}</h2>
+        <p className="bk-lead" data-revelar>{T.incluye.lead}</p>
+        <ul className="bk-incluye">
+          {T.incluye.puntos.map((p) => (
+            <li key={p.titulo} className={p.sello ? "bk-incluye-on" : ""} data-revelar="escala">
+              <span className="bk-enlace-icono"><Icono nombre={p.icono} size={20} /></span>
+              <span>
+                <strong>{p.titulo}</strong>
+                {p.texto}
+              </span>
+              {p.sello && <b>{p.sello}</b>}
+            </li>
+          ))}
+        </ul>
+        <div className="bk-incluye-enlaces">
+          {T.incluye.enlaces.map((l) => (
+            <a key={l.href} href={l.href} onClick={(e) => { registrarEvento("becas2027_enlace", { a: l.href }); irA(l.href)(e); }} className="bk-becado-enlace">
+              {l.texto}
+              <Icono nombre="flecha" size={14} />
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {/* Quién lo cuenta: Carina, becaria */}
+      <section className="bk-sobre" aria-labelledby="bk-sobre-t">
+        <div className="bk-sobre-caja">
+          <div className="bk-sobre-fotos" data-revelar="escala">
+            <img src={fotoBeca} alt="Carina con otras becarias del DAAD en Alemania" width="960" height="712" loading="lazy" decoding="async" className="bk-sobre-foto2" />
+            <img src={fotoCarina} alt="Carina Meza, fundadora de Inspira" width="720" height="1241" loading="lazy" decoding="async" className="bk-sobre-foto" />
+          </div>
+          <p className="bk-rotulo" data-revelar>
+            <Icono nombre="trofeo" size={15} />
+            {T.sobreMi.rotulo}
+          </p>
+          <h2 id="bk-sobre-t" className="bk-h2 bk-h2-claro" data-revelar>{T.sobreMi.titulo}</h2>
+          <p className="bk-lead bk-lead-claro" data-revelar>{T.sobreMi.texto}</p>
+          <ol className="bk-hitos">
+            {T.sobreMi.hitos.map((h) => (
+              <li key={h.anio} data-revelar>
+                <b>{h.anio}</b>
+                <span>
+                  <strong>{h.titulo}</strong>
+                  {h.texto}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="bk-verdad-cierre" data-revelar>{T.sobreMi.cierre}</p>
+          <a href="/carina" onClick={irA("/carina")} className="bk-sobre-enlace">
+            {T.sobreMi.enlace}
+            <Icono nombre="flecha" size={14} />
+          </a>
         </div>
       </section>
 

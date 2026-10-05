@@ -22,6 +22,11 @@ export const CARINA = {
     worksFor: { "@type": "Organization", name: "Inspira Legal", url: "https://www.inspira-legal.cloud/" },
     image: `${MEDIA}/foto/carina-retrato.jpg`,
     url: "https://www.inspira-legal.cloud/carina",
+    alumniOf: [
+      { "@type": "CollegeOrUniversity", name: "Université de Bordeaux – IAE Bordeaux School of Management" },
+      { "@type": "CollegeOrUniversity", name: "Universidad Nacional Mayor de San Marcos" },
+    ],
+    knowsAbout: ["Derecho de extranjería", "Visado de estudios en España", "Másteres en España", "Becas internacionales"],
   },
 
   retrato: `${MEDIA}/foto/carina-retrato.jpg`,
@@ -38,6 +43,86 @@ export const CARINA = {
   cta: {
     whatsapp: "Escríbeme por WhatsApp",
     sesion: "Reservar sesión",
+  },
+
+  // Sacado del CV de Carina (05/10/2026). Solo lo que acompaña al asesorado:
+  // su puesto público y los cursos de aduanas se quedan fuera a propósito.
+  // Tono: cercano, de tú, como habla en sus vídeos. Nada de lenguaje de CV.
+  trayectoria: {
+    titulo: "De dónde vengo",
+    lead: "No te hablo de oídas. Lo que te cuento en los vídeos lo estudié, lo trabajé y lo viví yo misma.",
+    experiencia: {
+      titulo: "En qué trabajo",
+      lista: [
+        {
+          periodo: "Desde 2023",
+          puesto: "Fundé Inspira",
+          lugar: "Fundadora y CEO · Lima",
+          texto: "Aquí ayudo a gente como tú a irse a estudiar y a vivir fuera: visas, permisos de estudio, arraigos y nacionalidad, en Europa y en Estados Unidos. Si te niegan una visa, yo misma preparo el recurso. Y no te suelto en el aeropuerto: te acompaño desde que eliges el máster hasta que ya estás instalado. También llevo Inspira Educa, para que más jóvenes lleguen a la universidad y a oportunidades fuera del país.",
+        },
+        {
+          periodo: "2020 – 2023",
+          puesto: "Tres años en extranjería",
+          lugar: "Consultoría Legal ADBA · Sevilla (en remoto)",
+          texto: "Trabajé para una consultora de Sevilla, al frente del equipo legal. Ahí aprendí el oficio de verdad: residencias, visas y todo el papeleo de extranjería, caso por caso.",
+        },
+      ],
+    },
+    ruta: {
+      titulo: "Mi ruta",
+      ayuda: "Toca cada parada",
+      paradas: [
+        {
+          id: "lima", lugar: "Lima", pais: "Perú", periodo: "2015 – 2025", foto: "graduadaAncha",
+          titulo: "Sanmarquina",
+          texto: "Estudié Derecho en San Marcos y después hice ahí mismo una maestría en Negocios Internacionales, en doble grado con la Université de Bordeaux.",
+          sirve: "Vengo de la universidad pública, como muchos de los que me escriben.",
+        },
+        {
+          id: "giessen", lugar: "Giessen", pais: "Alemania", periodo: "2020", foto: null,
+          titulo: "Mi intercambio",
+          texto: "En plena carrera hice un semestre de intercambio con la Justus Liebig University Giessen.",
+          sirve: "Fue la primera vez que vi por dentro cómo funciona una universidad europea.",
+        },
+        {
+          id: "medellin", lugar: "Medellín", pais: "Colombia", periodo: "2020", foto: "colombia",
+          titulo: "Mi primera beca",
+          texto: "Me fui a Medellín con una beca del Instituto CAPAZ y el DAAD. Pasaje y estadía pagados, y yo representando al Perú.",
+          sirve: "Sé lo que se siente postular a una beca y esperar la respuesta. A mí me dijeron que sí.",
+        },
+        {
+          id: "stuttgart", lugar: "Stuttgart", pais: "Alemania", periodo: "2022", foto: "alemania",
+          titulo: "La segunda beca",
+          texto: "Dos años después volví a postular, esta vez al DAAD de Alemania. Otra beca completa, y otra vez representando al Perú.",
+          sirve: "Dos postulaciones, dos becas. Eso mismo es lo que te enseño a armar.",
+        },
+        {
+          id: "burdeos", lugar: "Burdeos", pais: "Francia", periodo: "2025 – 2026", foto: "burdeos",
+          titulo: "Mi máster en Francia",
+          texto: "Hice un MBA en la Université de Bordeaux. Es un título oficial francés, de un año, y lo cursé en inglés.",
+          sirve: "La admisión, la matrícula, los papeles… todo lo que vas a pasar tú, ya lo pasé yo.",
+        },
+      ],
+    },
+  },
+
+  // La historia en formato «stories»: se ve como un vídeo, pero es la página.
+  // Cada lámina dura lo que marca --car-his-dur en carina.css.
+  historia: {
+    rotulo: "Mi historia en un ratito",
+    titulo: "Yo también hice este camino",
+    ayuda: "Toca para avanzar · mantén para pausar",
+    repetir: "Ver de nuevo",
+    cta: "Quiero que me acompañes",
+    laminas: [
+      { id: "hola", foto: "retrato", modo: "llena", etiqueta: "¡Hola!", titulo: "Soy Carina", texto: "Soy de Lima y un día me propuse salir a estudiar fuera. Te cuento cómo me fue." },
+      { id: "sanmarcos", foto: "graduada", modo: "llena", etiqueta: "Lima · San Marcos", titulo: "Aquí empezó todo", texto: "Me gradué de Derecho en San Marcos. De ahí salieron las ganas de ver mundo." },
+      { id: "colombia", foto: "colombia", modo: "marco", etiqueta: "2020 · Colombia", titulo: "Mi primera beca", texto: "Me fui a Medellín con todo pagado, representando al Perú. Ahí supe que sí se podía." },
+      { id: "alemania", foto: "alemania", modo: "marco", etiqueta: "2022 · Alemania", titulo: "Y luego, otra", texto: "Volví a postular y me la dieron: beca del DAAD en Stuttgart. Eso sí, ¡qué frío!" },
+      { id: "burdeos", foto: "burdeos", modo: "llena", etiqueta: "2025 · Francia", titulo: "Mi máster en Francia", texto: "Un MBA en Burdeos, en inglés. Los trámites que te tocan a ti, yo ya los hice." },
+      { id: "viaja", foto: "paris", foto2: "londres", modo: "duo", etiqueta: "Y de paso…", titulo: "También se viaja", texto: "París, Londres… Cuando estudias en Europa, todo te queda cerquita." },
+      { id: "hoy", foto: "mirador", modo: "llena", etiqueta: "Hoy · Inspira", titulo: "Ahora te toca a ti", texto: "Yo te acompaño con el máster, la visa y la llegada. Paso a paso y sin enredos.", final: true },
+    ],
   },
 
   videos: {

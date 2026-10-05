@@ -182,6 +182,479 @@
   border-bottom: 2px solid var(--sol);
 }
 
+/* ── Trayectoria ──────────────────────────────────────────────────────── */
+.car-tray {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 2.25rem 1.25rem 0;
+}
+.car-tray > .car-h2,
+.car-tray > .car-lead { text-align: center; }
+.car-tray-h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 1.75rem 0 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #0a5873;
+}
+.car-tray-linea {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  border-left: 2px solid #e1effd;
+}
+.car-tray-linea li {
+  position: relative;
+  padding-bottom: 1.25rem;
+}
+.car-tray-linea li:last-child { padding-bottom: 0; }
+.car-tray-linea li::before {
+  content: "";
+  position: absolute;
+  left: calc(-1.1rem - 7px);
+  top: 0.2rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--sol);
+  box-shadow: 0 0 0 4px #fff6e8;
+}
+.car-tray-periodo {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b8661a;
+}
+.car-tray-puesto {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: Merriweather, Georgia, serif;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  color: var(--noche);
+}
+.car-tray-lugar {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b6b78;
+}
+.car-tray-texto {
+  margin: 0.45rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--tinta);
+}
+/* ── Ruta: paradas, avión y ficha ─────────────────────────────────────── */
+.car-ruta-ayuda {
+  margin-left: auto;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #b8661a;
+}
+.car-ruta-linea {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding-top: 26px;
+}
+/* La vía va de centro a centro de la primera y la última parada. */
+.car-ruta-via {
+  position: absolute;
+  top: 37px;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  border-radius: 3px;
+  background: #e1effd;
+}
+.car-ruta-via span {
+  display: block;
+  height: 100%;
+  width: calc(var(--car-ruta-i) / var(--car-ruta-n) * 100%);
+  border-radius: 3px;
+  background: var(--sol);
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.car-ruta-avion {
+  position: absolute;
+  top: 0;
+  left: calc(10% + var(--car-ruta-i) / var(--car-ruta-n) * 80%);
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  margin-left: -13px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--noche);
+  color: var(--sol);
+  box-shadow: 0 8px 16px -8px rgba(0, 54, 72, 0.7);
+  transition: left 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.car-ruta-parada {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 56px;
+  padding: 4px 0 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: #4b6b78;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.car-ruta-punto {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #c5def8;
+  transition: transform 0.3s, border-color 0.3s, background-color 0.3s;
+}
+.car-ruta-pasada .car-ruta-punto { border-color: var(--sol); background: var(--sol); }
+.car-ruta-activa .car-ruta-punto { border-color: var(--sol); transform: scale(1.3); box-shadow: 0 0 0 5px #fff6e8; }
+.car-ruta-lugar { font-size: 0.7rem; font-weight: 700; line-height: 1.1; }
+.car-ruta-activa .car-ruta-lugar { color: var(--noche); font-weight: 800; }
+.car-ruta-parada:focus-visible { outline: 2px solid var(--noche); outline-offset: 2px; border-radius: 10px; }
+
+@keyframes car-ruta-entra {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.car-ruta-ficha {
+  margin-top: 0.75rem;
+  overflow: hidden;
+  background: var(--niebla);
+  border: 1px solid #e1effd;
+  border-radius: 20px;
+  animation: car-ruta-entra 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.car-ruta-foto {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+.car-ruta-foto-burdeos { object-position: 50% 78%; }
+.car-ruta-foto-colombia { object-position: 50% 80%; }
+.car-ruta-foto-alemania { object-position: 50% 60%; }
+.car-ruta-foto-graduadaAncha { object-position: 50% 20%; }
+.car-ruta-cuerpo { padding: 0.95rem 1rem 0.25rem; }
+.car-ruta-sirve {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0.7rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  background: #fff6e8;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--noche);
+}
+.car-ruta-sirve svg { flex: 0 0 auto; margin-top: 0.15rem; color: var(--sol); }
+.car-ruta-pasos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem 0.75rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #4b6b78;
+}
+.car-ruta-pasos button {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #c5def8;
+  background: #fff;
+  color: var(--noche);
+  cursor: pointer;
+}
+.car-ruta-pasos button:disabled { opacity: 0.35; cursor: default; }
+.car-ruta-atras { transform: scaleX(-1); }
+
+/* ── Historia (stories) ───────────────────────────────────────────────── */
+.car-his {
+  --car-his-dur: 5.5s;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 2.25rem 1.25rem 0;
+  text-align: center;
+}
+.car-his-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #b8661a;
+}
+.car-his-caja {
+  position: relative;
+  /* Que quepa entera entre la cabecera y la barra de abajo, y deje libre la
+     esquina del botón flotante de WhatsApp. */
+  width: min(100%, 310px, calc((100svh - 290px) * 9 / 16));
+  min-width: 250px;
+  aspect-ratio: 9 / 16;
+  margin: 1.1rem auto 0;
+  overflow: hidden;
+  border-radius: 28px;
+  background: var(--noche);
+  box-shadow: 0 30px 60px -30px rgba(0, 54, 72, 0.75);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  text-align: left;
+}
+.car-his-caja:focus-visible { outline: 3px solid var(--sol); outline-offset: 3px; }
+.car-his-lamina {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s ease, visibility 0s 0.45s;
+}
+.car-his-activa { opacity: 1; visibility: visible; transition: opacity 0.45s ease; }
+
+/* Foto a sangre, con movimiento lento. */
+@keyframes car-his-acerca {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.16); }
+}
+@keyframes car-his-aleja {
+  from { transform: scale(1.16); }
+  to { transform: scale(1.02); }
+}
+.car-his-llena .car-his-foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.car-his-activa.car-his-llena .car-his-foto { animation: car-his-acerca var(--car-his-dur) linear both; }
+.car-his-activa.car-his-llena:nth-of-type(odd) .car-his-foto { animation-name: car-his-aleja; }
+
+/* Foto apaisada: entera en un marco, sobre su propia copia desenfocada. */
+.car-his-fondo {
+  position: absolute;
+  top: -12%;
+  left: -12%;
+  width: 124%;
+  height: 124%;
+  object-fit: cover;
+  filter: blur(22px) brightness(0.55) saturate(1.2);
+}
+@keyframes car-his-marco {
+  from { transform: rotate(-4deg) scale(0.9); }
+  to { transform: rotate(-1.5deg) scale(1.02); }
+}
+.car-his-marco .car-his-foto {
+  position: absolute;
+  /* Centrada en el hueco que deja el texto. */
+  inset: 8% 6% 36%;
+  width: 88%;
+  height: auto;
+  margin: auto;
+  border: 5px solid #fff;
+  border-radius: 14px;
+  box-shadow: 0 24px 40px -18px rgba(0, 0, 0, 0.7);
+}
+.car-his-activa.car-his-marco .car-his-foto { animation: car-his-marco var(--car-his-dur) cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Dos fotos, como dos polaroids que caen una sobre otra. */
+@keyframes car-his-duo-a {
+  from { transform: rotate(-14deg) translate(-30%, -8%) scale(0.85); opacity: 0; }
+  18% { opacity: 1; }
+  to { transform: rotate(-6deg) scale(1); opacity: 1; }
+}
+@keyframes car-his-duo-b {
+  from { transform: rotate(16deg) translate(30%, 10%) scale(0.85); opacity: 0; }
+  18% { opacity: 1; }
+  to { transform: rotate(5deg) scale(1); opacity: 1; }
+}
+.car-his-duo .car-his-foto {
+  position: absolute;
+  top: 9%;
+  left: 5%;
+  width: 56%;
+  height: auto;
+  border: 5px solid #fff;
+  border-radius: 12px;
+  box-shadow: 0 24px 40px -18px rgba(0, 0, 0, 0.7);
+  transform: rotate(-6deg);
+}
+.car-his-duo .car-his-foto2 {
+  top: 22%;
+  left: auto;
+  right: 5%;
+  transform: rotate(5deg);
+}
+.car-his-activa.car-his-duo .car-his-foto { animation: car-his-duo-a 1.1s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.car-his-activa.car-his-duo .car-his-foto2 { animation: car-his-duo-b 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; }
+
+/* Texto: entra por partes. */
+@keyframes car-his-sube {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.car-his-texto {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 4.5rem 1.15rem 1.3rem;
+  background: linear-gradient(to top, rgba(1, 34, 47, 0.94) 0%, rgba(1, 34, 47, 0.78) 55%, rgba(1, 34, 47, 0) 100%);
+  color: #fff;
+}
+.car-his-texto > * { display: block; }
+.car-his-activa .car-his-texto > * { animation: car-his-sube 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.car-his-activa .car-his-texto > :nth-child(1) { animation-delay: 0.15s; }
+.car-his-activa .car-his-texto > :nth-child(2) { animation-delay: 0.3s; }
+.car-his-activa .car-his-texto > :nth-child(3) { animation-delay: 0.5s; }
+.car-his-activa .car-his-texto > :nth-child(4) { animation-delay: 0.9s; }
+.car-his-etiqueta {
+  width: fit-content;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--sol);
+  color: var(--noche);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.car-his-titulo {
+  margin-top: 0.5rem;
+  font-family: Merriweather, Georgia, serif;
+  font-size: 1.36rem;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+.car-his-texto p {
+  margin: 0.45rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+}
+.car-his-texto .car-his-cta {
+  display: flex;
+  min-height: 46px;
+  margin-top: 0.85rem;
+  padding: 0 0.8rem;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+/* Barras de progreso: su animación es el reloj de la historia. */
+.car-his-barras {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 54px;
+  display: flex;
+  gap: 4px;
+}
+.car-his-barra {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.35);
+}
+.car-his-barra > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+@keyframes car-his-llena {
+  to { transform: scaleX(1); }
+}
+.car-his-barra > .car-his-corre { animation: car-his-llena var(--car-his-dur) linear forwards; }
+.car-his-barra > .car-his-llena-ya { transform: none; }
+
+.car-his-control {
+  position: absolute;
+  top: -8px;
+  right: 4px;
+  display: inline-flex;
+  min-width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.car-his-repetir {
+  top: 22px;
+  right: 12px;
+  height: 32px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: rgba(1, 34, 47, 0.55);
+  backdrop-filter: blur(6px);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+.car-his-repetir svg { transform: scaleX(-1); }
+.car-his-ico-pausa {
+  width: 10px;
+  height: 12px;
+  border-left: 3px solid #fff;
+  border-right: 3px solid #fff;
+}
+.car-his-ico-play {
+  width: 0;
+  height: 0;
+  border-left: 11px solid #fff;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+}
+
+/* Pausa: se detienen a la vez la barra y la foto. */
+.car-his-pausa .car-his-corre,
+.car-his-pausa .car-his-foto { animation-play-state: paused; }
+.car-his-quieta .car-his-foto,
+.car-his-quieta .car-his-texto > * { animation: none !important; }
+
+.car-his-ayuda {
+  margin: 0.7rem 0 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #4b6b78;
+}
+
 /* ── El juego ─────────────────────────────────────────────────────────── */
 .car-juego { max-width: 560px; margin: 0 auto; padding: 2rem 1.25rem 0; }
 .car-juego-tarjeta {

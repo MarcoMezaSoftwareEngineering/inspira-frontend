@@ -6,8 +6,8 @@
 export const EQUIPO = [
   {
     nombre: "Carina Meza",
-    cargo: "Abogada asociada",
-    bio: "Especialista en extranjería y derecho migratorio español. Acompaña cada expediente desde la estrategia inicial hasta la resolución.",
+    cargo: "Fundadora y CEO",
+    bio: "Bachiller en Derecho por la UNMSM, con intercambio en la Justus Liebig University Giessen (Alemania), y MBA por la Université de Bordeaux (IAE Bordeaux). Trabaja en extranjería desde 2020: visados, permisos de estudio, arraigos, nacionalidad y recursos ante denegaciones. Becaria del DAAD en 2020 y 2022.",
     iniciales: "CM",
   },
   {

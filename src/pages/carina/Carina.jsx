@@ -5,7 +5,8 @@
 // Quien llega aquí viene de un vídeo de treinta segundos y tiene el pulgar en
 // el aire. No busca un catálogo: quiere saber quién es la persona que acaba de
 // ver, si es de fiar, y qué hace ahora. Por eso la página es corta y va en
-// este orden: la cara, la prueba, los vídeos, la puerta.
+// este orden: la cara, la prueba, la historia, la trayectoria, los vídeos, la
+// puerta.
 //
 //  - Cara: el retrato de marca, nombre y cargo. Que sea ella, sin rodeos.
 //  - Prueba: las cuatro cifras de CATEGORIAS_CASOS, que son las únicas que la
@@ -32,6 +33,8 @@ import { cascada, useRevelar } from "../../lib/revelar";
 import VideoVertical from "../../components/common/VideoVertical";
 import Opiniones from "../landing/master2027/Opiniones";
 import { CARINA } from "./textos";
+import Historia from "./Historia";
+import Ruta from "./Ruta";
 import "../../styles/movimiento.css";
 import "./carina.css";
 
@@ -49,6 +52,7 @@ export default function Carina() {
   useRevelar(raiz);
   const pasoCifra = cascada();
   const pasoVideo = cascada();
+  const T = CARINA.trayectoria;
 
   return (
     <main className="car" ref={raiz}>
@@ -89,6 +93,33 @@ export default function Carina() {
             <span>{c.titulo}</span>
           </div>
         ))}
+      </section>
+
+      {/* La historia, como un vídeo que se toca */}
+      <Historia whatsapp={wa} />
+
+      {/* La trayectoria: de dónde sale lo que cuenta en los vídeos */}
+      <section className="car-tray" aria-labelledby="car-tray-t">
+        <h2 id="car-tray-t" className="car-h2" data-revelar>{T.titulo}</h2>
+        <p className="car-lead" data-revelar>{T.lead}</p>
+
+        <Ruta />
+
+        <h3 className="car-tray-h3" data-revelar>
+          <Icono nombre="maletin" size={16} />
+          {T.experiencia.titulo}
+        </h3>
+        <ol className="car-tray-linea">
+          {T.experiencia.lista.map((e) => (
+            <li key={e.puesto} data-revelar>
+              <span className="car-tray-periodo">{e.periodo}</span>
+              <strong className="car-tray-puesto">{e.puesto}</strong>
+              <span className="car-tray-lugar">{e.lugar}</span>
+              <p className="car-tray-texto">{e.texto}</p>
+            </li>
+          ))}
+        </ol>
+
       </section>
 
       {/* Los vídeos */}

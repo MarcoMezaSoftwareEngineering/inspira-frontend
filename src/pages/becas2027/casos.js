@@ -21,7 +21,6 @@ export const BECADOS = [
     cifra: "33 €",
     cifraPie: "pagó de una matrícula de 4.274 €",
     texto: "La beca le descontó 4.240,80 € de la matrícula. Además le cubre alojamiento, alimentación y una dotación de 2.500 €.",
-    // ⚠️ Por confirmar con Carina que este vídeo es el de Elisabet.
     video: { id: "7", src: `${MEDIA}/video/carina-7.mp4`, poster: `${MEDIA}/video/carina-7.jpg`, titulo: "Beca AUIP para un máster en Valencia" },
   },
   {
@@ -31,6 +30,8 @@ export const BECADOS = [
     cifra: "2 en 1",
     cifraPie: "la admisión y la beca, a la vez",
     texto: "Lo acompañamos en las dos cosas: la postulación al máster y el expediente de la beca del Estado peruano, que tienen calendarios distintos.",
+    // Vídeo que envió Carina el 05/10/2026, pasado a H.264 para que suene en cualquier celular.
+    video: { id: "19", src: `${MEDIA}/video/carina-19.mp4`, poster: `${MEDIA}/video/carina-19.jpg`, titulo: "Beca Bicentenario y máster en la Politécnica de Valencia" },
     enlace: { href: "/beca-generacion-bicentenario-2026", texto: "Ver la Beca Bicentenario" },
   },
   {
@@ -51,6 +52,9 @@ export const MATRICULAS = [
   { id: "giandira", nombre: "Giandira", logo: "uvigo", uni: "U. de Vigo", master: "Economía", total: 767.45, curso: "2025/26" },
   { id: "marly", nombre: "Marly", logo: null, sigla: "UCO", uni: "U. de Córdoba", master: "Nutrición Humana", total: 885.6, curso: "2026/27" },
   { id: "miluska", nombre: "Miluska", logo: "ugr", uni: "U. de Granada", master: "Gestión y Tecnologías de Procesos de Negocio", total: 885.6, curso: "2025/26" },
+  // De Esther y Alisson la constancia muestra el primer pago (la mitad); el total es el mismo de Granada.
+  { id: "esther", nombre: "Esther", logo: "ugr", uni: "U. de Granada", master: "Gestión y Tecnologías de Procesos de Negocio", total: 885.6, curso: "2025/26", nota: "Pagado en dos partes" },
+  { id: "alisson", nombre: "Alisson", logo: "ugr", uni: "U. de Granada", master: "Derecho de los Negocios", total: 886.72, curso: "2025/26", nota: "Pagado en dos partes" },
   { id: "marco", nombre: "Marco", logo: "uma", uni: "U. de Málaga", master: "Dirección Estratégica e Innovación en Comunicación", total: 889.5, curso: "2025/26" },
   { id: "luz", nombre: "Luz", logo: "uma", uni: "U. de Málaga", master: "Asesoría Jurídica de Empresas", total: 927.76, curso: "2025/26", nota: "63 créditos" },
 ];

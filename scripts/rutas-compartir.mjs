@@ -38,6 +38,7 @@ export const IMG_MAPA = "/og/mapa-estudiar-en-espana.jpg";
 export const IMG_VISADO = "/og/visado-estudios.jpg";
 export const IMG_MASTER_TODO = "/og/master-en-espana.jpg";
 export const IMG_CARINA = "/og/carina.jpg";
+export const IMG_BECAS_2027 = "/og/becas-espana-2027.jpg";
 export const IMG_JUEGO = "/og/te-alcanza.jpg";
 export const IMG_ESTANCIA = "/og/estancia-estudios.jpg";
 const ESTANCIA_EUR = PRECIOS.estancia.eur;
@@ -224,6 +225,13 @@ export const RUTAS_COMPARTIR = {
       "Soy Carina Meza, CEO y consultora legal de Inspira. Acompaño a estudiantes peruanos hasta el aula en España: máster, visado y llegada. Mira mis vídeos y escríbeme.",
     image: IMG_CARINA,
     imageAlt: "Carina Meza, CEO y consultora legal de Inspira Legal",
+  },
+  "/becas-espana-2027": {
+    title: "Becas para tu máster en España 2027: calendario y requisitos | Inspira Legal",
+    description:
+      "Las 16 becas para tu máster en España, mes a mes: cuándo cerraron en 2026, qué cubre cada una y qué piden. Y si la beca no sale, másteres oficiales desde 570 €.",
+    image: IMG_BECAS_2027,
+    imageAlt: "Calendario de becas en España 2027. Inspira Legal",
   },
   "/te-alcanza": {
     title: "¿Dónde estudiar en España? Seis ciudades en 30 segundos | Inspira Legal",

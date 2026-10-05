@@ -85,6 +85,7 @@ export const ORIGENES_WHATSAPP = {
   "bicentenario-2026": "la página de la Beca Generación del Bicentenario 2026",
   enlaces: "la página de enlaces de Inspira",
   carina: "la página de Carina",
+  "becas-2027": "el calendario de becas España 2027",
   expediente: "el expediente de ejemplo",
   visado: "la página del visado de estudios",
   estancia: "la página de la estancia por estudios",
@@ -117,6 +118,7 @@ export function origenDeRuta(path = "") {
   if (p.startsWith("/calculadora")) return "calculadora";
   if (p.startsWith("/mapa-estudiar-en-espana")) return "mapa";
   if (p.startsWith("/beca-generacion-bicentenario")) return "bicentenario-2026";
+  if (p.startsWith("/becas-espana")) return "becas-2027";
   if (p.startsWith("/enlaces")) return "enlaces";
   if (p.startsWith("/asistente")) return "asistente";
   if (p.startsWith("/visa-o-estancia")) return "visa-o-estancia";

@@ -47,6 +47,7 @@ const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
 const TeAlcanza = lazyConRecarga(() => import("./pages/alcanza/TeAlcanza"));
 const Carina = lazyConRecarga(() => import("./pages/carina/Carina"));
+const Becas2027 = lazyConRecarga(() => import("./pages/becas2027/Becas2027"));
 const Expediente = lazyConRecarga(() => import("./pages/expediente/Expediente"));
 const Visado = lazyConRecarga(() => import("./pages/visado/Visado"));
 const MasterTodo = lazyConRecarga(() => import("./pages/landing/master/MasterTodo"));
@@ -420,6 +421,8 @@ const PUBLIC_PATHS = [
   // Sin estar aquí, se pintaba el 404 debajo de la página (24/09/2026).
   "/carina",
   "/expediente",
+  // La que se manda por mensaje a quien comenta «BECA ESPAÑA 2027».
+  "/becas-espana-2027",
   // Las landings de venta que se mandan por WhatsApp (24/09/2026).
   "/visado",
   "/master",
@@ -583,6 +586,7 @@ export default function App() {
       {path === "/mapa-estudiar-en-espana" && <MapaEspana />}
       {path === "/te-alcanza" && <TeAlcanza />}
       {path === "/carina" && <Carina />}
+      {path === "/becas-espana-2027" && <Becas2027 />}
       {path === "/expediente" && <Expediente />}
       {path === "/visado" && <Visado />}
       {path === "/master" && <MasterTodo />}

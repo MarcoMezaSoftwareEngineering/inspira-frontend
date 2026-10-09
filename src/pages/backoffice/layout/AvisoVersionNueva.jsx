@@ -15,9 +15,15 @@
 // y hay versión nueva, se recarga sola al volver: es lo que pasó el
 // 08/09/2026, cuando Carina abrió la app instalada y vio la de antes. Si se
 // descubre con la app en uso, se avisa y se deja el botón.
-import { useEffect, useState } from "react";
+//
+// Desde el 09/10/2026 el reloj es useSondeo: con la pestaña oculta ya no se
+// pregunta (la app instalada pasaba días haciéndolo de fondo) y al volver se
+// mira una sola vez.
+import { useState } from "react";
+import { useSondeo } from "../../../hooks/useSondeo";
 
 const CADA = 5 * 60 * 1000;
+const PRIMERA = 20 * 1000;
 const RATO_FUERA = 3 * 60 * 1000;
 
 function cargados() {
@@ -40,32 +46,14 @@ async function hayVersionNueva() {
 export default function AvisoVersionNueva({ producto = "Inspira Core" }) {
   const [nueva, setNueva] = useState(false);
 
-  useEffect(() => {
-    if (!import.meta.env.PROD) return undefined;
-    let vivo = true;
-    let ocultaDesde = null;
-    const mirar = (recargarSiFuera = false) => hayVersionNueva()
-      .then((v) => {
-        if (!vivo || !v) return;
-        const fuera = ocultaDesde ? Date.now() - ocultaDesde : 0;
-        if (recargarSiFuera && fuera >= RATO_FUERA) { window.location.reload(); return; }
-        setNueva(true);
-      })
-      .catch(() => {});
-    const cada = setInterval(() => mirar(false), CADA);
-    const primera = setTimeout(() => mirar(false), 20000);
-    const alCambiar = () => {
-      if (document.visibilityState === "hidden") { ocultaDesde = Date.now(); return; }
-      mirar(true);
-      ocultaDesde = null;
-    };
-    document.addEventListener("visibilitychange", alCambiar);
-    return () => {
-      vivo = false;
-      clearInterval(cada); clearTimeout(primera);
-      document.removeEventListener("visibilitychange", alCambiar);
-    };
-  }, []);
+  // `fuera`: cuánto estuvo oculta la pestaña, solo al volver (useSondeo).
+  useSondeo(({ motivo, fuera = 0 }) => hayVersionNueva()
+    .then((v) => {
+      if (!v) return;
+      if (motivo === "volver" && fuera >= RATO_FUERA) { window.location.reload(); return; }
+      setNueva(true);
+    })
+    .catch(() => {}), CADA, { activo: import.meta.env.PROD, primera: PRIMERA });
 
   if (!nueva) return null;
   return (

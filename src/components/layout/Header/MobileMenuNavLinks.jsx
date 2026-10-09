@@ -8,7 +8,7 @@
 // gratis, Eventos, Tienda, Blog y Nosotros (14/09/2026).
 import { useState } from "react";
 import { navItemsMovil, HERRAMIENTAS_GRATIS } from "./header.data";
-import { CATEGORIAS, hrefServicio } from "../../../config/servicios";
+import { CATEGORIAS, hrefServicio } from "../../../config/serviciosIndice";
 import { navigate } from "../../../services/navigate";
 import Icono from "../../common/Icono";
 

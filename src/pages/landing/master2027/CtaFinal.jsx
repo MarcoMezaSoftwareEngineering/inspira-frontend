@@ -3,7 +3,8 @@
 import Icono from "../../../components/common/Icono";
 import { CTA_FINAL, PIE } from "../../../config/paqueteMaster2027";
 import { BotonReserva, EnlaceWhatsapp, Eyebrow } from "./comunes";
-import logo from "../../../assets/images/logo.png";
+// WebP a 3x del tamaño pintado: 12 KB frente a los 69 del PNG (09/10/2026).
+import logo from "../../../assets/images/logo.webp";
 import fotoGraduada from "../../../assets/images/landing/master-2027/foto-graduada-birrete.webp";
 
 export function CtaFinal() {
@@ -62,8 +63,8 @@ export function Pie() {
             <img
               src={logo}
               alt="Inspira Legal"
-              width={320}
-              height={107}
+              width={324}
+              height={108}
               className="h-6 w-auto"
               loading="lazy"
               decoding="async"

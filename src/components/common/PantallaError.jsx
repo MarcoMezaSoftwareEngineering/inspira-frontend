@@ -2,7 +2,8 @@
 // acceso con Google (acceso.css), para el login fallido y para un fallo que
 // tumba la página entera. Siempre con salida: reintentar, WhatsApp e inicio.
 import { whatsappDesde } from "../../config/contacto";
-import logo from "../../assets/images/logo.png";
+// WebP a 3x del tamaño pintado: 12 KB frente a los 69 del PNG (09/10/2026).
+import logo from "../../assets/images/logo.webp";
 import "../../styles/acceso.css";
 
 /**

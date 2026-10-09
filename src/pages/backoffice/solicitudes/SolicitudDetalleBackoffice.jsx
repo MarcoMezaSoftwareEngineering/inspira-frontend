@@ -1,36 +1,68 @@
 // src/pages/backoffice/solicitudes/SolicitudDetalleBackoffice.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
-import FormularioDatosAcademicosAdmin from "./FormularioDatosAcademicosAdmin";
-import EleccionMastersAdmin from "./EleccionMastersAdmin";
-import ProgramacionPostulacionesAdmin from "./ProgramacionPostulacionesAdmin";
-import PortalesYJustificantesAdmin from "./PortalesYJustificantesAdmin";
-import CierreServicioMasterAdmin from "./CierreServicioMasterAdmin";
+import { lazyConRecarga } from "../../../lib/cargaDiferida";
 import { useSolicitudDetalle } from "./hooks/useSolicitudDetalle";
 import ChecklistSolicitudAdmin from "./components/ChecklistSolicitudAdmin";
-import RecordatorioMaster from "./components/RecordatorioMaster";
 import MensajesAdmin from "./components/MensajesAdmin";
-import InformeAdmin from "./components/InformeAdmin";
 import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
-import VisaSolvenciaAdmin from "./components/visa/VisaSolvenciaAdmin";
-import VisaDeclaracionAdmin from "./components/visa/VisaDeclaracionAdmin";
-import VisaImpresoAdmin from "./components/visa/VisaImpresoAdmin";
-import EstanciaAdmin from "./components/estancia/EstanciaAdmin";
-import ModificatoriaAdmin from "./components/modificatoria/ModificatoriaAdmin";
-import VisaRecordatoriosAdmin from "./components/visa/VisaRecordatoriosAdmin";
-import VisaFlujoInternoAdmin from "./components/visa/VisaFlujoInternoAdmin";
-import VisaEstadoVisadoAdmin from "./components/visa/VisaEstadoVisadoAdmin";
-import VisaSubirDocumento from "./components/visa/VisaSubirDocumento";
-import MarcadoPorCliente from "./components/visa/MarcadoPorCliente";
-import NotasExpediente from "./components/visa/NotasExpediente";
-import DocumentosProceso from "../../../components/common/DocumentosProceso";
-import VisaSesionAdmin from "./components/visa/VisaSesionAdmin";
-import VisaCierreAdmin from "./components/visa/VisaCierreAdmin";
-import VisaFormularioAdmin from "./components/visa/VisaFormularioAdmin";
 import IconoPaso, { ICONO_POR_BLOQUE } from "../../../components/common/IconoPaso";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../components/common/RutaPasos";
 import CercoErrores from "../../../components/common/CercoErrores";
-import RevisionRapida from "../comun/RevisionRapida";
+
+// Cada tipo de expediente trae sus pasos en su propio archivo (09/10/2026):
+// el máster, el visado, la estancia y la modificatoria no se parecen en nada
+// y antes viajaban los cuatro juntos (más de 400 KB) en cada expediente. Lo
+// común —ficha, documentos, mensajes— sigue aquí. En cuanto se sabe el tipo
+// se adelanta la descarga de su archivo (ver el efecto más abajo), así que
+// al cambiar de paso casi nunca hay espera.
+const CARGAR_MASTER = () => import("./pasosMaster");
+const CARGAR_VISA = () => import("./pasosVisa");
+const CARGAR_ESTANCIA = () => import("./components/estancia/EstanciaAdmin");
+const CARGAR_MODIFICATORIA = () => import("./components/modificatoria/ModificatoriaAdmin");
+
+const deMaster = (nombre) => lazyConRecarga(() => CARGAR_MASTER().then((m) => ({ default: m[nombre] })));
+const deVisa = (nombre) => lazyConRecarga(() => CARGAR_VISA().then((m) => ({ default: m[nombre] })));
+
+const FormularioDatosAcademicosAdmin = deMaster("FormularioDatosAcademicosAdmin");
+const EleccionMastersAdmin = deMaster("EleccionMastersAdmin");
+const ProgramacionPostulacionesAdmin = deMaster("ProgramacionPostulacionesAdmin");
+const PortalesYJustificantesAdmin = deMaster("PortalesYJustificantesAdmin");
+const CierreServicioMasterAdmin = deMaster("CierreServicioMasterAdmin");
+const InformeAdmin = deMaster("InformeAdmin");
+const RecordatorioMaster = deMaster("RecordatorioMaster");
+const DocumentosProceso = deMaster("DocumentosProceso");
+
+const VisaSolvenciaAdmin = deVisa("VisaSolvenciaAdmin");
+const VisaDeclaracionAdmin = deVisa("VisaDeclaracionAdmin");
+const VisaImpresoAdmin = deVisa("VisaImpresoAdmin");
+const VisaRecordatoriosAdmin = deVisa("VisaRecordatoriosAdmin");
+const VisaFlujoInternoAdmin = deVisa("VisaFlujoInternoAdmin");
+const VisaEstadoVisadoAdmin = deVisa("VisaEstadoVisadoAdmin");
+const VisaSubirDocumento = deVisa("VisaSubirDocumento");
+const MarcadoPorCliente = deVisa("MarcadoPorCliente");
+const NotasExpediente = deVisa("NotasExpediente");
+const VisaSesionAdmin = deVisa("VisaSesionAdmin");
+const VisaCierreAdmin = deVisa("VisaCierreAdmin");
+const VisaFormularioAdmin = deVisa("VisaFormularioAdmin");
+
+const EstanciaAdmin = lazyConRecarga(CARGAR_ESTANCIA);
+const ModificatoriaAdmin = lazyConRecarga(CARGAR_MODIFICATORIA);
+// Solo con ?revisar=1 (desde tareas y avisos).
+const RevisionRapida = lazyConRecarga(() => import("../comun/RevisionRapida"));
+
+/** Lo que se ve dentro de un paso mientras llega su código. */
+function CargandoPaso() {
+  return (
+    <div className="py-10 grid place-items-center" aria-busy="true">
+      {/* Aparece a los 300 ms: en una carga rápida no hay parpadeo. */}
+      <div style={{ animation: "inspira-fade-in .2s ease-out .3s both" }}>
+        <div className="w-5 h-5 border-2 border-[#023A4B] border-t-transparent rounded-full animate-spin" />
+        <span className="sr-only">Cargando…</span>
+      </div>
+    </div>
+  );
+}
 
 // Nombre corto de cada bloque del máster para la fila de iconos del móvil.
 const CORTO_BO = { cliente: "Ficha", checklist: "Documentos", formulario: "Formulario", informe: "Informe", eleccion: "Elección", programacion: "Postular", cierre: "Cierre" };
@@ -99,10 +131,12 @@ function BlqHead({ numero, titulo, estado, open, onToggle }) {
   );
 }
 
+// El cuerpo de cada paso. Lleva su propio Suspense: mientras llega el código
+// del paso, la cabecera sigue en su sitio y el hueco espera dentro.
 function CBox({ children }) {
   return (
     <div className="bg-white border border-[#E2E8F0] border-t-0 rounded-b-[12px] overflow-hidden shadow-sm mb-2">
-      {children}
+      <Suspense fallback={<CargandoPaso />}>{children}</Suspense>
     </div>
   );
 }
@@ -239,6 +273,13 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     return () => { cancel = true; };
   }, [detalle, isVisado]);
 
+  // En cuanto se sabe qué tipo de expediente es, se adelanta su código.
+  const tipoPasos = !detalle ? null : isModificatoria ? "modificatoria" : isEstancia ? "estancia" : isVisado ? "visa" : "master";
+  useEffect(() => {
+    const cargar = { master: CARGAR_MASTER, visa: CARGAR_VISA, estancia: CARGAR_ESTANCIA, modificatoria: CARGAR_MODIFICATORIA }[tipoPasos];
+    cargar?.().catch(() => { /* lazyConRecarga lo reintenta al pintar */ });
+  }, [tipoPasos]);
+
   const sesionPorTipo = (tipo) => visaSesiones.find((s) => s.tipo === tipo) || null;
   const sesionEstadoBloque = (tipo) => (sesionPorTipo(tipo)?.estado === "COMPLETADA" ? "completado" : "pendiente");
 
@@ -341,10 +382,12 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   return (
     <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
       {revisarRapido && (
-        <RevisionRapida idSolicitud={idSolicitud} onCerrar={(cambio) => {
-          setRevisarRapido(false);
-          if (cambio) window.location.replace(window.location.pathname);
-        }} />
+        <Suspense fallback={null}>
+          <RevisionRapida idSolicitud={idSolicitud} onCerrar={(cambio) => {
+            setRevisarRapido(false);
+            if (cambio) window.location.replace(window.location.pathname);
+          }} />
+        </Suspense>
       )}
 
       {/* ── NAVEGACIÓN EN MÓVIL ──
@@ -588,9 +631,13 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
               el visado: ni informe de IA, ni eleccion de universidades, ni
               postulaciones. Su panel es todo lo que hay. */}
           {isModificatoria ? (
-            <ModificatoriaAdmin idSolicitud={detalle?.id_solicitud} />
+            <Suspense fallback={<CargandoPaso />}>
+              <ModificatoriaAdmin idSolicitud={detalle?.id_solicitud} />
+            </Suspense>
           ) : isEstancia ? (
-            <EstanciaAdmin idSolicitud={detalle?.id_solicitud} />
+            <Suspense fallback={<CargandoPaso />}>
+              <EstanciaAdmin idSolicitud={detalle?.id_solicitud} />
+            </Suspense>
           ) : (
           <>
           {/* B0 — Checklist y estado del proceso (sólo visado, sólo interno) */}

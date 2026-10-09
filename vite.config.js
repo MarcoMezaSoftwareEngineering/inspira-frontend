@@ -27,8 +27,12 @@ function preciosPublicos() {
 }
 
 export default defineConfig({
-  // Dos HTML de entrada para la misma aplicación: index.html (web y panel del
-  // asesorado) y backoffice.html (Inspira Core, con su manifiesto e icono).
+  // Dos HTML de entrada: index.html (web y panel del asesorado, src/main.jsx)
+  // y backoffice.html (Inspira Core, con su manifiesto e icono). Desde el
+  // 09/10/2026 Core arranca de src/backoffice-main.jsx y no descarga la web
+  // pública. En desarrollo Vite sirve backoffice.html solo para /backoffice
+  // exacto; /backoffice/… cae en index.html y App.jsx monta BackofficeApp en
+  // diferido: las dos entradas tienen que seguir funcionando.
   build: {
     rollupOptions: {
       input: {
@@ -45,6 +49,14 @@ export default defineConfig({
   },
 
   plugins: [
+    // React Compiler (babel-plugin-react-compiler, en devDeps): APAGADO a
+    // propósito. Probado el 09/10/2026 solo sobre src/pages/backoffice/ con
+    //   react({ babel: (id) => ({ plugins: /[\\/]src[\\/]pages[\\/]backoffice[\\/]/
+    //     .test(id) ? [["babel-plugin-react-compiler", { target: "19" }]] : [] }) })
+    // el build sale sin errores, pero cada trozo de Core crece entre un 30 y
+    // un 50 % (el armazón de 14,8 a 19,7 KB gz; Clientes de 29,7 a 45; en total
+    // +171 KB gz), y lo que pesaba en Core era la descarga, no el repintado.
+    // Quedan además 13 avisos de set-state-in-effect del lint en la carpeta.
     react(),
     tailwindcss(),
     preciosPublicos(),

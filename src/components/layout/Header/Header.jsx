@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import logo from "../../../assets/images/logo.png";
+// El logo en WebP a 3x de su tamaño pintado (108×36): 12 KB frente a los 69
+// del PNG de 960 px, que sigue existiendo para los PDF y las imágenes OG
+// (09/10/2026).
+import logo from "../../../assets/images/logo.webp";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
 import { navItems, navSecundarios } from "./header.data";
@@ -82,7 +85,9 @@ export default function Header() {
       <div className={`v4-nav-wrap${scrolled ? " scrolled" : ""}`}>
         <header className="v4-nav">
           <a href="/" onClick={(e) => go(e, "/")} className="v4-logo-brand">
-            <img src={logo} alt="Inspira Legal" width="320" height="107" fetchPriority="high" />
+            {/* Sin fetchPriority alta: el LCP de la portada es el H1, y el logo
+                competía con la hoja de estilos y las fuentes (09/10/2026). */}
+            <img src={logo} alt="Inspira Legal" width="324" height="108" />
           </a>
 
           <nav className="v4-navlinks">

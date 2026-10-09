@@ -8,9 +8,58 @@
  * La página en sí —index.html— va SIEMPRE a la red primero. Aquí se despliega
  * a menudo, y una cáscara vieja servida desde caché apuntaría a trozos que ya
  * no existen. Solo si no hay red se usa la copia guardada.
+ *
+ * Los trozos se purgan (09/10/2026). Hasta entonces se guardaban para
+ * siempre: cada despliegue cambia sus nombres y la caché crecía 2,4 MB por
+ * versión sin soltar nunca nada. Ahora cada trozo lleva la fecha de su último
+ * uso, y tras una navegación CON red se tiran los que llevan una semana sin
+ * usarse (el servidor tampoco guarda más la versión anterior), con un tope
+ * de trozos por si acaso. Sin red no se purga nunca, y lo que enlaza la
+ * página que acaba de llegar no se toca: abrir sin conexión la última versión
+ * que se vio sigue funcionando igual que antes.
  */
 const CACHE = "inspira-v1";
 const CASCARA = "/index.html";
+
+const SELLO = "x-inspira-usado";   // cabecera propia con la fecha de último uso
+const HORA = 60 * 60 * 1000;
+const CADUCIDAD = 7 * 24 * HORA;    // una semana sin usarse: fuera
+const REFRESCO = 12 * HORA;         // un acierto renueva la fecha, como mucho cada 12 h
+const TOPE = 250;                   // y nunca más de 250 trozos
+let ultimaPurga = 0;
+
+/** Guarda un trozo con la fecha de uso de ahora. */
+function guardarTrozo(req, r) {
+  const cabeceras = new Headers(r.headers);
+  cabeceras.set(SELLO, String(Date.now()));
+  return r.blob()
+    .then((cuerpo) => new Response(cuerpo, { status: r.status, statusText: r.statusText, headers: cabeceras }))
+    .then((sellada) => caches.open(CACHE).then((c) => c.put(req, sellada)));
+}
+
+/**
+ * Tira los trozos que llevan una semana sin usarse y, si aún quedan más de
+ * TOPE, los más antiguos. `protegidos`: las rutas /assets/ que enlaza la
+ * página que acaba de llegar, que no se tocan aunque sean viejas.
+ */
+function purgar(protegidos) {
+  const ahora = Date.now();
+  if (ahora - ultimaPurga < 6 * HORA) return Promise.resolve();
+  ultimaPurga = ahora;
+  return caches.open(CACHE).then(async (c) => {
+    const trozos = [];
+    for (const req of await c.keys()) {
+      const ruta = new URL(req.url).pathname;
+      if (!ruta.startsWith("/assets/") || protegidos.has(ruta)) continue;
+      const r = await c.match(req);
+      // Los guardados antes de esta versión no tienen fecha: cuentan como viejos.
+      trozos.push({ req, usado: Number(r && r.headers.get(SELLO)) || 0 });
+    }
+    trozos.sort((a, b) => b.usado - a.usado);
+    const fuera = trozos.filter((t, i) => ahora - t.usado > CADUCIDAD || i >= TOPE);
+    await Promise.all(fuera.map((t) => c.delete(t.req)));
+  });
+}
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -48,6 +97,13 @@ self.addEventListener("fetch", (e) => {
           if (r.ok && esHtml && !url.pathname.startsWith("/backoffice")) {
             caches.open(CACHE).then((c) => c.put(CASCARA, r.clone())).catch(() => {});
           }
+          // Con red y una página nueva en la mano (la web o Core), es el
+          // momento de soltar los trozos que ya no usa nadie.
+          if (r.ok && esHtml) {
+            r.clone().text()
+              .then((html) => purgar(new Set(html.match(/\/assets\/[^"'\s<>)]+/g) || [])))
+              .catch(() => {});
+          }
           return r;
         })
         .catch(() => caches.match(CASCARA)),
@@ -58,10 +114,19 @@ self.addEventListener("fetch", (e) => {
   // Trozos con hash: caché primero. Son inmutables.
   if (url.pathname.startsWith("/assets/")) {
     e.respondWith(
-      caches.match(req).then((hit) => hit || fetch(req).then((r) => {
-        if (r.ok) caches.open(CACHE).then((c) => c.put(req, r.clone())).catch(() => {});
-        return r;
-      })),
+      caches.match(req).then((hit) => {
+        if (hit) {
+          // Se usa: se renueva su fecha para que la purga no lo tire.
+          const usado = Number(hit.headers.get(SELLO)) || 0;
+          if (Date.now() - usado > REFRESCO) guardarTrozo(req, hit.clone()).catch(() => {});
+          return hit;
+        }
+        return fetch(req).then((r) => {
+          // Solo respuestas completas: un 206 (vídeo por rangos) no se guarda.
+          if (r.status === 200) guardarTrozo(req, r.clone()).catch(() => {});
+          return r;
+        });
+      }),
     );
     return;
   }

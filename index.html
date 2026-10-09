@@ -60,7 +60,20 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet" />
+    <!-- Solo los estilos que se pintan (09/10/2026). Google ya sirve un único
+         woff2 variable por familia, estilo y alfabeto, pida uno o siete pesos;
+         lo que cuesta es pedir de más. Fuera Merriweather 300 y sus cursivas
+         salvo la 700 (la del <em> del H1 de la portada): con una sola cursiva
+         Google manda un archivo de 50 KB en vez del variable de 98 KB, y ese
+         archivo va en el camino del LCP. Fuera también Montserrat 300 cursiva.
+         Los pesos siguen siendo sueltos y no rangos (300..900) a propósito:
+         con rangos, los pesos intermedios del CSS (650, 750, 800, 850 y el 600
+         de Merriweather) se pintarían con su valor exacto, y hoy se pintan con
+         el siguiente que existe (700, 800 o 900): cambiaría el aspecto sin
+         descargar un byte menos.
+         No se precarga el woff2: su URL lleva la versión de la fuente y Google
+         la cambia al actualizarla. -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Merriweather:ital,wght@0,400;0,700;0,900;1,700&display=swap" rel="stylesheet" />
   </head>
 
   <body>

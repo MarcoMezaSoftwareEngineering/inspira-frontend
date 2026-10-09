@@ -1,7 +1,7 @@
 import { navigate } from "../../../services/navigate";
 import Reveal from "../../../components/common/Reveal";
 import BotonAsesoria from "../../../components/common/BotonAsesoria";
-import { PRECIO_ASESORIA } from "../../../config/servicios";
+import { PRECIO_ASESORIA } from "../../../config/serviciosIndice";
 import { ASESORIA } from "../../../config/contacto";
 
 const go = (e, href) => {

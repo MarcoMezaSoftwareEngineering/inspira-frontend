@@ -54,6 +54,8 @@ export default function MuestraPortal({ style, onAbrir, href }) {
               key={x.img}
               src={x.img}
               alt=""
+              width="520"
+              height="1125"
               className="enl-portal-pantalla"
               data-on={k === i ? "1" : "0"}
               loading={k === 0 ? "eager" : "lazy"}

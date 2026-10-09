@@ -29,10 +29,11 @@ import Fechas from "../master2027/Fechas";
 import Equipo from "../master2027/Equipo";
 import ExpedienteDigital from "./ExpedienteDigital";
 import Herramientas from "./Herramientas";
-import { Cinta, Numeral, Stickers } from "../../../components/common/EfectosLanding";
+import { Cinta, Numeral, PalabraRotante, Stickers } from "../../../components/common/EfectosLanding";
 import { useParallax } from "../../../lib/parallax";
 import { MASTER as T } from "./textos";
-import logo from "../../../assets/images/logo.png";
+// WebP a 3x del tamaño pintado: 12 KB frente a los 69 del PNG (09/10/2026).
+import logo from "../../../assets/images/logo.webp";
 import fotoBandera from "../../../assets/images/landing/master-2027/foto-bandera-espana.webp";
 import ilusAsesora from "../../../assets/images/landing/master-2027/ilus-asesora-auriculares.webp";
 import ilusLupa from "../../../assets/images/landing/master-2027/ilus-documentos-lupa.webp";
@@ -88,27 +89,6 @@ function PortalMock({ tipo }) {
 
 const irA = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-/** La palabra del titular que va cambiando: una ciudad, luego otra. */
-function PalabraRotante({ palabras }) {
-  const [i, setI] = useState(0);
-  const [saliendo, setSaliendo] = useState(false);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setSaliendo(true);
-      setTimeout(() => {
-        setI((x) => (x + 1) % palabras.length);
-        setSaliendo(false);
-      }, 220);
-    }, 2400);
-    return () => clearInterval(t);
-  }, [palabras.length]);
-  return (
-    <span key={i} className={`mst-palabra lfx-palabra-entra${saliendo ? " mst-palabra-sale" : ""}`} aria-live="off">
-      {palabras[i]}
-    </span>
-  );
-}
-
 function Faq() {
   const [abierta, setAbierta] = useState(0);
   const lista = T.faqIds.map((id) => FAQ.preguntas.find((p) => p.id === id)).filter(Boolean);
@@ -161,7 +141,7 @@ export default function MasterTodo() {
       <ProgresoLectura />
 
       <header className="mst-cabecera">
-        <img src={logo} alt="Inspira Legal" width={320} height={107} />
+        <img src={logo} alt="Inspira Legal" width={324} height={108} />
         <a href="/">Ver sitio completo →</a>
       </header>
 
@@ -175,7 +155,7 @@ export default function MasterTodo() {
             {T.hero.rotulo}
           </p>
           <h1>
-            {T.hero.tituloInicio} <PalabraRotante palabras={T.hero.palabras} />
+            {T.hero.tituloInicio} <PalabraRotante palabras={T.hero.palabras} prefijo="mst" aria-live="off" />
             <br />
             {T.hero.tituloFin}
           </h1>

@@ -18,6 +18,7 @@ import { rutaDe } from "../../ruta";
 import { comprobarRespuesta } from "../../../../services/sesion";
 import { usePublicarCabecera } from "../../cabeceraExpediente";
 import NovedadesExpediente from "../NovedadesExpediente";
+import { useSondeo } from "../../../../hooks/useSondeo";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -191,21 +192,17 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idSolicitud]);
 
-  // Auto-refresco: re-consulta cada ~25s y al volver a esta pestaña (silencioso, sin flicker).
-  useEffect(() => {
-    const refrescar = () => {
-      if (document.visibilityState === "visible") cargarTodo({ silent: true });
-    };
-    const intervalo = setInterval(refrescar, 25000);
-    window.addEventListener("focus", refrescar);
-    document.addEventListener("visibilitychange", refrescar);
-    return () => {
-      clearInterval(intervalo);
-      window.removeEventListener("focus", refrescar);
-      document.removeEventListener("visibilitychange", refrescar);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idSolicitud]);
+  // Auto-refresco silencioso (sin parpadeo), con useSondeo (09/10/2026).
+  // Antes: las cinco peticiones cada 25 s, también con la pestaña oculta, y
+  // dos veces al volver (foco + visibilidad). Ahora cada 60 s a la vista,
+  // nada oculta y una sola vez al volver. 25 s era el único sondeo del panel
+  // —máster y estancia no tienen ninguno— y lo que se refresca aquí lo cambia
+  // una persona del equipo a mano: un minuto basta, y al volver a la pestaña
+  // se ve al momento. La primera carga la hace el efecto de arriba.
+  // Si la vuelta falla, el sondeo espacia las siguientes (cargarTodo devuelve false).
+  useSondeo(async () => {
+    if ((await cargarTodo({ silent: true })) === false) throw new Error("Sin respuesta del expediente");
+  }, 60000, { clave: idSolicitud, primera: null });
 
   async function cargarTodo({ silent = false } = {}) {
     if (!silent) { setLoading(true); setError(""); }
@@ -226,9 +223,11 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
       if (rExp.ok) setVisaExp(rExp.expediente || null);
       if (rSes.ok) setSesiones(rSes.sesiones || []);
       if (rDocs.ok) setVisaDocs(rDocs.documentos || {});
+      return Boolean(rDetalle.ok);
     } catch (e) {
       console.error(e);
       if (!silent) setError("Error al cargar información.");
+      return false;
     } finally {
       if (!silent) setLoading(false);
     }

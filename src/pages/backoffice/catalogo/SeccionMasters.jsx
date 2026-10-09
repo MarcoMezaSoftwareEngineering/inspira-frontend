@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { boGET, boPOST, boDELETE } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import {
-  RAMAS, MODALIDADES,
+  RAMAS, MODALIDADES, CATEGORIAS_CRITERIO,
   formatPrecio, duracionLabel, activoBadge,
   MODAL_OVERLAY, MODAL_PANEL,
 } from "./catalogoConstants";

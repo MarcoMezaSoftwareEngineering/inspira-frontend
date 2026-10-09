@@ -24,7 +24,7 @@ import { cascada, useRevelar } from "../../lib/revelar";
 import { CifraAnimada } from "../landing/master2027/comunes";
 import { BECAS, BECAS2027 as T, FILTROS, MESES } from "./textos";
 import { BECADOS, MATRICULAS } from "./casos";
-import { LOGOS } from "./logos";
+import { LOGOS, MEDIDAS_LOGOS } from "./logos";
 import fotoCarina from "../../assets/images/carina/retrato-espana.webp";
 import fotoBeca from "../../assets/images/carina/beca-alemania.webp";
 import "../../styles/movimiento.css";
@@ -41,7 +41,7 @@ const irA = (href) => (e) => {
 /** El logotipo de la entidad o, si no lo tenemos, su sigla. */
 function Sello({ logo, sigla, grande = false }) {
   const clase = `bk-sello${grande ? " bk-sello-g" : ""}`;
-  if (logo && LOGOS[logo]) return <span className={clase}><img src={LOGOS[logo]} alt="" loading="lazy" decoding="async" /></span>;
+  if (logo && LOGOS[logo]) return <span className={clase}><img src={LOGOS[logo]} alt="" width={MEDIDAS_LOGOS[logo]?.[0]} height={MEDIDAS_LOGOS[logo]?.[1]} loading="lazy" decoding="async" /></span>;
   return <span className={`${clase} bk-sello-sigla`} aria-hidden="true">{sigla}</span>;
 }
 
@@ -156,7 +156,7 @@ export default function Becas2027() {
         <div className="bk-cinta" aria-hidden="true">
           <div className="bk-cinta-pista">
             {[...Object.keys(LOGOS), ...Object.keys(LOGOS)].map((k, n) => (
-              <span key={`${k}-${n}`} className="bk-sello bk-sello-g"><img src={LOGOS[k]} alt="" /></span>
+              <span key={`${k}-${n}`} className="bk-sello bk-sello-g"><img src={LOGOS[k]} alt="" width={MEDIDAS_LOGOS[k]?.[0]} height={MEDIDAS_LOGOS[k]?.[1]} decoding="async" /></span>
             ))}
           </div>
         </div>

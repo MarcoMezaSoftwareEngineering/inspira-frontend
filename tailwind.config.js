@@ -1,5 +1,8 @@
 export default {
-  content: ["./index.html", "./src/**/*.{js,jsx}"],
+  // Sin `content` (09/10/2026): en Tailwind 4 los globos de `content` de un
+  // @config se suman a las fuentes de CADA hoja que lo cargue, y deshacían
+  // el reparto por aplicación. Qué escanea cada hoja lo dicen sus @source:
+  // src/styles/globals.css, utilidades-core.css y utilidades-panel.css.
   theme: {
     extend: {
       // Paleta EXACTA del logo: azul petróleo #013446, celeste #88C4FC y

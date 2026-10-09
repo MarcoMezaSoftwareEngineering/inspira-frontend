@@ -3,7 +3,7 @@
 // autoavance y navegación manual. Da movimiento a /servicios y deja ver de
 // un vistazo cómo se reparte cada área.
 import { useEffect, useState, useCallback } from "react";
-import { CATEGORIAS, hrefServicio } from "../../config/servicios";
+import { CATEGORIAS, hrefServicio } from "../../config/serviciosIndice";
 import Icono from "../../components/common/Icono";
 import { navigate } from "../../services/navigate";
 

@@ -15,15 +15,20 @@ export default function MiDia() {
   const [clientes, setClientes] = useState([]);
   const [revisar, setRevisar] = useState(null);
 
+  // Dos peticiones en vez de tres (09/10/2026):
+  //  · Tareas: una sola, las abiertas que vencen de aquí a una semana, y aquí
+  //    se quedan las vencidas y las de hoy. Antes eran dos (vencidas y hoy),
+  //    cada una con su resumen y sus cifras, para luego juntarlas.
+  //  · Clientes: el servidor ya devuelve solo los que esperan algo del asesor
+  //    (`esperan=asesor`), en vez de 200 para filtrarlos aquí.
   const cargar = useCallback(() => {
     Promise.all([
-      boGET("/backoffice/tareas?alcance=mias&vence=vencidas&cerradas=no"),
-      boGET("/backoffice/tareas?alcance=mias&vence=hoy&cerradas=no"),
-      boGET("/backoffice/clientes?filtro=mios&pageSize=200&orden=urgentes"),
-    ]).then(([v, h, c]) => {
-      const vistas = new Set();
-      const lista = [...(v.tareas || []), ...(h.tareas || [])].filter((t) => !vistas.has(t.id_tarea) && vistas.add(t.id_tarea));
-      setTareas(lista);
+      boGET("/backoffice/tareas?alcance=mias&vence=semana&cerradas=no&limite=500"),
+      boGET("/backoffice/clientes?filtro=mios&esperan=asesor&pageSize=200&orden=urgentes"),
+    ]).then(([t, c]) => {
+      setTareas((t.tareas || []).filter((x) => x.vencida || x.para_hoy));
+      // El servidor ya filtra; esto solo cubre un backend anterior a
+      // `esperan`, que lo ignora y devolvería a todos los «míos».
       setClientes((c.clientes || []).filter((x) => x.sin_abrir?.length || (x.etapas || []).some((e) => e.le_toca === "asesor")));
     });
   }, []);

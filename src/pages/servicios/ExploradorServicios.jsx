@@ -2,7 +2,7 @@
 // Buscador + filtros por tema sobre el catálogo. Da una lectura inmediata de
 // cómo se reparten los servicios y permite llegar a uno concreto sin scroll.
 import { useMemo, useState } from "react";
-import { CATEGORIAS, TODOS_SERVICIOS, hrefServicio } from "../../config/servicios";
+import { CATEGORIAS, TODOS_SERVICIOS, hrefServicio } from "../../config/serviciosIndice";
 import Icono from "../../components/common/Icono";
 import { navigate } from "../../services/navigate";
 

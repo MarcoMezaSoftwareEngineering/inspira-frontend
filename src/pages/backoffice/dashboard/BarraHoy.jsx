@@ -3,14 +3,18 @@
 // La barra «Hoy» de Inspira Core: seis chips con lo que hay que atender hoy.
 // Cada chip abre la lista corta (máx. 10) con enlace a la solicitud o a la
 // sección correspondiente. Datos: GET /backoffice/hoy[?mio=1].
-import { useCallback, useEffect, useRef, useState } from "react";
+//
+// Se refresca cada 5 minutos con useSondeo (09/10/2026): antes seguía
+// preguntando con la pestaña oculta.
+import { useEffect, useRef, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
+import { useSondeo } from "../../../hooks/useSondeo";
+import { CLAVE_MIO_HOY as CLAVE_MIO, leerMioHoy, rutaHoy } from "./precargaInicio";
 import {
   AlarmClock, FileSearch, Wallet, Inbox, CalendarClock, ListChecks, ChevronDown, RefreshCw, X, ExternalLink,
 } from "lucide-react";
 
 const REFRESCO_MS = 5 * 60 * 1000;
-const CLAVE_MIO = "bo_hoy_mio";
 
 const TONOS = {
   rojo:   { borde: "#f1c4c4", fondo: "#fff5f5", acento: "#c53030", suave: "#fde8e8", texto: "#8f1f1f" },
@@ -76,32 +80,29 @@ function textoDias(dias) {
 }
 
 export default function BarraHoy() {
-  const [mio, setMio] = useState(() => {
-    try { return localStorage.getItem(CLAVE_MIO) === "1"; } catch { return false; }
-  });
+  const [mio, setMio] = useState(leerMioHoy);
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [abierto, setAbierto] = useState(null);
   const raiz = useRef(null);
 
-  const cargar = useCallback(() => {
+  // Cambiar «Solo lo mío» / «Todo el equipo» (la clave) vuelve a pedir ya.
+  const refrescar = useSondeo(async () => {
     setCargando(true);
-    boGET(`/backoffice/hoy${mio ? "?mio=1" : ""}`)
-      .then((r) => {
-        if (!r || r.ok === false) throw new Error(r?.msg || r?.message || "Sin respuesta");
-        setDatos(r);
-        setError(null);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setCargando(false));
-  }, [mio]);
-
-  useEffect(() => {
-    cargar();
-    const t = setInterval(cargar, REFRESCO_MS);
-    return () => clearInterval(t);
-  }, [cargar]);
+    try {
+      const r = await boGET(rutaHoy(mio));
+      if (!r || r.ok === false) throw new Error(r?.msg || r?.message || "Sin respuesta");
+      setDatos(r);
+      setError(null);
+    } catch (e) {
+      setError(e.message);
+      throw e;
+    } finally {
+      setCargando(false);
+    }
+  }, REFRESCO_MS, { clave: mio });
+  const cargar = () => { refrescar().catch(() => { /* el error ya se pinta */ }); };
 
   // Cerrar el desplegable al pulsar fuera o con Escape.
   useEffect(() => {

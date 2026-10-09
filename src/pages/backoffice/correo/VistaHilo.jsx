@@ -7,6 +7,7 @@ import { navigate } from "../../../services/navigate";
 import SelectorRespuestas from "../comun/SelectorRespuestas";
 import { DESDE_BUZON } from "./desdeBuzon";
 import AccionesHilo from "./AccionesHilo";
+import { useSondeo } from "../../../hooks/useSondeo";
 
 
 function hora(ms) {
@@ -43,13 +44,12 @@ export default function VistaHilo({ id, direcciones: dirs = [], onVolver, onResp
     boGET("/backoffice/solicitudes/equipo").then((r) => r.ok && setEquipo(r.equipo || []));
   }, [dirs.length]);
 
-  // «Lo estoy respondiendo yo»: aviso a los demás mientras está abierto.
-  useEffect(() => {
-    const marcar = () => boPOST(`/backoffice/correo/hilo/${id}/atender`, {});
-    marcar();
-    const t = setInterval(marcar, 60000);
-    return () => { clearInterval(t); boPOST(`/backoffice/correo/hilo/${id}/atender`, { soltar: true }); };
-  }, [id]);
+  // «Lo estoy respondiendo yo»: aviso a los demás mientras está abierto. Es un
+  // «sigo aquí» y no una lectura: sigue con la pestaña oculta (quien responde
+  // suele irse a otra a buscar un dato), y el servidor lo olvida a los 3 min
+  // si deja de llegar.
+  useSondeo(() => boPOST(`/backoffice/correo/hilo/${id}/atender`, {}), 60000, { clave: id, pausarOculta: false });
+  useEffect(() => () => { boPOST(`/backoffice/correo/hilo/${id}/atender`, { soltar: true }); }, [id]);
 
   async function asignar(id_usuario) {
     const r = await boPOST(`/backoffice/correo/hilo/${id}/asignar`, { id_usuario: id_usuario || null });

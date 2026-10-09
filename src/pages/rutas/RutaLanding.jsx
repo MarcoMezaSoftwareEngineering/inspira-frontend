@@ -2,7 +2,7 @@
 // Página puente de una ruta (/ruta/<id>): presenta la situación del
 // visitante, el gancho de esa vía y solo los servicios que le sirven.
 import { getRuta } from "../../config/rutas";
-import { getServicio, hrefServicio } from "../../config/servicios";
+import { getServicio, hrefServicio } from "../../config/serviciosIndice";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
 import BotonAsesoria from "../../components/common/BotonAsesoria";

@@ -119,7 +119,7 @@ export default function Historia({ whatsapp }) {
               className={`car-his-lamina car-his-${l.modo}${activa ? " car-his-activa" : ""}`}
               aria-hidden={!activa}
             >
-              {f && pedir && l.modo !== "llena" && <img src={f.src} alt="" className="car-his-fondo" aria-hidden="true" />}
+              {f && pedir && l.modo !== "llena" && <img src={f.src} alt="" width={f.ancho} height={f.alto} className="car-his-fondo" aria-hidden="true" decoding="async" />}
               {f && pedir && (
                 <img src={f.src} alt={f.alt} width={f.ancho} height={f.alto} className="car-his-foto" draggable="false" decoding="async" />
               )}

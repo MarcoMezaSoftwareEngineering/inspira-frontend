@@ -1,5 +1,41 @@
-@import "tailwindcss";
+/* Utilidades de Tailwind solo para la web pública y lo compartido
+   (09/10/2026). Antes Tailwind escaneaba el proyecto entero y el main.css
+   que descarga cualquier visitante llevaba también las utilidades de
+   Inspira Core y del panel del asesorado: 205 KB minificados de los que la
+   web pública usa la mitad. Ahora:
+     · esta hoja (la de main.jsx, la que carga todo el mundo) → páginas
+       públicas + carpetas compartidas;
+     · utilidades-core.css (la importa BackofficeApp) → Inspira Core;
+     · utilidades-panel.css (la importa PanelCliente) → panel del asesorado.
+   Cada hoja de zona vuelve a generar también lo compartido, para que dentro
+   de su zona el orden de las utilidades sea siempre el de Tailwind.
+
+   ⚠️ Si una página pública empieza a importar un archivo de pages/panel o de
+   pages/backoffice, añádelo aquí con su propio @source: si no, sus clases
+   no existen en la web. Al revés, lo mismo en la hoja de la zona. */
+@import "tailwindcss" source(none);
+@source "../*.jsx";
+@source "../components";
+@source "../lib";
+@source "../hooks";
+@source "../config";
+@source "../services";
+@source "../context";
+@source "../constants";
+@source "../utils";
+@source "../pages";
+@source not "../pages/backoffice";
+@source not "../pages/panel";
+/* /dev/muestra solo existe en desarrollo y trae sus propias hojas. */
+@source not "../pages/dev";
+/* Cruces de la web pública hacia el panel: /mapa-estudiar-en-espana guarda
+   la comparativa con el formulario de perfil del panel. */
+@source "../pages/panel/components/perfil.shared.jsx";
 @import "./v4.css";
+/* El botón flotante de WhatsApp: aquí y no en su componente, para que la
+   web no pida una hoja suelta de 1 KB antes de pintar (ver
+   components/common/WhatsAppFlotante.jsx). */
+@import "./whatsapp-flotante.css";
 /* panel.css y asesor.css ya no se importan aquí: solo los usan el panel del
    cliente y el backoffice, y cada uno los carga en su propio módulo
    (PanelCliente.jsx / BackofficeApp.jsx). Así la web pública no descarga
@@ -16,7 +52,11 @@ html, body, #root {
   margin: 0;
   padding: 0;
   background: #FFFFFF;
-  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Aquí decía "Inter" en primer lugar, pero Inter nunca se ha cargado: lo
+     que se ve es la fuente del sistema (Segoe UI en Windows, Roboto en
+     Android, San Francisco en Apple). Se deja la que de verdad se pinta
+     (09/10/2026). */
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 /* iOS Safari: smooth scrolling in overflow containers */

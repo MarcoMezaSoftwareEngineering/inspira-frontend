@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
+import { lazyConRecarga } from "../../../lib/cargaDiferida";
+import { RUTA_STATS } from "./precargaInicio";
 import BarraHoy from "./BarraHoy";
 import { Pagina, Cabecera, Cuerpo, Boton } from "../ui";
 import { navigate } from "../../../services/navigate";
@@ -8,9 +10,10 @@ import PanelEquipo from "./PanelEquipo";
 import {
   TrendingUp, Users, FileText, FileWarning, RefreshCw,
 } from "lucide-react";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from "recharts";
+
+// Recharts solo hace falta para este gráfico: viaja aparte y la pantalla no lo
+// espera; mientras llega, el hueco ya tiene su altura (09/10/2026).
+const GraficoClientes = lazyConRecarga(() => import("./GraficoClientes"));
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -18,15 +21,20 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [lastSync, setLastSync] = useState(null);
 
-  function cargar() {
-    setLoading(true);
-    boGET("/backoffice/dashboard/stats")
+  function pedir() {
+    boGET(RUTA_STATS)
       .then((data) => { if (data.error) throw new Error(data.error); setStats(data); setLastSync(new Date()); })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => { cargar(); }, []);
+  function cargar() {
+    setLoading(true);
+    pedir();
+  }
+
+  // Al montar ya se está cargando (estado inicial): basta con pedir.
+  useEffect(() => { pedir(); }, []);
 
   if (loading) return (
     <div className="p-4 sm:p-6 space-y-5 bg-[#f4f7f5] min-h-full">
@@ -110,26 +118,9 @@ export default function Dashboard() {
             <span className="text-[10px] font-extrabold text-[#147a4d] bg-[#e7f4ed] px-2 py-1 rounded-full mb-0.5">total acumulado</span>
           </div>
           <div className="h-[220px] px-2 pb-3 pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="clientesArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#147a4d" stopOpacity={0.18} />
-                    <stop offset="100%" stopColor="#147a4d" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} stroke="#edf1ee" />
-                <XAxis dataKey="mes" tick={{ fontSize: 10, fill: "#9ca7a1", fontWeight: 650 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "#9ca7a1", fontWeight: 650 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ background: "#18392a", border: "none", borderRadius: 10, padding: "7px 10px", boxShadow: "0 9px 22px rgba(16,54,34,.22)" }}
-                  labelStyle={{ color: "rgba(255,255,255,.62)", fontSize: 10, fontWeight: 550, marginBottom: 2 }}
-                  itemStyle={{ color: "#fff", fontSize: 11, fontWeight: 700 }}
-                  formatter={(value) => [`${value} clientes`, ""]}
-                />
-                <Area type="monotone" dataKey="count" stroke="#147a4d" strokeWidth={2.6} fill="url(#clientesArea)" dot={{ r: 4, fill: "#fff", stroke: "#147a4d", strokeWidth: 2.2 }} activeDot={{ r: 5 }} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <Suspense fallback={null}>
+              <GraficoClientes datos={chartData} />
+            </Suspense>
           </div>
         </section>
 

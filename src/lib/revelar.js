@@ -44,9 +44,11 @@ function obtener() {
       entradas.forEach((e) => {
         if (!e.isIntersecting) return;
         e.target.setAttribute("data-visto", "1");
+        pendientes.delete(e.target);
         // Una vez visto, se deja en paz: nada de volver a esconderlo al subir.
         observador.unobserve(e.target);
       });
+      if (!pendientes.size) desvigilar();
     },
     // Se dispara ANTES de que el bloque asome, no despues. El margen era
     // -12%, que ENCOGE la zona de disparo: el bloque tenia que entrar un 12%
@@ -68,27 +70,40 @@ function obtener() {
  * llega a avisar —webviews embebidas, motores con IntersectionObserver
  * caprichoso tras un salto de ancla—, se queda a opacity 0 para siempre.
  *
- * Esto barre cada poco lo que esté armado, sin ver y a la vista, y lo enseña
- * sin esperar al observador. Se detiene solo cuando no queda nada pendiente,
- * así que no hay temporizador vivo en una página ya recorrida.
+ * Esto enseña lo que esté armado, sin ver y a la vista, sin esperar al
+ * observador. Hasta el 09/10/2026 lo hacía un temporizador que cada 400 ms
+ * recorría el documento entero (querySelectorAll + getBoundingClientRect)
+ * mientras quedara algo sin ver: en una página larga que nadie baja hasta el
+ * final, eso era despertar al procesador dos veces y media por segundo
+ * durante toda la visita. Ahora solo se mira cuando algo puede haber cambiado
+ * (scroll, cambio de tamaño de la ventana o de la página) y solo la lista de
+ * pendientes, sin consultar el DOM. Cuando no queda nada, se desengancha.
  */
-let vigilante = null;
+const pendientes = new Set();
+let vigilando = false;
 let barriendo = false;
+let tamano = null;
 
 /** Enseña lo que esté armado, sin ver y a la vista. Devuelve cuánto queda. */
 function barrer() {
-  const pendientes = document.querySelectorAll("[data-revelar][data-armado]:not([data-visto])");
-  if (!pendientes.length) return 0;
+  if (!pendientes.size) return 0;
   const alto = window.innerHeight || 0;
   pendientes.forEach((n) => {
+    // Lo desmontado o ya visto (por el observador o por revelarTodo) sale de
+    // la lista sin más.
+    if (!n.isConnected || n.hasAttribute("data-visto")) {
+      pendientes.delete(n);
+      return;
+    }
     const caja = n.getBoundingClientRect();
     // A la vista (con un margen de cortesía) y todavía escondido: se enseña.
     if (caja.top < alto + 80 && caja.bottom > -80 && (caja.width > 0 || caja.height > 0)) {
       n.setAttribute("data-visto", "1");
+      pendientes.delete(n);
       if (observador) observador.unobserve(n);
     }
   });
-  return document.querySelectorAll("[data-revelar][data-armado]:not([data-visto])").length;
+  return pendientes.size;
 }
 
 /** Un barrido por fotograma como mucho, para no pelearse con el scroll. */
@@ -97,28 +112,35 @@ function barrerPronto() {
   barriendo = true;
   requestAnimationFrame(() => {
     barriendo = false;
-    barrer();
+    if (barrer() === 0) desvigilar();
   });
 }
 
 function vigilar() {
-  if (vigilante) return;
+  if (vigilando) return;
+  vigilando = true;
   // Al scroll, en el acto. En WebKit el observador puede tardar en avisar —o
-  // no avisar— y el bloque del mapa se veía en blanco hasta el siguiente tic
-  // del temporizador: casi un segundo de nada en mitad de la página.
+  // no avisar— y el bloque del mapa se veía en blanco hasta que algo volvía a
+  // mirar: casi un segundo de nada en mitad de la página.
   window.addEventListener("scroll", barrerPronto, { passive: true });
   window.addEventListener("resize", barrerPronto, { passive: true });
-  // Y un tic de fondo por si nadie hace scroll: lo que ya está a la vista al
-  // cargar tiene que salir igual.
-  vigilante = setInterval(() => {
-    if (barrer() === 0) {
-      clearInterval(vigilante);
-      vigilante = null;
-      window.removeEventListener("scroll", barrerPronto);
-      window.removeEventListener("resize", barrerPronto);
-    }
-  }, 400);
+  // Lo que entra en pantalla sin que nadie haga scroll (una lista que llega
+  // de la API y empuja la página, una imagen que termina de cargar) cambia el
+  // alto del documento: eso sustituye al antiguo tic de fondo.
+  if (typeof ResizeObserver === "function") {
+    tamano = new ResizeObserver(barrerPronto);
+    tamano.observe(document.documentElement);
+  }
   barrerPronto();
+}
+
+function desvigilar() {
+  if (!vigilando) return;
+  vigilando = false;
+  window.removeEventListener("scroll", barrerPronto);
+  window.removeEventListener("resize", barrerPronto);
+  tamano?.disconnect();
+  tamano = null;
 }
 
 /**
@@ -148,9 +170,13 @@ export function revelar(raiz) {
       n.setAttribute("data-visto", "1");
       return;
     }
+    pendientes.add(n);
     obs.observe(n);
   });
-  vigilar();
+  if (pendientes.size) vigilar();
+  // Al limpiar se deja de observar, pero el nodo sigue en `pendientes`: si
+  // sigue montado y armado, la red de seguridad lo enseña igual (como hacía
+  // el barrido del documento); si se desmontó, sale de la lista al barrer.
   return () => nodos.forEach((n) => obs.unobserve(n));
 }
 
@@ -167,8 +193,10 @@ export function revelarTodo(raiz = document) {
   raiz.querySelectorAll("[data-revelar]:not([data-visto])").forEach((n) => {
     n.setAttribute("data-armado", "1");
     n.setAttribute("data-visto", "1");
+    pendientes.delete(n);
     if (observador) observador.unobserve(n);
   });
+  if (!pendientes.size) desvigilar();
 }
 
 /**

@@ -3,7 +3,7 @@
 // por categoría y subgrupo — nada queda escondido tras un "ver más". Al pie,
 // las herramientas gratis y el botón de reservar (el mismo Calendly de toda
 // la web).
-import { CATEGORIAS, PRECIO_ASESORIA, hrefServicio } from "../../../config/servicios";
+import { CATEGORIAS, PRECIO_ASESORIA, hrefServicio } from "../../../config/serviciosIndice";
 import { CALENDLY_URL } from "../../../config/contacto";
 import { HERRAMIENTAS_GRATIS, RESERVAR_ETIQUETA } from "./header.data";
 import { navigate } from "../../../services/navigate";

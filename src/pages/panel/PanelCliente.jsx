@@ -20,14 +20,13 @@ import "../../styles/pasos.css";
 // Centro de avisos, línea de tiempo, instalar la app, doctorado y encuesta
 // de cierre (18/09/2026).
 import "../../styles/panel-centro.css";
+import "../../styles/utilidades-panel.css";
 import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";
 import Icono from "../../components/common/Icono";
 import { datosUsuario } from "../../components/common/usuario";
-import PerfilCliente from "./components/PerfilCliente";
 import MisServicios from "./components/MisServicios";
-import WizardPerfilCliente from "./components/WizardPerfilCliente";
 import { usePerfilIncompletoBool, datosQueFaltan } from "./hooks/usePerfilIncompletoBool";
 import AvisoPerfil from "./components/AvisoPerfil";
 import Bienvenida from "./components/Bienvenida";
@@ -56,6 +55,11 @@ import { olvidarNovedades } from "./novedades";
 
 // Las guías (GuiaMaster, GuiaApostilla…) las descarga MisGuias al abrirlas.
 const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
+// El perfil y el asistente de perfil (37 KB) solo se pintan al abrir «Mi
+// perfil» o cuando faltan datos: ya no viajan con la portada del panel
+// (09/10/2026).
+const PerfilCliente = lazyConRecarga(() => import("./components/PerfilCliente"));
+const WizardPerfilCliente = lazyConRecarga(() => import("./components/WizardPerfilCliente"));
 // «Mis pagos» se descarga al abrirlo; sus estilos van en panel.css (ex-pg-*).
 const MisPagos      = lazyConRecarga(() => import("./components/MisPagos"));
 
@@ -193,6 +197,14 @@ export default function PanelCliente({ path }) {
 
   async function cargarMe({ silencioso = false } = {}) {
     if (!silencioso) setErrorMe("");
+    // Los servicios y los pagos no dependen de lo que conteste /cliente/me
+    // (cada petición lleva su token): se piden a la vez y no en cascada
+    // detrás de él (09/10/2026). Si la sesión terminó, el primer 401 pinta
+    // AvisoSesion y lo demás queda debajo.
+    if (!silencioso) {
+      cargarServicios();
+      cargarPagos();
+    }
     try {
       const r = await apiGET("/cliente/me");
       // Sin `ok` es que la sesión terminó: ya lo pinta AvisoSesion.
@@ -204,11 +216,7 @@ export default function PanelCliente({ path }) {
       setUser(r.cliente || r.user || r);
     } catch {
       if (!silencioso) setErrorMe("No hay conexión. Comprueba tu internet y vuelve a intentarlo.");
-      return;
     }
-    if (silencioso) return;
-    cargarServicios();
-    cargarPagos();
   }
 
   // Tirar para recargar: lo mismo que entrar, sin esqueletos ni saltos.
@@ -511,7 +519,9 @@ export default function PanelCliente({ path }) {
           {/* Perfil: scroll externo */}
           {tab === "perfil" && (
             <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-5">
-              <PerfilCliente user={user} conAcademico={conAcademico} onUserUpdated={(nuevo) => setUser(nuevo)} />
+              <Suspense fallback={<LoadingPage />}>
+                <PerfilCliente user={user} conAcademico={conAcademico} onUserUpdated={(nuevo) => setUser(nuevo)} />
+              </Suspense>
               <AvisosMovil variante="perfil" />
               <SeguridadSesion />
             </div>
@@ -566,12 +576,15 @@ export default function PanelCliente({ path }) {
 
       {instalarAbierto && <InstalarAppModal onCerrar={() => setInstalarAbierto(false)} />}
 
+      {/* Es un modal: mientras llega su trozo no se pinta nada. */}
       {mostrarWizard && !finSesion && (
-        <WizardPerfilCliente
-          user={user}
-          conAcademico={conAcademico}
-          onComplete={(updatedUser) => setUser(updatedUser)}
-        />
+        <Suspense fallback={null}>
+          <WizardPerfilCliente
+            user={user}
+            conAcademico={conAcademico}
+            onComplete={(updatedUser) => setUser(updatedUser)}
+          />
+        </Suspense>
       )}
 
       {finSesion && <AvisoSesion motivo={finSesion} />}

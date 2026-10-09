@@ -36,7 +36,8 @@ import Faq from "./Faq";
 import { CtaFinal, Pie } from "./CtaFinal";
 import { BarraReserva, VentanaModal } from "./BarraYModales";
 import { ESTILOS_M27 } from "./comunes";
-import logo from "../../../assets/images/logo.png";
+// WebP a 3x del tamaño pintado: 12 KB frente a los 69 del PNG (09/10/2026).
+import logo from "../../../assets/images/logo.webp";
 
 
 // Una sola ventana emergente (cliente, 11/09/2026, tarde): la de la sesión
@@ -147,7 +148,7 @@ export default function MasterAds2027() {
 
       <header className="px-4 pt-4 min-[380px]:px-5 sm:px-6 sm:pt-6">
         <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-3">
-          <img src={logo} alt="Inspira Legal" width={320} height={107} className="h-8 w-auto sm:h-9" />
+          <img src={logo} alt="Inspira Legal" width={324} height={108} className="h-8 w-auto sm:h-9" />
           <a
             href="/"
             onClick={() => evento("ads2027_salir_sitio")}

@@ -4,7 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import { navigate } from "../../services/navigate";
 import { reportarError } from "../../lib/reportarError";
 import PantallaError from "../../components/common/PantallaError";
-import logo from "../../assets/images/logo.png";
+// WebP a 3x del tamaño pintado: 12 KB frente a los 69 del PNG (09/10/2026).
+import logo from "../../assets/images/logo.webp";
 import "../../styles/acceso.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";

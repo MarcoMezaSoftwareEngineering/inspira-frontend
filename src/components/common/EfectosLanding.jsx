@@ -1,7 +1,39 @@
 // src/components/common/EfectosLanding.jsx
 // Piezas de diseño de las landings de venta: la cinta que pasa, los stickers
 // sobre la foto y el numeral de sección. Estilos en styles/landing-fx.css.
+import { useEffect, useState } from "react";
 import "../../styles/landing-fx.css";
+
+/**
+ * La palabra del titular que va cambiando: una ciudad, luego otra.
+ *
+ * Vivía copiada en Estancia, MasterTodo y Visado, idéntica salvo el prefijo
+ * de sus clases (09/10/2026). `prefijo` es el de la página: con «est» pinta
+ * est-palabra y, al salir, est-palabra-sale. El resto de props va al <span>
+ * (MasterTodo le pone aria-live="off").
+ */
+export function PalabraRotante({ palabras, prefijo, ...resto }) {
+  const [i, setI] = useState(0);
+  const [saliendo, setSaliendo] = useState(false);
+  useEffect(() => {
+    const t = setInterval(() => {
+      setSaliendo(true);
+      setTimeout(() => {
+        setI((x) => (x + 1) % palabras.length);
+        setSaliendo(false);
+      }, 220);
+    }, 2400);
+    return () => clearInterval(t);
+  }, [palabras.length]);
+  return (
+    // La key cambia con la palabra: el span se monta de nuevo y su animación
+    // de entrada vuelve a empezar.
+    <span key={i} className={`${prefijo}-palabra lfx-palabra-entra${saliendo ? ` ${prefijo}-palabra-sale` : ""}`} {...resto}>
+      {palabras[i]}
+    </span>
+  );
+}
+
 
 /** Una cinta que se desplaza sin fin: el contenido va dos veces seguidas. */
 export function Cinta({ items, tono = "noche" }) {

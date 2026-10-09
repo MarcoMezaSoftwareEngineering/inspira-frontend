@@ -11,19 +11,26 @@
 // Cada pestaña conserva su regla de acceso: `perm` (checklist de Roles y
 // Permisos), `adminOnly`, o ninguna (cualquier rol interno, como Documentos,
 // que nunca la tuvo). El usuario solo ve las pestañas a las que tiene acceso.
+//
+// Cada pestaña se descarga al abrirla (09/10/2026). La de Correos traía
+// CodeMirror (más de 500 KB) y viajaba con todo Core aunque solo la abre
+// quien administra.
+import { Suspense } from "react";
 import { useAuth } from "../context/AuthContext";
+import { lazyConRecarga } from "../../../lib/cargaDiferida";
 import PestanasEnlace from "../layout/PestanasEnlace";
-import PlanesAdmin from "../planes/PlanesAdmin";
-import PreciosServicios from "../precios/PreciosServicios";
-import DocumentosBackoffice from "../documentos/DocumentosBackoffice";
-import ChecklistServicios from "../checklist/ChecklistServicios";
-import InstructivosServicios from "../instructivos/InstructivosServicios";
-import EmailTemplates from "../correos/EmailTemplates";
-import MediaPanel from "../media/MediaPanel";
-import CumplimientoLegal from "../legal/CumplimientoLegal";
-import UsuariosSettings from "../settings/UsuariosSettings";
-import Auditoria from "../auditoria/Auditoria";
-import Errores from "../errores/Errores";
+
+const PlanesAdmin = lazyConRecarga(() => import("../planes/PlanesAdmin"));
+const PreciosServicios = lazyConRecarga(() => import("../precios/PreciosServicios"));
+const DocumentosBackoffice = lazyConRecarga(() => import("../documentos/DocumentosBackoffice"));
+const ChecklistServicios = lazyConRecarga(() => import("../checklist/ChecklistServicios"));
+const InstructivosServicios = lazyConRecarga(() => import("../instructivos/InstructivosServicios"));
+const EmailTemplates = lazyConRecarga(() => import("../correos/EmailTemplates"));
+const MediaPanel = lazyConRecarga(() => import("../media/MediaPanel"));
+const CumplimientoLegal = lazyConRecarga(() => import("../legal/CumplimientoLegal"));
+const UsuariosSettings = lazyConRecarga(() => import("../settings/UsuariosSettings"));
+const Auditoria = lazyConRecarga(() => import("../auditoria/Auditoria"));
+const Errores = lazyConRecarga(() => import("../errores/Errores"));
 
 const TABS = [
   { id: "planes",       label: "Planes",              href: "/backoffice/planes",              perm: "planes.ver",       Component: PlanesAdmin },
@@ -67,7 +74,9 @@ export default function ConfiguracionPanel({ tabId = "planes" }) {
     <div className="flex flex-col h-full">
       <PestanasEnlace pestanas={visibles} activa={activa.id} etiqueta="Secciones de configuración" />
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <Component />
+        <Suspense fallback={<p className="text-[13px] text-neutral-400 py-10 text-center" aria-busy="true">Cargando…</p>}>
+          <Component />
+        </Suspense>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import {
   PRECIO_ASESORIA,
   DIFERENCIALES,
   hrefServicio,
-} from "../../config/servicios";
+} from "../../config/serviciosIndice";
 import { ASESORIA } from "../../config/contacto";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import PageHero from "../../components/layout/PageHero";

@@ -2,32 +2,41 @@
 // alguna está vencida. Se pide al montar, cada 2 minutos y cuando cambia una
 // tarea en esta pestaña (evento «inspira:tareas-cambio»). Si falla, no se
 // enseña nada: es una ayuda, no un aviso.
-import { useEffect, useState } from "react";
+//
+// Una sola fuente (09/10/2026): el contador sale en el menú lateral, en la
+// barra de abajo del móvil y en el cajón, y cada uno pedía lo suyo cada dos
+// minutos —tres veces lo mismo—. Ahora pregunta ProveedorCuentaTareas, una
+// vez, con useSondeo (nada con la pestaña oculta), y los tres lo leen.
+import { createContext, useContext, useEffect, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
+import { useSondeo } from "../../../hooks/useSondeo";
 
 const REFRESCO_MS = 2 * 60 * 1000;
 
-export default function ContadorTareas() {
+const CuentaTareas = createContext(null);
+
+export function ProveedorCuentaTareas({ children }) {
   const [cuenta, setCuenta] = useState(null);
 
+  const refrescar = useSondeo(async () => {
+    // Sin sesión no se pregunta: un 401 mandaría al login.
+    if (!localStorage.getItem("bo_token")) return;
+    const r = await boGET("/backoffice/tareas/cuenta");
+    if (!r?.ok) throw new Error("Sin cuenta de tareas");
+    setCuenta(r);
+  }, REFRESCO_MS);
+
   useEffect(() => {
-    let vivo = true;
-    const pedir = () => {
-      // Sin sesión no se pregunta: un 401 mandaría al login.
-      if (!localStorage.getItem("bo_token")) return;
-      boGET("/backoffice/tareas/cuenta")
-        .then((r) => { if (vivo && r?.ok) setCuenta(r); })
-        .catch(() => { /* sin red: se queda como estaba */ });
-    };
-    pedir();
-    const t = setInterval(pedir, REFRESCO_MS);
-    window.addEventListener("inspira:tareas-cambio", pedir);
-    return () => {
-      vivo = false;
-      clearInterval(t);
-      window.removeEventListener("inspira:tareas-cambio", pedir);
-    };
-  }, []);
+    const alCambiar = () => { refrescar().catch(() => { /* sin red: se queda como estaba */ }); };
+    window.addEventListener("inspira:tareas-cambio", alCambiar);
+    return () => window.removeEventListener("inspira:tareas-cambio", alCambiar);
+  }, [refrescar]);
+
+  return <CuentaTareas.Provider value={cuenta}>{children}</CuentaTareas.Provider>;
+}
+
+export default function ContadorTareas() {
+  const cuenta = useContext(CuentaTareas);
 
   if (!cuenta?.total) return null;
   const titulo = [

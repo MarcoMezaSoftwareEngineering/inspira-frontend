@@ -13,7 +13,6 @@ import "./styles/ergonomia.css";
 import { AuthProvider } from "./context/AuthContext";
 import InspiraDialog from "./components/ui/InspiraDialog";
 
-import { BrowserRouter } from "react-router-dom";
 import { vigilarVersionNueva, marcarArranqueCorrecto } from "./lib/versionNueva";
 import { vigilarEnlacesWhatsApp } from "./lib/whatsapp";
 import { vigilarErroresGlobales } from "./lib/reportarError";
@@ -63,14 +62,15 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 // es para los rastreadores: la aplicación pinta lo suyo en #root.
 document.getElementById("prerender")?.remove();
 createRoot(document.getElementById("root")).render(
+  // Sin <BrowserRouter> (09/10/2026): el enrutado es manual
+  // (window.location.pathname en App.jsx) y nadie consumía su contexto;
+  // react-router-dom añadía 30 KB a todas las páginas.
   <StrictMode>
-    <BrowserRouter>
-      <ErrorRaiz>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </ErrorRaiz>
-      <InspiraDialog />
-    </BrowserRouter>
+    <ErrorRaiz>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ErrorRaiz>
+    <InspiraDialog />
   </StrictMode>
 );

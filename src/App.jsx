@@ -15,7 +15,9 @@ import BarraInferior from "./components/layout/BarraInferior";
 import WhatsAppFlotante from "./components/common/WhatsAppFlotante";
 import { registrarVista } from "./lib/analytics";
 import { registrarVisita } from "./lib/visitas";
-import { getServicio } from "./config/servicios";
+// Solo el índice ligero del catálogo: el detalle de cada servicio lo descarga
+// su propia página (ServicioDetalle), no la portada.
+import { getServicio } from "./config/serviciosIndice";
 import { getRuta } from "./config/rutas";
 import { useSEO } from "./hooks/useSEO";
 import SEOSchema from "./components/SEOSchema";
@@ -356,6 +358,20 @@ const REDIRECCIONES = {
   "/beca": "/beca-generacion-bicentenario-2026",
 };
 
+// Cada aplicación trae su propia hoja de utilidades de Tailwind
+// (styles/utilidades-panel.css y utilidades-core.css, ver globals.css), que
+// se suma a la de la web al entrar y ya no se va. Dentro de su zona manda y
+// está completa; sobre una página pública podría ganarle a una regla de
+// main.css que debía ganar ella (un `hidden` del panel pisando un
+// `lg:flex` de la portada). Por eso salir del panel o de Core a otra zona
+// recarga la página en vez de pintarla encima (09/10/2026). Entrar no:
+// la hoja de la zona llega después y gana donde debe.
+function zonaDe(ruta) {
+  if (ruta.startsWith("/panel")) return "panel";
+  if (ruta.startsWith("/backoffice")) return "core";
+  return "web";
+}
+
 function rutaActual() {
   const { pathname, search } = window.location;
   const destino = REDIRECCIONES[pathname.replace(/\/+$/, "") || "/"];
@@ -373,10 +389,10 @@ function RouteSEO({ path }) {
   // Páginas de servicio: SEO dinámico a partir del catálogo
   if (!config && path.startsWith("/servicios/")) {
     const s = getServicio(path.slice("/servicios/".length));
-    if (s?.detalle) {
+    if (s?.ficha) {
       config = {
-        title: s.detalle.titulo,
-        description: `${s.detalle.gancho} ${s.resumen}`.slice(0, 300),
+        title: s.ficha.titulo,
+        description: `${s.ficha.gancho} ${s.resumen}`.slice(0, 300),
         path,
       };
     }
@@ -464,6 +480,11 @@ export default function App() {
     const onPop = (e) => {
       const nuevo = rutaActual();
       const viejo = pathRef.current;
+      // La URL ya es la nueva (pushState o «atrás»): recargar la abre limpia.
+      if (zonaDe(viejo) !== "web" && zonaDe(nuevo) !== zonaDe(viejo)) {
+        window.location.reload();
+        return;
+      }
       pathRef.current = nuevo;
       const enPanel = viejo.startsWith("/panel") && nuevo.startsWith("/panel") && viejo !== nuevo;
       const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -543,7 +564,7 @@ export default function App() {
   const servicioId = path.startsWith("/servicios/")
     ? path.slice("/servicios/".length)
     : null;
-  const isServicioDetalle = !!getServicio(servicioId)?.detalle;
+  const isServicioDetalle = !!getServicio(servicioId)?.ficha;
   const rutaId = path.startsWith("/ruta/") ? path.slice("/ruta/".length) : null;
   const isRuta = !!getRuta(rutaId);
   const isNotFound =
@@ -566,7 +587,10 @@ export default function App() {
           volvería a pedir el perfil y los servicios en cada sección. Se monta
           una vez y anima por dentro lo que cambia. */}
       <div key={isPanel ? "panel" : path} className={isPanel ? undefined : "v4-page-enter"}>
-      <Suspense fallback={<div className="min-h-[60vh]" />}>
+      {/* El hueco mientras llega la página mide una pantalla entera: con 60vh
+          el pie asomaba en el primer pantallazo y saltaba hacia abajo al
+          llegar el contenido (CLS de 0,19 en /servicios/master, 09/10/2026). */}
+      <Suspense fallback={<div className="min-h-screen" />}>
       {path === "/" && <Home />}
       {path === "/auth/success" && <AuthSuccess />}
       {path === "/servicios" && <ServiciosCatalogo />}

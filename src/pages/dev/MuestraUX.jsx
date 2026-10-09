@@ -11,6 +11,10 @@ import { MasterRowAdmin } from "../backoffice/solicitudes/components/InformeAdmi
 import { Tarjeta, CampoUX, FormularioUX, Acordeon, TablaAdaptativa } from "../../components/ux";
 import "../../styles/asesor.css";
 import "../../styles/panel.css";
+// Las utilidades de Tailwind de Core y del panel no están en main.css desde
+// el 09/10/2026: esta hoja las trae (y también las de esta página, que
+// escanea pages/dev).
+import "../../styles/utilidades-core.css";
 
 const BAREMO = [
   { criterio: "Expediente académico", categoria: "EXPEDIENTE_ACADEMICO", peso: 50 },

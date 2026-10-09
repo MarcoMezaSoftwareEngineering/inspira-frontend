@@ -1,10 +1,12 @@
 // src/pages/backoffice/correos/EmailTemplates.jsx
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { dialog } from "../../../services/dialogService";
-import CodeMirror from "@uiw/react-codemirror";
-import { html as htmlLang } from "@codemirror/lang-html";
-import { vscodeDark } from "@uiw/codemirror-theme-vscode";
+import { lazyConRecarga } from "../../../lib/cargaDiferida";
 import { boGET, boPOST, boPUT, boDELETE } from "../../../services/backofficeApi";
+
+// CodeMirror solo hace falta al editar una plantilla: la lista se abre sin
+// descargarlo y el editor llega al abrir el modal (09/10/2026).
+const EditorHtml = lazyConRecarga(() => import("./EditorHtml"));
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -513,29 +515,13 @@ function EditorModal({ template, tipos, assets, onGuardar, onCerrar }) {
           </div>
           <div className="flex-1 relative overflow-hidden">
             <div className="absolute inset-0">
-              <CodeMirror
-                value={htmlContent}
-                height="100%"
-                style={{ height: "100%", fontSize: "13px" }}
-                theme={vscodeDark}
-                extensions={[htmlLang()]}
-                onChange={(val) => setHtml(val)}
-                onCreateEditor={(view) => { cmViewRef.current = view; }}
-                basicSetup={{
-                  lineNumbers: true,
-                  highlightActiveLineGutter: true,
-                  foldGutter: true,
-                  drawSelection: true,
-                  indentOnInput: true,
-                  syntaxHighlighting: true,
-                  bracketMatching: true,
-                  closeBrackets: true,
-                  autocompletion: true,
-                  highlightActiveLine: true,
-                  highlightSelectionMatches: true,
-                  tabSize: 2,
-                }}
-              />
+              <Suspense fallback={<div className="h-full" style={{ background: "#1e1e1e" }} aria-busy="true" />}>
+                <EditorHtml
+                  value={htmlContent}
+                  onChange={(val) => setHtml(val)}
+                  onCreateEditor={(view) => { cmViewRef.current = view; }}
+                />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -573,7 +559,6 @@ export default function EmailTemplates() {
   const [toast, setToast]         = useState(null);
   const [filtroTipo, setFiltroTipo] = useState("todos");
 
-  useEffect(() => { cargar(); cargarTipos(); cargarAssets(); }, []);
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 5000);
@@ -596,6 +581,10 @@ export default function EmailTemplates() {
     const r = await boGET("/backoffice/media");
     if (r.ok) setAssets(r.assets || []);
   }
+
+  // Después de declarar las funciones que llama (el compilador de React no
+  // optimiza un componente que usa algo antes de declararlo).
+  useEffect(() => { cargar(); cargarTipos(); cargarAssets(); }, []);
 
   async function abrirEditar(t) {
     const r = await boGET(`/backoffice/email-templates/${t.id_template}`);

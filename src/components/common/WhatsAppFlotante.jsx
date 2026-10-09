@@ -27,10 +27,11 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { WHATSAPP_INSPIRA, origenDeRuta, whatsappDesde } from "../../config/contacto";
 import { enviarEventoEmbudo } from "../../lib/analytics";
-// La hoja se importa aquí y no en un trozo perezoso: App.jsx importa este
-// componente de forma estática, así que el CSS viaja en el paquete inicial y
-// el botón nunca se pinta sin estilos.
-import "../../styles/whatsapp-flotante.css";
+// La hoja (styles/whatsapp-flotante.css) la importa globals.css desde el
+// 09/10/2026: importada aquí, con Core en su propia entrada, era la única
+// hoja exclusiva de la web y Vite la sacaba a un main.css de 1 KB que
+// bloqueaba el pintado como una petición más. Sigue en el CSS inicial, así
+// que el botón nunca se pinta sin estilos.
 
 // Rutas sin botón: privadas o con su propio CTA fijo abajo.
 const SIN_BOTON = [/^\/panel/, /^\/backoffice/, /^\/auth/, /^\/master-2027-2028/, /^\/enlaces/];

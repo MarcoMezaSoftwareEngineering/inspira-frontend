@@ -1,0 +1,42 @@
+/* Utilidades de Tailwind que solo usa Inspira Core (09/10/2026). La importa
+   BackofficeApp.jsx, así que viaja con Core y la web pública no la
+   descarga. Ver el reparto completo en globals.css.
+
+   · Sin preflight ni tema: `@reference` solo presta el tema para resolver
+     las clases (con @config, el mismo que globals.css) y no emite nada. Las
+     utilidades salen con el valor de reserva dentro del var(), así que no
+     dependen de que main.css haya declarado esa variable.
+   · No se referencia globals.css a propósito: un @reference también hereda
+     sus @source y volvería a escanear la web pública entera.
+   · Las utilidades van en la misma capa `utilities` que las de main.css y
+     esta hoja llega después: por eso escanea también lo compartido. Así,
+     cualquier elemento que se pinte en Core tiene TODAS sus clases aquí, en
+     el orden de Tailwind, y nunca gana una regla suelta de main.css que
+     debía perder.
+   · La declaración de capas va primero por si un día esta hoja llega antes
+     que main.css (una entrada propia de Core): sin ella, `utilities` sería
+     la primera capa declarada y la de menos peso.
+
+   Core enseña las guías y formularios del panel tal cual los ve el
+   asesorado, así que lleva pages/panel entero: un import nuevo desde Core
+   no puede dejar un formulario sin estilos. */
+@layer properties, theme, base, components, utilities;
+@reference "tailwindcss";
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@config "../../tailwind.config.js";
+@source "../pages/backoffice";
+@source "../pages/panel";
+@source "../*.jsx";
+@source "../components";
+@source "../lib";
+@source "../hooks";
+@source "../config";
+@source "../services";
+@source "../context";
+@source "../constants";
+@source "../utils";
+/* /dev/muestra (solo en desarrollo) enseña piezas de Core y del panel e
+   importa esta hoja; sus propias clases salen de aquí. */
+@source "../pages/dev";
+/* Cruces: el mapa de doctorados reutiliza los datos del mapa de listas. */
+@source "../pages/landing/master2027/mapaEspana.data.js";

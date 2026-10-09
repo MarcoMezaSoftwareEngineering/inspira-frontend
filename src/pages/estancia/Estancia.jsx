@@ -16,7 +16,7 @@ import Icono from "../../components/common/Icono";
 import SEOSchema from "../../components/SEOSchema";
 import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
 import { CarruselVideos } from "../../components/common/VideoVertical";
-import { Cinta, Numeral, Stickers } from "../../components/common/EfectosLanding";
+import { Cinta, Numeral, PalabraRotante, Stickers } from "../../components/common/EfectosLanding";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
@@ -116,33 +116,15 @@ function VisorResolucion({ caso, onCerrar }) {
           <button type="button" className="est-visor-cerrar" onClick={onCerrar} aria-label={T.resultados.cerrar}>×</button>
         </header>
         <div className="est-visor-cuerpo">
-          <img src={caso.resolucion} alt={`${T.resultados.resolucionDe(caso.nombre)}, con los datos personales tapados`} loading="eager" />
+          {/* Todas miden 1100 de ancho; el alto va de 1391 a 1554 según la
+              resolución. 1519 reserva un hueco parecido y el CSS (height:
+              auto) pone el real al cargar, como en la lista de casos. */}
+          <img src={caso.resolucion} alt={`${T.resultados.resolucionDe(caso.nombre)}, con los datos personales tapados`} width="1100" height="1519" loading="eager" />
         </div>
         <p className="est-visor-pie">{T.resultados.tapado}</p>
       </div>
     </div>,
     document.body,
-  );
-}
-
-/** La palabra del titular que va cambiando. */
-function PalabraRotante({ palabras }) {
-  const [i, setI] = useState(0);
-  const [saliendo, setSaliendo] = useState(false);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setSaliendo(true);
-      setTimeout(() => {
-        setI((x) => (x + 1) % palabras.length);
-        setSaliendo(false);
-      }, 220);
-    }, 2400);
-    return () => clearInterval(t);
-  }, [palabras.length]);
-  return (
-    <span key={i} className={`est-palabra lfx-palabra-entra${saliendo ? " est-palabra-sale" : ""}`}>
-      {palabras[i]}
-    </span>
   );
 }
 
@@ -258,7 +240,7 @@ export default function Estancia() {
             {T.hero.rotulo}
           </p>
           <h1>
-            {T.hero.tituloInicio} <PalabraRotante palabras={T.hero.palabras} />?
+            {T.hero.tituloInicio} <PalabraRotante palabras={T.hero.palabras} prefijo="est" />?
             <br />
             {T.hero.tituloFin}
           </h1>

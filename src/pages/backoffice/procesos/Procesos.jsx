@@ -4,15 +4,24 @@
 // Tres cosas se hacen desde aquí porque son las que más se repiten y obligaban
 // a entrar al expediente: mover un proceso de etapa, registrar un cobro y dar
 // de alta a un cliente nuevo.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boGET, boPATCH, boPOST } from "../../../services/backofficeApi";
+import { lazyConRecarga } from "../../../lib/cargaDiferida";
 import AltaRapida from "../clientes/AltaRapida";
-import ProximasFechas from "./ProximasFechas";
-import TrackerVisa from "./TrackerVisa";
-import TrackerMaster from "./TrackerMaster";
 import { Pagina, Cabecera, Boton } from "../ui";
 import { Plus, X } from "lucide-react";
 import { cambiarEtapa as patchEtapa } from "../comun/cambiarEtapa";
+import { useMedia, ANCHO_LG } from "../comun/useMedia";
+
+// Las pestañas de fechas y de las hojas de visado y máster se descargan al
+// abrirlas: Procesos entra por «Métricas» y no las necesita (09/10/2026).
+const ProximasFechas = lazyConRecarga(() => import("./ProximasFechas"));
+const TrackerVisa = lazyConRecarga(() => import("./TrackerVisa"));
+const TrackerMaster = lazyConRecarga(() => import("./TrackerMaster"));
+
+function CargandoPestana() {
+  return <p className="text-[13px] text-neutral-400 py-8 text-center">Cargando…</p>;
+}
 
 const COLOR_SERVICIO = {
   master: "bg-[#EEF2F8] text-[#1A3557]",
@@ -302,6 +311,7 @@ export default function Procesos({ onAbrirProceso }) {
   // pestanas, no secciones distintas del menu. Es el mismo dato mirado de
   // otra forma, y tenerlos separados obligaba a saltar entre pantallas.
   const [pestana, setPestana] = useState("metricas");
+  const esAncho = useMedia(ANCHO_LG);
   const [metrica, setMetrica] = useState("");
 
   // Volcado de la respuesta al estado. Aparte de la peticion para que tanto el
@@ -560,17 +570,23 @@ export default function Procesos({ onAbrirProceso }) {
       )}
 
       {pestana === "fechas" && (
-        <ProximasFechas onAbrirProceso={onAbrirProceso} />
+        <Suspense fallback={<CargandoPestana />}>
+          <ProximasFechas onAbrirProceso={onAbrirProceso} />
+        </Suspense>
       )}
 
       {/* Visado tiene su propia hoja de seguimiento, con las columnas con las
           que ya trabaja el equipo y edicion en la celda. */}
       {pestana === "visa" && (
-        <TrackerVisa onAbrirProceso={onAbrirProceso} />
+        <Suspense fallback={<CargandoPestana />}>
+          <TrackerVisa onAbrirProceso={onAbrirProceso} />
+        </Suspense>
       )}
 
       {pestana === "master" && (
-        <TrackerMaster onAbrirProceso={onAbrirProceso} />
+        <Suspense fallback={<CargandoPestana />}>
+          <TrackerMaster onAbrirProceso={onAbrirProceso} />
+        </Suspense>
       )}
 
       {!["metricas", "fechas", "visa", "master"].includes(pestana) && (<>
@@ -631,8 +647,12 @@ export default function Procesos({ onAbrirProceso }) {
         <p className="text-[13px] text-neutral-400 py-8 text-center">Nada coincide con estos filtros.</p>
       ) : (
         <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-          {/* Escritorio */}
-          <table className="w-full text-left hidden lg:table">
+          {/* Escritorio. Antes se montaban las dos vistas y el CSS escondía
+              una (`hidden lg:table` / `lg:hidden`): el doble de filas, de
+              selectores de etapa y de campos de plazo. Ahora solo la que se
+              ve, con el mismo corte de 64rem (09/10/2026). */}
+          {esAncho ? (
+          <table className="w-full text-left">
             <thead>
               <tr className="bg-neutral-50 border-b border-neutral-200">
                 <th className="px-2.5 py-2 w-8">
@@ -647,8 +667,8 @@ export default function Procesos({ onAbrirProceso }) {
             </thead>
             <tbody>
               {visibles.map((p) => (
-                <>
-                  <tr key={p.id_solicitud}
+                <Fragment key={p.id_solicitud}>
+                  <tr
                     className={`border-b border-neutral-100 hover:bg-neutral-50/60 ${
                       seleccion.has(p.id_solicitud) ? "bg-[#E8F5EE]" : ""
                     }`}>
@@ -704,7 +724,7 @@ export default function Procesos({ onAbrirProceso }) {
                     </td>
                   </tr>
                   {pagoDe === p.id_solicitud && (
-                    <tr key={`pago-${p.id_solicitud}`}>
+                    <tr>
                       <td colSpan={9} className="p-0">
                         <NuevoPago proceso={p} metodos={metodos}
                           onHecho={() => { setPagoDe(null); cargar(); }}
@@ -712,13 +732,13 @@ export default function Procesos({ onAbrirProceso }) {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
-
-          {/* Móvil: filas densas, no tarjetas grandes */}
-          <div className="lg:hidden divide-y divide-neutral-100">
+          ) : (
+          /* Móvil: filas densas, no tarjetas grandes */
+          <div className="divide-y divide-neutral-100">
             {visibles.map((p) => (
               <div key={p.id_solicitud} className="px-3 py-3 active:bg-neutral-50 transition-colors">
                 <div className="flex items-start gap-2">
@@ -753,6 +773,7 @@ export default function Procesos({ onAbrirProceso }) {
               </div>
             ))}
           </div>
+          )}
         </div>
       )}
 

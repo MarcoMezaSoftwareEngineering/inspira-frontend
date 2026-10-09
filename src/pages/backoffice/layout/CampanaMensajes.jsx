@@ -1,33 +1,37 @@
 // La campana de Inspira Core: lo que los asesorados han escrito y nadie ha
 // leído todavía, de todos los expedientes. Se refresca sola cada minuto y al
-// volver a la pestaña; al abrir un expediente desde aquí, el hilo se marca
-// leído y el aviso desaparece en el siguiente refresco.
-import { useCallback, useEffect, useRef, useState } from "react";
+// volver a la pestaña; al abrir un hilo (MensajesAdmin) se marca leído y la
+// campana se pone al día en ese momento (evento «inspira:mensajes-leidos»).
+//
+// Hasta el 09/10/2026 volvía a preguntar en cada cambio de pantalla (tenía la
+// ruta entre las dependencias del efecto), con la pestaña oculta, y dos veces
+// al volver (foco + visibilidad): 17.017 peticiones desde mayo, la que más del
+// backend. Ahora pregunta useSondeo: cada minuto a la vista, nada oculta, una
+// al volver y más espaciado si el servidor falla.
+import { useEffect, useRef, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import { fechaHoraDoble } from "../../../lib/horas";
+import { useSondeo } from "../../../hooks/useSondeo";
 
 const CADA = 60 * 1000;
 
-export default function CampanaMensajes({ navigate, path }) {
+export default function CampanaMensajes({ navigate }) {
   const [datos, setDatos] = useState({ total: 0, items: [] });
   const [abierta, setAbierta] = useState(false);
   const ref = useRef(null);
 
-  const cargar = useCallback(async () => {
-    try {
-      const r = await boGET("/backoffice/solicitudes/mensajes/pendientes");
-      if (r?.ok) setDatos({ total: r.total || 0, items: r.items || [] });
-    } catch { /* la campana no puede romper el backoffice */ }
-  }, []);
+  const refrescar = useSondeo(async () => {
+    const r = await boGET("/backoffice/solicitudes/mensajes/pendientes");
+    if (!r?.ok) throw new Error("Sin mensajes pendientes");
+    setDatos({ total: r.total || 0, items: r.items || [] });
+  }, CADA);
 
   useEffect(() => {
-    const primera = setTimeout(cargar, 0);
-    const t = setInterval(cargar, CADA);
-    const onFoco = () => { if (document.visibilityState === "visible") cargar(); };
-    document.addEventListener("visibilitychange", onFoco);
-    window.addEventListener("focus", onFoco);
-    return () => { clearTimeout(primera); clearInterval(t); document.removeEventListener("visibilitychange", onFoco); window.removeEventListener("focus", onFoco); };
-  }, [cargar, path]);
+    // La campana no puede romper el backoffice: un fallo se queda en el sondeo.
+    const alLeer = () => { refrescar().catch(() => {}); };
+    window.addEventListener("inspira:mensajes-leidos", alLeer);
+    return () => window.removeEventListener("inspira:mensajes-leidos", alLeer);
+  }, [refrescar]);
 
   useEffect(() => {
     if (!abierta) return;

@@ -36,7 +36,12 @@ export default function MensajesAdmin({ idSolicitud }) {
           <HiloMensajes
             lado="asesor"
             idSolicitud={idSolicitud}
-            cargar={() => boGET(`/backoffice/solicitudes/${idSolicitud}/mensajes`)}
+            // Abrir el hilo lo marca leído: la campana de arriba se pone al día
+            // ya, en vez de esperar a su siguiente vuelta (CampanaMensajes).
+            cargar={() => boGET(`/backoffice/solicitudes/${idSolicitud}/mensajes`).then((r) => {
+              if (r?.ok) window.dispatchEvent(new Event("inspira:mensajes-leidos"));
+              return r;
+            })}
             enviar={(texto) => boPOST(`/backoffice/solicitudes/${idSolicitud}/mensajes`, { texto })}
           />
         </div>

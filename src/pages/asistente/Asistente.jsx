@@ -4,7 +4,7 @@
 // contenido vive en config/diagnostico.js; aquí solo está la experiencia.
 import { useState } from "react";
 import { getNodo, getResultado } from "../../config/diagnostico";
-import { getServicio, hrefServicio } from "../../config/servicios";
+import { getServicio, hrefServicio } from "../../config/serviciosIndice";
 import Icono from "../../components/common/Icono";
 import BotonAsesoria from "../../components/common/BotonAsesoria";
 import EnviarPlan from "../../components/common/EnviarPlan";

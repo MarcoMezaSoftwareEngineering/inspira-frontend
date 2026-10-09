@@ -2,29 +2,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { boGET } from "../../../../services/backofficeApi";
 
+// 09/10/2026: este hook también pedía /backoffice/usuarios-internos?rol=asesor
+// en cada expediente abierto y guardaba la selección de asesores para
+// AsesoresAsignadosAdmin, un componente que ya nadie montaba (se borró).
+// Eran unas mil peticiones desde mayo que no pintaban nada.
 export function useSolicitudDetalle(idSolicitud) {
   const [detalle, setDetalle] = useState(null);
   const [checklist, setChecklist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [asesoresDisponibles, setAsesoresDisponibles] = useState([]);
-  const [asesoresSeleccionados, setAsesoresSeleccionados] = useState([]);
-  const [guardandoAsesores, setGuardandoAsesores] = useState(false);
-
   async function cargar({ silencioso = false } = {}) {
     if (!silencioso) setLoading(true);
     setError("");
     try {
-      // 1) Checklist + solicitud (API admin)
-      const rChecklist = await boGET(`/api/admin/solicitudes/${idSolicitud}/checklist`);
+      // La solicitud con su checklist (API admin) y el detalle de backoffice
+      // con los asesores, a la vez: ninguna depende de la otra (iban en fila).
+      const [rChecklist, rBackoffice] = await Promise.all([
+        boGET(`/api/admin/solicitudes/${idSolicitud}/checklist`),
+        boGET(`/backoffice/solicitudes/${idSolicitud}`),
+      ]);
       if (!rChecklist.ok) {
         setError(rChecklist.message || rChecklist.msg || "No se pudo cargar la solicitud.");
         return;
       }
-
-      // 2) Detalle de backoffice con asesores
-      const rBackoffice = await boGET(`/backoffice/solicitudes/${idSolicitud}`);
 
       let solicitud = rChecklist.solicitud || {};
       if (rBackoffice.ok && rBackoffice.solicitud) {
@@ -37,19 +38,6 @@ export function useSolicitudDetalle(idSolicitud) {
 
       setDetalle(solicitud);
       setChecklist(rChecklist.checklist || []);
-
-      // Init asesoresSeleccionados
-      const s = solicitud;
-      let seleccion = [];
-
-      if (s.asesores && Array.isArray(s.asesores) && s.asesores.length > 0) {
-        seleccion = s.asesores.map((a) => String(a.usuario?.id_usuario ?? a.id_usuario));
-      } else if (s.asesor && s.asesor.id_usuario) {
-        seleccion = [String(s.asesor.id_usuario)];
-      } else if (s.id_asesor_asignado) {
-        seleccion = [String(s.id_asesor_asignado)];
-      }
-      setAsesoresSeleccionados(seleccion);
     } catch (e) {
       console.error(e);
       setError("Error al cargar la información de la solicitud.");
@@ -58,18 +46,8 @@ export function useSolicitudDetalle(idSolicitud) {
     }
   }
 
-  async function cargarAsesoresDisponibles() {
-    try {
-      const r = await boGET("/backoffice/usuarios-internos?rol=asesor");
-      if (r.ok) setAsesoresDisponibles(r.usuarios || []);
-    } catch (e) {
-      console.error("Error al cargar asesores disponibles", e);
-    }
-  }
-
   useEffect(() => {
     cargar();
-    cargarAsesoresDisponibles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idSolicitud]);
 
@@ -92,11 +70,5 @@ export function useSolicitudDetalle(idSolicitud) {
     loading,
     error,
     cargar,
-
-    asesoresDisponibles,
-    asesoresSeleccionados,
-    setAsesoresSeleccionados,
-    guardandoAsesores,
-    setGuardandoAsesores,
   };
 }

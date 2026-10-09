@@ -1,5 +1,5 @@
 import Reveal from "../../../components/common/Reveal";
-import { DIFERENCIALES } from "../../../config/servicios";
+import { DIFERENCIALES } from "../../../config/serviciosIndice";
 import Icono from "../../../components/common/Icono";
 import BotonAsesoria from "../../../components/common/BotonAsesoria";
 

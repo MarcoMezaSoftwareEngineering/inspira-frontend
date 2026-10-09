@@ -12,7 +12,7 @@
 // /visa-o-estancia (la regla de negocio vive en config/visaOEstancia.js) y el
 // checklist reutiliza los nueve documentos de /expediente. Todo lo que se
 // afirma sale de config: precios de metodo.js, cifras de CATEGORIAS_CASOS.
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Icono from "../../components/common/Icono";
 import { CarruselVideos } from "../../components/common/VideoVertical";
 import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
@@ -27,7 +27,7 @@ import { cascada, useRevelar } from "../../lib/revelar";
 import { CifraAnimada } from "../landing/master2027/comunes";
 import Opiniones from "../landing/master2027/Opiniones";
 import { DOCUMENTOS, IPREM_ANIO } from "../expediente/textos";
-import { Cinta, Numeral, Stickers } from "../../components/common/EfectosLanding";
+import { Cinta, Numeral, PalabraRotante, Stickers } from "../../components/common/EfectosLanding";
 import { useParallax } from "../../lib/parallax";
 import ilusAsesora from "../../assets/images/landing/master-2027/ilus-asesora-auriculares.webp";
 import ilusCarpeta from "../../assets/images/landing/master-2027/ilus-carpeta-archivos.webp";
@@ -45,26 +45,6 @@ const irA = (href) => (e) => {
 const P_DONDE = PREGUNTAS.find((p) => p.id === "donde");
 const irASeccion = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-/** La palabra del titular que va cambiando. */
-function PalabraRotante({ palabras }) {
-  const [i, setI] = useState(0);
-  const [saliendo, setSaliendo] = useState(false);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setSaliendo(true);
-      setTimeout(() => {
-        setI((x) => (x + 1) % palabras.length);
-        setSaliendo(false);
-      }, 220);
-    }, 2400);
-    return () => clearInterval(t);
-  }, [palabras.length]);
-  return (
-    <span key={i} className={`vis-palabra lfx-palabra-entra${saliendo ? " vis-palabra-sale" : ""}`}>
-      {palabras[i]}
-    </span>
-  );
-}
 const P_DINERO = PREGUNTAS.find((p) => p.id === "dinero");
 
 /** Las opciones de una pregunta, como botones de radio. */
@@ -277,7 +257,7 @@ export default function Visado() {
             {T.hero.rotulo}
           </p>
           <h1>
-            {T.hero.tituloInicio} <PalabraRotante palabras={T.hero.palabras} />?
+            {T.hero.tituloInicio} <PalabraRotante palabras={T.hero.palabras} prefijo="vis" />?
             <br />
             {T.hero.tituloFin}
           </h1>

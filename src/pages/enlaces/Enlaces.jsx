@@ -29,14 +29,15 @@
 // - La beca y los eventos se ordenan solos por temporada (ver más abajo).
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import logo from "../../assets/images/logo.png";
+// WebP a 3x del tamaño pintado: 12 KB frente a los 69 del PNG (09/10/2026).
+import logo from "../../assets/images/logo.webp";
 import Icono from "../../components/common/Icono";
 import WhatsAppFlotante from "../../components/common/WhatsAppFlotante";
 import { CALENDLY_URL, LINEAS, MENSAJE_SEGURO, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
 import { OPCIONES_ASESORIA } from "../../config/asesorias";
 import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 import { eventosActivos } from "../../config/eventos";
-import { getServicio, hrefServicio } from "../../config/servicios";
+import { getServicio, hrefServicio } from "../../config/serviciosIndice";
 import { TESTIMONIOS } from "../../config/testimonios";
 import { enviarEventoEmbudo } from "../../lib/analytics";
 import { useRevelar } from "../../lib/revelar";
@@ -524,6 +525,8 @@ function BotonBeca({ style }) {
       <img
         src="/og/beca-generacion-bicentenario-2026.jpg"
         alt=""
+        width="1200"
+        height="630"
         className="h-16 w-24 shrink-0 rounded-2xl object-cover"
         loading="lazy"
         decoding="async"
@@ -548,7 +551,10 @@ function BannerBeca({ style }) {
         <img
           src="/og/beca-generacion-bicentenario-2026.jpg"
           alt="Beca Generación del Bicentenario 2026: solo 20 becas"
+          width="1200"
+          height="630"
           className="aspect-[1200/630] w-full object-cover"
+          loading="lazy"
           decoding="async"
         />
       </a>
@@ -757,7 +763,7 @@ function Carrusel({ style }) {
             className="enl-vidrio flex w-[78%] shrink-0 flex-col overflow-hidden rounded-3xl text-white transition active:scale-[.98] sm:w-[70%]"
           >
             {r.img ? (
-              <img src={r.img} alt="" className="aspect-[1200/630] w-full object-cover" loading={i === 0 ? "eager" : "lazy"} decoding="async" />
+              <img src={r.img} alt="" width="1200" height="630" className="aspect-[1200/630] w-full object-cover" loading={i === 0 ? "eager" : "lazy"} decoding="async" />
             ) : (
               <span className="enl-recurso-icono" aria-hidden="true">
                 <Icono nombre={r.icono} size={58} strokeWidth={1.3} />
@@ -938,7 +944,7 @@ export default function Enlaces() {
         <header data-revelar className="enl-sube flex flex-col items-center text-center">
           <span className="enl-anillo flex h-24 w-24 items-center justify-center rounded-full">
             <span className="flex h-full w-full items-center justify-center rounded-full bg-white shadow-2xl">
-              <img src={logo} alt="Inspira Legal" className="h-auto w-[76%]" />
+              <img src={logo} alt="Inspira Legal" width="324" height="108" className="h-auto w-[76%]" />
             </span>
           </span>
           <h1 className="mt-4 font-fraunces text-2xl font-bold text-white">Inspira Legal</h1>
@@ -1020,7 +1026,7 @@ export default function Enlaces() {
           data-revelar className="enl-sube enl-tarjeta mt-3 flex overflow-hidden"
          
         >
-          <img src="/og/master-2027-2028.jpg" alt="" className="w-[42%] shrink-0 object-cover object-left" loading="lazy" decoding="async" />
+          <img src="/og/master-2027-2028.jpg" alt="" width="1200" height="630" className="w-[42%] shrink-0 object-cover object-left" loading="lazy" decoding="async" />
           <span className="flex min-w-0 flex-1 flex-col justify-center p-3.5 text-white">
             <span className="enl-marca-fuego">
               <Icono nombre="paquete" size={12} aria-hidden="true" /> Paquete Máster

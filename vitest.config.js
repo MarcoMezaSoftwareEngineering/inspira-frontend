@@ -7,6 +7,9 @@ import { defineConfig } from "vitest/config";
 import path from "node:path";
 
 export default defineConfig({
+  // JSX automático, como en la app (el plugin de React no se carga aquí): sin
+  // esto el JSX de las pruebas salía en modo clásico y pedía `React` global.
+  esbuild: { jsx: "automatic" },
   test: {
     environment: "node",
     include: ["src/**/*.test.{js,jsx}", "tests/**/*.test.{js,jsx}"],

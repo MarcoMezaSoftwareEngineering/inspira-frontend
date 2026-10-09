@@ -13,6 +13,7 @@ import Icono from "../../common/Icono";
 import UserMenu from "./UserMenu";
 import { loginGoogle } from "./LoginButton";
 import { BOTON_ENTRAR, BOTON_ENTRAR_CORTO } from "../../../config/portalMarca";
+import { useDiaDeHoy } from "../../../lib/hidratacion";
 
 // Flecha de los desplegables. Gira cuando el menú está abierto (ver .caret).
 const Caret = () => (
@@ -21,16 +22,21 @@ const Caret = () => (
   </svg>
 );
 
-export default function Header() {
+// `rutaInicial` viene de App: en el prerender no hay window y la cabecera
+// tiene que saber igualmente en qué página está (el hueco de .v4-route-spacer).
+export default function Header({ rutaInicial }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   // Desplegable abierto (label del item). Controlado por estado y no solo por
   // :hover, para que también funcione con clic, teclado y en pantallas táctiles.
   const [abierto, setAbierto] = useState(null);
   const [path, setPath] = useState(
-    typeof window !== "undefined" ? window.location.pathname : "/"
+    () => rutaInicial ?? (typeof window !== "undefined" ? window.location.pathname : "/")
   );
   const { user, loading } = useAuth();
+  // La promoción caduca por fecha: al hidratar se mira el día en que se
+  // generó el HTML, para que el aviso coincida con el que ya está pintado.
+  const dia = useDiaDeHoy();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -61,7 +67,7 @@ export default function Header() {
       {/* Barra fina: aviso de la promo + enlaces secundarios */}
       <div className={`v4-topbar${scrolled ? " oculta" : ""}`}>
         <div className="v4-topbar-inner">
-          {promoVigente() ? (
+          {promoVigente(dia) ? (
             <span className="v4-topbar-promo">
               <Icono nombre="destello" size={13} />
               Asesoría de orientación gratuita hasta el 22 de septiembre

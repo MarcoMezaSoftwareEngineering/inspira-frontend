@@ -1,8 +1,10 @@
 // src/pages/landing/master2027/comunes.jsx
 // Piezas compartidas por las secciones de la landing /master-2027-2028.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icono from "../../../components/common/Icono";
 import { CTA, WHATSAPP } from "../../../config/paqueteMaster2027";
+import { CALENDLY_URL } from "../../../config/contacto";
+import { useHidratando } from "../../../lib/hidratacion";
 import { URL_CALENDLY, evento, registrarCta, prefiereMenosMovimiento } from "./medicion";
 
 // Entradas solo con transform: el contenido nunca depende de la animación.
@@ -29,6 +31,10 @@ export function BotonReserva({
   alPulsar,
   className = "",
 }) {
+  // El HTML prerenderizado lleva el enlace sin los utm_* del anuncio (el
+  // servidor no ve la URL de quien llega): se ponen justo después de hidratar.
+  // Si el primer render ya los llevara, React no tocaría el href del HTML.
+  const hidratando = useHidratando();
   const tamano = compacto
     ? "px-4 py-2.5 text-sm"
     : grande
@@ -46,7 +52,7 @@ export function BotonReserva({
         />
       )}
       <a
-        href={URL_CALENDLY}
+        href={hidratando ? CALENDLY_URL : URL_CALENDLY}
         target="_blank"
         rel="noopener"
         onClick={() => {
@@ -152,12 +158,23 @@ export function Entrada({ children, retraso = 0, className = "" }) {
  * Cifra que sube desde cero al montar (con punto de miles). Va por pasos con
  * setTimeout y no con requestAnimationFrame: en una pestaña en segundo plano o
  * en una captura sin pintar, rAF se detiene y la cifra se quedaría a medias.
+ *
+ * En una página prerenderizada (09/10/2026) la cifra llega ya final en el
+ * HTML y no se vuelve a contar al hidratar: bajar a cero algo que ya se está
+ * leyendo sería un parpadeo. Al llegar navegando, sube como siempre.
  */
 const PASOS_CIFRA = 30;
 
 export function CifraAnimada({ valor, prefijo = "", sufijo = "", duracion = 1200 }) {
-  const [n, setN] = useState(() => (prefiereMenosMovimiento() ? valor : 0));
+  const hidratando = useHidratando();
+  const [n, setN] = useState(() => (hidratando || prefiereMenosMovimiento() ? valor : 0));
+  const llegoPintada = useRef(hidratando);
   useEffect(() => {
+    // Solo la primera vez: si luego cambia el valor, sube hasta el nuevo.
+    if (llegoPintada.current) {
+      llegoPintada.current = false;
+      return undefined;
+    }
     if (prefiereMenosMovimiento()) return undefined;
     let paso = 0;
     let temporizador;

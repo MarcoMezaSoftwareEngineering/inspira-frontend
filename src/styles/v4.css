@@ -30,7 +30,7 @@
 .v4-home *,
 .v4-nav-wrap * { box-sizing: border-box; }
 
-.v4-home { color: var(--ink); background: #fff; overflow-x: hidden; font-family: Montserrat, system-ui, sans-serif; }
+.v4-home { color: var(--ink); background: #fff; overflow-x: hidden; font-family: Montserrat, "Montserrat ajuste", system-ui, sans-serif; }
 .v4-home a { color: inherit; text-decoration: none; }
 .v4-home button, .v4-home input, .v4-home select { font: inherit; }
 
@@ -41,7 +41,7 @@
 /* ── NAV ─────────────────────────────────────────────────────────────── */
 /* Barra fina superior: promo + secciones secundarias. Se retrae al hacer
    scroll para que el nav flotante suba y gane pantalla. */
-.v4-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: #012938; color: rgba(255,255,255,.88); font-family: Montserrat, sans-serif; height: 34px; overflow: hidden; transition: .3s cubic-bezier(.22,1,.36,1); }
+.v4-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: #012938; color: rgba(255,255,255,.88); font-family: Montserrat, "Montserrat ajuste", sans-serif; height: 34px; overflow: hidden; transition: .3s cubic-bezier(.22,1,.36,1); }
 .v4-topbar.oculta { height: 0; }
 .v4-topbar-inner { max-width: 1180px; margin: auto; height: 34px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .v4-topbar-promo { display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; letter-spacing: .02em; }
@@ -53,7 +53,7 @@
 
 /* Nav flotante: una píldora de cristal con aire a los lados. Al hacer scroll
    sube al borde y se compacta un poco. */
-.v4-nav-wrap { position: fixed; top: 44px; left: 0; right: 0; z-index: 100; padding: 0 16px; transition: .3s var(--ease); font-family: Montserrat, system-ui, sans-serif; }
+.v4-nav-wrap { position: fixed; top: 44px; left: 0; right: 0; z-index: 100; padding: 0 16px; transition: .3s var(--ease); font-family: Montserrat, "Montserrat ajuste", system-ui, sans-serif; }
 .v4-nav { height: 72px; max-width: 1180px; margin: auto; padding: 0 12px 0 20px; border: 1px solid rgba(1, 52, 70, .08); background: rgba(255, 255, 255, .86); backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); border-radius: 22px; box-shadow: 0 10px 40px rgba(1, 52, 70, .10), inset 0 1px 0 rgba(255, 255, 255, .7); display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: .3s var(--ease); }
 .v4-nav-wrap.scrolled { top: 10px; }
 .v4-nav-wrap.scrolled .v4-nav { height: 62px; background: rgba(255, 255, 255, .92); box-shadow: 0 16px 44px rgba(1, 52, 70, .14), inset 0 1px 0 rgba(255, 255, 255, .7); }
@@ -153,7 +153,7 @@
 .v4-home .hero-head { max-width: 620px; }
 .v4-home .hero-eyebrow { color: var(--sky); font-size: 11.5px; letter-spacing: .14em; align-items: flex-start; line-height: 1.5; }
 .v4-home .hero-eyebrow .dot { margin-top: 5px; background: var(--accent); box-shadow: 0 0 0 4px rgba(250, 148, 58, .18); }
-.v4-home .hero h1 { font-family: Merriweather, Georgia, serif; color: #fff; font-size: clamp(34px, 4.4vw, 60px); line-height: 1.08; letter-spacing: -.028em; margin: 22px 0 22px; font-weight: 700; text-wrap: balance; }
+.v4-home .hero h1 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; color: #fff; font-size: clamp(34px, 4.4vw, 60px); line-height: 1.08; letter-spacing: -.028em; margin: 22px 0 22px; font-weight: 700; text-wrap: balance; }
 .v4-home .hero h1 em { font-style: italic; font-weight: 700; color: var(--sky); }
 .v4-home .hero .lead { font-size: clamp(16px, 1.35vw, 18px); line-height: 1.75; color: rgba(255, 255, 255, .72); max-width: 54ch; margin: 0 0 32px; font-weight: 400; }
 .v4-home .actions { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -206,7 +206,7 @@
 .v4-home .via-panel.c-sky .via-badge { background: var(--sky-soft); color: #17608f; }
 .v4-home .via-panel.c-orange .via-badge { background: #fff1e2; color: #b3641a; }
 .v4-home .via-panel.c-sun .via-badge { background: #fef6dd; color: #8d6a06; }
-.v4-home .via-main h2 { font-family: Merriweather, Georgia, serif; font-size: clamp(21px, 1.8vw, 26px); line-height: 1.22; letter-spacing: -.02em; color: var(--primary); margin: 14px 0 10px; font-weight: 700; max-width: 26ch; text-wrap: balance; }
+.v4-home .via-main h2 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: clamp(21px, 1.8vw, 26px); line-height: 1.22; letter-spacing: -.02em; color: var(--primary); margin: 14px 0 10px; font-weight: 700; max-width: 26ch; text-wrap: balance; }
 .v4-home .via-main > p { color: var(--muted); font-size: 14px; line-height: 1.7; margin: 0; max-width: 60ch; }
 .v4-home .via-main ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; }
 .v4-home .via-main li { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; line-height: 1.45; font-weight: 600; color: var(--ink); }
@@ -229,7 +229,7 @@
 .v4-home .via-dato { display: flex; align-items: center; gap: 22px; background: linear-gradient(150deg, #013446, #02506b); border-radius: 20px; padding: 16px 22px; color: #fff; position: relative; overflow: hidden; }
 .v4-home .via-dato:after { content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%; right: -110px; top: -120px; background: radial-gradient(circle, rgba(249, 200, 70, .3), transparent 68%); }
 .v4-home .via-dato-cifra { display: flex; align-items: baseline; gap: 10px; flex: 0 0 auto; position: relative; z-index: 2; }
-.v4-home .via-dato strong { display: block; font-family: Merriweather, Georgia, serif; font-size: 58px; line-height: .9; font-weight: 900; color: var(--sun); letter-spacing: -.05em; }
+.v4-home .via-dato strong { display: block; font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 58px; line-height: .9; font-weight: 900; color: var(--sun); letter-spacing: -.05em; }
 .v4-home .via-dato-unidad { display: block; font-size: 13px; font-weight: 800; line-height: 1.2; color: #fff; }
 .v4-home .via-dato-txt { position: relative; z-index: 2; min-width: 0; }
 .v4-home .via-dato-label { display: inline-block; background: var(--sun); color: #4a3803; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .09em; padding: 5px 10px; border-radius: 999px; }
@@ -281,7 +281,7 @@
 /* ── SECCIONES ───────────────────────────────────────────────────────── */
 .v4-home section { padding: 100px 0; }
 .v4-home .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 44px; }
-.v4-home .section-head h2 { font-family: Merriweather, Georgia, serif; font-size: clamp(36px, 4vw, 54px); line-height: 1.05; letter-spacing: -.04em; margin: 10px 0 0; color: var(--primary); font-weight: 800; }
+.v4-home .section-head h2 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: clamp(36px, 4vw, 54px); line-height: 1.05; letter-spacing: -.04em; margin: 10px 0 0; color: var(--primary); font-weight: 800; }
 .v4-home .section-head p { max-width: 520px; color: var(--muted); line-height: 1.7; margin: 0; }
 
 .v4-home .quick-calc { margin-top: -52px; position: relative; z-index: 6; padding: 0; }
@@ -295,7 +295,7 @@
 .v4-home .calc-field select { width: 100%; height: 52px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); padding: 0 14px; outline: none; color: var(--ink); font-weight: 600; cursor: pointer; transition: .2s; }
 .v4-home .calc-field select:focus { border-color: var(--sky-2); box-shadow: 0 0 0 3px rgba(136,196,252,.3); }
 .v4-home .range-wrap { display: grid; gap: 8px; }
-.v4-home .range-valor { font-family: Merriweather, Georgia, serif; font-size: 26px; font-weight: 900; color: var(--primary); letter-spacing: -.03em; line-height: 1; }
+.v4-home .range-valor { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 26px; font-weight: 900; color: var(--primary); letter-spacing: -.03em; line-height: 1; }
 .v4-home .range-wrap input[type=range] { width: 100%; height: 6px; padding: 0; border: 0; border-radius: 999px; background: linear-gradient(90deg, var(--sky), var(--accent)); accent-color: var(--accent); cursor: pointer; }
 .v4-home .range-meta { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--muted); }
 .v4-home .calc-btn { margin-top: 20px; width: 100%; }
@@ -323,7 +323,7 @@
 .v4-home .stage { min-height: 570px; background: linear-gradient(145deg, #013446, #02506b); border-radius: 30px; padding: 30px; color: #fff; position: relative; overflow: hidden; }
 .v4-home .stage:before { content: ""; position: absolute; inset: auto -12% -20% 35%; height: 70%; background: radial-gradient(circle, rgba(250, 148, 58, .16), transparent 65%); }
 .v4-home .stage-label { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: rgba(255, 255, 255, .52); font-weight: 800; position: relative; z-index: 2; }
-.v4-home .stage h3 { font-family: Merriweather, Georgia, serif; font-size: 38px; margin: 12px 0 10px; letter-spacing: -.035em; font-weight: 800; position: relative; z-index: 2; }
+.v4-home .stage h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 38px; margin: 12px 0 10px; letter-spacing: -.035em; font-weight: 800; position: relative; z-index: 2; }
 .v4-home .stage p { max-width: 520px; color: rgba(255, 255, 255, .66); line-height: 1.65; position: relative; z-index: 2; }
 .v4-home .stage-ui { position: relative; margin-top: 28px; background: #fff; color: var(--ink); border-radius: 20px; padding: 18px; box-shadow: 0 22px 50px rgba(0, 0, 0, .2); z-index: 2; }
 .v4-home .todo { display: flex; align-items: center; gap: 10px; padding: 11px; border-bottom: 1px solid var(--line); font-size: 12px; }
@@ -337,7 +337,7 @@
 .v4-home .service-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: #c8dcdf; }
 .v4-home .service-card.main { background: linear-gradient(145deg, #fff, #f3f8f9); }
 .v4-home .service-card .tag { display: inline-flex; padding: 7px 10px; border-radius: 999px; background: #fff0e2; color: #b96114; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
-.v4-home .service-card h3 { font-family: Merriweather, Georgia, serif; font-size: 34px; letter-spacing: -.035em; margin: 18px 0 10px; color: var(--primary); font-weight: 800; }
+.v4-home .service-card h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 34px; letter-spacing: -.035em; margin: 18px 0 10px; color: var(--primary); font-weight: 800; }
 .v4-home .service-card p { color: var(--muted); line-height: 1.6; font-size: 13px; max-width: 560px; }
 .v4-home .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 22px 0; max-width: 560px; }
 .v4-home .checkline { font-size: 12px; display: flex; gap: 8px; align-items: center; }
@@ -418,8 +418,8 @@
 .v4-home .asesoria-icon { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 15px; background: var(--sky-soft); color: var(--sky-2); margin-bottom: 16px; }
 .v4-home .asesoria-card.destacada .asesoria-icon { background: #fff1e2; color: var(--accent); }
 .v4-home .asesoria-dur { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-.v4-home .asesoria-card h3 { font-family: Merriweather, Georgia, serif; font-size: 25px; color: var(--primary); margin: 8px 0 12px; letter-spacing: -.03em; font-weight: 800; }
-.v4-home .asesoria-precio { font-family: Merriweather, Georgia, serif; font-size: 38px; font-weight: 900; color: var(--primary); letter-spacing: -.04em; line-height: 1; }
+.v4-home .asesoria-card h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 25px; color: var(--primary); margin: 8px 0 12px; letter-spacing: -.03em; font-weight: 800; }
+.v4-home .asesoria-precio { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 38px; font-weight: 900; color: var(--primary); letter-spacing: -.04em; line-height: 1; }
 .v4-home .asesoria-precio small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0; margin-top: 6px; }
 .v4-home .asesoria-card > p { color: var(--muted); font-size: 13px; line-height: 1.65; margin: 16px 0 0; }
 .v4-home .asesoria-card ul { list-style: none; padding: 0; margin: 16px 0 22px; display: grid; gap: 9px; flex: 1; }
@@ -447,7 +447,7 @@
 .v4-home .ruta-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: var(--sky-soft); color: var(--sky-2); }
 .v4-home .ruta-card.destacada .ruta-icon { background: rgba(255,255,255,.14); color: var(--sky); }
 .v4-home .ruta-card.urgente .ruta-icon { background: #fff1e2; color: var(--accent); }
-.v4-home .ruta-card h3 { font-family: Merriweather, Georgia, serif; font-size: 16px; font-weight: 850; color: var(--primary); margin: 4px 0 0; letter-spacing: -.02em; }
+.v4-home .ruta-card h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 16px; font-weight: 850; color: var(--primary); margin: 4px 0 0; letter-spacing: -.02em; }
 .v4-home .ruta-card p { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0; flex: 1; }
 .v4-home .ruta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .v4-home .ruta-tags span { font-size: 10.5px; font-weight: 700; background: var(--surface-2); color: #2c5f7a; padding: 5px 9px; border-radius: 999px; }
@@ -460,10 +460,10 @@
 .v4-home .porque-card { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 24px; transition: .25s var(--ease); }
 .v4-home .porque-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
 .v4-home .porque-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: var(--sky-soft); color: var(--sky-2); }
-.v4-home .porque-card h3 { font-family: Merriweather, Georgia, serif; font-size: 16px; font-weight: 850; color: var(--primary); margin: 12px 0 6px; }
+.v4-home .porque-card h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 16px; font-weight: 850; color: var(--primary); margin: 12px 0 6px; }
 .v4-home .porque-card p { color: var(--muted); font-size: 12.5px; line-height: 1.6; margin: 0; }
 .v4-home .becas-banner { margin-top: 20px; background: linear-gradient(135deg, #013446, #02506b); border-radius: 28px; padding: 36px 40px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; }
-.v4-home .becas-banner h3 { font-family: Merriweather, Georgia, serif; color: #fff; font-size: 26px; line-height: 1.25; letter-spacing: -.03em; margin: 10px 0 10px; font-weight: 800; max-width: 720px; }
+.v4-home .becas-banner h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; color: #fff; font-size: 26px; line-height: 1.25; letter-spacing: -.03em; margin: 10px 0 10px; font-weight: 800; max-width: 720px; }
 .v4-home .becas-banner p { color: rgba(255,255,255,.66); font-size: 13px; line-height: 1.65; margin: 0; max-width: 620px; }
 
 /* ── TESTIMONIOS ─────────────────────────────────────────────────────── */
@@ -480,7 +480,7 @@
 .v4-home .testimonial-card .who b { display: block; font-size: 13px; }
 .v4-home .testimonial-card .who span { color: var(--muted); font-size: 11px; }
 .v4-home .testimonial-card.cta-card { background: linear-gradient(160deg, #013446, #02506b); justify-content: center; }
-.v4-home .testimonial-card.cta-card h3 { font-family: Merriweather, Georgia, serif; color: #fff; font-size: 24px; letter-spacing: -.03em; margin: 0; font-weight: 800; }
+.v4-home .testimonial-card.cta-card h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; color: #fff; font-size: 24px; letter-spacing: -.03em; margin: 0; font-weight: 800; }
 .v4-home .testimonial-card.cta-card p { color: rgba(255,255,255,.7); font-size: 13px; line-height: 1.6; margin: 0; }
 .v4-home .testimonial-card.cta-card .btn { align-self: flex-start; }
 
@@ -549,13 +549,13 @@
 .v4-home .rec-etapa { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; background: #fff; }
 .v4-home .rec-card.es-solo .rec-etapa { color: #b3261e; }
 .v4-home .rec-card.es-con .rec-etapa { color: #17608f; }
-.v4-home .rec-card h3 { font-family: Merriweather, Georgia, serif; font-size: clamp(21px, 2.4vw, 30px); line-height: 1.2; letter-spacing: -.03em; color: var(--primary); margin: 14px 0 10px; font-weight: 800; }
+.v4-home .rec-card h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: clamp(21px, 2.4vw, 30px); line-height: 1.2; letter-spacing: -.03em; color: var(--primary); margin: 14px 0 10px; font-weight: 800; }
 .v4-home .rec-card p { color: var(--muted); font-size: 14.5px; line-height: 1.7; margin: 0; max-width: 560px; }
 .v4-home .rec-card-side { text-align: center; padding: 22px 18px; border-radius: 18px; background: #fff; box-shadow: 0 10px 26px rgba(1,52,70,.08); }
 .v4-home .rec-marca { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; margin: 0 auto 12px; }
 .v4-home .rec-card.es-solo .rec-marca { background: #fdeaea; color: #b3261e; }
 .v4-home .rec-card.es-con .rec-marca { background: var(--sky-soft); color: var(--sky-2); }
-.v4-home .rec-card-side b { display: block; font-family: Merriweather, Georgia, serif; font-size: 17px; font-weight: 850; letter-spacing: -.02em; line-height: 1.25; }
+.v4-home .rec-card-side b { display: block; font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 17px; font-weight: 850; letter-spacing: -.02em; line-height: 1.25; }
 .v4-home .rec-card.es-solo .rec-card-side b { color: #b3261e; }
 .v4-home .rec-card.es-con .rec-card-side b { color: var(--primary); }
 .v4-home .rec-card-side small { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
@@ -572,7 +572,7 @@
 .v4-home .cta { padding: 100px 0; }
 .v4-home .cta-box { background: linear-gradient(135deg, #012938, #02506b); border-radius: 32px; padding: 56px; display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center; position: relative; overflow: hidden; }
 .v4-home .cta-box:after { content: ""; position: absolute; width: 520px; height: 520px; border-radius: 50%; right: -170px; top: -240px; background: radial-gradient(circle, rgba(154, 206, 255, .18), transparent 68%); }
-.v4-home .cta h2 { font-family: Merriweather, Georgia, serif; color: #fff; font-size: 48px; line-height: 1.05; letter-spacing: -.04em; margin: 8px 0 12px; font-weight: 800; }
+.v4-home .cta h2 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; color: #fff; font-size: 48px; line-height: 1.05; letter-spacing: -.04em; margin: 8px 0 12px; font-weight: 800; }
 .v4-home .cta p { color: rgba(255, 255, 255, .62); max-width: 620px; line-height: 1.65; }
 
 .v4-home [data-reveal] { opacity: 0; transform: translateY(26px) scale(.985); transition: opacity .7s var(--ease), transform .7s var(--ease); }
@@ -630,16 +630,16 @@
 .page-hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); background-size: 46px 46px; mask-image: linear-gradient(to bottom, black, transparent 82%); -webkit-mask-image: linear-gradient(to bottom, black, transparent 82%); }
 .page-hero-glow { position: absolute; width: 420px; height: 420px; border-radius: 50%; right: -130px; top: -160px; background: radial-gradient(circle, rgba(136,196,252,.22), transparent 68%); }
 .page-hero-inner { position: relative; z-index: 2; width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
-.page-hero-volver { display: inline-block; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.6); text-decoration: none; margin-bottom: 16px; transition: .2s; }
+.page-hero-volver { display: inline-block; font-family: Montserrat, "Montserrat ajuste", sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.6); text-decoration: none; margin-bottom: 16px; transition: .2s; }
 .page-hero-volver:hover { color: #fff; }
-.page-hero-tag { display: inline-flex; align-items: center; gap: 8px; font-family: Montserrat, sans-serif; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); backdrop-filter: blur(8px); color: rgba(255,255,255,.88); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; padding: 8px 15px; border-radius: 999px; }
+.page-hero-tag { display: inline-flex; align-items: center; gap: 8px; font-family: Montserrat, "Montserrat ajuste", sans-serif; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); backdrop-filter: blur(8px); color: rgba(255,255,255,.88); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; padding: 8px 15px; border-radius: 999px; }
 .page-hero-tag svg { color: #fa943a; }
-.page-hero h1 { font-family: Merriweather, Georgia, serif; color: #fff; font-size: clamp(30px, 4.6vw, 56px); line-height: 1.06; letter-spacing: -.038em; margin: 20px 0 0; font-weight: 800; max-width: 880px; }
+.page-hero h1 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; color: #fff; font-size: clamp(30px, 4.6vw, 56px); line-height: 1.06; letter-spacing: -.038em; margin: 20px 0 0; font-weight: 800; max-width: 880px; }
 .page-hero h1 span { color: #88c4fc; }
-.page-hero-lead { font-family: Montserrat, sans-serif; font-size: clamp(15px, 1.5vw, 18px); line-height: 1.7; color: rgba(255,255,255,.72); max-width: 640px; margin: 18px 0 0; }
+.page-hero-lead { font-family: Montserrat, "Montserrat ajuste", sans-serif; font-size: clamp(15px, 1.5vw, 18px); line-height: 1.7; color: rgba(255,255,255,.72); max-width: 640px; margin: 18px 0 0; }
 .page-hero-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 28px; }
 .page-hero-quick { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 28px; }
-.page-hero-quick a { display: inline-flex; align-items: center; gap: 8px; font-family: Montserrat, sans-serif; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.9); text-decoration: none; padding: 10px 15px; border-radius: 13px; font-size: 12.5px; font-weight: 700; backdrop-filter: blur(6px); transition: .22s cubic-bezier(.22,1,.36,1); }
+.page-hero-quick a { display: inline-flex; align-items: center; gap: 8px; font-family: Montserrat, "Montserrat ajuste", sans-serif; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.9); text-decoration: none; padding: 10px 15px; border-radius: 13px; font-size: 12.5px; font-weight: 700; backdrop-filter: blur(6px); transition: .22s cubic-bezier(.22,1,.36,1); }
 .page-hero-quick a:hover { background: #fa943a; border-color: #fa943a; color: #fff; transform: translateY(-3px); box-shadow: 0 12px 24px rgba(250,148,58,.3); }
 @media (max-width: 620px) {
   .page-hero { padding: 104px 0 48px; }
@@ -648,10 +648,10 @@
 }
 
 /* ── SIGUE EXPLORANDO (bloque de salida de cada página) ──────────────── */
-.sigue { background: linear-gradient(180deg, #fff 0%, #f4f9fe 100%); border-top: 1px solid #d8e7f5; padding: 56px 0 64px; font-family: Montserrat, sans-serif; }
+.sigue { background: linear-gradient(180deg, #fff 0%, #f4f9fe 100%); border-top: 1px solid #d8e7f5; padding: 56px 0 64px; font-family: Montserrat, "Montserrat ajuste", sans-serif; }
 .sigue-inner { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
 .sigue-head { text-align: center; margin-bottom: 28px; }
-.sigue-head h2 { font-family: Merriweather, Georgia, serif; font-size: clamp(22px, 2.4vw, 30px); font-weight: 900; color: #013446; margin: 0; letter-spacing: -.02em; }
+.sigue-head h2 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: clamp(22px, 2.4vw, 30px); font-weight: 900; color: #013446; margin: 0; letter-spacing: -.02em; }
 .sigue-head p { color: #62808f; font-size: 14.5px; margin: 8px 0 0; }
 .sigue-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .sigue-card { position: relative; display: flex; flex-direction: column; gap: 7px; background: #fff; border: 1px solid #d8e7f5; border-radius: 20px; padding: 22px 20px; text-decoration: none; transition: .25s cubic-bezier(.22,1,.36,1); }
@@ -659,7 +659,7 @@
 .sigue-card.destacada { background: linear-gradient(160deg, #013446, #02506b); border-color: transparent; }
 .sigue-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; background: #e3f0fe; color: #4e9ee8; }
 .sigue-card.destacada .sigue-icon { background: rgba(255,255,255,.14); color: #88c4fc; }
-.sigue-card b { font-family: Merriweather, Georgia, serif; font-size: 15.5px; font-weight: 700; color: #013446; margin-top: 4px; }
+.sigue-card b { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 15.5px; font-weight: 700; color: #013446; margin-top: 4px; }
 .sigue-card small { font-size: 12.5px; line-height: 1.55; color: #62808f; }
 .sigue-card.destacada b { color: #fff; }
 .sigue-card.destacada small { color: rgba(255,255,255,.72); }
@@ -671,7 +671,7 @@
 /* ── BARRA DE NAVEGACIÓN INFERIOR (móvil / tablet) ──────────────────── */
 .barra-inferior { position: fixed; left: 0; right: 0; bottom: 0; z-index: 46; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: rgba(255,255,255,.94); backdrop-filter: blur(16px); border-top: 1px solid #d8e7f5; padding: 7px 6px calc(7px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -6px 24px rgba(1,52,70,.09); }
 .barra-inferior .bi-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 2px; border: 0; background: transparent; cursor: pointer; border-radius: 12px; color: #62808f; text-decoration: none; transition: .2s cubic-bezier(.22,1,.36,1); }
-.barra-inferior .bi-item span { font-family: Montserrat, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: -.01em; }
+.barra-inferior .bi-item span { font-family: Montserrat, "Montserrat ajuste", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: -.01em; }
 .barra-inferior .bi-item:active { transform: scale(.93); }
 .barra-inferior .bi-item.activo { color: #013446; background: #e3f0fe; }
 .barra-inferior .bi-item.destacado svg { color: #4e9ee8; }
@@ -860,7 +860,7 @@
 }
 
 /* ── EXPLORADOR DE SERVICIOS (buscador + temas) ─────────────────────── */
-.explorador { background: #fff; border-bottom: 1px solid #d8e7f5; padding: 32px 0 34px; font-family: Montserrat, sans-serif; }
+.explorador { background: #fff; border-bottom: 1px solid #d8e7f5; padding: 32px 0 34px; font-family: Montserrat, "Montserrat ajuste", sans-serif; }
 .explorador-inner { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
 .exp-cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
 .exp-cat { display: flex; align-items: center; gap: 12px; text-align: left; background: #f4f9fe; border: 1.5px solid #d8e7f5; border-radius: 18px; padding: 15px 16px; cursor: pointer; transition: .25s cubic-bezier(.22,1,.36,1); }
@@ -873,12 +873,12 @@
 .exp-cat-txt small { font-size: 11px; color: #62808f; }
 .exp-cat.activa .exp-cat-txt b { color: #fff; }
 .exp-cat.activa .exp-cat-txt small { color: rgba(255,255,255,.62); }
-.exp-cat-n { font-family: Merriweather, Georgia, serif; font-size: 22px; font-weight: 900; color: #fa943a; }
+.exp-cat-n { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 22px; font-weight: 900; color: #fa943a; }
 
 .exp-buscador { display: flex; align-items: center; gap: 11px; background: #f4f9fe; border: 1.5px solid #d8e7f5; border-radius: 15px; padding: 0 16px; height: 52px; transition: .2s; }
 .exp-buscador:focus-within { border-color: #88c4fc; box-shadow: 0 0 0 3px rgba(136,196,252,.28); background: #fff; }
 .exp-buscador svg { color: #4e9ee8; flex: 0 0 auto; }
-.exp-buscador input { flex: 1; border: 0; background: transparent; outline: none; font-family: Montserrat, sans-serif; font-size: 14px; color: #0d2c3a; min-width: 0; }
+.exp-buscador input { flex: 1; border: 0; background: transparent; outline: none; font-family: Montserrat, "Montserrat ajuste", sans-serif; font-size: 14px; color: #0d2c3a; min-width: 0; }
 .exp-buscador input::placeholder { color: #8ba3b3; }
 .exp-limpiar { border: 0; background: #013446; color: #fff; font-size: 11.5px; font-weight: 800; padding: 7px 13px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
 
@@ -913,7 +913,7 @@
 .v4-home .sistema { background: linear-gradient(160deg, #012938 0%, #013446 55%, #02506b 100%); position: relative; overflow: hidden; }
 .v4-home .sistema:before { content: ""; position: absolute; width: 520px; height: 520px; border-radius: 50%; left: -180px; bottom: -240px; background: radial-gradient(circle, rgba(136,196,252,.18), transparent 68%); }
 .v4-home .sistema-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1.05fr .95fr; gap: 52px; align-items: center; }
-.v4-home .sistema h2 { font-family: Merriweather, Georgia, serif; color: #fff; font-size: clamp(26px, 3.2vw, 42px); line-height: 1.16; letter-spacing: -.03em; margin: 18px 0 16px; font-weight: 900; }
+.v4-home .sistema h2 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; color: #fff; font-size: clamp(26px, 3.2vw, 42px); line-height: 1.16; letter-spacing: -.03em; margin: 18px 0 16px; font-weight: 900; }
 .v4-home .sistema h2 span { color: var(--sky); }
 .v4-home .sistema > .v4-container > .sistema-grid p { color: rgba(255,255,255,.72); line-height: 1.72; font-size: 15px; margin: 0 0 22px; max-width: 540px; }
 .v4-home .sistema-lista { list-style: none; padding: 0; margin: 0 0 26px; display: grid; gap: 11px; }
@@ -928,7 +928,7 @@
 .v4-home .mock-body { padding: 18px; }
 .v4-home .mock-progreso { background: linear-gradient(135deg, #013446, #02506b); border-radius: 16px; padding: 15px 16px; color: #fff; margin-bottom: 16px; }
 .v4-home .mock-progreso-head { display: flex; align-items: baseline; justify-content: space-between; font-size: 12.5px; font-weight: 700; }
-.v4-home .mock-progreso-head b { font-family: Merriweather, Georgia, serif; font-size: 20px; color: var(--sun); }
+.v4-home .mock-progreso-head b { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 20px; color: var(--sun); }
 .v4-home .mock-barra { height: 6px; border-radius: 99px; background: rgba(255,255,255,.16); margin: 9px 0 7px; overflow: hidden; }
 .v4-home .mock-barra i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--sky), var(--accent)); }
 .v4-home .mock-progreso small { font-size: 10.5px; color: rgba(255,255,255,.6); }
@@ -952,13 +952,13 @@
 }
 
 /* ── CARRUSEL DE CATEGORÍAS (/servicios) ────────────────────────────── */
-.cat-slider { background: linear-gradient(180deg, #f4f9fe 0%, #fff 100%); border-bottom: 1px solid #d8e7f5; padding: 34px 0 40px; font-family: Montserrat, sans-serif; }
+.cat-slider { background: linear-gradient(180deg, #f4f9fe 0%, #fff 100%); border-bottom: 1px solid #d8e7f5; padding: 34px 0 40px; font-family: Montserrat, "Montserrat ajuste", sans-serif; }
 .cat-slider-inner { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
 .cat-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
 .cat-tab { display: flex; align-items: center; gap: 10px; background: #fff; border: 1.5px solid #d8e7f5; border-radius: 16px; padding: 14px 16px; cursor: pointer; text-align: left; transition: .28s cubic-bezier(.22,1,.36,1); }
 .cat-tab:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(1,52,70,.1); }
 .cat-tab span { flex: 1; font-size: 13.5px; font-weight: 800; color: #013446; line-height: 1.25; }
-.cat-tab em { font-style: normal; font-family: Merriweather, Georgia, serif; font-size: 17px; font-weight: 900; color: #62808f; }
+.cat-tab em { font-style: normal; font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 17px; font-weight: 900; color: #62808f; }
 .cat-tab svg { flex: 0 0 auto; color: #4e9ee8; }
 .cat-tab.activo { border-color: transparent; }
 .cat-tab.activo.c-sky { background: #013446; }
@@ -976,7 +976,7 @@
 .cat-panel.c-sky .cat-badge { color: #17608f; }
 .cat-panel.c-orange .cat-badge { color: #b3641a; }
 .cat-panel.c-sun .cat-badge { color: #8d6a06; }
-.cat-panel-head h3 { font-family: Merriweather, Georgia, serif; font-size: clamp(21px, 2.4vw, 29px); font-weight: 900; color: #013446; letter-spacing: -.02em; margin: 12px 0 8px; }
+.cat-panel-head h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: clamp(21px, 2.4vw, 29px); font-weight: 900; color: #013446; letter-spacing: -.02em; margin: 12px 0 8px; }
 .cat-panel-head p { color: #62808f; font-size: 13.5px; line-height: 1.65; margin: 0; max-width: 620px; }
 .cat-cta { display: inline-flex; align-items: center; gap: 8px; background: #013446; color: #fff !important; text-decoration: none; font-size: 13px; font-weight: 800; padding: 12px 18px; border-radius: 13px; white-space: nowrap; transition: .22s cubic-bezier(.22,1,.36,1); }
 .cat-cta:hover { background: #fa943a; transform: translateY(-2px); box-shadow: 0 12px 24px rgba(250,148,58,.3); }
@@ -1005,7 +1005,7 @@
 
 /* Acciones de la tarjeta de asesoría: agendar o pagar en la web */
 .v4-home .asesoria-acciones { display: grid; gap: 8px; }
-.v4-home .asesoria-pagar { display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--primary); font-family: Montserrat, sans-serif; font-size: 12.5px; font-weight: 800; padding: 9px 12px; border-radius: 11px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: .2s; }
+.v4-home .asesoria-pagar { display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--primary); font-family: Montserrat, "Montserrat ajuste", sans-serif; font-size: 12.5px; font-weight: 800; padding: 9px 12px; border-radius: 11px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: .2s; }
 .v4-home .asesoria-pagar:hover { background: var(--surface-2); text-decoration: none; }
 
 /* ── CALENDARIO RUMBO A 2027 ─────────────────────────────────────────── */
@@ -1014,7 +1014,7 @@
 .v4-home .cal-hoy.urgente { background: linear-gradient(135deg, #b3641a, #e07a1c); }
 .v4-home .cal-hoy-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,.15); color: var(--sun); flex: 0 0 auto; }
 .v4-home .cal-hoy-label { display: block; font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.62); }
-.v4-home .cal-hoy b { display: block; font-family: Merriweather, Georgia, serif; font-size: 19px; font-weight: 900; margin: 3px 0 4px; }
+.v4-home .cal-hoy b { display: block; font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 19px; font-weight: 900; margin: 3px 0 4px; }
 .v4-home .cal-hoy p { margin: 0; font-size: 13px; color: rgba(255,255,255,.78); line-height: 1.5; }
 
 .v4-home .cal-linea { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
@@ -1029,7 +1029,7 @@
 .v4-home .cal-badge { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; background: var(--accent); color: #fff; padding: 4px 9px; border-radius: 999px; }
 .v4-home .cal-badge.paralelo { background: var(--sky-soft); color: #17608f; }
 .v4-home .cal-periodo { font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; color: var(--accent); margin-top: 4px; }
-.v4-home .cal-etapa h3 { font-family: Merriweather, Georgia, serif; font-size: 16px; font-weight: 900; color: var(--primary); margin: 0; letter-spacing: -.02em; }
+.v4-home .cal-etapa h3 { font-family: Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif; font-size: 16px; font-weight: 900; color: var(--primary); margin: 0; letter-spacing: -.02em; }
 .v4-home .cal-etapa p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); flex: 1; }
 .v4-home .cal-consejo { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; line-height: 1.5; color: var(--ink); background: var(--surface); border-radius: 11px; padding: 9px 11px; }
 .v4-home .cal-consejo svg { color: var(--accent); flex: 0 0 auto; margin-top: 1px; }

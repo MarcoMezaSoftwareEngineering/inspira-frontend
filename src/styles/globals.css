@@ -31,6 +31,8 @@
 /* Cruces de la web pública hacia el panel: /mapa-estudiar-en-espana guarda
    la comparativa con el formulario de perfil del panel. */
 @source "../pages/panel/components/perfil.shared.jsx";
+/* Antes que v4.css: las fuentes de reserva ajustadas que usan sus pilas. */
+@import "./fuentes-ajuste.css";
 @import "./v4.css";
 /* El botón flotante de WhatsApp: aquí y no en su componente, para que la
    web no pida una hoja suelta de 1 KB antes de pintar (ver

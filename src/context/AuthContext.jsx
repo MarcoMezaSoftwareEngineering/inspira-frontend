@@ -1,18 +1,36 @@
 // src/context/AuthContext.jsx
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, startTransition, useCallback, useContext, useEffect, useState } from "react";
 import { borrarSesionLocal, cerrarSesionServidor } from "../services/sesion";
 import { desactivarAvisos } from "../services/push";
 
 const AuthContext = createContext(null);
 const API = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
-export function AuthProvider({ children }) {
+// `arranqueSuave`: la página llegó prerenderizada y se está hidratando (Raiz.jsx).
+export function AuthProvider({ children, arranqueSuave = false }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Estable entre renders: AuthSuccess lo tiene como dependencia de su efecto,
   // y con una función nueva en cada render el canje del token se repetía.
-  const fetchMe = useCallback(async () => {
+  //
+  // `suave`: en una página prerenderizada, la comprobación de la sesión al
+  // arrancar aplica su resultado en una transición (09/10/2026). Si el trozo
+  // de la ruta aún no ha bajado, React no ha hidratado ese Suspense; un cambio
+  // urgente de este contexto le haría tirar el HTML del servidor y repintarlo
+  // (el contenido parpadea y se pierde la ventaja). En una transición, React
+  // espera a hidratarlo. En el resto de casos va como siempre, y también
+  // cuando se llama a propósito (AuthSuccess, antes de navegar al panel): el
+  // panel tiene que ver ya al usuario.
+  const fetchMe = useCallback(async ({ suave = false } = {}) => {
+    const aplicar = (usuario) => {
+      const cambiar = () => {
+        setUser(usuario);
+        setLoading(false);
+      };
+      if (suave) startTransition(cambiar);
+      else cambiar();
+    };
     try {
       const token = localStorage.getItem("token");
 
@@ -26,16 +44,14 @@ export function AuthProvider({ children }) {
       });
 
       if (!res.ok) {
-        setUser(null);
+        aplicar(null);
         return;
       }
 
       const data = await res.json();
-      setUser(data.ok ? data.user : null);
+      aplicar(data.ok ? data.user : null);
     } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
+      aplicar(null);
     }
   }, []);
 
@@ -43,13 +59,18 @@ export function AuthProvider({ children }) {
     // ✅ Si NO hay token, no tiene sentido llamar /auth/me
     const token = localStorage.getItem("token");
     if (!token) {
-      setUser(null);
-      setLoading(false);
+      const sinSesion = () => {
+        setUser(null);
+        setLoading(false);
+      };
+      // En transición por lo mismo que `suave` (ver fetchMe).
+      if (arranqueSuave) startTransition(sinSesion);
+      else sinSesion();
       return;
     }
 
-    fetchMe();
-  }, [fetchMe]);
+    fetchMe({ suave: arranqueSuave });
+  }, [fetchMe, arranqueSuave]);
 
   // Cerrar sesión la invalida también en el servidor —el token deja de valer
   // aunque alguien lo hubiera copiado— y avisa a las demás pestañas. Con

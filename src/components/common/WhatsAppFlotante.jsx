@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { WHATSAPP_INSPIRA, origenDeRuta, whatsappDesde } from "../../config/contacto";
 import { enviarEventoEmbudo } from "../../lib/analytics";
+import { useHidratando } from "../../lib/hidratacion";
 // La hoja (styles/whatsapp-flotante.css) la importa globals.css desde el
 // 09/10/2026: importada aquí, con Core en su propia entrada, era la única
 // hoja exclusiva de la web y Vite la sacaba a un main.css de 1 KB que
@@ -74,6 +75,9 @@ export default function WhatsAppFlotante({
 }) {
   const ruta = path || (typeof window === "undefined" ? "/" : window.location.pathname);
   const [abajo, setAbajo] = useState(null);
+  // Va en un portal a document.body: ni el servidor ni la hidratación pueden
+  // pintarlo. Aparece justo después de hidratar.
+  const hidratando = useHidratando();
 
   // El alto de la barra inferior no es fijo: crece con el área segura del móvil
   // y desaparece a partir de 1100 px. Se mide de verdad en vez de copiar un
@@ -94,7 +98,7 @@ export default function WhatsAppFlotante({
     };
   }, [ruta]);
 
-  if (typeof document === "undefined") return null;
+  if (typeof document === "undefined" || hidratando) return null;
   if (!forzar && SIN_BOTON.some((r) => r.test(ruta))) return null;
 
   const claveOrigen = origen || origenDeRuta(ruta);

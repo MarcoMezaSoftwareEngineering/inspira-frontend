@@ -1,10 +1,12 @@
 import Reveal from "../../../components/common/Reveal";
 import Icono from "../../../components/common/Icono";
 import { OPCIONES_ASESORIA, promoVigente } from "../../../config/asesorias";
+import { useDiaDeHoy } from "../../../lib/hidratacion";
 import ComprarProducto from "../../../components/common/ComprarProducto";
 
 export default function Asesorias() {
-  const promo = promoVigente();
+  // Al hidratar la portada prerenderizada, el día del HTML (lib/hidratacion.js).
+  const promo = promoVigente(useDiaDeHoy());
   const opciones = OPCIONES_ASESORIA.filter((o) => !o.promo || promo);
   const principales = opciones.filter((o) => !o.secundaria);
   const secundaria = opciones.find((o) => o.secundaria);

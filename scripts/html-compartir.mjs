@@ -19,7 +19,8 @@ import { RUTAS_COMPARTIR, SITIO, MARCA, datosRuta, nombreArchivo } from "./rutas
 import { POSTS, AUTOR_POR_DEFECTO } from "../src/pages/blog/blog.data.js";
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const DIST = path.join(RAIZ, "dist");
+// INSPIRA_DIST: la misma carpeta de salida que vite.config.js (pruebas).
+const DIST = process.env.INSPIRA_DIST ? path.resolve(process.env.INSPIRA_DIST) : path.join(RAIZ, "dist");
 const SALIDA = path.join(DIST, "compartir");
 const INDEX = path.join(DIST, "index.html");
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useHidratando } from "../../../lib/hidratacion";
 
 // ⚠️ SUSTANCIACIÓN. Cada cifra debe poder acreditarse con evidencia que ya
 // exista al publicarla. Catálogo: más de 3.000 másteres oficiales activos y 45
@@ -20,19 +21,37 @@ const miles = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 const PERIODO_METRICAS =
   "según los registros internos de expedientes (agosto de 2026) y el catálogo académico de la empresa (septiembre de 2026)";
 
-/* Réplica del contador del mockup: ease-out cúbico sobre 1.6s al entrar en viewport */
+/* Réplica del contador del mockup: ease-out cúbico sobre 1.6s al entrar en viewport.
+
+   Estados: "oculto" (aún no asomó), "visto" (asomó: aparece y cuenta) y
+   "quieto": la portada llegó prerenderizada (09/10/2026) y la cifra ya está
+   pintada, final y visible, en el HTML; se lee sin JavaScript. Al hidratar,
+   la que está a la vista se queda así, sin volver a contar; la de más abajo
+   pasa a "oculto" y contará al asomar, como siempre. */
 function useInView(threshold = 0.35) {
   const ref = useRef(null);
-  const [seen, setSeen] = useState(false);
+  const hidratando = useHidratando();
+  const [estado, setEstado] = useState(hidratando ? "quieto" : "oculto");
+  const llegoPintado = useRef(hidratando);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // El primer aviso del observador dice dónde estaba al hidratar.
+    let primerAviso = llegoPintado.current;
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const primero = primerAviso;
+          primerAviso = false;
           if (entry.isIntersecting) {
-            setSeen(true);
+            if (!primero) setEstado("visto");
             io.unobserve(el);
+          } else if (primero) {
+            // Por la posición y no por el umbral: la que asoma sin llegar al
+            // 35 % ya se está viendo y no se esconde (ver Reveal).
+            const bordeInferior = entry.rootBounds ? entry.rootBounds.bottom : window.innerHeight;
+            if (entry.boundingClientRect.top >= bordeInferior) setEstado("oculto");
+            else io.unobserve(el);
           }
         });
       },
@@ -41,15 +60,16 @@ function useInView(threshold = 0.35) {
     io.observe(el);
     return () => io.disconnect();
   }, [threshold]);
-  return [ref, seen];
+  return [ref, estado];
 }
 
 function Metric({ m }) {
-  const [ref, seen] = useInView();
-  const [value, setValue] = useState(0);
+  const [ref, estado] = useInView();
+  const seen = estado !== "oculto";
+  const [value, setValue] = useState(estado === "quieto" ? m.count : 0);
 
   useEffect(() => {
-    if (!seen || m.fixed) return;
+    if (estado !== "visto" || m.fixed) return;
     const start = performance.now();
     const dur = 1600;
     let raf;
@@ -61,7 +81,7 @@ function Metric({ m }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [seen, m]);
+  }, [estado, m]);
 
   return (
     <article className={`metric${seen ? " in" : ""}`} ref={ref} data-reveal="">

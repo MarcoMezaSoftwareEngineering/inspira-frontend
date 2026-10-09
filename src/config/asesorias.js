@@ -3,6 +3,7 @@
 // La promoción gratuita tiene fecha de caducidad: al pasar `hasta` deja de
 // mostrarse sola, sin necesidad de tocar el resto de la web.
 import { CALENDLY_URL } from "./contacto";
+import { diaLocal } from "../lib/hidratacion";
 // Importes de la fuente única (precios-inspira.json).
 import { SESION_PRECIOS as S30, AMPLIADA_PRECIOS as S50 } from "./paqueteMaster2027Resumen";
 
@@ -16,8 +17,11 @@ export const PROMO_GRATIS = {
   url: CALENDLY_URL,
 };
 
-export const promoVigente = () =>
-  PROMO_GRATIS.activa && new Date() <= new Date(`${PROMO_GRATIS.hasta}T23:59:59`);
+// `dia` ("aaaa-mm-dd"): la cabecera y el botón flotante pasan el de
+// useDiaDeHoy (lib/hidratacion.js) para hidratar el HTML prerenderizado sin
+// desajustes. Sin él, el de hoy en la hora local, como antes.
+export const promoVigente = (dia = diaLocal()) =>
+  PROMO_GRATIS.activa && dia <= PROMO_GRATIS.hasta;
 
 // La asesoría 1:1 de 30 minutos es EL producto de entrada: va primera y
 // destacada. La gratuita de 12 min es solo un paso previo opcional.

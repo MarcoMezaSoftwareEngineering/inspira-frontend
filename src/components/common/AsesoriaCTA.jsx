@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
 import { OPCIONES_ASESORIA, promoVigente } from "../../config/asesorias";
 import ReservaLateral from "./ReservaLateral";
+import { useDiaDeHoy } from "../../lib/hidratacion";
 
 const VISTO_KEY = "inspira_cta_asesoria_visto"; // sessionStorage: por sesión
 
@@ -20,7 +21,8 @@ export default function AsesoriaCTA() {
   const [abierto, setAbierto] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  const promo = promoVigente();
+  // Al hidratar el HTML prerenderizado, el día en que se generó (lib/hidratacion.js).
+  const promo = promoVigente(useDiaDeHoy());
   const opciones = OPCIONES_ASESORIA.filter((o) => !o.promo || promo);
 
   // El botón flotante aparece tras un breve scroll para no tapar el hero.

@@ -13,6 +13,7 @@ import { createPortal } from "react-dom";
 import Icono from "../../../components/common/Icono";
 import { BARRA, CTA, MODALES } from "../../../config/paqueteMaster2027";
 import { BotonReserva } from "./comunes";
+import { useHidratando } from "../../../lib/hidratacion";
 
 function Cruz() {
   return (
@@ -24,6 +25,10 @@ function Cruz() {
 
 /** Se esconde con transform (nunca opacity) y queda inerte mientras no se ve. */
 export function BarraReserva({ oculta, onCerrar }) {
+  // Un portal no se puede pintar en el servidor ni al hidratar: con la página
+  // prerenderizada (09/10/2026), la barra aparece justo después de hidratar.
+  const hidratando = useHidratando();
+  if (hidratando) return null;
   return createPortal(
     <div
       role="region"

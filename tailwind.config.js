@@ -33,13 +33,16 @@ export default {
 
         white: "#FFFFFF",
       },
+      // Tras cada fuente va su reserva ajustada (styles/fuentes-ajuste.css,
+      // 09/10/2026): lo prerenderizado se pinta antes de que lleguen las de
+      // Google y así no salta al cambiar de letra.
       fontFamily: {
-        sans: ["Montserrat", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["Montserrat", "Montserrat ajuste", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
         // `fraunces` se mantiene como alias del display para no tocar las
         // decenas de clases font-fraunces ya existentes.
-        fraunces: ["Merriweather", "Georgia", "serif"],
-        display:  ["Merriweather", "Georgia", "serif"],
-        serif:    ["Merriweather", "Georgia", "serif"],
+        fraunces: ["Merriweather", "Merriweather ajuste", "Merriweather ajuste Noto", "Georgia", "serif"],
+        display:  ["Merriweather", "Merriweather ajuste", "Merriweather ajuste Noto", "Georgia", "serif"],
+        serif:    ["Merriweather", "Merriweather ajuste", "Merriweather ajuste Noto", "Georgia", "serif"],
       },
     },
   },

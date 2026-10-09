@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/html-compartir.mjs",
+    "build": "vite build && node scripts/html-compartir.mjs && node scripts/prerender.mjs",
     "og": "python scripts/og-compartir.py",
     "lint": "eslint .",
     "sitemap": "node scripts/sitemap.mjs",

@@ -1,0 +1,52 @@
+/* Fuentes de reserva ajustadas a Montserrat y Merriweather (09/10/2026).
+
+   Las dos llegan de Google Fonts con font-display: swap: hasta que bajan, el
+   texto se pinta con la de reserva del sistema y, al cambiar, cada línea mide
+   distinto y el contenido salta. Mientras la web esperaba al JavaScript no se
+   notaba (las fuentes solían llegar antes), pero la portada prerenderizada
+   (scripts/prerender.mjs) se pinta antes que ellas: el cambio de letra movía
+   la tarjeta de las tres vías y daba un CLS de 0,17 en Lighthouse.
+
+   Aquí la fuente de reserva se escala para ocupar lo mismo que la buena:
+   size-adjust iguala el ancho medio de las letras y los *-override, la altura
+   de la línea. Cuando llega la de verdad, casi nada se mueve. No cambia cómo
+   se ve la página con sus fuentes: solo el instante anterior.
+
+   Cifras de @capsizecss/metrics (la misma técnica que next/font), calculadas
+   para la regular de cada familia:
+     · Montserrat sobre Arial / Helvetica / Roboto: los tres dan ≈113 %, así
+       que una sola cara vale para Windows, Mac, iPhone y Android.
+     · Merriweather sobre Georgia (Windows, Mac, iPhone) y sobre Noto Serif
+       (Android, que no trae Georgia): difieren un 8 %, van por separado.
+   Si local() no encuentra la fuente, el navegador pasa a la siguiente de la
+   lista, como siempre.
+
+   Uso: Montserrat, "Montserrat ajuste", …  y
+        Merriweather, "Merriweather ajuste", "Merriweather ajuste Noto", Georgia, serif
+   (v4.css y tailwind.config.js). */
+@font-face {
+  font-family: "Montserrat ajuste";
+  src: local("Arial"), local("ArialMT"), local("Helvetica"), local("Roboto"), local("Roboto Regular"), local("Roboto-Regular");
+  ascent-override: 85.79%;
+  descent-override: 22.25%;
+  line-gap-override: 0%;
+  size-adjust: 112.83%;
+}
+
+@font-face {
+  font-family: "Merriweather ajuste";
+  src: local("Georgia");
+  ascent-override: 90.45%;
+  descent-override: 25.09%;
+  line-gap-override: 0%;
+  size-adjust: 108.79%;
+}
+
+@font-face {
+  font-family: "Merriweather ajuste Noto";
+  src: local("Noto Serif"), local("Noto Serif Regular"), local("NotoSerif-Regular");
+  ascent-override: 97.59%;
+  descent-override: 27.07%;
+  line-gap-override: 0%;
+  size-adjust: 100.83%;
+}

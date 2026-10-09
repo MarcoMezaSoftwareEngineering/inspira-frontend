@@ -4,6 +4,7 @@ import { navigate } from "../../../services/navigate";
 import { NOMBRE_PORTAL, NOMBRE_CORTO } from "../../../config/portalMarca";
 import { MarcoTelefono } from "../../common/MarcoDispositivo";
 import { CAPTURAS_PORTAL } from "../../common/capturasPortal";
+import { useDiaDeHoy } from "../../../lib/hidratacion";
 
 const ir = (e, href) => {
   e.preventDefault();
@@ -44,6 +45,8 @@ const enlacesLegales = [
  * más los accesos a los documentos legales y al Libro de Reclamaciones.
  */
 export default function Footer() {
+  // El año sale del día de useDiaDeHoy: al hidratar, el del HTML prerenderizado.
+  const anio = useDiaDeHoy().slice(0, 4);
   const abrirCookies = () =>
     window.dispatchEvent(new CustomEvent("inspira:abrir-cookies"));
 
@@ -207,7 +210,7 @@ export default function Footer() {
 
         <div className="mt-8 border-t border-neutral-200 pt-6 text-xs leading-relaxed text-neutral-500">
           <p>
-            © {new Date().getFullYear()} {TITULAR.razonSocial}. Todos los
+            © {anio} {TITULAR.razonSocial}. Todos los
             derechos reservados.
           </p>
           <p className="mt-2">

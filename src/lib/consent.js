@@ -13,6 +13,7 @@
 
 import { VERSIONES } from "../config/legal";
 
+// La lee también scripts/prerender-guarda.js (solo si existe): si cambia, cámbiala allí.
 const CLAVE = "inspira_consent";
 const VIGENCIA_MESES = 12;
 

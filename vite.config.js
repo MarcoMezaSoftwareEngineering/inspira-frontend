@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 import { readFileSync } from "node:fs";
+import process from "node:process";
 
 // Fuente única de precios para los HTML estáticos de public/ (calculadora):
 // publica /precios-inspira.js (window.PRECIOS_INSPIRA) desde
@@ -34,6 +35,16 @@ export default defineConfig({
   // exacto; /backoffice/… cae en index.html y App.jsx monta BackofficeApp en
   // diferido: las dos entradas tienen que seguir funcionando.
   build: {
+    // INSPIRA_DIST: compilar en otra carpeta sin tocar dist/ (pruebas de
+    // rendimiento contra una versión anterior). La leen también
+    // scripts/html-compartir.mjs y scripts/prerender.mjs.
+    outDir: process.env.INSPIRA_DIST || "dist",
+    emptyOutDir: true,
+    // .vite/manifest.json: qué CSS y qué trozos necesita cada página diferida.
+    // Lo usa scripts/prerender.mjs para enlazarlos en el HTML prerenderizado
+    // (sin ellos la página se pintaría sin sus estilos) y lo borra después:
+    // no se publica (09/10/2026).
+    manifest: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),

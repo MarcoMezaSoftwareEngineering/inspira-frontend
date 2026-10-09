@@ -18,10 +18,11 @@ import { BARRA_ETIQUETA } from "../../config/portalMarca";
 const esMaster = (p) => p.startsWith("/servicios/master") || p.startsWith("/master-");
 const esServicios = (p) => p === "/servicios" || (p.startsWith("/servicios/") && !esMaster(p));
 
-export default function BarraInferior() {
+// `rutaInicial` viene de App: en el prerender no hay window (ver Header).
+export default function BarraInferior({ rutaInicial }) {
   const { user } = useAuth();
   const [path, setPath] = useState(
-    typeof window !== "undefined" ? window.location.pathname : "/"
+    () => rutaInicial ?? (typeof window !== "undefined" ? window.location.pathname : "/")
   );
 
   useEffect(() => {

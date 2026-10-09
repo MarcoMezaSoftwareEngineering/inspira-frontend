@@ -466,8 +466,21 @@ const PUBLIC_PATHS = [
   "/libro-de-reclamaciones",
 ];
 
-export default function App() {
-  const [path, setPath] = useState(rutaActual);
+/**
+ * @param {string}  [ruta]            Solo en el prerender (entry-server.jsx): la
+ *                                    ruta que se pinta, porque allí no hay window.
+ * @param {boolean} [prerenderizada]  El HTML ya trae esta página pintada: en el
+ *                                    servidor y al hidratarla en el navegador.
+ */
+export default function App({ ruta, prerenderizada = false }) {
+  const [path, setPath] = useState(() => ruta ?? rutaActual());
+
+  // La página que llegó prerenderizada ya está en pantalla cuando React la
+  // hidrata: no lleva la animación de entrada (.v4-page-enter), que la haría
+  // desaparecer y volver a aparecer. Las demás, y esta misma si se vuelve a
+  // ella navegando, entran animadas como siempre (09/10/2026).
+  const [rutaYaPintada, setRutaYaPintada] = useState(prerenderizada ? path : null);
+  if (rutaYaPintada !== null && rutaYaPintada !== path) setRutaYaPintada(null);
 
   // Dentro del panel, cambiar de pantalla es una transición y no un corte:
   // View Transitions donde el navegador las tiene (Chrome, Safari 18). Hacia
@@ -580,13 +593,13 @@ export default function App() {
       {path === "/servicios/master" && <SEOSchema schema={SCHEMA_MASTER} id="master" />}
       {path === "/servicios/estancia" && <SEOSchema schema={SCHEMA_ESTANCIA} id="estancia" />}
 
-      {!isPanel && !sinChrome && !isNotFound && <Header />}
+      {!isPanel && !sinChrome && !isNotFound && <Header rutaInicial={path} />}
 
       {/* `key` fuerza el remontaje al navegar: cada página entra con animación.
           El panel NO: sus rutas internas cambian a cada clic y remontarlo
           volvería a pedir el perfil y los servicios en cada sección. Se monta
           una vez y anima por dentro lo que cambia. */}
-      <div key={isPanel ? "panel" : path} className={isPanel ? undefined : "v4-page-enter"}>
+      <div key={isPanel ? "panel" : path} className={isPanel || path === rutaYaPintada ? undefined : "v4-page-enter"}>
       {/* El hueco mientras llega la página mide una pantalla entera: con 60vh
           el pie asomaba en el primer pantallazo y saltaba hacia abajo al
           llegar el contenido (CLS de 0,19 en /servicios/master, 09/10/2026). */}
@@ -643,7 +656,7 @@ export default function App() {
       {/* 404 */}
       {isNotFound && (
         <>
-          <Header />
+          <Header rutaInicial={path} />
           <NotFound />
         </>
       )}
@@ -657,7 +670,7 @@ export default function App() {
       {!isPanel && !sinChrome && <AsesoriaCTA />}
 
       {/* Navegación inferior tipo app (móvil y tablet). «Reservar» abre Calendly. */}
-      {!isPanel && !sinChrome && <BarraInferior />}
+      {!isPanel && !sinChrome && <BarraInferior rutaInicial={path} />}
 
       {/* WhatsApp siempre a mano. Decide él dónde no debe salir (panel,
           backoffice, /auth y las landings con su propia barra de acción), así

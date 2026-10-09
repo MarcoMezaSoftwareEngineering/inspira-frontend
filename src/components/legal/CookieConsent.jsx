@@ -11,6 +11,7 @@ import {
   rechazarTodo,
   requiereDecision,
 } from "../../lib/consent";
+import { useHidratando } from "../../lib/hidratacion";
 
 const OPCIONALES = ["preferencias", "analitica", "marketing"];
 
@@ -33,6 +34,18 @@ export default function CookieConsent() {
   const [visible, setVisible] = useState(requiereDecision);
   const [panel, setPanel] = useState(false);
   const [seleccion, setSeleccion] = useState(obtenerConsentimiento);
+  // El aviso va también en el HTML prerenderizado (09/10/2026): quien entra
+  // por primera vez lo ve con la página, como siempre, sin esperar a la
+  // hidratación (en el móvil es lo más grande del primer pantallazo de
+  // /servicios, su LCP). El servidor no sabe qué decidió este navegador: si
+  // ya hay una decisión guardada, scripts/prerender-guarda.js lo esconde antes
+  // de pintar (<html data-aviso-cookies-oculto>) y, al hidratar, se quita o se
+  // queda según la decisión de verdad.
+  const hidratando = useHidratando();
+
+  useEffect(() => {
+    if (!hidratando && visible) document.documentElement.removeAttribute("data-aviso-cookies-oculto");
+  }, [hidratando, visible]);
 
   useEffect(() => {
     // Ejecuta los tags ya consentidos en visitas anteriores.
@@ -54,7 +67,7 @@ export default function CookieConsent() {
     };
   }, []);
 
-  if (!visible) return null;
+  if (!visible && !hidratando) return null;
 
   const cerrar = () => {
     setVisible(false);
@@ -77,6 +90,7 @@ export default function CookieConsent() {
   return (
     <div
       className="fixed inset-x-0 bottom-0 z-[9999] p-3 sm:p-5"
+      data-aviso-cookies=""
       role="dialog"
       aria-label="Configuración de cookies"
     >

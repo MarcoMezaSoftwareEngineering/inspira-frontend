@@ -1,7 +1,7 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { startTransition } from "react";
+import { createRoot, hydrateRoot } from "react-dom/client";
 
-import App from "./App.jsx";
+import Raiz from "./Raiz.jsx";
 import "./styles/globals.css";
 // La escala y el tacto compartidos por las dos mitades del producto.
 // Va aquí y no en cada shell a propósito: importada desde BackofficeApp y
@@ -10,13 +10,9 @@ import "./styles/globals.css";
 // pantalla. En la entrada está siempre, y pesa 6 KB.
 import "./styles/ergonomia.css";
 
-import { AuthProvider } from "./context/AuthContext";
-import InspiraDialog from "./components/ui/InspiraDialog";
-
 import { vigilarVersionNueva, marcarArranqueCorrecto } from "./lib/versionNueva";
 import { vigilarEnlacesWhatsApp } from "./lib/whatsapp";
 import { vigilarErroresGlobales } from "./lib/reportarError";
-import ErrorRaiz from "./components/common/ErrorRaiz";
 
 // Los errores que no pasan por ningún cerco (un clic, una promesa sin catch)
 // también llegan a Core → Configuración → Errores.
@@ -61,16 +57,38 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 // El HTML pre-renderizado de las entradas del blog (scripts/html-compartir.mjs)
 // es para los rastreadores: la aplicación pinta lo suyo en #root.
 document.getElementById("prerender")?.remove();
-createRoot(document.getElementById("root")).render(
-  // Sin <BrowserRouter> (09/10/2026): el enrutado es manual
-  // (window.location.pathname en App.jsx) y nadie consumía su contexto;
-  // react-router-dom añadía 30 KB a todas las páginas.
-  <StrictMode>
-    <ErrorRaiz>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ErrorRaiz>
-    <InspiraDialog />
-  </StrictMode>
-);
+
+// Las páginas públicas principales llegan con su contenido ya pintado
+// (scripts/prerender.mjs, 09/10/2026): <html data-prerender="/ruta"> dice
+// cuál trae el HTML. Si es la de la barra de direcciones, React lo hidrata:
+// conserva lo pintado, sin parpadeo ni animación repetida. Si no lo es (nginx
+// sirve index.html, con la portada dentro, a /mapa, /panel o un 404), #root
+// sigue escondido (la guarda del <head> solo lo enseña en su ruta): se vacía
+// y se monta de cero, como siempre. En los dos casos se marca
+// data-prerender-ok, por si la guarda no llegó a correr.
+const raiz = document.getElementById("root");
+const html = document.documentElement;
+
+if (html.dataset.prerender === window.location.pathname && raiz.hasChildNodes()) {
+  html.setAttribute("data-prerender-ok", "");
+  // En una transición, React hidrata a ratos y cede el hilo entre uno y otro:
+  // la página ya se ve y, si alguien toca o desplaza mientras tanto, responde.
+  // Sin ella, hidratar la portada era una tarea larga de casi un segundo en un
+  // móvil lento (TBT de Lighthouse). Es lo que hace Next.js.
+  startTransition(() => {
+    hydrateRoot(raiz, <Raiz prerenderizada />, {
+      // Un desajuste entre el servidor y el navegador no rompe nada: React
+      // repinta ese trozo y sigue. Sin este manejador, React lo pasa a
+      // window.reportError y vigilarErroresGlobales lo mandaría a Core →
+      // Configuración → Errores, que es para fallos de verdad.
+      onRecoverableError(error, info) {
+        console.warn("[prerender] desajuste al hidratar:", error, info?.componentStack || "");
+      },
+    });
+  });
+} else {
+  raiz.textContent = "";
+  html.removeAttribute("data-aviso-cookies-oculto");
+  html.setAttribute("data-prerender-ok", "");
+  createRoot(raiz).render(<Raiz />);
+}

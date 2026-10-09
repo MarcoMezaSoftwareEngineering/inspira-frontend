@@ -170,6 +170,11 @@ aunque la plataforma cachee por URL de imagen.
 
 - Ruta nueva con vista previa propia: añadirla en `scripts/rutas-compartir.mjs`
   y en el `map` de este archivo.
+- Prerender (09/10/2026): `scripts/prerender.mjs` pinta dentro de su HTML de
+  compartir las páginas de su lista `PAGINAS` (y la portada dentro de
+  `index.html`). Solo sirve para rutas que estén en el `map` del servidor: las
+  demás reciben `index.html`. Para que una ruta del `map` llegue con el
+  contenido ya pintado, añadirla también a `PAGINAS`.
 - Imágenes: `npm run og` (o `python scripts/og-compartir.py`) regenera las tres
   en `public/og/`.
 - Si cambia el `<head>` de `index.html`, cada etiqueta og/twitter debe seguir

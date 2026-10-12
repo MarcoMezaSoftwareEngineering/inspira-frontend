@@ -30,9 +30,14 @@ const COLOR_SERVICIO = {
   fp:     "bg-[#E8F5EE] text-[#1D6A4A]",
   legal:  "bg-[#FDEDEC] text-[#C0392B]",
   doc:    "bg-[#E6F4F6] text-[#0E5E6B]",
+  grado:  "bg-[#EAF1FB] text-[#1F4E8C]",
+  homesc: "bg-[#FDF3E3] text-[#8A5A0B]",
+  homuni: "bg-[#F1ECFA] text-[#5B3B9E]",
+  recurso: "bg-[#FDECEC] text-[#A93226]",
 };
 const CORTO = { master: "Máster", visa: "Visado", ee: "Estancia",
-  mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado" };
+  mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado",
+  grado: "Grado", homesc: "Homol. escolar", homuni: "Homol. título", recurso: "Recurso" };
 
 // Los colores salen de las hojas de seguimiento del equipo: verde admitido,
 // morado lista de espera, marrón cita completada, rojo excluido. En una tabla

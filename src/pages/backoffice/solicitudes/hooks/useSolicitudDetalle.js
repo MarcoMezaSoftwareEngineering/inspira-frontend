@@ -33,6 +33,10 @@ export function useSolicitudDetalle(idSolicitud) {
           ...solicitud,
           asesores: rBackoffice.solicitud.asesores || solicitud.asesores,
           informe_compat_curado: rBackoffice.solicitud.informe_compat_curado ?? null,
+          // El servicio y la etapa, por si el checklist viene de una versión
+          // del servidor que aún no los manda.
+          panel_servicio: solicitud.panel_servicio ?? rBackoffice.solicitud.panel_servicio ?? null,
+          etapa: solicitud.etapa ?? rBackoffice.solicitud.etapa ?? null,
         };
       }
 

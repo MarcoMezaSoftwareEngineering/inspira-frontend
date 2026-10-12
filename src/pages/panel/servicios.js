@@ -14,8 +14,16 @@ export const SERVICIO = {
   MODIFICATORIA: "modificatoria",
   FP: "fp",
   DOCTORADO: "doctorado",
+  // Trámites por pasos (12/10/2026), con la misma clave que `panel_servicio`.
+  GRADO: "grado",
+  HOMESC: "homesc",
+  HOMUNI: "homuni",
+  RECURSO: "recurso",
   OTRO: "otro",
 };
+
+/** Los que abren el recorrido genérico por pasos (DetalleSolicitudTramite). */
+export const TRAMITES = [SERVICIO.GRADO, SERVICIO.FP, SERVICIO.HOMESC, SERVICIO.HOMUNI, SERVICIO.RECURSO];
 
 // El identificador del tipo manda: es lo que decide el backend. El texto es el
 // respaldo para los expedientes antiguos, que no lo llevaban.
@@ -58,6 +66,8 @@ export function servicioDe(s) {
   // Doctorado (18/09/2026): su tipo puede ser uno genérico de máster, así que
   // se mira el título («Doctorado en España · …») antes que el tipo.
   if (s?.panel_servicio === "doc" || /doctorado/i.test(String(s?.titulo || ""))) return SERVICIO.DOCTORADO;
+  // Trámites por pasos: la clave del servidor manda (grado, fp, homesc…).
+  if (TRAMITES.includes(s?.panel_servicio)) return s.panel_servicio;
 
   const txt = textoDe(s);
   if (/modificatoria|modificaci/.test(txt)) return SERVICIO.MODIFICATORIA;
@@ -67,10 +77,14 @@ export function servicioDe(s) {
   if (txt.includes("visado") || /\bvisa\b/.test(txt) || String(s?.codigo_servicio || "") === "017") return SERVICIO.VISADO;
   const idTipo = Number(s?.id_tipo_solicitud);
   if (TIPOS_MASTER.includes(idTipo)) return SERVICIO.MASTER;
-  if (idTipo === TIPO_HOMOLOGACION || /homologa/.test(txt)) return SERVICIO.OTRO;
-  // El máster antes que la FP: «posgrado» contiene «grado» y caía en FP.
+  // El máster antes que la FP y el grado: «posgrado» contiene «grado».
   if (/m[aá]ster|maestr[ií]a|postgrado|posgrado/.test(txt)) return SERVICIO.MASTER;
-  if (/formaci[oó]n profesional|\bfp\b|grado/.test(txt)) return SERVICIO.FP;
+  if (/reposici|recurso/.test(txt)) return SERVICIO.RECURSO;
+  if (/homologaci[oó]n.*(t[ií]tulo|universitari)|equivalencia/.test(txt)) return SERVICIO.HOMUNI;
+  if (/homologaci[oó]n.*(escolar|bachiller|secundaria)/.test(txt)) return SERVICIO.HOMESC;
+  if (idTipo === TIPO_HOMOLOGACION || /homologa/.test(txt)) return SERVICIO.OTRO;
+  if (/formaci[oó]n profesional|\bfp\b/.test(txt)) return SERVICIO.FP;
+  if (/\bgrado\b/.test(txt)) return SERVICIO.GRADO;
   // Lo que no se reconoce NO se hace pasar por máster (14/09/2026). Antes caía
   // ahí por defecto: a un cliente de nacionalidad o de arraigo se le abrían la
   // guía del máster y las becas y se le exigía el perfil completo. Sigue
@@ -96,6 +110,12 @@ const ACCESOS = {
   // Recorrido propio (DetalleSolicitudDoctorado) y su guía en PDF en
   // «Mis guías» (GUIAS_PORTAL): sin "portal" la pestaña no se abría.
   [SERVICIO.DOCTORADO]: ["portal", "apostilla"],
+  // Trámites por pasos: recorrido propio, sus PDF (cuando existan) y la
+  // apostilla. Grado y FP, además, becas.
+  [SERVICIO.GRADO]: ["portal", "becas", "apostilla"],
+  [SERVICIO.HOMESC]: ["portal", "apostilla"],
+  [SERVICIO.HOMUNI]: ["portal", "apostilla"],
+  [SERVICIO.RECURSO]: ["portal", "apostilla"],
   [SERVICIO.OTRO]: ["apostilla"],
 };
 
@@ -156,7 +176,7 @@ export function pestanasGuiasDe(accesos, guiasPortal = []) {
  * doctorado (18/09/2026): el doctorado no tiene formulario académico propio,
  * pero su candidatura parte de la carrera y la universidad de origen.
  */
-const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.FP, SERVICIO.DOCTORADO];
+const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.FP, SERVICIO.GRADO, SERVICIO.DOCTORADO];
 
 /**
  * Recursos que abren los servicios PROPIOS de la lista. Los expedientes a los

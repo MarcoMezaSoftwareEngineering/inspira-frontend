@@ -43,7 +43,7 @@ export function ClienteDetail({ c }) {
             <>
               {svc === "master"           && <MasterResumen c={c} />}
               {(svc === "visa" || svc === "ee") && <VisaEeResumen c={c} />}
-              {svc === "fp"               && <FpResumen c={c} />}
+              {["fp", "grado", "homesc", "homuni", "recurso"].includes(svc) && <FpResumen c={c} />}
               {svc === "legal"            && <LegalResumen c={c} />}
               {svc === "doc"              && <DocResumen c={c} />}
             </>

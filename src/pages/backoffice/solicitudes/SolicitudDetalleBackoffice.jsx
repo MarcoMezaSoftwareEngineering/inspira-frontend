@@ -6,6 +6,7 @@ import { useSolicitudDetalle } from "./hooks/useSolicitudDetalle";
 import ChecklistSolicitudAdmin from "./components/ChecklistSolicitudAdmin";
 import MensajesAdmin from "./components/MensajesAdmin";
 import EncabezadoClienteAdmin from "./EncabezadoClienteAdmin";
+import { esTramite } from "../../../lib/tramites";
 import IconoPaso, { ICONO_POR_BLOQUE } from "../../../components/common/IconoPaso";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera, BotonVolver, tonoDeEstado } from "../../../components/common/RutaPasos";
 import CercoErrores from "../../../components/common/CercoErrores";
@@ -20,6 +21,8 @@ const CARGAR_MASTER = () => import("./pasosMaster");
 const CARGAR_VISA = () => import("./pasosVisa");
 const CARGAR_ESTANCIA = () => import("./components/estancia/EstanciaAdmin");
 const CARGAR_MODIFICATORIA = () => import("./components/modificatoria/ModificatoriaAdmin");
+// Trámites por pasos (grado, fp, homologaciones, recurso; 12/10/2026).
+const TramiteAdmin = lazyConRecarga(() => import("./components/tramite/TramiteAdmin"));
 
 const deMaster = (nombre) => lazyConRecarga(() => CARGAR_MASTER().then((m) => ({ default: m[nombre] })));
 const deVisa = (nombre) => lazyConRecarga(() => CARGAR_VISA().then((m) => ({ default: m[nombre] })));
@@ -196,9 +199,14 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     Number(detalle?.id_tipo_solicitud) === 18 ||
     String(detalle?.tipo?.nombre || detalle?.titulo || "").toLowerCase().includes("estancia");
   const estadoDe = (id) => bloquesServidor.find((b) => b.id === id)?.estado ?? "pendiente";
+  // Los trámites por pasos (grado, fp, homologaciones, recurso; 12/10/2026)
+  // traen sus bloques del servidor y su panel propio (TramiteAdmin).
+  const isTramite = esTramite(detalle?.panel_servicio);
   // El máster lleva la navegación nueva (cabecera, fila de pasos, «le toca»);
-  // visado, estancia y modificatoria conservan la suya.
-  const esMaster = !isVisado && !isEstancia && !isModificatoria;
+  // visado, estancia y modificatoria conservan la suya. Los trámites por pasos
+  // usan la del máster.
+  const esMaster = !isVisado && !isEstancia && !isModificatoria && !isTramite;
+  const conRuta = esMaster || isTramite;
 
   // En visado la lista se arma aquí y no en el servidor: los bloques nuevos
   // (declaración jurada, impreso oficial) dependen del expediente, que esta
@@ -353,7 +361,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
     nota: `${porRevisar ? `${porRevisar} documento${porRevisar === 1 ? "" : "s"} por revisar · ` : ""}${sinDecidir ? `${sinDecidir} elección${sinDecidir === 1 ? "" : "es"} sin decidir · ` : ""}el mismo expediente que ve ${(detalle?.cliente?.nombre || "el asesorado").split(" ")[0]} en su panel y el tracker de Procesos.`,
   };
   const pasosBO = bloques.map((b) => ({
-    id: b.id, num: b.numero, icono: ICONO_POR_BLOQUE[b.id] || "info", titulo: b.label, corto: CORTO_BO[b.id] || b.label,
+    id: b.id, num: b.numero, icono: b.icono || ICONO_POR_BLOQUE[b.id] || "info", titulo: b.label, corto: b.corto || CORTO_BO[b.id] || b.label,
     subtitulo: b.id === "checklist" && porRevisar ? `${porRevisar} por revisar` : b.id === "eleccion" && sinDecidir ? `${sinDecidir} sin decidir` : undefined,
     estado: tonoDeEstado(b.estado),
     badge: b.id === "checklist" ? porRevisar : b.id === "eleccion" ? sinDecidir : 0,
@@ -491,7 +499,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       )}
 
       {/* ── SIDEBAR (sólo escritorio) ── */}
-      {!esMaster && (
+      {!conRuta && (
       <aside className="hidden lg:block w-[220px] flex-none border-r border-[#E2E8F0] bg-white overflow-y-auto px-[9px] py-3">
 
         {/* Back button */}
@@ -564,7 +572,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
             <span className={`w-[21px] h-[21px] rounded-[6px] flex items-center justify-center text-[10px] font-bold font-mono shrink-0 ${
               activo ? "bg-[#1D6A4A] text-white" : b.estado === "completado" ? "bg-[#E8F5EE] text-[#1D6A4A]" : "bg-[#F4F6F9] text-[#6B7280]"
             }`}>
-              <IconoPaso nombre={ICONO_POR_BLOQUE[b.id] || "info"} className="w-3.5 h-3.5" />
+              <IconoPaso nombre={b.icono || ICONO_POR_BLOQUE[b.id] || "info"} className="w-3.5 h-3.5" />
             </span>
             <span className={`text-[11.5px] flex-1 leading-[1.3] ${activo ? "font-bold" : "font-medium"}`}>{b.label}</span>
             <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${dotColor(b.estado)}`} />
@@ -575,7 +583,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       )}
 
       {/* ── Máster, pantalla grande: la columna con la ficha resumida y los pasos ── */}
-      {esMaster && (
+      {conRuta && (
         <aside className="hidden lg:flex w-[310px] flex-none flex-col gap-3 overflow-y-auto bg-[#F4F6F9] border-r border-[#E2E8F0] px-4 py-4">
           <div><BotonVolver onClick={onVolver}>Solicitudes</BotonVolver></div>
           <ExpedienteCabecera
@@ -595,7 +603,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
         <CercoErrores clave={activeBloque} donde={`core/${activeBloque || "expediente"}`}>
 
           {/* Máster, móvil y tablet: volver, la ficha resumida y la fila de pasos. */}
-          {esMaster && (
+          {conRuta && (
             <div className="lg:hidden space-y-3 mb-3">
               <div><BotonVolver onClick={onVolver}>Solicitudes</BotonVolver></div>
               <ExpedienteCabecera
@@ -610,7 +618,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           )}
 
           {/* Máster: el paso en el que está y lo primero que toca. */}
-          {esMaster && (
+          {conRuta && (
             <div key={`${activeBloque}-titulo`} className="space-y-3 mb-4 rp-entra">
               <TituloPaso paso={pasoBO} total={pasosBO.length - 1} indice={indiceBloque} etiquetaEstado={pasoBO?.subtitulo} />
               <LeToca
@@ -630,7 +638,17 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           {/* La estancia por estudios NO comparte bloques con el master ni con
               el visado: ni informe de IA, ni eleccion de universidades, ni
               postulaciones. Su panel es todo lo que hay. */}
-          {isModificatoria ? (
+          {isTramite ? (
+            <Suspense fallback={<CargandoPaso />}>
+              <TramiteAdmin
+                detalle={detalle}
+                setDetalle={setDetalle}
+                checklistPorEtapa={checklistPorEtapa}
+                recargar={cargar}
+                activeBloque={activeBloque}
+              />
+            </Suspense>
+          ) : isModificatoria ? (
             <Suspense fallback={<CargandoPaso />}>
               <ModificatoriaAdmin idSolicitud={detalle?.id_solicitud} />
             </Suspense>

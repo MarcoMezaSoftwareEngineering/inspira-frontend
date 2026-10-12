@@ -5,7 +5,7 @@ import Inicio from "./Inicio";
 import ServiciosList from "./mis-servicios/ServiciosList";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
-import { SERVICIO, servicioDe } from "../servicios";
+import { SERVICIO, TRAMITES, servicioDe } from "../servicios";
 import { EsqueletoExpediente } from "./Esqueleto";
 
 // Cada tipo de expediente se descarga solo cuando se abre. Los cuatro juntos
@@ -17,6 +17,8 @@ const DetalleSolicitudEstancia = lazyConRecarga(() => import("./mis-servicios/De
 const DetalleSolicitudModificatoria = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudModificatoria"));
 // El doctorado tiene su recorrido propio desde el 18/09/2026 (antes abría el del máster).
 const DetalleSolicitudDoctorado = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudDoctorado"));
+// Grado, FP, homologaciones y recurso: un solo recorrido guiado por su ficha.
+const DetalleSolicitudTramite = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudTramite"));
 
 /**
  * La lista, o el expediente que diga la URL.
@@ -63,6 +65,8 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
             <DetalleSolicitudEstancia {...comunes} />
           ) : tipo === SERVICIO.DOCTORADO ? (
             <DetalleSolicitudDoctorado {...comunes} seccion={seccion} onSeccion={irSeccion} />
+          ) : TRAMITES.includes(tipo) ? (
+            <DetalleSolicitudTramite {...comunes} seccion={seccion} onSeccion={irSeccion} />
           ) : tipo === SERVICIO.VISADO ? (
             <DetalleSolicitudVisado {...comunes} seccion={seccion} onSeccion={irSeccion} />
           ) : (

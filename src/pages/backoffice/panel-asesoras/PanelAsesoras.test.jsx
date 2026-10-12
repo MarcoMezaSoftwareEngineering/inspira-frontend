@@ -226,7 +226,7 @@ describe("Panel asesoras — lista", () => {
 
   it("pestañas de servicio", async () => {
     const { container } = await montar();
-    for (const t of ["Máster", "Visa estudios", "Estancia est.", "FP / Grado", "Legal / RR", "Doctorado"]) {
+    for (const t of ["Máster", "Visa estudios", "Estancia est.", "FP", "Legal / RR", "Doctorado"]) {
       pestana(t);
       expect(html(container)).toMatchSnapshot(t);
     }
@@ -303,7 +303,7 @@ describe("Panel asesoras — detalle", () => {
     pestana("Estancia est.");
     fireEvent.click(within(tarjeta("Elena Soto")).getByLabelText("Expandir"));
     expect(html(container)).toMatchSnapshot("estancia");
-    pestana("FP / Grado");
+    pestana("FP");
     fireEvent.click(within(tarjeta("Sofía León")).getByLabelText("Expandir"));
     expect(html(container)).toMatchSnapshot("fp");
     pestana("Legal / RR");
@@ -443,7 +443,7 @@ describe("Panel asesoras — menú, modales y acciones", () => {
 
   it("editar estancia, FP, legal y doctorado (cancelar)", async () => {
     const { container } = await montar();
-    for (const [tab, nombre] of [["Estancia est.", "Elena Soto"], ["FP / Grado", "Sofía León"], ["Legal / RR", "Carlos Mena"], ["Doctorado", "Diana Paz"]]) {
+    for (const [tab, nombre] of [["Estancia est.", "Elena Soto"], ["FP", "Sofía León"], ["Legal / RR", "Carlos Mena"], ["Doctorado", "Diana Paz"]]) {
       pestana(tab);
       abrirMenu(nombre);
       fireEvent.click(screen.getByText("Editar datos del panel"));
@@ -458,7 +458,7 @@ describe("Panel asesoras — menú, modales y acciones", () => {
     fireEvent.click(screen.getByText("+ Agregar cliente"));
     expect(html(container)).toMatchSnapshot("modal nuevo máster");
     const modal = () => container.querySelector(".fixed.inset-0");
-    for (const s of ["Visa estudios", "Estancia est.", "FP / Grado", "Legal / RR", "Doctorado"]) {
+    for (const s of ["Visa estudios", "Estancia est.", "FP", "Legal / RR", "Doctorado"]) {
       fireEvent.click(within(modal()).getByText(s));
       expect(html(container)).toMatchSnapshot(`modal nuevo ${s}`);
     }

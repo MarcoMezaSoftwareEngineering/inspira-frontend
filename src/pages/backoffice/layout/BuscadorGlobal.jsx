@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { boGET } from "../../../services/backofficeApi";
 import { navigate } from "../../../services/navigate";
 
-const SERVICIO = { master: "Máster", visa: "Visado", ee: "Estancia", mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado" };
+const SERVICIO = { master: "Máster", visa: "Visado", ee: "Estancia", mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado", grado: "Grado", homesc: "Homologación escolar", homuni: "Homologación de título", recurso: "Recurso de reposición" };
 
 export default function BuscadorGlobal() {
   const [abierto, setAbierto] = useState(false);

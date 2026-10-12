@@ -13,7 +13,7 @@ import { SVC_KEYS, PAGE_SIZE } from "./partes/constantes";
 import { keyFor } from "./partes/utilidades";
 
 export function usePanelAsesoras() {
-  const [data, setData]               = useState({ master:[], visa:[], ee:[], fp:[], legal:[], doc:[] });
+  const [data, setData]               = useState(() => Object.fromEntries(SVC_KEYS.map((s) => [s, []])));
   const [loading, setLoading]         = useState(true);
   const [curTab, setCurTab]           = useState("all");
   const [expandedKey, setExpandedKey] = useState(null);

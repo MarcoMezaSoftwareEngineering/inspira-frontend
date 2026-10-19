@@ -12,7 +12,7 @@
 import { apiGET } from "../services/api";
 
 /** Las claves de `panel_servicio` que son trámites por pasos. Espejo del backend. */
-export const CLAVES_TRAMITE = ["grado", "fp", "homesc", "homuni", "recurso"];
+export const CLAVES_TRAMITE = ["grado", "fp", "homesc", "homuni", "recurso", "pac"];
 
 export const esTramite = (clave) => CLAVES_TRAMITE.includes(String(clave || ""));
 

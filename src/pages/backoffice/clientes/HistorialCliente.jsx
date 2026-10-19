@@ -32,7 +32,7 @@ const FILTROS = [
   ["nota,pago", "Notas y pagos"],
 ];
 
-const SERVICIO = { master: "Máster", visa: "Visado", ee: "Estancia", mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado", grado: "Grado", homesc: "Homologación escolar", homuni: "Homologación de título", recurso: "Recurso de reposición" };
+const SERVICIO = { master: "Máster", visa: "Visado", ee: "Estancia", mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado", grado: "Grado", homesc: "Homologación escolar", homuni: "Homologación de título", recurso: "Recurso de reposición", pac: "PAC (UGE)" };
 
 function cuando(iso) {
   const d = new Date(iso);

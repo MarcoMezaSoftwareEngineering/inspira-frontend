@@ -4,10 +4,10 @@
 /* ─── Constantes ─────────────────────────────────────────────────────────── */
 // Los trámites por pasos (grado, homesc, homuni, recurso; 12/10/2026) van
 // junto a la FP, que es el primero de ellos.
-export const SVC_KEYS = ["master", "visa", "ee", "fp", "grado", "homesc", "homuni", "recurso", "legal", "doc"];
+export const SVC_KEYS = ["master", "visa", "ee", "fp", "grado", "homesc", "homuni", "recurso", "pac", "legal", "doc"];
 export const SVC_LABELS = { master: "Máster", visa: "Visa estudios", ee: "Estancia est.",
   mod: "Modificatoria", fp: "FP", grado: "Grado", homesc: "Homol. escolar", homuni: "Homol. título",
-  recurso: "Recurso", legal: "Legal / RR", doc: "Doctorado" };
+  recurso: "Recurso", pac: "PAC", legal: "Legal / RR", doc: "Doctorado" };
 export const TABS = [{ id: "all", label: "Todos" }, ...SVC_KEYS.map(s => ({ id: s, label: SVC_LABELS[s] }))];
 export const FASES_VE = ["Estrategia realizada", "Preparación documentaria", "Cita programada", "Documentos listos"];
 export const UNI_EST = ["ADMITIDO","LISTA DE ESPERA ALTA","LISTA DE ESPERA MEDIA","LISTA DE ESPERA BAJA","POSTULADO","POSTULAR","NO POSTULAR AUN","PROCESO PREVIO","PENDIENTE","EXCLUIDO","FINALIZADO"];
@@ -25,4 +25,5 @@ export const SVC_COLORS = {
   homesc: { bg: "#FDF3E3", text: "#8A5A0B" },
   homuni: { bg: "#F1ECFA", text: "#5B3B9E" },
   recurso: { bg: "#FDECEC", text: "#A93226" },
+  pac:    { bg: "#DFF3F1", text: "#0B5D5A" },
 };

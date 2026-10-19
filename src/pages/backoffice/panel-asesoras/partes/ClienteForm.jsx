@@ -234,7 +234,7 @@ export function ClienteForm({ item, svc, saving, onSubmit, onCancel }) {
       )}
 
       {/* ── FP ── */}
-      {["fp", "grado", "homesc", "homuni", "recurso"].includes(svc) && (
+      {["fp", "grado", "homesc", "homuni", "recurso", "pac"].includes(svc) && (
         <div className="grid grid-cols-2 gap-3">
           {[["centro","Centro"],["estadoAdm","Estado admisión"],["nie","NIE"],["expediente","Nº expediente"]].map(([k,l]) => (
             <label key={k}><span className={lab}>{l}</span><input className={inp} value={form[k]} onChange={e => set(k, e.target.value)} /></label>

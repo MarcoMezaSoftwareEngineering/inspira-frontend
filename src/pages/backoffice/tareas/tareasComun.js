@@ -34,7 +34,7 @@ export const PRIORIDAD = Object.fromEntries(PRIORIDADES.map((p) => [p.valor, p])
 // Para las tarjetas, donde no cabe «Postulación a Máster».
 export const SERVICIO_CORTO = {
   master: "Máster", visa: "Visado", ee: "Estancia", mod: "Modificatoria", fp: "FP", legal: "Extranjería", doc: "Doctorado",
-  grado: "Grado", homesc: "Homologación escolar", homuni: "Homologación de título", recurso: "Recurso de reposición",
+  grado: "Grado", homesc: "Homologación escolar", homuni: "Homologación de título", recurso: "Recurso de reposición", pac: "PAC (UGE)",
 };
 
 /** «18 sept», para un día "YYYY-MM-DD". */

@@ -54,6 +54,8 @@ exports[`Panel asesoras — detalle > abrir Drive y expediente desde el detalle 
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -945,6 +947,8 @@ exports[`Panel asesoras — detalle > estancia, FP, legal y doctorado > doctorad
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors bg-primary/10 border-primary/30 text-primary font-bold">Doctorado <span class="opacity-60">1</span>
@@ -1195,6 +1199,8 @@ exports[`Panel asesoras — detalle > estancia, FP, legal y doctorado > estancia
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -1524,6 +1530,8 @@ exports[`Panel asesoras — detalle > estancia, FP, legal y doctorado > fp 1`] =
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -1776,6 +1784,8 @@ exports[`Panel asesoras — detalle > estancia, FP, legal y doctorado > legal 1`
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors bg-primary/10 border-primary/30 text-primary font-bold">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -2033,6 +2043,8 @@ exports[`Panel asesoras — detalle > máster completo: resumen, universidades, 
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -2789,6 +2801,8 @@ exports[`Panel asesoras — detalle > máster completo: resumen, universidades, 
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -3523,6 +3537,8 @@ exports[`Panel asesoras — detalle > máster completo: resumen, universidades, 
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -4414,6 +4430,8 @@ exports[`Panel asesoras — detalle > máster completo: resumen, universidades, 
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -5335,6 +5353,8 @@ exports[`Panel asesoras — detalle > máster sin nombre ni registro de beca 1`]
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -6179,6 +6199,8 @@ exports[`Panel asesoras — detalle > máster vacío: sin beca, sin universidade
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -6934,6 +6956,8 @@ exports[`Panel asesoras — detalle > máster vacío: sin beca, sin universidade
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -7661,6 +7685,8 @@ exports[`Panel asesoras — detalle > máster vacío: sin beca, sin universidade
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -8509,6 +8535,8 @@ exports[`Panel asesoras — detalle > máster vacío: sin beca, sin universidade
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -9237,6 +9265,8 @@ exports[`Panel asesoras — detalle > visa con fases y visa sin fases > con fase
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -9616,6 +9646,8 @@ exports[`Panel asesoras — detalle > visa con fases y visa sin fases > pagos al
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -9884,6 +9916,8 @@ exports[`Panel asesoras — detalle > visa con fases y visa sin fases > sin fase
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -10237,6 +10271,8 @@ exports[`Panel asesoras — lista > búsqueda, filtro por estado y limpiar (vuel
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -10348,6 +10384,8 @@ exports[`Panel asesoras — lista > búsqueda, filtro por estado y limpiar (vuel
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -10581,6 +10619,8 @@ exports[`Panel asesoras — lista > búsqueda, filtro por estado y limpiar (vuel
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -10926,6 +10966,8 @@ exports[`Panel asesoras — lista > cargando 1`] = `
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">0</span>
@@ -11037,6 +11079,8 @@ exports[`Panel asesoras — lista > error al cargar (ok: false) 1`] = `
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">0</span>
@@ -11147,6 +11191,8 @@ exports[`Panel asesoras — lista > muchas páginas: puntos suspensivos y saltos
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
@@ -11863,6 +11909,8 @@ exports[`Panel asesoras — lista > muchas páginas: puntos suspensivos y saltos
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
@@ -12583,6 +12631,8 @@ exports[`Panel asesoras — lista > muchas páginas: puntos suspensivos y saltos
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">0</span>
@@ -13296,6 +13346,8 @@ exports[`Panel asesoras — lista > pestañas de servicio > Doctorado 1`] = `
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors bg-primary/10 border-primary/30 text-primary font-bold">Doctorado <span class="opacity-60">1</span>
@@ -13445,6 +13497,8 @@ exports[`Panel asesoras — lista > pestañas de servicio > Estancia est. 1`] = 
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -13634,6 +13688,8 @@ exports[`Panel asesoras — lista > pestañas de servicio > FP 1`] = `
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -13784,6 +13840,8 @@ exports[`Panel asesoras — lista > pestañas de servicio > Legal / RR 1`] = `
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors bg-primary/10 border-primary/30 text-primary font-bold">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -13933,6 +13991,8 @@ exports[`Panel asesoras — lista > pestañas de servicio > Máster 1`] = `
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -14550,6 +14610,8 @@ exports[`Panel asesoras — lista > pestañas de servicio > Visa estudios 1`] = 
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -14780,6 +14842,8 @@ exports[`Panel asesoras — lista > servicio que falta en la respuesta > doctora
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors bg-primary/10 border-primary/30 text-primary font-bold">Doctorado <span class="opacity-60">0</span>
@@ -14890,6 +14954,8 @@ exports[`Panel asesoras — lista > servicio que falta en la respuesta > todos 1
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
@@ -15082,6 +15148,8 @@ exports[`Panel asesoras — lista > sin datos 1`] = `
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">0</span>
@@ -15192,6 +15260,8 @@ exports[`Panel asesoras — lista > todos los servicios, página 1 y página 2 >
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -15908,6 +15978,8 @@ exports[`Panel asesoras — lista > todos los servicios, página 1 y página 2 >
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -16340,6 +16412,8 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -16398,6 +16472,7 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. escolar</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. título</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Recurso</button>
+<button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">PAC</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Legal / RR</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-green-400 bg-green-50 text-green-800 font-semibold">Doctorado</button>
 </div>
@@ -17144,6 +17219,8 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -17202,6 +17279,7 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. escolar</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. título</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Recurso</button>
+<button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">PAC</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Legal / RR</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Doctorado</button>
 </div>
@@ -17989,6 +18067,8 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -18047,6 +18127,7 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. escolar</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. título</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Recurso</button>
+<button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">PAC</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Legal / RR</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Doctorado</button>
 </div>
@@ -18789,6 +18870,8 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -18847,6 +18930,7 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. escolar</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. título</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Recurso</button>
+<button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">PAC</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-green-400 bg-green-50 text-green-800 font-semibold">Legal / RR</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Doctorado</button>
 </div>
@@ -19597,6 +19681,8 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -19655,6 +19741,7 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. escolar</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. título</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Recurso</button>
+<button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">PAC</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Legal / RR</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Doctorado</button>
 </div>
@@ -20438,6 +20525,8 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -20496,6 +20585,7 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. escolar</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Homol. título</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Recurso</button>
+<button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">PAC</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Legal / RR</button>
 <button class="px-3 py-1.5 text-xs rounded-lg border transition-colors border-neutral-200 text-neutral-600">Doctorado</button>
 </div>
@@ -21314,6 +21404,8 @@ exports[`Panel asesoras — menú, modales y acciones > agregar cliente: un form
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors bg-primary/10 border-primary/30 text-primary font-bold">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -21463,6 +21555,8 @@ exports[`Panel asesoras — menú, modales y acciones > editar estancia, FP, leg
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -21702,6 +21796,8 @@ exports[`Panel asesoras — menú, modales y acciones > editar estancia, FP, leg
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -22011,6 +22107,8 @@ exports[`Panel asesoras — menú, modales y acciones > editar estancia, FP, leg
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -22245,6 +22343,8 @@ exports[`Panel asesoras — menú, modales y acciones > editar estancia, FP, leg
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors bg-primary/10 border-primary/30 text-primary font-bold">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -22612,6 +22712,8 @@ exports[`Panel asesoras — menú, modales y acciones > editar un máster: formu
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -23678,6 +23780,8 @@ exports[`Panel asesoras — menú, modales y acciones > editar un máster: formu
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -24848,6 +24952,8 @@ exports[`Panel asesoras — menú, modales y acciones > editar visa (fases) y gu
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -25733,6 +25839,8 @@ exports[`Panel asesoras — menú, modales y acciones > menú de acciones: abrir
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
 </button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
+</button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Doctorado <span class="opacity-60">1</span>
@@ -26447,6 +26555,8 @@ exports[`Panel asesoras — menú, modales y acciones > menú de acciones: abrir
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>
@@ -27311,6 +27421,8 @@ exports[`Panel asesoras — menú, modales y acciones > quitar del panel: confir
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Homol. título <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Recurso <span class="opacity-60">0</span>
+</button>
+<button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">PAC <span class="opacity-60">0</span>
 </button>
 <button class="px-3 h-8 rounded-full text-[12px] border transition-colors border-neutral-200 text-neutral-500 hover:border-neutral-300">Legal / RR <span class="opacity-60">1</span>
 </button>

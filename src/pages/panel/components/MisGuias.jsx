@@ -18,12 +18,14 @@ const GuiaMaster = lazyConRecarga(() => import("../GuiaMaster"));
 const GuiaApostilla = lazyConRecarga(() => import("../GuiaApostilla"));
 const GuiaEstancia = lazyConRecarga(() => import("../GuiaEstancia"));
 const GuiaModificatoria = lazyConRecarga(() => import("../GuiaModificatoria"));
+const GuiaGrado = lazyConRecarga(() => import("../GuiaGrado"));
 
 const GUIA = {
   guia: GuiaMaster,
   apostilla: GuiaApostilla,
   estancia: GuiaEstancia,
   modificatoria: GuiaModificatoria,
+  grado: GuiaGrado,
 };
 
 function Cargando() {

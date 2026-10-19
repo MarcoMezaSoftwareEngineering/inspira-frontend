@@ -232,3 +232,26 @@
 .ex-alertas span { font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: #eef3f7; color: #10303f; display: inline-flex; align-items: center; gap: 4px; }
 .ex-alertas span.warn { background: #fff3e0; color: #b8730c; }
 .ex-alertas span.ok { background: #e6f6ee; color: #1d7a52; }
+
+/* ── Ruta corta dentro de un paso (la homologación escolar del grado y la FP,
+   19/10/2026): siete estados en línea, con su propio color, que avanzan con
+   una transición cuando el asesor mueve el estado. ─────────────────────── */
+.rm-caja { background: #fff; border: 1px solid var(--rm-borde, #e9d9bd); border-radius: 18px; padding: 14px 14px 12px; overflow: hidden; }
+.rm-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.rm-cab h3 { margin: 0; font-size: 14px; font-weight: 800; color: var(--rm-color, #8a5a0b); }
+.rm-cab small { font-size: 11.5px; color: #5f7a89; }
+.rm-ruta { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n), 1fr); position: relative; }
+.rm-ruta::before { content: ""; position: absolute; top: 17px; left: calc(100% / var(--n) / 2); right: calc(100% / var(--n) / 2); height: 3px; border-radius: 3px; background: #f1e9db; }
+.rm-ruta::after { content: ""; position: absolute; top: 17px; left: calc(100% / var(--n) / 2); width: calc((100% - 100% / var(--n)) * var(--hecho)); height: 3px; border-radius: 3px; background: var(--rm-color, #8a5a0b); transition: width .8s cubic-bezier(.22,1,.36,1); }
+.rm-ruta li { position: relative; z-index: 1; display: grid; justify-items: center; gap: 5px; text-align: center; min-width: 0; }
+.rm-ico { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: #fff; border: 2px solid #ead9bb; color: #b59b70; transition: transform .35s cubic-bezier(.22,1,.36,1), background .35s, border-color .35s, color .35s; }
+.rm-ico svg { width: 16px; height: 16px; }
+.rm-ruta li[data-e="ok"] .rm-ico { background: var(--rm-color, #8a5a0b); border-color: var(--rm-color, #8a5a0b); color: #fff; }
+.rm-ruta li[data-e="on"] .rm-ico { border-color: var(--rm-color, #8a5a0b); color: var(--rm-color, #8a5a0b); transform: scale(1.12); box-shadow: 0 0 0 6px var(--rm-halo, rgba(138,90,11,.12)); }
+.rm-txt { font-size: 10.5px; line-height: 1.2; font-weight: 700; color: #7a8c96; max-width: 9ch; }
+.rm-ruta li[data-e="on"] .rm-txt, .rm-ruta li[data-e="ok"] .rm-txt { color: #10303f; }
+.rm-ahora { margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--rm-suave, #fdf3e3); font-size: 13px; line-height: 1.5; color: #10303f; animation: rm-entra .45s cubic-bezier(.22,1,.36,1); }
+.rm-ahora b { color: var(--rm-color, #8a5a0b); }
+@keyframes rm-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (max-width: 480px) { .rm-txt { display: none; } .rm-ico { width: 30px; height: 30px; } .rm-ruta::before, .rm-ruta::after { top: 14px; } }
+@media (prefers-reduced-motion: reduce) { .rm-ruta::after, .rm-ico, .rm-ahora { transition: none; animation: none; } }

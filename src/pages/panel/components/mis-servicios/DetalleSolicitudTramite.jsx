@@ -17,6 +17,7 @@ import DocumentosProceso from "../../../../components/common/DocumentosProceso";
 import CercoErrores from "../../../../components/common/CercoErrores";
 import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera } from "../../../../components/common/RutaPasos";
 import Icono from "../../../../components/common/Icono";
+import RutaMini from "../../../../components/common/RutaMini";
 import { EsqueletoExpediente } from "../Esqueleto";
 import NovedadesExpediente from "../NovedadesExpediente";
 import EncuestaCierre from "../EncuestaCierre";
@@ -210,40 +211,79 @@ const TONO_ESTADO = {
   Admitida: "ok", Matriculada: "ok", "No admitida": "alto", Pendiente: "aviso", Respondido: "ok", Archivado: "alto",
 };
 
-/** La lista del servicio (universidades, ciclos, requerimientos), tal como la trabaja Inspira. */
-function Candidaturas({ def, filas }) {
+/**
+ * La lista del servicio (carreras y ciclos, universidades, requerimientos),
+ * tal como la trabaja Inspira. Si la lista tiene campos `cliente: "editar"`
+ * (su «sí» en la elección), se guardan fila a fila.
+ */
+function Candidaturas({ def, filas, idSolicitud, pasoId, onGuardado }) {
   const lista = def.lista;
+  const [guardando, setGuardando] = useState(null);
   if (!lista || !filas) return null;
-  const visibles = lista.campos.filter((c) => c.tipo !== "secreto" && !["notas", "estado"].includes(c.clave));
+  const editables = pasoId === "eleccion" ? lista.campos.filter((c) => c.cliente === "editar") : [];
+  const visibles = lista.campos.filter((c) => c.tipo !== "secreto" && !["notas", "estado", "tipo", "baremo"].includes(c.clave) && c.cliente !== "editar");
   const titulo = (f) => f.programa || f.centro || f.descripcion || lista.singular;
   const sub = (f) => [f.centro && f.programa ? f.centro : null, f.ciudad, f.comunidad].filter(Boolean).join(" · ");
+  const grupos = lista.campos.some((c) => c.clave === "tipo")
+    ? [...new Set(filas.map((f) => f.tipo || "Otras opciones"))].map((t) => ({ t, filas: filas.filter((f) => (f.tipo || "Otras opciones") === t) }))
+    : [{ t: null, filas }];
+
+  async function marcar(fila, campo, v) {
+    setGuardando(`${fila.id}:${campo.clave}`);
+    try {
+      const r = await apiPATCH(`/solicitudes/${idSolicitud}/tramite/candidaturas/${fila.id}`, { campos: { [campo.clave]: v } });
+      if (r?.ok) onGuardado?.(r);
+    } finally {
+      setGuardando(null);
+    }
+  }
+
   return (
     <section className="pnl-doc-lista" aria-label={lista.titulo}>
       <h3>{lista.titulo}</h3>
       {!filas.length ? (
         <p className="text-[13px] text-neutral-500 m-0">Todavía no hay {lista.singular === "requerimiento" ? "ninguno" : "ninguna propuesta"}: tu asesor la está preparando.</p>
-      ) : (
-        <ul>
-          {filas.map((f) => {
-            const e = f.estado ? { texto: f.estado, tono: TONO_ESTADO[f.estado] || "tipo" } : null;
-            const detalles = visibles
-              .filter((c) => !["programa", "centro", "ciudad", "comunidad", "descripcion"].includes(c.clave) && f[c.clave])
-              .map((c) => `${c.label}: ${mostrarValor(c, f[c.clave])}`);
-            return (
-              <li key={f.id} className="!items-start">
-                <span className="pnl-doc-nombre">
-                  {titulo(f)}
-                  {sub(f) && <small className="block text-[11.5px] font-medium text-neutral-500">{sub(f)}</small>}
-                  {f.descripcion && f.programa && <small className="block text-[11.5px] text-neutral-600">{f.descripcion}</small>}
-                  {detalles.length > 0 && <small className="block text-[11px] font-normal text-neutral-500 mt-0.5">{detalles.join(" · ")}</small>}
-                  {f.portal_url && <a className="block text-[11.5px] font-bold text-primary mt-0.5" href={f.portal_url} target="_blank" rel="noopener noreferrer">Abrir portal</a>}
-                </span>
-                {e && <span className={`pnl-chip pnl-chip-${e.tono}`}><span className="punto" />{e.texto}</span>}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      ) : grupos.map((g) => (
+        <div key={g.t || "todas"} className="mt-2 first:mt-0">
+          {g.t && <p className="m-0 mb-1 text-[11px] font-extrabold uppercase tracking-wider text-primary">{g.t}</p>}
+          <ul>
+            {g.filas.map((f) => {
+              const e = f.estado ? { texto: f.estado, tono: TONO_ESTADO[f.estado] || "tipo" } : null;
+              const detalles = visibles
+                .filter((c) => !["programa", "centro", "ciudad", "comunidad", "descripcion"].includes(c.clave) && f[c.clave])
+                .map((c) => `${c.label}: ${mostrarValor(c, f[c.clave])}`);
+              return (
+                <li key={f.id} className="!items-start !flex-wrap">
+                  <span className="pnl-doc-nombre flex-1">
+                    {titulo(f)}
+                    {sub(f) && <small className="block text-[11.5px] font-medium text-neutral-500">{sub(f)}</small>}
+                    {f.descripcion && f.programa && <small className="block text-[11.5px] text-neutral-600">{f.descripcion}</small>}
+                    {f.baremo && <small className="block text-[11.5px] text-neutral-600">Admisión: {f.baremo}</small>}
+                    {detalles.length > 0 && <small className="block text-[11px] font-normal text-neutral-500 mt-0.5">{detalles.join(" · ")}</small>}
+                    {f.portal_url && <a className="block text-[11.5px] font-bold text-primary mt-0.5" href={f.portal_url} target="_blank" rel="noopener noreferrer">Abrir portal</a>}
+                  </span>
+                  {e && <span className={`pnl-chip pnl-chip-${e.tono}`}><span className="punto" />{e.texto}</span>}
+                  {editables.map((c) => (
+                    <span key={c.clave} className="basis-full flex items-center gap-2 mt-1">
+                      <small className="text-[11px] font-bold text-neutral-500">{c.label}:</small>
+                      {(c.opciones || []).map((o) => (
+                        <button
+                          key={o} type="button"
+                          disabled={guardando === `${f.id}:${c.clave}`}
+                          onClick={() => marcar(f, c, o)}
+                          className={`pnl-chip ${f[c.clave] === o ? (o === "Sí" ? "pnl-chip-ok" : "pnl-chip-alto") : "pnl-chip-tipo"} ux-tap`}
+                        >
+                          {o}
+                        </button>
+                      ))}
+                    </span>
+                  ))}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
     </section>
   );
 }
@@ -383,6 +423,8 @@ export default function DetalleSolicitudTramite({ solicitudBase, onIrAGuia, secc
                 <p>{paso.tuParte}</p>
               </section>
 
+              {paso.ruta && <RutaMini ruta={paso.ruta} valor={datos.tramite?.[paso.ruta.campo]} />}
+
               <Plazos plazos={plazosPaso} />
 
               <CamposPaso
@@ -392,7 +434,13 @@ export default function DetalleSolicitudTramite({ solicitudBase, onIrAGuia, secc
                 onGuardado={(r) => setDatos((d) => ({ ...d, tramite: r.tramite, derivados: r.derivados }))}
               />
 
-              <Candidaturas def={def} filas={candidaturas} />
+              <Candidaturas
+                def={def}
+                filas={candidaturas}
+                idSolicitud={idSolicitud}
+                pasoId={activo}
+                onGuardado={(r) => setDatos((d) => ({ ...d, candidaturas: r.candidaturas }))}
+              />
 
               <DocsDelPaso docs={docsPaso} />
 

@@ -12,6 +12,7 @@ import { cambiarEtapa } from "../../../comun/cambiarEtapa";
 import EncabezadoClienteAdmin from "../../EncabezadoClienteAdmin";
 import ChecklistSolicitudAdmin from "../ChecklistSolicitudAdmin";
 import DocumentosProceso from "../../../../../components/common/DocumentosProceso";
+import RutaMini from "../../../../../components/common/RutaMini";
 import { fechaCorta, gruposDe, mostrarValor } from "../../../../../lib/tramites";
 
 /* ── La cabecera y la caja de cada bloque (como en el máster) ───────────── */
@@ -308,6 +309,14 @@ export default function TramiteAdmin({ detalle, setDetalle, checklistPorEtapa, r
                 <p className="m-0"><b>Qué se hace:</b> {pasoActivo.explica}</p>
                 <p className="m-0 mt-1 text-[#5f7a89]"><b>Lo que ve el asesorado como su parte:</b> {pasoActivo.tuParte}</p>
               </section>
+
+              {pasoActivo.ruta && (
+                <section>
+                  <Sub>{pasoActivo.ruta.titulo} · lo que ve el asesorado</Sub>
+                  <RutaMini ruta={pasoActivo.ruta} valor={datos.tramite?.[pasoActivo.ruta.campo]} />
+                  <p className="text-[11.5px] text-[#5f7a89] mt-2 mb-0">Se mueve con el campo «{(pasoActivo.campos || []).find((c) => c.clave === pasoActivo.ruta.campo)?.label || pasoActivo.ruta.campo}» de abajo.</p>
+                </section>
+              )}
 
               {plazos.length > 0 && (
                 <section>

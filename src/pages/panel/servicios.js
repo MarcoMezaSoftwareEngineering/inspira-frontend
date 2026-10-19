@@ -108,13 +108,16 @@ const ACCESOS = {
   [SERVICIO.VISADO]: ["portal", "apostilla"],
   [SERVICIO.ESTANCIA]: ["portal", "estancia", "apostilla"],
   [SERVICIO.MODIFICATORIA]: ["modificatoria", "apostilla"],
-  [SERVICIO.FP]: ["portal", "becas", "apostilla"],
+  // Grado y FP (Carina, 19/10/2026): su guía propia (proceso de postulación
+  // para un extranjero, PCE y los documentos exactos) y nada de apostilla
+  // ni máster.
+  [SERVICIO.FP]: ["portal", "grado"],
   // Recorrido propio (DetalleSolicitudDoctorado) y su guía en PDF en
   // «Mis guías» (GUIAS_PORTAL): sin "portal" la pestaña no se abría.
   [SERVICIO.DOCTORADO]: ["portal", "apostilla"],
   // Trámites por pasos: recorrido propio, sus PDF (cuando existan) y la
   // apostilla. Grado y FP, además, becas.
-  [SERVICIO.GRADO]: ["portal", "becas", "apostilla"],
+  [SERVICIO.GRADO]: ["portal", "grado"],
   [SERVICIO.HOMESC]: ["portal", "apostilla"],
   [SERVICIO.HOMUNI]: ["portal", "apostilla"],
   [SERVICIO.RECURSO]: ["portal", "apostilla"],
@@ -157,6 +160,7 @@ export const PESTANAS_GUIAS = [
   { clave: "guia", label: "Máster", icono: "libro" },
   { clave: "estancia", label: "Estancia", icono: "bandera" },
   { clave: "modificatoria", label: "Residencia y Trabajo", icono: "laptop" },
+  { clave: "grado", label: "Grado y FP", icono: "birrete" },
   { clave: "apostilla", label: "Apostilla", icono: "documento" },
 ];
 

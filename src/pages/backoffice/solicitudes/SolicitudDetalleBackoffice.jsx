@@ -228,6 +228,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
         { id: "datos",        numero: "1", label: "Datos del solicitante", estado: "pendiente" },
         { id: "documentos",   numero: "2", label: "Documentos",            estado: "pendiente" },
         { id: "acompanantes", numero: "3", label: "Acompañantes",          estado: "pendiente" },
+        { id: "generadores",  numero: "5", label: "Impresos",              estado: "pendiente" },
         { id: "extranjeria",  numero: "4", label: "UGE y consulado",       estado: "pendiente" },
       ];
     }

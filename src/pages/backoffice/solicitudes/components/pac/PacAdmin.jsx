@@ -7,6 +7,7 @@
 import Invitados from "../Invitados";
 import AcompanantesPacAdmin from "./AcompanantesPacAdmin";
 import RecordatorioPac from "./RecordatorioPac";
+import GeneradoresPac from "./GeneradoresPac";
 import { Flujo } from "./pac-admin/Flujo";
 import { Datos } from "./pac-admin/Datos";
 import { Documentos } from "./pac-admin/Documentos";
@@ -30,6 +31,7 @@ export default function PacAdmin({ idSolicitud }) {
       <RecordatorioPac id={idSolicitud} docs={docs} onCambio={cargar} />
       <AcompanantesPacAdmin idSolicitud={idSolicitud} exp={exp} numero="3" />
       <CerrarCarpeta id={idSolicitud} exp={exp} docs={docs} onHecho={cargar} />
+      <GeneradoresPac id={idSolicitud} exp={exp} docs={docs} onArchivado={cargar} numero="5" />
       <Extranjeria id={idSolicitud} registros={ext} onCambio={cargar} />
     </div>
   );

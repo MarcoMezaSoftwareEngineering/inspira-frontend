@@ -187,7 +187,9 @@ export function pestanasGuiasDe(accesos, guiasPortal = []) {
  * doctorado (18/09/2026): el doctorado no tiene formulario académico propio,
  * pero su candidatura parte de la carrera y la universidad de origen.
  */
-const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.FP, SERVICIO.GRADO, SERVICIO.DOCTORADO];
+// Grado y FP (19/10/2026) preguntan lo suyo en su propio formulario del
+// expediente; al PAC y al resto no se les pide perfil académico.
+const DE_ESTUDIOS = [SERVICIO.MASTER, SERVICIO.DOCTORADO];
 
 /**
  * Recursos que abren los servicios PROPIOS de la lista. Los expedientes a los

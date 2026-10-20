@@ -39,6 +39,7 @@ const OPCIONES = {
   pais_residencia: ["Perú", "España", "Otro"],
   con_duracion: ["1 año", "2 años", "3 años", "Indefinido"],
   patria_potestad: [["AMBOS", "La comparten ambos padres"], ["EXCLUSIVA", "La tiene en exclusiva quien viaja (hay sentencia)"]],
+  cobertura_ss: [["POR_CONFIRMAR", "Por confirmar con el empleador"], ["SI", "Sí, nos cubre la Seguridad Social: no necesitamos seguro"], ["NO", "No: necesitamos seguro privado"]],
 };
 
 const ETIQUETA = {
@@ -268,7 +269,7 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
         setExp((p) => ({ ...p, revision: r.expediente?.revision }));
         if (version.current === v) { pendientes.current = {}; setTocado(false); }
         // El rol cambia qué documentos se piden: se recarga la lista.
-        if ("rol" in payload || "fecha_nacimiento" in payload || "patria_potestad" in payload) cargar();
+        if ("rol" in payload || "fecha_nacimiento" in payload || "patria_potestad" in payload || "cobertura_ss" in payload) cargar();
       }
     }, 900);
     return () => clearTimeout(t);
@@ -440,7 +441,17 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
 
           <Paso numero={esTitular ? "5" : "4"} titulo="Tu seguro médico" subtitulo="Privado, sin copagos ni carencias"
             faltan={0} abierto={paso === 5} onToggle={() => abrir(5)}>
-            <Seguro />
+            <div className="rounded-xl border border-neutral-200 px-3.5 py-3 mb-3 space-y-2">
+              <Selector label="¿El contrato del titular os da de alta en la Seguridad Social?" obligatorio
+                opciones={OPCIONES.cobertura_ss} valor={exp.cobertura_ss} onChange={set("cobertura_ss")}
+                ayuda="Consúltalo con el empleador: si el alta del titular en la Seguridad Social cubre a la familia como beneficiarios, no necesitáis seguro privado. Si no, cada persona necesita una póliza sin copagos ni carencias (o una familiar que os incluya)." />
+              <p className="text-[12px] text-neutral-600 leading-relaxed m-0">
+                {exp.cobertura_ss === "SI" ? "Perfecto: el seguro privado deja de ser obligatorio en tu lista de documentos. Si cambia, avísanos."
+                  : exp.cobertura_ss === "NO" ? "Entonces hace falta seguro privado para cada persona. Cotízalo con Félix antes de contratar nada."
+                  : "Hasta que lo confirmes, el seguro sigue en la lista como pendiente. Pide la confirmación por escrito a la empresa."}
+              </p>
+            </div>
+            {exp.cobertura_ss !== "SI" && <Seguro />}
             <div className={g}>
               <Campo label="Aseguradora" valor={exp.seguro_aseguradora} onChange={set("seguro_aseguradora")} />
               <Campo label="Nº de póliza" valor={exp.seguro_poliza} onChange={set("seguro_poliza")} />
@@ -490,7 +501,7 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
             </div>
           )}
           <ComoEscanear />
-          <Seguro />
+          {exp.cobertura_ss !== "SI" && <Seguro />}
           <ResumenDocumentos ranuras={docs?.ranuras} />
           <PedirRevision id={id} docs={docs} exp={exp} onHecho={cargar} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">

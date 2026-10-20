@@ -118,6 +118,7 @@ export function Datos({ exp, onGuardar }) {
       ["Documento del otro progenitor", "otro_progenitor_doc", null],
     ]],
     ["Seguro médico", [
+      ["Cubre la Seguridad Social del titular", "cobertura_ss", null, { opciones: ["POR_CONFIRMAR", "SI", "NO"] }],
       ["Aseguradora", "seguro_aseguradora", null],
       ["Póliza", "seguro_poliza", null],
       ["Cobertura hasta", "seguro_hasta", null, { tipo: "date" }],

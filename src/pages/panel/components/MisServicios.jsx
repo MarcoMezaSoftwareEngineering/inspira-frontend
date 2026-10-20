@@ -19,6 +19,8 @@ const DetalleSolicitudModificatoria = lazyConRecarga(() => import("./mis-servici
 const DetalleSolicitudDoctorado = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudDoctorado"));
 // Grado, FP, homologaciones y recurso: un solo recorrido guiado por su ficha.
 const DetalleSolicitudTramite = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudTramite"));
+// Profesional altamente cualificado (UGE): expediente de extranjería con acompañantes.
+const DetalleSolicitudPac = lazyConRecarga(() => import("./mis-servicios/DetalleSolicitudPac"));
 
 /**
  * La lista, o el expediente que diga la URL.
@@ -65,6 +67,8 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
             <DetalleSolicitudEstancia {...comunes} />
           ) : tipo === SERVICIO.DOCTORADO ? (
             <DetalleSolicitudDoctorado {...comunes} seccion={seccion} onSeccion={irSeccion} />
+          ) : tipo === SERVICIO.PAC ? (
+            <DetalleSolicitudPac {...comunes} />
           ) : TRAMITES.includes(tipo) ? (
             <DetalleSolicitudTramite {...comunes} seccion={seccion} onSeccion={irSeccion} />
           ) : tipo === SERVICIO.VISADO ? (

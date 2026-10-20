@@ -23,6 +23,7 @@ const CARGAR_ESTANCIA = () => import("./components/estancia/EstanciaAdmin");
 const CARGAR_MODIFICATORIA = () => import("./components/modificatoria/ModificatoriaAdmin");
 // Trámites por pasos (grado, fp, homologaciones, recurso; 12/10/2026).
 const TramiteAdmin = lazyConRecarga(() => import("./components/tramite/TramiteAdmin"));
+const PacAdmin = lazyConRecarga(() => import("./components/pac/PacAdmin"));
 
 const deMaster = (nombre) => lazyConRecarga(() => CARGAR_MASTER().then((m) => ({ default: m[nombre] })));
 const deVisa = (nombre) => lazyConRecarga(() => CARGAR_VISA().then((m) => ({ default: m[nombre] })));
@@ -201,11 +202,12 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const estadoDe = (id) => bloquesServidor.find((b) => b.id === id)?.estado ?? "pendiente";
   // Los trámites por pasos (grado, fp, homologaciones, recurso; 12/10/2026)
   // traen sus bloques del servidor y su panel propio (TramiteAdmin).
-  const isTramite = esTramite(detalle?.panel_servicio);
+  const isPac = Number(detalle?.id_tipo_solicitud) === 29 || detalle?.panel_servicio === "pac";
+  const isTramite = !isPac && esTramite(detalle?.panel_servicio);
   // El máster lleva la navegación nueva (cabecera, fila de pasos, «le toca»);
   // visado, estancia y modificatoria conservan la suya. Los trámites por pasos
   // usan la del máster.
-  const esMaster = !isVisado && !isEstancia && !isModificatoria && !isTramite;
+  const esMaster = !isVisado && !isEstancia && !isModificatoria && !isTramite && !isPac;
   const conRuta = esMaster || isTramite;
 
   // En visado la lista se arma aquí y no en el servidor: los bloques nuevos
@@ -219,6 +221,16 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
   const bloques = useMemo(() => {
     // La estancia lleva su propia navegacion dentro del panel; la lista
     // lateral del master aqui no significa nada.
+    if (isPac) {
+      return [
+        { id: "flujo",        numero: "0", label: "Estado del expediente", estado: "pendiente" },
+        { id: "invitados",    numero: "0b", label: "Quién más entra",      estado: "pendiente" },
+        { id: "datos",        numero: "1", label: "Datos del solicitante", estado: "pendiente" },
+        { id: "documentos",   numero: "2", label: "Documentos",            estado: "pendiente" },
+        { id: "acompanantes", numero: "3", label: "Acompañantes",          estado: "pendiente" },
+        { id: "extranjeria",  numero: "4", label: "UGE y consulado",       estado: "pendiente" },
+      ];
+    }
     if (isModificatoria) {
       return [
         { id: "flujo",       numero: "0", label: "Estado del expediente", estado: "pendiente" },
@@ -261,7 +273,7 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
       { id: "cierre",      numero: "7", label: "Cierre del expediente", estado: hecho(visaExp?.cierre_estado === "CERRADO") },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isModificatoria, isEstancia, isVisado, bloquesServidor, visaExp, visaSesiones]);
+  }, [isPac, isModificatoria, isEstancia, isVisado, bloquesServidor, visaExp, visaSesiones]);
 
   // Cargar expediente, sesiones y documentos entregables del visado
   useEffect(() => {
@@ -638,7 +650,11 @@ export default function SolicitudDetalleBackoffice({ idSolicitud, onVolver }) {
           {/* La estancia por estudios NO comparte bloques con el master ni con
               el visado: ni informe de IA, ni eleccion de universidades, ni
               postulaciones. Su panel es todo lo que hay. */}
-          {isTramite ? (
+          {isPac ? (
+            <Suspense fallback={<CargandoPaso />}>
+              <PacAdmin idSolicitud={detalle?.id_solicitud} />
+            </Suspense>
+          ) : isTramite ? (
             <Suspense fallback={<CargandoPaso />}>
               <TramiteAdmin
                 detalle={detalle}

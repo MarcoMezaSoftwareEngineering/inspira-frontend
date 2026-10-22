@@ -43,6 +43,7 @@ const CARGAR = {
   sistematizador: () => import("./sistematizador/SistematizadorMasteres"),
   masteres: () => import("./catalogo-masteres/BuscadorMasteres"),
   doctorado: () => import("./doctorado/DoctoradoCore"),
+  estudios: () => import("./estudios/EstudiosCore"),
   presupuestos: () => import("./presupuestos/PresupuestosPortal"),
   calculadora: () => import("./calculadora/LeadsCalculadora"),
   leads: () => import("./leads/Leads"),
@@ -77,6 +78,7 @@ const UniversidadesLista = lazyConRecarga(CARGAR.universidades);
 const SistematizadorMasteres = lazyConRecarga(CARGAR.sistematizador);
 const BuscadorMasteres = lazyConRecarga(CARGAR.masteres);
 const DoctoradoCore = lazyConRecarga(CARGAR.doctorado);
+const EstudiosCore = lazyConRecarga(CARGAR.estudios);
 const PresupuestosPortal = lazyConRecarga(CARGAR.presupuestos);
 const LeadsCalculadora = lazyConRecarga(CARGAR.calculadora);
 const Leads = lazyConRecarga(CARGAR.leads);
@@ -127,6 +129,7 @@ const SECCION_DE_RUTA = {
   "/backoffice/sistematizador": "sistematizador",
   "/backoffice/masteres": "masteres",
   "/backoffice/doctorado": "doctorado",
+  "/backoffice/estudios": "estudios",
   "/backoffice/presupuestos": "presupuestos",
   "/backoffice/calculadora": "calculadora",
   "/backoffice/leads": "leads",
@@ -441,6 +444,8 @@ export default function BackofficeApp() {
             {path === "/backoffice/masteres" && <BuscadorMasteres />}
             {/* Doctorado: guía del servicio y catálogo interno (18/09/2026). */}
             {path === "/backoffice/doctorado" && <DoctoradoCore />}
+            {/* Grados y FP: catálogo QEDU + RCD para el informe (22/10/2026). */}
+            {path === "/backoffice/estudios" && <EstudiosCore />}
 
             {path === "/backoffice/presupuestos" && <PresupuestosPortal />}
 

@@ -137,3 +137,7 @@
 .ase-dc-medida { display: inline-flex; background: #eef2f6; border-radius: 10px; padding: 3px; gap: 2px; margin-bottom: 8px; }
 .ase-dc-medida button { border: 0; background: none; border-radius: 8px; padding: 6px 11px; font-size: 12.5px; font-weight: 700; color: #62808f; cursor: pointer; }
 .ase-dc-medida button[data-on="1"] { background: #fff; color: #013446; box-shadow: 0 1px 2px rgba(1, 52, 70, .12); }
+
+/* Grados y FP (22/10/2026): el buscador reutiliza el catálogo; botón pequeño en tabla. */
+.ase-dc-boton.mini { min-height: 28px; padding: 0 10px; font-size: 12px; border-radius: 9px; margin-left: 8px; }
+.ase-dc-cat .ase-dc-tabla { min-width: 760px; }

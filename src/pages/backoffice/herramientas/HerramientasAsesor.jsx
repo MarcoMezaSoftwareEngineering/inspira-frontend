@@ -272,6 +272,11 @@ export default function HerramientasAsesor() {
               dato={r ? `${r.cargados.toLocaleString("es-ES")} másteres buscables` : null}
             />
             <TarjetaEnlace
+              icono={<GraduationCap />} tono="verde" titulo="Grados y FP" href="/backoffice/estudios"
+              chip={<Chip tono="verde">nuevo</Chip>}
+              descripcion="Catálogo de grados (QEDU: nota de corte, plazas, precio) y de ciclos de FP de grado superior con sus centros (RCD). De aquí sale el informe de grado/FP."
+            />
+            <TarjetaEnlace
               icono={<GraduationCap />} tono="petrol" titulo="Doctorado" href="/backoffice/doctorado"
               chip={<Chip tono="verde">nuevo</Chip>}
               descripcion="Guía del servicio (residencia UGE, acceso, proceso, paquetes) y catálogo interno: 1.234 programas oficiales con mapa, plazos y precios."

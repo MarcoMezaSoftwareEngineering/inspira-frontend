@@ -6,7 +6,7 @@
 // de candidaturas, documentos): GET /backoffice/tramites/:id la trae con los
 // datos del expediente. La etapa se mueve aquí mismo y es la que coloca al
 // asesorado en su paso.
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { boGET, boPATCH, boPUT } from "../../../../../services/backofficeApi";
 import { cambiarEtapa } from "../../../comun/cambiarEtapa";
 import EncabezadoClienteAdmin from "../../EncabezadoClienteAdmin";
@@ -14,6 +14,12 @@ import ChecklistSolicitudAdmin from "../ChecklistSolicitudAdmin";
 import DocumentosProceso from "../../../../../components/common/DocumentosProceso";
 import RutaMini from "../../../../../components/common/RutaMini";
 import { fechaCorta, gruposDe, mostrarValor } from "../../../../../lib/tramites";
+import Ventana from "../../../ui/Ventana";
+
+// El catálogo de grados (QEDU) y FP (RCD) se carga solo si se abre: pesa.
+const BuscadorEstudios = lazy(() => import("../../../estudios/BuscadorEstudios"));
+// Fichas cuya lista se llena desde el catálogo de estudios (22/10/2026).
+const CON_CATALOGO = { grado: "grados", fp: "fp" };
 
 /* ── La cabecera y la caja de cada bloque (como en el máster) ───────────── */
 
@@ -132,6 +138,7 @@ function ListaAdmin({ idSolicitud, def, modo, candidaturas, onGuardado }) {
   const [abierta, setAbierta] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [aviso, setAviso] = useState("");
+  const [catalogo, setCatalogo] = useState(false);
 
   useEffect(() => { setFilas((candidaturas || []).map((c) => ({ ...c }))); }, [candidaturas]);
 
@@ -147,6 +154,13 @@ function ListaAdmin({ idSolicitud, def, modo, candidaturas, onGuardado }) {
   const anadir = () => {
     const f = { id: nuevoId(), ...(campoEstado ? { estado: campoEstado.opciones[0] } : {}) };
     setFilas((fs) => [...fs, f]); setAbierta(f.id);
+  };
+  // Desde el catálogo: la fila llega ya rellena (programa, centro, nota, plazas…)
+  // y se queda como «Propuesta» hasta que el asesor la guarde.
+  const anadirDelCatalogo = (datos) => {
+    const estado = campoEstado?.opciones?.includes(datos.estado) ? datos.estado : campoEstado?.opciones?.[0];
+    const f = { id: nuevoId(), ...datos, ...(estado ? { estado } : {}) };
+    setFilas((fs) => [...fs, f]); setAviso(`Añadido: ${datos.programa}. Recuerda guardar la lista.`);
   };
 
   async function guardar() {
@@ -200,9 +214,19 @@ function ListaAdmin({ idSolicitud, def, modo, candidaturas, onGuardado }) {
       </div>
       <div className="flex items-center gap-3 flex-wrap mt-3">
         <button type="button" className="ex-btn" onClick={anadir}>+ Añadir {lista.singular}</button>
+        {CON_CATALOGO[def.clave] && <button type="button" className="ex-btn" onClick={() => setCatalogo(true)}>Añadir desde el catálogo</button>}
         <button type="button" className="ex-btn" disabled={guardando} onClick={guardar}>{guardando ? "Guardando…" : "Guardar lista"}</button>
         {aviso && <span className="text-[12px] text-[#5f7a89]">{aviso}</span>}
       </div>
+      {CON_CATALOGO[def.clave] && (
+        <Ventana abierta={catalogo} onCerrar={() => setCatalogo(false)} ancho="xl" titulo="Catálogo de grados y FP" subtitulo="Cada «Añadir» crea una fila en la lista; al terminar, cierra y pulsa «Guardar lista».">
+          {catalogo && (
+            <Suspense fallback={<p className="text-[13px] text-[#5f7a89]">Cargando el catálogo…</p>}>
+              <BuscadorEstudios inicial={CON_CATALOGO[def.clave]} onElegir={anadirDelCatalogo} />
+            </Suspense>
+          )}
+        </Ventana>
+      )}
     </section>
   );
 }

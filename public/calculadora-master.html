@@ -576,6 +576,10 @@ const UNIS={
   "Otra":[{n:"Universidad de Granada",com:"Andalucía",p:850},{n:"Universidad de Sevilla",com:"Andalucía",p:850},{n:"Universidad de Salamanca",com:"Castilla y León",p:1000},{n:"Universidad de Santiago de Compostela",com:"Galicia",p:950},{n:"Universidad del País Vasco (UPV/EHU)",com:"País Vasco",p:1800},{n:"Universitat de València (UV)",com:"Valencia",p:3200},{n:"Universidad Rey Juan Carlos (URJC)",com:"Madrid",p:5300},{n:"Universidad Complutense de Madrid (UCM)",com:"Madrid",p:5300},{n:"Universidad Autónoma de Madrid (UAM)",com:"Madrid",p:5300},{n:"Universitat de Barcelona (UB)",com:"Cataluña",p:4500}]
 };
 
+// Los utm_* de la visita: los guarda la web (lib/analytics.js, misma origen) y, si
+// esta página se abre con ?utm_… directo, también valen. Sin esto los leads de la
+// calculadora llegaban a Core sin campaña aunque el backend ya los leía.
+function utmGuardado(){try{const u=JSON.parse(sessionStorage.getItem('inspira_utm')||'{}')||{};let q=new URLSearchParams(location.search);try{if(window.top!==window)q=new URLSearchParams(window.top.location.search)}catch(e){}['utm_source','utm_medium','utm_campaign'].forEach(k=>{if(q.get(k))u[k]=q.get(k)});return u}catch(e){return {}}}
 function enviarAMake(datos){ fetch(API_BASE+'/api/calculadora/make-webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)}).catch(()=>{}); }
 
 function generarMensajeAsesoria(d){ return encodeURIComponent('Hola Inspira, vengo de la calculadora de máster (botón de asesoría). Quiero separar mi asesoría diagnóstico.\n\n📋 Mi perfil:\n• Nombre: '+d.nombre+'\n• País: '+d.pais+'\n• Carrera: '+d.carrera+'\n• Área: '+d.area+'\n• Interés de Máster: '+d.masterInteres+'\n• Promedio: '+d.promedioES+'/10\n• Presupuesto: '+d.presupuesto+' €/año\n• Perfil de vida: '+d.vida+'\n\n¿Tienen disponibilidad? 🙏'); }
@@ -665,7 +669,7 @@ function calcular(){
   // Guardar en base de datos del backoffice
   try {
     const becasCalificadas=becas.filter(b=>b.e==='si'||b.e==='posible').map(b=>({nombre:b.n,estado:b.e}));
-    fetch('https://api.inspira-legal.cloud/api/calculadora/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,pais,email,whatsapp:wpp,nota_espana:nota,area,presupuesto:pres,vida,auip,funcionario:func_,ods,cyl:comunidadesPref,universidad:universidad||null,ranking,becas_califica:becasCalificadas,...consentimiento})}).catch(()=>{});
+    fetch('https://api.inspira-legal.cloud/api/calculadora/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...utmGuardado(),nombre,pais,email,whatsapp:wpp,nota_espana:nota,area,presupuesto:pres,vida,auip,funcionario:func_,ods,cyl:comunidadesPref,universidad:universidad||null,ranking,becas_califica:becasCalificadas,...consentimiento})}).catch(()=>{});
   } catch(e) {}
 
   const dWpp={nombre,pais,carrera,area,masterInteres,promedioES,presupuesto:pres+' €',vida:vida==='economico'?'Económico':vida==='equilibrado'?'Equilibrado':'Ambicioso',auip:auip==='si'?'Sí':'No'};

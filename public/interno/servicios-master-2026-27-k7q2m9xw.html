@@ -1012,6 +1012,9 @@ async function enviar() {
     consent_ts: new Date().toISOString(),
     consent_origen: 'portal-presupuesto'
   };
+  // Los utm_* de la visita (los guarda la web en sessionStorage) o los de esta URL:
+  // sin ellos la solicitud llegaba a Core sin campaña.
+  const utm = (() => { try { const u = JSON.parse(sessionStorage.getItem('inspira_utm') || '{}') || {}; const q = new URLSearchParams(location.search); ['utm_source','utm_medium','utm_campaign'].forEach(k => { if (q.get(k)) u[k] = q.get(k); }); return u; } catch (e) { return {}; } })();
 
   const comunidades = [...document.querySelectorAll('#c-comunidades .on')].map(el => el.textContent.trim());
   const servicios   = [...document.querySelectorAll('#c-servicios .on')].map(el => el.textContent.trim());
@@ -1033,7 +1036,7 @@ async function enviar() {
     const res = await fetch('https://api.inspira-legal.cloud/api/presupuesto', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre: n, contacto: c, comunidades, cant_unis, servicios, estimacion_eur, situacion, ...consentimiento })
+      body: JSON.stringify({ nombre: n, contacto: c, comunidades, cant_unis, servicios, estimacion_eur, situacion, ...consentimiento, ...utm })
     });
     const data = await res.json();
     if(data.ok) {

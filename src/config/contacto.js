@@ -1,25 +1,16 @@
 // src/config/contacto.js
 // Canales de captación.
 //
-// UNA sola forma de reservar la sesión diagnóstico en toda la web: el enlace de
-// Calendly de abajo (decisión del 14/09/2026, al recortar los menús). Cabecera,
-// mega-menú, barra inferior, botón flotante, pestaña lateral, ventana emergente,
-// páginas de servicio y landings del máster abren esta URL, sin pasos
-// intermedios. No vuelvas a meter una ventana propia ni /reservar entre medias.
-//
-// Por qué Calendly y no la agenda propia (/reservar, con Mercado Pago): el
-// 14/09/2026 GET /api/reservas/disponibilidad en producción devolvía
-// `dias: []` —ni un horario libre cargado en Core → Agenda—, así que nadie
-// podía completar una reserva por ahí; el evento «Sesión diagnóstico» de
-// Calendly (30 min, Google Meet) tenía 14 horarios libres del 15 al 21/09.
-// Si algún día la agenda propia tiene horarios y se prueba de punta a punta
-// (horario → pago → confirmación en Agenda), el cambio se hace aquí y en los
-// botones que abren esta URL en pestaña nueva.
+// UNA sola forma de reservar en toda la web: la agenda propia (/reservar), con
+// pago por tarjeta (Mercado Pago), transferencia con voucher o «pagar después».
+// Desde el 02/11/2026 sustituye a Calendly, cuyo evento queda desactivado.
+// Cabecera, mega-menú, barra inferior, botón flotante, pestaña lateral, ventana
+// emergente, páginas de servicio y landings abren esta URL, sin pasos
+// intermedios. Para abrir un servicio concreto: `/reservar?servicio=<id>`.
 import { TITULAR } from "./legal";
 import { SESION_PRECIOS } from "./paqueteMaster2027Resumen";
 
-export const CALENDLY_URL =
-  "https://calendly.com/administracion-inspira-legal/30min";
+export const RESERVAR_URL = "/reservar";
 
 export const LINKTREE_URL = "https://linktr.ee/inspira_educa";
 

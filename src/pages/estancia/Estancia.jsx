@@ -21,7 +21,7 @@ import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
 import { ANIOS_ESTANCIA, CASOS_ESTANCIA, diasResolucion, etiquetaTipo, mesesVigencia } from "../../config/casosEstancia";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { DIAS_ANTELACION } from "../../config/visaOEstancia";
 import { PROCESOS } from "../../config/serviciosProceso";
 import { eur } from "../../config/paqueteMaster2027Resumen";
@@ -250,7 +250,7 @@ export default function Estancia() {
               <Icono nombre="whatsapp" size={20} />
               {T.hero.whatsapp}
             </a>
-            <a href={CALENDLY_URL} target="_blank" rel="noopener" className="est-btn est-btn-borde" onClick={() => registrarEvento("estancia_sesion", { donde: "hero" })}>
+            <a href={RESERVAR_URL} className="est-btn est-btn-borde" onClick={() => registrarEvento("estancia_sesion", { donde: "hero" })}>
               <Icono nombre="calendario" size={18} />
               {T.hero.sesion}
             </a>
@@ -525,7 +525,7 @@ export default function Estancia() {
             <div>
               <strong>{T.paquete.sesionTitulo}</strong>
               <p>{T.paquete.sesionTexto}</p>
-              <a href={CALENDLY_URL} target="_blank" rel="noopener" className="est-enlace" onClick={() => registrarEvento("estancia_sesion", { donde: "paquete" })}>
+              <a href={RESERVAR_URL} className="est-enlace" onClick={() => registrarEvento("estancia_sesion", { donde: "paquete" })}>
                 {T.hero.sesion} →
               </a>
             </div>
@@ -589,7 +589,7 @@ export default function Estancia() {
             <Icono nombre="whatsapp" size={20} />
             {T.cierre.whatsapp}
           </a>
-          <a href={CALENDLY_URL} target="_blank" rel="noopener" className="est-btn est-btn-claro" onClick={() => registrarEvento("estancia_sesion", { donde: "cierre" })}>
+          <a href={RESERVAR_URL} className="est-btn est-btn-claro" onClick={() => registrarEvento("estancia_sesion", { donde: "cierre" })}>
             <Icono nombre="calendario" size={18} />
             {T.cierre.sesion}
           </a>
@@ -601,7 +601,7 @@ export default function Estancia() {
 
       <BarraCta
         whatsapp={wa(T.hero.whatsappDetalle)}
-        sesion={CALENDLY_URL}
+        sesion={RESERVAR_URL}
         textoWhatsapp="WhatsApp"
         textoSesion={T.hero.sesionCorta}
         onWhatsapp={() => registrarEvento("estancia_whatsapp", { donde: "barra" })}

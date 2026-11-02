@@ -20,7 +20,7 @@ import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
 import { Cinta } from "../../components/common/EfectosLanding";
 import { navigate } from "../../services/navigate";
 import { useSEO } from "../../hooks/useSEO";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { RESENAS_GOOGLE } from "../../config/testimonios";
 import { registrarEvento } from "../../lib/analytics";
 import { cascada, useRevelar } from "../../lib/revelar";
@@ -288,7 +288,7 @@ export default function BlogPost({ slug }) {
               <Icono nombre="whatsapp" size={18} />
               Escríbenos por WhatsApp
             </a>
-            <a href={CALENDLY_URL} target="_blank" rel="noopener" className="bp-btn" onClick={() => registrarEvento("blog_sesion", { slug })}>
+            <a href={RESERVAR_URL} className="bp-btn" onClick={() => registrarEvento("blog_sesion", { slug })}>
               <Icono nombre="calendario" size={18} />
               Reservar la sesión
             </a>
@@ -313,7 +313,7 @@ export default function BlogPost({ slug }) {
 
       <BarraCta
         whatsapp={wa}
-        sesion={CALENDLY_URL}
+        sesion={RESERVAR_URL}
         textoWhatsapp="WhatsApp"
         textoSesion="Sesión · 25 €"
         desde={700}

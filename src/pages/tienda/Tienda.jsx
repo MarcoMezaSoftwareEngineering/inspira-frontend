@@ -3,7 +3,7 @@
 //
 // Vuelve el grid de compra (12/09/2026: el cliente quiere empezar a vender).
 // Estuvo sustituido por un «en construcción» desde el 25/08/2026 por una
-// pantalla en blanco: el archivo usaba CALENDLY_URL sin importarlo. Ya va
+// pantalla en blanco: el archivo usaba RESERVAR_URL sin importarlo. Ya va
 // importado.
 //
 // Qué se puede comprar lo deciden DOS llaves, y hacen falta las dos:
@@ -19,7 +19,7 @@
 // y sin botón de compra.
 import { useEffect, useState } from "react";
 import { PRODUCTOS } from "../../config/tienda";
-import { CALENDLY_URL } from "../../config/contacto";
+import { RESERVAR_URL } from "../../config/contacto";
 import { navigate } from "../../services/navigate";
 import ComprarProducto from "../../components/common/ComprarProducto";
 import PageHero from "../../components/layout/PageHero";
@@ -173,9 +173,7 @@ export default function Tienda() {
           Los pagos se procesan de forma segura con Mercado Pago y el acceso te
           llega al correo que indiques. ¿Dudas con un producto?{" "}
           <a
-            href={CALENDLY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={RESERVAR_URL}
             className="font-semibold text-primary hover:underline"
           >
             Agenda una asesoría

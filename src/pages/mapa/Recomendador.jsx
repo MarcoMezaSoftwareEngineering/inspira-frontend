@@ -14,7 +14,7 @@
 import { useState } from "react";
 import Icono from "../../components/common/Icono";
 import IconoMapa from "./IconosMapa";
-import { CALENDLY_URL } from "../../config/contacto";
+import { RESERVAR_URL } from "../../config/contacto";
 import { SIN_RAMA, masteresDe, nombreRama } from "./indice";
 import { RECOMENDAR, eur, numero } from "./mapaTextos";
 
@@ -229,9 +229,7 @@ export default function Recomendador({ indice, onCerrar, onResultado, onElegir, 
               </ol>
               <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <a
-                  href={CALENDLY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={RESERVAR_URL}
                   className="mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-2.5 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#003648]"
                 >
                   <Icono nombre="calendario" size={17} />

@@ -18,7 +18,7 @@ import Icono from "../../components/common/Icono";
 import VideoVertical from "../../components/common/VideoVertical";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { cascada, useRevelar } from "../../lib/revelar";
 import { CifraAnimada } from "../landing/master2027/comunes";
@@ -412,7 +412,7 @@ export default function Becas2027() {
             <Icono nombre="whatsapp" size={20} />
             {T.ayuda.whatsapp}
           </a>
-          <a href={CALENDLY_URL} target="_blank" rel="noopener" className="bk-btn bk-btn-noche" onClick={() => registrarEvento("becas2027_sesion", {})}>
+          <a href={RESERVAR_URL} className="bk-btn bk-btn-noche" onClick={() => registrarEvento("becas2027_sesion", {})}>
             <Icono nombre="calendario" size={18} />
             {T.ayuda.sesion}
           </a>

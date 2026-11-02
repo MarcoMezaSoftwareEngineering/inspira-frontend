@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { navigate } from "../../../services/navigate";
 import Reveal from "../../../components/common/Reveal";
 import Icono from "../../../components/common/Icono";
-import { CALENDLY_URL } from "../../../config/contacto";
+import { RESERVAR_URL } from "../../../config/contacto";
 import { HREF_PAQUETE, NOMBRE_PAQUETE } from "../../../config/paqueteMaster2027Resumen";
 
 const go = (e, href) => {
@@ -133,9 +133,7 @@ export default function Hero() {
             <div className="actions">
               <a
                 className="btn btn-primary"
-                href={CALENDLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={RESERVAR_URL}
               >
                 <Icono nombre="calendario" size={18} />
                 Agenda tu asesoría 1:1 <span className="arr">→</span>

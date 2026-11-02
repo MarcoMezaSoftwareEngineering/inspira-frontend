@@ -183,8 +183,9 @@ export default function Header({ rutaInicial }) {
                   key={item.label}
                   href={item.href}
                   onClick={(e) => go(e, item.href)}
-                  className={active ? "route-active" : undefined}
+                  className={item.cta ? "v4-nav-cta" : active ? "route-active" : undefined}
                 >
+                  {item.cta && <Icono nombre="calendario" size={15} />}
                   {item.label}
                 </a>
               );

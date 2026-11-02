@@ -19,7 +19,7 @@ import BarraCta, { ProgresoLectura } from "../../components/common/BarraCta";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { PREGUNTAS, evaluar } from "../../config/visaOEstancia";
 import { eur } from "../../config/paqueteMaster2027Resumen";
 import { registrarEvento } from "../../lib/analytics";
@@ -267,7 +267,7 @@ export default function Visado() {
               <Icono nombre="whatsapp" size={20} />
               {T.hero.whatsapp}
             </a>
-            <a href={CALENDLY_URL} target="_blank" rel="noopener" className="vis-btn vis-btn-borde" onClick={() => registrarEvento("visado_sesion", { donde: "hero" })}>
+            <a href={RESERVAR_URL} className="vis-btn vis-btn-borde" onClick={() => registrarEvento("visado_sesion", { donde: "hero" })}>
               <Icono nombre="calendario" size={18} />
               {T.hero.sesion}
             </a>
@@ -442,7 +442,7 @@ export default function Visado() {
             </li>
           ))}
         </ol>
-        <a href={CALENDLY_URL} target="_blank" rel="noopener" className="vis-btn vis-btn-sol mov-brillo" data-revelar onClick={() => registrarEvento("visado_sesion", { donde: "como" })}>
+        <a href={RESERVAR_URL} className="vis-btn vis-btn-sol mov-brillo" data-revelar onClick={() => registrarEvento("visado_sesion", { donde: "como" })}>
           <Icono nombre="calendario" size={18} />
           {T.hero.sesion}
         </a>
@@ -501,7 +501,7 @@ export default function Visado() {
             <Icono nombre="whatsapp" size={20} />
             {T.cierre.whatsapp}
           </a>
-          <a href={CALENDLY_URL} target="_blank" rel="noopener" className="vis-btn vis-btn-claro" onClick={() => registrarEvento("visado_sesion", { donde: "cierre" })}>
+          <a href={RESERVAR_URL} className="vis-btn vis-btn-claro" onClick={() => registrarEvento("visado_sesion", { donde: "cierre" })}>
             <Icono nombre="calendario" size={18} />
             {T.cierre.sesion}
           </a>
@@ -511,7 +511,7 @@ export default function Visado() {
 
       <BarraCta
         whatsapp={wa(T.cierre.whatsappDetalle)}
-        sesion={CALENDLY_URL}
+        sesion={RESERVAR_URL}
         textoWhatsapp="WhatsApp"
         textoSesion={T.hero.sesionCorta}
         onWhatsapp={() => registrarEvento("visado_whatsapp", { donde: "barra" })}

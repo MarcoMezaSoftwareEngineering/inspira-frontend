@@ -2,20 +2,18 @@
 // Tarjeta fija al costado derecho: recuerda la sesión diagnóstico de 30 min.
 // Entra deslizándose tras el primer scroll para no tapar el hero (que ya lleva
 // su propio botón). En pantallas más estrechas se colapsa a una pestaña.
-// Abre Calendly directamente: es el único destino de reserva de la web
+// Abre /reservar directamente: es el único destino de reserva de la web
 // (config/contacto.js).
 import Icono from "./Icono";
 import { ASESORIA_PRINCIPAL } from "../../config/asesorias";
-import { CALENDLY_URL } from "../../config/contacto";
+import { RESERVAR_URL } from "../../config/contacto";
 
 export default function ReservaLateral({ visible = true }) {
   return (
     <div className={"reserva-lateral" + (visible ? " visible" : "")}>
       {/* Escritorio: tarjeta con el precio a la vista */}
       <a
-        href={CALENDLY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={RESERVAR_URL}
         className="reserva-lateral-card no-underline"
         aria-label="Reservar la sesión diagnóstico de 30 minutos"
       >
@@ -31,9 +29,7 @@ export default function ReservaLateral({ visible = true }) {
 
       {/* Pestaña estrecha */}
       <a
-        href={CALENDLY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={RESERVAR_URL}
         className="reserva-lateral-tab"
         aria-label="Reservar la sesión diagnóstico"
       >

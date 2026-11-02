@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Icono from "../../../components/common/Icono";
 import { CTA, WHATSAPP } from "../../../config/paqueteMaster2027";
-import { CALENDLY_URL } from "../../../config/contacto";
+import { RESERVAR_URL } from "../../../config/contacto";
 import { useHidratando } from "../../../lib/hidratacion";
 import { URL_CALENDLY, evento, registrarCta, prefiereMenosMovimiento } from "./medicion";
 
@@ -52,9 +52,7 @@ export function BotonReserva({
         />
       )}
       <a
-        href={hidratando ? CALENDLY_URL : URL_CALENDLY}
-        target="_blank"
-        rel="noopener"
+        href={hidratando ? RESERVAR_URL : URL_CALENDLY}
         onClick={() => {
           registrarCta(ubicacion);
           alPulsar?.();

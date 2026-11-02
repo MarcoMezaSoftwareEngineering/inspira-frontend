@@ -11,7 +11,7 @@ import EnviarPlan from "../../components/common/EnviarPlan";
 import PageHero from "../../components/layout/PageHero";
 import SigueExplorando from "../../components/layout/SigueExplorando";
 import { navigate } from "../../services/navigate";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 
 const go = (e, href) => {
@@ -374,9 +374,7 @@ export default function Asistente() {
           <p className="mt-6 text-center text-[13px] text-neutral-600">
             ¿Prefieres saltarte esto y hablar directamente con un abogado?{" "}
             <a
-              href={CALENDLY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={RESERVAR_URL}
               className="font-bold text-primary hover:underline"
             >
               Agenda tu asesoría

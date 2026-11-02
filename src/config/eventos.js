@@ -1,7 +1,7 @@
 // src/config/eventos.js
 // Eventos gratuitos de la marca. `activo: false` retira el evento de la web
 // sin borrar su contenido.
-import { CALENDLY_URL } from "./contacto";
+import { RESERVAR_URL } from "./contacto";
 
 export const EVENTOS = [
   {
@@ -59,7 +59,7 @@ export const EVENTOS = [
       "Calendario completo Rumbo al 2027 en PDF.",
       "Sesión de preguntas en vivo con el equipo legal.",
     ],
-    urlInscripcion: CALENDLY_URL,
+    urlInscripcion: RESERVAR_URL,
   },
 ];
 

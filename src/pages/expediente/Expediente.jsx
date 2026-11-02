@@ -17,7 +17,7 @@ import { createPortal } from "react-dom";
 import Icono from "../../components/common/Icono";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { cascada, useRevelar } from "../../lib/revelar";
 import { DOCUMENTOS, EXPEDIENTE, IPREM_ANIO, IPREM_MES, PASOS, TOTAL } from "./textos";
@@ -555,7 +555,7 @@ export default function Expediente() {
             <Icono nombre="whatsapp" size={20} />
             {EXPEDIENTE.cierre.whatsapp}
           </a>
-          <a href={CALENDLY_URL} target="_blank" rel="noopener" className="exp-btn exp-btn-claro" onClick={() => registrarEvento("expediente_sesion", {})}>
+          <a href={RESERVAR_URL} className="exp-btn exp-btn-claro" onClick={() => registrarEvento("expediente_sesion", {})}>
             <Icono nombre="calendario" size={18} />
             {EXPEDIENTE.cierre.sesion}
           </a>

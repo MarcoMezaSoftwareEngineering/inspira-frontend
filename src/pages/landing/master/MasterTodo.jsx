@@ -15,7 +15,7 @@ import BarraCta, { ProgresoLectura } from "../../../components/common/BarraCta";
 import { CarruselVideos } from "../../../components/common/VideoVertical";
 import { useSEO } from "../../../hooks/useSEO";
 import { CATEGORIAS_CASOS } from "../../../config/casos";
-import { CALENDLY_URL, whatsappDesde } from "../../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../../config/contacto";
 import { ADEMAS, BENEFICIOS, FAQ, INCLUYE, LISTAS, MATRICULA } from "../../../config/paqueteMaster2027";
 import { IPREM_REFERENCIA } from "../../../config/costeVida";
 import { eur } from "../../../config/paqueteMaster2027Resumen";
@@ -165,7 +165,7 @@ export default function MasterTodo() {
               <Icono nombre="whatsapp" size={20} />
               {T.hero.whatsapp}
             </a>
-            <a href={CALENDLY_URL} target="_blank" rel="noopener" className="mst-btn mst-btn-borde" onClick={() => registrarEvento("master_todo_sesion", { donde: "hero" })}>
+            <a href={RESERVAR_URL} className="mst-btn mst-btn-borde" onClick={() => registrarEvento("master_todo_sesion", { donde: "hero" })}>
               <Icono nombre="calendario" size={18} />
               {T.hero.sesion}
             </a>
@@ -429,7 +429,7 @@ export default function MasterTodo() {
               <Icono nombre="whatsapp" size={20} />
               {T.precio.whatsapp}
             </a>
-            <a href={CALENDLY_URL} target="_blank" rel="noopener" className="mst-btn mst-btn-sol" onClick={() => registrarEvento("master_todo_sesion", { donde: "precio" })}>
+            <a href={RESERVAR_URL} className="mst-btn mst-btn-sol" onClick={() => registrarEvento("master_todo_sesion", { donde: "precio" })}>
               <Icono nombre="calendario" size={18} />
               {T.precio.sesion}
             </a>
@@ -459,7 +459,7 @@ export default function MasterTodo() {
             <Icono nombre="whatsapp" size={20} />
             {T.hero.whatsapp}
           </a>
-          <a href={CALENDLY_URL} target="_blank" rel="noopener" className="mst-btn mst-btn-claro" onClick={() => registrarEvento("master_todo_sesion", { donde: "cierre" })}>
+          <a href={RESERVAR_URL} className="mst-btn mst-btn-claro" onClick={() => registrarEvento("master_todo_sesion", { donde: "cierre" })}>
             <Icono nombre="calendario" size={18} />
             {T.hero.sesion}
           </a>
@@ -470,7 +470,7 @@ export default function MasterTodo() {
 
       <BarraCta
         whatsapp={wa(T.hero.whatsappDetalle)}
-        sesion={CALENDLY_URL}
+        sesion={RESERVAR_URL}
         textoWhatsapp="Cotización"
         textoSesion={T.hero.sesionCorta}
         oculta={calculadoraEnPantalla}

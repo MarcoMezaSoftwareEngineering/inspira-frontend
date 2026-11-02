@@ -129,12 +129,6 @@ export const TERCEROS_EN_PAGINA = [
     dato: "Dirección IP y datos técnicos del navegador al descargar la fuente.",
   },
   {
-    nombre: "Calendly",
-    finalidad:
-      "Agendar una llamada de asesoría desde el resultado de la calculadora.",
-    dato: "Nombre y correo, únicamente si haces clic en el botón de agendar.",
-  },
-  {
     nombre: "WhatsApp (Meta)",
     finalidad: "Continuar la conversación por WhatsApp si tú lo eliges.",
     dato: "El mensaje y tu número, únicamente si haces clic en el botón.",

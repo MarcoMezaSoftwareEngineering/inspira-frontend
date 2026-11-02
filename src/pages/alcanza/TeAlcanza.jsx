@@ -26,7 +26,7 @@ import CercoErrores from "../../components/common/CercoErrores";
 import Icono from "../../components/common/Icono";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { crearIndice, prefiereMenosMovimiento } from "../mapa/indice";
 import IlustracionCiudad from "../mapa/IlustracionesMapa";
@@ -266,7 +266,7 @@ function Resultado({ elegidas, totalCiudades, onOtraVez }) {
           <Icono nombre="mapa" size={18} />
           {ALCANZA.resultado.verMapa}
         </a>
-        <a href={CALENDLY_URL} target="_blank" rel="noopener" className="alc-cta-linea">
+        <a href={RESERVAR_URL} className="alc-cta-linea">
           <Icono nombre="calendario" size={18} />
           {ALCANZA.resultado.sesion}
         </a>

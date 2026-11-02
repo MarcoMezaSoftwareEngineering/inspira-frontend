@@ -2,7 +2,7 @@
 // Modalidades de asesoría que se ofrecen en la web.
 // La promoción gratuita tiene fecha de caducidad: al pasar `hasta` deja de
 // mostrarse sola, sin necesidad de tocar el resto de la web.
-import { CALENDLY_URL } from "./contacto";
+import { RESERVAR_URL } from "./contacto";
 import { diaLocal } from "../lib/hidratacion";
 // Importes de la fuente única (precios-inspira.json).
 import { SESION_PRECIOS as S30, AMPLIADA_PRECIOS as S50 } from "./paqueteMaster2027Resumen";
@@ -14,7 +14,7 @@ export const PROMO_GRATIS = {
   texto:
     "Por tiempo limitado: 12 minutos con un especialista para orientar tu caso, sin costo.",
   etiqueta: "Gratis por tiempo limitado",
-  url: CALENDLY_URL,
+  url: RESERVAR_URL,
 };
 
 // `dia` ("aaaa-mm-dd"): la cabecera y el botón flotante pasan el de
@@ -44,26 +44,26 @@ export const OPCIONES_ASESORIA = [
       "Definimos tu mejor vía: visado, estancia o residencia",
       "Plan de acción con próximos pasos y documentos",
     ],
-    url: CALENDLY_URL,
+    url: `${RESERVAR_URL}?servicio=sesion-diagnostico`,
   },
   {
     id: "personalizada-50",
     idPago: "asesoria-50",
     precioPen: S50.pen,
     nombre: "Asesoría ampliada",
-    duracion: "50 minutos",
+    duracion: "1 hora",
     precio: `${S50.eur} €`,
     precioAlt: `S/ ${S50.pen}`,
     icono: "documento",
     descripcion:
       "Para casos con varias variables: denegatorias previas, familia, doble vía o expedientes ya iniciados.",
     incluye: [
-      "Todo lo de la asesoría de 30 minutos",
+      "Todo lo de la sesión diagnóstico de 30 minutos",
       "Revisión de expedientes o resoluciones previas",
       "Estrategia para casos con familia o doble vía",
       "Tiempo suficiente para revisar documentos contigo",
     ],
-    url: CALENDLY_URL,
+    url: `${RESERVAR_URL}?servicio=asesoria-ampliada`,
   },
   {
     id: "gratis-12",
@@ -81,7 +81,7 @@ export const OPCIONES_ASESORIA = [
       "Te indicamos qué vía explorar",
       "Sin diagnóstico jurídico ni plan de acción",
     ],
-    url: CALENDLY_URL,
+    url: RESERVAR_URL,
   },
 ];
 

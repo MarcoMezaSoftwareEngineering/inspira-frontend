@@ -12,7 +12,7 @@
 //   se construyen con él. Todos los importes salen de la fuente única
 //   precios-inspira.json (vía paqueteMaster2027Resumen.js y metodo.js).
 // - Fechas del curso 2027-28: siempre estimadas («~» o «estimada»).
-// - Respuestas del cliente del 10/09/2026 (tarde): el evento de Calendly se
+// - Respuestas del cliente del 10/09/2026 (tarde): la reserva de la sesión se
 //   llama «Sesión diagnóstico», se paga por transferencia, Plin o Mercado Pago
 //   y las reuniones 1 a 1 van en todo paquete. No se publica tipo de cambio,
 //   moneda de cobro ni política de devolución.
@@ -1163,7 +1163,7 @@ export const FAQ = {
     {
       id: "como-pago",
       q: "¿Cómo pago?",
-      a: ["Reservas tu sesión en Calendly y la pagas de una de estas dos formas: pago directo, por transferencia a la cuenta empresarial de Inspira o por Plin, o con Mercado Pago, que permite pagar hasta en 3 cuotas sin intereses con tarjeta de crédito. Desde el extranjero también puedes pagar por PayPal o con un link de pago que te enviamos. Los planes se pagan por las mismas vías."],
+      a: ["Reservas tu sesión en nuestra agenda y la pagas ahí mismo con tarjeta (Mercado Pago) o por transferencia a la cuenta empresarial de Inspira, subiendo tu voucher. También puedes dejar el horario separado y confirmarlo luego por WhatsApp. Los planes se pagan por transferencia a la cuenta empresarial, por Plin, con Mercado Pago o, desde el extranjero, por PayPal o con un link de pago que te enviamos."],
     },
   ],
 };

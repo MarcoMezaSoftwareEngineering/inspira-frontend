@@ -9,6 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 import { loginGoogle } from "../../components/layout/Header/LoginButton";
 import { dialog } from "../../services/dialogService";
 import { fechaCompleta } from "./fechas";
+import { descargarIcs, googleCalendarUrl } from "./calendario";
 import "./reservar.css";
 
 const BASE = "/api/reservas/cliente";
@@ -194,6 +195,9 @@ export default function PagarReserva() {
   const [cargando, setCargando] = useState(true);
   const [haciendo, setHaciendo] = useState(null); // "tarjeta" | "transferencia" | "despues"
   const [cambiar, setCambiar] = useState(false);
+  const [confirmandoCancelar, setConfirmandoCancelar] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
+  const [cancelada, setCancelada] = useState(null); // { devolucion }
 
   const cargar = useCallback(async () => {
     try {
@@ -245,6 +249,56 @@ export default function PagarReserva() {
     }
   };
 
+  const cancelar = async () => {
+    setCancelando(true);
+    try {
+      const res = await apiPOST(`${BASE}/${id}/cancelar`, {});
+      if (res?.ok) setCancelada({ devolucion: !!res.devolucion });
+      else dialog.toast(res?.msg || "No se pudo cancelar la cita.", "error");
+    } catch {
+      dialog.toast("Error de conexión. Intente de nuevo.", "error");
+    } finally {
+      setCancelando(false);
+      setConfirmandoCancelar(false);
+    }
+  };
+
+  if (cancelada) {
+    return (
+      <Marco>
+        <h1 className="font-fraunces text-3xl font-semibold text-primary">Reserva cancelada</h1>
+        <p className="mt-2 text-tinta-2">
+          {cancelada.devolucion
+            ? "Como faltaban más de 24 horas, procede la devolución del importe. Nos pondremos en contacto con usted para gestionarla. Le enviamos la confirmación por correo."
+            : "El horario volvió a la agenda."}
+        </p>
+        <a href="/reservar" className={`${boton.primario} mt-6 inline-block`}>Reservar otro horario</a>
+      </Marco>
+    );
+  }
+
+  // Cancelar con confirmación en la misma página (sin diálogos del navegador).
+  const bloqueCancelar = (pagada) =>
+    confirmandoCancelar ? (
+      <div className="rv-entrada rounded-2xl border border-alto/30 bg-alto-soft p-4">
+        <p className="text-sm font-semibold text-alto-ink">
+          {pagada ? "¿Cancelar esta cita? Procede la devolución del importe." : "¿Cancelar esta reserva?"}
+        </p>
+        <div className="mt-3 flex gap-2">
+          <button type="button" onClick={cancelar} disabled={cancelando} className="rounded-full bg-alto px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+            {cancelando ? "Cancelando…" : "Sí, cancelar"}
+          </button>
+          <button type="button" onClick={() => setConfirmandoCancelar(false)} className={`${boton.secundario} !py-2`}>
+            No, mantener
+          </button>
+        </div>
+      </div>
+    ) : (
+      <button type="button" className="text-sm text-muted underline underline-offset-4" onClick={() => setConfirmandoCancelar(true)}>
+        Cancelar {pagada ? "la cita" : "esta reserva"}
+      </button>
+    );
+
   if (!id) {
     return (
       <Marco>
@@ -292,9 +346,46 @@ export default function PagarReserva() {
       <Marco>
         <h1 className="font-fraunces text-3xl font-semibold text-primary">Su cita está confirmada</h1>
         <p className="mt-2 text-tinta-2">{resumen}</p>
-        <p className="mt-4 rounded-2xl bg-verde-soft px-4 py-3 text-sm font-medium text-verde-ink">
-          Le enviamos los detalles de la cita por correo.
-        </p>
+
+        <section className="mt-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-linea">
+          <Fila etiqueta="Servicio" valor={r.titulo} />
+          {r.modalidad === "presencial" ? (
+            <Fila etiqueta="Lugar" valor={r.lugar || "San Isidro, Lima. El equipo le confirmará la dirección."} />
+          ) : (
+            <Fila etiqueta="Reunión" valor={r.meet_url ? <a className="text-primary underline" href={r.meet_url} target="_blank" rel="noopener noreferrer">{r.meet_url}</a> : "El enlace de Google Meet le llegará por correo."} />
+          )}
+          {r.motivo && <Fila etiqueta="Lo que nos contó" valor={r.motivo} />}
+        </section>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <a href={googleCalendarUrl(r)} target="_blank" rel="noopener noreferrer" className={boton.primario}>
+            Agregar a Google Calendar
+          </a>
+          <button type="button" onClick={() => descargarIcs(r)} className={boton.secundario}>
+            Descargar para Apple u Outlook (.ics)
+          </button>
+        </div>
+
+        <section className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-linea">
+          <h2 className="font-semibold text-tinta">¿Necesita hacer un cambio?</h2>
+          {r.puede_gestionar ? (
+            <>
+              <p className="mt-1 text-sm text-tinta-2">Puede reprogramar o cancelar sin costo hasta 24 horas antes de la cita.</p>
+              <div className="mt-3 flex flex-wrap items-center gap-4">
+                <a href={`/reservar?reprogramar=${r.id_reserva}`} className={boton.secundario}>Reprogramar</a>
+                {bloqueCancelar(true)}
+              </div>
+            </>
+          ) : (
+            <div className="mt-1">
+              <ContactosWhatsApp
+                contactos={r.contactos}
+                titulo="Faltan menos de 24 horas para la cita. Para cualquier cambio, escríbanos por WhatsApp:"
+                mensaje={`Hola, necesito hacer un cambio en mi reserva ${r.transferencia.referencia} (${resumen}).`}
+              />
+            </div>
+          )}
+        </section>
       </Marco>
     );
   }
@@ -431,7 +522,9 @@ export default function PagarReserva() {
         </button>
       )}
 
-      <a href="/reservar" className="mt-8 block text-center text-sm text-muted underline underline-offset-4">
+      <div className="mt-8 text-center">{bloqueCancelar(false)}</div>
+
+      <a href="/reservar" className="mt-4 block text-center text-sm text-muted underline underline-offset-4">
         Volver a la agenda
       </a>
     </Marco>

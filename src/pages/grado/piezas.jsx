@@ -1,7 +1,7 @@
 // src/pages/grado/piezas.jsx
 // Piezas comunes de /grado-en-espana: sección, títulos, botones y avisos.
 import Icono from "../../components/common/Icono";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 
 export function evento(nombre, datos = {}) {
@@ -59,9 +59,7 @@ export function Titulo({ eyebrow, titulo, intro, oscuro = false, centrado = fals
 export function BotonSesion({ ubicacion, children = "Reservar la sesión diagnóstico", className = "" }) {
   return (
     <a
-      href={CALENDLY_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={RESERVAR_URL}
       onClick={() => evento("grado_cta_sesion", { ubicacion })}
       className={`inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-center font-bold text-white shadow-lg shadow-accent/25 transition hover:scale-[1.02] hover:bg-accent-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sun active:scale-95 ${className}`}
     >

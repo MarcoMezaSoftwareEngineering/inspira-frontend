@@ -8,7 +8,7 @@
 // El catálogo de programas es interno: aquí solo agregados.
 import PageHero from "../../components/layout/PageHero";
 import Icono from "../../components/common/Icono";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { CIFRAS, POR_QUE, NOS_ENCARGAMOS, PAQUETES, PASOS, REQUISITOS, NACIONALIDAD, FAQ, DESCARGO } from "../../config/doctoradoEspana";
 import { Seccion, Titulo, Orientativo, evento } from "../grado/piezas";
 import MapaDoctoradoPublico from "./MapaDoctoradoPublico";
@@ -18,7 +18,7 @@ const waPlan = (nombre) => whatsappDesde("doctorado-espana", `Me interesa el paq
 
 function BotonSesion({ ubicacion, children = "Reservar la sesión diagnóstico", className = "" }) {
   return (
-    <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" onClick={() => evento("doctorado_cta_sesion", { ubicacion })}
+    <a href={RESERVAR_URL} onClick={() => evento("doctorado_cta_sesion", { ubicacion })}
       className={`inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-center font-bold text-white shadow-lg shadow-accent/25 transition hover:scale-[1.02] hover:bg-accent-dark active:scale-95 ${className}`}>
       <Icono nombre="calendario" size={18} />{children}
     </a>

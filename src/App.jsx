@@ -454,7 +454,7 @@ const PUBLIC_PATHS = [
   // Enlaces para las biografías de redes (sustituye a Linktree).
   "/enlaces",
   // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
-  // cabecera. Solo se llega por URL: la reserva de la web va por Calendly.
+  // cabecera. Es la reserva de la web.
   "/reservar",
   // Pago de una reserva concreta: privada, sin SEO (la página queda noindex).
   "/reservar/pago",
@@ -673,7 +673,7 @@ export default function App({ ruta, prerenderizada = false }) {
       {/* Invitación permanente a la primera asesoría (no en el panel privado) */}
       {!isPanel && !sinChrome && <AsesoriaCTA />}
 
-      {/* Navegación inferior tipo app (móvil y tablet). «Reservar» abre Calendly. */}
+      {/* Navegación inferior tipo app (móvil y tablet). «Reservar» abre /reservar. */}
       {!isPanel && !sinChrome && <BarraInferior rutaInicial={path} />}
 
       {/* WhatsApp siempre a mano. Decide él dónde no debe salir (panel,

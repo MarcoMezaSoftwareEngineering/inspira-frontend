@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 import PageHero from "../../components/layout/PageHero";
 import Icono from "../../components/common/Icono";
 import EnviarPlan from "../../components/common/EnviarPlan";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { SESION_DIAGNOSTICO, eur } from "../../config/metodo";
 import { navigate } from "../../services/navigate";
 import { registrarEvento } from "../../lib/analytics";
@@ -72,9 +72,7 @@ function Eyebrow({ children }) {
 function BotonCalendly({ children, className = "" }) {
   return (
     <a
-      href={CALENDLY_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={RESERVAR_URL}
       className={`inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-extrabold text-white shadow-lg shadow-accent/25 transition hover:scale-[1.03] hover:bg-accent-dark active:scale-95 ${className}`}
     >
       {children}

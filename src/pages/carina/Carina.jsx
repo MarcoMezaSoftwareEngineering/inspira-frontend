@@ -27,7 +27,7 @@ import SEOSchema from "../../components/SEOSchema";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CATEGORIAS_CASOS } from "../../config/casos";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { cascada, useRevelar } from "../../lib/revelar";
 import VideoVertical from "../../components/common/VideoVertical";
@@ -76,7 +76,7 @@ export default function Carina() {
               <Icono nombre="whatsapp" size={20} />
               {CARINA.cta.whatsapp}
             </a>
-            <a href={CALENDLY_URL} target="_blank" rel="noopener" className="car-btn car-btn-sesion" onClick={() => registrarEvento("carina_sesion", {})}>
+            <a href={RESERVAR_URL} className="car-btn car-btn-sesion" onClick={() => registrarEvento("carina_sesion", {})}>
               <Icono nombre="calendario" size={18} />
               {CARINA.cta.sesion}
             </a>

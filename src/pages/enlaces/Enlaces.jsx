@@ -33,7 +33,7 @@ import { createPortal } from "react-dom";
 import logo from "../../assets/images/logo.webp";
 import Icono from "../../components/common/Icono";
 import WhatsAppFlotante from "../../components/common/WhatsAppFlotante";
-import { CALENDLY_URL, LINEAS, MENSAJE_SEGURO, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
+import { RESERVAR_URL, LINEAS, MENSAJE_SEGURO, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
 import { OPCIONES_ASESORIA } from "../../config/asesorias";
 import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 import { eventosActivos } from "../../config/eventos";
@@ -639,9 +639,7 @@ function ReservaAsesoria({ style }) {
         </p>
       </div>
       <a
-        href={actual.url || CALENDLY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={actual.url || RESERVAR_URL}
         onClick={() => marcar(`reserva:${actual.id}`)}
         className="enl-brillo mov-toque mt-3 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3.5 text-sm font-extrabold text-primary-dark shadow-lg shadow-accent/25 transition hover:bg-sun"
       >

@@ -1,13 +1,13 @@
 // src/components/common/AsesoriaCTA.jsx
 // Invitación permanente a la sesión diagnóstico: botón flotante y pestaña
-// lateral, que abren Calendly directamente —el único destino de reserva de la
+// lateral, que abren /reservar directamente —el único destino de reserva de la
 // web (config/contacto.js)—, y una ventana con las modalidades que sale sola
 // una vez por sesión tras leer un poco. Hasta el 14/09/2026 el botón, la
 // pestaña y la barra inferior abrían esa ventana como paso intermedio.
 // La ventana vuelve a aparecer en cada visita (solo se silencia dentro de la
 // misma sesión de navegación, para no molestar mientras se lee).
 import { useEffect, useState } from "react";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { OPCIONES_ASESORIA, promoVigente } from "../../config/asesorias";
 import ReservaLateral from "./ReservaLateral";
 import { useDiaDeHoy } from "../../lib/hidratacion";
@@ -62,14 +62,12 @@ export default function AsesoriaCTA() {
 
   return (
     <>
-      {/* Pestaña lateral fija (escritorio): directa a Calendly */}
+      {/* Pestaña lateral fija (escritorio): directa a /reservar */}
       <ReservaLateral visible={visible} />
 
-      {/* Botón flotante: directo a Calendly, como la cabecera */}
+      {/* Botón flotante: directo a /reservar, como la cabecera */}
       <a
-        href={CALENDLY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={RESERVAR_URL}
         aria-label="Reserva tu sesión diagnóstico"
         className={`fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full px-5 py-3.5 text-sm font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 ${
           visible
@@ -168,9 +166,7 @@ export default function AsesoriaCTA() {
               ))}
 
               <a
-                href={CALENDLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={RESERVAR_URL}
                 onClick={cerrar}
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3.5 font-extrabold text-white transition hover:bg-accent-dark"
               >

@@ -24,7 +24,7 @@ import CercoErrores from "../../components/common/CercoErrores";
 import Icono from "../../components/common/Icono";
 import { useSEO } from "../../hooks/useSEO";
 import { CASOS } from "../../config/casos";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { navigate } from "../../services/navigate";
 import { cascada, revelarTodo, useRevelar } from "../../lib/revelar";
@@ -166,9 +166,7 @@ function AccionesHero() {
   return (
     <>
       <a
-        href={CALENDLY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={RESERVAR_URL}
         onClick={() => registrarEvento("mapa_sesion", { desde: "cabecera" })}
         className="mov-toque mov-brillo inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-extrabold text-primary hover:bg-accent-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
       >
@@ -423,9 +421,7 @@ function CtaFinal() {
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
           <a
-            href={CALENDLY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={RESERVAR_URL}
             onClick={() => registrarEvento("mapa_sesion", {})}
             className="mapa-boton mov-toque inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-6 py-3.5 font-extrabold text-[#003648] hover:bg-[#F4AD62] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
           >

@@ -20,7 +20,7 @@ import Icono from "../../components/common/Icono";
 import { useSEO } from "../../hooks/useSEO";
 import { navigate } from "../../services/navigate";
 import { CASOS } from "../../config/casos";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { useRevelar } from "../../lib/revelar";
 import { casosEnMapa, crearIndice, masteresDe, mejorRanking } from "./indice";
 import { plazoMasTemprano, rangoFechas, cursoCorto } from "./plazos";
@@ -289,9 +289,7 @@ function Contenido({ datos, tipo, id }) {
               Revisamos tu perfil con un abogado especialista y te decimos si {lugar} tiene sentido para ti. Sales con un plan escrito.
             </p>
             <a
-              href={CALENDLY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={RESERVAR_URL}
               className="mapa-boton mov-toque mt-3 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-3 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62]"
             >
               <Icono nombre="calendario" size={17} />

@@ -36,7 +36,7 @@ export default function BarraCta({ whatsapp, sesion, textoWhatsapp = "WhatsApp",
         <Icono nombre="whatsapp" size={18} />
         {textoWhatsapp}
       </a>
-      <a href={sesion} target="_blank" rel="noopener" className="bcta-btn bcta-sesion" onClick={onSesion} tabIndex={visible ? 0 : -1}>
+      <a href={sesion} className="bcta-btn bcta-sesion" onClick={onSesion} tabIndex={visible ? 0 : -1}>
         <Icono nombre="calendario" size={16} />
         {textoSesion}
       </a>

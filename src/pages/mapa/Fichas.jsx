@@ -11,7 +11,7 @@
 // recorra con la vista sin leerla entera. Los iconos son opcionales: un Bloque
 // sin `icono` sigue pintando igual que antes.
 import Icono from "../../components/common/Icono";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import { navigate } from "../../services/navigate";
 import {
@@ -749,9 +749,7 @@ export function FichaFuera({ id, foco, indice, geoPorId, planFuera, onElegir }) 
       </div>
       <div className="mt-6 grid gap-2">
         <a
-          href={CALENDLY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={RESERVAR_URL}
           className={`mapa-boton inline-flex items-center justify-center gap-2 rounded-2xl bg-[#F09C48] px-4 py-3 text-sm font-extrabold text-[#003648] hover:bg-[#F4AD62] ${FOCO}`}
         >
           <Icono nombre="calendario" size={18} />

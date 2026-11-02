@@ -6,8 +6,8 @@
 // `cta` lo pinta como botón.
 //
 // Reservar la sesión diagnóstico tiene un solo destino en toda la web:
-// CALENDLY_URL (ver config/contacto.js).
-import { CALENDLY_URL } from "../../../config/contacto";
+// RESERVAR_URL (ver config/contacto.js).
+import { RESERVAR_URL } from "../../../config/contacto";
 import { MENU_ETIQUETA } from "../../../config/portalMarca";
 
 export const RESERVAR_ETIQUETA = "Reserva tu sesión";
@@ -17,7 +17,7 @@ export const navItems = [
   { label: "Paquete Máster 2027", href: "/servicios/master" },
   { label: "Casos de éxito", href: "/casos-de-exito" },
   { label: MENU_ETIQUETA, href: "/plataforma" },
-  { label: RESERVAR_ETIQUETA, href: CALENDLY_URL, externo: true, cta: true },
+  { label: RESERVAR_ETIQUETA, href: RESERVAR_URL, cta: true },
 ];
 
 // Barra fina de arriba. «Nosotros» vive solo en el pie.

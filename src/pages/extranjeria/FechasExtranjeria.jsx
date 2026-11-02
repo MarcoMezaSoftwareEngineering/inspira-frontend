@@ -28,7 +28,7 @@ import PageHero from "../../components/layout/PageHero";
 import CercoErrores from "../../components/common/CercoErrores";
 import Icono from "../../components/common/Icono";
 import SEOSchema from "../../components/SEOSchema";
-import { CALENDLY_URL, whatsappDesde } from "../../config/contacto";
+import { RESERVAR_URL, whatsappDesde } from "../../config/contacto";
 import { registrarEvento } from "../../lib/analytics";
 import {
   FASES,
@@ -769,9 +769,7 @@ export default function FechasExtranjeria() {
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <a
-              href={CALENDLY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={RESERVAR_URL}
               onClick={() => evento("extranjeria_fechas_cta_sesion", { ubicacion: "final" })}
               className="ext-foco-claro inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-bold text-white shadow-lg shadow-accent/25 transition hover:bg-accent-dark"
             >

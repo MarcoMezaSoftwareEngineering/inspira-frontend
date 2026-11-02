@@ -8,7 +8,7 @@
 // componentes; los hooks y utilidades viven en utiles.js.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CALENDLY_URL } from "../../config/contacto";
+import { RESERVAR_URL } from "../../config/contacto";
 import { BECAS } from "../../config/paqueteMaster2027";
 import { PRECIO_DESDE, eur } from "../../config/paqueteMaster2027Resumen";
 import {
@@ -132,9 +132,7 @@ export function Chevron({ size = 16 }) {
 export function BotonCalendly({ children, className = "" }) {
   return (
     <a
-      href={CALENDLY_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={RESERVAR_URL}
       className={`bic-press mov-toque inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-center font-extrabold text-primary-dark shadow-lg shadow-accent/25 transition hover:bg-sun ${className}`}
     >
       {children}

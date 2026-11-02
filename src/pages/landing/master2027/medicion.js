@@ -1,34 +1,34 @@
 // src/pages/landing/master2027/medicion.js
 //
 // Medición y reglas de comportamiento de la landing /master-2027-2028:
-// - enlace de Calendly con los utm_* del anuncio,
+// - enlace de reserva (/reservar) con los utm_* del anuncio,
 // - eventos de analítica (registrarEvento ya respeta el consentimiento),
 // - marcas de sesión que apagan las ventanas emergentes,
 // - «zonas» donde el visitante está trabajando (simulador, mapa, calculadora)
 //   y en las que ninguna ventana emergente debe interrumpirle.
-import { CALENDLY_URL } from "../../../config/contacto";
+import { RESERVAR_URL } from "../../../config/contacto";
 import { registrarEvento } from "../../../lib/analytics";
 
 const UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 
 // Se calcula una vez al cargar el módulo: la landing es de una sola URL y los
 // utm_* no cambian mientras se navega por ella.
-function construirCalendly() {
-  if (typeof window === "undefined") return CALENDLY_URL;
+function construirEnlaceReserva() {
+  if (typeof window === "undefined") return RESERVAR_URL;
   try {
     const origen = new URLSearchParams(window.location.search);
-    const url = new URL(CALENDLY_URL);
+    const url = new URL(RESERVAR_URL, window.location.origin);
     UTM.forEach((clave) => {
       const valor = origen.get(clave);
       if (valor) url.searchParams.set(clave, valor);
     });
-    return url.toString();
+    return `${url.pathname}${url.search}`;
   } catch {
-    return CALENDLY_URL;
+    return RESERVAR_URL;
   }
 }
 
-export const URL_CALENDLY = construirCalendly();
+export const URL_CALENDLY = construirEnlaceReserva();
 
 // Página que emite los eventos: la landing de Ads o /servicios/master, que
 // reutiliza sus secciones (ServicioMaster2027 la fija al montar y la devuelve

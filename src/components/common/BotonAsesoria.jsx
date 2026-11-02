@@ -1,7 +1,7 @@
 // src/components/common/BotonAsesoria.jsx
-// Botón reutilizable que lleva a Calendly. Se usa en cada cierre de sección
+// Botón reutilizable que lleva a /reservar. Se usa en cada cierre de sección
 // para que nunca haya una pantalla sin invitación a la primera asesoría.
-import { CALENDLY_URL } from "../../config/contacto";
+import { RESERVAR_URL } from "../../config/contacto";
 
 const ESTILOS = {
   primario:
@@ -20,9 +20,7 @@ export default function BotonAsesoria({
 }) {
   return (
     <a
-      href={CALENDLY_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={RESERVAR_URL}
       className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-extrabold transition ${ESTILOS[variante]} ${className}`}
     >
       📅 {children}

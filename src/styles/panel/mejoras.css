@@ -1,0 +1,82 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO · hoja de bloque (02/11/2026)
+   Dueño: B5 · Las cinco mejoras que Carina aprobó tras leer el plan:
+     1. Novedades plegadas en el teléfono (NovedadesExpediente.jsx).
+     2. «Instala la app» y «Avisos en tu móvil» al final del Inicio (Inicio.jsx:
+        solo cambia el orden del JSX; aquí no hay nada).
+     3. «Reintentar» en el error de carga del expediente (ErrorCarga.jsx).
+     4. «Etapa n de m» bajo el riel de estancia, PAC y modificatoria (Bloques.jsx).
+     5. Palabras unificadas (solo texto en los JSX; aquí no hay nada).
+   Ámbito: .pnl-error-carga y .pnl-estado-meta. Se importa en PanelCliente.jsx
+   después de cuenta.css.
+
+   Reglas (ver base.css):
+   · Todo selector va con .pnl delante: esta hoja pisa a las de arriba
+     (panel.css, panel-app.css, panel-*.css, pasos*.css), que no se editan.
+   · Colores: variables de .pnl (panel.css). Un hex solo como reserva antes
+     de un color-mix() o para el blanco; ningún color nuevo fuera de los tokens.
+   · Clases nuevas con prefijo pnl-. Ninguna pnl- declara display en un nodo
+     que se oculte con una utilidad de Tailwind ni position en uno con
+     fixed/sticky/absolute de Tailwind.
+   · Solo se animan transform y opacity.
+   ========================================================================== */
+
+
+/* ── ERROR DE CARGA CON «REINTENTAR» (ErrorCarga.jsx) ─────────────────────
+   Sobre la caja .pnl-error de base.css (tono alto): icono de línea, texto y
+   el botón en rejilla, como .pnl-aviso. Ni flex ni margen aquí: los pone el
+   JSX según dónde vaya (fila superior del máster y del visado, o columna). */
+.pnl .pnl-error.pnl-error-carga {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+}
+.pnl .pnl-error-carga-icono {
+  display: grid; place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: rgba(190, 60, 66, .16);
+  background: color-mix(in srgb, var(--alto) 16%, var(--alto-soft));
+  color: var(--alto-ink);
+}
+.pnl .pnl-error-carga-icono svg { width: 16px; height: 16px; }
+.pnl .pnl-error-carga-texto {
+  margin: 0; min-width: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45;
+  color: var(--alto-ink);
+}
+/* El botón, blanco sobre el fondo rojo suave, con el filo del tono. */
+.pnl .pnl-error-carga > .pnl-btn {
+  border-color: rgba(190, 60, 66, .3);
+  border-color: color-mix(in srgb, var(--alto) 30%, transparent);
+}
+@media (max-width: 519.98px) {
+  .pnl .pnl-error-carga > .pnl-btn { grid-column: 2 / -1; justify-self: start; }
+}
+
+
+/* ── «ETAPA n DE m» BAJO EL RIEL (Bloques.jsx · EstadoProceso) ────────────
+   Una línea meta debajo del riel; en el teléfono, donde los rótulos de los
+   tramos van solo para el lector de pantalla (tramites.css), es lo único
+   que dice en qué punto del recorrido va. */
+.pnl .pnl-estado-meta {
+  margin: 10px 0 0;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.3;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ── NOVEDADES PLEGADAS EN EL TELÉFONO (NovedadesExpediente.jsx) ──────────
+   Sin reglas: plegada, la cabecera va sola (tramites.css quita el hueco de
+   abajo con :last-child) y «Ver» / «Ocultar» ya llega a los 44 px de toque
+   con la talla s de base.css. */
+
+
+/* ── Movimiento reducido: va siempre al final ── */
+@media (prefers-reduced-motion: reduce) {
+  .pnl .pnl-error-carga > .pnl-btn { transition: none; }
+}

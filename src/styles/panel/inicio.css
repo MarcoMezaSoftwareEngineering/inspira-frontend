@@ -1,0 +1,786 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO · hoja de bloque (25/10/2026)
+   Dueño: B2 · Inicio, Mis servicios y Mi ruta.
+   Ámbito: saludo, próximo paso, plazos, Mi ruta, lista de servicios, instalar la app y avisos en el móvil.
+
+   Reglas (ver base.css):
+   · Todo selector va con .pnl delante: esta hoja pisa a las de arriba
+     (panel.css, panel-app.css, panel-*.css, pasos*.css), que no se editan.
+   · Colores: variables de .pnl (panel.css). Un hex solo como reserva antes
+     de un color-mix() o para el blanco; ningún color nuevo fuera de los tokens.
+   · Clases nuevas con prefijo pnl-. Ninguna pnl- declara display en un nodo
+     que se oculte con una utilidad de Tailwind (ese ocultar va aquí con @media)
+     ni position en uno con fixed/sticky/absolute de Tailwind.
+   · Solo se animan transform y opacity.
+   ========================================================================== */
+
+
+/* ── SALUDO (SaludoInicio.jsx; pisa panel-app.css:73-169) ─────────────────
+   La noche se queda aquí, con los halos más suaves para que las cifras se
+   lean: el cielo baja de .38 a --halo-cielo (.22); el sol (.30) se queda. */
+.pnl .pnl-hero {
+  border-radius: var(--radio-xl);
+  padding: 24px 20px 18px;
+  background: var(--noche);
+  box-shadow: var(--sombra-noche);
+}
+@media (min-width: 640px) {
+  .pnl .pnl-hero { padding: 28px 28px 22px; }
+}
+.pnl .pnl-hero::before {
+  background: radial-gradient(closest-side, var(--halo-cielo), transparent);
+}
+.pnl .pnl-hero-reticula {
+  background-image:
+    linear-gradient(var(--reticula-trazo) 1px, transparent 1px),
+    linear-gradient(90deg, var(--reticula-trazo) 1px, transparent 1px);
+  background-size: var(--reticula) var(--reticula);
+}
+.pnl .pnl-hero-fecha {
+  margin: 0;
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.3;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--sobre-noche-3);
+}
+.pnl .pnl-hero-saludo {
+  margin: 8px 0 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: clamp(26px, 7vw, 32px); line-height: 1.15; letter-spacing: -.02em;
+  color: #fff;
+}
+.pnl .pnl-hero-saludo span { color: var(--accent-2); }
+.pnl .pnl-hero-resumen {
+  margin: 8px 0 0;
+  font-size: var(--fs-lectura); font-weight: 500; line-height: 1.5;
+  color: var(--sobre-noche-2);
+}
+
+/* Cifras: tiles de cristal OSCURO (llevan texto), sin desenfoque. */
+.pnl .pnl-hero-stats { gap: 8px; margin-top: 20px; }
+.pnl .pnl-hero-stat {
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 76px;
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  border: 1px solid var(--cristal-borde);
+  background: var(--cristal-texto);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition:
+    transform var(--d-corta) var(--muelle),
+    border-color var(--d-corta) var(--salida);
+}
+@media (hover: hover) {
+  .pnl .pnl-hero-stat:hover { border-color: rgba(255, 255, 255, .4); }
+}
+.pnl .pnl-hero-stat:active { transform: scale(.96); transition-duration: var(--d-toque); }
+.pnl .pnl-hero-stat:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+.pnl .pnl-hero-stat b {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 26px; line-height: 1.1; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.pnl .pnl-hero-stat[data-tono='alto'] b  { color: var(--alto-noche); }
+.pnl .pnl-hero-stat[data-tono='aviso'] b { color: var(--accent-2); }
+.pnl .pnl-hero-stat[data-tono='ok'] b    { color: var(--ok-noche); }
+.pnl .pnl-hero-stat small {
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.3;
+  color: var(--sobre-noche-2);
+}
+
+/* Quién le atiende (data-tour="asesor"). */
+.pnl .pnl-hero-asesor {
+  gap: 12px;
+  margin-top: 18px; padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+}
+.pnl .pnl-hero-asesor-ini { width: 44px; height: 44px; font-size: 15px; font-weight: 800; }
+.pnl .pnl-hero-asesor-datos { gap: 1px; }
+.pnl .pnl-hero-asesor-datos small {
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.3;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--accent-2);
+}
+.pnl .pnl-hero-asesor-datos strong {
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.3;
+  color: #fff;
+  /* El nombre del asesor en dos líneas antes que cortado («Andrea Sala…»). */
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pnl .pnl-hero-asesor-datos span {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.4;
+  color: var(--sobre-noche-2);
+}
+.pnl .pnl-hero-asesor-datos .pnl-hero-asesor-linea {
+  margin-top: 1px;
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--sobre-noche-3);
+}
+
+/* WhatsApp: píldora de cristal (el aspecto de .pnl-btn-noche); se pone sol
+   al pasar o tocar. El latido es un anillo que crece y se apaga, 3 veces. */
+.pnl .pnl-hero-wa {
+  gap: 8px;
+  height: 44px; min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--cristal-borde);
+  background: var(--cristal);
+  color: #fff;
+  font-size: var(--fs-cuerpo); font-weight: 600; line-height: 1;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--d-corta) var(--muelle),
+    background-color var(--d-corta) var(--salida),
+    border-color var(--d-corta) var(--salida),
+    color var(--d-corta) var(--salida);
+}
+.pnl .pnl-hero-wa svg {
+  width: 18px; height: 18px; flex: 0 0 auto;
+  color: var(--accent-2);
+  transition: color var(--d-corta) var(--salida);
+}
+@media (hover: hover) {
+  .pnl .pnl-hero-wa:hover { background: var(--accent); border-color: var(--accent); color: var(--primary-dark); }
+  .pnl .pnl-hero-wa:hover svg { color: var(--primary-dark); }
+}
+.pnl .pnl-hero-wa:active {
+  background: var(--accent); border-color: var(--accent); color: var(--primary-dark);
+  transform: scale(.96);
+  transition-duration: var(--d-toque);
+}
+.pnl .pnl-hero-wa:active svg { color: var(--primary-dark); }
+.pnl .pnl-hero-wa:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+.pnl .pnl-hero-wa::after {
+  inset: -1px;
+  border: 2px solid rgba(255, 176, 102, .35);
+  box-shadow: none;
+  opacity: 0;
+  animation: pnlLatidoCristal 2.8s var(--salida) 1.2s 3 forwards;
+}
+@keyframes pnlLatidoCristal {
+  0%       { opacity: 1; transform: scale(1); }
+  80%,100% { opacity: 0; transform: scale(1.16, 1.5); }
+}
+@keyframes pnlLatidoCristalRedondo {
+  0%       { opacity: 1; transform: scale(1); }
+  80%,100% { opacity: 0; transform: scale(1.5); }
+}
+/* En el teléfono, solo el icono en 44×44 (el nombre sigue en aria-label): con
+   «WhatsApp» escrito, el nombre del asesor se cortaba en «Andrea Salazar…». */
+@media (max-width: 479.98px) {
+  .pnl .pnl-hero-wa .pnl-hero-wa-texto { display: none; }
+  .pnl .pnl-hero-wa { width: 44px; padding: 0; gap: 0; justify-content: center; }
+  .pnl .pnl-hero-wa::after { animation-name: pnlLatidoCristalRedondo; }
+}
+
+
+/* ── TU PRÓXIMO PASO (ProximoPaso.jsx; pisa panel.css:678-698 y
+   panel-app.css:172-196). El filo y el icono llevan el tono del paso. ── */
+.pnl .ex-proximo:not([data-tono]) { --tono: var(--info); --tono-soft: var(--info-soft); --tono-ink: var(--info-ink); }
+.pnl .ex-proximo {
+  gap: 12px;
+  padding: 20px 20px 20px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-proximo::before { width: 4px; background: var(--tono); }
+.pnl .ex-proximo::after {
+  background: radial-gradient(closest-side, rgba(78, 158, 232, .07), transparent);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--tono) 7%, transparent), transparent);
+}
+.pnl .ex-proximo-fila { gap: 14px; }
+.pnl .ex-proximo .ex-proximo-icono {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+.pnl .ex-proximo .ex-proximo-icono svg { width: 22px; height: 22px; }
+/* El anillo del paso urgente late 3 veces y se queda quieto. */
+.pnl .ex-proximo .ex-proximo-icono::after {
+  inset: -4px;
+  border-radius: 18px;
+  border-color: rgba(190, 60, 66, .35);
+  border-color: color-mix(in srgb, var(--tono) 35%, transparent);
+  animation-iteration-count: 3;
+  animation-fill-mode: forwards;
+}
+.pnl .ex-proximo-titulo {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.3; letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl .ex-proximo-detalle {
+  margin: 6px 0 0;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .ex-proximo-detalle b { font-weight: 700; color: var(--ink); }
+/* Dos líneas como mucho para el detalle de una tarea; «Todo al día» dice
+   lo que viene en la ruta y se lee entero. */
+.pnl .ex-proximo:not([data-tono='ok']) .ex-proximo-detalle {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pnl .ex-proximo-fecha {
+  min-height: 28px;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-pildora);
+  background: var(--surface);
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.3;
+  color: var(--ink-2);
+}
+.pnl .ex-proximo-fecha svg { width: 14px; height: 14px; flex: 0 0 auto; color: var(--primary-2); }
+.pnl .ex-proximo-botones { gap: 8px 16px; margin-top: 4px; }
+.pnl .ex-proximo-botones .pnl-btn-cta { height: auto; padding: 6px 24px; }
+.pnl .ex-proximo-botones .pnl-btn-cta svg { transition: transform var(--d-corta) var(--muelle); }
+@media (hover: hover) {
+  .pnl .ex-proximo-botones .pnl-btn-cta:hover svg { transform: translateX(3px); }
+}
+.pnl .ex-proximo-falta {
+  min-height: var(--pnl-tap);
+  padding: 6px 12px;
+  font-size: var(--fs-cuerpo); font-weight: 600;
+}
+
+
+/* ── TÍTULOS DE SECCIÓN (pisa panel-app.css:199-203 y :552) ───────────────
+   «También pendiente», «Tus próximas fechas» y «Tus servicios», iguales. */
+.pnl .pnl-seccion-titulo,
+.pnl .pnl-plazos-cabeza {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  margin: 0 2px 12px;
+}
+.pnl .pnl-seccion-titulo h2,
+.pnl .pnl-plazos-titulo {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.2; letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl .pnl-seccion-titulo small,
+.pnl .pnl-plazos-sub {
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.3;
+  color: var(--muted);
+  text-align: right;
+}
+.pnl .pnl-seccion-titulo .pnl-recargar { margin-left: auto; }
+.pnl .pnl-seccion-titulo .pnl-recargar svg { transition: transform var(--d-media) var(--salida); }
+.pnl .pnl-seccion-titulo .pnl-btn-texto svg { width: 14px; height: 14px; }
+
+
+/* ── TAMBIÉN PENDIENTE (Inicio.jsx; pisa panel.css:531-557 y
+   panel-app.css:354-362). Toda la fila es el botón. ─────────────────── */
+/* Una columna que no crece con el texto: el detalle va en una línea con
+   elipsis desde 768 y, sin esto, en la tableta empujaba la lista fuera. */
+.pnl .pnl-pend { gap: 8px; grid-template-columns: minmax(0, 1fr); }
+.pnl .pnl-pend-item:not([data-tono]) { --tono: var(--neutro); --tono-soft: var(--neutro-soft); --tono-ink: var(--neutro-ink); }
+.pnl .pnl-pend-item {
+  min-height: 64px;
+  gap: 12px;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--tono);
+  border-radius: var(--radio-m);
+  background: #fff;
+  box-shadow: none;
+  transition:
+    transform var(--d-corta) var(--muelle),
+    box-shadow var(--d-corta) var(--salida);
+}
+@media (hover: hover) {
+  .pnl .pnl-pend-item:hover { transform: translateY(-2px); box-shadow: var(--sombra-1); }
+}
+.pnl .pnl-pend-item:active { transform: scale(.985); transition-duration: var(--d-toque); }
+.pnl .pnl-pend-item:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-pend-item .pnl-pend-icono {
+  width: 36px; height: 36px;
+  border-radius: var(--radio-s);
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+.pnl .pnl-pend-texto {
+  font-size: var(--fs-cuerpo); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-pend-detalle {
+  margin-top: 2px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+@media (max-width: 767.98px) {
+  .pnl .pnl-pend-detalle {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+.pnl .pnl-pend-ir {
+  gap: 4px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--primary-2);
+}
+/* «Ver N más»: el ancho de la columna, sin la sangría de panel.css que lo
+   sacaba 46 px por la derecha. */
+.pnl .pnl-pend .pnl-btn {
+  margin-left: 0;
+  width: 100%;
+  height: auto;
+  min-height: var(--pnl-tap);
+  justify-content: center;
+}
+
+
+/* ── PRÓXIMAS FECHAS (PlazosLinea.jsx; pisa panel-novedades.css:171-322) ──
+   La tira llega al borde de la pantalla con la sangría del contenedor
+   (--gutter), también entre 640 y 900, donde se quedaba 8 px corta. */
+.pnl .pnl-plazos-linea {
+  gap: 10px;
+  margin: 0 calc(-1 * var(--gutter)) -8px;
+  /* 18 abajo (y -8 de margen) para que la sombra de las tarjetas no se
+     corte en seco contra el borde de la tira. */
+  padding: 2px var(--gutter) 18px;
+  scroll-padding-inline: var(--gutter);
+}
+.pnl .pnl-plazos-paso { flex: 0 0 248px; }
+@media (min-width: 900px) {
+  /* En el ordenador, la misma tarjeta de 248 como mínimo: con 220 cabían
+     cuatro y el texto se quedaba en «Plazo para responder al…». */
+  .pnl .pnl-plazos-linea {
+    margin: 0;
+    padding: 2px 0 4px;
+    grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  }
+  .pnl .pnl-plazos-paso { flex: none; }
+}
+.pnl .pnl-plazos-item:not([data-tono]) { --tono: var(--info); --tono-soft: var(--info-soft); --tono-ink: var(--info-ink); }
+.pnl .pnl-plazos-item {
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--tono);
+  border-radius: var(--radio-m);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+  transition: transform var(--d-corta) var(--muelle);
+}
+.pnl .pnl-plazos-item:hover { transform: none; }
+@media (hover: hover) {
+  .pnl .pnl-plazos-item:hover { transform: translateY(-2px); }
+}
+.pnl .pnl-plazos-item:active { transform: scale(.98); transition-duration: var(--d-toque); }
+.pnl .pnl-plazos-item:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-plazos-item .pnl-plazos-chip {
+  align-content: center;
+  gap: 4px;
+  width: 48px; height: 56px;
+  padding: 0;
+  border-radius: var(--radio-s);
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+.pnl .pnl-plazos-item .pnl-plazos-chip b {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 22px; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pnl .pnl-plazos-item .pnl-plazos-chip span {
+  margin-top: 0;
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1;
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.pnl .pnl-plazos-cuerpo { gap: 4px; }
+.pnl .pnl-plazos-item .pnl-plazos-cuenta {
+  gap: 5px;
+  font-size: var(--fs-meta); font-weight: 700; line-height: 1.3;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--tono-ink);
+}
+.pnl .pnl-plazos-cuenta svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.pnl .pnl-plazos-texto {
+  font-size: var(--fs-cuerpo); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-plazos-servicio {
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  color: var(--muted);
+}
+
+
+/* ── TUS SERVICIOS (ProximoPaso.jsx: ResumenExpediente; pisa panel.css:
+   701-712 y panel-app.css:365-370). La franja de 3 px se queda. ──────── */
+.pnl .ex-resumen { gap: 12px; }
+.pnl .ex-resumen-tarjeta {
+  /* Una columna que no crece con su contenido: un chip largo («Universidad
+     Carlos III de Madrid · 3 nov 2026») se salía de la tarjeta. */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 4px;
+  padding: var(--pad-tarjeta);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-resumen-cabeza { gap: 10px; padding-bottom: 8px; }
+.pnl .ex-resumen-cabeza h3 {
+  flex: 1 1 auto; min-width: 0;
+  margin: 0;
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  color: var(--primary);
+  /* Tres líneas: con el icono y «Abrir» al lado, el título (ya recortado a
+     48 letras) no cabe en dos en la columna del ordenador. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+@media (min-width: 1024px) {
+  .pnl .ex-resumen-cabeza h3 { -webkit-line-clamp: 4; }
+}
+.pnl .ex-resumen-cabeza .pnl-ico svg { width: 16px; height: 16px; }
+.pnl .ex-resumen-abrir { flex: 0 0 auto; height: auto; }
+.pnl .ex-resumen-abrir svg { width: 14px; height: 14px; }
+.pnl .ex-resumen-fila {
+  min-height: 48px;
+  gap: 8px 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-suave);
+}
+.pnl .ex-resumen-fila-titulo {
+  font-size: var(--fs-cuerpo); font-weight: 600; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .ex-resumen-fila-datos { gap: 6px; min-width: 0; }
+.pnl .ex-resumen-fila-datos .pnl-chip { white-space: normal; text-align: left; border-radius: var(--radio-s); }
+.pnl .ex-resumen-pie {
+  margin: 6px 0 0;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+  color: var(--alto-ink);
+}
+
+
+/* ── MI RUTA, RESUMEN DE INICIO (MiRuta.jsx: MiRutaResumen; pisa
+   panel.css:745-753). Un tramo por etapa con la gramática del trayecto. */
+.pnl .ex-miruta-mini {
+  gap: 14px;
+  padding: var(--pad-tarjeta);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-miruta-mini-cabeza { gap: 12px; }
+.pnl .ex-miruta-mini-linea {
+  margin: 6px 0 0;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.5;
+  color: var(--ink);
+}
+.pnl .ex-miruta-mini-linea b { font-weight: 700; }
+.pnl .ex-miruta-mini-puntos { gap: 4px; }
+.pnl .ex-miruta-mini-puntos span {
+  height: 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--pista);
+  box-shadow: inset 0 0 0 1px var(--trazo);
+}
+.pnl .ex-miruta-mini-puntos span[data-estado='hecho']     { background: var(--green);  box-shadow: none; }
+.pnl .ex-miruta-mini-puntos span[data-estado='actual']    { background: var(--accent); box-shadow: none; }
+.pnl .ex-miruta-mini-puntos span[data-estado='siguiente'] { background: var(--sky-2);  box-shadow: none; }
+
+
+/* ── MI RUTA, PÁGINA (MiRuta.jsx; pisa panel.css:715-743) ─────────────────
+   El riel como trayecto: verde lo hecho, petróleo→cielo lo que está en
+   curso, el avión sobre sol donde está ahora y punteado lo que falta. */
+.pnl .ex-miruta-etapa { gap: 14px; }
+.pnl .ex-miruta-riel { width: 36px; }
+.pnl .ex-miruta-linea {
+  width: 2px;
+  margin: 4px 0;
+  border-radius: 2px;
+  background: repeating-linear-gradient(180deg, var(--decor) 0 3px, transparent 3px 9px);
+}
+.pnl .ex-miruta-etapa[data-estado='hecho'] .ex-miruta-linea {
+  background: rgba(29, 106, 74, .35);
+  background: color-mix(in srgb, var(--green) 35%, transparent);
+}
+.pnl .ex-miruta-etapa[data-estado='actual'] .ex-miruta-linea {
+  background: linear-gradient(180deg, var(--primary-2), var(--sky-2));
+}
+.pnl .ex-miruta-marca {
+  width: 36px; height: 36px;
+  border: 1px solid var(--line);
+  background: var(--fondo-tile);
+  color: var(--ink-2);
+}
+.pnl .ex-miruta-marca[data-estado='hecho'] { border-color: var(--green); background: var(--green); color: #fff; }
+.pnl .ex-miruta-marca[data-estado='actual'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--primary-dark);
+  box-shadow: 0 0 0 4px rgba(250, 148, 58, .2);
+}
+.pnl .ex-miruta-marca[data-estado='siguiente'] {
+  border-color: rgba(78, 158, 232, .35);
+  border-color: color-mix(in srgb, var(--info) 35%, transparent);
+  background: var(--info-soft);
+  color: var(--info-ink);
+}
+.pnl .ex-miruta-marca[data-estado='proximamente'] {
+  border: 1px dashed var(--trazo);
+  background: #fff;
+  color: var(--ink-2);
+}
+.pnl .ex-miruta-paso .ex-miruta-marca { width: 28px; height: 28px; }
+.pnl .ex-miruta-paso .ex-miruta-marca svg { width: 14px; height: 14px; }
+.pnl .ex-miruta-num { font-size: var(--fs-meta); font-weight: 800; font-variant-numeric: tabular-nums; }
+.pnl .ex-miruta-contenido { padding-bottom: 16px; }
+.pnl .ex-miruta-cabeza {
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-radius: var(--radio-m);
+}
+/* El estado como eyebrow; el de ahora con el punto sol. */
+.pnl .ex-miruta-etapa .ex-miruta-estado {
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.3;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--ink-2);
+}
+.pnl .ex-miruta-etapa[data-estado='hecho'] .ex-miruta-estado     { color: var(--ok-ink); }
+.pnl .ex-miruta-etapa[data-estado='actual'] .ex-miruta-estado    { color: var(--aviso-ink); }
+.pnl .ex-miruta-etapa[data-estado='siguiente'] .ex-miruta-estado { color: var(--info-ink); }
+.pnl .ex-miruta-etapa[data-estado='actual'] .ex-miruta-estado::before {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  margin-right: 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--accent);
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
+.pnl .ex-miruta-titulo {
+  margin: 2px 0 0;
+  font-size: 16px; font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .ex-miruta-detalle {
+  margin: 2px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .ex-miruta-pasos { gap: 6px; margin-top: 8px; }
+.pnl .ex-miruta-paso {
+  min-height: 48px;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  transition: border-color var(--d-corta) var(--salida), transform var(--d-corta) var(--muelle);
+}
+.pnl .ex-miruta-paso-texto strong {
+  font-size: var(--fs-cuerpo); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .ex-miruta-paso-texto small {
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  color: var(--ink-2);
+}
+.pnl .pnl-miruta-ir { color: var(--trazo); }
+
+
+/* ── MIS SERVICIOS (ServiciosList.jsx; pisa panel.css:336-351 y
+   panel-app.css:373-376). La tarjeta entera abre el servicio: el ::after
+   del botón la cubre, sin lógica nueva. ─────────────────────────────── */
+/* panel-app.css pone margin: 0 2px a la cabecera y anula el space-y-4 de
+   la lista: el botón «Actualizar» tocaba la primera tarjeta. */
+.pnl .pnl-lista-cab { margin: 0 2px 16px; }
+.pnl .pnl-card { border-radius: var(--radio-l); }
+.pnl .pnl-card-cuerpo { gap: 12px; padding: var(--pad-tarjeta) var(--pad-tarjeta) 14px; }
+.pnl .pnl-card-cabeza { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pnl .pnl-card-cabeza .pnl-ico svg { width: 22px; height: 22px; }
+.pnl .pnl-card h3 {
+  margin: 0;
+  font-size: 16px; font-weight: 700; line-height: 1.35;
+  color: var(--primary);
+}
+.pnl .pnl-card-desc {
+  margin: 4px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .pnl-card-pie {
+  gap: 12px;
+  padding: 12px var(--pad-tarjeta);
+  border-top: 1px solid var(--line-suave);
+}
+.pnl .pnl-card-meta {
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.5;
+  color: var(--muted);
+}
+
+.pnl .pnl-card-link { position: relative; cursor: pointer; }
+/* 4 px más de zona por abajo: al subir 2 px en hover, el puntero que estaba
+   en el borde sigue dentro y la tarjeta no parpadea. */
+.pnl .pnl-card-link::before { content: ""; position: absolute; inset: 0 0 -4px 0; }
+.pnl .pnl-card-link .pnl-card-pie .pnl-btn-primario,
+.pnl .pnl-card-link .pnl-card-pie .pnl-btn-primario:hover,
+.pnl .pnl-card-link .pnl-card-pie .pnl-btn-primario:active {
+  position: static;
+  transform: none;
+}
+.pnl .pnl-card-link .pnl-card-pie .pnl-btn-primario::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: var(--radio-l);
+}
+.pnl .pnl-card-link .pnl-card-pie .pnl-btn-primario svg { transition: transform var(--d-corta) var(--muelle); }
+/* panel.css:342 sube la tarjeta en :hover también en el teléfono, donde el
+   hover se queda pegado: aquí solo con ratón. */
+.pnl .pnl-card-link:hover { transform: none; border-color: var(--line); box-shadow: var(--sombra-1); }
+@media (hover: hover) {
+  .pnl .pnl-card-link:hover { transform: translateY(-2px); border-color: var(--sky-2); box-shadow: var(--sombra-2); }
+  .pnl .pnl-card-link:hover .pnl-btn-primario { background: var(--primary-2); }
+  .pnl .pnl-card-link:hover .pnl-card-pie .pnl-btn-primario svg { transform: translateX(3px); }
+}
+.pnl .pnl-card-link:active { transform: scale(.99); transition-duration: var(--d-toque); }
+/* El foco se ve en la tarjeta entera (el botón es su único control). */
+.pnl .pnl-card-link .pnl-card-pie .pnl-btn-primario:focus-visible { outline: none; }
+.pnl .pnl-card-link:focus-within { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+@supports selector(:has(*)) {
+  .pnl .pnl-card-link:focus-within:not(:has(:focus-visible)) { outline: none; }
+}
+
+
+/* ── PARA TU TELÉFONO: instalar la app (AvisoInstalarApp, PasosInstalar;
+   pisa panel.css:618-637) y avisos (AvisosMovil; pisa panel-avisos.css). */
+.pnl .ex-app,
+.pnl .pnl-avisos {
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-app-cabecera,
+.pnl .pnl-avisos-cabecera { align-items: flex-start; gap: 12px; }
+.pnl .ex-app .ex-app-icono,
+.pnl .pnl-avisos-icono {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 40px; height: 40px;
+  border-radius: var(--radio-s);
+  background: var(--info-soft);
+  color: var(--primary-2);
+}
+.pnl .pnl-avisos-activo .pnl-avisos-icono { background: var(--ok-soft); color: var(--ok-ink); }
+.pnl .ex-app-titulo,
+.pnl .pnl-avisos-titulo {
+  margin: 0;
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.3; letter-spacing: 0;
+  color: var(--primary);
+}
+.pnl .pnl-avisos-titulo { margin-bottom: 2px; }
+.pnl .ex-app-sub,
+.pnl .ex-app-texto,
+.pnl .pnl-avisos-texto {
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .ex-app-sub { margin: 2px 0 0; }
+.pnl .ex-app-texto { margin: 0; }
+.pnl .ex-app-texto b,
+.pnl .pnl-avisos-texto b { font-weight: 700; color: var(--ink); }
+
+/* Pasos: filas de 44 con el icono y el número en su tile. */
+.pnl .ex-app-pasos { gap: 4px; }
+.pnl .ex-app-pasos li {
+  min-height: var(--pnl-tap);
+  gap: 10px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+.pnl .ex-app-pasos li b { font-weight: 700; color: var(--ink); }
+.pnl .ex-app-paso-icono {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--info-soft);
+  color: var(--primary-2);
+}
+.pnl .ex-app-paso-num {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 24px; height: 24px;
+  border-radius: var(--radio-xs);
+  background: var(--fondo-tile);
+  color: var(--ink-2);
+  font-size: var(--fs-meta); font-weight: 800; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.pnl .ex-app-botones { gap: 8px 12px; }
+.pnl .ex-app-botones .pnl-btn-primario,
+.pnl .pnl-avisos-btn { height: auto; padding: 6px 18px; font-size: var(--fs-cuerpo); }
+.pnl .ex-app-ahora-no,
+.pnl .pnl-avisos-ahora-no {
+  min-height: var(--pnl-tap);
+  padding: 6px 12px;
+  font-size: var(--fs-cuerpo); font-weight: 600;
+  color: var(--primary-2);
+}
+.pnl .pnl-avisos-botones { gap: 8px 12px; padding-left: 52px; }
+@media (max-width: 519.98px) {
+  .pnl .pnl-avisos-botones { padding-left: 0; }
+}
+.pnl .pnl-avisos-error {
+  margin: 0;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+  color: var(--alto-ink);
+}
+
+
+/* ── Movimiento reducido: va siempre al final ── */
+@media (prefers-reduced-motion: reduce) {
+  .pnl .pnl-hero::before,
+  .pnl .pnl-hero::after,
+  .pnl .pnl-hero-wa::after,
+  .pnl .ex-proximo .ex-proximo-icono::after { animation: none; }
+
+  .pnl .pnl-hero-stat,
+  .pnl .pnl-hero-wa,
+  .pnl .pnl-hero-wa svg,
+  .pnl .pnl-pend-item,
+  .pnl .pnl-plazos-item,
+  .pnl .pnl-card-link,
+  .pnl .pnl-card-link .pnl-card-pie .pnl-btn-primario svg,
+  .pnl .ex-proximo-botones .pnl-btn-cta svg,
+  .pnl .pnl-seccion-titulo .pnl-recargar svg,
+  .pnl .ex-miruta-paso { transition: none; }
+
+  .pnl .pnl-hero-stat:active,
+  .pnl .pnl-hero-wa:active,
+  .pnl .pnl-pend-item:is(:hover, :active),
+  .pnl .pnl-plazos-item:is(:hover, :active),
+  .pnl .pnl-card-link:is(:hover, :active),
+  .pnl .pnl-card-link:hover .pnl-card-pie .pnl-btn-primario svg,
+  .pnl .ex-proximo-botones .pnl-btn-cta:hover svg { transform: none; }
+}

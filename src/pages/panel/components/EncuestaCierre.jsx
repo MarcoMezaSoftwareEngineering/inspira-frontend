@@ -16,6 +16,7 @@ import Icono from "../../../components/common/Icono";
 import { apiGET, apiPOST } from "../../../services/api";
 import { fechaCorta } from "../../../lib/horas";
 import { recorta } from "../pendientes";
+import { menosMovimiento } from "../hooks/useMovimiento";
 
 const url = (id) => `/cierre-master/panel/solicitudes/${id}/encuesta-cierre`;
 const CARAS = ["", "Mal", "Regular", "Bien", "Muy bien", "Excelente"];
@@ -47,7 +48,7 @@ function Resena({ href }) {
   return (
     <div className="pnl-enc-resena">
       <p><b>¿Nos ayudas con una reseña en Google?</b> Es lo que más ayuda a otras personas a encontrarnos. Un minuto.</p>
-      <a href={href} target="_blank" rel="noopener noreferrer" className="pnl-btn-cta ux-tap">
+      <a href={href} target="_blank" rel="noopener noreferrer" className="pnl-btn-primario ux-tap">
         <Icono nombre="estrella" size={15} />
         Dejar reseña en Google
       </a>
@@ -87,7 +88,7 @@ export default function EncuestaCierre({ idSolicitud, servicio = null, soloPendi
 
   // Desde el correo (/panel?encuesta=ID) se baja hasta ella.
   useEffect(() => {
-    if (destacada && datos && ref.current) ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (destacada && datos && ref.current) ref.current.scrollIntoView({ behavior: menosMovimiento() ? "auto" : "smooth", block: "center" });
   }, [destacada, datos]);
 
   if (!datos || !datos.disponible || datos.via_master) return null;
@@ -131,6 +132,7 @@ export default function EncuestaCierre({ idSolicitud, servicio = null, soloPendi
           <label className="pnl-enc-campo">
             <span>Tu comentario (opcional)</span>
             <textarea
+              className="pnl-campo-control"
               rows={3}
               maxLength={2000}
               value={f.comentario}
@@ -138,17 +140,18 @@ export default function EncuestaCierre({ idSolicitud, servicio = null, soloPendi
               onChange={(e) => setF({ ...f, comentario: e.target.value })}
             />
           </label>
-          <label className="pnl-enc-check">
+          <label className="pnl-enc-check pnl-casilla-fila">
             <input type="checkbox" checked={f.autoriza_publicar} onChange={(e) => setF({ ...f, autoriza_publicar: e.target.checked })} />
             <span>Autorizo que publiquen mi opinión, sin mi nombre completo.</span>
           </label>
-          <label className="pnl-enc-check">
+          <label className="pnl-enc-check pnl-casilla-fila">
             <input type="checkbox" checked={f.quiere_contacto} onChange={(e) => setF({ ...f, quiere_contacto: e.target.checked })} />
             <span>Quiero que me contacten para otro servicio.</span>
           </label>
           {error && <p className="pnl-error">{error}</p>}
           <div className="pnl-enc-botones">
-            <button type="submit" className="pnl-btn-cta ux-tap" disabled={!f.general || guardando}>
+            <button type="submit" className="pnl-btn-primario ux-tap" disabled={!f.general || guardando}>
+              {guardando && <span className="pnl-spinner" data-talla="s" aria-hidden="true" />}
               {guardando ? "Enviando…" : enc ? "Guardar cambios" : "Enviar"}
             </button>
             {enc && <button type="button" className="pnl-btn ux-tap" onClick={() => setEditando(false)}>Cancelar</button>}

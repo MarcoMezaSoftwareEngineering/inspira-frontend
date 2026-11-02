@@ -7,7 +7,7 @@ import ChecklistDocumentos from "./sections/ChecklistDocumentos";
 import VisaDatosCliente from "./sections/VisaDatosCliente";
 import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
-import { estadoVisado, TONOS } from "../../../../lib/visaFlujoInterno";
+import { estadoVisado } from "../../../../lib/visaFlujoInterno";
 import { EsqueletoExpediente } from "../Esqueleto";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 import SelectorSeccionMovil from "./SelectorSeccionMovil";
@@ -18,69 +18,73 @@ import { rutaDe } from "../../ruta";
 import { comprobarRespuesta } from "../../../../services/sesion";
 import { usePublicarCabecera } from "../../cabeceraExpediente";
 import NovedadesExpediente from "../NovedadesExpediente";
+import ErrorCarga from "./ErrorCarga";
 import { useSondeo } from "../../../../hooks/useSondeo";
+import { TituloPaso, ExpedienteCabecera, tonoDeEstado } from "../../../../components/common/RutaPasos";
+import IconoPaso from "../../../../components/common/IconoPaso";
+import Icono from "../../../../components/common/Icono";
+import { inicialesDe, IconoLinea } from "./utils";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
-const DOT_COLORS = {
-  completado: "bg-emerald-500",
-  pendiente:  "bg-amber-400",
-  observado:  "bg-red-400",
-  cargando:   "bg-blue-400 animate-pulse",
+// El estado de cada sección, en el tono del panel (el mismo mapa que el
+// selector del teléfono).
+const TONO_PUNTO = {
+  completado: "ok",
+  pendiente:  "aviso",
+  observado:  "alto",
+  cargando:   "info",
 };
 
-// ── NavItem — botón de la barra lateral (copiado del detalle de Máster) ───────
-function NavItem({ num, titulo, subtitulo, estado, active, onClick }) {
+// El icono de cada sección (nombres de IconoPaso), como los pasos del máster.
+const ICONO_SECCION = {
+  datos: "user", sesion: "calendar", economicos: "coins", docs: "folder",
+  entregables: "fileText", estado: "flag", mensajes: "message",
+};
+
+// ── NavItem — botón de la columna de secciones (pantalla grande) ─────────────
+function NavItem({ num, icono, titulo, subtitulo, estado, active, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center gap-2.5 ${
-        active ? "bg-primary shadow-sm" : "hover:bg-neutral-100"
-      }`}
+      aria-current={active ? "page" : undefined}
+      className="pnl-nav-item"
     >
-      <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-colors ${
-        active ? "bg-white/20 text-white" : "bg-primary-light/10 text-primary-light"
-      }`}>
-        {num}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className={`text-xs font-semibold leading-tight ${active ? "text-white" : "text-neutral-800"}`}>
-          {titulo}
-        </p>
-        {subtitulo && (
-          <p className={`text-[10px] mt-0.5 truncate ${active ? "text-white/60" : "text-neutral-400"}`}>
-            {subtitulo}
-          </p>
-        )}
-      </div>
+      <span className="pnl-nav-item-ico">
+        {icono ? <IconoPaso nombre={icono} /> : num}
+      </span>
+      <span className="pnl-nav-item-txt">
+        <b>{titulo}</b>
+        {subtitulo && <small>{subtitulo}</small>}
+      </span>
       {estado && (
-        <span className={`shrink-0 w-2 h-2 rounded-full ${active ? "bg-white/40" : (DOT_COLORS[estado] || "bg-neutral-300")}`} />
+        <span className="pnl-punto" data-tono={TONO_PUNTO[estado] || "neutro"} aria-hidden="true" />
       )}
     </button>
   );
 }
 
 // ── Helpers de contenido ──────────────────────────────────────────────────────
+// Los tonos de siempre (info, ok, warn, stop) en el diccionario del panel. El
+// icono: el que se le pase (Icono o IconoPaso) o, si no, el del tono.
+const AVISO_TONO = { info: "info", ok: "ok", warn: "aviso", stop: "alto" };
+const AVISO_ICONO = { info: "info", ok: "checkCircle", aviso: "alert", alto: "alert" };
 function Aviso({ tono = "info", icono, children }) {
-  const tonos = {
-    info: "bg-sky-50 border-sky-200 text-sky-900",
-    ok:   "bg-emerald-50 border-emerald-200 text-emerald-900",
-    warn: "bg-amber-50 border-amber-200 text-amber-900",
-  };
+  const t = AVISO_TONO[tono] || "info";
   return (
-    <div className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] leading-relaxed ${tonos[tono]}`}>
-      <span className="shrink-0 text-base leading-none mt-0.5">{icono}</span>
-      <div>{children}</div>
+    <div className="pnl-aviso pnl-aviso-bloque" data-tono={t}>
+      <span className="pnl-aviso-icono">{icono || <IconoLinea nombre={AVISO_ICONO[t]} />}</span>
+      <div className="pnl-aviso-texto">{children}</div>
     </div>
   );
 }
 
-function Tarjeta({ titulo, children, borde }) {
+function Tarjeta({ titulo, children, tono }) {
   return (
-    <div className={`bg-white border rounded-2xl shadow-sm p-4 ${borde || "border-neutral-200"}`}>
+    <div className="pnl-tarjeta pnl-tarjeta-visado" data-anidada="1" data-tono={tono}>
       {titulo && (
-        <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-2.5">{titulo}</p>
+        <p className="pnl-eyebrow"><span className="punto" />{titulo}</p>
       )}
       {children}
     </div>
@@ -92,25 +96,24 @@ function SesionView({ sesion, etiqueta, vacio, pie }) {
   const agendada = sesion && sesion.estado !== "PENDIENTE";
   const completada = sesion?.estado === "COMPLETADA" || sesion?.estado === "REALIZADA";
   return (
-    <div className={`rounded-2xl border p-4 ${
-      completada ? "border-emerald-200 bg-emerald-50/50"
-      : agendada ? "border-sky-200 bg-sky-50/50"
-      : "border-dashed border-neutral-300 bg-neutral-50"
-    }`}>
-      <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">{etiqueta}</p>
-      <p className={`font-bold mt-1 ${agendada ? "text-[20px] text-primary" : "text-[17px] text-neutral-400"}`}>
+    <div
+      className={`pnl-cita${agendada || completada ? "" : " pnl-vacio-suave"}`}
+      data-estado={completada ? "completada" : agendada ? "agendada" : "vacia"}
+    >
+      <p className="pnl-cita-etiqueta">{etiqueta}</p>
+      <p className="pnl-cita-fecha">
         {agendada && sesion.fecha ? sesion.fecha : "Por agendar"}
         {agendada && sesion.hora ? ` · ${sesion.hora}` : ""}
       </p>
-      <p className="text-[12px] text-neutral-500 mt-1">
+      <p className="pnl-cita-texto">
         {agendada ? (sesion.plataforma || "Te confirmamos los detalles aquí") : vacio}
       </p>
-      {pie && <p className="text-[12px] text-neutral-500 mt-1.5">{pie}</p>}
-      {sesion?.notas && <p className="text-[12px] text-neutral-600 mt-2">{sesion.notas}</p>}
+      {pie && <p className="pnl-cita-texto">{pie}</p>}
+      {sesion?.notas && <p className="pnl-cita-texto">{sesion.notas}</p>}
       {sesion?.enlace_meet && (
-        <a href={sesion.enlace_meet} target="_blank" rel="noreferrer"
-          className="inline-block mt-3 text-[13px] font-semibold px-4 py-2 rounded-xl bg-[#2471A3] text-white hover:opacity-90 transition-all">
-          🔗 Unirme a la sesión
+        <a href={sesion.enlace_meet} target="_blank" rel="noreferrer" className="pnl-btn-primario pnl-cita-boton">
+          <Icono nombre="video" size={16} />
+          Unirme a la sesión
         </a>
       )}
     </div>
@@ -147,29 +150,33 @@ function DescargaDoc({ slot, doc, idSolicitud }) {
     }
   }
 
-  const esPdf = (doc.mime || "").includes("pdf");
-
   return (
-    <div className="flex items-center gap-3 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5">
-      <span className="shrink-0 text-xl">{esPdf ? "📕" : "📄"}</span>
+    <div className="pnl-descarga">
+      <span className="pnl-ico" data-talla="l"><IconoPaso nombre="fileText" /></span>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-semibold text-neutral-800 truncate">{doc.etiqueta || doc.nombre}</p>
+        <p className="pnl-descarga-nombre">{doc.etiqueta || doc.nombre}</p>
         {doc.etiqueta && doc.nombre && (
-          <p className="text-[11px] text-neutral-400 truncate">{doc.nombre}</p>
+          <p className="pnl-descarga-archivo">{doc.nombre}</p>
         )}
-        {error && <p className="text-[11px] text-red-600 mt-0.5">{error}</p>}
+        {error && <p className="pnl-campo-ayuda">{error}</p>}
       </div>
       <button
         type="button"
         onClick={descargar}
         disabled={bajando}
-        className="shrink-0 text-[12px] font-semibold px-3 py-1.5 rounded-lg border-2 border-[#1D6A4A] text-[#1D6A4A] hover:bg-[#1D6A4A] hover:text-white transition-all disabled:opacity-50"
+        className="pnl-btn"
+        data-talla="s"
       >
         {bajando ? "…" : "Descargar"}
       </button>
     </div>
   );
 }
+
+// El estado del visado (lib/visaFlujoInterno, que no se toca) en el tono del
+// panel: sin morado.
+const TONO_VISADO = { sky: "info", emerald: "ok", red: "alto", amber: "aviso", violet: "info", neutral: "neutro" };
+const ICONO_TONO = { info: "info", ok: "checkCircle", alto: "alert", aviso: "alert", neutro: "info" };
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion, faltanPerfil = 0, onPerfilCambiado }) {
@@ -219,6 +226,9 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
         apiGET(`/solicitudes/${idSolicitud}/visa-documentos`),
       ]);
       if (rDetalle.ok) setDetalle(rDetalle.solicitud);
+      // Sin la solicitud no hay expediente que pintar: se dice, con
+      // «Reintentar» (antes quedaba en blanco). El sondeo silencioso no avisa.
+      else if (!silent) setError("Error al cargar información.");
       if (rChecklist.ok) setChecklist(rChecklist.checklist || []);
       if (rExp.ok) setVisaExp(rExp.expediente || null);
       if (rSes.ok) setSesiones(rSes.sesiones || []);
@@ -350,7 +360,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
       case "sesion":
         return (
           <div className="space-y-3">
-            <Aviso tono="ok" icono="⭐">
+            <Aviso tono="ok" icono={<Icono nombre="estrella" size={16} />}>
               Esta es la <b>única sesión obligatoria</b>. Aquí definimos tu ruta y,
               sobre todo, tu estrategia de medios económicos.
             </Aviso>
@@ -369,8 +379,8 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
                   "Aclaramos qué documentos aplican a tu situación",
                   "Resolvemos todas tus dudas del proceso",
                 ].map((t) => (
-                  <li key={t} className="flex gap-2 text-[13px] text-neutral-700 leading-relaxed">
-                    <span className="shrink-0 text-[#1D6A4A] font-bold">✓</span>
+                  <li key={t} className="pnl-lista-check">
+                    <IconoPaso nombre="check" />
                     <span dangerouslySetInnerHTML={{ __html: t }} />
                   </li>
                 ))}
@@ -385,7 +395,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
         const form = visaDocs?.formulario;
         return (
           <div className="space-y-3">
-            <Aviso tono="info" icono="📝">
+            <Aviso tono="info" icono={<IconoPaso nombre="fileText" />}>
               Tu <b>declaración jurada</b> y tu <b>formulario oficial</b> los redacta
               Inspira con los datos que cargaste. Cuando estén revisados aparecerán aquí
               para que los descargues, los imprimas y los firmes.
@@ -404,7 +414,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
             )}
 
             {form && (
-              <Aviso tono="warn" icono="✍️">
+              <Aviso tono="warn" icono={<IconoPaso nombre="fileText" />}>
                 El formulario se firma <b>a mano</b>, en bolígrafo azul o negro, el día de
                 tu cita. No lo firmes antes de revisarlo con tu asesor.
               </Aviso>
@@ -418,35 +428,39 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
         const req = visaExp?.requerimiento_estado;
         return (
           <div className="space-y-3">
-            <div className={`rounded-2xl border px-4 py-3 ${TONOS[ev.tono]}`}>
-              <p className="text-[9px] font-bold uppercase tracking-widest opacity-70">Estado de tu visado</p>
-              <p className="text-[17px] font-bold mt-0.5">{ev.icono} {ev.texto}</p>
+            <div className="pnl-aviso pnl-estado-visado" data-tono={TONO_VISADO[ev.tono] || "neutro"}>
+              <span className="pnl-aviso-icono"><IconoLinea nombre={ICONO_TONO[TONO_VISADO[ev.tono] || "neutro"]} /></span>
+              <div className="min-w-0">
+                <p className="pnl-estado-visado-rotulo">Estado de tu visado</p>
+                <p className="pnl-estado-visado-texto">{ev.texto}</p>
+              </div>
             </div>
 
             {/* Un requerimiento exige que actúe él, y con plazo: va antes que nada. */}
             {req === "SOLICITADO" && (
-              <Tarjeta titulo="Te han pedido subsanar algo" borde="border-red-300">
-                <p className="text-[13px] text-neutral-700 leading-relaxed">
+              <Tarjeta titulo="Te han pedido subsanar algo" tono="alto">
+                <p className="pnl-visado-texto">
                   El consulado solicitó documentación o aclaraciones adicionales.
                 </p>
                 {visaExp?.requerimiento_detalle && (
-                  <p className="text-[13px] text-neutral-800 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-2 leading-relaxed">
+                  <p className="pnl-visado-pide">
                     <b>Qué piden:</b> {visaExp.requerimiento_detalle}
                   </p>
                 )}
                 {visaExp?.requerimiento_plazo && (
-                  <p className="text-[13px] font-bold text-red-700 mt-2">
-                    ⏰ Plazo para responder: {visaExp.requerimiento_plazo}
+                  <p className="pnl-visado-plazo">
+                    <IconoLinea nombre="alert" />
+                    <span>Plazo para responder: {visaExp.requerimiento_plazo}</span>
                   </p>
                 )}
-                <p className="text-[12px] text-neutral-500 mt-2">
+                <p className="pnl-visado-meta">
                   Súbelo cuanto antes en <b>Mis documentos</b>. Tu asesor te acompaña en esto.
                 </p>
               </Tarjeta>
             )}
 
             {req === "SUBSANADO" && (
-              <Aviso tono="ok" icono="✅">
+              <Aviso tono="ok">
                 Ya presentamos lo que pedían. Ahora toca esperar la resolución.
               </Aviso>
             )}
@@ -460,23 +474,23 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
               } : null}
               etiqueta="Cita BLS · Consulado"
               vacio="La agendamos contigo y te confirmamos aquí"
-              pie="📍 BLS International · llega 15 min antes"
+              pie="BLS International · llega 15 min antes"
             />
 
             {visaExp?.cita_estado === "REAGENDAR" && (
-              <Aviso tono="warn" icono="🔁">
+              <Aviso tono="warn" icono={<IconoLinea nombre="refresh" />}>
                 Hay que <b>reagendar</b> tu cita. Tu asesor te contactará con las
                 nuevas fechas disponibles.
               </Aviso>
             )}
 
             {visaExp?.visado_resultado === "FAVORABLE" && (
-              <Tarjeta titulo="Resolución" borde="border-emerald-200">
-                <p className="text-[15px] font-bold text-[#1D6A4A]">🎉 ¡Visa concedida!</p>
+              <Tarjeta titulo="Resolución" tono="ok">
+                <p className="pnl-visado-resolucion" data-tono="ok"><Icono nombre="destello" size={16} />¡Visa concedida!</p>
                 {visaExp.visado_resultado_fecha && (
-                  <p className="text-[12.5px] text-neutral-500 mt-1">Resuelta el {visaExp.visado_resultado_fecha}</p>
+                  <p className="pnl-visado-meta">Resuelta el {visaExp.visado_resultado_fecha}</p>
                 )}
-                <p className="text-[13px] text-neutral-600 mt-2 leading-relaxed">
+                <p className="pnl-visado-texto">
                   Tu asesor te indicará cómo recoger el pasaporte y te orientará sobre tu
                   llegada a España (NIE, TIE y empadronamiento).
                 </p>
@@ -484,23 +498,24 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
             )}
 
             {visaExp?.visado_resultado === "DENEGADO" && (
-              <Tarjeta titulo="Resolución" borde="border-red-300">
-                <p className="text-[15px] font-bold text-red-700">Resolución desfavorable</p>
+              <Tarjeta titulo="Resolución" tono="alto">
+                <p className="pnl-visado-resolucion" data-tono="alto">Resolución desfavorable</p>
                 {visaExp.visado_resultado_fecha && (
-                  <p className="text-[12.5px] text-neutral-500 mt-1">Notificada el {visaExp.visado_resultado_fecha}</p>
+                  <p className="pnl-visado-meta">Notificada el {visaExp.visado_resultado_fecha}</p>
                 )}
                 {visaExp.via_posterior === "APELACION" && (
-                  <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
-                    ⚖️ Estamos <b>presentando una apelación</b>. Tu asesor te contará los plazos.
+                  <p className="pnl-visado-texto pnl-visado-con-icono">
+                    <Icono nombre="balanza" size={16} />
+                    <span>Estamos <b>presentando una apelación</b>. Tu asesor te contará los plazos.</span>
                   </p>
                 )}
                 {visaExp.via_posterior === "ESTANCIA_ESTUDIOS" && (
-                  <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
-                    ↪️ Estamos reconduciendo tu caso por la vía de <b>estancia por estudios</b>.
+                  <p className="pnl-visado-texto">
+                    Estamos reconduciendo tu caso por la vía de <b>estancia por estudios</b>.
                   </p>
                 )}
                 {!visaExp.via_posterior && (
-                  <p className="text-[13px] text-neutral-700 mt-2 leading-relaxed">
+                  <p className="pnl-visado-texto">
                     Tu asesor está estudiando las opciones y te contactará.
                   </p>
                 )}
@@ -509,18 +524,18 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
 
             {!visaExp?.visado_resultado && (
               <>
-                <Aviso tono="ok" icono="🎒">
+                <Aviso tono="ok" icono={<Icono nombre="maleta" size={16} />}>
                   Lleva: expediente original + copia, pasaporte, foto y{" "}
                   <b>efectivo para la tasa consular</b>.
                 </Aviso>
-                <Aviso tono="warn" icono="✈️">
+                <Aviso tono="warn" icono={<Icono nombre="avion" size={16} />}>
                   <b>No compres tu vuelo</b> todavía: sólo reserva con tarifa flexible.
                 </Aviso>
               </>
             )}
 
             {visaExp?.cierre_estado === "CERRADO" && (
-              <Aviso tono="ok" icono="🏁">
+              <Aviso tono="ok" icono={<Icono nombre="bandera" size={16} />}>
                 Tu expediente está <b>cerrado</b>. ¡Gracias por confiar en Inspira!
               </Aviso>
             )}
@@ -534,12 +549,24 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
   }
 
   const sec = navSections.find((s) => s.id === activeSection) || navSections[0];
+  // Las secciones con su icono: para la columna, el selector y el título.
+  const secciones = navSections.map((s) => ({ ...s, icono: ICONO_SECCION[s.id] }));
+  // La cabecera del expediente, la misma del máster: iniciales, número y anillo.
+  const cabecera = detalle ? (
+    <ExpedienteCabecera
+      iniciales={inicialesDe(cli.nombre)}
+      eyebrow={`Solicitud #${detalle.id_solicitud}`}
+      titulo={detalle.tipo?.nombre || "Visa de Estudios"}
+      linea={cli.nombre}
+      pct={pct}
+    />
+  ) : null;
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="pnl-con-selector flex flex-col lg:h-full lg:min-h-0">
 
       {/* Fila superior: botón volver + encabezado compacto */}
-      <div className="shrink-0 flex items-center gap-3 mb-3 max-md:mb-0">
+      <div className="shrink-0 flex items-center gap-3 mb-3 max-md:mb-0 lg:mb-0">
         <button
           onClick={onVolver}
           aria-label="Volver a mis servicios"
@@ -554,36 +581,12 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
 
 
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-            <span className="text-red-500 text-sm">⚠</span>
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
+          <ErrorCarga className="flex-1 min-w-0" mensaje={error} onReintentar={() => cargarTodo()} />
         )}
 
+        {/* Tableta: la cabecera arriba. En pantalla grande va en la columna. */}
         {!loading && !error && detalle && (
-          <div className="pnl-solo-grande flex-1 min-w-0 bg-white border border-neutral-200 rounded-2xl shadow-sm px-3 sm:px-4 py-2.5 flex items-center gap-3 sm:gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold text-primary-light uppercase tracking-widest leading-none">
-                Solicitud #{detalle.id_solicitud}
-              </p>
-              <p className="text-[13px] sm:text-sm font-bold text-neutral-900 leading-snug truncate mt-0.5">
-                🇪🇸 {detalle.tipo?.nombre || "Visa de Estudios"} · {cli.nombre || ""}
-              </p>
-            </div>
-            {/* En móvil no cabe la barra: se resume en el porcentaje. */}
-            <span className="sm:hidden shrink-0 text-[11px] font-bold text-[#1D6A4A] bg-emerald-50 border border-emerald-200 rounded-full px-2 py-1">
-              {pct}%
-            </span>
-            <div className="shrink-0 hidden sm:block w-32">
-              <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-neutral-500 font-medium">Progreso</span>
-                <span className="font-bold text-neutral-800">{pct}%</span>
-              </div>
-              <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-700 bg-[#1D6A4A]" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          </div>
+          <div className="pnl-solo-grande flex-1 min-w-0 lg:hidden">{cabecera}</div>
         )}
       </div>
 
@@ -598,40 +601,52 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
         <div className="shrink-0 mb-3"><NovedadesExpediente idSolicitud={idSolicitud} plegable /></div>
       )}
 
-      {/* Panel principal */}
+      {/* Panel principal. En el teléfono y la tableta crece con su contenido y
+          se desplaza la página; la columna con scroll propio, desde 1024. */}
       {!loading && !error && detalle && (
-        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
+        <div className="flex flex-col lg:flex-row gap-3 lg:flex-1 lg:min-h-0">
 
-          {/* Desktop: sidebar vertical */}
-          <div className="hidden md:flex w-64 shrink-0 bg-white border border-neutral-200 rounded-2xl shadow-sm p-2 flex-col gap-0.5 overflow-y-auto">
-            {navSections.map((s) => (
-              <NavItem
-                key={s.id}
-                num={s.num}
-                titulo={s.titulo}
-                subtitulo={s.subtitulo}
-                estado={s.estado}
-                active={activeSection === s.id}
-                onClick={() => setActiveSection(s.id)}
-              />
-            ))}
+          {/* Pantalla grande: la cabecera y las secciones, en su columna. */}
+          <div className="pnl-nav-visado">
+            {cabecera}
+            <div className="pnl-nav-visado-lista">
+              {secciones.map((s) => (
+                <NavItem
+                  key={s.id}
+                  num={s.num}
+                  icono={s.icono}
+                  titulo={s.titulo}
+                  subtitulo={s.subtitulo}
+                  estado={s.estado}
+                  active={activeSection === s.id}
+                  onClick={() => setActiveSection(s.id)}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Contenido de la sección activa (llena el área). La clave por
               sección hace que cada una entre con su transición. */}
-          <div key={activeSection} className="pnl-entra flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div key={activeSection} className="pnl-entra flex flex-col gap-3 min-w-0 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+            {/* El paso en el que está, como en el máster. El subtítulo va en
+                el chip del título, no repetido en la tarjeta. */}
+            <TituloPaso
+              paso={{ ...sec, icono: ICONO_SECCION[sec.id], estado: tonoDeEstado(sec.estado) }}
+              total={navSections.length}
+              indice={navSections.indexOf(sec) + 1}
+            />
             <SeccionSiempreAbiertoCtx.Provider value={true}>
               {/* Medios y datos economicos van juntos: lo que se marca aqui es
                   lo que decide que documentos se piden en el bloque siguiente. */}
               {activeSection === "economicos" ? (
-                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
+                <SeccionPanel numero={sec.num} titulo={sec.titulo} estado={sec.estado}>
                   <div className="space-y-4">
                     <VisaMediosEconomicos
                       idSolicitud={idSolicitud}
                       expediente={visaExp}
                       onGuardado={() => cargarTodo({ silent: true })}
                     />
-                    <div className="border-t border-neutral-200 pt-4">
+                    <div className="pnl-visado-separa">
                       <VisaDeclaracionCliente
                         idSolicitud={idSolicitud}
                         expediente={visaExp}
@@ -641,7 +656,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
                   </div>
                 </SeccionPanel>
               ) : activeSection === "datos" ? (
-                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
+                <SeccionPanel numero={sec.num} titulo={sec.titulo} estado={sec.estado}>
                   <VisaDatosCliente
                     idSolicitud={idSolicitud}
                     expediente={visaExp}
@@ -665,7 +680,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
                   expediente={visaExp}
                 />
               ) : (
-                <SeccionPanel numero={sec.num} titulo={sec.titulo} subtitulo={sec.subtitulo} estado={sec.estado}>
+                <SeccionPanel numero={sec.num} titulo={sec.titulo} estado={sec.estado}>
                   {renderBody(sec.id)}
                 </SeccionPanel>
               )}
@@ -673,7 +688,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
           </div>
 
           {/* Móvil: el selector de sección, abajo. */}
-          <SelectorSeccionMovil secciones={navSections} activa={activeSection} onCambiar={setActiveSection} />
+          <SelectorSeccionMovil secciones={secciones} activa={activeSection} onCambiar={setActiveSection} />
         </div>
       )}
     </div>

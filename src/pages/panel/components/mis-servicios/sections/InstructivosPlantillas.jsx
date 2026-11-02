@@ -7,6 +7,7 @@
 // suelto (el visado).
 import SeccionPanel from "./SeccionPanel";
 import GuiaDocumentosMaster from "./GuiaDocumentosMaster";
+import IconoPaso from "../../../../../components/common/IconoPaso";
 
 export function InstructivosContenido({ instructivos, onIrAGuia, guiaDocumentos = false }) {
   const lista = Array.isArray(instructivos) ? instructivos : [];
@@ -18,24 +19,26 @@ export function InstructivosContenido({ instructivos, onIrAGuia, guiaDocumentos 
           <button
             type="button"
             onClick={() => onIrAGuia("guia")}
-            className="flex items-center gap-3 bg-[#1D6A4A]/5 border border-[#1D6A4A]/20 rounded-xl px-4 py-3.5 text-left hover:bg-[#1D6A4A]/10 transition-all"
+            className="pnl-guia-enlace"
           >
-            <span className="text-xl shrink-0">🎓</span>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#1D6A4A]">Guía completa del Máster</p>
-              <p className="text-xs text-neutral-500">Paso a paso de todo el proceso de postulación.</p>
-            </div>
+            <span className="pnl-ico" data-talla="l"><IconoPaso nombre="cap" /></span>
+            <span className="min-w-0 flex-1">
+              <span className="pnl-guia-enlace-titulo">Guía completa del Máster</span>
+              <span className="pnl-guia-enlace-texto">Paso a paso de todo el proceso de postulación.</span>
+            </span>
+            <IconoPaso nombre="arrowRight" className="pnl-guia-enlace-flecha" />
           </button>
           <button
             type="button"
             onClick={() => onIrAGuia("apostilla")}
-            className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 text-left hover:bg-amber-100/60 transition-all"
+            className="pnl-guia-enlace"
           >
-            <span className="text-xl shrink-0">📜</span>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-amber-800">Guía de Apostilla</p>
-              <p className="text-xs text-neutral-500">Cómo apostillar tus documentos.</p>
-            </div>
+            <span className="pnl-ico" data-talla="l"><IconoPaso nombre="scroll" /></span>
+            <span className="min-w-0 flex-1">
+              <span className="pnl-guia-enlace-titulo">Guía de Apostilla</span>
+              <span className="pnl-guia-enlace-texto">Cómo apostillar tus documentos.</span>
+            </span>
+            <IconoPaso nombre="arrowRight" className="pnl-guia-enlace-flecha" />
           </button>
         </div>
       )}
@@ -44,34 +47,27 @@ export function InstructivosContenido({ instructivos, onIrAGuia, guiaDocumentos 
       {guiaDocumentos && <GuiaDocumentosMaster />}
 
       {lista.length === 0 ? (
-        <div className="py-6 text-center">
-          <p className="text-sm text-neutral-400">Aún no hay instructivos configurados.</p>
+        <div className="pnl-vacio-suave">
+          <p>Aún no hay instructivos configurados.</p>
         </div>
       ) : (
         <ul className="space-y-3">
           {lista.map((doc) => (
             <li
               key={doc.url}
-              className="flex items-center justify-between gap-4 bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3.5 hover:border-primary-light/30 hover:bg-primary-light/5 transition-all"
+              className="pnl-descarga"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-neutral-800 truncate">{doc.label}</span>
-              </div>
+              <span className="pnl-ico" data-talla="l"><IconoPaso nombre="fileText" /></span>
+              <span className="pnl-descarga-nombre min-w-0 flex-1">{doc.label}</span>
               <a
                 href={doc.url}
                 target="_blank"
                 rel="noreferrer"
                 download
-                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all active:scale-95"
+                className="pnl-btn shrink-0"
+                data-talla="s"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 10l-4 4-4-4M12 4v10" />
-                </svg>
+                <IconoPaso nombre="download" />
                 Descargar
               </a>
             </li>

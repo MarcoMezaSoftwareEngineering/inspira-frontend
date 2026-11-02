@@ -3,7 +3,11 @@
 // Están aquí y no dentro de cada pantalla porque el titular de una estancia y
 // su acompañante rellenan el mismo formulario —el bloque 1 del EX-00— y no
 // tiene sentido que se vean distintos según por dónde se entre.
+//
+// Estilos: .pnl-campo* de styles/panel/base.css (la etiqueta encima, la caja de
+// 48 y 16 px en táctil); lo propio de estas pantallas, en panel/tramites.css.
 import { useId, useState } from "react";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
 /** La ⓘ que explica un campo cuando el nombre no basta. */
 export function Ayuda({ texto }) {
@@ -12,18 +16,15 @@ export function Ayuda({ texto }) {
   return (
     <span className="relative inline-flex">
       <button type="button" onClick={() => setAbierto((v) => !v)}
-        aria-label="Qué va aquí"
-        className="w-[15px] h-[15px] rounded-full border border-neutral-300 text-neutral-400
-          text-[10px] leading-none grid place-items-center hover:border-primary-light
-          hover:text-primary-light shrink-0">
+        aria-label="Qué va aquí" aria-expanded={abierto}
+        className="pnl-info">
         i
       </button>
       {abierto && (
-        <span className="absolute z-20 left-0 top-5 w-60 rounded-lg bg-primary text-white
-          text-[11.5px] leading-relaxed px-3 py-2 shadow-lg">
+        <span className="pnl-burbuja absolute z-20 left-0 top-7">
           {texto}
           <button type="button" onClick={() => setAbierto(false)}
-            className="block mt-1.5 text-[10.5px] text-white/60 hover:text-white">cerrar</button>
+            className="pnl-burbuja-cerrar">cerrar</button>
         </span>
       )}
     </span>
@@ -38,11 +39,11 @@ export function Ayuda({ texto }) {
  */
 export function Etiqueta({ id, label, ayuda, obligatorio }) {
   return (
-    <span className="flex items-center gap-1.5 flex-wrap">
-      <label htmlFor={id} className="text-[12.5px] font-medium text-neutral-700">
+    <span className="pnl-campo-etiqueta flex items-center gap-x-2 gap-y-1 flex-wrap">
+      <label htmlFor={id}>
         {label}
       </label>
-      {!obligatorio && <span className="text-[10.5px] text-neutral-400">opcional</span>}
+      {!obligatorio && <small>opcional</small>}
       <Ayuda texto={ayuda} />
     </span>
   );
@@ -56,14 +57,12 @@ export function Campo({ label, valor, onChange, tipo = "text", ayuda, obligatori
   // mayúsculas parece roto, ni las fechas.
   const mayus = tipo === "text";
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="pnl-campo">
       <Etiqueta id={id} label={label} ayuda={ayuda} obligatorio={obligatorio} />
       <input
         id={id} type={tipo} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className={`text-[14px] border rounded-lg px-3 py-2.5 bg-white transition-colors
-          focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/25 focus:border-[#1D6A4A] ${
-          mayus ? "uppercase placeholder:normal-case" : ""
-        } ${falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"}`}
+        data-estado={falta ? "falta" : undefined}
+        className={`pnl-campo-control ${mayus ? "uppercase placeholder:normal-case" : ""}`}
       />
     </div>
   );
@@ -73,14 +72,12 @@ export function Selector({ label, valor, onChange, opciones, ayuda, obligatorio,
   const pares = opciones.map((o) => (Array.isArray(o) ? o : [o, o]));
   const id = useId();
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="pnl-campo">
       <Etiqueta id={id} label={label} ayuda={ayuda} obligatorio={obligatorio} />
       <select
         id={id} value={valor ?? ""} onChange={(e) => onChange(e.target.value)}
-        className={`text-[14px] border rounded-lg px-3 py-2.5 bg-white
-          focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/25 focus:border-[#1D6A4A] ${
-          falta ? "border-amber-400 bg-amber-50/40" : "border-neutral-300"
-        }`}
+        data-estado={falta ? "falta" : undefined}
+        className="pnl-campo-control"
       >
         <option value="">—</option>
         {pares.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
@@ -95,12 +92,14 @@ export function Guardado({ guardando, tocado, completo, arriba }) {
     : tocado ? "Sin guardar…"
     : completo ? "Guardado. Ya está todo."
     : "Guardado";
-  const tono = guardando || tocado ? "text-neutral-400" : "text-[#1D6A4A]";
+  const ok = !guardando && !tocado;
   return (
-    <p className={`flex items-center gap-1.5 text-[11.5px] ${tono} ${arriba ? "mb-3" : "mt-4"}`}>
-      <span aria-hidden="true">{guardando || tocado ? "•" : "✓"}</span>
+    <p className={`pnl-guardado ${arriba ? "pnl-guardado-arriba" : "pnl-guardado-abajo"}`} data-ok={ok ? "1" : undefined}>
+      {guardando ? <span className="pnl-spinner" data-talla="s" aria-hidden="true" />
+        : tocado ? <span className="pnl-guardado-punto" aria-hidden="true" />
+        : <IconoPaso nombre="check" className="w-3.5 h-3.5" strokeWidth={2.4} />}
       {texto}
-      {!guardando && !tocado && <span className="text-neutral-400">· se guarda solo</span>}
+      {ok && <span className="pnl-guardado-solo">· se guarda solo</span>}
     </p>
   );
 }

@@ -22,17 +22,15 @@ import AcompanantesCliente from "./AcompanantesCliente";
 import { abrirArchivo } from "../../../../services/archivos";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 
-import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
-import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
+import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear, IconoAlerta } from "./Bloques";
+import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
+import ErrorCarga from "./ErrorCarga";
 import NovedadesExpediente from "../NovedadesExpediente";
-const TONOS = {
-  neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
-  azul:    "bg-[#EEF2F8] text-primary border-primary/20",
-  ambar:   "bg-amber-50 text-amber-800 border-amber-300",
-  violeta: "bg-violet-50 text-violet-800 border-violet-300",
-  rojo:    "bg-red-50 text-red-800 border-red-300",
-  verde:   "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/30",
-};
+import { EsqueletoExpediente } from "../Esqueleto";
+import Icono from "../../../../components/common/Icono";
+import IconoPaso from "../../../../components/common/IconoPaso";
+// Lo que llega de Extranjería, en los tonos del panel (styles/panel.css).
+const TONO_REGISTRO = { RESOLUCION: "ok", REQUERIMIENTO: "alto" };
 
 const OPCIONES = {
   sexo: ["Hombre", "Mujer"],
@@ -55,19 +53,18 @@ const OPCIONES = {
 
 /* ── Estado y plazos ─────────────────────────────────────────────────────── */
 
+/** «1 día», «3 días»: el plural con el número, no «día(s)». */
+const dias = (n) => `${n} ${Math.abs(n) === 1 ? "día" : "días"}`;
+
 function CajaPlazo({ titulo, dato }) {
   if (!dato) return null;
   return (
-    <div className={`rounded-xl border px-3.5 py-3 ${
-      dato.a_tiempo ? "border-[#1D6A4A]/30 bg-[#E8F5EE]" : "border-red-300 bg-red-50"
-    }`}>
-      <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-500">{titulo}</p>
-      <p className={`text-[19px] font-bold leading-tight mt-0.5 ${
-        dato.a_tiempo ? "text-[#14532d]" : "text-red-700"
-      }`}>{dato.limite}</p>
-      <p className="text-[11.5px] text-neutral-600 mt-0.5">
-        {dato.a_tiempo ? `Quedan ${dato.dias_restantes} día(s)`
-          : `Pasado hace ${Math.abs(dato.dias_restantes)} día(s)`}
+    <div className="pnl-plazo-caja" data-tono={dato.a_tiempo ? "ok" : "alto"}>
+      <p className="pnl-plazo-caja-titulo">{titulo}</p>
+      <p className="pnl-plazo-caja-fecha">{dato.limite}</p>
+      <p className="pnl-plazo-caja-pie">
+        {dato.a_tiempo ? `Quedan ${dias(dato.dias_restantes)}`
+          : `Pasado hace ${dias(Math.abs(dato.dias_restantes))}`}
       </p>
     </div>
   );
@@ -83,13 +80,12 @@ function Plazos({ plazos }) {
         <CajaPlazo titulo="Tope desde tu llegada" dato={tope} />
       </div>
       {avisos.map((a, i) => (
-        <div key={i} className={`rounded-xl border px-3.5 py-2.5 text-[12.5px] leading-relaxed flex gap-2 ${
-          a.nivel === "alto" ? "bg-red-50 border-red-300 text-red-800"
-            : a.nivel === "medio" ? "bg-amber-50 border-amber-300 text-amber-900"
-            : "bg-neutral-50 border-neutral-200 text-neutral-600"
-        }`}>
-          <span className="shrink-0">{a.nivel === "alto" ? "⚠️" : "💡"}</span>
-          <span>{a.texto}</span>
+        <div key={i} className="pnl-aviso pnl-aviso-arriba"
+          data-tono={a.nivel === "alto" ? "alto" : a.nivel === "medio" ? "aviso" : "neutro"}>
+          <span className="pnl-aviso-icono" aria-hidden="true">
+            {a.nivel === "alto" ? <IconoAlerta /> : <IconoPaso nombre="info" />}
+          </span>
+          <p className="pnl-aviso-texto">{a.texto}</p>
         </div>
       ))}
     </div>
@@ -115,31 +111,34 @@ function SeguimientoExpediente({ exp }) {
 
   if (!filas.length) {
     return (
-      <p className="text-[12.5px] text-neutral-500 leading-relaxed mb-3">
-        Cuando presentemos tu solicitud te daremos aquí el número de expediente para que
-        puedas seguirlo por tu cuenta.
-      </p>
+      <div className="pnl-vacio-suave mb-3">
+        <span className="pnl-vacio-suave-icono" aria-hidden="true"><IconoPaso nombre="search" /></span>
+        <p>
+          Cuando presentemos tu solicitud te daremos aquí el número de expediente para que
+          puedas seguirlo por tu cuenta.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-primary/20 bg-[#EEF2F8] px-3.5 py-3 mb-3">
-      <p className="text-[10px] font-bold uppercase tracking-widest font-mono
-        text-primary mb-2">Para consultar tu expediente</p>
-      <table className="w-full">
+    <div className="pnl-ficha">
+      <p className="pnl-eyebrow">Para consultar tu expediente</p>
+      <table className="pnl-ficha-tabla">
         <tbody>
           {filas.map(([k, v]) => (
             <tr key={k}>
-              <td className="text-[11.5px] text-neutral-500 py-0.5 pr-3 align-top w-[45%]">{k}</td>
-              <td className="text-[12.5px] font-bold text-primary py-0.5 select-all">{v}</td>
+              <td className="pnl-ficha-k">{k}</td>
+              <td className="pnl-ficha-v">{v}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <a href="https://infoext2.delegaciondelgobierno.gob.es/infoext2/consulta.html"
         target="_blank" rel="noreferrer"
-        className="inline-block text-[11.5px] font-semibold text-primary-light hover:underline mt-2">
-        Consultar en la sede de la Delegación del Gobierno →
+        className="pnl-btn-texto pnl-ficha-enlace" data-talla="s">
+        Consultar en la sede de la Delegación del Gobierno
+        <IconoPaso nombre="external" />
       </a>
     </div>
   );
@@ -173,30 +172,28 @@ function PedirRevision({ id, docs, exp, onHecho }) {
   // que no existe.
   if (!subidos) {
     return (
-      <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 py-3 mb-3
-        flex items-center gap-3 flex-wrap">
-        <div className="min-w-0 flex-1">
-          <p className="text-[12.5px] font-semibold text-neutral-600">
-            ¿Terminaste de subir?
-          </p>
-          <p className="text-[11.5px] text-neutral-500 leading-relaxed">
-            Cuando subas tus documentos, avísanos desde aquí y los revisamos.
-          </p>
+      <div className="pnl-aviso pnl-aviso-arriba pnl-revision mb-3" data-tono="neutro">
+        <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="send" /></span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="pnl-aviso-texto min-w-0 flex-1">
+            <p><b>¿Terminaste de subir?</b></p>
+            <p className="pnl-aviso-detalle">
+              Cuando subas tus documentos, avísanos desde aquí y los revisamos.
+            </p>
+          </div>
+          <button type="button" disabled className="pnl-btn shrink-0" data-talla="s">
+            Pedir revisión
+          </button>
         </div>
-        <button type="button" disabled
-          className="shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg
-            border border-neutral-300 text-neutral-400 cursor-not-allowed">
-          Pedir revisión
-        </button>
       </div>
     );
   }
 
   if (yaPedida) {
     return (
-      <div className="rounded-xl border border-sky-200 bg-sky-50/50 px-3.5 py-3 mb-3 flex gap-2.5">
-        <span className="shrink-0 text-[14px]">👀</span>
-        <p className="text-[12.5px] text-sky-900 leading-relaxed">
+      <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="info">
+        <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="eye" /></span>
+        <p className="pnl-aviso-texto">
           <b>Tu asesor ya sabe que has subido documentos.</b> Los está revisando y te dirá
           si están correctos o qué hay que corregir. Si subes algo más, vuelve a avisarle.
         </p>
@@ -205,44 +202,40 @@ function PedirRevision({ id, docs, exp, onHecho }) {
   }
 
   return (
-    <div className="rounded-xl border border-[#1D6A4A]/30 bg-[#E8F5EE]/50 px-3.5 py-3 mb-3">
+    <div className="pnl-aviso pnl-aviso-arriba pnl-revision mb-3" data-tono="info">
+      <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="send" /></span>
       {!abierto ? (
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="min-w-0 flex-1">
-            <p className="text-[12.5px] font-semibold text-[#14532d]">
-              ¿Has terminado de subir?
-            </p>
-            <p className="text-[11.5px] text-neutral-600 leading-relaxed">
-              Avísanos y revisamos tus {porRevisar || subidos} documento(s).
+          <div className="pnl-aviso-texto min-w-0 flex-1">
+            <p><b>¿Has terminado de subir?</b></p>
+            <p className="pnl-aviso-detalle">
+              Avísanos y revisamos {(porRevisar || subidos) === 1 ? "tu documento" : `tus ${porRevisar || subidos} documentos`}.
             </p>
           </div>
           <button type="button" onClick={() => setAbierto(true)}
-            className="shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg
-              bg-[#1D6A4A] text-white hover:opacity-90">
+            className="pnl-btn-primario shrink-0" data-talla="s">
             Pedir revisión
           </button>
         </div>
       ) : (
-        <div className="space-y-2">
-          <p className="text-[12.5px] font-semibold text-[#14532d]">
-            Avisar a tu asesor
+        <div className="flex flex-col gap-2">
+          <p className="pnl-aviso-texto">
+            <b>Avisar a tu asesor</b>
           </p>
           <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)}
             placeholder="¿Algo que debamos saber? (opcional)"
-            className="w-full text-[12.5px] border border-neutral-300 rounded-lg px-3 py-2
-              focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]" />
+            className="pnl-campo-control pnl-revision-nota" />
           <div className="flex items-center gap-2">
             <button type="button" onClick={pedir} disabled={enviando}
-              className="text-[12.5px] font-semibold px-4 py-2 rounded-lg bg-[#1D6A4A]
-                text-white disabled:opacity-40 hover:opacity-90">
+              className="pnl-btn-primario" data-talla="s">
               {enviando ? "Avisando…" : "Enviar"}
             </button>
             <button type="button" onClick={() => setAbierto(false)}
-              className="text-[12px] text-neutral-500 hover:text-neutral-800">Cancelar</button>
+              className="pnl-btn-texto" data-talla="s">Cancelar</button>
           </div>
         </div>
       )}
-      {msg && <p className="text-[11.5px] text-neutral-600 mt-2">{msg}</p>}
+      {msg && <p className="pnl-aviso-detalle">{msg}</p>}
     </div>
   );
 }
@@ -263,15 +256,21 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
   const [guardando, setGuardando] = useState(false);
   const [tocado, setTocado] = useState(false);
 
-  const cargar = useCallback(() => Promise.all([
-    apiGET(`/solicitudes/${id}/estancia`),
-    apiGET(`/solicitudes/${id}/estancia/documentos`),
-    apiGET(`/solicitudes/${id}/estancia/extranjeria`),
-  ]).then(([a, b, c]) => {
-    if (a?.ok) setExp(a.expediente);
-    if (b?.ok) setDocs(b);
-    if (c?.ok) setExt(c.registros || []);
-  }), [id]);
+  // Sin esto, si la primera carga fallaba el esqueleto se quedaba para siempre.
+  const [errorCarga, setErrorCarga] = useState("");
+  const cargar = useCallback(() => {
+    setErrorCarga("");
+    return Promise.all([
+      apiGET(`/solicitudes/${id}/estancia`),
+      apiGET(`/solicitudes/${id}/estancia/documentos`),
+      apiGET(`/solicitudes/${id}/estancia/extranjeria`),
+    ]).then(([a, b, c]) => {
+      if (a?.ok) setExp(a.expediente);
+      else setErrorCarga(a?.error || "No se pudo cargar tu expediente.");
+      if (b?.ok) setDocs(b);
+      if (c?.ok) setExt(c.registros || []);
+    }).catch((e) => setErrorCarga(e?.message || "No se pudo cargar tu expediente."));
+  }, [id]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
@@ -355,10 +354,18 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
     () => Object.entries(docs?.ranuras || {}).filter(([, d]) => d.de === "asesor"), [docs]);
 
   if (!exp) {
-    return <p className="text-[13px] text-neutral-400 py-10 text-center">Cargando tu expediente…</p>;
+    return (
+      <div className="flex-1 min-h-0 overflow-auto">
+        <div className="max-w-4xl mx-auto">
+          {errorCarga
+            ? <ErrorCarga mensaje={errorCarga} onReintentar={cargar} />
+            : <EsqueletoExpediente variante="bloques" />}
+        </div>
+      </div>
+    );
   }
 
-  const g = "grid grid-cols-1 sm:grid-cols-2 gap-3";
+  const g = "grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4";
   const abrir = (n) => setPaso(paso === n ? 0 : n);
 
   const PASOS = {
@@ -379,17 +386,15 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
   return (
     <div className="flex-1 min-h-0 overflow-auto">
-      <div className="max-w-4xl mx-auto p-4 sm:p-5 space-y-3">
+      <div className="max-w-4xl mx-auto space-y-4 pb-6">
         <button type="button" onClick={onVolver}
           className="pnl-sin-volver text-[12px] font-semibold text-neutral-500 hover:text-primary">
-          ← Mis servicios
+          <IconoPaso nombre="arrowLeft" /> Mis servicios
         </button>
 
         <div className="pnl-solo-grande">
-          <p className="text-[10px] font-bold uppercase tracking-[.2em] font-mono text-[#1D6A4A]">
-            Estancia por estudios
-          </p>
-          <h1 className="font-serif text-xl font-bold text-primary">Tu expediente</h1>
+          <p className="pnl-eyebrow"><span className="punto" />Estancia por estudios</p>
+          <h1 className="pnl-display pnl-exp-titulo">Tu expediente</h1>
         </div>
 
         <EstadoProceso revision={rev} />
@@ -432,19 +437,17 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
             </p>
           </AyudaPlegable>
 
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="flex-1 h-2 rounded-full bg-neutral-100 overflow-hidden">
-              <div className="h-full bg-[#1D6A4A] transition-all"
-                style={{ width: `${totalCampos ? (hechos / totalCampos) * 100 : 0}%` }} />
-            </div>
-            <span className="text-[11.5px] font-bold text-neutral-500 shrink-0">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="pnl-barra flex-1"
+              style={{ "--p": totalCampos ? (hechos / totalCampos) * 100 : 0 }}><i /></div>
+            <span className="pnl-avance-cifra">
               {datosCompletos ? "listo" : `${hechos}/${totalCampos}`}
             </span>
           </div>
 
           <Guardado guardando={guardando} tocado={tocado} completo={datosCompletos} arriba />
 
-          <div className="space-y-2">
+          <div className="pnl-pasos">
             <Paso numero="1" titulo="Quién eres" subtitulo="Como figura en tu pasaporte"
               faltan={cuenta(PASOS[1])} abierto={paso === 1} onToggle={() => abrir(1)} onSiguiente={() => setPaso(2)}>
               <div className={g}>
@@ -529,15 +532,15 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                   falta={falta("Fin del programa")}
                   valor={exp.prog_fin} onChange={set("prog_fin")} />
               </div>
-              <label className="flex items-start gap-2 mb-3 text-[12.5px] text-neutral-700">
-                <input type="checkbox" className="mt-0.5 accent-[#1D6A4A]"
+              <label className="pnl-casilla-fila pnl-casilla-larga mb-3">
+                <input type="checkbox"
                   checked={exp.viaje_schengen_180 === true}
                   onChange={(e) => set("viaje_schengen_180")(e.target.checked)} />
                 <span>
                   He viajado al espacio Schengen en los últimos 180 días
-                  <span className="block text-[11px] text-neutral-400">
+                  <small>
                     Si es así, tus 90 días no empiezan de cero.
-                  </span>
+                  </small>
                 </span>
               </label>
               <Plazos plazos={rev?.plazos} />
@@ -573,8 +576,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                   valor={exp.prog_codigo} onChange={set("prog_codigo")} />
               </div>
 
-              <p className="text-[10px] font-bold uppercase tracking-widest font-mono
-                text-neutral-400 mt-4 mb-2">Dónde está tu universidad</p>
+              <p className="pnl-eyebrow pnl-campos-grupo">Dónde está tu universidad</p>
               <div className={g}>
                 <Campo label="Dirección" valor={exp.uni_direccion} onChange={set("uni_direccion")} />
                 <Campo label="Localidad" valor={exp.uni_localidad} onChange={set("uni_localidad")} />
@@ -593,16 +595,15 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
               subtitulo="Tiene que ser la misma provincia donde estudias"
               faltan={usaUni ? 0 : cuenta(PASOS[5])} abierto={paso === 5} onToggle={() => abrir(5)}>
 
-              <label className="flex items-start gap-2 mb-3 text-[12.5px] text-neutral-700
-                rounded-xl border border-primary/20 bg-[#EEF2F8] px-3 py-2.5 cursor-pointer">
-                <input type="checkbox" className="mt-0.5 accent-[#1D6A4A]"
+              <label className="pnl-casilla-fila pnl-casilla-larga pnl-casilla-caja mb-3">
+                <input type="checkbox"
                   checked={usaUni} onChange={(e) => set("dom_usa_universidad")(e.target.checked)} />
                 <span>
                   <b>Todavía no tengo dirección en España</b>
-                  <span className="block text-[11.5px] text-neutral-500 mt-0.5">
+                  <small>
                     Usaremos la de tu universidad. Lo que Extranjería mira es que la provincia
                     coincida, y así coincide.
-                  </span>
+                  </small>
                 </span>
               </label>
 
@@ -611,7 +612,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                   <Campo label="Calle" obligatorio falta={falta("Domicilio en España")}
                     ayuda="El nombre de la calle, sin número."
                     valor={exp.dom_direccion} onChange={set("dom_direccion")} />
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-4">
                     <Campo label="Número" valor={exp.dom_numero} onChange={set("dom_numero")} />
                     <Campo label="Piso / puerta" valor={exp.dom_piso} onChange={set("dom_piso")} />
                   </div>
@@ -625,12 +626,11 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
                 </div>
               )}
 
-              <p className="text-[10px] font-bold uppercase tracking-widest font-mono
-                text-neutral-400 mt-4 mb-2">Algo más que debamos saber</p>
+              <p className="pnl-eyebrow pnl-campos-grupo">Algo más que debamos saber</p>
               <textarea rows={3} value={exp.notas ?? ""} onChange={(e) => set("notas")(e.target.value)}
                 placeholder="Un NIE anterior, una estancia previa, cualquier cosa…"
-                className="w-full text-[13px] border border-neutral-300 rounded-lg px-3 py-2
-                  focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]" />
+                aria-label="Algo más que debamos saber"
+                className="pnl-campo-control" />
             </Paso>
           </div>
 
@@ -641,15 +641,14 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
         <Bloque numero="2" titulo="Guía del proceso"
           subtitulo="Qué se pide, en qué orden y con qué plazos"
           abierto={bloque === 2} onToggle={() => setBloque(bloque === 2 ? 0 : 2)}>
-          <p className="text-[13px] text-neutral-700 leading-relaxed mb-3">
+          <p className="pnl-bloque-texto">
             Recuerda que viajas <b>como turista</b> y tramitas desde España. La guía lleva lo
             que necesitas en frontera y lo que hay que reunir después.
           </p>
           <button type="button" onClick={() => onIrAGuia?.("estancia")}
-            className="inline-flex items-center gap-2 text-[13px] font-semibold px-4 py-2.5
-              rounded-lg text-white hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #013446 0%, #013446 100%)" }}>
-            📖 Abrir la guía de estancia por estudios
+            className="pnl-btn-primario">
+            <Icono nombre="libro" size={16} />
+            Abrir la guía de estancia por estudios
           </button>
         </Bloque>
 
@@ -663,25 +662,27 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
           {/* Aviso, no candado: puede tener el pasaporte a mano y la carta de
               admisión no, y bloquearle sólo haría que lo mande por WhatsApp. */}
           {!datosCompletos && (
-            <div className="rounded-xl bg-amber-50 border border-amber-300 px-3.5 py-3 mb-3 flex gap-2.5">
-              <span className="shrink-0 text-[14px]">📋</span>
-              <div>
-                <p className="text-[12.5px] text-amber-900 leading-relaxed">
+            <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="aviso">
+              <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="list" /></span>
+              <div className="pnl-aviso-texto">
+                <p>
                   Puedes ir subiendo documentos, pero <b>no podremos presentar tu expediente
                   hasta que completes tus datos</b>: se copian al formulario oficial.
                 </p>
                 <button type="button" onClick={() => { setBloque(1); setPaso(1); }}
-                  className="text-[12px] font-semibold text-primary hover:underline mt-1">
-                  Ir a completar mis datos →
+                  className="pnl-btn-texto pnl-aviso-enlace" data-talla="s">
+                  Ir a completar mis datos
+                  <IconoPaso nombre="arrowRight" />
                 </button>
               </div>
             </div>
           )}
 
           {docs?.observados?.length > 0 && (
-            <div className="rounded-xl bg-red-50 border border-red-300 px-3.5 py-2.5 mb-3">
-              <p className="text-[12.5px] text-red-800 leading-relaxed">
-                Hay {docs.observados.length} documento(s) que hay que corregir. Te decimos
+            <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="alto">
+              <span className="pnl-aviso-icono" aria-hidden="true"><IconoAlerta /></span>
+              <p className="pnl-aviso-texto">
+                Hay {docs.observados.length} {docs.observados.length === 1 ? "documento" : "documentos"} que hay que corregir. Te decimos
                 exactamente qué falla en cada uno.
               </p>
             </div>
@@ -693,16 +694,15 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
           <PedirRevision id={id} docs={docs} exp={exp} onHecho={cargar} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+          <div className="ex-docs">
             {ranurasCliente.map(([clave, def]) => (
               <TarjetaDocumento key={clave} base={`/solicitudes/${id}/estancia`}
                 clave={clave} def={def} onCambio={cargar} />
             ))}
           </div>
 
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono
-            text-neutral-400 mb-2">Los preparamos nosotros</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <p className="pnl-eyebrow pnl-docs-grupo">Los preparamos nosotros</p>
+          <div className="ex-docs">
             {ranurasAsesor.map(([clave, def]) => (
               <TarjetaDocumento key={clave} base={`/solicitudes/${id}/estancia`}
                 clave={clave} def={def} onCambio={cargar} />
@@ -725,40 +725,39 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
         {/* ── 5 · Extranjería ── */}
         <Bloque numero="5" titulo="Extranjería"
-          subtitulo={ext.length ? `${ext.length} comunicación(es)` : "Sin novedades"}
+          subtitulo={ext.length ? `${ext.length} ${ext.length === 1 ? "comunicación" : "comunicaciones"}` : "Sin novedades"}
           abierto={bloque === 5} onToggle={() => setBloque(bloque === 5 ? 0 : 5)}>
           <SeguimientoExpediente exp={exp} />
 
           {ext.length === 0 ? (
-            <p className="text-[13px] text-neutral-400">
-              Cuando Extranjería nos comunique algo, aparecerá aquí y te avisaremos por correo.
-            </p>
+            <div className="pnl-vacio-suave">
+              <span className="pnl-vacio-suave-icono" aria-hidden="true"><IconoPaso nombre="mail" /></span>
+              <p>
+                Cuando Extranjería nos comunique algo, aparecerá aquí y te avisaremos por correo.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2.5">
               {ext.map((r) => (
-                <div key={r.id_registro} className="rounded-xl border border-neutral-200 px-3.5 py-3">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5
-                      rounded border ${
-                      r.tipo === "RESOLUCION" ? TONOS.verde
-                        : r.tipo === "REQUERIMIENTO" ? TONOS.rojo : TONOS.ambar
-                    }`}>{r.tipo_label}</span>
-                    {r.fecha && <span className="text-[11px] text-neutral-400">{r.fecha}</span>}
+                <div key={r.id_registro} className="pnl-registro">
+                  <div className="pnl-registro-cab">
+                    <span className="pnl-chip" data-talla="sm" data-tono={TONO_REGISTRO[r.tipo] || "aviso"}>{r.tipo_label}</span>
+                    {r.fecha && <span className="pnl-registro-fecha">{r.fecha}</span>}
                   </div>
-                  <p className="text-[13.5px] font-semibold text-neutral-800 mt-1">{r.titulo}</p>
+                  <p className="pnl-registro-titulo">{r.titulo}</p>
                   {r.detalle && (
-                    <p className="text-[12.5px] text-neutral-600 leading-relaxed mt-1">{r.detalle}</p>
+                    <p className="pnl-registro-detalle">{r.detalle}</p>
                   )}
                   {r.plazo && (
-                    <p className="text-[12px] font-semibold text-red-700 mt-1">
+                    <p className="pnl-registro-plazo">
                       Plazo para responder: {r.plazo}
                     </p>
                   )}
                   {r.tiene_archivo && (
                     <button type="button" onClick={() => abrirArchivo(`/solicitudes/${id}/estancia/extranjeria/${r.id_registro}/archivo`, {})}
-                      className="inline-block text-[11.5px] font-semibold text-primary-light
-                        hover:underline mt-1.5">
-                      📄 Ver el documento
+                      className="pnl-btn pnl-registro-boton" data-talla="s">
+                      <IconoPaso nombre="fileText" />
+                      Ver el documento
                     </button>
                   )}
                 </div>

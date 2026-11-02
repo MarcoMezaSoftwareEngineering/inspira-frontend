@@ -23,7 +23,7 @@ export default function SidebarItem({ label, active, onClick, icono, badge = 0, 
       aria-current={active ? "page" : undefined}
       className={`pnl-item${active ? " activo" : ""}${sub ? " pnl-sub" : ""}`}
     >
-      {icono && <Icono nombre={icono} size={sub ? 14 : 17} />}
+      {icono && <Icono nombre={icono} size={sub ? 16 : 18} />}
       <span className="pnl-item-texto">{label}</span>
       {badge > 0 && <span className="pnl-badge" aria-label={`${badge} pendientes`}>{badge}</span>}
     </button>

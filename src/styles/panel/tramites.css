@@ -1,0 +1,1048 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO · hoja de bloque (25/10/2026)
+   Dueño: B3b · Expediente: estancia, PAC, modificatoria y piezas comunes.
+   Ámbito: riel y bloques de estancia/PAC/modificatoria, tarjeta de documento, campos, acompañantes, ¿Qué me falta?, Novedades, línea de tiempo, esqueletos del expediente y visor de archivos.
+
+   Reglas (ver base.css):
+   · Todo selector va con .pnl delante: esta hoja pisa a las de arriba
+     (panel.css, panel-app.css, panel-*.css, pasos*.css), que no se editan.
+   · Colores: variables de .pnl (panel.css). Un hex solo como reserva antes
+     de un color-mix() o para el blanco; ningún color nuevo fuera de los tokens.
+   · Clases nuevas con prefijo pnl-. Ninguna pnl- declara display en un nodo
+     que se oculte con una utilidad de Tailwind (ese ocultar va aquí con @media)
+     ni position en uno con fixed/sticky/absolute de Tailwind.
+   · Solo se animan transform y opacity.
+   · Ojo con los márgenes: estas hojas no van en capa y ganan a las utilidades
+     de Tailwind. Si una primitiva de base.css pone margin: 0 (.pnl-eyebrow,
+     .pnl-guardado, .pnl-campo-etiqueta…), el hueco se da aquí con una clase,
+     no con mt-/mb- en el JSX, que perdería.
+   ========================================================================== */
+
+
+/* ── ESTADO DEL EXPEDIENTE (Bloques.jsx · EstadoProceso) ─────────────────
+   Pisa panel-app.css:513-527. La etapa en Merriweather con su punto de
+   color; debajo, el riel como trayecto: verde = hecho, petróleo→cielo = en
+   curso con el punto sol al final («ahora»), punteado = lo que falta. */
+.pnl .pnl-estado {
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  padding: var(--pad-tarjeta);
+  box-shadow: var(--sombra-1);
+}
+.pnl .pnl-estado-eyebrow { margin: 0 0 10px; }
+
+.pnl .pnl-estado-etapa:not([data-tono]) { --tono: var(--neutro); }
+.pnl .pnl-estado-etapa {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0; border-radius: 0;
+  background: none;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.25; letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl .pnl-estado-etapa::before {
+  content: "";
+  width: 10px; height: 10px; flex: 0 0 auto;
+  /* Centrado con la primera línea aunque la etapa ocupe dos. */
+  margin-top: calc((1.25em - 10px) / 2);
+  border-radius: 999px;
+  background: var(--tono);
+  animation: pnlLatePunto 2s ease-in-out 3;
+}
+.pnl .pnl-estado-texto {
+  margin: 8px 0 16px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.pnl .pnl-estado-riel { display: flex; gap: 4px; }
+.pnl .pnl-estado-tramo { position: relative; flex: 1 1 0; min-width: 0; }
+.pnl .pnl-estado-tramo i {
+  display: block; height: 6px;
+  border-radius: var(--radio-pildora);
+  /* Lo que falta: guiones de --decor, centrados, sobre la pista. */
+  background:
+    repeating-linear-gradient(90deg, var(--decor) 0 4px, transparent 4px 8px) center / 100% 2px no-repeat,
+    var(--pista);
+}
+.pnl .pnl-estado-tramo[data-e='pasada'] i { background: var(--green); }
+.pnl .pnl-estado-tramo[data-e='actual'] i { background: linear-gradient(90deg, var(--primary-2), var(--sky-2)); }
+/* El brillo del tramo actual pasa una sola vez. */
+.pnl .pnl-estado-tramo[data-e='actual'] i::after { animation-iteration-count: 1; }
+/* «Ahora»: el punto sol de 8 px al final del tramo en curso. */
+.pnl .pnl-estado-tramo[data-e='actual']::after {
+  content: "";
+  position: absolute; top: -1px; right: 0;
+  width: 8px; height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px #fff;
+}
+.pnl .pnl-estado-tramo small {
+  display: block;
+  margin-top: 8px;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.3;
+  color: var(--ink-2);
+  white-space: normal; overflow: visible; text-overflow: clip;
+  padding-right: 6px;
+  -webkit-hyphens: manual; hyphens: manual;
+  overflow-wrap: break-word;
+}
+.pnl .pnl-estado-tramo[data-e='actual'] small { font-weight: 700; color: var(--primary); }
+/* En el teléfono los rótulos no caben («Comple… Subien…»): se quedan para
+   el lector de pantalla y el riel va solo; la etapa ya está arriba. */
+@media (max-width: 519.98px) {
+  .pnl .pnl-estado-tramo small {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: 0; padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+
+/* ── BLOQUE, nivel 1 (Bloques.jsx · Bloque) ── pisa panel-app.css:471-495 */
+.pnl .pnl-bloque {
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+  transition: border-color var(--d-corta) var(--salida), box-shadow var(--d-media) var(--salida);
+}
+.pnl .pnl-bloque[data-abierto='1'] {
+  border-color: rgba(2, 80, 107, .25);
+  border-color: color-mix(in srgb, var(--primary-2) 25%, transparent);
+  box-shadow: var(--sombra-2);
+}
+.pnl .pnl-bloque-cab {
+  min-height: 64px;
+  padding: 14px 18px;
+  gap: 12px;
+}
+.pnl .pnl-bloque-cab:active { background: var(--fondo-suave); }
+.pnl .pnl-bloque-cab:focus-visible {
+  outline: 2px solid var(--foco-anillo); outline-offset: -2px;
+  border-radius: var(--radio-l);
+}
+.pnl .pnl-bloque-num {
+  width: 36px; height: 36px;
+  border-radius: var(--radio-s);
+  background: var(--primary);
+  font-family: var(--f-display); font-size: 15px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.pnl .pnl-bloque[data-abierto='1'] .pnl-bloque-num { transform: none; }
+.pnl .pnl-bloque-txt b {
+  font-size: 16px; font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-bloque-txt span {
+  margin-top: 2px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.4;
+  color: var(--ink-2);
+}
+.pnl .pnl-bloque-chev {
+  width: 20px; height: 20px;
+  color: var(--trazo);
+  transition: transform var(--d-corta) var(--salida), color var(--d-corta) var(--salida);
+}
+.pnl .pnl-bloque[data-abierto='1'] > .pnl-bloque-cab .pnl-bloque-chev {
+  transform: rotate(180deg);
+  color: var(--primary-2);
+}
+.pnl .pnl-bloque-cuerpo {
+  padding: 16px 18px 20px;
+  border-top: 1px solid var(--line-suave);
+  animation: pnlDespliega var(--d-media) var(--salida) both;
+}
+
+
+/* ── PASO, nivel 2 (Bloques.jsx · Paso) ── pisa panel-app.css:497-510
+   Sin caja dentro de caja: filas con divisor, una casilla redonda (número o
+   check en verde) y su propio chevrón (.pnl-paso-chev), que ya no hereda el
+   giro del bloque abierto. */
+.pnl .pnl-paso {
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-suave);
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+.pnl .pnl-paso:last-child { border-bottom: 0; }
+.pnl .pnl-paso[data-ok='1'],
+.pnl .pnl-paso[data-abierto='1'] { border-color: var(--line-suave); }
+.pnl .pnl-paso-cab {
+  width: calc(100% + 16px);
+  min-height: 56px;
+  margin: 0 -8px;
+  padding: 12px 8px;
+  gap: 12px;
+  border-radius: var(--radio-s);
+}
+.pnl .pnl-paso-cab:active { background: var(--fondo-suave); }
+.pnl .pnl-paso-cab:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: -2px; }
+.pnl .pnl-paso-num {
+  width: 28px; height: 28px;
+  border-radius: var(--radio-pildora);
+  border: 2px solid var(--trazo);
+  background: #fff;
+  font-size: var(--fs-meta); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  transition: background-color var(--d-corta) var(--salida), border-color var(--d-corta) var(--salida), color var(--d-corta) var(--salida);
+}
+.pnl .pnl-paso[data-abierto='1'][data-ok='0'] .pnl-paso-num { border-color: var(--primary-2); color: var(--primary); }
+.pnl .pnl-paso[data-ok='1'] .pnl-paso-num {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+.pnl .pnl-paso-txt b {
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-paso-txt span {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.4;
+  color: var(--ink-2);
+}
+.pnl .pnl-paso-faltan { flex: 0 0 auto; }
+.pnl .pnl-paso-chev {
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  color: var(--trazo);
+  transition: transform var(--d-corta) var(--salida), color var(--d-corta) var(--salida);
+}
+.pnl .pnl-paso[data-abierto='1'] > .pnl-paso-cab .pnl-paso-chev {
+  transform: rotate(180deg);
+  color: var(--primary-2);
+}
+.pnl .pnl-paso-cuerpo {
+  padding: 4px 0 16px;
+  border-top: 0;
+  animation: pnlDespliega var(--d-media) var(--salida) both;
+}
+@media (min-width: 520px) {
+  .pnl .pnl-paso-cuerpo { padding-left: 40px; }
+}
+.pnl .pnl-paso-pie {
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-suave);
+}
+.pnl .pnl-paso-pie small {
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  color: var(--muted);
+}
+
+
+/* ── CAMPOS (campos.jsx y la copia de modificatoria) ─────────────────────
+   La familia .pnl-campo es de base.css; aquí la rejilla del bloque, la ⓘ
+   con su burbuja y el «Guardado · se guarda solo». */
+.pnl .pnl-campo-etiqueta label { cursor: pointer; }
+.pnl .pnl-burbuja { display: block; text-align: left; }
+.pnl .pnl-burbuja-cerrar {
+  position: relative;
+  display: block;
+  margin-top: 6px;
+  padding: 2px 0;
+  border: 0; background: none;
+  font: 600 var(--fs-meta)/1.3 var(--f-texto);
+  color: rgba(255, 255, 255, .85);
+  text-decoration: underline; text-underline-offset: 3px;
+  cursor: pointer;
+}
+.pnl .pnl-burbuja-cerrar::before { content: ""; position: absolute; inset: -12px -16px; }
+.pnl .pnl-burbuja-cerrar:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
+
+/* El título de un grupo de campos («Dónde está tu universidad»): eyebrow con
+   24 de aire arriba. */
+.pnl .pnl-eyebrow.pnl-campos-grupo { margin: 24px 0 12px; }
+
+.pnl .pnl-guardado.pnl-guardado-arriba { display: flex; margin: 0 0 14px; }
+.pnl .pnl-guardado.pnl-guardado-abajo { display: flex; margin: 16px 0 0; }
+.pnl .pnl-guardado-solo { font-weight: 500; color: var(--muted); }
+/* La explicación de la ⓘ en modificatoria va en línea, bajo la etiqueta. */
+.pnl .pnl-ayuda-campo {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: var(--radio-s);
+  background: var(--info-soft);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--info-ink);
+}
+.pnl .pnl-info[aria-expanded='true'] { background: var(--primary); border-color: var(--primary); color: #fff; }
+/* Caja suave para una pregunta con su explicación (el seguro del PAC). */
+.pnl .pnl-caja-suave {
+  display: grid; gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+  background: var(--fondo-suave);
+}
+.pnl .pnl-caja-suave-texto {
+  margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+.pnl .pnl-guardado-punto {
+  width: 6px; height: 6px; flex: 0 0 auto;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+/* Casilla con su explicación debajo (Schengen, «Todavía no tengo
+   dirección»…): la fila entera es el objetivo táctil. */
+.pnl .pnl-casilla-fila.pnl-casilla-larga { align-items: flex-start; padding: 10px 0; }
+.pnl .pnl-casilla-larga input[type='checkbox'] { margin-top: 1px; }
+.pnl .pnl-casilla-larga small {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.45;
+  color: var(--muted);
+}
+/* La misma, en caja (sobre papel suave). */
+.pnl .pnl-casilla-caja {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+  background: var(--fondo-suave);
+}
+.pnl .pnl-casilla-caja small { color: var(--ink-2); }
+
+
+/* ── AVISOS EN LÍNEA ─────────────────────────────────────────────────────
+   .pnl-aviso es de base.css. Los del expediente llevan texto de varias
+   líneas: el icono arriba y el detalle en tinta. */
+.pnl .pnl-aviso.pnl-aviso-arriba { align-items: start; }
+.pnl .pnl-aviso-detalle {
+  margin: 4px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .pnl-aviso-detalle b { color: var(--tono-ink); }
+.pnl .pnl-aviso .pnl-aviso-enlace { margin-top: 6px; margin-left: -8px; }
+
+
+/* ── AYUDA PLEGABLE (AyudaPlegable.jsx y «Cómo escanear») ────────────────
+   Pisa panel-documentos.css:99-155. El tono por data-tono (info, aviso;
+   importante = aviso con el filo sol); la cabecera de 44 y .pnl-chev. */
+.pnl .pnl-ayuda:not([data-tono]) { --tono: var(--info); --tono-soft: var(--info-soft); --tono-ink: var(--info-ink); }
+.pnl .pnl-ayuda {
+  margin: 0 0 12px;
+  border-radius: var(--radio-m);
+  background: var(--tono-soft);
+  border: 1px solid rgba(78, 158, 232, .3);
+  border: 1px solid color-mix(in srgb, var(--tono) 30%, transparent);
+  color: var(--tono-ink);
+}
+.pnl .pnl-ayuda[data-tono='importante'] { border-left: 3px solid var(--accent); }
+.pnl .pnl-ayuda-cab {
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+.pnl .pnl-ayuda-cab:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-ayuda .pnl-ayuda-ico,
+.pnl .pnl-ayuda[data-tono] .pnl-ayuda-ico {
+  width: 28px; height: 28px;
+  margin-top: 0;
+  border-radius: 9px;
+  background: rgba(78, 158, 232, .16);
+  background: color-mix(in srgb, var(--tono) 16%, var(--tono-soft));
+  font-size: var(--fs-meta); font-weight: 800;
+  color: var(--tono-ink);
+}
+.pnl .pnl-ayuda-ico svg { width: 16px; height: 16px; }
+.pnl .pnl-ayuda-titulo {
+  font-size: var(--fs-eyebrow); font-weight: 700; letter-spacing: var(--tracking-eyebrow);
+  opacity: 1;
+  color: var(--tono-ink);
+}
+.pnl .pnl-ayuda-resumen {
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45;
+  color: var(--tono-ink);
+}
+.pnl .pnl-ayuda-mas {
+  margin-top: 0;
+  font-size: var(--fs-meta); font-weight: 600;
+  opacity: 1;
+  color: var(--tono-ink);
+}
+.pnl .pnl-ayuda .pnl-chev,
+.pnl .pnl-ayuda .pnl-ayuda-chev { flex: 0 0 auto; margin-top: 0; opacity: 1; color: var(--tono-ink); }
+.pnl .pnl-ayuda[data-abierta='1'] .pnl-ayuda-chev { transform: rotate(180deg); }
+.pnl .pnl-ayuda-cuerpo {
+  margin: 0;
+  padding: 0 14px 14px 50px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.6;
+  color: var(--ink);
+}
+@media (max-width: 480px) {
+  .pnl .pnl-ayuda-cuerpo { padding-left: 14px; }
+}
+
+
+/* ── MARCO DE ESTANCIA, PAC Y MODIFICATORIA ──────────────────────────────
+   La cabecera de escritorio (.pnl-solo-grande, oculta en el teléfono por
+   panel-app.css) y los textos sueltos dentro de un bloque. */
+.pnl .pnl-exp-titulo { margin-top: 6px; font-size: 24px; }
+.pnl .pnl-pasos { margin-top: 2px; }
+.pnl .pnl-bloque-texto {
+  margin: 0 0 14px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.6;
+  color: var(--ink);
+}
+.pnl .pnl-bloque-lista {
+  margin: 0; padding-left: 20px;
+  display: grid; gap: 8px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.6;
+  color: var(--ink);
+}
+.pnl .pnl-bloque-lista b { color: var(--primary); }
+.pnl .pnl-avance-cifra {
+  flex: 0 0 auto;
+  font-size: var(--fs-meta); font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ok-ink);
+}
+/* Dentro de un bloque el aviso lleva frases enteras: el cuerpo en 500 y lo
+   que importa en <b>. */
+.pnl .pnl-bloque-cuerpo .pnl-aviso-texto,
+.pnl .pnl-aviso.pnl-aviso-arriba .pnl-aviso-texto { font-weight: 500; }
+.pnl .pnl-bloque-cuerpo .pnl-aviso-texto b,
+.pnl .pnl-aviso.pnl-aviso-arriba .pnl-aviso-texto b { font-weight: 700; }
+.pnl .pnl-aviso-texto > p + p { margin-top: 2px; }
+/* Pedir revisión: el contenido ocupa las dos columnas tras el icono. */
+.pnl .pnl-revision > :not(.pnl-aviso-icono) { grid-column: 2 / -1; min-width: 0; }
+.pnl .pnl-revision-nota.pnl-campo-control { min-height: 76px; }
+/* Título de grupo de documentos («Los preparamos nosotros»). */
+.pnl .pnl-eyebrow.pnl-docs-grupo { margin: 22px 0 2px; }
+.pnl .pnl-docs-bloque + .pnl-docs-bloque { margin-top: 6px; }
+.pnl .pnl-docs-grupo-nota {
+  margin: 6px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .pnl-vacio-suave .pnl-vacio-suave-icono svg { width: 22px; height: 22px; }
+
+
+/* ── PLAZOS (CajaPlazo de estancia y PAC) ────────────────────────────────
+   Caja suave del tono: ok si va a tiempo, alto si ya pasó. */
+.pnl .pnl-plazo-caja:not([data-tono]) { --tono: var(--neutro); --tono-soft: var(--neutro-soft); --tono-ink: var(--neutro-ink); }
+.pnl .pnl-plazo-caja {
+  padding: 14px 16px;
+  border-radius: var(--radio-m);
+  background: var(--tono-soft);
+  border: 1px solid rgba(29, 106, 74, .3);
+  border: 1px solid color-mix(in srgb, var(--tono) 30%, transparent);
+}
+.pnl .pnl-plazo-caja-titulo {
+  margin: 0;
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.3;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--tono-ink);
+}
+.pnl .pnl-plazo-caja-fecha {
+  margin: 6px 0 0;
+  font-family: var(--f-display); font-weight: 700; font-size: 22px; line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: var(--tono-ink);
+}
+.pnl .pnl-plazo-caja-pie {
+  margin: 4px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+.pnl .pnl-plazo-caja-nota {
+  margin: 6px 0 0;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+
+
+/* ── FICHA DE SEGUIMIENTO («Para consultar tu expediente») ───────────────
+   Sobre bruma: la clave en --ink-2 (--muted ahí daría 4,24:1). */
+.pnl .pnl-ficha {
+  margin: 0 0 12px;
+  padding: 14px 16px 10px;
+  border-radius: var(--radio-m);
+  background: var(--info-soft);
+}
+.pnl .pnl-ficha .pnl-eyebrow { margin-bottom: 6px; }
+.pnl .pnl-ficha-tabla { width: 100%; border-collapse: collapse; }
+.pnl .pnl-ficha-tabla tr + tr td { border-top: 1px solid rgba(78, 158, 232, .2); border-top: 1px solid color-mix(in srgb, var(--info) 20%, transparent); }
+.pnl .pnl-ficha-tabla td { height: 40px; padding: 9px 0; vertical-align: baseline; }
+.pnl .pnl-ficha-tabla td.pnl-ficha-k { padding-right: 12px; }
+.pnl .pnl-ficha-k {
+  width: 45%;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.35;
+  color: var(--ink-2);
+}
+.pnl .pnl-ficha-v {
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+  -webkit-user-select: all; user-select: all;
+  overflow-wrap: anywhere;
+}
+.pnl .pnl-ficha-vacio {
+  margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .pnl-ficha-enlace { margin: 6px 0 0 -8px; text-align: left; }
+.pnl .pnl-fichas { display: grid; gap: 10px; }
+.pnl .pnl-fichas .pnl-ficha { margin: 0; }
+
+
+/* ── LO QUE LLEGA DE EXTRANJERÍA / UGE / CONSULADO ───────────────────── */
+.pnl .pnl-registro {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+  background: #fff;
+}
+.pnl .pnl-registro-cab { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pnl .pnl-registro-fecha {
+  font-size: var(--fs-meta); font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.pnl .pnl-registro-titulo {
+  margin: 8px 0 0;
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-registro-detalle {
+  margin: 4px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+.pnl .pnl-registro-plazo {
+  margin: 6px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--alto-ink);
+}
+.pnl .pnl-registro-boton { margin-top: 10px; }
+
+
+/* ── FICHA DE DOCUMENTO DE ESTANCIA, PAC Y ACOMPAÑANTES ──────────────────
+   TarjetaDocumento.jsx y la copia de modificatoria toman la anatomía .ex-doc
+   de base.css (la del máster). Aquí, lo que solo tienen ellas. */
+.pnl .pnl-doc > .pnl-doc-estado,
+.pnl .pnl-doc > .pnl-doc-ejemplo,
+.pnl .pnl-doc > .pnl-doc-modelo-nota,
+.pnl .pnl-doc > .ex-doc-pliegues,
+.pnl .pnl-doc > .ex-subir { grid-column: 2; }
+.pnl .pnl-doc .ex-doc-fila { align-items: flex-start; flex-wrap: wrap; }
+/* Con un chip largo («Lo hacemos nosotros») el nombre no se parte en cuatro
+   líneas: el chip baja debajo cuando no le quedan 10rem al nombre. */
+.pnl .pnl-doc .ex-doc-fila .n { flex: 1 1 10rem; }
+.pnl .pnl-doc .ex-doc-fila .pnl-chip { flex: 0 0 auto; }
+.pnl .pnl-doc .ex-doc-desc { margin: 0; }
+.pnl .pnl-doc-estado {
+  margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--info-ink);
+}
+.pnl .pnl-doc-ejemplo { justify-self: start; margin-left: -8px; }
+.pnl .pnl-doc-modelo-nota {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radio-s);
+  background: var(--fondo-suave);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .pnl-doc .ex-doc-obs { display: flex; }
+.pnl .pnl-doc .ex-doc-obs b { display: block; margin-bottom: 2px; }
+.pnl .pnl-doc > .ex-subir { justify-content: center; text-align: center; cursor: pointer; }
+.pnl .pnl-doc > .ex-subir:disabled { opacity: .6; cursor: default; }
+.pnl .pnl-doc > .ex-subir:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-obligatorio { color: var(--aviso-ink); font-weight: 700; white-space: nowrap; }
+
+/* El nombre del archivo es el botón que lo abre en el visor: se ve como
+   enlace, no como píldora. Quien lo subió va al lado, en meta. */
+.pnl .ex-arch button.nm {
+  display: block;
+  flex: 1 1 8rem; min-width: 0;
+  min-height: 0;
+  padding: 4px 0;
+  border: 0; border-radius: 4px;
+  background: none;
+  font: 600 var(--fs-cuerpo-sm)/1.35 var(--f-texto);
+  color: var(--primary-2);
+  text-align: left;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  .pnl .ex-arch button.nm:hover:not(:disabled) { background: none; border-color: transparent; text-decoration-color: currentColor; }
+}
+.pnl .ex-arch button.nm::before { content: ""; position: absolute; inset: -9px 0; }
+.pnl .pnl-arch-quien {
+  flex: 0 1 auto; min-width: 0; max-width: 45%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--muted);
+}
+.pnl .ex-arch button[data-peligro] { text-transform: capitalize; }
+/* En la ficha: el nombre arriba, quién lo subió debajo y «Quitar» a la
+   derecha, en vez de partir la fila en dos líneas desiguales. */
+.pnl .pnl-doc .ex-arch {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  align-content: center;
+  gap: 0 10px;
+}
+.pnl .pnl-doc .ex-arch > svg { grid-column: 1; grid-row: 1 / span 2; }
+.pnl .pnl-doc .ex-arch button.nm { grid-column: 2; grid-row: 1; }
+.pnl .pnl-doc .ex-arch .pnl-arch-quien { grid-column: 2; grid-row: 2; max-width: none; }
+.pnl .pnl-doc .ex-arch button[data-peligro] { grid-column: 3; grid-row: 1 / span 2; }
+/* En el teléfono el nombre se lee entero, en su propia línea, y las acciones
+   van debajo: «certificado-de-antecedentes…» no dice qué archivo es. */
+@media (max-width: 639.98px) {
+  .pnl .ex-arch .nm,
+  .pnl .ex-arch button.nm {
+    flex: 1 1 calc(100% - 26px);
+    white-space: normal; overflow: visible; text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
+  .pnl .pnl-doc .ex-arch { grid-template-columns: 16px minmax(0, 1fr); row-gap: 2px; }
+  .pnl .pnl-doc .ex-arch > svg { grid-row: 1; }
+  .pnl .pnl-doc .ex-arch button[data-peligro] {
+    grid-column: 2; grid-row: 3;
+    justify-self: start;
+    margin-top: 4px;
+  }
+  /* Subir y «Hacer foto», uno al lado del otro. */
+  .pnl .pnl-arch-pie:has(> .ex-subir) { flex-wrap: nowrap; }
+  .pnl .pnl-arch-pie > .ex-subir { flex: 1 1 0; min-width: 0; gap: 6px; padding-inline: 10px; justify-content: center; }
+  .pnl .pnl-arch-pie > .pnl-arch-foto { flex: 0 0 auto; padding-inline: 12px; }
+}
+
+/* Resumen de documentos (ResumenDocumentos): solo la fila de chips. */
+.pnl .pnl-docs-resumen .pnl-chip { font-variant-numeric: tabular-nums; }
+
+
+/* ── SUBIR: avisos, «Hacer foto» y «Recibido» (AvisoArchivo.jsx) ────────
+   Pisa panel-documentos.css:30-91 con los tonos del panel. */
+.pnl .pnl-arch-foto {
+  min-height: var(--pnl-tap);
+  padding: 0 16px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--primary);
+}
+.pnl .pnl-arch-foto svg { color: var(--primary-2); }
+.pnl .pnl-arch-foto:focus-within { outline: 2px solid var(--foco-anillo); }
+.pnl .pnl-arch-estado { font-size: var(--fs-cuerpo-sm); color: var(--ink-2); }
+.pnl .pnl-arch-aviso:not([data-tono]) { --tono: var(--neutro); --tono-soft: var(--neutro-soft); --tono-ink: var(--neutro-ink); }
+.pnl .pnl-arch-aviso,
+.pnl .pnl-arch-aviso[data-tono] {
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  background: var(--tono-soft);
+  border: 1px solid rgba(122, 147, 162, .3);
+  border: 1px solid color-mix(in srgb, var(--tono) 30%, transparent);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--tono-ink);
+}
+.pnl .pnl-arch-aviso[data-tono='ok'] { padding-right: 52px; }
+.pnl .pnl-arch-aviso b { font-weight: 700; }
+.pnl .pnl-arch-botones .pnl-btn,
+.pnl .pnl-arch-botones .pnl-btn-primario,
+.pnl .pnl-arch-botones .pnl-btn-cta {
+  height: auto;
+  min-height: var(--pnl-tap-s);
+  padding: 4px 14px;
+  font-size: var(--fs-cuerpo-sm);
+}
+@media (pointer: coarse) {
+  .pnl .pnl-arch-botones :is(.pnl-btn, .pnl-btn-primario)::before {
+    content: ""; position: absolute; inset: calc((var(--pnl-tap-s) - 44px) / 2);
+  }
+}
+/* La ✕ del «Recibido»: el aspecto del botón de icono en talla s. */
+.pnl .pnl-arch-cerrar {
+  top: 6px; right: 6px;
+  display: grid; place-items: center;
+  width: var(--pnl-tap-s); height: var(--pnl-tap-s);
+  border: 1px solid var(--line); border-radius: 10px;
+  background: #fff;
+  color: var(--primary);
+  opacity: 1;
+}
+.pnl .pnl-arch-cerrar svg { width: 16px; height: 16px; }
+.pnl .pnl-arch-cerrar:hover { background: var(--sky-soft); border-color: var(--sky-2); }
+.pnl .pnl-arch-cerrar:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+@media (pointer: coarse) {
+  .pnl .pnl-arch-cerrar::before { content: ""; position: absolute; inset: calc((var(--pnl-tap-s) - 44px) / 2); }
+}
+
+
+/* ── ACOMPAÑANTES (AcompanantesCliente y AcompanantesPacCliente) ────────
+   Cada persona, una ficha plegable como un paso: icono, nombre, lo que le
+   falta y el chevrón; dentro, pestañas en segmentos. */
+.pnl .pnl-acomp {
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+  background: #fff;
+  overflow: hidden;
+  transition: border-color var(--d-corta) var(--salida), box-shadow var(--d-corta) var(--salida);
+}
+.pnl .pnl-acomp[data-abierta='1'] {
+  border-color: rgba(2, 80, 107, .25);
+  border-color: color-mix(in srgb, var(--primary-2) 25%, transparent);
+  box-shadow: var(--sombra-1);
+}
+.pnl .pnl-acomp-cab {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  min-height: 60px;
+  padding: 10px 14px;
+  border: 0; background: none;
+  font: inherit; text-align: left; color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.pnl .pnl-acomp-cab:active { background: var(--fondo-suave); }
+.pnl .pnl-acomp-cab:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: -2px; border-radius: var(--radio-m); }
+.pnl .pnl-acomp-cab .pnl-ico svg { width: 18px; height: 18px; }
+.pnl .pnl-acomp-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.pnl .pnl-acomp-txt b {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-acomp-txt span {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.4;
+  color: var(--ink-2);
+}
+.pnl .pnl-acomp-faltan {
+  flex: 0 0 auto;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.3;
+  text-align: right;
+  color: var(--aviso-ink);
+}
+.pnl .pnl-acomp-cuerpo { border-top: 1px solid var(--line-suave); }
+.pnl .pnl-segmentos.pnl-acomp-pestanas { margin: 14px 14px 0; width: fit-content; max-width: calc(100% - 28px); }
+.pnl .pnl-acomp-panel { padding: 16px 14px 18px; }
+.pnl .pnl-acomp-nota {
+  margin: 0;
+  padding: 8px 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500;
+  color: var(--muted);
+}
+.pnl .pnl-btn.pnl-anadir { border-style: dashed; border-color: var(--trazo); color: var(--primary); }
+@media (hover: hover) {
+  .pnl .pnl-btn.pnl-anadir:hover:not(:disabled) { border-color: var(--sky-2); }
+}
+.pnl .pnl-btn-texto.pnl-texto-peligro { color: var(--alto-ink); }
+.pnl .pnl-texto-suave { color: var(--ink-2); }
+
+/* Caja de un tono con campos dentro (menor de edad, otro progenitor, el
+   titular del PAC): filo del tono a la izquierda, fondo suave. */
+.pnl .pnl-caja-tono:not([data-tono]) { --tono: var(--info); --tono-soft: var(--info-soft); --tono-ink: var(--info-ink); }
+.pnl .pnl-caja-tono {
+  padding: 14px 16px 16px;
+  border-radius: var(--radio-m);
+  border-left: 3px solid var(--tono);
+  background: var(--tono-soft);
+}
+.pnl .pnl-caja-tono-anidada { background: #fff; border: 1px solid rgba(250, 148, 58, .35); border: 1px solid color-mix(in srgb, var(--tono) 35%, transparent); border-left: 3px solid var(--tono); }
+.pnl .pnl-caja-tono-texto {
+  margin: 0 0 14px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.55;
+  color: var(--tono-ink);
+}
+.pnl .pnl-caja-tono-texto b { font-weight: 700; }
+.pnl .pnl-caja-tono .pnl-campo-etiqueta,
+.pnl .pnl-caja-tono .pnl-campo-etiqueta small { color: var(--ink-2); }
+
+/* Un aviso de una línea, sin caja (lo que el servidor avisa al revisar). */
+.pnl .pnl-aviso-linea {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 12px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--aviso-ink);
+}
+.pnl .pnl-aviso-linea svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 2px; }
+
+
+/* ── ¿QUÉ ME FALTA? (QueMeFalta.jsx) ── pisa panel.css:756-771 ────────── */
+.pnl .ex-falta {
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-falta-boton {
+  min-height: 56px;
+  gap: 12px;
+  padding: 10px 14px;
+  color: var(--primary);
+  -webkit-tap-highlight-color: transparent;
+}
+.pnl .ex-falta-boton:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: -2px; border-radius: var(--radio-l); }
+.pnl .ex-falta-boton-icono {
+  width: 36px; height: 36px;
+  border-radius: var(--radio-s);
+  background: var(--info-soft);
+  color: var(--primary-2);
+}
+.pnl .ex-falta-boton-texto {
+  font-size: var(--fs-cuerpo); font-weight: 700;
+  color: var(--primary);
+}
+.pnl .ex-falta-cuenta { display: inline-grid; place-items: center; }
+.pnl .ex-falta-cuerpo {
+  gap: 12px;
+  max-height: 55dvh;
+  padding: 14px;
+  border-top: 1px solid var(--line-suave);
+  animation: pnlDespliega var(--d-media) var(--salida) both;
+}
+.pnl .ex-falta-resumen {
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.55;
+  color: var(--ink);
+}
+.pnl .ex-falta-lista { gap: 8px; }
+.pnl .ex-falta-fila:not([data-tono]) { --tono-soft: var(--info-soft); --tono-ink: var(--info-ink); }
+.pnl .ex-falta-fila {
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-suave);
+  border-radius: var(--radio-m);
+  background: var(--fondo-suave);
+}
+.pnl .ex-falta-fila-icono,
+.pnl .ex-falta-fila[data-tono] .ex-falta-fila-icono {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+.pnl .ex-falta-fila-texto {
+  font-size: var(--fs-cuerpo); font-weight: 700; line-height: 1.4;
+  color: var(--ink);
+}
+.pnl .ex-falta-fila-detalle {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+.pnl .ex-falta-fila .pnl-btn { height: auto; }
+@media (max-width: 519.98px) {
+  .pnl .ex-falta-fila .pnl-btn[data-talla='s'] {
+    width: 100%;
+    min-height: var(--pnl-tap);
+    font-size: var(--fs-cuerpo);
+  }
+}
+
+
+/* ── NOVEDADES (NovedadesExpediente.jsx) ── pisa panel-novedades.css:16-166
+   Filas densas: icono, título y detalle, y la fecha a la derecha también en
+   el teléfono. Lo nuevo, con un filo de info y el chip «Nuevo». La lógica
+   (cuándo cuenta la visita) no cambia. */
+.pnl .pnl-nov {
+  padding: var(--pad-tarjeta);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .pnl-nov-cabeza { align-items: center; gap: 12px; margin-bottom: 12px; }
+/* Plegada (visado y máster en el teléfono) la cabecera va sola: sin hueco debajo. */
+.pnl .pnl-nov-cabeza:last-child { margin-bottom: 0; }
+.pnl .pnl-nov-titulo {
+  gap: 8px;
+  font-size: 16px; font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-nov-historial,
+.pnl .pnl-nov-plegar { flex: 0 0 auto; }
+.pnl .pnl-nov-historial svg { color: var(--primary-2); }
+.pnl .pnl-nov-historial-pie { margin-top: 10px; }
+.pnl .pnl-nov-lista { gap: 6px; }
+.pnl .pnl-nov-item {
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-suave);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  transition: transform var(--d-corta) var(--muelle), border-color var(--d-corta) var(--salida);
+}
+.pnl .pnl-nov-item[data-nueva] {
+  background: #fff;
+  box-shadow: inset 3px 0 0 var(--info);
+}
+@media (hover: hover) {
+  .pnl .pnl-nov-item:hover { border-color: var(--line); }
+}
+.pnl .pnl-nov-item:active { transform: scale(.985); }
+.pnl .pnl-nov-item:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-nov-item:not([data-tono]) { --tono-soft: var(--info-soft); --tono-ink: var(--info-ink); }
+.pnl .pnl-nov-icono,
+.pnl .pnl-nov-item[data-tono] .pnl-nov-icono {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+/* El título y, a la derecha, «Nuevo» y la fecha en flotante: en la línea
+   del título si cabe; si no, bajan y comparten línea con el detalle. Así la
+   fila crece lo justo. */
+.pnl .pnl-nov-texto { display: flow-root; align-self: center; min-width: 0; }
+.pnl .pnl-nov-linea {
+  display: block;
+  font-size: var(--fs-cuerpo-sm); line-height: 1.35;
+}
+.pnl .pnl-nov-linea b { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+.pnl .pnl-nov-meta {
+  float: right;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin: 0 0 2px 10px;
+}
+.pnl .pnl-chip.pnl-nov-badge { text-transform: none; letter-spacing: 0; }
+.pnl .pnl-nov-detalle {
+  margin-top: 2px;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  color: var(--ink-2);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.pnl .pnl-nov-fecha,
+.pnl .pnl-nov-item .pnl-nov-fecha {
+  grid-column: auto;
+  padding-top: 0;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.pnl .pnl-nov-vacio {
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  background: var(--fondo-suave);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .pnl-nov-vacio svg { flex: 0 0 auto; color: var(--primary-2); }
+.pnl .pnl-nov-esqueleto {
+  height: 56px;
+  border-radius: 14px;
+  background: var(--fondo-tile);
+  animation: pnlRespira 1.4s ease-in-out infinite;
+}
+.pnl .pnl-nov-mas { margin-top: 10px; }
+
+
+/* ── HISTORIAL (LineaTiempoExpediente.jsx) ── pisa panel-centro.css:107-192
+   La hoja de base (.pnl-hoja) con el velo token; en pantalla grande sigue
+   siendo un panel a la derecha. Los puntos, en el tono de cada línea. */
+@media (min-width: 768px) {
+  .pnl .pnl-lt-hoja.pnl-hoja {
+    max-height: none;
+    margin: 0;
+    border-radius: var(--radio-xl) 0 0 var(--radio-xl);
+  }
+}
+.pnl .pnl-lt-hoja.pnl-hoja { overflow: hidden; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pnl .pnl-lt-cab { padding: 14px 18px 12px; border-bottom-color: var(--line-suave); }
+.pnl .pnl-lt-cab h2 {
+  font-size: var(--fs-titulo); font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-lt-cab p { font-size: var(--fs-meta); font-weight: 500; color: var(--muted); }
+.pnl .pnl-lt-cab-icono {
+  width: 36px; height: 36px;
+  border-radius: var(--radio-s);
+  background: var(--info-soft);
+  color: var(--primary-2);
+}
+.pnl .pnl-lt-grupo {
+  margin: 18px 0 8px;
+  font-size: var(--fs-eyebrow); font-weight: 700;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--primary-2);
+}
+.pnl .pnl-lt-dia-etiqueta {
+  margin: 10px 0 4px 42px;
+  font-size: var(--fs-meta); font-weight: 700;
+  color: var(--primary);
+}
+.pnl .pnl-lt-lista::before { background: var(--line); }
+.pnl .pnl-lt-item {
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 8px 8px 0;
+  border-radius: var(--radio-s);
+}
+@media (hover: hover) {
+  .pnl .pnl-lt-item:hover { background: var(--fondo-suave); }
+}
+.pnl .pnl-lt-item:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-lt-item:not([data-tono]) { --tono: var(--info); --tono-ink: var(--info-ink); }
+.pnl .pnl-lt-punto,
+.pnl .pnl-lt-item[data-tono] .pnl-lt-punto {
+  border-color: var(--tono);
+  color: var(--tono-ink);
+}
+.pnl .pnl-lt-texto b {
+  font-size: var(--fs-cuerpo-sm); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-lt-texto small {
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  color: var(--ink-2);
+}
+.pnl .pnl-lt-cuando {
+  font-size: var(--fs-meta); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary-2);
+}
+.pnl .pnl-lt-cuando small { font-weight: 500; color: var(--muted); }
+.pnl .pnl-vacio-suave.pnl-lt-vacio { margin: 0; }
+.pnl .pnl-lt-nota {
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.45;
+  color: var(--muted);
+}
+
+
+/* ── Movimiento reducido: va siempre al final ── */
+@media (prefers-reduced-motion: reduce) {
+  .pnl .pnl-estado-etapa::before,
+  .pnl .pnl-estado-tramo[data-e='actual'] i::after,
+  .pnl .pnl-bloque-cuerpo,
+  .pnl .pnl-paso-cuerpo,
+  .pnl .ex-falta-cuerpo,
+  .pnl .pnl-nov-lista > li,
+  .pnl .pnl-nov-esqueleto,
+  .pnl .pnl-arch-aviso,
+  .pnl .pnl-ayuda-cuerpo { animation: none; }
+  .pnl .pnl-bloque,
+  .pnl .pnl-bloque-chev,
+  .pnl .pnl-paso-chev,
+  .pnl .pnl-paso-num,
+  .pnl .pnl-acomp,
+  .pnl .pnl-nov-item,
+  .pnl .pnl-ayuda-chev { transition: none; }
+  .pnl .pnl-nov-item:active { transform: none; }
+}

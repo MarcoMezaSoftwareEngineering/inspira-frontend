@@ -12,7 +12,7 @@ import Icono from "../../../components/common/Icono";
 
 function IconoMas() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
       <circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" />
     </svg>
   );
@@ -54,7 +54,7 @@ export default function BarraPestanas({ tab, pendientes = 0, conPagos = false, c
             else onIr?.(p.clave);
           }}
         >
-          {p.clave === "mas" ? <IconoMas /> : <Icono nombre={p.icono} size={20} />}
+          {p.clave === "mas" ? <IconoMas /> : <Icono nombre={p.icono} size={22} />}
           <span>{p.texto}</span>
           {p.badge > 0 && <span className="pnl-tab-badge" aria-hidden="true">{p.badge > 9 ? "9+" : p.badge}</span>}
         </button>

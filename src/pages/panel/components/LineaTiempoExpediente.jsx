@@ -12,6 +12,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import Icono from "../../../components/common/Icono";
+import IconoPaso from "../../../components/common/IconoPaso";
 import { navigate } from "../../../services/navigate";
 import { fechaHoraDoble } from "../../../lib/horas";
 import { ICONO_NOVEDAD, TONO_NOVEDAD } from "../novedades";
@@ -38,15 +39,18 @@ export default function LineaTiempoExpediente({ idSolicitud, items = [], desde =
 
   return createPortal(
     <div className="pnl pnl-lt" role="dialog" aria-modal="true" aria-labelledby="pnl-lt-titulo">
-      <div className="pnl-lt-fondo" onClick={onCerrar} />
-      <div className="pnl-lt-hoja">
+      <div className="pnl-lt-fondo pnl-velo-token" onClick={onCerrar} />
+      <div className="pnl-lt-hoja pnl-hoja">
+        <span className="pnl-hoja-tirador" aria-hidden="true" />
         <header className="pnl-lt-cab">
           <span className="pnl-lt-cab-icono" aria-hidden="true"><Icono nombre="reloj" size={18} /></span>
           <div className="min-w-0">
             <h2 id="pnl-lt-titulo">Historial del expediente</h2>
             {servicio?.titulo && <p>{recorta(servicio.titulo, 60)}</p>}
           </div>
-          <button type="button" className="pnl-lt-x ux-tap" onClick={onCerrar} aria-label="Cerrar">✕</button>
+          <button type="button" className="pnl-btn-icono pnl-lt-x ux-tap" onClick={onCerrar} aria-label="Cerrar">
+            <IconoPaso nombre="x" />
+          </button>
         </header>
 
         <div className="pnl-lt-cuerpo">
@@ -74,9 +78,12 @@ export default function LineaTiempoExpediente({ idSolicitud, items = [], desde =
           <section aria-labelledby="pnl-lt-paso">
             <h3 id="pnl-lt-paso" className="pnl-lt-grupo">Lo que ha pasado</h3>
             {!dias.length ? (
-              <p className="pnl-lt-vacio">
-                Todavía no hay movimientos en los últimos 60 días. Cuando tu asesor revise un documento, te escriba o tu proceso avance, lo verás aquí.
-              </p>
+              <div className="pnl-vacio-suave pnl-lt-vacio">
+                <span className="pnl-vacio-suave-icono" aria-hidden="true"><Icono nombre="reloj" size={22} /></span>
+                <p>
+                  Todavía no hay movimientos en los últimos 60 días. Cuando tu asesor revise un documento, te escriba o tu proceso avance, lo verás aquí.
+                </p>
+              </div>
             ) : dias.map((g) => (
               <div key={g.dia} className="pnl-lt-dia">
                 <p className="pnl-lt-dia-etiqueta">{g.etiqueta}</p>
@@ -90,7 +97,7 @@ export default function LineaTiempoExpediente({ idSolicitud, items = [], desde =
                           <span className="pnl-lt-texto">
                             <b>
                               {n.titulo}
-                              {nueva && <span className="pnl-nov-badge">Nuevo</span>}
+                              {nueva && <span className="pnl-chip pnl-nov-badge" data-talla="sm" data-tono="info">Nuevo</span>}
                             </b>
                             {n.detalle && <small>{n.detalle}</small>}
                           </span>

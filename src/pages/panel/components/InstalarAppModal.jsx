@@ -12,6 +12,7 @@ import {
   alCambiar, androidDentroDeApp, androidSamsung, instalarAhora, iphoneFueraDeSafari, puedeInstalar, sistema, yaInstalada,
 } from "../instalarApp";
 import { IconoTelefono, PasosAndroid, PasosEscritorio, PasosIphone } from "./PasosInstalar";
+import IconoPaso from "../../../components/common/IconoPaso";
 
 const PESTANAS = [
   { clave: "iphone", texto: "iPhone" },
@@ -51,22 +52,25 @@ export default function InstalarAppModal({ onCerrar }) {
 
   return createPortal(
     <div className="pnl pnl-inst" role="dialog" aria-modal="true" aria-labelledby="pnl-inst-titulo">
-      <div className="pnl-inst-fondo" onClick={onCerrar} />
-      <div className="pnl-inst-hoja">
+      <div className="pnl-inst-fondo pnl-velo-token" onClick={onCerrar} />
+      <div className="pnl-inst-hoja pnl-hoja">
+        <span className="pnl-hoja-tirador" aria-hidden="true" />
         <header className="pnl-inst-cab">
-          <span className="ex-app-icono bg-sky/20 text-primary"><IconoTelefono /></span>
+          <span className="ex-app-icono pnl-inst-icono"><IconoTelefono /></span>
           <div className="min-w-0">
             <h2 id="pnl-inst-titulo">Instala la app de Inspira</h2>
             <p>Tu panel a un toque, sin pasar por ninguna tienda de aplicaciones.</p>
           </div>
-          <button type="button" className="pnl-lt-x ux-tap" onClick={onCerrar} aria-label="Cerrar">✕</button>
+          <button type="button" className="pnl-btn-icono" onClick={onCerrar} aria-label="Cerrar">
+            <IconoPaso nombre="x" className="w-[18px] h-[18px]" />
+          </button>
         </header>
 
         {instalada ? (
           <p className="pnl-inst-ok">Ya estás usando la app instalada. Puedes abrirla siempre desde el icono de Inspira.</p>
         ) : (
           <>
-            <div className="pnl-inst-pestanas" role="tablist" aria-label="Dispositivo">
+            <div className="pnl-inst-pestanas pnl-segmentos" role="tablist" aria-label="Dispositivo">
               {PESTANAS.map((p) => (
                 <button key={p.clave} type="button" role="tab" aria-selected={ver === p.clave}
                   className="pnl-inst-pestana ux-tap" onClick={() => setVer(p.clave)}>
@@ -78,7 +82,7 @@ export default function InstalarAppModal({ onCerrar }) {
             {conEvento && (
               <div className="pnl-inst-directo">
                 <p>Tu navegador permite instalarla directamente:</p>
-                <button type="button" className="pnl-btn-cta ux-tap" onClick={instalar}>Instalar</button>
+                <button type="button" className="pnl-btn-primario ux-tap" onClick={instalar}>Instalar</button>
               </div>
             )}
             {resultado === "accepted" && <p className="pnl-inst-ok" role="status">Listo: la app de Inspira ya está instalada.</p>}

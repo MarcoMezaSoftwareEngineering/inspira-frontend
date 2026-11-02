@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { whatsappDesde } from "../../config/contacto";
+import Icono from "../../components/common/Icono";
+import IconoPaso from "../../components/common/IconoPaso";
 
 // ─── Checklist data ────────────────────────────────────────────────────────
 const CHECKLIST_SECTIONS = [
   {
     id: "docs",
     title: "Documentación académica",
-    icon: "📄",
+    icon: "documento",
     items: [
       { id: "docs_1", text: "Título universitario obtenido y firmado" },
       { id: "docs_2", text: "Certificado de calificaciones apostillado" },
@@ -17,7 +19,7 @@ const CHECKLIST_SECTIONS = [
   {
     id: "postulacion",
     title: "Postulación universitaria",
-    icon: "🏫",
+    icon: "libro",
     items: [
       { id: "post_1", text: "Elegir al menos 3 universidades objetivo en España" },
       { id: "post_2", text: "Completar preinscripción en cada universidad" },
@@ -29,7 +31,7 @@ const CHECKLIST_SECTIONS = [
   {
     id: "beca",
     title: "Beca",
-    icon: "🎓",
+    icon: "birrete",
     items: [
       { id: "beca_1", text: "Identificar becas para las que califico" },
       { id: "beca_2", text: "Enviar solicitud de beca antes del plazo" },
@@ -39,7 +41,7 @@ const CHECKLIST_SECTIONS = [
   {
     id: "visa",
     title: "Visa / Estancia",
-    icon: "✈️",
+    icon: "avion",
     items: [
       { id: "visa_1", text: "Determinar si necesito Visa de Estudios o Autorización de Estancia" },
       { id: "visa_2", text: "Carta de admisión o matrícula de la universidad" },
@@ -51,7 +53,7 @@ const CHECKLIST_SECTIONS = [
   {
     id: "llegada",
     title: "Llegada a España",
-    icon: "🏠",
+    icon: "casa",
     items: [
       { id: "arr_1", text: "Empadronarse en el ayuntamiento (imprescindible)" },
       { id: "arr_2", text: "Solicitar NIE / TIE en comisaría de policía" },
@@ -83,11 +85,11 @@ function ExternalIcon() {
 
 function CheckCircle({ done }) {
   return done ? (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="text-[#1D6A4A] shrink-0">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="text-verde shrink-0">
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   ) : (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="text-[#E2E8F0] shrink-0">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="text-trazo shrink-0">
       <circle cx="12" cy="12" r="9" />
     </svg>
   );
@@ -96,7 +98,7 @@ function CheckCircle({ done }) {
 // ─── Section card wrapper ──────────────────────────────────────────────────
 function Card({ children, className = "" }) {
   return (
-    <div className={`bg-white border border-[#E2E8F0] rounded-2xl p-5 mb-4 shadow-sm ${className}`}>
+    <div className={`bg-white border border-linea rounded-[20px] p-4 sm:p-5 mb-4 shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -127,68 +129,71 @@ export default function GuiaMaster() {
   const pct = Math.round((doneCount / totalCount) * 100);
 
   const TABS = [
-    { id: "inicio", label: "🏠 Inicio" },
-    { id: "proceso", label: "📋 Proceso" },
-    { id: "docs", label: "📄 Docs" },
-    { id: "apostilla", label: "🔏 Apostilla" },
-    { id: "visa", label: "✈️ Visa" },
-    { id: "checklist", label: "✅ Checklist" },
+    { id: "inicio", label: "Inicio", icono: "casa" },
+    { id: "proceso", label: "Proceso", icono: "brujula" },
+    { id: "docs", label: "Docs", icono: "documento" },
+    { id: "apostilla", label: "Apostilla", icono: "candado" },
+    { id: "visa", label: "Visa", icono: "avion" },
+    { id: "checklist", label: "Checklist", icono: "check" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] font-sans">
+    <div className="bg-fondo font-sans">
       {/* ── Header ── */}
-      <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light px-6 py-10">
+      <div className="bg-gradient-to-br from-noche via-primary to-primary-light px-5 py-8 sm:px-6 sm:py-10">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1.5 mb-4">
-            <span className="text-white text-xs font-semibold">⚖️ Inspira Legal · Asesoría Especializada</span>
+            <span className="inline-flex items-center gap-1.5 text-white text-meta font-semibold"><Icono nombre="balanza" size={14} />Inspira Legal · Asesoría Especializada</span>
           </div>
           <h1 className="font-serif text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
             Guía Máster España 2026–2027
           </h1>
-          <p className="text-white/80 font-sans text-base mb-6 max-w-2xl leading-relaxed">
+          <p className="text-white/90 font-sans text-base mb-6 max-w-[68ch] leading-relaxed">
             Todo lo que necesitas saber para postular a un máster oficial en España: proceso, documentos, apostilla, visa y checklist interactivo.
           </p>
           <div className="flex flex-wrap gap-3">
-            <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-              📋 Guía completa 2026
+            <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-meta font-semibold px-3 py-1.5 rounded-full">
+              <Icono nombre="documento" size={14} />Guía completa 2026
             </span>
-            <span className="inline-flex items-center gap-1.5 bg-accent/20 text-accent text-xs font-semibold px-3 py-1.5 rounded-full border border-accent/30">
-              ✅ {doneCount}/{totalCount} completado
+            <span className="inline-flex items-center gap-1.5 bg-accent/20 text-white text-meta font-semibold px-3 py-1.5 rounded-full border border-accent/30 tabular-nums">
+              <Icono nombre="check" size={14} />{doneCount}/{totalCount} completado
             </span>
           </div>
         </div>
       </div>
 
       {/* ── Tab Bar ── */}
-      <div className="bg-white border-b border-[#E2E8F0] sticky top-0 z-20 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 flex gap-0.5 overflow-x-auto">
+      <div className="bg-fondo border-b border-linea sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 py-2.5 overflow-x-auto [scrollbar-width:none]">
+          <div className="inline-flex gap-1 p-1 rounded-full bg-neutro-soft">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTabActiva(t.id)}
-              className={`px-4 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors font-sans ${
+              className={`inline-flex items-center gap-1.5 min-h-11 px-4 rounded-full text-cuerpo font-semibold whitespace-nowrap transition-colors font-sans ${
                 tabActiva === t.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-slate-500 hover:text-primary hover:border-primary/30"
+                  ? "bg-primary text-white"
+                  : "text-tinta-2 hover:bg-white hover:text-primary"
               }`}
             >
+              <Icono nombre={t.icono} size={16} />
               {t.label}
             </button>
           ))}
+          </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
 
         {/* ═══════════════ INICIO ═══════════════ */}
         {tabActiva === "inicio" && (
           <div>
             {/* Welcome banner */}
-            <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light rounded-2xl p-7 mb-6 text-white">
-              <p className="text-xs uppercase tracking-widest text-white/60 mb-2">Bienvenido/a</p>
+            <div className="bg-gradient-to-br from-noche via-primary to-primary-light rounded-3xl p-6 sm:p-7 mb-6 text-white">
+              <p className="text-eyebrow font-bold uppercase text-white/85 mb-2">Bienvenido/a</p>
               <h2 className="font-serif text-2xl font-bold mb-3">Tu camino al máster en España</h2>
-              <p className="text-white/80 text-sm leading-relaxed max-w-2xl">
+              <p className="text-white/90 text-lectura leading-relaxed max-w-[68ch]">
                 Esta guía te acompañará en cada etapa del proceso: desde elegir tu máster hasta llegar a España.
                 Usa el checklist para no perderte ningún paso.
               </p>
@@ -197,12 +202,12 @@ export default function GuiaMaster() {
             {/* What is a máster oficial? */}
             <Card>
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-2xl shrink-0">
-                  🎓
+                <div className="w-12 h-12 rounded-xl bg-info-soft text-primary-light flex items-center justify-center shrink-0">
+                  <Icono nombre="birrete" size={24} />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-primary mb-2">¿Qué es un Máster Oficial?</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                  <h3 className="font-serif text-display-2 font-bold text-primary mb-2">¿Qué es un Máster Oficial?</h3>
+                  <p className="text-lectura text-tinta-2 leading-relaxed mb-3 max-w-[68ch]">
                     Un máster oficial en España (también llamado máster universitario) es un título de posgrado regulado por el
                     Espacio Europeo de Educación Superior (EEES). Tiene entre <strong>60 y 120 ECTS</strong> (European Credits)
                     y una duración de 1 a 2 años. Es el único tipo de máster que da acceso a programas de doctorado y que es
@@ -210,13 +215,13 @@ export default function GuiaMaster() {
                   </p>
                   <div className="grid sm:grid-cols-3 gap-3">
                     {[
-                      { icon: "📅", label: "Duración", val: "1–2 años" },
-                      { icon: "📐", label: "Créditos", val: "60–120 ECTS" },
-                      { icon: "🌍", label: "Reconocimiento", val: "Toda la UE" },
+                      { icon: "calendario", label: "Duración", val: "1–2 años" },
+                      { icon: "libro", label: "Créditos", val: "60–120 ECTS" },
+                      { icon: "globo", label: "Reconocimiento", val: "Toda la UE" },
                     ].map((item) => (
-                      <div key={item.label} className="bg-[#F4F6F9] rounded-xl p-3 text-center">
-                        <p className="text-xl mb-1">{item.icon}</p>
-                        <p className="text-xs text-slate-400 font-sans">{item.label}</p>
+                      <div key={item.label} className="bg-fondo rounded-xl p-3 text-center">
+                        <Icono nombre={item.icon} size={20} className="mx-auto mb-1 text-primary-light" />
+                        <p className="text-meta text-tinta-2 font-sans">{item.label}</p>
                         <p className="text-sm font-semibold text-primary">{item.val}</p>
                       </div>
                     ))}
@@ -228,11 +233,11 @@ export default function GuiaMaster() {
             {/* Por qué Inspira */}
             <Card>
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#E8F5EE] border border-[#1D6A4A]/20 flex items-center justify-center text-2xl shrink-0">
-                  ⚖️
+                <div className="w-12 h-12 rounded-xl bg-verde-soft text-verde flex items-center justify-center shrink-0">
+                  <Icono nombre="balanza" size={24} />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-primary mb-2">¿Por qué Inspira Legal?</h3>
+                  <h3 className="font-serif text-display-2 font-bold text-primary mb-2">¿Por qué Inspira Legal?</h3>
                   <ul className="space-y-2">
                     {[
                       "Asesoría jurídica especializada en visas de estudios y autorizaciones de estancia",
@@ -241,8 +246,8 @@ export default function GuiaMaster() {
                       "Soporte post-llegada: NIE, TIE, empadronamiento y cuenta bancaria",
                       "Equipo hispanohablante con experiencia en trámites consulares latinoamericanos",
                     ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700 font-sans">
-                        <span className="text-[#F5C842] font-bold shrink-0 mt-0.5">✓</span>
+                      <li key={i} className="flex items-start gap-2 text-lectura text-tinta font-sans leading-relaxed">
+                        <IconoPaso nombre="check" className="w-4 h-4 mt-1 shrink-0 text-verde" />
                         {item}
                       </li>
                     ))}
@@ -252,12 +257,12 @@ export default function GuiaMaster() {
             </Card>
 
             {/* Info alert */}
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-4">
+            <div className="bg-aviso-soft border border-accent/30 rounded-2xl p-4 sm:p-5 mb-4">
               <div className="flex items-start gap-3">
-                <span className="text-xl shrink-0">⚠️</span>
+                <IconoPaso nombre="info" className="w-5 h-5 shrink-0 mt-0.5 text-aviso-ink" />
                 <div>
-                  <p className="font-semibold text-amber-800 text-sm mb-1">Importante antes de comenzar</p>
-                  <p className="text-amber-700 text-sm leading-relaxed">
+                  <p className="font-bold text-aviso-ink text-cuerpo mb-1">Importante antes de comenzar</p>
+                  <p className="text-aviso-ink text-cuerpo leading-relaxed max-w-[68ch]">
                     Los plazos de admisión en universidades españolas suelen abrir entre <strong>enero y marzo</strong> para el
                     curso siguiente. Las becas tienen plazos propios, muchas veces más cortos. Te recomendamos iniciar el proceso
                     con al menos <strong>8 meses de anticipación</strong>.
@@ -270,13 +275,14 @@ export default function GuiaMaster() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setTabActiva("proceso")}
-                className="bg-primary text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center gap-2 bg-primary text-white font-semibold text-cuerpo px-5 min-h-11 rounded-full hover:bg-primary-light transition-colors"
               >
-                Ver el proceso completo →
+                Ver el proceso completo
+                <IconoPaso nombre="arrowRight" className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setTabActiva("checklist")}
-                className="bg-white border border-[#E2E8F0] text-primary font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#F4F6F9] transition-colors"
+                className="inline-flex items-center bg-white border border-linea text-primary font-semibold text-cuerpo px-5 min-h-11 rounded-full hover:bg-info-soft hover:border-sky-dark transition-colors"
               >
                 Ir al checklist
               </button>
@@ -290,42 +296,42 @@ export default function GuiaMaster() {
             {/* Phase cards */}
             <div className="grid sm:grid-cols-2 gap-4 mb-8">
               {[
-                { num: "01", title: "Investigación", color: "bg-blue-50 border-blue-200", numColor: "text-blue-700", desc: "Elige tu área de estudio, investiga universidades y másteres. Define si necesitas beca y cuáles aplican para ti." },
-                { num: "02", title: "Documentación", color: "bg-[#E8F5EE] border-[#1D6A4A]/25", numColor: "text-[#1D6A4A]", desc: "Obtén apostilla de título y calificaciones, equivalencia MEC, carta de motivación y cartas de recomendación." },
-                { num: "03", title: "Postulación", color: "bg-amber-50 border-amber-200", numColor: "text-amber-700", desc: "Completa preinscripción universitaria, solicita la beca en los plazos establecidos y espera la resolución." },
-                { num: "04", title: "Visa y llegada", color: "bg-rose-50 border-rose-200", numColor: "text-rose-700", desc: "Tramita visa de estudios o autorización de estancia, llega a España, empadrónate y obtén tu TIE." },
+                { num: "01", title: "Investigación", color: "bg-info-soft border-info-ink/20", numColor: "text-info-ink", desc: "Elige tu área de estudio, investiga universidades y másteres. Define si necesitas beca y cuáles aplican para ti." },
+                { num: "02", title: "Documentación", color: "bg-verde-soft border-verde/25", numColor: "text-verde-ink", desc: "Obtén apostilla de título y calificaciones, equivalencia MEC, carta de motivación y cartas de recomendación." },
+                { num: "03", title: "Postulación", color: "bg-aviso-soft border-accent/30", numColor: "text-aviso-ink", desc: "Completa preinscripción universitaria, solicita la beca en los plazos establecidos y espera la resolución." },
+                { num: "04", title: "Visa y llegada", color: "bg-neutro-soft border-trazo/30", numColor: "text-neutro-ink", desc: "Tramita visa de estudios o autorización de estancia, llega a España, empadrónate y obtén tu TIE." },
               ].map((phase) => (
                 <div key={phase.num} className={`border rounded-2xl p-5 ${phase.color}`}>
                   <span className={`font-serif text-3xl font-bold ${phase.numColor} leading-none`}>{phase.num}</span>
-                  <h3 className={`font-serif font-bold text-primary text-lg mt-1 mb-2`}>{phase.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{phase.desc}</p>
+                  <h3 className={`font-serif font-bold text-primary text-display-2 mt-1 mb-2`}>{phase.title}</h3>
+                  <p className="text-cuerpo text-tinta-2 leading-relaxed">{phase.desc}</p>
                 </div>
               ))}
             </div>
 
             {/* Calendar timeline */}
             <Card>
-              <h3 className="font-serif text-lg font-bold text-primary mb-4">Calendario recomendado</h3>
+              <h3 className="font-serif text-display-2 font-bold text-primary mb-4">Calendario recomendado</h3>
               <div className="space-y-3">
                 {[
-                  { mes: "Ene–Feb", icon: "🔍", accion: "Investigar másteres y universidades objetivo. Consultar con Inspira Legal." },
-                  { mes: "Feb–Mar", icon: "📄", accion: "Iniciar apostilla digital de título y calificaciones. Calcular equivalencia MEC." },
-                  { mes: "Mar–Abr", icon: "🏫", accion: "Abrir preinscripciones universitarias. Solicitar AUIP/TalentUnileon/USAL (plazos cortos)." },
-                  { mes: "Abr–May", icon: "🎓", accion: "Solicitar AUIP (UPV, UC3M, URJC cierre 30 abr). Solicitar Erasmus Mundus." },
-                  { mes: "Jun–Jul", icon: "📬", accion: "Recibir cartas de admisión. Solicitar becas UCM y UAH Cervantes (julio). Tramitar visa." },
-                  { mes: "Sep", icon: "✈️", accion: "Viaje a España. Empadronamiento, NIE, TIE, apertura cuenta bancaria, tarjeta sanitaria." },
+                  { mes: "Ene–Feb", icon: <Icono nombre="lupa" size={16} />, accion: "Investigar másteres y universidades objetivo. Consultar con Inspira Legal." },
+                  { mes: "Feb–Mar", icon: <Icono nombre="documento" size={16} />, accion: "Iniciar apostilla digital de título y calificaciones. Calcular equivalencia MEC." },
+                  { mes: "Mar–Abr", icon: <Icono nombre="libro" size={16} />, accion: "Abrir preinscripciones universitarias. Solicitar AUIP/TalentUnileon/USAL (plazos cortos)." },
+                  { mes: "Abr–May", icon: <Icono nombre="birrete" size={16} />, accion: "Solicitar AUIP (UPV, UC3M, URJC cierre 30 abr). Solicitar Erasmus Mundus." },
+                  { mes: "Jun–Jul", icon: <IconoPaso nombre="mail" className="w-4 h-4" />, accion: "Recibir cartas de admisión. Solicitar becas UCM y UAH Cervantes (julio). Tramitar visa." },
+                  { mes: "Sep", icon: <Icono nombre="avion" size={16} />, accion: "Viaje a España. Empadronamiento, NIE, TIE, apertura cuenta bancaria, tarjeta sanitaria." },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">
                     <div className="w-20 shrink-0 text-right">
-                      <span className="text-xs font-bold text-primary font-sans">{item.mes}</span>
+                      <span className="text-meta font-bold text-primary font-sans">{item.mes}</span>
                     </div>
                     <div className="w-8 flex flex-col items-center shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-[#F4F6F9] border-2 border-[#E2E8F0] flex items-center justify-center text-base">
+                      <div className="w-8 h-8 rounded-full bg-fondo border-2 border-linea flex items-center justify-center text-primary-light">
                         {item.icon}
                       </div>
-                      {i < 5 && <div className="w-0.5 h-6 bg-[#E2E8F0] mt-1" />}
+                      {i < 5 && <div className="w-0.5 h-6 bg-linea mt-1" />}
                     </div>
-                    <p className="text-sm text-slate-600 leading-relaxed pt-1">{item.accion}</p>
+                    <p className="text-cuerpo text-tinta-2 leading-relaxed pt-1">{item.accion}</p>
                   </div>
                 ))}
               </div>
@@ -333,29 +339,29 @@ export default function GuiaMaster() {
 
             {/* Steps 1–10 */}
             <Card>
-              <h3 className="font-serif text-lg font-bold text-primary mb-5">Los 10 pasos del proceso</h3>
+              <h3 className="font-serif text-display-2 font-bold text-primary mb-5">Los 10 pasos del proceso</h3>
               <div className="space-y-4">
                 {[
-                  { n: 1, icon: "🔎", t: "Elige tu área y máster", d: "Define el área de estudio, las universidades españolas que te interesan y el tipo de máster (presencial, semipresencial, doble titulación)." },
-                  { n: 2, icon: "🎓", t: "Verifica requisitos académicos", d: "Comprueba la nota media mínima requerida, los idiomas y si tu grado es compatible con el máster elegido." },
-                  { n: 3, icon: "📋", t: "Evalúa becas disponibles", d: "Revisa qué becas aplican para ti (AUIP, TalentUnileon, Luis Vives, USAL, F. Carolina, Erasmus) y sus plazos exactos." },
-                  { n: 4, icon: "📄", t: "Consigue la apostilla", d: "Apostilla tu título universitario y certificado de calificaciones en el país de origen (ver sección Apostilla)." },
-                  { n: 5, icon: "🔢", t: "Calcula equivalencia MEC", d: "Convierte tu nota media a la escala española (0–10) usando la fórmula MEC. Muchas becas lo exigen como documento." },
-                  { n: 6, icon: "✍️", t: "Redacta tu carta de motivación", d: "Adapta tu carta a cada universidad. Incluye por qué ese máster, tu proyecto profesional y tu conexión con España o Europa." },
-                  { n: 7, icon: "🏫", t: "Realiza la preinscripción", d: "Completa la preinscripción universitaria dentro del plazo. Guarda el comprobante: algunas becas lo exigen antes de solicitar." },
-                  { n: 8, icon: "📮", t: "Solicita la beca", d: "Envía la solicitud de beca con todos los documentos requeridos. Verifica doble que la lista esté completa." },
-                  { n: 9, icon: "🛂", t: "Tramita la visa o estancia", d: "Con la carta de admisión, solicita la Visa de Estudios (>90 días) o Autorización de Estancia (<90 días) en el consulado." },
-                  { n: 10, icon: "🏠", t: "Llega y regularízate", d: "Al llegar: empadrónate, solicita el NIE/TIE, abre cuenta bancaria y pide la tarjeta sanitaria gratuita." },
+                  { n: 1, icon: "lupa", t: "Elige tu área y máster", d: "Define el área de estudio, las universidades españolas que te interesan y el tipo de máster (presencial, semipresencial, doble titulación)." },
+                  { n: 2, icon: "birrete", t: "Verifica requisitos académicos", d: "Comprueba la nota media mínima requerida, los idiomas y si tu grado es compatible con el máster elegido." },
+                  { n: 3, icon: "estrella", t: "Evalúa becas disponibles", d: "Revisa qué becas aplican para ti (AUIP, TalentUnileon, Luis Vives, USAL, F. Carolina, Erasmus) y sus plazos exactos." },
+                  { n: 4, icon: "documento", t: "Consigue la apostilla", d: "Apostilla tu título universitario y certificado de calificaciones en el país de origen (ver sección Apostilla)." },
+                  { n: 5, icon: "grafico", t: "Calcula equivalencia MEC", d: "Convierte tu nota media a la escala española (0–10) usando la fórmula MEC. Muchas becas lo exigen como documento." },
+                  { n: 6, icon: "chat", t: "Redacta tu carta de motivación", d: "Adapta tu carta a cada universidad. Incluye por qué ese máster, tu proyecto profesional y tu conexión con España o Europa." },
+                  { n: 7, icon: "libro", t: "Realiza la preinscripción", d: "Completa la preinscripción universitaria dentro del plazo. Guarda el comprobante: algunas becas lo exigen antes de solicitar." },
+                  { n: 8, icon: "paquete", t: "Solicita la beca", d: "Envía la solicitud de beca con todos los documentos requeridos. Verifica doble que la lista esté completa." },
+                  { n: 9, icon: "pasaporte", t: "Tramita la visa o estancia", d: "Con la carta de admisión, solicita la Visa de Estudios (>90 días) o Autorización de Estancia (<90 días) en el consulado." },
+                  { n: 10, icon: "casa", t: "Llega y regularízate", d: "Al llegar: empadrónate, solicita el NIE/TIE, abre cuenta bancaria y pide la tarjeta sanitaria gratuita." },
                 ].map((step) => (
                   <div key={step.n} className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-cuerpo shrink-0 tabular-nums">
                       {step.n}
                     </div>
-                    <div className="flex-1 pt-0.5">
-                      <p className="font-semibold text-primary text-sm mb-0.5">
-                        {step.icon} {step.t}
+                    <div className="flex-1 pt-0.5 min-w-0">
+                      <p className="flex items-center gap-2 font-bold text-primary text-lectura mb-0.5">
+                        <Icono nombre={step.icon} size={16} className="shrink-0 text-primary-light" />{step.t}
                       </p>
-                      <p className="text-sm text-slate-600 leading-relaxed">{step.d}</p>
+                      <p className="text-cuerpo text-tinta-2 leading-relaxed max-w-[68ch]">{step.d}</p>
                     </div>
                   </div>
                 ))}
@@ -368,11 +374,11 @@ export default function GuiaMaster() {
         {tabActiva === "docs" && (
           <div>
             {/* Green banner */}
-            <div className="bg-[#E8F5EE] border border-[#1D6A4A]/25 rounded-2xl p-5 mb-4 flex items-start gap-3">
-              <span className="text-2xl shrink-0">✅</span>
+            <div className="bg-verde-soft border border-verde/25 rounded-2xl p-4 sm:p-5 mb-4 flex items-start gap-3">
+              <IconoPaso nombre="checkCircle" className="w-6 h-6 shrink-0 text-verde" />
               <div>
-                <p className="font-semibold text-[#1D6A4A] font-sans mb-1">Preferimos Apostilla Digital</p>
-                <p className="text-sm text-[#1D6A4A]/80 leading-relaxed">
+                <p className="font-bold text-verde-ink font-sans mb-1">Preferimos Apostilla Digital</p>
+                <p className="text-cuerpo text-verde-ink leading-relaxed max-w-[68ch]">
                   En la mayoría de los casos la <strong>apostilla digital con QR verificable</strong> es aceptada por universidades
                   y consulados españoles. Es más rápida, económica y segura que la física.
                   Inspira Legal te guía en obtenerla desde tu país.
@@ -381,11 +387,11 @@ export default function GuiaMaster() {
             </div>
 
             {/* Navy banner */}
-            <div className="bg-primary text-white rounded-2xl p-5 mb-4 flex items-start gap-3">
-              <span className="text-2xl shrink-0">📋</span>
+            <div className="bg-primary text-white rounded-2xl p-4 sm:p-5 mb-4 flex items-start gap-3">
+              <Icono nombre="documento" size={24} className="shrink-0 text-sky" />
               <div>
-                <p className="font-semibold mb-1">Cumple TODAS las etapas del proceso</p>
-                <p className="text-sm text-white/80 leading-relaxed">
+                <p className="font-bold mb-1">Cumple TODAS las etapas del proceso</p>
+                <p className="text-cuerpo text-white/90 leading-relaxed max-w-[68ch]">
                   No envíes documentos incompletos. Una solicitud rechazada por documentación incompleta puede costarte
                   el cupo o la beca. Usa el checklist de esta guía para verificar cada punto antes de enviar.
                 </p>
@@ -393,11 +399,11 @@ export default function GuiaMaster() {
             </div>
 
             {/* Amber card: Diploma + Apostilla = 1 PDF */}
-            <div className="bg-[#F5C842]/10 border border-[#F5C842]/40 rounded-2xl p-5 mb-6 flex items-start gap-3">
-              <span className="text-2xl shrink-0">💡</span>
+            <div className="bg-sun/10 border border-sun/50 rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3">
+              <IconoPaso nombre="sparkles" className="w-6 h-6 shrink-0 text-aviso-ink" />
               <div>
-                <p className="font-semibold text-primary mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
-                <p className="text-sm text-slate-700 leading-relaxed">
+                <p className="font-bold text-primary mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
+                <p className="text-cuerpo text-tinta leading-relaxed max-w-[68ch]">
                   Cuando envíes documentos digitalmente, el diploma y su apostilla deben ir <strong>combinados en un solo archivo PDF</strong>.
                   Sube primero el diploma y luego la apostilla en el mismo documento.
                   No los envíes por separado: algunas plataformas solo admiten un archivo por campo.
@@ -406,12 +412,12 @@ export default function GuiaMaster() {
             </div>
 
             {/* Doc list */}
-            <h3 className="font-serif text-lg font-bold text-primary mb-4">Documentos habituales requeridos</h3>
+            <h3 className="font-serif text-display-2 font-bold text-primary mb-4">Documentos habituales requeridos</h3>
             <div className="space-y-3">
               {[
                 {
                   cat: "Identidad",
-                  icon: "🪪",
+                  icon: "pasaporte",
                   docs: [
                     { n: "Pasaporte vigente", d: "Con mínimo 12 meses de validez restante. Copia de las páginas con datos y fotos." },
                     { n: "DNI o documento de identidad nacional", d: "Puede ser requerido adicionalmente por algunas universidades." },
@@ -419,7 +425,7 @@ export default function GuiaMaster() {
                 },
                 {
                   cat: "Académicos",
-                  icon: "🎓",
+                  icon: "birrete",
                   docs: [
                     { n: "Título universitario apostillado", d: "Original + apostilla. En PDF: diploma + apostilla en un solo archivo." },
                     { n: "Certificado oficial de calificaciones apostillado", d: "Con nota media calculada. Apostillado igual que el título." },
@@ -429,7 +435,7 @@ export default function GuiaMaster() {
                 },
                 {
                   cat: "Motivación y referencias",
-                  icon: "✍️",
+                  icon: "chat",
                   docs: [
                     { n: "Carta de motivación", d: "Documento personalizado por universidad/beca. Máx. 1–2 páginas o 2.000 caracteres según la entidad." },
                     { n: "Cartas de recomendación", d: "1–2 cartas de profesores o directores académicos. Algunas becas exigen carta del rector/vicerrector." },
@@ -438,7 +444,7 @@ export default function GuiaMaster() {
                 },
                 {
                   cat: "Postulación y beca",
-                  icon: "📮",
+                  icon: "paquete",
                   docs: [
                     { n: "Comprobante de preinscripción universitaria", d: "Resguardo o confirmación de la universidad. Obligatorio para AUIP antes de solicitar beca." },
                     { n: "Formulario de solicitud de beca", d: "Específico de cada convocatoria. Algunos exigen formulario en PDF, otros en plataforma online." },
@@ -447,7 +453,7 @@ export default function GuiaMaster() {
                 },
                 {
                   cat: "Económicos y seguros",
-                  icon: "💰",
+                  icon: "euro",
                   docs: [
                     { n: "Seguro médico privado con cobertura en España", d: "Obligatorio para visa de estudios. Debe cubrir al menos repatriación y asistencia sanitaria." },
                     { n: "Acreditación de medios económicos", d: "Extracto bancario, carta de sponsor o declaración de beca. Mínimo aprox. €600/mes durante la estancia." },
@@ -455,17 +461,17 @@ export default function GuiaMaster() {
                 },
               ].map((cat) => (
                 <Card key={cat.cat}>
-                  <h4 className="font-serif font-bold text-primary mb-3 flex items-center gap-2">
-                    <span>{cat.icon}</span>
+                  <h4 className="text-lectura font-bold text-primary mb-3 flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-info-soft text-primary-light grid place-items-center shrink-0"><Icono nombre={cat.icon} size={16} /></span>
                     {cat.cat}
                   </h4>
                   <div className="space-y-3">
                     {cat.docs.map((doc, i) => (
                       <div key={i} className="flex items-start gap-3">
-                        <span className="mt-1 w-2 h-2 rounded-full bg-[#1D6A4A] shrink-0" />
+                        <span className="mt-2 w-2 h-2 rounded-full bg-verde shrink-0" />
                         <div>
-                          <p className="text-sm font-semibold text-slate-800">{doc.n}</p>
-                          <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{doc.d}</p>
+                          <p className="text-cuerpo font-semibold text-tinta">{doc.n}</p>
+                          <p className="text-cuerpo-sm text-tinta-2 leading-relaxed mt-0.5">{doc.d}</p>
                         </div>
                       </div>
                     ))}
@@ -481,8 +487,8 @@ export default function GuiaMaster() {
           <div>
             {/* What is apostille */}
             <Card>
-              <h3 className="font-serif text-lg font-bold text-primary mb-3">¿Qué es la Apostilla de La Haya?</h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+              <h3 className="font-serif text-display-2 font-bold text-primary mb-3">¿Qué es la Apostilla de La Haya?</h3>
+              <p className="text-lectura text-tinta-2 leading-relaxed mb-4 max-w-[68ch]">
                 La Apostilla es una certificación internacional que valida la autenticidad de un documento público
                 emitido en un país firmante del Convenio de La Haya (1961). En el contexto del máster en España,
                 se requiere que tu <strong>título universitario</strong> y tu <strong>certificado de calificaciones</strong> estén
@@ -490,14 +496,14 @@ export default function GuiaMaster() {
               </p>
               <div className="grid sm:grid-cols-3 gap-3">
                 {[
-                  { icon: "🌍", t: "Internacional", d: "Reconocida en +120 países firmantes del Convenio." },
-                  { icon: "✅", t: "Obligatoria", d: "Sin apostilla, el documento no tiene validez oficial en España." },
-                  { icon: "⚡", t: "Digital preferida", d: "La apostilla digital con QR es aceptada y más rápida." },
+                  { icon: "globo", t: "Internacional", d: "Reconocida en +120 países firmantes del Convenio." },
+                  { icon: "check", t: "Obligatoria", d: "Sin apostilla, el documento no tiene validez oficial en España." },
+                  { icon: "rayo", t: "Digital preferida", d: "La apostilla digital con QR es aceptada y más rápida." },
                 ].map((item) => (
-                  <div key={item.t} className="bg-[#F4F6F9] rounded-xl p-4 text-center">
-                    <p className="text-2xl mb-2">{item.icon}</p>
-                    <p className="text-xs font-bold text-primary mb-1">{item.t}</p>
-                    <p className="text-xs text-slate-500 leading-relaxed">{item.d}</p>
+                  <div key={item.t} className="bg-fondo rounded-xl p-4 text-center">
+                    <Icono nombre={item.icon} size={24} className="mx-auto mb-2 text-primary-light" />
+                    <p className="text-cuerpo-sm font-bold text-primary mb-1">{item.t}</p>
+                    <p className="text-cuerpo-sm text-tinta-2 leading-relaxed">{item.d}</p>
                   </div>
                 ))}
               </div>
@@ -505,9 +511,9 @@ export default function GuiaMaster() {
 
             {/* Digital vs Physical */}
             <div className="grid sm:grid-cols-2 gap-4 mb-6">
-              <div className="bg-[#E8F5EE] border border-[#1D6A4A]/25 rounded-2xl p-5">
-                <p className="text-lg mb-2">✅</p>
-                <h4 className="font-serif font-bold text-[#1D6A4A] mb-2">Apostilla Digital (preferida)</h4>
+              <div className="bg-verde-soft border border-verde/25 rounded-2xl p-5">
+                <IconoPaso nombre="checkCircle" className="w-6 h-6 mb-2 text-verde" />
+                <h4 className="text-lectura font-bold text-verde-ink mb-2">Apostilla Digital (preferida)</h4>
                 <ul className="space-y-1.5">
                   {[
                     "Tiene QR de verificación en línea",
@@ -516,15 +522,15 @@ export default function GuiaMaster() {
                     "No requiere envío físico",
                     "Más económica y segura",
                   ].map((it, i) => (
-                    <li key={i} className="text-sm text-[#1D6A4A]/80 flex items-start gap-2">
+                    <li key={i} className="text-cuerpo text-verde-ink flex items-start gap-2">
                       <span className="shrink-0 mt-0.5">•</span>{it}
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5">
-                <p className="text-lg mb-2">📄</p>
-                <h4 className="font-serif font-bold text-primary mb-2">Apostilla Física</h4>
+              <div className="bg-white border border-linea rounded-2xl p-5">
+                <Icono nombre="documento" size={24} className="mb-2 text-primary-light" />
+                <h4 className="text-lectura font-bold text-primary mb-2">Apostilla Física</h4>
                 <ul className="space-y-1.5">
                   {[
                     "Sello/sticker sobre el documento original",
@@ -533,7 +539,7 @@ export default function GuiaMaster() {
                     "Costo más elevado (envíos + tasas)",
                     "Usar cuando la digital no está disponible",
                   ].map((it, i) => (
-                    <li key={i} className="text-sm text-slate-500 flex items-start gap-2">
+                    <li key={i} className="text-cuerpo text-tinta-2 flex items-start gap-2">
                       <span className="shrink-0 mt-0.5">•</span>{it}
                     </li>
                   ))}
@@ -542,11 +548,11 @@ export default function GuiaMaster() {
             </div>
 
             {/* Diploma + Apostilla = 1 PDF */}
-            <div className="bg-[#F5C842]/10 border border-[#F5C842]/40 rounded-2xl p-5 mb-6 flex items-start gap-3">
-              <span className="text-2xl shrink-0">💡</span>
+            <div className="bg-sun/10 border border-sun/50 rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3">
+              <IconoPaso nombre="sparkles" className="w-6 h-6 shrink-0 text-aviso-ink" />
               <div>
-                <p className="font-semibold text-primary mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
-                <p className="text-sm text-slate-700 leading-relaxed">
+                <p className="font-bold text-primary mb-1">Diploma + Apostilla = UN ÚNICO PDF</p>
+                <p className="text-cuerpo text-tinta leading-relaxed max-w-[68ch]">
                   Al enviar tus documentos digitalmente, combina el diploma y su apostilla en <strong>un solo archivo PDF</strong>.
                   Ordena: página 1 = diploma, página 2 en adelante = apostilla. No los envíes como archivos separados.
                 </p>
@@ -554,7 +560,7 @@ export default function GuiaMaster() {
             </div>
 
             {/* By country */}
-            <h3 className="font-serif text-lg font-bold text-primary mb-4">Proceso por país</h3>
+            <h3 className="font-serif text-display-2 font-bold text-primary mb-4">Proceso por país</h3>
             <div className="space-y-3">
               {[
                 {
@@ -602,20 +608,20 @@ export default function GuiaMaster() {
               ].map((item) => (
                 <Card key={item.pais}>
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h4 className="font-serif font-bold text-primary text-base">{item.pais}</h4>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${item.digital ? "bg-[#E8F5EE] text-[#1D6A4A]" : "bg-amber-50 text-amber-700"}`}>
+                    <h4 className="text-lectura font-bold text-primary">{item.pais}</h4>
+                    <span className={`text-meta font-semibold px-2.5 py-1 rounded-full shrink-0 ${item.digital ? "bg-verde-soft text-verde-ink" : "bg-aviso-soft text-aviso-ink"}`}>
                       {item.digital ? "Digital disponible" : "Proceso mixto"}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mb-2 font-sans">
+                  <p className="text-cuerpo-sm text-tinta-2 mb-2 font-sans">
                     <strong>Entidad: </strong>{item.entidad}
                   </p>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-3">{item.desc}</p>
+                  <p className="text-cuerpo text-tinta-2 leading-relaxed mb-1 max-w-[68ch]">{item.desc}</p>
                   <a
                     href={item.portal}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-[#1D6A4A] font-semibold hover:underline"
+                    className="inline-flex items-center min-h-11 text-cuerpo-sm text-primary-light font-semibold hover:underline"
                   >
                     Portal oficial
                     <ExternalIcon />
@@ -626,11 +632,11 @@ export default function GuiaMaster() {
 
             {/* Inspira CTA */}
             <div className="mt-6 bg-primary text-white rounded-2xl p-6 text-center">
-              <p className="font-serif text-lg font-bold mb-2">¿Tienes dudas con tu apostilla?</p>
-              <p className="text-white/80 text-sm mb-4">Inspira Legal te orienta en cada paso del proceso de legalización documental.</p>
+              <p className="font-serif text-display-2 font-bold mb-2">¿Tienes dudas con tu apostilla?</p>
+              <p className="text-white/90 text-cuerpo mb-4">Inspira Legal te orienta en cada paso del proceso de legalización documental.</p>
               <a
                 href="mailto:administracion@inspira-legal.cloud"
-                className="inline-block bg-accent text-primary font-bold text-sm px-6 py-3 rounded-xl hover:bg-accent/90 transition-colors"
+                className="inline-flex items-center min-h-11 bg-accent text-primary-dark font-bold text-cuerpo px-6 rounded-full hover:bg-accent-dark transition-colors"
               >
                 Consultar con Inspira Legal
               </a>
@@ -642,10 +648,10 @@ export default function GuiaMaster() {
         {tabActiva === "visa" && (
           <div>
             {/* Visa hero */}
-            <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light rounded-2xl p-7 mb-6 text-white">
-              <p className="text-xs uppercase tracking-widest text-white/60 mb-2">Trámite migratorio</p>
+            <div className="bg-gradient-to-br from-noche via-primary to-primary-light rounded-3xl p-6 sm:p-7 mb-6 text-white">
+              <p className="text-eyebrow font-bold uppercase text-white/85 mb-2">Trámite migratorio</p>
               <h2 className="font-serif text-2xl font-bold mb-3">Visa y autorización de estancia</h2>
-              <p className="text-white/80 text-sm leading-relaxed max-w-xl">
+              <p className="text-white/90 text-lectura leading-relaxed max-w-[68ch]">
                 Para estudiar en España necesitarás uno de estos dos documentos según la duración de tu programa.
                 Inspira Legal te acompaña en ambos procesos.
               </p>
@@ -655,14 +661,14 @@ export default function GuiaMaster() {
             <div className="grid sm:grid-cols-2 gap-5 mb-6">
               {/* Visa estudios */}
               <div className="bg-white border-2 border-primary/20 rounded-2xl p-6 shadow-sm">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl mb-4">
-                  ✈️
+                <div className="w-12 h-12 rounded-xl bg-info-soft text-primary-light flex items-center justify-center mb-4">
+                  <Icono nombre="avion" size={24} />
                 </div>
-                <h3 className="font-serif font-bold text-primary text-lg mb-1">Visa de Estudios</h3>
-                <p className="text-xs text-amber-600 font-semibold bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 inline-block mb-3">
+                <h3 className="font-serif font-bold text-primary text-display-2 mb-1">Visa de Estudios</h3>
+                <p className="text-meta text-aviso-ink font-semibold bg-aviso-soft border border-accent/30 rounded-full px-2.5 py-1 inline-block mb-3">
                   Duración del máster &gt;90 días
                 </p>
-                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                <p className="text-cuerpo text-tinta-2 leading-relaxed mb-4">
                   Autoriza a residir en España por el período de estudios (hasta 1 o 2 años, renovable).
                   Se solicita en el consulado español del país de origen.
                 </p>
@@ -675,29 +681,29 @@ export default function GuiaMaster() {
                     "Fotografías recientes tipo pasaporte",
                     "Pago de tasa consular",
                   ].map((req, i) => (
-                    <p key={i} className="text-xs text-slate-600 flex items-start gap-2">
-                      <span className="text-[#1D6A4A] mt-0.5 shrink-0">✓</span>
+                    <p key={i} className="text-cuerpo-sm text-tinta-2 flex items-start gap-2">
+                      <IconoPaso nombre="check" className="w-4 h-4 mt-0.5 shrink-0 text-verde" />
                       {req}
                     </p>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
-                  <p className="text-xs text-slate-400">
-                    <strong className="text-slate-600">Plazo de tramitación:</strong> 2–8 semanas según consulado
+                <div className="mt-4 pt-4 border-t border-linea">
+                  <p className="text-cuerpo-sm text-tinta-2">
+                    <strong className="text-tinta">Plazo de tramitación:</strong> 2–8 semanas según consulado
                   </p>
                 </div>
               </div>
 
               {/* Autorización de estancia */}
-              <div className="bg-white border-2 border-[#1D6A4A]/20 rounded-2xl p-6 shadow-sm">
-                <div className="w-12 h-12 rounded-xl bg-[#E8F5EE] border border-[#1D6A4A]/20 flex items-center justify-center text-2xl mb-4">
-                  📋
+              <div className="bg-white border-2 border-verde/20 rounded-2xl p-6 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-verde-soft text-verde flex items-center justify-center mb-4">
+                  <Icono nombre="documento" size={24} />
                 </div>
-                <h3 className="font-serif font-bold text-primary text-lg mb-1">Autorización de Estancia</h3>
-                <p className="text-xs text-[#1D6A4A] font-semibold bg-[#E8F5EE] border border-[#1D6A4A]/20 rounded-full px-2.5 py-1 inline-block mb-3">
+                <h3 className="font-serif font-bold text-primary text-display-2 mb-1">Autorización de Estancia</h3>
+                <p className="text-meta text-verde-ink font-semibold bg-verde-soft border border-verde/20 rounded-full px-2.5 py-1 inline-block mb-3">
                   Estancias ≤90 días
                 </p>
-                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                <p className="text-cuerpo text-tinta-2 leading-relaxed mb-4">
                   Permite entrar a España para programas cortos o presencialidad parcial. Proceso más sencillo.
                   Algunos másteres semipresenciales con módulos intensivos pueden entrar aquí.
                 </p>
@@ -709,15 +715,15 @@ export default function GuiaMaster() {
                     "Medios económicos suficientes",
                     "Reserva de alojamiento",
                   ].map((req, i) => (
-                    <p key={i} className="text-xs text-slate-600 flex items-start gap-2">
-                      <span className="text-[#1D6A4A] mt-0.5 shrink-0">✓</span>
+                    <p key={i} className="text-cuerpo-sm text-tinta-2 flex items-start gap-2">
+                      <IconoPaso nombre="check" className="w-4 h-4 mt-0.5 shrink-0 text-verde" />
                       {req}
                     </p>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
-                  <p className="text-xs text-slate-400">
-                    <strong className="text-slate-600">Nota:</strong> Si el programa supera 90 días, necesitas visa de estudios
+                <div className="mt-4 pt-4 border-t border-linea">
+                  <p className="text-cuerpo-sm text-tinta-2">
+                    <strong className="text-tinta">Nota:</strong> Si el programa supera 90 días, necesitas visa de estudios
                   </p>
                 </div>
               </div>
@@ -725,33 +731,33 @@ export default function GuiaMaster() {
 
             {/* Tips */}
             <Card>
-              <h3 className="font-serif font-bold text-primary mb-4">Consejos clave para el proceso</h3>
+              <h3 className="font-serif font-bold text-primary text-display-2 mb-4">Consejos clave para el proceso</h3>
               <div className="space-y-3">
                 {[
-                  { icon: "🗓️", tip: "Solicita cita consular con al menos 3 meses de anticipación. La demanda en temporada alta puede ser muy alta." },
-                  { icon: "📋", tip: "Ten todos los documentos listos ANTES de solicitar la cita. En muchos consulados no hay segunda oportunidad en la misma cita." },
-                  { icon: "💰", tip: "Acredita medios económicos suficientes (aprox. €600/mes). Puede ser beca concedida, extracto bancario o carta de sponsor." },
-                  { icon: "🏥", tip: "El seguro médico debe estar en español y cubrir todo el período de estancia, incluyendo repatriación." },
-                  { icon: "🏠", tip: "Una dirección de alojamiento confirmada en España facilita el trámite, aunque no siempre es obligatoria en la visa." },
+                  { icon: "calendario", tip: "Solicita cita consular con al menos 3 meses de anticipación. La demanda en temporada alta puede ser muy alta." },
+                  { icon: "documento", tip: "Ten todos los documentos listos ANTES de solicitar la cita. En muchos consulados no hay segunda oportunidad en la misma cita." },
+                  { icon: "euro", tip: "Acredita medios económicos suficientes (aprox. €600/mes). Puede ser beca concedida, extracto bancario o carta de sponsor." },
+                  { icon: "salud", tip: "El seguro médico debe estar en español y cubrir todo el período de estancia, incluyendo repatriación." },
+                  { icon: "casa", tip: "Una dirección de alojamiento confirmada en España facilita el trámite, aunque no siempre es obligatoria en la visa." },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-xl shrink-0">{item.icon}</span>
-                    <p className="text-sm text-slate-600 leading-relaxed">{item.tip}</p>
+                    <span className="w-9 h-9 rounded-xl bg-info-soft text-primary-light grid place-items-center shrink-0"><Icono nombre={item.icon} size={18} /></span>
+                    <p className="text-cuerpo text-tinta-2 leading-relaxed pt-1.5 max-w-[68ch]">{item.tip}</p>
                   </div>
                 ))}
               </div>
             </Card>
 
             {/* Inspira CTA */}
-            <div className="bg-gradient-to-br from-[#012938] via-primary to-primary-light text-white rounded-2xl p-7 text-center mt-2">
-              <p className="font-serif text-xl font-bold mb-2">Inspira Legal te acompaña en ambos procesos</p>
-              <p className="text-white/80 text-sm mb-5 max-w-md mx-auto leading-relaxed">
+            <div className="bg-gradient-to-br from-noche via-primary to-primary-light text-white rounded-3xl p-6 sm:p-7 text-center mt-2">
+              <p className="font-serif text-display-2 font-bold mb-2">Inspira Legal te acompaña en ambos procesos</p>
+              <p className="text-white/90 text-cuerpo mb-5 max-w-md mx-auto leading-relaxed">
                 Desde determinar qué tipo de autorización necesitas hasta preparar el expediente completo para el consulado.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <a
                   href="mailto:administracion@inspira-legal.cloud"
-                  className="inline-block bg-accent text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-accent/90 transition-colors"
+                  className="inline-flex items-center min-h-11 bg-accent text-primary-dark font-bold text-cuerpo px-6 rounded-full hover:bg-accent-dark transition-colors"
                 >
                   Consultar ahora
                 </a>
@@ -759,7 +765,7 @@ export default function GuiaMaster() {
                   href={whatsappDesde("panel-guia-master", "Tengo una consulta sobre mi máster.")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block bg-white/15 border border-white/30 text-white font-semibold text-sm px-7 py-3 rounded-xl hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center min-h-11 bg-white/10 border border-white/25 text-white font-semibold text-cuerpo px-6 rounded-full hover:bg-white/20 transition-colors"
                 >
                   WhatsApp
                 </a>
@@ -774,16 +780,16 @@ export default function GuiaMaster() {
             {/* Progress */}
             <Card>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-serif font-bold text-primary text-lg">Tu progreso</h3>
-                <span className="text-sm font-semibold text-primary-light">{doneCount}/{totalCount} completados</span>
+                <h3 className="font-serif font-bold text-primary text-display-2">Tu progreso</h3>
+                <span className="text-cuerpo font-semibold text-primary-light tabular-nums">{doneCount}/{totalCount} completados</span>
               </div>
-              <div className="w-full bg-[#E2E8F0] rounded-full h-3 mb-2">
+              <div className="w-full bg-linea rounded-full h-2.5 mb-2 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-primary-light to-accent h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${pct}%` }}
+                  className="w-full bg-gradient-to-r from-primary-light to-accent h-full rounded-full origin-left transition-transform duration-500 motion-reduce:transition-none"
+                  style={{ transform: `scaleX(${pct / 100})` }}
                 />
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-cuerpo-sm text-tinta-2">
                 {pct === 100
                   ? "¡Felicidades! Has completado todos los pasos."
                   : pct >= 50
@@ -800,25 +806,26 @@ export default function GuiaMaster() {
                 return (
                   <div key={section.id}>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-serif font-bold text-primary flex items-center gap-2">
-                        <span>{section.icon}</span>
+                      <h3 className="text-lectura font-bold text-primary flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-lg bg-info-soft text-primary-light grid place-items-center shrink-0"><Icono nombre={section.icon} size={16} /></span>
                         {section.title}
                       </h3>
-                      <span className="text-xs text-slate-400 font-sans">
+                      <span className="text-meta text-tinta-2 font-sans tabular-nums">
                         {secDone}/{secTotal}
                       </span>
                     </div>
-                    <div className="bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden shadow-sm divide-y divide-[#F4F6F9]">
+                    <div className="bg-white border border-linea rounded-2xl overflow-hidden shadow-sm divide-y divide-linea">
                       {section.items.map((item) => {
                         const done = !!checked[item.id];
                         return (
                           <button
                             key={item.id}
                             onClick={() => toggleCheck(item.id)}
-                            className={`w-full text-left flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[#F4F6F9] ${done ? "bg-[#F4F6F9]" : "bg-white"}`}
+                            aria-pressed={done}
+                            className={`w-full text-left flex items-center gap-4 px-5 py-4 min-h-[56px] transition-colors hover:bg-fondo ${done ? "bg-fondo" : "bg-white"}`}
                           >
                             <CheckCircle done={done} />
-                            <span className={`text-sm font-sans transition-colors ${done ? "line-through text-slate-400" : "text-slate-700"}`}>
+                            <span className={`text-cuerpo font-sans transition-colors ${done ? "line-through text-tinta-2" : "text-tinta"}`}>
                               {item.text}
                             </span>
                           </button>
@@ -831,13 +838,13 @@ export default function GuiaMaster() {
             </div>
 
             {/* Reset + note */}
-            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-[#E2E8F0]">
-              <p className="text-xs text-slate-400 font-sans">
+            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-linea">
+              <p className="text-cuerpo-sm text-tinta-2 font-sans">
                 Tu progreso se guarda automáticamente en este dispositivo.
               </p>
               <button
                 onClick={() => setChecked({})}
-                className="text-xs text-red-500 hover:text-red-700 font-semibold font-sans"
+                className="inline-flex items-center min-h-11 text-cuerpo-sm text-alto-ink hover:underline font-semibold font-sans"
               >
                 Reiniciar checklist
               </button>
@@ -845,15 +852,15 @@ export default function GuiaMaster() {
 
             {/* CTA */}
             {pct === 100 && (
-              <div className="mt-6 bg-gradient-to-br from-[#012938] via-primary to-primary-light text-white rounded-2xl p-7 text-center">
-                <p className="text-3xl mb-3">🎉</p>
-                <p className="font-serif text-xl font-bold mb-2">¡Lo lograste!</p>
-                <p className="text-white/80 text-sm mb-5 leading-relaxed">
+              <div className="mt-6 bg-gradient-to-br from-noche via-primary to-primary-light text-white rounded-3xl p-6 sm:p-7 text-center">
+                <Icono nombre="trofeo" size={32} className="mx-auto mb-3 text-accent" />
+                <p className="font-serif text-display-2 font-bold mb-2">¡Lo lograste!</p>
+                <p className="text-white/90 text-cuerpo mb-5 leading-relaxed">
                   Has completado todos los pasos del proceso. Inspira Legal está aquí si necesitas asesoría final.
                 </p>
                 <a
                   href="mailto:administracion@inspira-legal.cloud"
-                  className="inline-block bg-accent text-primary font-bold text-sm px-7 py-3 rounded-xl hover:bg-accent/90 transition-colors"
+                  className="inline-flex items-center min-h-11 bg-accent text-primary-dark font-bold text-cuerpo px-6 rounded-full hover:bg-accent-dark transition-colors"
                 >
                   Contactar a Inspira Legal
                 </a>

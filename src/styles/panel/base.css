@@ -1,0 +1,1102 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO · primitivas comunes (25/10/2026)
+   Dueño: B0 (cimientos). La usan todos los bloques; ninguno la edita: lo
+   propio de cada pantalla va en su hoja (cascara, inicio, expediente,
+   tramites, cuenta), que se importan después de esta.
+
+   Reglas:
+   · Todo va con .pnl delante: pisa a panel.css, panel-app.css, panel-*.css y
+     pasos*.css sin editarlas. Core no carga esta hoja (solo PanelCliente).
+   · Solo variables de .pnl (panel.css). Un hex solo como reserva antes de un
+     color-mix() o para el blanco.
+   · Tono por atributo: los componentes leen --tono, --tono-soft y --tono-ink
+     (panel.css: [data-tono]) y declaran el suyo POR DEFECTO con
+     :not([data-tono]); nunca con una reserva dentro de var().
+   · Estas clases declaran display y por eso NO se combinan en el JSX con
+     hidden, md:hidden, lg:flex ni parecidas (las hojas sin capa ganan a las
+     utilidades): .pnl-btn y todas sus variantes, .ex-btn, .pnl-btn-icono,
+     .pnl-aviso, .pnl-ico, .pnl-chev, .pnl-eyebrow, .pnl-barra > i,
+     .pnl-esq-bloque, .pnl-campo, .pnl-casilla-fila, .pnl-info,
+     .pnl-interruptor(-fila), .pnl-segmentos, .pnl-guardado,
+     .pnl-barra-guardar, .pnl-docs-resumen, .pnl-hoja-tirador y
+     .pnl-spinner[data-talla='s']. Ese ocultar va en la hoja del bloque con
+     @media. Los .pnl-btn* declaran position: relative: nunca con fixed,
+     sticky ni absolute de Tailwind.
+   · .pnl-noche, .pnl-hoja, .pnl-burbuja, .pnl-barra-guardar y
+     .pnl-velo-token NO declaran position: la pone el JSX (relative, sticky,
+     fixed…) con Tailwind.
+   · Solo se animan transform y opacity. Movimiento reducido al final.
+   ========================================================================== */
+
+
+/* ── BOTONES ──────────────────────────────────────────────────────────────
+   Una sola forma para todos: píldora, 44 de toque (40 con puntero fino),
+   14/600. Un solo naranja por pantalla (.pnl-btn-cta); el resto, petróleo
+   (.pnl-btn-primario), blanco (.pnl-btn) o texto (.pnl-btn-texto). */
+.pnl .pnl-btn,
+.pnl .pnl-btn-cta,
+.pnl .pnl-btn-primario,
+.pnl .pnl-btn-texto,
+.pnl .pnl-btn-peligro,
+.pnl .pnl-btn-noche,
+.pnl .ex-btn {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--pnl-tap); height: auto;
+  padding: 6px 18px;
+  border-radius: var(--radio-pildora);
+  /* 1.2 y no 1: si el texto no cabe y baja de línea, que respire. */
+  font: 600 var(--fs-cuerpo)/1.2 var(--f-texto);
+  text-align: center;
+  letter-spacing: 0;
+  text-decoration: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--d-corta) var(--salida),
+    background-color var(--d-corta) var(--salida),
+    border-color var(--d-corta) var(--salida),
+    color var(--d-corta) var(--salida),
+    box-shadow var(--d-corta) var(--salida);
+}
+.pnl .pnl-btn svg,
+.pnl .pnl-btn-cta svg,
+.pnl .pnl-btn-primario svg,
+.pnl .pnl-btn-texto svg,
+.pnl .pnl-btn-peligro svg,
+.pnl .pnl-btn-noche svg,
+.pnl .ex-btn svg { width: 16px; height: 16px; flex: 0 0 auto; }
+
+.pnl .pnl-btn:active:not(:disabled),
+.pnl .pnl-btn-cta:active:not(:disabled),
+.pnl .pnl-btn-primario:active:not(:disabled),
+.pnl .pnl-btn-texto:active:not(:disabled),
+.pnl .pnl-btn-peligro:active:not(:disabled),
+.pnl .pnl-btn-noche:active:not(:disabled),
+.pnl .ex-btn:active:not(:disabled) {
+  transform: scale(.96);
+  transition: transform var(--d-toque) var(--muelle);
+}
+.pnl .pnl-btn:focus-visible,
+.pnl .pnl-btn-cta:focus-visible,
+.pnl .pnl-btn-primario:focus-visible,
+.pnl .pnl-btn-texto:focus-visible,
+.pnl .pnl-btn-peligro:focus-visible,
+.pnl .pnl-btn-noche:focus-visible,
+.pnl .pnl-btn-icono:focus-visible,
+.pnl .ex-btn:focus-visible {
+  outline: 2px solid var(--foco-anillo);
+  outline-offset: 2px;
+}
+.pnl .pnl-noche :focus-visible,
+.pnl .pnl-btn-noche:focus-visible,
+.pnl [data-sobre='noche']:focus-visible { outline-color: var(--foco-noche); }
+.pnl label.pnl-btn:focus-within { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-btn:disabled,
+.pnl .pnl-btn-cta:disabled,
+.pnl .pnl-btn-primario:disabled,
+.pnl .pnl-btn-texto:disabled,
+.pnl .pnl-btn-peligro:disabled,
+.pnl .pnl-btn-noche:disabled,
+.pnl .pnl-btn-icono:disabled,
+.pnl .ex-btn:disabled {
+  opacity: .45; cursor: default; transform: none;
+}
+
+/* (a) CTA sol: «Tu próximo paso», «Pagar», «Entrar con Google», hoja de
+   sesión. Texto en tinta sobre sol (7,4:1); antes blanco (2,2:1). */
+.pnl .pnl-btn-cta {
+  border: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: var(--primary-dark);
+  font-weight: 700;
+  box-shadow: var(--sombra-cta);
+}
+.pnl .pnl-btn-cta.pnl-btn-grande { min-height: 48px; font-size: var(--fs-lectura); }
+@media (max-width: 519.98px) {
+  .pnl .pnl-btn-cta.pnl-btn-grande { width: 100%; }
+}
+
+/* (b) Primario petróleo: Guardar, Continuar, Activar avisos, Ver servicio.
+   .ex-btn (pasos.css) se iguala a este; .sec es el secundario y .plano el
+   terciario. */
+.pnl .pnl-btn-primario,
+.pnl .ex-btn {
+  border: 0;
+  background: var(--primary);
+  color: #fff;
+}
+
+/* (c) Secundario blanco. */
+.pnl .pnl-btn,
+.pnl .pnl-btn-peligro,
+.pnl .ex-btn.sec {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--primary);
+}
+.pnl .pnl-btn svg,
+.pnl .ex-btn.sec svg { color: var(--primary-2); }
+
+/* (d) Terciario: texto en petróleo-2, subrayado solo al pasar. */
+.pnl .pnl-btn-texto,
+.pnl .ex-btn.plano {
+  border: 0;
+  background: none;
+  color: var(--primary-2);
+  padding: 6px 8px;
+  text-underline-offset: 3px;
+}
+
+/* (e) Peligro: el secundario en rojo. */
+.pnl .pnl-btn-peligro {
+  color: var(--alto-ink);
+  border-color: rgba(190, 60, 66, .3);
+  border-color: color-mix(in srgb, var(--alto) 30%, transparent);
+}
+.pnl .pnl-btn-peligro svg { color: var(--alto-ink); }
+
+/* (g) Sobre noche: cristal con texto blanco al 100 %. */
+.pnl .pnl-btn-noche {
+  border: 1px solid var(--cristal-borde);
+  background: var(--cristal);
+  color: #fff;
+}
+
+/* Hover solo donde hay ratón: en el teléfono se quedaba «pegado». */
+@media (hover: hover) {
+  .pnl .pnl-btn-cta:hover:not(:disabled) { transform: translateY(-2px); }
+  .pnl .pnl-btn-primario:hover:not(:disabled),
+  .pnl .ex-btn:not(.sec):not(.plano):hover:not(:disabled) {
+    background: var(--primary-2);
+    transform: translateY(-1px);
+  }
+  .pnl .pnl-btn:hover:not(:disabled),
+  .pnl .ex-btn.sec:hover:not(:disabled) {
+    border-color: var(--sky-2);
+    background: var(--sky-soft);
+  }
+  .pnl .pnl-btn-texto:hover:not(:disabled),
+  .pnl .ex-btn.plano:hover:not(:disabled) { text-decoration: underline; }
+  .pnl .pnl-btn-peligro:hover:not(:disabled) {
+    background: var(--alto-soft);
+    border-color: rgba(190, 60, 66, .5);
+    border-color: color-mix(in srgb, var(--alto) 50%, transparent);
+  }
+  .pnl .pnl-btn-noche:hover:not(:disabled) {
+    background: var(--accent); border-color: var(--accent); color: var(--primary-dark);
+  }
+  .pnl .pnl-btn-icono:hover:not(:disabled) { border-color: var(--sky-2); background: var(--sky-soft); }
+  .pnl .pnl-btn-icono[data-sobre='noche']:hover:not(:disabled) { background: rgba(255, 255, 255, .18); border-color: var(--cristal-borde); }
+}
+.pnl .pnl-btn-noche:active:not(:disabled) {
+  background: var(--accent); border-color: var(--accent); color: var(--primary-dark);
+}
+
+/* (f) Botón de icono: atrás, menú, cerrar, recargar. */
+.pnl .pnl-btn-icono {
+  position: relative;
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  width: var(--pnl-tap); height: var(--pnl-tap);
+  padding: 0;
+  border: 1px solid var(--line); border-radius: var(--radio-s);
+  background: #fff; color: var(--primary);
+  font: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--d-corta) var(--salida),
+    background-color var(--d-corta) var(--salida),
+    border-color var(--d-corta) var(--salida);
+}
+.pnl .pnl-btn-icono svg { width: 18px; height: 18px; }
+.pnl .pnl-btn-icono:active:not(:disabled) { transform: scale(.94); transition: transform var(--d-toque) var(--muelle); }
+.pnl .pnl-btn-icono[data-sobre='noche'] {
+  border-color: var(--cristal-borde);
+  background: var(--cristal);
+  color: #fff;
+}
+
+/* (h) TALLA S: la única forma de un botón de 36. Se ve de 36 y llega a 44
+   de toque con un ::before invisible en puntero grueso. */
+.pnl .pnl-btn[data-talla='s'],
+.pnl .pnl-btn-primario[data-talla='s'],
+.pnl .pnl-btn-texto[data-talla='s'],
+.pnl .pnl-btn-peligro[data-talla='s'],
+.pnl .pnl-btn-noche[data-talla='s'] {
+  min-height: var(--pnl-tap-s);
+  padding: 4px 12px;
+  font-size: var(--fs-cuerpo-sm);
+  gap: 6px;
+}
+.pnl .pnl-btn-texto[data-talla='s'] { padding: 4px 8px; }
+.pnl .pnl-btn-icono[data-talla='s'] {
+  width: var(--pnl-tap-s); height: var(--pnl-tap-s);
+  border-radius: 10px;
+}
+.pnl .pnl-btn-icono[data-talla='s'] svg { width: 16px; height: 16px; }
+@media (pointer: coarse) {
+  .pnl .pnl-btn[data-talla='s']::before,
+  .pnl .pnl-btn-primario[data-talla='s']::before,
+  .pnl .pnl-btn-texto[data-talla='s']::before,
+  .pnl .pnl-btn-peligro[data-talla='s']::before,
+  .pnl .pnl-btn-noche[data-talla='s']::before,
+  .pnl .pnl-btn-icono[data-talla='s']::before,
+  .pnl .pnl-aviso .pnl-btn::before,
+  .pnl .ex-arch button::before {
+    content: "";
+    position: absolute;
+    inset: calc((var(--pnl-tap-s) - 44px) / 2);
+  }
+}
+
+
+/* ── CHIP ─────────────────────────────────────────────────────────────────
+   Estado en píldora: fondo y tinta del tono, sin borde. Los alias de
+   panel.css (.pnl-chip-ok…) se traducen al tono; data-tono manda sobre
+   ellos. Pisa panel.css:232-245. */
+.pnl .pnl-chip {
+  min-height: 26px;
+  padding: 3px 10px;
+  gap: 6px;
+  border: 0; border-radius: var(--radio-pildora);
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.35;
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+.pnl .pnl-chip .punto { width: 6px; height: 6px; border-radius: 999px; background: currentColor; flex: 0 0 auto; }
+.pnl .pnl-chip[data-talla='sm'] { min-height: 22px; padding: 2px 8px; font-size: var(--fs-meta); font-weight: 600; }
+
+.pnl .pnl-chip:not([data-tono]) { --tono-soft: var(--neutro-soft); --tono-ink: var(--neutro-ink); }
+.pnl .pnl-chip-ok:not([data-tono])      { --tono-soft: var(--ok-soft);     --tono-ink: var(--ok-ink); }
+.pnl .pnl-chip-aviso:not([data-tono])   { --tono-soft: var(--aviso-soft);  --tono-ink: var(--aviso-ink); }
+.pnl .pnl-chip-alto:not([data-tono])    { --tono-soft: var(--alto-soft);   --tono-ink: var(--alto-ink); }
+.pnl .pnl-chip-info:not([data-tono]),
+.pnl .pnl-chip-etapa:not([data-tono])   { --tono-soft: var(--info-soft);   --tono-ink: var(--info-ink); }
+.pnl .pnl-chip-tipo:not([data-tono]),
+.pnl .pnl-chip-neutro:not([data-tono]),
+.pnl .pnl-chip-neutral:not([data-tono]) { --tono-soft: var(--neutro-soft); --tono-ink: var(--neutro-ink); }
+.pnl .pnl-chip-titular:not([data-tono]) { --tono-soft: var(--aviso-soft);  --tono-ink: var(--aviso-ink); }
+
+
+/* ── CONTADOR ─────────────────────────────────────────────────────────────
+   Campana, ☰, pestañas, menú, Novedades, ¿Qué me falta? y RutaPasos: el
+   número en tinta sobre sol (7,4:1; antes blanco, 2,2:1). Cada uno conserva
+   su posición y su display; aquí solo el dibujo. */
+.pnl .pnl-badge,
+.pnl .pnl-tab-badge,
+.pnl .pnl-burger-punto,
+.pnl .pnl-avc-cuenta,
+.pnl .pnl-nov-cuenta,
+.pnl .ex-falta-cuenta,
+.pnl .rp-n {
+  min-width: 18px; height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radio-pildora);
+  background: var(--accent);
+  color: var(--primary-dark);
+  font-size: 11px; font-weight: 800; font-style: normal; line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px #fff;
+}
+/* Novedades lleva texto («3 nuevas»): un poco más de aire y centrado. */
+.pnl .pnl-nov-cuenta { display: inline-flex; align-items: center; padding: 0 8px; white-space: nowrap; }
+.pnl .pnl-side .pnl-badge,
+.pnl .pnl-side .pnl-tab-badge,
+.pnl .pnl-side .pnl-burger-punto,
+.pnl .pnl-side .pnl-avc-cuenta,
+.pnl .pnl-side .pnl-nov-cuenta,
+.pnl .pnl-side .ex-falta-cuenta,
+.pnl .pnl-side .rp-n { box-shadow: 0 0 0 2px var(--primary); }
+
+
+/* ── EYEBROW Y TÍTULO ─────────────────────────────────────────────────────
+   La seña de marca sobre claro: 11/700 en mayúsculas, petróleo-2 (8,9:1)
+   con el punto sol de 6 px. Sobre noche, en sol claro. */
+.pnl .pnl-eyebrow {
+  display: flex; align-items: center; gap: 6px;
+  margin: 0;
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.2;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--primary-2);
+}
+.pnl .pnl-eyebrow .punto {
+  width: 6px; height: 6px; flex: 0 0 auto;
+  border-radius: 999px; background: var(--accent);
+}
+.pnl .pnl-noche .pnl-eyebrow,
+.pnl .pnl-eyebrow[data-sobre='noche'] { color: var(--accent-2); }
+
+.pnl .pnl-display {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.2; letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl .pnl-noche .pnl-display { color: #fff; }
+
+
+/* ── AVISO ────────────────────────────────────────────────────────────────
+   Pule la .pnl-aviso de panel.css:371-381 (AvisoPerfil): icono, texto y
+   botón en rejilla; el tono por defecto es aviso, así AvisoPerfil.jsx sigue
+   igual sin tocarlo. */
+.pnl .pnl-aviso:not([data-tono]) { --tono: var(--aviso); --tono-soft: var(--aviso-soft); --tono-ink: var(--aviso-ink); }
+.pnl .pnl-aviso {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+  border: 1px solid rgba(250, 148, 58, .3);
+  border: 1px solid color-mix(in srgb, var(--tono) 30%, transparent);
+}
+.pnl .pnl-aviso[data-importante]:not([data-importante='false']):not([data-importante='0']) {
+  border-left: 3px solid var(--accent);
+}
+.pnl .pnl-aviso-icono {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; flex: 0 0 auto;
+  border-radius: 10px;
+  /* El tono al 16 % sobre el fondo del aviso: con #fff (el 14 % del plan) el
+     tile se fundía con el fondo y desaparecía. */
+  background: rgba(250, 148, 58, .16);
+  background: color-mix(in srgb, var(--tono) 16%, var(--tono-soft));
+  color: var(--tono-ink);
+}
+.pnl .pnl-aviso-icono svg { width: 16px; height: 16px; }
+.pnl .pnl-aviso-texto {
+  margin: 0; min-width: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45;
+  color: var(--tono-ink);
+}
+.pnl .pnl-aviso-texto b,
+.pnl .pnl-aviso-texto strong { font-weight: 700; }
+/* Sin icono, el texto ocupa su sitio. */
+.pnl .pnl-aviso > .pnl-aviso-texto:first-child { grid-column: 1 / 3; }
+/* El botón del aviso va en talla s (anula el height 36 de panel.css:381). */
+.pnl .pnl-aviso .pnl-btn {
+  min-height: var(--pnl-tap-s);
+  padding: 4px 12px;
+  font-size: var(--fs-cuerpo-sm);
+}
+@media (max-width: 519.98px) {
+  .pnl .pnl-aviso > .pnl-btn,
+  .pnl .pnl-aviso > .pnl-btn-primario,
+  .pnl .pnl-aviso > .pnl-btn-texto { grid-column: 2 / -1; justify-self: start; }
+}
+
+
+/* ── TARJETA E ICONO ──────────────────────────────────────────────────── */
+.pnl .pnl-tarjeta {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  padding: var(--pad-tarjeta);
+  box-shadow: var(--sombra-1);
+}
+.pnl .pnl-tarjeta[data-anidada]:not([data-anidada='false']):not([data-anidada='0']) {
+  border-radius: var(--radio-m);
+  box-shadow: none;
+}
+
+.pnl .pnl-card {
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra-1);
+}
+@media (hover: hover) {
+  .pnl .pnl-card:hover { transform: translateY(-2px); box-shadow: var(--sombra-2); }
+}
+
+.pnl .pnl-ico:not([data-tono]) { --tono-soft: var(--sky-soft); --tono-ink: var(--primary-2); }
+.pnl .pnl-ico {
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  width: 32px; height: 32px; border-radius: 10px;
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+.pnl .pnl-ico[data-talla='s']  { width: 28px; height: 28px; border-radius: 9px; }
+.pnl .pnl-ico[data-talla='m']  { width: 32px; height: 32px; border-radius: 10px; }
+.pnl .pnl-ico[data-talla='l']  { width: 36px; height: 36px; border-radius: 12px; }
+.pnl .pnl-ico[data-talla='xl'] { width: 44px; height: 44px; border-radius: 14px; }
+
+
+/* ── PLIEGUE ──────────────────────────────────────────────────────────────
+   El chevrón de <IconoPaso nombre="chevron" className="pnl-chev"/>: gira
+   180° cuando su control está abierto. */
+.pnl .pnl-chev {
+  width: 18px; height: 18px; flex: 0 0 auto;
+  color: var(--trazo);
+  transition: transform var(--d-corta) var(--salida), color var(--d-corta) var(--salida);
+}
+.pnl [aria-expanded='true'] > .pnl-chev,
+.pnl [aria-expanded='true'] .pnl-chev-propio,
+.pnl details[open] > summary .pnl-chev {
+  transform: rotate(180deg);
+  color: var(--primary-2);
+}
+.pnl .pnl-despliega { animation: pnlDespliega var(--d-media) var(--salida) both; }
+
+
+/* ── PROGRESO ─────────────────────────────────────────────────────────────
+   <div class="pnl-barra" style="--p: 45"><i/></div>: la barra crece con
+   scaleX, no con width. */
+.pnl .pnl-barra {
+  height: 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--pista);
+  overflow: hidden;
+}
+.pnl .pnl-barra > i {
+  display: block; height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+  transform-origin: left center;
+  transform: scaleX(calc(var(--p, 0) / 100));
+  transition: transform var(--d-larga) var(--salida);
+}
+
+
+/* ── NOCHE ────────────────────────────────────────────────────────────────
+   Solo lateral, saludo, bienvenida o vacío de página, cabecera de perfil,
+   guías y becas. SIN position: el JSX le pone la suya (relative/sticky),
+   que la retícula necesita. data-talla s | l cambia el tamaño de los halos. */
+.pnl .pnl-noche {
+  --halo-w: 420px; --halo-h: 300px;
+  background:
+    radial-gradient(var(--halo-w, 420px) var(--halo-h, 300px) at 88% 0%, var(--halo-cielo), transparent 70%),
+    radial-gradient(var(--halo-w, 420px) var(--halo-h, 300px) at 2% 100%, var(--halo-sol), transparent 68%),
+    var(--noche);
+  color: #fff;
+  isolation: isolate;
+  overflow: hidden;
+}
+.pnl .pnl-noche[data-talla='s'] { --halo-w: 300px; --halo-h: 200px; }
+.pnl .pnl-noche[data-talla='l'] { --halo-w: 520px; --halo-h: 340px; }
+.pnl .pnl-noche::before {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--reticula-trazo) 1px, transparent 1px),
+    linear-gradient(90deg, var(--reticula-trazo) 1px, transparent 1px);
+  background-size: var(--reticula) var(--reticula);
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent 82%);
+  mask-image: linear-gradient(to bottom, #000, transparent 82%);
+}
+/* Tile de cristal QUE LLEVA TEXTO sobre noche (cifras, líneas de contacto). */
+.pnl .pnl-cristal-texto {
+  background: var(--cristal-texto);
+  border: 1px solid var(--cristal-borde);
+  color: var(--sobre-noche-2);
+}
+
+
+/* ── CAMPO ────────────────────────────────────────────────────────────────
+   Una sola familia para visado, estancia, PAC, modificatoria y perfil:
+   la etiqueta ENCIMA de la caja, la caja de 48 (42 con puntero fino) y
+   16 px en táctil para que iOS no amplíe al enfocar. */
+.pnl .pnl-campo { display: grid; gap: 6px; min-width: 0; }
+.pnl .pnl-campo-etiqueta {
+  margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.4;
+  color: var(--ink-2);
+}
+.pnl .pnl-campo-etiqueta small {
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--muted);
+}
+.pnl .pnl-campo-control {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--trazo);
+  border-radius: var(--radio-s);
+  background-color: #fff;
+  font: 500 var(--fs-campo)/1.4 var(--f-texto);
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--d-corta) var(--salida), box-shadow var(--d-corta) var(--salida);
+}
+@media (pointer: fine) {
+  .pnl .pnl-campo-control { min-height: 42px; }
+}
+.pnl .pnl-campo-control::placeholder { color: var(--muted); opacity: 1; }
+.pnl select.pnl-campo-control {
+  -webkit-appearance: none; appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a93a2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+}
+.pnl textarea.pnl-campo-control {
+  min-height: 112px;
+  padding: 12px 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.pnl .pnl-campo-control[data-estado='falta'] {
+  border: 1.5px solid var(--aviso-ink);
+  background-color: #fffaf3;
+}
+.pnl .pnl-campo-control[data-estado='error'],
+.pnl .pnl-campo-control[aria-invalid='true'] {
+  border: 1.5px solid var(--alto);
+}
+.pnl .pnl-campo-control:focus,
+.pnl .pnl-campo-control:focus-visible {
+  border-color: var(--foco-anillo);
+  box-shadow: 0 0 0 1px var(--foco-anillo), var(--foco);
+}
+/* El rango del presupuesto: la pista no da para anillo, lo lleva el tirador. */
+.pnl input[type='range']:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--foco-anillo); }
+.pnl input[type='range']:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--foco-anillo); }
+.pnl .pnl-campo-control:disabled,
+.pnl .pnl-campo-control[readonly] {
+  background-color: var(--fondo-suave);
+  color: var(--ink-2);
+}
+.pnl .pnl-campo-control:disabled { cursor: default; }
+.pnl .pnl-campo-ayuda {
+  margin: 0;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+  color: var(--alto-ink);
+}
+
+/* Casilla: el <label> entero es el objetivo táctil de 44. */
+.pnl .pnl-casilla-fila {
+  display: flex; align-items: center; gap: 12px;
+  min-height: var(--pnl-tap);
+  cursor: pointer;
+  font-size: var(--fs-cuerpo); line-height: 1.45;
+  color: var(--ink);
+}
+.pnl .pnl-casilla-fila input[type='checkbox'],
+.pnl .pnl-casilla-fila input[type='radio'] {
+  width: 20px; height: 20px; flex: 0 0 auto;
+  margin: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* La ⓘ: 20 visibles, 44 de toque. Su burbuja es .pnl-burbuja. */
+.pnl .pnl-info {
+  position: relative;
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  width: 20px; height: 20px;
+  padding: 0;
+  border: 1px solid var(--trazo); border-radius: var(--radio-pildora);
+  background: #fff;
+  font: 700 var(--fs-meta)/1 var(--f-texto);
+  color: var(--primary-2);
+  cursor: pointer;
+}
+.pnl .pnl-info::before { content: ""; position: absolute; inset: -12px; }
+.pnl .pnl-info:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-burbuja {
+  width: min(280px, 80vw);
+  padding: 10px 12px;
+  border-radius: var(--radio-s);
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  box-shadow: var(--sombra-3);
+}
+
+/* Interruptor: solo la pista visual. Siempre dentro de una
+   .pnl-interruptor-fila, que es la fila tocable de 44 (un <label> con el
+   input dentro, o el propio <button>). Encendido con aria-checked/
+   aria-pressed en la fila, data-on en la pista o un input:checked delante. */
+.pnl .pnl-interruptor-fila {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: var(--pnl-tap);
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.pnl button.pnl-interruptor-fila {
+  width: 100%;
+  padding: 0; border: 0; background: none;
+  font: inherit; color: inherit;
+}
+.pnl .pnl-interruptor-fila:disabled,
+.pnl .pnl-interruptor-fila[aria-disabled='true'] { opacity: .6; cursor: default; }
+.pnl .pnl-interruptor-fila:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; border-radius: var(--radio-s); }
+.pnl .pnl-interruptor {
+  position: relative;
+  display: inline-block; flex: 0 0 auto;
+  width: 44px; height: 26px;
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-tile);
+  box-shadow: inset 0 0 0 1px var(--trazo);
+  transition: background-color var(--d-corta) var(--salida), box-shadow var(--d-corta) var(--salida);
+}
+.pnl .pnl-interruptor::after {
+  content: "";
+  position: absolute; top: 2px; left: 2px;
+  width: 22px; height: 22px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(1, 41, 56, .3);
+  transition: transform var(--d-corta) var(--muelle);
+}
+.pnl .pnl-interruptor[data-on='1'],
+.pnl .pnl-interruptor[data-on='true'],
+.pnl [aria-checked='true'] > .pnl-interruptor,
+.pnl [aria-pressed='true'] > .pnl-interruptor,
+.pnl .pnl-interruptor-fila[aria-checked='true'] .pnl-interruptor,
+.pnl .pnl-interruptor-fila[aria-pressed='true'] .pnl-interruptor,
+.pnl input:checked + .pnl-interruptor {
+  background: var(--primary);
+  box-shadow: none;
+}
+.pnl .pnl-interruptor[data-on='1']::after,
+.pnl .pnl-interruptor[data-on='true']::after,
+.pnl [aria-checked='true'] > .pnl-interruptor::after,
+.pnl [aria-pressed='true'] > .pnl-interruptor::after,
+.pnl .pnl-interruptor-fila[aria-checked='true'] .pnl-interruptor::after,
+.pnl .pnl-interruptor-fila[aria-pressed='true'] .pnl-interruptor::after,
+.pnl input:checked + .pnl-interruptor::after { transform: translateX(18px); }
+.pnl input:focus-visible + .pnl-interruptor { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+
+/* Segmentos: pestañas en píldora con desplazamiento lateral. 52 de alto. */
+.pnl .pnl-segmentos {
+  display: flex; gap: 4px;
+  max-width: 100%;
+  padding: 4px;
+  border-radius: var(--radio-pildora);
+  background: var(--fondo-tile);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.pnl .pnl-segmentos::-webkit-scrollbar { display: none; }
+.pnl .pnl-segmentos > button,
+.pnl .pnl-segmentos > a {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 0 0 auto;
+  min-height: var(--pnl-tap);
+  padding: 0 16px;
+  border: 0; border-radius: var(--radio-pildora);
+  background: transparent;
+  font: 600 var(--fs-cuerpo)/1.2 var(--f-texto);
+  color: var(--ink-2);
+  white-space: nowrap; text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--d-corta) var(--salida), color var(--d-corta) var(--salida);
+}
+.pnl .pnl-segmentos > :is(button, a) svg { width: 16px; height: 16px; flex: 0 0 auto; }
+@media (hover: hover) {
+  .pnl .pnl-segmentos > :is(button, a):hover:not([aria-selected='true']):not([aria-pressed='true']) {
+    background: #fff; color: var(--primary);
+  }
+}
+.pnl .pnl-segmentos > [aria-selected='true'],
+.pnl .pnl-segmentos > [aria-pressed='true'] {
+  background: var(--primary);
+  color: #fff;
+}
+.pnl .pnl-segmentos > :is(button, a):focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: -2px; }
+
+/* «Guardado · se guarda solo». Con data-ok, el check entra con un muelle. */
+.pnl .pnl-guardado {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+  color: var(--muted);
+}
+.pnl .pnl-guardado[data-ok]:not([data-ok='false']):not([data-ok='0']) { color: var(--ok-ink); }
+.pnl .pnl-guardado svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.pnl .pnl-guardado[data-ok]:not([data-ok='false']):not([data-ok='0']) svg {
+  animation: pnlGuardadoEntra var(--d-corta) var(--muelle) both;
+}
+@keyframes pnlGuardadoEntra { from { transform: scale(.8); opacity: 0; } to { transform: none; opacity: 1; } }
+
+
+/* ── BARRA DE GUARDAR ─────────────────────────────────────────────────────
+   Solo el dibujo. La posición la pone el JSX:
+   `sticky bottom-[var(--selector-alto)] z-[14]`. */
+.pnl .pnl-barra-guardar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, .92);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.4;
+  color: var(--muted);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pnl .pnl-barra-guardar { background: rgba(255, 255, 255, .98); }
+}
+.pnl .pnl-barra-guardar:is([data-sucio='1'], [data-sucio='true'], [data-sucio='']),
+.pnl .pnl-barra-guardar :is([data-sucio='1'], [data-sucio='true'], [data-sucio='']) {
+  font-weight: 600;
+  color: var(--aviso-ink);
+}
+
+
+/* ── FICHA DE DOCUMENTO ───────────────────────────────────────────────────
+   La comparten DocCard (máster y visado), TarjetaDocumento (estancia, PAC)
+   y la copia de modificatoria. Cada selector de pasos.css:134-180 con .pnl
+   delante; pasos.css no se toca (lo usa Core). */
+.pnl .ex-doc {
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 6px 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line-suave);
+}
+.pnl .ex-doc-ico {
+  width: 40px; height: 40px;
+  border-radius: var(--radio-s);
+  background: var(--fondo-suave);
+  color: var(--primary-2);
+}
+.pnl .ex-doc-ico svg { width: 18px; height: 18px; }
+.pnl .ex-doc[data-e='aprobado'] .ex-doc-ico { background: var(--ok-soft); color: var(--ok-ink); }
+.pnl .ex-doc[data-e='observado'] .ex-doc-ico,
+.pnl .ex-doc[data-e='rechazado'] .ex-doc-ico { background: var(--alto-soft); color: var(--alto-ink); }
+.pnl .ex-doc[data-e='solicitado'] .ex-doc-ico { background: var(--aviso-soft); color: var(--aviso-ink); }
+.pnl .ex-doc-ico i {
+  min-width: 18px; height: 18px;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px; font-weight: 800; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pnl .ex-doc-fila .n {
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .ex-doc-desc {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* Chip de estado. Mapa genérico: ok → ok, on → info, warn → aviso (un
+   plazo, como «Hasta …» en Postulaciones), no → alto, ped → aviso (sale el
+   morado), info → neutro. Dentro de la ficha, warn es «Por corregir» → alto. */
+.pnl .ex-est {
+  min-height: 26px;
+  padding: 3px 10px;
+  gap: 6px;
+  border-radius: var(--radio-pildora);
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.35;
+  background: var(--neutro-soft);
+  color: var(--neutro-ink);
+}
+.pnl .ex-est svg { width: 12px; height: 12px; }
+.pnl .ex-est[data-e='ok']   { background: var(--ok-soft);     color: var(--ok-ink); }
+.pnl .ex-est[data-e='on']   { background: var(--info-soft);   color: var(--info-ink); }
+.pnl .ex-est[data-e='warn'] { background: var(--aviso-soft);  color: var(--aviso-ink); }
+.pnl .ex-est[data-e='no']   { background: var(--alto-soft);   color: var(--alto-ink); }
+.pnl .ex-est[data-e='ped']  { background: var(--aviso-soft);  color: var(--aviso-ink); }
+.pnl .ex-est[data-e='info'] { background: var(--neutro-soft); color: var(--neutro-ink); }
+.pnl .ex-doc .ex-est[data-e='warn'] { background: var(--alto-soft); color: var(--alto-ink); }
+
+.pnl .ex-doc-obs {
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radio-s);
+  background: var(--alto-soft);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink);
+}
+.pnl .ex-doc-obs b { color: var(--alto-ink); font-weight: 700; }
+.pnl .ex-doc-obs[data-k='ped'] { background: var(--aviso-soft); }
+.pnl .ex-doc-obs[data-k='ped'] b { color: var(--aviso-ink); }
+
+.pnl .ex-doc-pliegues { gap: 4px 16px; }
+.pnl .ex-doc-pliegues summary {
+  gap: 8px;
+  min-height: var(--pnl-tap);
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--primary-2);
+}
+.pnl .ex-doc-pliegues summary::after {
+  content: "";
+  width: 8px; height: 8px; flex: 0 0 auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--d-corta) var(--salida);
+}
+.pnl .ex-doc-pliegues details[open] summary::after {
+  content: "";
+  transform: translateY(2px) rotate(-135deg);
+}
+.pnl .ex-doc-pliegues summary:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; border-radius: 6px; }
+.pnl .ex-doc-cuerpo {
+  margin: 4px 0 6px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--line);
+  font-size: var(--fs-cuerpo-sm); line-height: 1.55;
+  color: var(--ink-2);
+}
+
+
+/* ── ARCHIVOS Y SUBIDA ──────────────────────────────────────────────────── */
+.pnl .ex-doc-archivos { gap: 6px; }
+.pnl .ex-arch {
+  min-height: 48px;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radio-s);
+  background: var(--fondo-suave);
+  border: 1px solid var(--line-suave);
+  font-size: var(--fs-cuerpo-sm);
+}
+/* Con los botones de 36, el nombre se quedaba en «cv…» en la columna
+   estrecha: si no cabe con 8rem, los botones bajan a su propia línea. */
+.pnl .ex-arch { flex-wrap: wrap; row-gap: 6px; }
+.pnl .ex-arch > svg { color: var(--ink-2); }
+.pnl .ex-arch .nm { flex: 1 1 8rem; font-size: var(--fs-cuerpo-sm); font-weight: 600; color: var(--ink); }
+.pnl .ex-arch small { font-size: var(--fs-meta); color: var(--muted); }
+.pnl .ex-arch .acciones { gap: 6px; }
+/* «Ver», «Eliminar»…: el aspecto de .pnl-btn data-talla='s'. */
+.pnl .ex-arch button {
+  position: relative;
+  flex: 0 0 auto;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--pnl-tap-s);
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-pildora);
+  background: #fff;
+  font: 600 var(--fs-cuerpo-sm)/1.2 var(--f-texto);
+  color: var(--primary-2);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--d-corta) var(--salida), border-color var(--d-corta) var(--salida), transform var(--d-corta) var(--salida);
+}
+.pnl .ex-arch button svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.pnl .ex-arch button.rojo,
+.pnl .ex-arch button[data-peligro] {
+  color: var(--alto-ink);
+  background: transparent;
+  border-color: transparent;
+}
+.pnl .ex-arch button:active:not(:disabled) { transform: scale(.96); transition: transform var(--d-toque) var(--muelle); }
+.pnl .ex-arch button:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .ex-arch button:disabled { opacity: .45; cursor: default; }
+@media (hover: hover) {
+  .pnl .ex-arch button:not(.rojo):not([data-peligro]):hover:not(:disabled) { border-color: var(--sky-2); background: var(--sky-soft); }
+  .pnl .ex-arch button:is(.rojo, [data-peligro]):hover:not(:disabled) { background: var(--alto-soft); }
+}
+
+.pnl .ex-subir {
+  min-height: 56px;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px dashed var(--trazo);
+  border-radius: 14px;
+  background: var(--fondo-suave);
+  font-size: var(--fs-cuerpo); font-weight: 600; line-height: 1.3;
+  color: var(--primary-2);
+  transition:
+    border-color var(--d-corta) var(--salida),
+    background-color var(--d-corta) var(--salida),
+    color var(--d-corta) var(--salida);
+}
+.pnl .ex-subir svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.pnl .ex-subir:hover,
+.pnl .ex-subir[data-arrastre]:not([data-arrastre='false']):not([data-arrastre='0']) {
+  border-color: var(--sky-2);
+  background: var(--info-soft);
+  color: var(--primary);
+}
+.pnl .ex-subir:focus-within { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .ex-nota {
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.45;
+  color: var(--muted);
+}
+
+/* Resumen de documentos: la cifra grande, «de N aprobados», una fila de
+   chips sm y una .pnl-barra. Marcado:
+   <div class="pnl-docs-resumen">
+     <p class="pnl-docs-resumen-cifra"><b>4</b><span>de 9 aprobados</span></p>
+     <div class="pnl-docs-resumen-chips">…chips sm…</div>
+     <div class="pnl-barra" style="--p: 44"><i/></div>
+   </div> */
+.pnl .pnl-docs-resumen { display: grid; gap: 10px; min-width: 0; }
+.pnl .pnl-docs-resumen-cifra {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  margin: 0;
+}
+.pnl .pnl-docs-resumen-cifra > b,
+.pnl .pnl-docs-resumen-cifra > strong {
+  font-family: var(--f-display); font-weight: 700; font-size: 32px; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+}
+.pnl .pnl-docs-resumen-cifra > span {
+  font-size: var(--fs-cuerpo); font-weight: 600;
+  color: var(--ink-2);
+}
+.pnl .pnl-docs-resumen-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+
+/* ── VACÍO, ERROR, ESQUELETO, HOJA Y SPINNER ───────────────────────────── */
+
+/* Vacío suave (dentro de una pantalla; el de página entera es .pnl-vacio,
+   en noche). Marcado: .pnl-vacio-suave > .pnl-vacio-suave-icono + título
+   (h3/h4/strong) + p + un .pnl-btn opcional. */
+.pnl .pnl-vacio-suave {
+  padding: 28px 20px;
+  border-radius: var(--radio-m);
+  background: var(--fondo-suave);
+  text-align: center;
+}
+.pnl .pnl-vacio-suave-icono {
+  display: grid; place-items: center;
+  width: 48px; height: 48px;
+  margin: 0 auto 12px;
+  border-radius: var(--radio-m);
+  background: var(--fondo-tile);
+  color: var(--ink-2);
+}
+.pnl .pnl-vacio-suave-icono svg { width: 22px; height: 22px; }
+.pnl .pnl-vacio-suave > :is(h2, h3, h4, strong) {
+  display: block;
+  margin: 0 0 6px;
+  font-family: var(--f-texto);
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-vacio-suave p {
+  max-width: 36ch;
+  margin: 0 auto;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+.pnl .pnl-vacio-suave :is(.pnl-btn, .pnl-btn-primario, .pnl-btn-texto) { margin-top: 14px; }
+
+/* Error: caja de bloque (como <p> o <div>; MisPagos la usa de las dos
+   formas), sin rejilla ni hueco para botones. */
+.pnl .pnl-error {
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  background: var(--alto-soft);
+  border: 1px solid rgba(190, 60, 66, .25);
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45;
+  color: var(--alto-ink);
+}
+
+/* Esqueletos. .pnl-esq-tarjeta SIGUE siendo el contenedor blanco (panel.css:
+   361, Esqueleto.jsx); dentro, líneas que respiran (pnlRespira, como hoy).
+   .pnl-esq-bloque es el bloque suelto: fila 60, tarjeta 132, hero 210. */
+.pnl .pnl-esq-tarjeta {
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+}
+.pnl .pnl-esq {
+  background: linear-gradient(90deg, var(--fondo-tile) 0%, #f8fbfd 50%, var(--fondo-tile) 100%);
+  animation: pnlRespira 1.4s ease-in-out infinite;
+}
+.pnl .pnl-esq.pnl-esq-bloque { display: block; width: 100%; }
+.pnl .pnl-esq.pnl-esq-bloque[data-talla='fila']    { height: 60px;  border-radius: var(--radio-m); }
+.pnl .pnl-esq.pnl-esq-bloque[data-talla='tarjeta'] { height: 132px; border-radius: var(--radio-l); }
+.pnl .pnl-esq.pnl-esq-bloque[data-talla='hero']    { height: 210px; border-radius: var(--radio-xl); }
+
+/* Hoja (desde abajo en el teléfono, centrada desde 640). Su posición y su
+   ancho los pone el JSX (aquí no van: ganarían a las utilidades). */
+.pnl .pnl-hoja {
+  max-height: 88dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  border-radius: var(--radio-xl) var(--radio-xl) 0 0;
+  box-shadow: var(--sombra-3);
+}
+@media (min-width: 640px) {
+  .pnl .pnl-hoja { border-radius: var(--radio-xl); margin-inline: auto; }
+}
+.pnl .pnl-hoja-tirador {
+  display: block;
+  width: 36px; height: 4px;
+  margin: 8px auto 0;
+  border-radius: var(--radio-pildora);
+  background: var(--line);
+}
+@media (min-width: 640px) {
+  .pnl .pnl-hoja-tirador { display: none; }
+}
+.pnl .pnl-velo-token {
+  background: var(--velo);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+/* Spinner: el de LoadingPage conserva tamaño (26) y margen; cambia de
+   color. data-talla='s' es el de los botones (14, en el color del texto). */
+.pnl .pnl-spinner {
+  border-color: var(--pista);
+  border-top-color: var(--sky-2);
+}
+.pnl .pnl-spinner[data-talla='s'] {
+  display: inline-block; flex: 0 0 auto;
+  width: 14px; height: 14px;
+  margin: 0;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  vertical-align: middle;
+}
+
+
+/* ── Movimiento reducido: va siempre al final ─────────────────────────────
+   Nada se anima ni se desplaza; el spinner gira despacio y el esqueleto se
+   queda quieto. */
+@media (prefers-reduced-motion: reduce) {
+  .pnl .pnl-btn,
+  .pnl .pnl-btn-cta,
+  .pnl .pnl-btn-primario,
+  .pnl .pnl-btn-texto,
+  .pnl .pnl-btn-peligro,
+  .pnl .pnl-btn-noche,
+  .pnl .pnl-btn-icono,
+  .pnl .ex-btn,
+  .pnl .ex-arch button,
+  .pnl .ex-subir,
+  .pnl .pnl-card,
+  .pnl .pnl-chev,
+  .pnl .pnl-barra > i,
+  .pnl .pnl-campo-control,
+  .pnl .pnl-interruptor,
+  .pnl .pnl-interruptor::after,
+  .pnl .pnl-segmentos > :is(button, a),
+  .pnl .ex-doc-pliegues summary::after { transition: none; }
+
+  .pnl .pnl-btn:is(:hover, :active),
+  .pnl .pnl-btn-cta:is(:hover, :active),
+  .pnl .pnl-btn-primario:is(:hover, :active),
+  .pnl .pnl-btn-texto:is(:hover, :active),
+  .pnl .pnl-btn-peligro:is(:hover, :active),
+  .pnl .pnl-btn-noche:is(:hover, :active),
+  .pnl .pnl-btn-icono:is(:hover, :active),
+  .pnl .ex-btn:is(:hover, :active),
+  .pnl .ex-arch button:active,
+  .pnl .pnl-card:hover { transform: none; }
+
+  /* Con !important: la regla del check lleva más selectores que esta. */
+  .pnl .pnl-guardado svg { animation: none !important; }
+  /* panel-app.css fija la duración del lateral con !important. */
+  .pnl .pnl-side { transition: none !important; }
+  .pnl .pnl-top .pnl-top-titulo,
+  .pnl .pnl-top .pnl-top-titulo h1 { transition: none; }
+
+  .pnl .pnl-despliega,
+  .pnl .pnl-badge,
+  .pnl .pnl-tab-badge,
+  .pnl .pnl-burger-punto,
+  .pnl .pnl-avc-cuenta,
+  .pnl .pnl-nov-cuenta,
+  .pnl .ex-falta-cuenta,
+  .pnl .rp-n { animation: none; }
+
+  .pnl .pnl-esq { animation: none; }
+  .pnl .pnl-spinner { animation-duration: 2s; }
+}

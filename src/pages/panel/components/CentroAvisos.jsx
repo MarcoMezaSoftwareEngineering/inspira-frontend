@@ -139,13 +139,13 @@ export default function CentroAvisos({ servicios = [], pagos = [] }) {
         <div className="pnl-avc-panel" role="dialog" aria-label="Avisos">
           <header className="pnl-avc-cab">
             <h2>Avisos</h2>
-            <button type="button" className="pnl-avc-listo" onClick={cerrar}>Marcar como visto</button>
+            <button type="button" className="pnl-btn-texto pnl-avc-listo" data-talla="s" onClick={cerrar}>Marcar como visto</button>
           </header>
 
           <div className="pnl-avc-cuerpo">
             {plazos.length > 0 && (
               <>
-                <p className="pnl-avc-grupo">Te toca pronto</p>
+                <p className="pnl-eyebrow pnl-avc-grupo"><span className="punto" aria-hidden="true" />Te toca pronto</p>
                 <ul className="pnl-avc-lista">
                   {plazos.map((p) => (
                     <li key={p.clave}>
@@ -164,9 +164,12 @@ export default function CentroAvisos({ servicios = [], pagos = [] }) {
               </>
             )}
 
-            <p className="pnl-avc-grupo">Novedades</p>
+            <p className="pnl-eyebrow pnl-avc-grupo"><span className="punto" aria-hidden="true" />Novedades</p>
             {!recientes.length ? (
-              <p className="pnl-avc-vacio">Nada nuevo por ahora. Cuando tu asesor revise algo o te escriba, lo verás aquí.</p>
+              <div className="pnl-vacio-suave pnl-avc-vacio">
+                <span className="pnl-vacio-suave-icono" aria-hidden="true"><Icono nombre="campana" size={22} /></span>
+                <p>Nada nuevo por ahora. Cuando tu asesor revise algo o te escriba, lo verás aquí.</p>
+              </div>
             ) : (
               <ul className="pnl-avc-lista">
                 {recientes.map((n, i) => {

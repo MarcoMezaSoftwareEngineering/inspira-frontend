@@ -6,3 +6,7 @@ dist/
 
 # Kit de marca: vive en el servidor (/var/www/inspira-interno), no en git
 public/interno/marca-inspira-t4w9c2hx/
+
+# Capturas del panel con datos ficticios (scripts/panel-qa)
+dist-qa*/
+bun.lock

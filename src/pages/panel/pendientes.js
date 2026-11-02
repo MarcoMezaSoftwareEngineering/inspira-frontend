@@ -101,7 +101,7 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
     if (r.docs_observados > 0) {
       items.push({
         clave: `obs-${id}`, peso: 1, tono: "alto", icono: "documento",
-        texto: plural(r.docs_observados, "documento observado", "documentos observados"),
+        texto: plural(r.docs_observados, "documento por corregir", "documentos por corregir"),
         detalle: "Hay que volver a subirlos corregidos", servicio: de,
         accion: "Corregir", href: ir("docs"),
       });

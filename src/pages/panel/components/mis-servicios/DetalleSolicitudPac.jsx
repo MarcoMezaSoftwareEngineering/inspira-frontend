@@ -17,19 +17,17 @@ import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
 import AcompanantesPacCliente from "./AcompanantesPacCliente";
 import { abrirArchivo } from "../../../../services/archivos";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
-import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear } from "./Bloques";
+import { Bloque, Paso, EstadoProceso, OtraPersona, ComoInvitado, ComoEscanear, IconoAlerta } from "./Bloques";
 import { avanceDeRevision, usePublicarCabecera } from "../../cabeceraExpediente";
+import ErrorCarga from "./ErrorCarga";
 import NovedadesExpediente from "../NovedadesExpediente";
 import { WHATSAPP_SEGURO } from "../../../../config/contacto";
+import { EsqueletoExpediente } from "../Esqueleto";
+import Icono from "../../../../components/common/Icono";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
-const TONOS = {
-  neutral: "bg-neutral-100 text-neutral-600 border-neutral-200",
-  azul:    "bg-[#EEF2F8] text-primary border-primary/20",
-  ambar:   "bg-amber-50 text-amber-800 border-amber-300",
-  violeta: "bg-violet-50 text-violet-800 border-violet-300",
-  rojo:    "bg-red-50 text-red-800 border-red-300",
-  verde:   "bg-[#E8F5EE] text-[#14532d] border-[#1D6A4A]/30",
-};
+// Lo que llega de la UGE y del consulado, en los tonos del panel (styles/panel.css).
+const TONO_REGISTRO = { RESOLUCION: "ok", REQUERIMIENTO: "alto" };
 
 const OPCIONES = {
   rol: [["TITULAR", "Soy el titular del PAC (el profesional contratado)"], ["FAMILIAR", "Soy familiar de un titular que ya tiene su resolución"]],
@@ -50,16 +48,19 @@ const ETIQUETA = {
 
 /* ── Plazos y seguimiento ────────────────────────────────────────────────── */
 
+/** «1 día», «3 días»: el plural con el número, no «día(s)». */
+const dias = (n) => `${n} ${Math.abs(n) === 1 ? "día" : "días"}`;
+
 function CajaPlazo({ titulo, dato }) {
   if (!dato) return null;
   return (
-    <div className={`rounded-xl border px-3.5 py-3 ${dato.a_tiempo ? "border-[#1D6A4A]/30 bg-[#E8F5EE]" : "border-red-300 bg-red-50"}`}>
-      <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-500">{titulo}</p>
-      <p className={`text-[19px] font-bold leading-tight mt-0.5 ${dato.a_tiempo ? "text-[#14532d]" : "text-red-700"}`}>{dato.limite}</p>
-      <p className="text-[11.5px] text-neutral-600 mt-0.5">
-        {dato.a_tiempo ? `Quedan ${dato.dias_restantes} día(s)` : `Pasado hace ${Math.abs(dato.dias_restantes)} día(s)`}
+    <div className="pnl-plazo-caja" data-tono={dato.a_tiempo ? "ok" : "alto"}>
+      <p className="pnl-plazo-caja-titulo">{titulo}</p>
+      <p className="pnl-plazo-caja-fecha">{dato.limite}</p>
+      <p className="pnl-plazo-caja-pie">
+        {dato.a_tiempo ? `Quedan ${dias(dato.dias_restantes)}` : `Pasado hace ${dias(Math.abs(dato.dias_restantes))}`}
       </p>
-      {dato.explicacion && <p className="text-[11px] text-neutral-500 mt-1 leading-snug">{dato.explicacion}</p>}
+      {dato.explicacion && <p className="pnl-plazo-caja-nota">{dato.explicacion}</p>}
     </div>
   );
 }
@@ -76,9 +77,9 @@ function Plazos({ plazos }) {
         <CajaPlazo titulo="Pedir la TIE antes de" dato={tie} />
       </div>
       {avisos.map((a, i) => (
-        <div key={i} className={`rounded-xl border px-3.5 py-2.5 text-[12.5px] leading-relaxed flex gap-2 ${
-          a.nivel === "alto" ? "bg-red-50 border-red-300 text-red-800" : "bg-amber-50 border-amber-300 text-amber-900"}`}>
-          <span className="shrink-0">{a.nivel === "alto" ? "⚠️" : "💡"}</span><span>{a.texto}</span>
+        <div key={i} className="pnl-aviso pnl-aviso-arriba" data-tono={a.nivel === "alto" ? "alto" : "aviso"}>
+          <span className="pnl-aviso-icono" aria-hidden="true">{a.nivel === "alto" ? <IconoAlerta /> : <IconoPaso nombre="info" />}</span>
+          <p className="pnl-aviso-texto">{a.texto}</p>
         </div>
       ))}
     </div>
@@ -89,8 +90,8 @@ function Dato({ k, v }) {
   if (!v) return null;
   return (
     <tr>
-      <td className="text-[11.5px] text-neutral-500 py-0.5 pr-3 align-top w-[45%]">{k}</td>
-      <td className="text-[12.5px] font-bold text-primary py-0.5 select-all">{v}</td>
+      <td className="pnl-ficha-k">{k}</td>
+      <td className="pnl-ficha-v">{v}</td>
     </tr>
   );
 }
@@ -123,16 +124,16 @@ function Seguimiento({ exp }) {
   ].filter(([, v]) => v);
 
   const Tabla = ({ titulo, filas, vacio }) => (
-    <div className="rounded-xl border border-primary/20 bg-[#EEF2F8] px-3.5 py-3">
-      <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-primary mb-1.5">{titulo}</p>
+    <div className="pnl-ficha">
+      <p className="pnl-eyebrow">{titulo}</p>
       {filas.length ? (
-        <table className="w-full"><tbody>{filas.map(([k, v]) => <Dato key={k} k={k} v={v} />)}</tbody></table>
-      ) : <p className="text-[12px] text-neutral-500 m-0">{vacio}</p>}
+        <table className="pnl-ficha-tabla"><tbody>{filas.map(([k, v]) => <Dato key={k} k={k} v={v} />)}</tbody></table>
+      ) : <p className="pnl-ficha-vacio">{vacio}</p>}
     </div>
   );
 
   return (
-    <div className="space-y-2.5 mb-3">
+    <div className="pnl-fichas mb-3">
       <Tabla titulo="Fase 1 · Autorización en la UGE (Mercurio)" filas={filasUge} vacio="Cuando presentemos tu solicitud verás aquí el número de expediente, la tasa y la resolución." />
       <Tabla titulo="Fase 2 · Visado en el consulado" filas={filasCon} vacio="Con la autorización concedida pediremos tu cita en BLS y la verás aquí." />
       {filasEsp.length > 0 && <Tabla titulo="En España" filas={filasEsp} vacio="" />}
@@ -161,45 +162,49 @@ function PedirRevision({ id, docs, exp, onHecho }) {
 
   if (!subidos) {
     return (
-      <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 py-3 mb-3 flex items-center gap-3 flex-wrap">
-        <div className="min-w-0 flex-1">
-          <p className="text-[12.5px] font-semibold text-neutral-600">¿Terminaste de subir?</p>
-          <p className="text-[11.5px] text-neutral-500 leading-relaxed">Cuando subas tus documentos, avísanos desde aquí y los revisamos.</p>
+      <div className="pnl-aviso pnl-aviso-arriba pnl-revision mb-3" data-tono="neutro">
+        <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="send" /></span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="pnl-aviso-texto min-w-0 flex-1">
+            <p><b>¿Terminaste de subir?</b></p>
+            <p className="pnl-aviso-detalle">Cuando subas tus documentos, avísanos desde aquí y los revisamos.</p>
+          </div>
+          <button type="button" disabled className="pnl-btn shrink-0" data-talla="s">Pedir revisión</button>
         </div>
-        <button type="button" disabled className="shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg border border-neutral-300 text-neutral-400 cursor-not-allowed">Pedir revisión</button>
       </div>
     );
   }
   if (yaPedida) {
     return (
-      <div className="rounded-xl border border-sky-200 bg-sky-50/50 px-3.5 py-3 mb-3 flex gap-2.5">
-        <span className="shrink-0 text-[14px]">👀</span>
-        <p className="text-[12.5px] text-sky-900 leading-relaxed"><b>Tu asesor ya sabe que has subido documentos.</b> Los está revisando y te dirá si están correctos o qué hay que corregir. Si subes algo más, vuelve a avisarle.</p>
+      <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="info">
+        <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="eye" /></span>
+        <p className="pnl-aviso-texto"><b>Tu asesor ya sabe que has subido documentos.</b> Los está revisando y te dirá si están correctos o qué hay que corregir. Si subes algo más, vuelve a avisarle.</p>
       </div>
     );
   }
   return (
-    <div className="rounded-xl border border-[#1D6A4A]/30 bg-[#E8F5EE]/50 px-3.5 py-3 mb-3">
+    <div className="pnl-aviso pnl-aviso-arriba pnl-revision mb-3" data-tono="info">
+      <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="send" /></span>
       {!abierto ? (
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="min-w-0 flex-1">
-            <p className="text-[12.5px] font-semibold text-[#14532d]">¿Has terminado de subir?</p>
-            <p className="text-[11.5px] text-neutral-600 leading-relaxed">Avísanos y revisamos tus {porRevisar || subidos} documento(s).</p>
+          <div className="pnl-aviso-texto min-w-0 flex-1">
+            <p><b>¿Has terminado de subir?</b></p>
+            <p className="pnl-aviso-detalle">Avísanos y revisamos {(porRevisar || subidos) === 1 ? "tu documento" : `tus ${porRevisar || subidos} documentos`}.</p>
           </div>
-          <button type="button" onClick={() => setAbierto(true)} className="shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg bg-[#1D6A4A] text-white hover:opacity-90">Pedir revisión</button>
+          <button type="button" onClick={() => setAbierto(true)} className="pnl-btn-primario shrink-0" data-talla="s">Pedir revisión</button>
         </div>
       ) : (
-        <div className="space-y-2">
-          <p className="text-[12.5px] font-semibold text-[#14532d]">Avisar a tu asesor</p>
+        <div className="flex flex-col gap-2">
+          <p className="pnl-aviso-texto"><b>Avisar a tu asesor</b></p>
           <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="¿Algo que debamos saber? (opcional)"
-            className="w-full text-[12.5px] border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#1D6A4A] focus:border-[#1D6A4A]" />
+            className="pnl-campo-control pnl-revision-nota" />
           <div className="flex items-center gap-2">
-            <button type="button" onClick={pedir} disabled={enviando} className="text-[12.5px] font-semibold px-4 py-2 rounded-lg bg-[#1D6A4A] text-white disabled:opacity-40 hover:opacity-90">{enviando ? "Avisando…" : "Enviar"}</button>
-            <button type="button" onClick={() => setAbierto(false)} className="text-[12px] text-neutral-500 hover:text-neutral-800">Cancelar</button>
+            <button type="button" onClick={pedir} disabled={enviando} className="pnl-btn-primario" data-talla="s">{enviando ? "Avisando…" : "Enviar"}</button>
+            <button type="button" onClick={() => setAbierto(false)} className="pnl-btn-texto" data-talla="s">Cancelar</button>
           </div>
         </div>
       )}
-      {msg && <p className="text-[11.5px] text-neutral-600 mt-2">{msg}</p>}
+      {msg && <p className="pnl-aviso-detalle">{msg}</p>}
     </div>
   );
 }
@@ -207,18 +212,22 @@ function PedirRevision({ id, docs, exp, onHecho }) {
 /** El seguro: se recomienda a Félix (StarSeguro) antes de que lo contraten mal. */
 function Seguro() {
   return (
-    <div className="rounded-xl border border-[#1D6A4A]/30 bg-[#E8F5EE]/60 px-3.5 py-3 mb-3 flex items-center gap-3 flex-wrap">
-      <div className="min-w-0 flex-1">
-        <p className="text-[12.5px] font-semibold text-[#14532d]">El seguro médico: cotízalo con Félix</p>
-        <p className="text-[11.5px] text-neutral-600 leading-relaxed">
+    <div className="pnl-aviso pnl-aviso-arriba pnl-revision mb-3" data-tono="info">
+      <span className="pnl-aviso-icono" aria-hidden="true"><Icono nombre="salud" size={16} /></span>
+      <div className="flex items-center gap-3 flex-wrap">
+      <div className="pnl-aviso-texto min-w-0 flex-1">
+        <p><b>El seguro médico: cotízalo con Félix</b></p>
+        <p className="pnl-aviso-detalle">
           Tiene que ser privado, con una aseguradora autorizada en España, con cobertura completa y <b>sin copagos ni carencias</b>
           (o la póliza familiar que cubra a todos). Félix Olaya (StarSeguro) conoce lo que pide la UGE y el consulado.
         </p>
       </div>
       <a href={WHATSAPP_SEGURO} target="_blank" rel="noopener noreferrer"
-        className="shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg bg-[#25D366] text-white hover:opacity-90">
+        className="pnl-btn-primario shrink-0" data-talla="s">
+        <Icono nombre="whatsapp" size={16} />
         Cotizar con Félix
       </a>
+      </div>
     </div>
   );
 }
@@ -236,15 +245,21 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
   const [guardando, setGuardando] = useState(false);
   const [tocado, setTocado] = useState(false);
 
-  const cargar = useCallback(() => Promise.all([
-    apiGET(`/solicitudes/${id}/pac`),
-    apiGET(`/solicitudes/${id}/pac/documentos`),
-    apiGET(`/solicitudes/${id}/pac/extranjeria`),
-  ]).then(([a, b, c]) => {
-    if (a?.ok) setExp(a.expediente);
-    if (b?.ok) setDocs(b);
-    if (c?.ok) setExt(c.registros || []);
-  }), [id]);
+  // Sin esto, si la primera carga fallaba el esqueleto se quedaba para siempre.
+  const [errorCarga, setErrorCarga] = useState("");
+  const cargar = useCallback(() => {
+    setErrorCarga("");
+    return Promise.all([
+      apiGET(`/solicitudes/${id}/pac`),
+      apiGET(`/solicitudes/${id}/pac/documentos`),
+      apiGET(`/solicitudes/${id}/pac/extranjeria`),
+    ]).then(([a, b, c]) => {
+      if (a?.ok) setExp(a.expediente);
+      else setErrorCarga(a?.error || "No se pudo cargar tu expediente.");
+      if (b?.ok) setDocs(b);
+      if (c?.ok) setExt(c.registros || []);
+    }).catch((e) => setErrorCarga(e?.message || "No se pudo cargar tu expediente."));
+  }, [id]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
@@ -288,9 +303,19 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
   const ranurasCliente = useMemo(() => Object.entries(docs?.ranuras || {}).filter(([, d]) => d.de === "cliente"), [docs]);
   const ranurasAsesor = useMemo(() => Object.entries(docs?.ranuras || {}).filter(([, d]) => d.de === "asesor"), [docs]);
 
-  if (!exp) return <p className="text-[13px] text-neutral-400 py-10 text-center">Cargando tu expediente…</p>;
+  if (!exp) {
+    return (
+      <div className="flex-1 min-h-0 overflow-auto">
+        <div className="max-w-4xl mx-auto">
+          {errorCarga
+            ? <ErrorCarga mensaje={errorCarga} onReintentar={cargar} />
+            : <EsqueletoExpediente variante="bloques" />}
+        </div>
+      </div>
+    );
+  }
 
-  const g = "grid grid-cols-1 sm:grid-cols-2 gap-3";
+  const g = "grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4";
   const abrir = (n) => setPaso(paso === n ? 0 : n);
   const esTitular = exp.rol !== "FAMILIAR";
   const menor = Boolean(rev?.menor);
@@ -301,17 +326,21 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
     3: ["Nº de pasaporte", "Fecha de emisión del pasaporte", "Fecha de caducidad del pasaporte", "Correo electrónico", "Teléfono", "País donde vives ahora", "Domicilio actual", "Localidad actual"],
     4: ["Empresa que te contrata", "NIF de la empresa", "Provincia del centro de trabajo", "Puesto", "Salario bruto anual", "Inicio previsto del contrato", "Titulación superior o experiencia que acredita"],
   };
-  const totalCampos = (rev?.faltan?.length || 0) + 0;
+  // Los mismos «x de y» que estancia y modificatoria. El titular no rellena los
+  // datos del titular (paso 1) y el familiar no pasa por el paso 4.
+  const totalCampos = (esTitular ? 1 : PASOS[1].length) + PASOS[2].length + PASOS[3].length
+    + (esTitular ? PASOS[4].length : 0);
+  const hechos = Math.max(0, totalCampos - (rev?.faltan?.length || 0));
   const datosCompletos = rev?.completo;
 
   return (
     <div className="flex-1 min-h-0 overflow-auto">
-      <div className="max-w-4xl mx-auto p-4 sm:p-5 space-y-3">
-        <button type="button" onClick={onVolver} className="pnl-sin-volver text-[12px] font-semibold text-neutral-500 hover:text-primary">← Mis servicios</button>
+      <div className="max-w-4xl mx-auto space-y-4 pb-6">
+        <button type="button" onClick={onVolver} className="pnl-sin-volver text-[12px] font-semibold text-neutral-500 hover:text-primary"><IconoPaso nombre="arrowLeft" /> Mis servicios</button>
 
         <div className="pnl-solo-grande">
-          <p className="text-[10px] font-bold uppercase tracking-[.2em] font-mono text-[#1D6A4A]">Profesional altamente cualificado · UGE</p>
-          <h1 className="font-serif text-xl font-bold text-primary">Tu expediente</h1>
+          <p className="pnl-eyebrow"><span className="punto" />Profesional altamente cualificado · UGE</p>
+          <h1 className="pnl-display pnl-exp-titulo">Tu expediente</h1>
         </div>
 
         <EstadoProceso revision={rev} />
@@ -333,9 +362,10 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
 
         {/* ── 1 · Datos ── */}
         <Bloque numero="1" titulo="Tus datos"
-          subtitulo={datosCompletos ? "Completos" : `Faltan ${totalCampos} dato(s)`}
+          subtitulo={datosCompletos ? "Completos" : `${hechos} de ${totalCampos} completados`}
           abierto={bloque === 1} onToggle={() => setBloque(bloque === 1 ? 0 : 1)}>
 
+          <div className="pnl-pasos">
           <Paso numero="1" titulo="Quién pide la residencia" subtitulo="Titular del PAC o familiar de un titular"
             faltan={cuenta(PASOS[1])} abierto={paso === 1} onToggle={() => abrir(1)} onSiguiente={() => setPaso(2)}>
             <div className="space-y-3">
@@ -343,8 +373,8 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
                 opciones={OPCIONES.rol} valor={exp.rol} onChange={set("rol")}
                 ayuda="El titular es el profesional contratado por la empresa en España. Si tu cónyuge, pareja, padre o madre ya tiene la resolución favorable, tú pides la tuya como familiar vinculado a la suya." />
               {!esTitular && (
-                <div className="rounded-xl border-l-[3px] border-sky-400 bg-sky-50 px-3.5 py-3 space-y-3">
-                  <p className="text-[12.5px] text-sky-900 leading-relaxed">
+                <div className="pnl-caja-tono" data-tono="info">
+                  <p className="pnl-caja-tono-texto">
                     Tu solicitud se vincula al expediente del titular: su <b>número de expediente en la UGE</b> va en tu formulario MI-F y adjuntamos su resolución favorable.
                   </p>
                   <div className={g}>
@@ -381,8 +411,8 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
               <Campo label="Nombre de la madre" obligatorio falta={falta("Nombre de la madre")} valor={exp.nombre_madre} onChange={set("nombre_madre")} />
             </div>
             {menor && (
-              <div className="rounded-xl border-l-[3px] border-amber-400 bg-amber-50 px-3.5 py-3 mt-4 space-y-3">
-                <p className="text-[12.5px] text-amber-900 leading-relaxed">
+              <div className="pnl-caja-tono mt-5" data-tono="aviso">
+                <p className="pnl-caja-tono-texto">
                   Eres menor de edad: tu solicitud la firma tu representante legal y, si tu padre o tu madre no viaja contigo, la UGE exige su <b>autorización notarial apostillada</b> (o la sentencia de patria potestad exclusiva).
                 </p>
                 <div className={g}>
@@ -410,7 +440,7 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
               <Campo label="Localidad actual" obligatorio falta={falta("Localidad actual")} valor={exp.dom_localidad} onChange={set("dom_localidad")} />
               <Campo label="Provincia o región" valor={exp.dom_provincia} onChange={set("dom_provincia")} />
             </div>
-            <p className="text-[11.5px] font-semibold text-neutral-600 mt-4 mb-2">Dónde vivirás en España (si ya lo sabes)</p>
+            <p className="pnl-eyebrow pnl-campos-grupo">Dónde vivirás en España (si ya lo sabes)</p>
             <div className={g}>
               <Campo label="Dirección en España" valor={exp.esp_direccion} onChange={set("esp_direccion")} />
               <Campo label="Localidad" valor={exp.esp_localidad} onChange={set("esp_localidad")} />
@@ -441,11 +471,11 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
 
           <Paso numero={esTitular ? "5" : "4"} titulo="Tu seguro médico" subtitulo="Privado, sin copagos ni carencias"
             faltan={0} abierto={paso === 5} onToggle={() => abrir(5)}>
-            <div className="rounded-xl border border-neutral-200 px-3.5 py-3 mb-3 space-y-2">
+            <div className="pnl-caja-suave mb-3">
               <Selector label="¿El contrato del titular os da de alta en la Seguridad Social?" obligatorio
                 opciones={OPCIONES.cobertura_ss} valor={exp.cobertura_ss} onChange={set("cobertura_ss")}
                 ayuda="Consúltalo con el empleador: si el alta del titular en la Seguridad Social cubre a la familia como beneficiarios, no necesitáis seguro privado. Si no, cada persona necesita una póliza sin copagos ni carencias (o una familiar que os incluya)." />
-              <p className="text-[12px] text-neutral-600 leading-relaxed m-0">
+              <p className="pnl-caja-suave-texto">
                 {exp.cobertura_ss === "SI" ? "Perfecto: el seguro privado deja de ser obligatorio en tu lista de documentos. Si cambia, avísanos."
                   : exp.cobertura_ss === "NO" ? "Entonces hace falta seguro privado para cada persona. Cotízalo con Félix antes de contratar nada."
                   : "Hasta que lo confirmes, el seguro sigue en la lista como pendiente. Pide la confirmación por escrito a la empresa."}
@@ -460,8 +490,9 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
             <Guardado guardando={guardando} tocado={tocado} completo={datosCompletos} />
           </Paso>
 
+          </div>
           {(rev?.avisos || []).map((t) => (
-            <p key={t} className="text-[12px] text-amber-700 leading-relaxed mt-3">⚠ {t}</p>
+            <p key={t} className="pnl-aviso-linea"><IconoAlerta /> {t}</p>
           ))}
           <Guardado guardando={guardando} tocado={tocado} completo={datosCompletos} arriba />
         </Bloque>
@@ -469,16 +500,19 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
         {/* ── 2 · Cómo va el trámite ── */}
         <Bloque numero="2" titulo="Cómo es el trámite" subtitulo="Dos fases: la UGE y el consulado"
           abierto={bloque === 2} onToggle={() => setBloque(bloque === 2 ? 0 : 2)}>
-          <ol className="m-0 pl-5 space-y-2 text-[13px] text-neutral-700 leading-relaxed">
+          <ol className="pnl-bloque-lista">
             <li><b>Autorización en la UGE-CE</b> (Unidad de Grandes Empresas), 100 % telemática por Mercurio. La presenta el abogado de Inspira con su certificado profesional y tu documento de representación, o tú con tu certificado digital español. La UGE resuelve en veinte días hábiles; si no contesta, se entiende concedida.</li>
             <li><b>Visado en el consulado</b>, con cita en BLS: acuden todos los solicitantes, también los menores, con originales y copias en el mismo orden. Resuelve en unos diez días y el visado se recoge en persona dentro del mes.</li>
             <li><b>En España</b>: empadronamiento, cita de huellas y TIE dentro del mes desde la entrada.</li>
           </ol>
-          <div className="rounded-xl bg-amber-50 border border-amber-300 px-3.5 py-3 mt-3 text-[12.5px] text-amber-900 leading-relaxed space-y-1">
-            <p className="m-0"><b>Lo que más se olvida:</b></p>
-            <p className="m-0">· El pasaporte va <b>completo</b>, todas las páginas, también las que están en blanco. Solo la hoja de datos es motivo de requerimiento.</p>
-            <p className="m-0">· Los antecedentes penales, apostillados y con <b>menos de tres meses</b> al presentarlos, más la <b>declaración responsable</b> de los últimos cinco años.</p>
-            <p className="m-0">· Si vais varios, <b>cada persona presenta su propia solicitud</b> (su MI-F, su tasa, su resolución), todas vinculadas al expediente del titular.</p>
+          <div className="pnl-aviso pnl-aviso-arriba mt-4" data-tono="aviso">
+            <span className="pnl-aviso-icono" aria-hidden="true"><IconoAlerta /></span>
+            <div className="pnl-aviso-texto">
+            <p><b>Lo que más se olvida:</b></p>
+            <p>· El pasaporte va <b>completo</b>, todas las páginas, también las que están en blanco. Solo la hoja de datos es motivo de requerimiento.</p>
+            <p>· Los antecedentes penales, apostillados y con <b>menos de tres meses</b> al presentarlos, más la <b>declaración responsable</b> de los últimos cinco años.</p>
+            <p>· Si vais varios, <b>cada persona presenta su propia solicitud</b> (su MI-F, su tasa, su resolución), todas vinculadas al expediente del titular.</p>
+            </div>
           </div>
         </Bloque>
 
@@ -487,30 +521,31 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
           subtitulo={docs?.faltan?.length ? `Te faltan ${docs.faltan.length}` : docs?.observados?.length ? `${docs.observados.length} por corregir` : "Todo entregado"}
           abierto={bloque === 3} onToggle={() => setBloque(bloque === 3 ? 0 : 3)}>
           {!datosCompletos && (
-            <div className="rounded-xl bg-amber-50 border border-amber-300 px-3.5 py-3 mb-3 flex gap-2.5">
-              <span className="shrink-0 text-[14px]">📋</span>
-              <div>
-                <p className="text-[12.5px] text-amber-900 leading-relaxed">Puedes ir subiendo documentos, pero <b>no podremos presentar hasta que completes tus datos</b>: se copian al formulario oficial de la UGE.</p>
-                <button type="button" onClick={() => { setBloque(1); setPaso(1); }} className="text-[12px] font-semibold text-primary hover:underline mt-1">Ir a completar mis datos →</button>
+            <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="aviso">
+              <span className="pnl-aviso-icono" aria-hidden="true"><IconoPaso nombre="list" /></span>
+              <div className="pnl-aviso-texto">
+                <p>Puedes ir subiendo documentos, pero <b>no podremos presentar hasta que completes tus datos</b>: se copian al formulario oficial de la UGE.</p>
+                <button type="button" onClick={() => { setBloque(1); setPaso(1); }} className="pnl-btn-texto pnl-aviso-enlace" data-talla="s">Ir a completar mis datos<IconoPaso nombre="arrowRight" /></button>
               </div>
             </div>
           )}
           {docs?.observados?.length > 0 && (
-            <div className="rounded-xl bg-red-50 border border-red-300 px-3.5 py-2.5 mb-3">
-              <p className="text-[12.5px] text-red-800 leading-relaxed">Hay {docs.observados.length} documento(s) que hay que corregir. Te decimos exactamente qué falla en cada uno.</p>
+            <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="alto">
+              <span className="pnl-aviso-icono" aria-hidden="true"><IconoAlerta /></span>
+              <p className="pnl-aviso-texto">Hay {docs.observados.length} {docs.observados.length === 1 ? "documento" : "documentos"} que hay que corregir. Te decimos exactamente qué falla en cada uno.</p>
             </div>
           )}
           <ComoEscanear />
           {exp.cobertura_ss !== "SI" && <Seguro />}
           <ResumenDocumentos ranuras={docs?.ranuras} />
           <PedirRevision id={id} docs={docs} exp={exp} onHecho={cargar} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+          <div className="ex-docs">
             {ranurasCliente.map(([clave, def]) => (
               <TarjetaDocumento key={clave} base={`/solicitudes/${id}/pac`} clave={clave} def={def} onCambio={cargar} />
             ))}
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest font-mono text-neutral-400 mb-2">Los preparamos nosotros</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <p className="pnl-eyebrow pnl-docs-grupo">Los preparamos nosotros</p>
+          <div className="ex-docs">
             {ranurasAsesor.map(([clave, def]) => (
               <TarjetaDocumento key={clave} base={`/solicitudes/${id}/pac`} clave={clave} def={def} onCambio={cargar} />
             ))}
@@ -526,26 +561,29 @@ export default function DetalleSolicitudPac({ solicitudBase, onVolver, faltanPer
 
         {/* ── 5 · UGE y consulado ── */}
         <Bloque numero="5" titulo="UGE y consulado"
-          subtitulo={ext.length ? `${ext.length} comunicación(es)` : "Dónde va tu solicitud"}
+          subtitulo={ext.length ? `${ext.length} ${ext.length === 1 ? "comunicación" : "comunicaciones"}` : "Dónde va tu solicitud"}
           abierto={bloque === 5} onToggle={() => setBloque(bloque === 5 ? 0 : 5)}>
           <Plazos plazos={rev?.plazos} />
           <Seguimiento exp={exp} />
           {ext.length === 0 ? (
-            <p className="text-[13px] text-neutral-400">Cuando la UGE o el consulado nos comuniquen algo, aparecerá aquí y te avisaremos por correo.</p>
+            <div className="pnl-vacio-suave">
+              <span className="pnl-vacio-suave-icono" aria-hidden="true"><IconoPaso nombre="mail" /></span>
+              <p>Cuando la UGE o el consulado nos comuniquen algo, aparecerá aquí y te avisaremos por correo.</p>
+            </div>
           ) : (
             <div className="space-y-2.5">
               {ext.map((r) => (
-                <div key={r.id_registro} className="rounded-xl border border-neutral-200 px-3.5 py-3">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${r.tipo === "RESOLUCION" ? TONOS.verde : r.tipo === "REQUERIMIENTO" ? TONOS.rojo : TONOS.ambar}`}>{r.tipo_label}</span>
-                    {r.fecha && <span className="text-[11px] text-neutral-400">{r.fecha}</span>}
+                <div key={r.id_registro} className="pnl-registro">
+                  <div className="pnl-registro-cab">
+                    <span className="pnl-chip" data-talla="sm" data-tono={TONO_REGISTRO[r.tipo] || "aviso"}>{r.tipo_label}</span>
+                    {r.fecha && <span className="pnl-registro-fecha">{r.fecha}</span>}
                   </div>
-                  <p className="text-[13.5px] font-semibold text-neutral-800 mt-1">{r.titulo}</p>
-                  {r.detalle && <p className="text-[12.5px] text-neutral-600 leading-relaxed mt-1">{r.detalle}</p>}
-                  {r.plazo && <p className="text-[12px] font-semibold text-red-700 mt-1">Plazo para responder: {r.plazo}</p>}
+                  <p className="pnl-registro-titulo">{r.titulo}</p>
+                  {r.detalle && <p className="pnl-registro-detalle">{r.detalle}</p>}
+                  {r.plazo && <p className="pnl-registro-plazo">Plazo para responder: {r.plazo}</p>}
                   {r.tiene_archivo && (
                     <button type="button" onClick={() => abrirArchivo(`/solicitudes/${id}/pac/extranjeria/${r.id_registro}/archivo`, {})}
-                      className="inline-block text-[11.5px] font-semibold text-primary-light hover:underline mt-1.5">📄 Ver el documento</button>
+                      className="pnl-btn pnl-registro-boton" data-talla="s"><IconoPaso nombre="fileText" />Ver el documento</button>
                   )}
                 </div>
               ))}

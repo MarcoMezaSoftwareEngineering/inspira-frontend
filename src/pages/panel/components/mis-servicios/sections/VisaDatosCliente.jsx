@@ -10,6 +10,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiPUT } from "../../../../../services/api";
 import AyudaPlegable from "../../AyudaPlegable";
+import IconoPaso from "../../../../../components/common/IconoPaso";
+import { IconoLinea } from "../utils";
+import Icono from "../../../../../components/common/Icono";
 
 /* ── Fechas ───────────────────────────────────────────────────────────────────
    En base de datos se guardan como texto libre porque el expediente arrastra
@@ -98,57 +101,54 @@ function estadoInicial(exp, cli, extra) {
 }
 
 /* ── Piezas de interfaz ──────────────────────────────────────────────────── */
+// Los tonos de siempre (info, ok, warn) en el diccionario del panel. El
+// icono: el que se le pase o, si no, el del tono.
+const AVISO_TONO = { info: "info", ok: "ok", warn: "aviso", stop: "alto" };
+const AVISO_ICONO = { info: "info", ok: "checkCircle", aviso: "alert", alto: "alert" };
 function Aviso({ tono = "info", icono, children }) {
-  const tonos = {
-    info:  "bg-sky-50 border-sky-200 text-sky-900",
-    ok:    "bg-emerald-50 border-emerald-200 text-emerald-900",
-    warn:  "bg-amber-50 border-amber-200 text-amber-900",
-  };
+  const t = AVISO_TONO[tono] || "info";
   return (
-    <div className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] leading-relaxed ${tonos[tono]}`}>
-      <span className="shrink-0 text-base leading-none mt-0.5">{icono}</span>
-      <div>{children}</div>
+    <div className="pnl-aviso pnl-aviso-bloque" data-tono={t}>
+      <span className="pnl-aviso-icono">{icono || <IconoLinea nombre={AVISO_ICONO[t]} />}</span>
+      <div className="pnl-aviso-texto">{children}</div>
     </div>
   );
 }
 
 function Grupo({ titulo, children }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4">
-      <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-3">{titulo}</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">{children}</div>
+    <div className="pnl-tarjeta pnl-tarjeta-visado" data-anidada="1">
+      <p className="pnl-eyebrow"><span className="punto" />{titulo}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-4">{children}</div>
     </div>
   );
 }
 
+// La etiqueta va ENCIMA de la caja, legible; si falta el dato, la caja lo dice.
 function Campo({ label, valor, onChange, tipo = "text", ancho, pista, opciones, disabled, placeholder, falta }) {
   const clase = ancho === "full" ? "sm:col-span-2" : "";
-  const estilo =
-    "w-full bg-transparent border-none outline-none p-0 text-[13.5px] font-semibold text-neutral-800 " +
-    "placeholder:font-normal placeholder:text-neutral-300 disabled:text-neutral-400";
   return (
-    <div className={`${clase} rounded-xl px-3 py-2.5 border transition-colors focus-within:border-primary-light focus-within:bg-white ${
-      falta ? "bg-amber-50/60 border-amber-300" : "bg-neutral-50 border-neutral-200"
-    }`}>
-      <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">
-        {label}{falta && <span className="text-amber-600 ml-1">· falta</span>}
+    <div className={`pnl-campo ${clase}`}>
+      <label className="pnl-campo-etiqueta">
+        {label}{falta && <span className="pnl-campo-falta"> · falta</span>}
       </label>
       {opciones ? (
-        <select className={estilo} value={valor} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+        <select className="pnl-campo-control" data-estado={falta ? "falta" : undefined} value={valor} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
           <option value="">Elige…</option>
           {opciones.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
       ) : (
         <input
           type={tipo}
-          className={estilo}
+          className="pnl-campo-control"
+          data-estado={falta ? "falta" : undefined}
           value={valor}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
         />
       )}
-      {pista && <p className="text-[10.5px] text-neutral-400 mt-1 font-normal leading-snug">{pista}</p>}
+      {pista && <p className="pnl-campo-pista">{pista}</p>}
     </div>
   );
 }
@@ -159,22 +159,22 @@ function OpcionTarjeta({ activa, icono, titulo, descripcion, onClick, disabled }
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`w-full text-left rounded-2xl border-2 p-4 transition-all relative disabled:opacity-60 ${
-        activa ? "border-[#1D6A4A] bg-emerald-50/60" : "border-neutral-200 bg-white hover:border-neutral-300"
-      }`}
+      aria-pressed={activa}
+      className="pnl-opcion"
     >
       {activa && (
-        <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1D6A4A] text-white">
-          ✓ Tu opción
+        <span className="pnl-opcion-marca">
+          <IconoPaso nombre="check" strokeWidth={2.4} />
+          Tu opción
         </span>
       )}
-      <div className="flex items-center gap-3">
-        <span className="shrink-0 w-10 h-10 rounded-xl bg-neutral-100 grid place-items-center text-xl">{icono}</span>
-        <div className="min-w-0">
-          <p className="text-[14px] font-bold text-primary">{titulo}</p>
-          <p className="text-[12px] text-neutral-500 mt-0.5">{descripcion}</p>
-        </div>
-      </div>
+      <span className="pnl-opcion-cab">
+        <span className="pnl-opcion-ico">{icono}</span>
+        <span className="min-w-0">
+          <span className="pnl-opcion-titulo">{titulo}</span>
+          <span className="pnl-opcion-texto">{descripcion}</span>
+        </span>
+      </span>
     </button>
   );
 }
@@ -260,15 +260,13 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
     <div className="space-y-3">
 
       {/* Pestañas */}
-      <div className="flex gap-1 bg-neutral-100 border border-neutral-200 rounded-xl p-1">
+      <div className="pnl-segmentos pnl-segmentos-llenos">
         {[[1, "1 · Tus datos"], [2, "2 · Credenciales BLS"]].map(([n, txt]) => (
           <button
             key={n}
             type="button"
             onClick={() => setPestana(n)}
-            className={`flex-1 py-2 rounded-lg text-[12.5px] font-semibold transition-all ${
-              pestana === n ? "bg-primary text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
-            }`}
+            aria-pressed={pestana === n}
           >
             {txt}
           </button>
@@ -276,7 +274,7 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
       </div>
 
       {bloqueado && (
-        <Aviso tono="warn" icono="🔒">
+        <Aviso tono="warn" icono={<Icono nombre="candado" size={16} />}>
           Tu formulario oficial ya está <b>firmado</b>, así que estos datos quedaron congelados.
           Si necesitas corregir algo, escríbele a tu asesor.
         </Aviso>
@@ -298,7 +296,7 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
       )}
 
       {!bloqueado && faltantes.length === 0 && (
-        <Aviso tono="ok" icono="✅">
+        <Aviso tono="ok">
           Tienes <b>todos tus datos completos</b>. Si algo cambia, edítalo y vuelve a guardar.
         </Aviso>
       )}
@@ -365,20 +363,20 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
         </>
       ) : (
         <>
-          <Aviso tono="info" icono="🔑">
+          <Aviso tono="info" icono={<Icono nombre="candado" size={16} />}>
             BLS International es la plataforma donde se agenda tu cita en el consulado.
           </Aviso>
 
-          <p className="text-[14px] font-semibold text-neutral-700 px-1">¿Ya tienes una cuenta en BLS?</p>
+          <p className="pnl-visado-pregunta">¿Ya tienes una cuenta en BLS?</p>
 
           <div className="space-y-2">
             <OpcionTarjeta
-              activa={bls.tiene === true} icono="✅"
+              activa={bls.tiene === true} icono={<IconoPaso nombre="checkCircle" />}
               titulo="Sí, ya tengo cuenta" descripcion="Te pediremos tus credenciales"
               onClick={() => setCredencial("tiene", true)} disabled={inhabilitado}
             />
             <OpcionTarjeta
-              activa={bls.tiene === false} icono="🆕"
+              activa={bls.tiene === false} icono={<Icono nombre="destello" size={18} />}
               titulo="No, aún no tengo" descripcion="Nosotros la crearemos por ti"
               onClick={() => setCredencial("tiene", false)} disabled={inhabilitado}
             />
@@ -398,19 +396,20 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
                 <button
                   type="button"
                   onClick={() => setVerPass((v) => !v)}
-                  className="sm:col-span-2 text-left text-[11.5px] font-semibold text-primary-light hover:underline px-1"
+                  className="pnl-btn-texto sm:col-span-2 justify-self-start"
+                  data-talla="s"
                 >
                   {verPass ? "Ocultar contraseña" : "Ver contraseña"}
                 </button>
               </Grupo>
-              <Aviso tono="warn" icono="🔒">
+              <Aviso tono="warn" icono={<Icono nombre="candado" size={16} />}>
                 Se guardan <b>cifradas</b> y sólo las usa tu asesor para agendar tu cita.
               </Aviso>
             </>
           )}
 
           {bls.tiene === false && (
-            <Aviso tono="ok" icono="✨">
+            <Aviso tono="ok" icono={<Icono nombre="destello" size={16} />}>
               Perfecto. <b>Nosotros crearemos tu cuenta BLS</b> y te compartiremos el acceso.
             </Aviso>
           )}
@@ -419,23 +418,23 @@ export default function VisaDatosCliente({ idSolicitud, expediente, cliente, ext
 
       {/* Barra de guardado */}
       {!bloqueado && (
-        <div className="sticky bottom-0 -mx-1 px-1 pt-2 pb-1 bg-gradient-to-t from-white via-white to-transparent">
+        <div className="pnl-barra-guardar sticky bottom-[var(--selector-alto)] z-[14] flex-wrap">
           {aviso && (
-            <div className="mb-2">
-              <Aviso tono={aviso.tono} icono={aviso.tono === "ok" ? "✔" : "⚠️"}>{aviso.texto}</Aviso>
+            <div className="w-full">
+              <Aviso tono={aviso.tono}>{aviso.texto}</Aviso>
             </div>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={guardar}
               disabled={guardando}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1D6A4A] text-white text-sm font-semibold shadow-sm hover:bg-[#175a3e] active:scale-95 transition-all disabled:opacity-60 disabled:active:scale-100"
+              className="pnl-btn-primario"
             >
-              {guardando && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+              {guardando && <span className="pnl-spinner" data-talla="s" />}
               {guardando ? "Guardando…" : "Guardar"}
             </button>
-            <p className="text-[11.5px] text-neutral-400">
+            <p className="pnl-barra-guardar-texto" data-sucio={sucio ? "1" : undefined}>
               {sucio ? "Tienes cambios sin guardar" : `${completados} de ${CAMPOS.length} datos completados`}
             </p>
           </div>

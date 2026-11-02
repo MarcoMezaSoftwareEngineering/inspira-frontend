@@ -14,7 +14,9 @@
 // así que no puede llevar enlaces ni botones.
 //
 // Si lleva `clave`, recuerda en este navegador si la dejó abierta o cerrada.
-// Estilos en styles/panel-documentos.css (pnl-ayuda-*).
+// Estilos en styles/panel-documentos.css (pnl-ayuda-*), pisados desde
+// styles/panel/tramites.css; el chevrón gira con .pnl-chev (base.css). Va en línea
+// porque IconoPaso «chevron» cae en «info».
 import { useId, useState } from "react";
 
 const PREFIJO = "pnl-ayuda:";
@@ -58,7 +60,7 @@ export default function AyudaPlegable({
           {resumen && <span className="pnl-ayuda-resumen">{resumen}</span>}
         </span>
         <span className="pnl-ayuda-mas">{abierta ? "Ocultar" : "Ver más"}</span>
-        <svg className="pnl-ayuda-chev" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        <svg className="pnl-ayuda-chev pnl-chev" width="16" height="16" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="m6 9 6 6 6-6" />
         </svg>

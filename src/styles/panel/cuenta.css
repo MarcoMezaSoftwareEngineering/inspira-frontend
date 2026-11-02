@@ -1,0 +1,1233 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO · hoja de bloque (25/10/2026)
+   Dueño: B4 · Perfil, pagos, avisos, guías y becas.
+   Ámbito: perfil y su asistente, seguridad de la sesión, pagos, centro de avisos, guías, encuesta de cierre, instalar la app (modal) y becas.
+
+   Reglas (ver base.css):
+   · Todo selector va con .pnl delante: esta hoja pisa a las de arriba
+     (panel.css, panel-app.css, panel-*.css, pasos*.css), que no se editan.
+   · Colores: variables de .pnl (panel.css). Un hex solo como reserva antes
+     de un color-mix() o para el blanco; ningún color nuevo fuera de los tokens.
+   · Clases nuevas con prefijo pnl-. Ninguna pnl- declara display en un nodo
+     que se oculte con una utilidad de Tailwind (ese ocultar va aquí con @media)
+     ni position en uno con fixed/sticky/absolute de Tailwind.
+   · Solo se animan transform y opacity.
+   · La campana (.pnl-avc-boton) es de B1 (cascara.css): aquí solo su panel.
+   ========================================================================== */
+
+
+/* ── AVISO DE PERFIL (AvisoPerfil.jsx) ────────────────────────────────────
+   Va arriba de cada expediente y de Pagos. Toma la .pnl-aviso de base (tono
+   aviso por defecto) y se compacta: tile de 32 arriba, texto 13/600 y
+   «Completar» en talla s; por debajo de 520 baja bajo el texto, sin ocupar
+   todo el ancho. Pisa panel.css (.pnl-aviso, :490-503). */
+.pnl .pnl-aviso-perfil {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 10px 12px;
+  border-radius: var(--radio-m);
+}
+.pnl .pnl-aviso-perfil .pnl-aviso-icono { align-self: start; }
+.pnl .pnl-aviso-perfil .pnl-aviso-texto {
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45;
+  color: var(--tono-ink);
+}
+.pnl .pnl-aviso-perfil > .pnl-btn { white-space: nowrap; }
+@media (max-width: 519.98px) {
+  .pnl .pnl-aviso-perfil { grid-template-columns: 32px minmax(0, 1fr); }
+  .pnl .pnl-aviso-perfil > .pnl-btn { grid-column: 2 / -1; justify-self: start; }
+}
+
+
+/* ── PERFIL: contenedor y ficha (PerfilCliente.jsx) ───────────────────────
+   En escritorio la página del perfil se estrecha a 53rem: con 4xl los datos
+   quedaban sueltos en filas muy anchas, y con 48rem, apretados. El contenedor lo pinta
+   PanelCliente (B1); aquí solo se le baja el ancho si lleva el perfil. */
+.pnl div:has(> .pnl-perfil) { max-width: 53rem; }
+
+.pnl .pnl-perfil:not(.pnl-tarjeta) { display: grid; gap: 12px; }
+/* Aire hasta «Avisos en tu móvil» y «Seguridad», que vienen detrás. */
+.pnl .pnl-perfil { margin-bottom: 16px; }
+.pnl .pnl-perfil-esq { gap: 8px; }
+
+/* La tarjeta va sin relleno (la cabecera es a sangre) y SIN overflow:
+   el desplegable de país o universidad no se puede cortar en su borde. */
+.pnl .pnl-perfil-tarjeta { padding: 0; overflow: visible; }
+
+/* Cabecera noche: el fondo es el de panel.css (.pnl-perfil-cab), que ya
+   cumple; aquí solo el aire, la rejilla y la letra. */
+.pnl .pnl-perfil-cab {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 20px;
+  border-radius: calc(var(--radio-l) - 1px) calc(var(--radio-l) - 1px) 0 0;
+}
+.pnl .pnl-perfil-cab[data-modo='editar'] { grid-template-columns: minmax(0, 1fr) auto; }
+.pnl .pnl-perfil-cab-avatar { display: block; width: 56px; height: 56px; border-radius: 999px; box-shadow: 0 0 0 2px var(--cristal-borde); }
+.pnl .pnl-perfil-cab-texto { min-width: 0; }
+.pnl .pnl-perfil-cab-nombre {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 20px; line-height: 1.25; letter-spacing: -.01em;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+.pnl .pnl-perfil-cab-correo {
+  margin: 4px 0 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.4;
+  color: var(--sobre-noche-2);
+}
+.pnl .pnl-perfil-cab-desde {
+  margin: 2px 0 0;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  color: var(--sobre-noche-3);
+}
+.pnl .pnl-perfil-cab-boton { justify-self: end; }
+/* «Cancelar» de la cabecera de edición: texto blanco sobre noche. */
+.pnl .pnl-perfil-cab .pnl-btn-texto { color: #fff; }
+@media (max-width: 519.98px) {
+  /* Con el botón al lado, el nombre se quedaba en una columna de 150 px:
+     en el teléfono «Editar» baja bajo el texto. */
+  .pnl .pnl-perfil-cab:not([data-modo='editar']) { grid-template-columns: 56px minmax(0, 1fr); align-items: start; }
+  .pnl .pnl-perfil-cab:not([data-modo='editar']) .pnl-perfil-cab-avatar { grid-row: 1 / span 2; }
+  .pnl .pnl-perfil-cab:not([data-modo='editar']) .pnl-perfil-cab-boton { grid-column: 2; justify-self: start; margin-top: 8px; }
+}
+
+.pnl .pnl-perfil-cuerpo { padding: var(--pad-tarjeta); }
+.pnl .pnl-perfil-pista {
+  margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+/* Rótulo de sección: eyebrow de marca (era verde de 9 px). */
+.pnl .pnl-perfil-sec { margin: 24px 0 10px; }
+.pnl .pnl-perfil-pista + .pnl-perfil-sec { margin-top: 16px; }
+
+/* ── Dato del perfil: se lee y se toca para editarlo ── */
+.pnl .pnl-perfil-dato {
+  justify-content: flex-start;
+  min-height: 64px;
+  padding: 10px 32px 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-s);
+  background: #fff;
+}
+@media (hover: hover) {
+  .pnl .pnl-perfil-dato:not([data-editando]):hover { border-color: var(--sky-2); box-shadow: var(--sombra-1); }
+}
+.pnl .pnl-perfil-dato:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-perfil-dato-label {
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.3;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted);
+}
+.pnl .pnl-perfil-dato-valor {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal; text-overflow: clip;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-lectura); font-weight: 600; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-perfil-dato-lapiz {
+  top: 10px; right: 10px;
+  color: var(--trazo);
+  opacity: 1;
+  transition: color var(--d-corta) var(--salida);
+}
+.pnl .pnl-perfil-dato:hover .pnl-perfil-dato-lapiz,
+.pnl .pnl-perfil-dato:focus-visible .pnl-perfil-dato-lapiz { color: var(--primary-2); opacity: 1; }
+
+/* Vacío: una invitación a «Añadir». */
+.pnl .pnl-perfil-dato[data-vacio='1'] { border-style: dashed; border-color: var(--trazo); background: #fff; }
+.pnl .pnl-perfil-anadir { font-size: var(--fs-cuerpo); font-weight: 700; color: var(--primary-2); }
+
+/* Vacío y exigido: borde de 1,5 en tinta de aviso (6,3:1) y fondo aviso;
+   el rótulo pasa a --ink-2, porque --muted no llega a AA sobre aviso-soft. */
+.pnl .pnl-perfil-dato[data-falta='1'] {
+  border: 1.5px solid var(--aviso-ink);
+  background: var(--aviso-soft);
+}
+.pnl .pnl-perfil-dato[data-falta='1'] .pnl-perfil-dato-label { color: var(--ink-2); }
+.pnl .pnl-perfil-dato[data-falta='1'] .pnl-perfil-anadir { color: var(--aviso-ink); }
+/* El chip «Obligatorio» va sobre el propio aviso-soft: un punto más de tono
+   para que no se funda (aviso-ink sobre él, ≥ 5,7:1). */
+.pnl .pnl-perfil-dato-label .pnl-perfil-dato-req {
+  text-transform: none; letter-spacing: 0;
+  background: rgba(250, 148, 58, .16);
+  background: color-mix(in srgb, var(--aviso) 16%, #fff);
+}
+
+/* Datos largos (universidad, carrera, área): en el teléfono, a todo el
+   ancho y en dos líneas. */
+@media (max-width: 639.98px) {
+  .pnl .pnl-perfil-dato[data-largo='1'] { grid-column: 1 / -1; }
+}
+
+/* Recién guardado: el destello se queda; la etiqueta, a 12 px con icono. */
+.pnl .pnl-perfil-dato-ok {
+  display: inline-flex; align-items: center; gap: 4px;
+  right: 8px; bottom: -10px;
+  padding: 2px 8px;
+  border-radius: var(--radio-pildora);
+  background: var(--green); color: #fff;
+  font-size: var(--fs-meta); font-weight: 700; letter-spacing: 0; line-height: 1.4;
+}
+
+/* Abierto: ocupa la fila; editor con la familia de campos de base. */
+.pnl .pnl-perfil-dato[data-editando='1'] {
+  padding: 12px;
+  border-color: var(--primary-2);
+  box-shadow: var(--foco);
+}
+.pnl .pnl-perfil-editor { margin-top: 6px; }
+.pnl .pnl-perfil-editor-error {
+  margin: 8px 0 0;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+  color: var(--alto-ink);
+}
+.pnl .pnl-perfil-editor-botones { gap: 8px; margin-top: 12px; }
+.pnl .pnl-perfil-editor-botones .pnl-btn,
+.pnl .pnl-perfil-editor-botones .pnl-btn-primario { height: auto; padding: 6px 18px; }
+
+.pnl .pnl-perfil-nota {
+  margin: 4px 0 0;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.4;
+  color: var(--muted);
+}
+.pnl .pnl-perfil-aviso { margin: 0; }
+
+/* ── Perfil en modo «Editar» ── */
+.pnl .pnl-perfil-form {
+  display: grid; gap: 20px;
+  padding: var(--pad-tarjeta);
+}
+.pnl .pnl-perfil-form-col { display: grid; gap: 20px; min-width: 0; }
+.pnl .pnl-perfil-form .pnl-perfil-sec { margin: 4px 0 12px; }
+.pnl .pnl-perfil-form .pnl-casilla-fila { font-size: var(--fs-cuerpo-sm); font-weight: 500; color: var(--ink-2); }
+.pnl .pnl-campo-control.pnl-campo-prefijo { width: 116px; flex: 0 0 auto; }
+.pnl .pnl-campo-control.pnl-campo-anio { width: 112px; flex: 0 0 auto; }
+.pnl .pnl-campo-pista {
+  display: flex; align-items: center; gap: 4px;
+  margin: 4px 0 0;
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+}
+.pnl .pnl-perfil-presupuesto {
+  margin-top: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+  background: var(--fondo-suave);
+}
+.pnl .pnl-perfil-presupuesto[data-estado='error'] { border: 1.5px solid var(--alto); background: var(--alto-soft); }
+.pnl .pnl-perfil-cifra {
+  margin: 0 0 8px;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 22px; line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+}
+.pnl .pnl-perfil-pie {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap;
+  padding: 12px var(--pad-tarjeta);
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 calc(var(--radio-l) - 1px) calc(var(--radio-l) - 1px);
+  background: var(--surface);
+}
+@media (max-width: 519.98px) {
+  .pnl .pnl-perfil-pie .pnl-btn-primario { flex: 1 1 auto; }
+}
+
+/* Desplegable de país y universidad (Combobox, perfil.shared.jsx). */
+.pnl .pnl-combo-lista {
+  list-style: none;
+  max-height: 264px;
+  margin: 4px 0 0; padding: 4px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-s);
+  box-shadow: var(--sombra-3);
+}
+.pnl .pnl-combo-opcion {
+  display: flex; align-items: center;
+  width: 100%; min-height: var(--pnl-tap);
+  padding: 8px 12px;
+  border: 0; border-radius: 8px;
+  background: none;
+  text-align: left;
+  font: 500 var(--fs-cuerpo)/1.35 var(--f-texto);
+  color: var(--ink);
+  cursor: pointer;
+}
+.pnl .pnl-combo-opcion:hover,
+.pnl .pnl-combo-opcion:focus-visible { background: var(--info-soft); color: var(--primary); }
+.pnl .pnl-combo-opcion:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: -2px; }
+.pnl .pnl-combo-opcion:hover .text-muted,
+.pnl .pnl-combo-opcion:focus-visible .text-muted { color: var(--ink-2); }
+.pnl .pnl-combo-nota {
+  margin-top: 4px;
+  padding: 8px 12px 4px;
+  border-top: 1px solid var(--line-suave);
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--muted);
+}
+
+
+/* ── SEGURIDAD DE LA CUENTA (SeguridadSesion.jsx) ─────────────────────────
+   Tarjeta estándar (pisa panel-app.css:379-392). */
+.pnl .pnl-seguridad {
+  gap: 12px 14px;
+  margin-top: 16px;
+  padding: var(--pad-tarjeta);
+  border-radius: var(--radio-l);
+}
+.pnl .pnl-seguridad-icono {
+  width: 44px; height: 44px;
+  border-radius: var(--radio-s);
+  background: var(--sky-soft); color: var(--primary-2);
+}
+.pnl .pnl-seguridad-cuerpo h3 {
+  font-size: var(--fs-titulo); font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-seguridad-cuerpo p {
+  margin-top: 4px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+.pnl .pnl-seguridad-cuerpo b { color: var(--ink); font-weight: 700; }
+.pnl .pnl-seguridad-botones { gap: 8px; }
+
+
+
+/* ── CABECERA DE PÁGINA (.pnl-head) ───────────────────────────────────────
+   La usan Pagos, Mi ruta (B2) y Guías en PDF. Pisa panel.css (.pnl-head). */
+.pnl .pnl-head { align-items: flex-end; gap: 12px 16px; }
+.pnl .pnl-head h2 {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.2; letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl .pnl-head p {
+  margin: 6px 0 0;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+
+
+/* ── PAGOS: resumen (MisPagos.jsx) ────────────────────────────────────────
+   Pisa panel.css (.ex-pg-*) y panel-perfil-pagos.css. Pagos sigue siendo el
+   molde: papel sobre bruma, sin noche. */
+@media (max-width: 519.98px) {
+  /* «Pagado» y «Te toca» uno junto al otro; «Próximo vencimiento» debajo. */
+  .pnl .ex-pg-resumen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .pnl .ex-pg-resumen > :nth-child(3) { grid-column: 1 / -1; }
+}
+.pnl .ex-pg-dato:not([data-tono]) { --tono: var(--info); }
+.pnl .ex-pg-dato {
+  gap: 2px;
+  min-width: 0; min-height: 76px;
+  padding: 14px 16px 14px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+  background: #fff;
+}
+.pnl .ex-pg-dato::before { width: 4px; background: var(--tono); }
+.pnl .ex-pg-dato > span {
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.3;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--ink-2);
+}
+.pnl .ex-pg-dato > b {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 22px; line-height: 1.25; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+  overflow-wrap: anywhere;
+}
+.pnl .ex-pg-dato > small {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+.pnl .ex-pg-dato[data-tono='alto'] > small:first-of-type { color: var(--alto-ink); font-weight: 700; }
+
+
+/* ── PAGOS: plan, barra y cuotas ── */
+.pnl .ex-pg-plan {
+  gap: 12px;
+  padding: var(--pad-tarjeta);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-pg-plan-cab h3 {
+  margin: 6px 0 0;
+  font-size: var(--fs-titulo); font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .ex-pg-plan-total { gap: 6px; }
+.pnl .ex-pg-plan-total b {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 28px; line-height: 1.1; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+}
+.pnl .ex-pg-barra-texto {
+  margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .pnl-pagos-estados { margin: 2px 0 4px; gap: 6px; }
+
+.pnl .ex-pg-cuotas { margin-top: 6px; }
+.pnl .ex-pg-cuota { gap: 12px; padding-bottom: 16px; }
+.pnl .ex-pg-cuota:not(:last-child)::after {
+  left: 13px; top: 32px; bottom: 4px;
+  width: 2px; border-radius: 2px;
+  background: var(--line);
+}
+.pnl .ex-pg-cuota[data-tono='ok']:not(:last-child)::after {
+  background: rgba(29, 106, 74, .35);
+  background: color-mix(in srgb, var(--green) 35%, transparent);
+}
+/* Marca de 28: hecha en verde con check; la que está en curso (la primera
+   sin pagar), en petróleo; las que faltan, en tile con borde de trazo. Las
+   que piden algo (vencida, vence pronto, en revisión) llevan su tono. */
+.pnl .ex-pg-marca {
+  width: 28px; height: 28px; margin-top: 4px;
+  border: 1px solid var(--trazo);
+  background: var(--fondo-tile);
+  color: var(--ink-2);
+  font-size: var(--fs-meta); font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.pnl .ex-pg-marca[data-tono='ok'] { background: var(--green); border-color: var(--green); color: #fff; }
+.pnl .ex-pg-marca:is([data-tono='info'], [data-tono='aviso'], [data-tono='alto']) {
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+  border-color: rgba(122, 147, 162, .6);
+  border-color: color-mix(in srgb, var(--tono) 55%, transparent);
+}
+.pnl .ex-pg-cuotas > .ex-pg-cuota:first-child:not([data-tono='ok']) > .ex-pg-marca,
+.pnl .ex-pg-cuota[data-tono='ok'] + .ex-pg-cuota:not([data-tono='ok']) > .ex-pg-marca {
+  background: var(--primary); border-color: var(--primary); color: #fff;
+}
+.pnl .ex-pg-marca svg { width: 14px; height: 14px; }
+
+.pnl .ex-pg-cuota-cuerpo {
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+}
+.pnl .ex-pg-cuota[data-tono='alto'] .ex-pg-cuota-cuerpo {
+  border-color: rgba(190, 60, 66, .35);
+  border-color: color-mix(in srgb, var(--alto) 35%, transparent);
+}
+.pnl .ex-pg-cuota-fila strong {
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.pnl .ex-pg-cuota-fila small {
+  margin-top: 2px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+.pnl .ex-pg-cuota-texto {
+  padding: 8px 12px;
+  border-radius: var(--radio-s);
+  background: var(--fondo-suave);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink);
+}
+.pnl .ex-pg-cuota-texto[data-tono] { background: var(--tono-soft); color: var(--tono-ink); }
+.pnl .ex-pg-cuota-texto[data-tono='alto'] { font-weight: 600; }
+
+/* Botones de la cuota: «Pagar» es el único sol de la pantalla. */
+.pnl .ex-pg-botones { gap: 8px; }
+.pnl .ex-pg-botones .pnl-btn,
+.pnl .ex-pg-botones .pnl-btn-cta,
+.pnl .ex-pg-botones .pnl-btn-texto { height: auto; }
+.pnl .pnl-pagos-acciones .pnl-pagos-pagar { white-space: nowrap; }
+.pnl .pnl-pagos-acciones .pnl-pagos-subir { white-space: nowrap; }
+.pnl .pnl-pagos-via {
+  font-size: var(--fs-meta); font-weight: 700; line-height: 1.3;
+  color: var(--primary-dark);
+  opacity: 1;
+}
+@media (max-width: 519.98px) {
+  /* A todo el ancho, el importe en una línea y el medio de pago debajo. */
+  .pnl .pnl-pagos-acciones .pnl-pagos-pagar {
+    flex: 1 1 100%;
+    flex-wrap: wrap; row-gap: 0;
+    padding-top: 8px; padding-bottom: 8px;
+  }
+  .pnl .pnl-pagos-acciones .pnl-pagos-via { flex-basis: 100%; text-align: center; }
+  /* «Ya pagué: subir comprobante» cabe en una línea con menos relleno lateral. */
+  .pnl .pnl-pagos-acciones .pnl-btn { flex: 1 1 100%; padding-left: 12px; padding-right: 12px; }
+}
+.pnl .ex-pg-aviso-mp {
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  border: 1px solid rgba(250, 148, 58, .3);
+  border: 1px solid color-mix(in srgb, var(--aviso) 30%, transparent);
+  background: var(--aviso-soft);
+}
+.pnl .ex-pg-aviso-mp > p { font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45; color: var(--aviso-ink); }
+
+/* Datos de transferencia abiertos dentro de la cuota. */
+.pnl .pnl-pagos-datos {
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radio-m);
+  border: 1px solid var(--line-suave);
+  background: var(--fondo-suave);
+}
+.pnl .pnl-pagos-datos > p {
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.5;
+  color: var(--ink);
+}
+
+
+/* ── PAGOS: cómo pagar ── */
+.pnl .ex-pg-datos {
+  gap: 14px;
+  padding: var(--pad-tarjeta);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-pg-datos[data-compacto='1'] { padding: 0; border: 0; box-shadow: none; background: transparent; }
+.pnl .ex-pg-datos[data-vacio='1'] p { font-size: var(--fs-cuerpo); font-weight: 600; color: var(--ink); }
+.pnl .ex-pg-datos-cab h3 {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.2; letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl .ex-pg-datos-cab p {
+  margin-top: 4px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+/* Un medio por fila: en dos columnas el CCI de 20 cifras se partía y su
+   «Copiar» bajaba a otra línea. */
+.pnl .ex-pg-medios-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.pnl .ex-pg-medio {
+  align-content: start;
+  gap: 4px;
+  padding: 12px 14px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-m);
+  background: #fff;
+}
+.pnl .ex-pg-medio dl { gap: 0; align-content: start; }
+.pnl .ex-pg-dl-fila {
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 10px;
+  min-height: 48px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line-suave);
+}
+.pnl .ex-pg-dl-fila:first-child { border-top: 0; }
+.pnl .ex-pg-dl-fila dt {
+  font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+  color: var(--muted);
+}
+.pnl .ex-pg-dl-fila dd {
+  justify-content: space-between;
+  gap: 4px 8px;
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.pnl .ex-pg-numero {
+  font-family: var(--f-texto);
+  font-size: var(--fs-lectura); font-weight: 700; letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 519.98px) {
+  /* La clave encima y el valor a todo el ancho: el CCI de 20 cifras y su
+     «Copiar» caben en la misma línea. */
+  .pnl .ex-pg-dl-fila { grid-template-columns: minmax(0, 1fr); padding: 8px 0; }
+  .pnl .ex-pg-medio { padding-left: 12px; padding-right: 12px; }
+  .pnl .ex-pg-numero { font-size: var(--fs-cuerpo); letter-spacing: 0; }
+}
+/* «Copiar»: píldora de talla s con icono; «Copiado» en verde. */
+.pnl .ex-pg-copiar { flex: 0 0 auto; }
+.pnl .ex-pg-copiar[data-hecho] { color: var(--ok-ink); border-color: rgba(29, 106, 74, .35); border-color: color-mix(in srgb, var(--green) 35%, transparent); }
+.pnl .ex-pg-copiar[data-hecho] svg { color: var(--ok-ink); }
+
+/* Comprobante enviado: aviso en tono ok (pisa .ex-pg-ok de panel.css). */
+.pnl .ex-pg-ok .pnl-aviso-texto { flex: none; }
+
+
+/* ── PAGOS: hoja del comprobante (portal con .pnl propio) ── */
+.pnl .ex-pg-modal-panel {
+  border-radius: var(--radio-xl) var(--radio-xl) 0 0;
+  box-shadow: var(--sombra-3);
+}
+@media (min-width: 640px) {
+  .pnl .ex-pg-modal-panel { border-radius: var(--radio-xl); }
+}
+.pnl .ex-pg-modal-cab { gap: 12px; padding: 14px 18px 12px; border-bottom: 1px solid var(--line); }
+.pnl .ex-pg-modal-cab h3 {
+  margin: 6px 0 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.2; letter-spacing: -.01em;
+}
+.pnl .ex-pg-modal-cab p {
+  margin-top: 4px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .ex-pg-modal-x { margin-left: auto; }
+.pnl .ex-pg-modal-cuerpo { gap: 14px; padding: 16px 18px; }
+.pnl .ex-pg-archivo {
+  min-height: 104px;
+  align-content: center;
+  padding: 18px 14px;
+  border: 1.5px dashed var(--trazo);
+  border-radius: var(--radio-m);
+  background: var(--fondo-suave);
+  color: var(--primary-2);
+  transition: border-color var(--d-corta) var(--salida), background-color var(--d-corta) var(--salida);
+}
+.pnl .ex-pg-archivo:hover { border-color: var(--sky-2); background: var(--info-soft); }
+.pnl .ex-pg-archivo:focus-within { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .ex-pg-archivo[data-lleno='1'] {
+  border-style: solid;
+  border-color: rgba(29, 106, 74, .4);
+  border-color: color-mix(in srgb, var(--green) 40%, transparent);
+  background: var(--ok-soft);
+  color: var(--ok-ink);
+}
+.pnl .ex-pg-archivo span { font-size: var(--fs-cuerpo); font-weight: 700; color: var(--ink); }
+.pnl .ex-pg-archivo small { font-size: var(--fs-meta); font-weight: 500; color: var(--ink-2); }
+.pnl .ex-pg-medios { gap: 8px; }
+.pnl .ex-pg-medios legend {
+  margin-bottom: 8px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--ink-2);
+}
+.pnl .ex-pg-medio-opcion {
+  position: relative;
+  min-height: var(--pnl-tap); height: auto;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-pildora);
+  background: #fff;
+  font-size: var(--fs-cuerpo); font-weight: 600;
+  color: var(--primary);
+  transition: background-color var(--d-corta) var(--salida), color var(--d-corta) var(--salida), border-color var(--d-corta) var(--salida);
+}
+.pnl .ex-pg-medio-opcion[data-on='1'] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.pnl .ex-pg-medio-opcion:focus-within { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .ex-pg-campo { gap: 6px; }
+.pnl .ex-pg-campo > span {
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--ink-2);
+}
+.pnl .ex-pg-campo .pnl-campo-control { height: auto; }
+.pnl .ex-pg-modal-pie {
+  gap: 8px;
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+}
+.pnl .ex-pg-modal-pie .pnl-btn,
+.pnl .ex-pg-modal-pie .pnl-btn-primario { height: auto; }
+
+
+/* ── PAGOS: la próxima cuota, fija abajo en el teléfono ──
+   La posición (sticky) es la de panel-perfil-pagos.css: aquí solo el dibujo. */
+@media (max-width: 767px) {
+  .pnl .pnl-pagos-barra {
+    padding: 10px 10px 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radio-l);
+    box-shadow: var(--sombra-3);
+  }
+  .pnl .pnl-pagos-barra[data-tono='alto'] {
+    border-color: rgba(190, 60, 66, .35);
+    border-color: color-mix(in srgb, var(--alto) 35%, transparent);
+  }
+  .pnl .pnl-pagos-barra-texto strong {
+    font-size: var(--fs-cuerpo-sm); font-weight: 700; line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .pnl .pnl-pagos-barra-texto small {
+    font-size: var(--fs-meta); font-weight: 600; line-height: 1.4;
+    color: var(--ink-2);
+  }
+  .pnl .pnl-pagos-barra[data-tono='alto'] .pnl-pagos-barra-texto small { color: var(--alto-ink); }
+  .pnl .pnl-pagos-barra .pnl-btn-cta { height: auto; padding: 6px 16px; white-space: nowrap; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pnl .pnl-pagos-barra { background: rgba(255, 255, 255, .98); }
+}
+
+
+/* ── CENTRO DE AVISOS (CentroAvisos.jsx) ──────────────────────────────────
+   Solo el panel que abre la campana; el botón de la campana es de B1
+   (cascara.css). Pisa panel-centro.css:42-95. La lógica del diálogo no se
+   toca. */
+.pnl .pnl-avc-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra-3);
+}
+.pnl .pnl-avc-cab { gap: 8px; padding: 14px 12px 10px 16px; border-bottom: 1px solid var(--line); }
+.pnl .pnl-avc-cab h2 {
+  font-size: var(--fs-titulo); font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-avc-cuerpo { padding: 4px 8px 12px; }
+.pnl .pnl-avc-grupo { margin: 14px 8px 6px; }
+.pnl .pnl-avc-lista { gap: 2px; }
+.pnl .pnl-avc-item:not([data-tono]) { --tono-soft: var(--info-soft); --tono-ink: var(--info-ink); }
+.pnl .pnl-avc-item {
+  position: relative;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 10px 8px;
+  border-radius: var(--radio-s);
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--d-corta) var(--salida);
+}
+.pnl .pnl-avc-item[data-nueva='1'] { background: transparent; }
+@media (hover: hover) {
+  .pnl .pnl-avc-item:hover { background: var(--fondo-suave); }
+}
+.pnl .pnl-avc-item:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: -2px; }
+.pnl .pnl-avc-item[data-tono] .pnl-avc-icono {
+  position: relative;
+  width: 36px; height: 36px;
+  border-radius: var(--radio-s);
+  background: var(--tono-soft);
+  color: var(--tono-ink);
+}
+/* Lo nuevo: el título en 700 y un punto sol de 8 en la esquina del tile. */
+.pnl .pnl-avc-item[data-nueva='1'] .pnl-avc-icono::after {
+  content: "";
+  position: absolute; top: -3px; right: -3px;
+  width: 8px; height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px #fff;
+}
+.pnl .pnl-avc-texto { gap: 2px; }
+.pnl .pnl-avc-texto b {
+  font-size: var(--fs-cuerpo); font-weight: 600; line-height: 1.35;
+  color: var(--ink);
+}
+.pnl .pnl-avc-item[data-nueva='1'] .pnl-avc-texto b { font-weight: 700; }
+.pnl .pnl-avc-texto small {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.4;
+  color: var(--ink-2);
+}
+.pnl .pnl-avc-cuando {
+  align-self: start;
+  padding-top: 2px;
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--muted);
+}
+.pnl .pnl-avc-item[data-nueva='1'] .pnl-avc-cuando { color: var(--ink-2); font-weight: 600; }
+.pnl .pnl-avc-vacio { margin: 4px 0 0; padding: 20px 16px; }
+
+
+/* ── MIS GUÍAS: pestañas (MisGuias.jsx) ───────────────────────────────────
+   Las pestañas pasan a segmentos con desplazamiento lateral; la activa es la
+   de la URL (data-on y aria-current). Pisa panel.css (.ex-guias-*). */
+.pnl .ex-guias-pestanas {
+  display: block;
+  padding: 12px var(--gutter);
+  background: var(--papel);
+  border-bottom: 1px solid var(--line);
+}
+.pnl .ex-guias-pestanas > .pnl-segmentos { width: max-content; max-width: 100%; }
+/* La última pestaña no se queda pegada al borde al terminar de deslizar. */
+@media (max-width: 639.98px) {
+  .pnl .ex-guias-pestanas > .pnl-segmentos { padding-right: 16px; }
+}
+.pnl .pnl-segmentos > .ex-guias-pestana { border: 0; }
+.pnl .pnl-segmentos > .ex-guias-pestana svg { color: currentColor; }
+.pnl .pnl-segmentos > .ex-guias-pestana[data-on='1'] { background: var(--primary); color: #fff; cursor: default; }
+
+
+/* ── GUÍAS EN PDF (GuiaPortal.jsx) ── */
+.pnl .ex-guia-portal-lista { gap: 10px; }
+.pnl .ex-guia-portal {
+  gap: 12px 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .ex-guia-portal-icono {
+  width: 40px; height: 40px;
+  border-radius: var(--radio-s);
+  background: var(--sky-soft);
+  color: var(--primary-2);
+}
+.pnl .ex-guia-portal .pnl-eyebrow { margin: 0 0 4px; }
+.pnl .ex-guia-portal strong {
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+}
+.pnl .ex-guia-portal small:not(.pnl-eyebrow) {
+  margin-top: 4px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+}
+.pnl .ex-guia-portal-peso { font-size: var(--fs-meta); font-weight: 600; color: var(--muted); opacity: 1; }
+@media (max-width: 519.98px) {
+  .pnl .ex-guia-portal { align-items: flex-start; }
+  .pnl .ex-guia-portal .pnl-btn { width: 100%; }
+}
+
+
+/* ── BECAS (BecasEspana.jsx) ──────────────────────────────────────────────
+   La cabecera es noche de la marca (era un degradado propio con verde); las
+   pestañas, segmentos sobre bruma; las tarjetas, las del panel. */
+.pnl .pnl-becas-cab {
+  display: grid; justify-items: center; gap: 10px;
+  padding: 28px var(--gutter) 24px;
+  text-align: center;
+}
+@media (min-width: 640px) { .pnl .pnl-becas-cab { padding: 36px 24px 28px; } }
+/* Con el aviso de perfil encima, la noche no se pega a él. */
+.pnl :has(> .pnl-aviso-perfil) + .pnl-becas > .pnl-becas-cab { margin-top: 16px; }
+.pnl .pnl-becas-cab-icono {
+  display: grid; place-items: center;
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: var(--cristal-texto);
+  border: 1px solid var(--cristal-borde);
+  color: var(--accent-2);
+}
+.pnl .pnl-becas-cab-titulo {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 24px; line-height: 1.2; letter-spacing: -.01em;
+  color: #fff;
+}
+@media (min-width: 640px) { .pnl .pnl-becas-cab-titulo { font-size: 28px; } }
+.pnl .pnl-becas-cab-texto {
+  max-width: 60ch; margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.5;
+  color: var(--sobre-noche-2);
+}
+.pnl .pnl-becas-cab-datos { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+.pnl .pnl-becas-dato {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 30px; padding: 4px 12px;
+  border-radius: var(--radio-pildora);
+  font-size: var(--fs-meta); font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pnl .pnl-becas-dato svg { color: var(--sky); }
+.pnl .pnl-becas-dato[data-tono='ok'] svg { color: var(--ok-noche); }
+.pnl .pnl-becas-dato[data-tono='aviso'] svg { color: var(--accent-2); }
+
+/* Pestañas: la posición sticky es la de Tailwind (sticky top-0 z-10). */
+.pnl .pnl-becas-pestanas {
+  padding: 10px var(--gutter);
+  background: rgba(244, 249, 254, .92);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pnl .pnl-becas-pestanas { background: rgba(244, 249, 254, .98); }
+}
+.pnl .pnl-becas-pestanas > .pnl-segmentos { width: max-content; max-width: 100%; margin: 0 auto; }
+
+/* Filtros */
+.pnl .pnl-becas-filtros {
+  padding: 12px var(--gutter);
+  background: var(--papel);
+  border-bottom: 1px solid var(--line);
+}
+.pnl .pnl-becas-buscar { position: relative; }
+.pnl .pnl-becas-buscar .pnl-campo-control { padding-left: 42px; }
+.pnl .pnl-becas-buscar-icono {
+  position: absolute; left: 14px; top: 50%;
+  width: 18px; height: 18px;
+  transform: translateY(-50%);
+  color: var(--trazo);
+  pointer-events: none;
+}
+.pnl .pnl-becas-cuenta {
+  margin: 0;
+  font-size: var(--fs-meta); font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* Tarjeta de beca: tocable entera en su cabecera. */
+.pnl .pnl-beca { padding: 0; overflow: hidden; }
+.pnl .pnl-beca[data-abierta] { border-color: var(--sky-2); box-shadow: var(--sombra-2); }
+.pnl .pnl-beca-cab {
+  display: flex; align-items: flex-start; gap: 12px;
+  width: 100%; min-height: var(--pnl-tap);
+  padding: 16px;
+  border: 0; background: none;
+  text-align: left; font: inherit; color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--d-corta) var(--salida);
+}
+@media (hover: hover) {
+  .pnl .pnl-beca-cab:not(.pnl-destacada):hover { background: var(--fondo-suave); }
+}
+.pnl .pnl-beca-cab:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: -2px; }
+/* La destacada (Luis Vives): fondo sol claro, el mismo que en expediente.css;
+   el texto siempre en tinta. */
+.pnl .pnl-destacada {
+  background: #fef8e6;
+  background: color-mix(in srgb, var(--sun) 14%, #fff);
+}
+.pnl .pnl-beca-cab.pnl-destacada .pnl-beca-importe { color: var(--ink); }
+/* Sobre el sol claro, los chips en blanco para que no se fundan. */
+.pnl .pnl-destacada .pnl-chip { background: #fff; }
+.pnl .pnl-beca-titulo {
+  display: flex; align-items: flex-start; gap: 6px;
+  margin: 0;
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.35;
+  color: var(--primary);
+}
+.pnl .pnl-beca-estrella { flex: 0 0 auto; margin-top: 2px; color: var(--sun); fill: var(--sun); }
+.pnl .pnl-beca-importe {
+  margin: 6px 0 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45;
+  color: var(--ok-ink);
+}
+.pnl .pnl-beca-cuantas {
+  margin: 2px 0 0;
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--ink-2);
+}
+.pnl .pnl-beca-chev {
+  flex: 0 0 auto;
+  width: 18px; height: 18px; margin-top: 4px;
+  color: var(--trazo);
+  transition: transform var(--d-corta) var(--salida), rotate var(--d-corta) var(--salida);
+}
+.pnl .pnl-beca-detalle {
+  display: grid; gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+  background: var(--fondo-suave);
+}
+.pnl .pnl-beca-lista { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.pnl .pnl-beca-lista > li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.5;
+  color: var(--ink);
+}
+.pnl .pnl-beca-lista-icono { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 3px; }
+.pnl .pnl-beca-doc {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 30px; padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radio-xs);
+  background: #fff;
+  font-size: var(--fs-meta); font-weight: 600;
+  color: var(--ink-2);
+}
+.pnl .pnl-beca-doc svg { color: var(--primary-2); flex: 0 0 auto; }
+
+.pnl .pnl-becas-portales p:not(.pnl-eyebrow) {
+  margin: 0;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.5;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.pnl .pnl-becas-portales strong { color: var(--ink); font-weight: 700; }
+.pnl .pnl-becas-portales .pnl-becas-portales-pie {
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--line-suave);
+}
+
+/* Cajas de información (¿Califico AUIP?, Ayudas en España). */
+.pnl .pnl-becas-info {
+  padding: 16px;
+  border: 1px solid rgba(78, 158, 232, .25);
+  border: 1px solid color-mix(in srgb, var(--info) 25%, transparent);
+  border-radius: var(--radio-m);
+  background: var(--info-soft);
+}
+.pnl .pnl-becas-info h2 {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 8px;
+  font-size: var(--fs-titulo); font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-becas-info h2 svg { color: var(--primary-2); flex: 0 0 auto; }
+.pnl .pnl-becas-info p {
+  margin: 0;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+.pnl .pnl-becas-info strong { color: var(--ink); }
+.pnl .pnl-becas-info .pnl-becas-info-pie { margin-top: 4px; font-size: var(--fs-cuerpo-sm); }
+.pnl .pnl-becas-info .pnl-becas-info-pie strong { color: var(--primary); }
+
+.pnl .pnl-becas-pais,
+.pnl .pnl-becas-region { padding: 0; overflow: hidden; }
+.pnl .pnl-becas-pais-cab,
+.pnl .pnl-becas-region-cab {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--fondo-suave);
+}
+.pnl .pnl-becas-pais-cab p,
+.pnl .pnl-becas-region-cab h3 {
+  margin: 0;
+  font-size: var(--fs-lectura); font-weight: 700;
+  color: var(--primary);
+}
+.pnl .pnl-becas-pais-lista { padding: 8px 16px 10px; }
+.pnl .pnl-becas-pais-lista p {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 0; padding: 5px 0;
+  border-bottom: 1px solid var(--line-suave);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--ink);
+}
+.pnl .pnl-becas-pais-lista p:last-child { border-bottom: 0; }
+.pnl .pnl-becas-pais-lista .pnl-beca-lista-icono { width: 14px; height: 14px; margin-top: 2px; }
+.pnl .pnl-becas-region-cuerpo { display: grid; gap: 14px; padding: 14px 16px 16px; }
+.pnl .pnl-becas-ayuda { padding-left: 12px; border-left: 2px solid var(--line); }
+.pnl .pnl-becas-ayuda-nombre {
+  margin: 0;
+  font-size: var(--fs-cuerpo); font-weight: 700;
+  color: var(--ink);
+}
+.pnl .pnl-becas-ayuda-texto {
+  margin: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+.pnl .pnl-becas-ayuda-req {
+  display: flex; align-items: flex-start; gap: 6px;
+  margin: 4px 0 0;
+  font-size: var(--fs-meta); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+.pnl .pnl-becas-ayuda-req .pnl-beca-lista-icono { width: 14px; height: 14px; margin-top: 1px; }
+.pnl .pnl-becas-enlace {
+  display: inline-flex; align-items: center;
+  min-height: var(--pnl-tap);
+  font-size: var(--fs-meta); font-weight: 600;
+  color: var(--primary-2);
+  text-decoration: underline; text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+
+/* ── ASISTENTE DE PERFIL (WizardPerfilCliente.jsx) ────────────────────────
+   Hoja desde abajo en el teléfono y centrada desde 640 (.pnl-hoja), con el
+   velo de marca. Por dentro, la misma familia de campos que el perfil. */
+.pnl .pnl-wizard { overflow: hidden; max-height: 92dvh; }
+.pnl .pnl-wizard-barra { border-radius: 0; }
+.pnl .pnl-wizard-cab { padding: 20px 20px 16px; }
+@media (min-width: 640px) { .pnl .pnl-wizard-cab { padding: 24px 28px 16px; } }
+.pnl .pnl-wizard-icono {
+  display: grid; place-items: center;
+  width: 48px; height: 48px;
+  margin-bottom: 12px;
+  border-radius: var(--radio-m);
+  background: var(--info-soft);
+  color: var(--primary-2);
+}
+.pnl .pnl-wizard-opcional {
+  font-size: var(--fs-meta); font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  color: var(--muted);
+}
+.pnl .pnl-wizard-pie {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+@media (min-width: 640px) {
+  .pnl .pnl-wizard-pie { padding: 14px 28px; }
+}
+
+
+/* ── ENCUESTA DE CIERRE (EncuestaCierre.jsx) ──────────────────────────────
+   Tarjeta estándar; su botón va en petróleo (en Inicio el sol es del
+   próximo paso). Pisa panel-centro.css:195-245. */
+.pnl .pnl-enc {
+  padding: var(--pad-tarjeta);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-l);
+  background: #fff;
+  box-shadow: var(--sombra-1);
+}
+.pnl .pnl-enc[data-destacada='1'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(250, 148, 58, .22);
+}
+.pnl .pnl-enc-cab { gap: 12px; margin-bottom: 12px; }
+.pnl .pnl-enc-cab h2 {
+  font-size: var(--fs-titulo); font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-enc-icono {
+  width: 40px; height: 40px;
+  border-radius: var(--radio-s);
+  background: #fdf3d6;
+  background: color-mix(in srgb, var(--sun) 24%, #fff);
+  color: var(--primary);
+}
+.pnl .pnl-enc-servicio {
+  margin-top: 2px;
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--muted);
+}
+.pnl .pnl-enc-form,
+.pnl .pnl-enc-hecha { gap: 14px; }
+.pnl .pnl-enc-lead {
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.55;
+  color: var(--ink);
+}
+.pnl .pnl-enc-estrellas { gap: 4px; }
+.pnl .pnl-enc-estrella {
+  width: 44px; height: 44px;
+  border-radius: var(--radio-s);
+  background: var(--fondo-suave);
+  color: var(--trazo);
+  transition: transform var(--d-toque) var(--muelle), color var(--d-corta) var(--salida), background-color var(--d-corta) var(--salida);
+}
+.pnl .pnl-enc-estrella[data-on='1'] {
+  color: var(--accent);
+  background: rgba(250, 148, 58, .12);
+  background: color-mix(in srgb, var(--accent) 12%, #fff);
+}
+.pnl .pnl-enc-estrella:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-enc-cara {
+  margin-left: 6px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--primary-2);
+}
+.pnl .pnl-enc-campo { gap: 6px; }
+.pnl .pnl-enc-campo > span {
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--ink-2);
+}
+.pnl .pnl-enc-check { align-items: center; }
+.pnl .pnl-enc-botones { gap: 8px; }
+.pnl .pnl-enc-resena {
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  background: #fdf6e0;
+  background: color-mix(in srgb, var(--sun) 16%, #fff);
+  border: 1px solid rgba(250, 148, 58, .3);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.pnl .pnl-enc-resena p {
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.5;
+  color: var(--ink);
+}
+
+
+/* ── INSTALAR LA APP (InstalarAppModal.jsx, portal con .pnl propio) ───────
+   Hoja de radio 24 con el velo de marca y cierre de icono. Usa
+   PasosInstalar (B2) tal cual. Pisa panel-centro.css:106-190. */
+.pnl .pnl-inst-hoja {
+  gap: 12px;
+  padding: 0 0 calc(16px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 768px) {
+  .pnl .pnl-inst-hoja { border-radius: var(--radio-xl); }
+}
+.pnl .pnl-inst-cab {
+  gap: 12px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.pnl .pnl-inst-cab h2 {
+  font-size: var(--fs-titulo); font-weight: 700; line-height: 1.3;
+  color: var(--primary);
+}
+.pnl .pnl-inst-cab p {
+  margin-top: 2px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--ink-2);
+}
+.pnl .pnl-inst-icono {
+  width: 40px; height: 40px;
+  border-radius: var(--radio-s);
+  background: var(--info-soft);
+  color: var(--primary-2);
+}
+.pnl .pnl-inst-pestanas.pnl-segmentos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pnl .pnl-inst-pestanas.pnl-segmentos > button {
+  padding: 4px 8px;
+  font-size: var(--fs-cuerpo-sm); line-height: 1.2;
+  white-space: normal;
+  box-shadow: none;
+}
+.pnl .pnl-inst-directo {
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  background: #fdf6e0;
+  background: color-mix(in srgb, var(--sun) 16%, #fff);
+}
+.pnl .pnl-inst-directo p { font-size: var(--fs-cuerpo-sm); font-weight: 600; color: var(--primary); }
+.pnl .pnl-inst-ok {
+  padding: 12px 14px;
+  border-radius: var(--radio-m);
+  background: var(--ok-soft);
+  color: var(--ok-ink);
+  font-size: var(--fs-cuerpo-sm); font-weight: 600; line-height: 1.45;
+}
+
+
+/* ── Movimiento reducido: va siempre al final ── */
+@media (prefers-reduced-motion: reduce) {
+  .pnl .pnl-perfil-dato,
+  .pnl .pnl-perfil-dato-lapiz { transition: none; }
+  .pnl .pnl-perfil-dato:active:not([data-editando]) { transform: none; }
+  /* El destello de guardado deja de latir: queda solo el cambio de color. */
+  .pnl .pnl-perfil-dato[data-guardado='1'] { animation: none; }
+  .pnl .pnl-perfil-dato-ok { animation: none; }
+  .pnl .ex-pg-archivo,
+  .pnl .ex-pg-medio-opcion { transition: none; }
+  .pnl .pnl-pagos-datos,
+  .pnl .ex-pg-modal-panel { animation: none; }
+  .pnl .pnl-avc-item { transition: none; }
+  .pnl .pnl-avc-panel { animation: none; }
+  .pnl .pnl-beca-cab,
+  .pnl .pnl-beca-chev { transition: none; }
+  /* La entrada del asistente va en un style en línea: solo !important la apaga. */
+  .pnl .pnl-wizard,
+  .pnl .pnl-wizard-velo { animation: none !important; }
+  .pnl .pnl-enc-estrella { transition: none; }
+  .pnl .pnl-enc-estrella:active { transform: none; }
+  .pnl .pnl-inst-hoja,
+  .pnl .pnl-inst-fondo { animation: none; }
+}

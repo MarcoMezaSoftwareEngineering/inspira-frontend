@@ -10,6 +10,9 @@ const lista = (nombres, max = 3) => {
   return `${n.slice(0, max).join(", ")} y ${n.length - max} más`;
 };
 
+/** «1 día», «3 días»: el plural con el número, no «día(s)». */
+const dias = (n) => `${n} ${Math.abs(n) === 1 ? "día" : "días"}`;
+
 /** «2027-01-29» → «29 ene 2027». Si no es una fecha, el texto tal cual. */
 export function fechaLegible(valor) {
   if (!valor) return "";
@@ -96,7 +99,7 @@ function filasComunes({ faltanPerfil, resumen, irPerfil, irPlazos, irRequerimien
     filas.push({
       clave: "plazo", tono: "aviso", icono: "calendar",
       texto: `Plazo más cercano: ${p.universidad || p.nombre || "postulación"}, ~${fechaLegible(p.cierra)}`,
-      detalle: plazos.length > 1 ? `Y ${plazos.length - 1} plazo(s) más en las próximas dos semanas` : p.nombre || null,
+      detalle: plazos.length > 1 ? `Y ${plazos.length - 1} ${plazos.length - 1 === 1 ? "plazo" : "plazos"} más en las próximas dos semanas` : p.nombre || null,
       accion: "Ver plazos", onIr: irPlazos,
     });
   }
@@ -219,7 +222,7 @@ export function queMeFaltaEstancia({ revision, docs, extranjeria, faltanPerfil, 
     filas.push({
       clave: "plazo", tono: p.d.a_tiempo === false ? "alto" : "aviso", icono: "calendar",
       texto: `Plazo más cercano: ${p.t.toLowerCase()} ~${fechaLegible(p.d.limite)}`,
-      detalle: p.d.dias_restantes != null ? (p.d.a_tiempo === false ? `Pasado hace ${Math.abs(p.d.dias_restantes)} día(s)` : `Quedan ${p.d.dias_restantes} día(s)`) : null,
+      detalle: p.d.dias_restantes != null ? (p.d.a_tiempo === false ? `Pasado hace ${dias(Math.abs(p.d.dias_restantes))}` : `Quedan ${dias(p.d.dias_restantes)}`) : null,
       accion: "Ver", onIr: () => ir.bloque(1),
     });
   }

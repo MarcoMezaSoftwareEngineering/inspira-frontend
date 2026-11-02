@@ -22,9 +22,10 @@ const QUE_HAY = [
 
 export default function Bienvenida() {
   return (
-    <div className="pnl min-h-dvh flex items-center justify-center p-4 sm:p-6">
-      <div className="pnl-vacio w-full max-w-md pnl-entra">
-        <div className="pnl-side-logo" style={{ margin: "0 auto 22px" }}>
+    <div className="pnl min-h-dvh flex items-stretch sm:items-center justify-center p-0 sm:p-6">
+      {/* En el teléfono, a sangre: ocupa la pantalla entera (cascara.css). */}
+      <div className="pnl-vacio pnl-vacio-pantalla w-full max-w-md pnl-entra">
+        <div className="pnl-side-logo pnl-vacio-logo">
           <img src={logo} alt="Inspira Legal" />
         </div>
         <h3>Expediente Digital Inspira</h3>
@@ -35,12 +36,14 @@ export default function Bienvenida() {
           el acceso.
         </p>
 
-        <div className="pnl-lineas" style={{ marginBottom: 24 }}>
+        <div className="pnl-lineas">
           {QUE_HAY.map((q) => (
-            <div key={q.titulo} className="pnl-linea" style={{ cursor: "default" }}>
-              <Icono nombre={q.icono} size={16} />
+            <div key={q.titulo} className="pnl-linea pnl-cristal-texto" data-fija="1">
+              <span className="pnl-linea-tile">
+                <Icono nombre={q.icono} size={18} />
+              </span>
               <span className="pnl-linea-datos">
-                <strong style={{ fontSize: 13.5 }}>{q.titulo}</strong>
+                <strong>{q.titulo}</strong>
                 <small>{q.texto}</small>
               </span>
             </div>
@@ -48,21 +51,21 @@ export default function Bienvenida() {
         </div>
 
         <div className="pnl-vacio-acciones">
-          <button type="button" className="pnl-btn-cta ux-tap" onClick={() => loginGoogle()}>
-            <Icono nombre="usuario" size={15} />
+          <button type="button" className="pnl-btn-cta pnl-btn-grande ux-tap" onClick={() => loginGoogle()}>
+            <Icono nombre="usuario" size={16} />
             Entrar con tu correo de Google
           </button>
-          <button type="button" className="pnl-vacio-fantasma ux-tap" onClick={() => navigate("/")}>
+          <button type="button" className="pnl-btn-noche ux-tap" onClick={() => navigate("/")}>
             Ver la web
           </button>
         </div>
 
-        <p style={{ marginTop: 22, marginBottom: 0, fontSize: 12 }}>
+        <p className="pnl-vacio-pie">
           ¿Todavía no tienes acceso?{" "}
           <a
             href={whatsappDesde("panel-bienvenida", "Quiero información para acceder a mi panel.")}
             target="_blank" rel="noopener noreferrer"
-            style={{ color: "#fff", fontWeight: 700, textDecoration: "underline" }}
+            className="pnl-vacio-enlace"
           >
             Escríbenos
           </a>

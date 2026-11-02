@@ -21,6 +21,18 @@ import "../../styles/pasos.css";
 // de cierre (18/09/2026).
 import "../../styles/panel-centro.css";
 import "../../styles/utilidades-panel.css";
+// Hojas por bloque (25/10/2026): pisan a las de arriba con .pnl delante; cada
+// bloque solo escribe en la suya.
+import "../../styles/panel/base.css";
+import "../../styles/panel/cascara.css";
+import "../../styles/panel/inicio.css";
+import "../../styles/panel/expediente.css";
+import "../../styles/panel/tramites.css";
+import "../../styles/panel/cuenta.css";
+// Las cinco mejoras aprobadas por Carina el 02/11/2026 (B5): va la última.
+import "../../styles/panel/mejoras.css";
+// Lo que comparte con Inspira Core: traduce sus clases a los tokens del panel.
+import "../../styles/panel/compartidos.css";
 import { apiGET, apiPOST } from "../../services/api";
 import PanelSidebar from "./components/PanelSidebar";
 import Avatar from "../../components/common/Avatar";
@@ -311,7 +323,7 @@ export default function PanelCliente({ path }) {
   // Tab titles
   // Todas las guías comparten título: la pestaña de dentro dice cuál es.
   const titles = {
-    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", pagos: "Mis pagos", perfil: "Mi Perfil", becas: "Becas España",
+    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", pagos: "Mis pagos", perfil: "Mi perfil", becas: "Becas España",
     ...Object.fromEntries(CLAVES_GUIAS.map((clave) => [clave, "Mis guías"])),
   };
 
@@ -406,12 +418,12 @@ export default function PanelCliente({ path }) {
       <ServiciosPanelCtx.Provider value={lista}>
       <main className={`flex-1 min-w-0 flex flex-col overflow-y-auto ${esScrollInterno ? "lg:min-h-0 lg:overflow-hidden" : ""}`}>
         {/* Barra superior */}
-        <div ref={barraRef} className="pnl-top sticky top-0 z-10 shrink-0">
+        <div ref={barraRef} className="pnl-top sticky top-0 z-10 shrink-0" data-exp={ruta.idServicio ? "1" : undefined}>
           {/* Dentro de un expediente, la flecha de volver. Fuera no hace falta
               botón: en el teléfono navega la barra de pestañas y en pantalla
               grande está el menú lateral. */}
           {ruta.idServicio && (
-            <button className="pnl-atras" onClick={() => navigate("/panel")} aria-label="Volver a Inicio">
+            <button className="pnl-atras pnl-btn-icono" onClick={() => navigate("/panel")} aria-label="Volver a Inicio">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M15 18l-6-6 6-6" />
@@ -427,15 +439,19 @@ export default function PanelCliente({ path }) {
             <h1 title={ruta.idServicio ? (cabExp?.titulo || servicioAbierto?.titulo || "") : undefined}>{tituloBarra}</h1>
           </div>
 
+          {/* Lo de la derecha va junto, empujado por un solo margen
+              (cascara.css): ya no depende de ml-auto condicionales. */}
+          <div className="pnl-top-derecha">
           {ruta.idServicio && cabExp?.pct != null && (
             <span className="pnl-top-pct" aria-label={`Avance del expediente: ${cabExp.pct} %`}>{cabExp.pct}%</span>
           )}
 
           {/* El menú, también dentro de un expediente (en el teléfono no hay
-              barra de pestañas ahí), con lo pendiente encima. */}
+              barra de pestañas ahí), con lo pendiente encima. Se oculta desde
+              768 px en cascara.css: md:hidden perdía contra su display. */}
           {ruta.idServicio && (
-            <button className="pnl-top-menu md:hidden" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            <button className="pnl-top-menu pnl-btn-icono" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M4 7h16M4 12h16M4 17h16" />
               </svg>
@@ -446,20 +462,21 @@ export default function PanelCliente({ path }) {
           {/* La campana: lo nuevo en sus expedientes, plazos y cuotas desde la
               última visita. */}
           {conCampana && (
-            <div className={ruta.idServicio && cabExp?.pct != null ? "" : "ml-auto"}>
+            <div>
               <CentroAvisos servicios={lista} pagos={planesPago} />
             </div>
           )}
 
           {/* Tocar la foto abre el perfil, como en cualquier app. */}
           {user && (
-            <div className={`pnl-top-user${conCampana ? "" : " ml-auto"}${ruta.idServicio ? " max-md:!hidden" : ""}`}>
+            <div className={`pnl-top-user${ruta.idServicio ? " max-md:!hidden" : ""}`}>
               <span className="pnl-top-nombre hidden sm:block" title={nombre}>{datosUsuario(user).corto}</span>
               <button type="button" className="pnl-top-avatar" onClick={() => handleChangeTab("perfil")} aria-label="Abrir mi perfil">
-                <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={34} />
+                <Avatar foto={foto} iniciales={iniciales} nombre={nombre} size={36} />
               </button>
             </div>
           )}
+          </div>
 
           {/* Avance del expediente abierto: una línea bajo la barra. */}
           {ruta.idServicio && cabExp?.pct != null && (
@@ -518,7 +535,7 @@ export default function PanelCliente({ path }) {
 
           {/* Perfil: scroll externo */}
           {tab === "perfil" && (
-            <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-5">
+            <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-5">
               <Suspense fallback={<LoadingPage />}>
                 <PerfilCliente user={user} conAcademico={conAcademico} onUserUpdated={(nuevo) => setUser(nuevo)} />
               </Suspense>

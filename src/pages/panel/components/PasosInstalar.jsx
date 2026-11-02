@@ -44,8 +44,8 @@ function Lista({ pasos }) {
     <ol className="ex-app-pasos">
       {pasos.map((p, i) => (
         <li key={i}>
-          <span className="ex-app-paso-icono text-primary">{p.icono}</span>
-          <span className="ex-app-paso-num text-accent">{i + 1}</span>
+          <span className="ex-app-paso-icono">{p.icono}</span>
+          <span className="ex-app-paso-num">{i + 1}</span>
           <span>{p.texto}</span>
         </li>
       ))}

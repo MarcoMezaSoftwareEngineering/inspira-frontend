@@ -16,6 +16,7 @@ import { apiPOST, apiUpload } from "../../../services/api";
 import { abrirArchivo } from "../../../services/archivos";
 import { whatsappDesde } from "../../../config/contacto";
 import { importe, nombreCuota, estadoCuota, diaPago, proximaCuota, importeSoles } from "../pagosCliente";
+import { menosMovimiento } from "../hooks/useMovimiento";
 
 const MODALIDAD = { CONTADO: "Pago al contado", DOS_CUOTAS: "En dos cuotas", PERSONALIZADO: "Plan a medida" };
 const MEDIOS = [
@@ -41,7 +42,8 @@ function Copiar({ texto }) {
     } catch { /* sin portapapeles: el número está a la vista */ }
   }
   return (
-    <button type="button" className="ex-pg-copiar ux-tap" onClick={copiar} aria-label={`Copiar ${texto}`}>
+    <button type="button" className="pnl-btn ex-pg-copiar ux-tap" data-talla="s" data-hecho={hecho ? "1" : undefined} onClick={copiar} aria-label={`Copiar ${texto}`}>
+      <Icono nombre={hecho ? "check" : "copiar"} size={14} />
       {hecho ? "Copiado" : "Copiar"}
     </button>
   );
@@ -89,7 +91,7 @@ function DatosPago({ medios, compacto = false }) {
       <div className="ex-pg-medios-grid">
         {t && (
           <div className="ex-pg-medio">
-            <span className="ex-pg-eyebrow">Transferencia{t.banco ? ` · ${t.banco}` : ""}</span>
+            <span className="pnl-eyebrow ex-pg-eyebrow"><span className="punto" aria-hidden="true" />Transferencia{t.banco ? ` · ${t.banco}` : ""}</span>
             <dl>
               {t.titular && <Fila k="Titular" v={t.titular} />}
               {(t.tipo_cuenta || t.moneda) && <Fila k="Cuenta" v={[t.tipo_cuenta, t.moneda].filter(Boolean).join(" · ")} />}
@@ -100,7 +102,7 @@ function DatosPago({ medios, compacto = false }) {
         )}
         {p && (
           <div className="ex-pg-medio">
-            <span className="ex-pg-eyebrow">Plin</span>
+            <span className="pnl-eyebrow ex-pg-eyebrow"><span className="punto" aria-hidden="true" />Plin</span>
             <dl>
               <Fila k="Número" v={p.numero} copiar />
               {p.titular && <Fila k="Titular" v={p.titular} />}
@@ -188,17 +190,20 @@ function SubirComprobante({ cuota, medios, onCerrar, onHecho }) {
 
   return createPortal(
     <div className="pnl ex-pg-modal" role="dialog" aria-modal="true" aria-labelledby="ex-pg-modal-titulo">
-      <div className="ex-pg-modal-fondo" onClick={() => { if (!enviando) onCerrar(); }} />
+      <div className="ex-pg-modal-fondo pnl-velo-token" onClick={() => { if (!enviando) onCerrar(); }} />
       <form className="ex-pg-modal-panel" onSubmit={enviar}>
+        <span className="pnl-hoja-tirador" aria-hidden="true" />
         <div className="ex-pg-modal-cab">
           <div className="min-w-0">
-            <span className="ex-pg-eyebrow">{nombreCuota(cuota)} · {importe(cuota.monto, cuota.moneda)}</span>
+            <span className="pnl-eyebrow ex-pg-eyebrow"><span className="punto" aria-hidden="true" />{nombreCuota(cuota)} · {importe(cuota.monto, cuota.moneda)}</span>
             <h3 id="ex-pg-modal-titulo" className="text-primary">
               {cuota.estado === "EN_REVISION" ? "Cambiar comprobante" : "Subir comprobante"}
             </h3>
             <p>Foto o PDF de tu transferencia, Plin o Yape. Tu asesor lo revisa y te confirma el pago.</p>
           </div>
-          <button type="button" className="ex-pg-modal-x" onClick={onCerrar} disabled={enviando} aria-label="Cerrar">✕</button>
+          <button type="button" className="pnl-btn-icono ex-pg-modal-x" onClick={onCerrar} disabled={enviando} aria-label="Cerrar">
+            <IconoPaso nombre="x" className="w-[18px] h-[18px]" />
+          </button>
         </div>
 
         <div className="ex-pg-modal-cuerpo">
@@ -222,7 +227,7 @@ function SubirComprobante({ cuota, medios, onCerrar, onHecho }) {
 
           <label className="ex-pg-campo">
             <span>N.º de operación (opcional)</span>
-            <input value={referencia} maxLength={120} placeholder="Lo ves en tu comprobante" onChange={(e) => setReferencia(e.target.value)} />
+            <input className="pnl-campo-control" value={referencia} maxLength={120} placeholder="Lo ves en tu comprobante" onChange={(e) => setReferencia(e.target.value)} />
           </label>
 
           {error && <p className="pnl-error">{error}</p>}
@@ -230,7 +235,8 @@ function SubirComprobante({ cuota, medios, onCerrar, onHecho }) {
 
         <div className="ex-pg-modal-pie">
           <button type="button" className="pnl-btn ux-tap" onClick={onCerrar} disabled={enviando}>Cancelar</button>
-          <button type="submit" className="pnl-btn-cta ux-tap" disabled={!archivo || grande || enviando}>
+          <button type="submit" className="pnl-btn-primario ux-tap" disabled={!archivo || grande || enviando}>
+            {enviando && <span className="pnl-spinner" data-talla="s" aria-hidden="true" />}
             {enviando ? "Enviando…" : "Enviar comprobante"}
           </button>
         </div>
@@ -260,7 +266,7 @@ function Cuota({ c, destacada, medios, mp, datosAbiertos, onVerDatos, onSubir, o
                 : c.fecha_vencimiento ? `${c.vencido ? "Venció" : "Vence"} el ${diaPago(c.fecha_vencimiento)}` : "Sin fecha de vencimiento"}
             </small>
           </div>
-          <span className={`pnl-chip pnl-chip-${e.tono}`}><span className="punto" />{e.etiqueta}</span>
+          <span className={`pnl-chip pnl-chip-${e.tono}`} data-talla="sm"><span className="punto" />{e.etiqueta}</span>
         </div>
 
         {e.texto && c.estado !== "PAGADO" && <p className="ex-pg-cuota-texto" data-tono={e.tono}>{e.texto}</p>}
@@ -274,32 +280,32 @@ function Cuota({ c, destacada, medios, mp, datosAbiertos, onVerDatos, onSubir, o
         {pendiente && (
           <div className="ex-pg-botones pnl-pagos-acciones">
             {enLinea ? (
-              <button type="button" className="pnl-btn-cta ux-tap pnl-pagos-pagar" onClick={() => onPagarLinea(c)} disabled={mp?.cargando}>
+              <button type="button" className="pnl-btn-cta pnl-btn-grande ux-tap pnl-pagos-pagar" onClick={() => onPagarLinea(c)} disabled={mp?.cargando}>
                 <Icono nombre="euro" size={15} />
                 {mp?.cargando ? "Abriendo Mercado Pago…" : `Pagar ${soles || importe(c.monto, c.moneda)}`}
                 {!mp?.cargando && <span className="pnl-pagos-via">con Mercado Pago</span>}
               </button>
             ) : (
-              <button type="button" className="pnl-btn-cta ux-tap pnl-pagos-pagar" onClick={() => onVerDatos(c)} aria-expanded={datosAbiertos}>
+              <button type="button" className="pnl-btn-cta pnl-btn-grande ux-tap pnl-pagos-pagar" onClick={() => onVerDatos(c)} aria-expanded={datosAbiertos}>
                 <Icono nombre="euro" size={15} />
                 Pagar {importe(c.monto, c.moneda)}
               </button>
             )}
             {c.puede_subir_comprobante && (
-              <button type="button" className="pnl-btn ux-tap" onClick={() => onSubir(c)}>
+              <button type="button" className="pnl-btn pnl-pagos-subir ux-tap" onClick={() => onSubir(c)}>
                 <Icono nombre="documento" size={15} />
                 {c.motivo_rechazo ? "Subir otro comprobante" : "Ya pagué: subir comprobante"}
               </button>
             )}
             {enLinea && (
-              <button type="button" className="ex-pg-enlace" onClick={() => onVerDatos(c)} aria-expanded={datosAbiertos}>
+              <button type="button" className="pnl-btn-texto ex-pg-enlace" onClick={() => onVerDatos(c)} aria-expanded={datosAbiertos}>
                 {datosAbiertos ? "Ocultar transferencia y Plin" : "Prefiero transferencia o Plin"}
               </button>
             )}
             {c.tiene_comprobante && (
               <button
                 type="button"
-                className="ex-pg-enlace"
+                className="pnl-btn-texto ex-pg-enlace"
                 onClick={() => abrirArchivo(`/cliente/pagos/${c.id_pago}/comprobante`, { nombre: `comprobante-${c.id_pago}` })}
               >
                 Ver comprobante
@@ -320,12 +326,12 @@ function Cuota({ c, destacada, medios, mp, datosAbiertos, onVerDatos, onSubir, o
         {!pendiente && ((c.estado === "EN_REVISION" && c.puede_subir_comprobante) || c.tiene_comprobante) && (
           <div className="ex-pg-botones">
             {c.estado === "EN_REVISION" && c.puede_subir_comprobante && (
-              <button type="button" className="pnl-btn ux-tap" onClick={() => onSubir(c)}>Cambiar comprobante</button>
+              <button type="button" className="pnl-btn pnl-pagos-subir ux-tap" onClick={() => onSubir(c)}>Cambiar comprobante</button>
             )}
             {c.tiene_comprobante && (
               <button
                 type="button"
-                className="ex-pg-enlace"
+                className="pnl-btn-texto ex-pg-enlace"
                 onClick={() => abrirArchivo(`/cliente/pagos/${c.id_pago}/comprobante`, { nombre: `comprobante-${c.id_pago}` })}
               >
                 Ver comprobante
@@ -367,7 +373,7 @@ function EstadosPlan({ cuotas }) {
   return (
     <ul className="pnl-pagos-estados" aria-label="Estado de las cuotas">
       {partes.map((p) => (
-        <li key={p.t} className={`pnl-chip pnl-chip-${p.tono}`}><span className="punto" />{p.t}</li>
+        <li key={p.t} className={`pnl-chip pnl-chip-${p.tono}`} data-talla="sm"><span className="punto" />{p.t}</li>
       ))}
     </ul>
   );
@@ -379,16 +385,16 @@ function Plan({ plan, destacada, medios, mp, verDatos, onVerDatos, onSubir, onPa
     <section className="ex-pg-plan">
       <header className="ex-pg-plan-cab">
         <div className="min-w-0">
-          <span className="ex-pg-eyebrow">{MODALIDAD[plan.modalidad] || "Plan de pagos"}</span>
+          <span className="pnl-eyebrow ex-pg-eyebrow"><span className="punto" aria-hidden="true" />{MODALIDAD[plan.modalidad] || "Plan de pagos"}</span>
           <h3 className="text-primary">{plan.concepto}</h3>
         </div>
         <div className="ex-pg-plan-total">
           <b>{importe(plan.total, plan.moneda)}</b>
-          {plan.estado === "PAGADO" && <span className="pnl-chip pnl-chip-ok"><span className="punto" />Pagado</span>}
+          {plan.estado === "PAGADO" && <span className="pnl-chip pnl-chip-ok" data-talla="sm"><span className="punto" />Pagado</span>}
         </div>
       </header>
-      <div className="ex-pg-barra" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Parte pagada">
-        <i style={{ width: `${pct}%` }} />
+      <div className="pnl-barra ex-pg-barra" style={{ "--p": pct }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Parte pagada">
+        <i />
       </div>
       <p className="ex-pg-barra-texto">
         {importe(plan.pagado, plan.moneda)} pagados de {importe(plan.total, plan.moneda)}
@@ -464,7 +470,7 @@ export default function MisPagos({ datos, onRecargar }) {
     const el = document.getElementById(`ex-pg-cuota-${destacada}`);
     if (el) {
       desplazado.current = true;
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.scrollIntoView({ behavior: menosMovimiento() ? "auto" : "smooth", block: "center" });
     }
   }, [destacada, planes.length]);
 
@@ -489,7 +495,7 @@ export default function MisPagos({ datos, onRecargar }) {
   function irADatos(c) {
     setVerDatos((x) => ({ ...x, [c.id_pago]: true }));
     requestAnimationFrame(() => {
-      document.getElementById(`ex-pg-cuota-${c.id_pago}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      document.getElementById(`ex-pg-cuota-${c.id_pago}`)?.scrollIntoView({ behavior: menosMovimiento() ? "auto" : "smooth", block: "center" });
     });
   }
 
@@ -498,9 +504,9 @@ export default function MisPagos({ datos, onRecargar }) {
       <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-5 space-y-4" aria-busy="true">
         <div className="pnl-esq pnl-esq-titulo" />
         <div className="ex-pg-resumen">
-          {[0, 1, 2].map((i) => <div key={i} className="pnl-esq" style={{ height: 78, borderRadius: 16 }} />)}
+          {[0, 1, 2].map((i) => <div key={i} className="pnl-esq pnl-esq-bloque" data-talla="fila" />)}
         </div>
-        <div className="pnl-esq" style={{ height: 220, borderRadius: 20 }} />
+        <div className="pnl-esq pnl-esq-bloque" data-talla="tarjeta" />
       </div>
     );
   }
@@ -521,15 +527,15 @@ export default function MisPagos({ datos, onRecargar }) {
       {datos.error && (
         <div className="pnl-error ex-pg-error">
           <span>{datos.error}</span>
-          <button type="button" className="pnl-btn ux-tap" onClick={onRecargar}>Reintentar</button>
+          <button type="button" className="pnl-btn ux-tap" data-talla="s" onClick={onRecargar}>Reintentar</button>
         </div>
       )}
 
       {enviado && (
-        <div className="ex-pg-ok" role="status">
-          <Icono nombre="escudo" size={18} />
-          <p>Comprobante enviado. Tu asesor lo revisará y verás la cuota como pagada en cuanto lo valide.</p>
-          <button type="button" className="ex-pg-enlace" onClick={() => setEnviado(false)}>Cerrar</button>
+        <div className="pnl-aviso ex-pg-ok" data-tono="ok" role="status">
+          <span className="pnl-aviso-icono"><Icono nombre="escudo" size={16} /></span>
+          <p className="pnl-aviso-texto">Comprobante enviado. Tu asesor lo revisará y verás la cuota como pagada en cuanto lo valide.</p>
+          <button type="button" className="pnl-btn-texto ex-pg-enlace" data-talla="s" onClick={() => setEnviado(false)}>Cerrar</button>
         </div>
       )}
 
@@ -558,7 +564,8 @@ export default function MisPagos({ datos, onRecargar }) {
           )}
         </>
       ) : !datos.error && (
-        <div className="pnl-pend-vacio">
+        <div className="pnl-vacio-suave">
+          <span className="pnl-vacio-suave-icono" aria-hidden="true"><Icono nombre="euro" size={22} /></span>
           <span className="pnl-chip pnl-chip-ok"><span className="punto" />Sin pagos</span>
           <p>Todavía no tienes un plan de pagos. Cuando tu asesor lo cree, verás aquí tus cuotas.</p>
         </div>

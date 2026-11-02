@@ -42,16 +42,16 @@ export default function AvisoSesion({ motivo }) {
         <p>{t.texto}</p>
         <div className="pnl-sesion-botones">
           {motivo === "otra-cuenta" ? (
-            <button type="button" className="pnl-btn-cta" onClick={() => window.location.reload()} autoFocus>
+            <button type="button" className="pnl-btn-cta pnl-btn-grande" onClick={() => window.location.reload()} autoFocus>
               Recargar
             </button>
           ) : motivo === "inactiva" ? (
-            <a className="pnl-btn-cta" href={whatsappDesde("panel-inactiva", "Mi acceso al Expediente Digital aparece desactivado.")} target="_blank" rel="noopener noreferrer">
+            <a className="pnl-btn-cta pnl-btn-grande" href={whatsappDesde("panel-inactiva", "Mi acceso al Expediente Digital aparece desactivado.")} target="_blank" rel="noopener noreferrer">
               <Icono nombre="chat" size={15} />
               Escribir a Inspira
             </a>
           ) : (
-            <button type="button" className="pnl-btn-cta" onClick={() => loginGoogle()} autoFocus>
+            <button type="button" className="pnl-btn-cta pnl-btn-grande" onClick={() => loginGoogle()} autoFocus>
               <Icono nombre="usuario" size={15} />
               Volver a entrar
             </button>

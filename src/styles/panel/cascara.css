@@ -1,0 +1,510 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO · hoja de bloque (25/10/2026)
+   Dueño: B1 · Cáscara.
+   Ámbito: barra superior (.pnl-top), lateral (.pnl-side), pestañas (.pnl-tabbar), campana, bienvenida, recorrido (Tour), aviso de sesión y pantallas de respaldo (LoadingPage, .pnl-nota, CercoErrores).
+
+   Reglas (ver base.css):
+   · Todo selector va con .pnl delante: esta hoja pisa a las de arriba
+     (panel.css, panel-app.css, panel-*.css, pasos*.css), que no se editan.
+   · Colores: variables de .pnl (panel.css). Un hex solo como reserva antes
+     de un color-mix() o para el blanco; ningún color nuevo fuera de los tokens.
+   · Clases nuevas con prefijo pnl-. Ninguna pnl- declara display en un nodo
+     que se oculte con una utilidad de Tailwind (ese ocultar va aquí con @media)
+     ni position en uno con fixed/sticky/absolute de Tailwind.
+   · Solo se animan transform y opacity.
+   ========================================================================== */
+
+
+/* ── BARRA SUPERIOR ───────────────────────────────────────────────────────
+   Pisa panel.css (.pnl-top, eyebrow, h1, nombre, área segura) y panel-app.css
+   (compactarse, atrás, %, progreso y ☰). .pnl-top es sticky por Tailwind: aquí
+   no va position. El relleno va SOLO en longhands: el shorthand borraría el
+   hueco de la muesca (env(safe-area-inset-top)) en la app instalada. */
+.pnl .pnl-top {
+  min-height: 64px;
+  gap: var(--esp-2);
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  padding-bottom: 10px;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, .9);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.pnl .pnl-top[data-elevada='1'] {
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 10px 30px -18px rgba(1, 52, 70, .35);
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .pnl .pnl-top,
+  .pnl .pnl-top[data-elevada='1'] { background: rgba(255, 255, 255, .98); }
+}
+
+/* La seña de marca sobre claro: petróleo-2 (8,9:1) con el punto sol de 6 px.
+   Antes era texto naranja de 9,5 px (2,2:1). En bloque, para que un eyebrow
+   largo («Solicitud #155 · Curso 2027-28») termine en «…» y no se corte. */
+.pnl .pnl-top-eyebrow {
+  display: block;
+  max-width: 100%;
+  margin: 0 0 2px;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.3;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--primary-2);
+}
+.pnl .pnl-top-eyebrow .punto {
+  display: inline-block; vertical-align: middle;
+  width: 6px; height: 6px;
+  margin: -2px 6px 0 0;
+  border-radius: var(--radio-pildora);
+  background: var(--accent);
+}
+
+/* Título de pantalla: Merriweather 700 (antes 800, que se pintaba en 900). */
+.pnl .pnl-top h1 {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: var(--fs-display-2); line-height: 1.2; letter-spacing: -.01em;
+  color: var(--primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Dentro de un expediente el título es un nombre largo («Visado de estudios
+   · Valeria Ramos Quispe»): en Montserrat y hasta dos líneas, entero. */
+.pnl .pnl-top[data-exp='1'] h1 {
+  font-family: var(--f-texto); font-weight: 700;
+  font-size: var(--fs-lectura); line-height: 1.2; letter-spacing: 0;
+  color: var(--ink);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Volver y menú: el botón de icono común (base.css), 44 de toque. */
+.pnl .pnl-atras,
+.pnl .pnl-top-menu {
+  width: var(--pnl-tap); height: var(--pnl-tap);
+  margin: 0;
+  border-radius: var(--radio-s);
+}
+/* El ☰ solo hace falta en el teléfono: en pantalla grande está el lateral.
+   Antes md:hidden perdía contra el display:grid de panel-app.css. */
+@media (min-width: 768px) {
+  .pnl .pnl-top-menu { display: none; }
+}
+
+/* Todo lo de la derecha, junto y empujado por un solo margen. El !important
+   neutraliza los de panel-app.css (.pnl-top-pct + .pnl-top-user, etc.). */
+.pnl .pnl-top-derecha {
+  display: flex; align-items: center; gap: var(--esp-2);
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+.pnl .pnl-top-derecha > * { margin-left: 0 !important; }
+
+/* Avance del expediente: sigue en pastilla verde. */
+.pnl .pnl-top-pct {
+  display: inline-flex; align-items: center; flex: 0 0 auto;
+  height: 28px;
+  padding-block: 0; padding-inline: 10px;
+  border: 0; border-radius: var(--radio-pildora);
+  background: var(--ok-soft);
+  color: var(--ok-ink);
+  font-size: var(--fs-meta); font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* La línea de 3 px bajo la barra: verde liso que crece con scaleX (antes
+   animaba background-size). Su posición la pone panel-app.css. */
+.pnl .pnl-top-progreso {
+  height: 3px;
+  background: var(--green);
+  transform-origin: left center;
+  transform: scaleX(calc(var(--p, 0) / 100));
+  transition: transform var(--d-larga) var(--salida);
+}
+
+/* Usuario: el nombre en gris legible y la foto con 44 de toque. */
+.pnl .pnl-top-user { gap: var(--esp-2); }
+.pnl .pnl-top-nombre {
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+  color: var(--ink-2);
+}
+.pnl .pnl-top-avatar {
+  display: inline-grid; place-items: center;
+  min-width: var(--pnl-tap); min-height: var(--pnl-tap);
+  border-radius: var(--radio-pildora);
+}
+
+/* ── CAMPANA ──────────────────────────────────────────────────────────────
+   El estilo de .pnl-avc-boton es de este bloque (B4 lleva el panel de
+   avisos). El aspecto de .pnl-btn-icono, con el contador común (base.css). */
+.pnl .pnl-avc-boton {
+  position: relative;
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  width: var(--pnl-tap); height: var(--pnl-tap);
+  /* ux-tap (ergonomia.css) lo subía a 48 en táctil: igual que la flecha y el ☰. */
+  min-width: var(--pnl-tap); min-height: var(--pnl-tap);
+  padding: 0;
+  border: 1px solid var(--line); border-radius: var(--radio-s);
+  background: #fff; color: var(--primary);
+  font: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--d-corta) var(--salida),
+    background-color var(--d-corta) var(--salida),
+    border-color var(--d-corta) var(--salida);
+}
+.pnl .pnl-avc-boton svg { width: 18px; height: 18px; }
+.pnl .pnl-avc-boton:active { transform: scale(.94); transition: transform var(--d-toque) var(--muelle); }
+.pnl .pnl-avc-boton:focus-visible { outline: 2px solid var(--foco-anillo); outline-offset: 2px; }
+.pnl .pnl-avc-boton[aria-expanded='true'] { border-color: var(--sky-2); background: var(--sky-soft); }
+@media (hover: hover) {
+  .pnl .pnl-avc-boton:hover { border-color: var(--sky-2); background: var(--sky-soft); }
+}
+
+
+/* ── LATERAL ──────────────────────────────────────────────────────────────
+   Pisa panel.css (.pnl-side-*, .pnl-item). No cambian el fondo, el ancho,
+   la placa del logo ni la ficha de cristal: solo tamaños y legibilidad. */
+.pnl .pnl-side-user {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.pnl .pnl-side-nombre { font-size: var(--fs-cuerpo-sm); }
+.pnl .pnl-side-correo {
+  font-size: var(--fs-meta);
+  color: var(--sobre-noche-3);
+}
+
+/* Grupos («MIS SERVICIOS»…): 11 px legibles (antes 9,5 al 50 %). */
+.pnl .pnl-side-grupo {
+  padding: 0 12px;
+  margin: 24px 0 8px;
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.2;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--sobre-noche-3);
+}
+/* El primero va pegado a la ficha del usuario: con 20 basta. */
+.pnl .pnl-side nav > .pnl-side-grupo:first-child { margin-top: 20px; }
+
+/* Ítems de 44. Sin margen entre ellos: así, a 800 px de alto, el menú
+   entero (también «Becas España») cabe sin tener que desplazarlo. */
+.pnl .pnl-item {
+  min-height: 44px;
+  padding: 0 12px;
+  margin-bottom: 0;
+  gap: 12px;
+  border-radius: var(--radio-s);
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.25;
+  color: var(--sobre-noche-2);
+  transition:
+    background-color var(--d-corta) var(--salida),
+    color var(--d-corta) var(--salida);
+}
+.pnl .pnl-item svg {
+  width: 18px; height: 18px;
+  color: rgba(255, 255, 255, .7);
+}
+@media (hover: hover) {
+  .pnl .pnl-item:not(.activo):hover { background: rgba(255, 255, 255, .08); color: #fff; }
+  .pnl .pnl-item:not(.activo):hover svg { color: #fff; }
+}
+/* El activo: fondo de cristal, icono cielo y la barra sol de 3×20. */
+.pnl .pnl-item.activo {
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  font-weight: 600;
+}
+.pnl .pnl-item.activo svg { color: var(--sky); }
+.pnl .pnl-item.activo::before { height: 20px; }
+
+/* Expedientes colgando de «Mis servicios»: alineados con el texto del padre. */
+.pnl .pnl-item.pnl-sub {
+  min-height: 44px;
+  padding: 0 12px 0 40px;
+  margin-bottom: 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500;
+  color: var(--sobre-noche-3);
+}
+.pnl .pnl-item.pnl-sub svg { width: 16px; height: 16px; }
+.pnl .pnl-item.pnl-sub.activo { color: #fff; font-weight: 600; }
+
+/* Pie: ítems a 13 px y el dominio legible (antes al 24 %). Son acciones
+   secundarias: var(--pnl-tap), 44 en táctil y 40 con ratón. */
+.pnl .pnl-side-pie .pnl-item {
+  min-height: var(--pnl-tap);
+  font-size: var(--fs-cuerpo-sm); font-weight: 500;
+  color: var(--sobre-noche-3);
+}
+.pnl .pnl-side-pie .pnl-item svg { width: 16px; height: 16px; }
+.pnl .pnl-side-dominio {
+  margin: 0;
+  padding: 6px 12px 0;
+  font-size: var(--fs-meta); letter-spacing: .02em;
+  color: var(--sobre-noche-3);
+}
+
+
+/* ── PESTAÑAS (teléfono) ──────────────────────────────────────────────────
+   Pisa panel-app.css. Misma geometría y la misma píldora petróleo que se
+   desliza; algo más redonda. Su ocultar en pantalla grande sigue en
+   panel-app.css (@media min-width 768): aquí no se declara display. */
+.pnl .pnl-tabbar { border-radius: var(--radio-xl); }
+.pnl .pnl-tabbar-pildora { border-radius: 18px; }
+.pnl .pnl-tab { color: var(--ink-2); }
+.pnl .pnl-tab svg { width: 22px; height: 22px; }
+/* 11 px (excepción declarada del tabbar), en gris oscuro: 6:1. */
+.pnl .pnl-tab > span:not(.pnl-tab-badge) {
+  font-size: var(--fs-eyebrow); font-weight: 600; line-height: 1.1;
+}
+.pnl .pnl-tab[aria-current='page'] { color: #fff; }
+.pnl .pnl-tab[aria-current='page'] svg { color: var(--accent-2); }
+
+/* Hueco para que la barra no tape lo último: solo en el teléfono. */
+@media (max-width: 767px) {
+  .pnl .pnl-con-tabbar {
+    padding-bottom: calc(var(--tabbar-alto) + 24px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Velo del cajón del menú. */
+.pnl .pnl-velo { background: var(--velo); }
+
+
+/* ── VACÍO DE PÁGINA Y BIENVENIDA ─────────────────────────────────────────
+   .pnl-vacio (panel.css) es de este bloque: lo usan Bienvenida, SinAcceso y
+   Mi ruta vacía. Las capas de .pnl-noche en talla m, con los tokens. */
+.pnl .pnl-vacio {
+  border-radius: var(--radio-xl);
+  padding: 40px 24px;
+  background:
+    radial-gradient(420px 300px at 88% 0%, var(--halo-cielo), transparent 70%),
+    radial-gradient(420px 300px at 2% 100%, var(--halo-sol), transparent 68%),
+    var(--noche);
+  color: #fff;
+}
+@media (min-width: 640px) {
+  .pnl .pnl-vacio { padding: 56px 40px; }
+}
+.pnl .pnl-vacio::before {
+  background-image:
+    linear-gradient(var(--reticula-trazo) 1px, transparent 1px),
+    linear-gradient(90deg, var(--reticula-trazo) 1px, transparent 1px);
+  background-size: var(--reticula) var(--reticula);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 82%);
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+.pnl .pnl-vacio-icono {
+  border-color: var(--cristal-borde);
+  background: var(--cristal);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.pnl .pnl-vacio-logo { margin: 0 auto 22px; }
+
+/* Título en Merriweather 700 (antes 800, que se pintaba en 900). */
+.pnl .pnl-vacio h3 {
+  margin: 0 0 10px;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 26px; line-height: 1.2; letter-spacing: -.01em;
+  color: #fff;
+  text-wrap: balance;
+}
+@media (min-width: 640px) {
+  .pnl .pnl-vacio h3 { font-size: 32px; }
+}
+.pnl .pnl-vacio p {
+  max-width: 40ch;
+  margin: 0 auto 24px;
+  font-size: var(--fs-lectura); font-weight: 500; line-height: 1.6;
+  color: var(--sobre-noche-2);
+}
+.pnl .pnl-vacio p.ex-lema {
+  max-width: none;
+  margin: -2px auto 18px;
+  font-family: var(--f-display); font-style: italic; font-weight: 700;
+  font-size: 17px; line-height: 1.4;
+  color: var(--accent-2);
+}
+
+/* Líneas de cristal con texto: velo noche debajo (--cristal-texto), para que
+   el texto al 90 % pase AA aun sobre el halo. */
+.pnl .pnl-vacio .pnl-lineas {
+  max-width: 430px;
+  margin: 0 auto 24px;
+  gap: 10px;
+}
+.pnl .pnl-vacio .pnl-linea {
+  min-height: 56px;
+  padding: 8px 14px;
+  gap: 12px;
+  border: 1px solid var(--cristal-borde);
+  border-radius: var(--radio-m);
+  background: var(--cristal-texto);
+  color: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.pnl .pnl-vacio .pnl-linea[data-fija] { cursor: default; }
+.pnl .pnl-vacio .pnl-linea[data-fija]:hover {
+  transform: none;
+  background: var(--cristal-texto);
+}
+@media (hover: hover) {
+  .pnl .pnl-vacio a.pnl-linea:hover { background: var(--cristal); }
+}
+.pnl .pnl-vacio .pnl-linea:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+.pnl .pnl-linea-tile {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 40px; height: 40px;
+  border-radius: var(--radio-s);
+  background: var(--cristal);
+  color: var(--sky);
+}
+.pnl .pnl-linea-tile svg { width: 18px; height: 18px; }
+.pnl .pnl-vacio .pnl-linea-datos { gap: 2px; }
+.pnl .pnl-vacio .pnl-linea-datos strong {
+  font-size: var(--fs-lectura); font-weight: 700; line-height: 1.3; letter-spacing: 0;
+  color: #fff;
+}
+.pnl .pnl-vacio .pnl-linea-datos small {
+  font-size: var(--fs-cuerpo-sm); font-weight: 500; line-height: 1.45;
+  color: var(--sobre-noche-2);
+}
+
+/* Acciones: el CTA sol (único naranja) y «Ver la web» en cristal. */
+.pnl .pnl-vacio-acciones { gap: var(--esp-3); }
+.pnl .pnl-vacio-acciones .pnl-btn-cta.pnl-btn-grande { max-width: 340px; }
+/* El botón fantasma de SinAcceso toma la forma de .pnl-btn-noche. */
+.pnl .pnl-vacio-fantasma {
+  min-height: var(--pnl-tap); height: auto;
+  padding: 6px 18px;
+  border-color: var(--cristal-borde);
+  background: var(--cristal);
+  font-size: var(--fs-cuerpo); font-weight: 600;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media (hover: hover) {
+  .pnl .pnl-vacio-fantasma:hover {
+    transform: none;
+    border-color: var(--accent); background: var(--accent); color: var(--primary-dark);
+  }
+}
+
+.pnl .pnl-vacio p.pnl-vacio-pie {
+  max-width: none;
+  margin: 22px auto 0;
+  font-size: var(--fs-cuerpo-sm); font-weight: 500;
+  color: var(--sobre-noche-3);
+}
+.pnl .pnl-vacio-enlace {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pnl .pnl-vacio-enlace:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; border-radius: 4px; }
+
+/* A sangre en el teléfono: la bienvenida ocupa la pantalla entera. Gana a
+   w-full max-w-md porque esta hoja no va en capa. */
+@media (max-width: 639.98px) {
+  .pnl .pnl-vacio-pantalla {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    min-height: 100dvh;
+    border-radius: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: calc(40px + env(safe-area-inset-top, 0px)) 20px calc(32px + env(safe-area-inset-bottom, 0px));
+  }
+}
+/* Desde 640, la tarjeta centrada de siempre, un poco más ancha (512 en vez
+   de 448): con los textos ya legibles, así cabe entera en 800 px de alto. */
+@media (min-width: 640px) {
+  .pnl .pnl-vacio-pantalla { max-width: 512px; }
+}
+
+
+/* ── RECORRIDO (Tour) ─────────────────────────────────────────────────────
+   Solo visual: la lógica de visible() no se toca. El foco con anillo sol
+   (panel.css) se conserva. */
+.pnl .pnl-tour-tarjeta {
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra-3);
+  font-family: var(--f-texto);
+}
+.pnl .pnl-tour-paso {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); font-weight: 700; line-height: 1.2;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  color: var(--primary-2);
+}
+.pnl .pnl-tour-paso::before {
+  content: "";
+  width: 6px; height: 6px; flex: 0 0 auto;
+  border-radius: var(--radio-pildora);
+  background: var(--accent);
+}
+.pnl .pnl-tour-tarjeta h4 {
+  margin: 0 0 6px;
+  font-family: var(--f-texto); font-weight: 700;
+  font-size: var(--fs-titulo); line-height: 1.3; letter-spacing: 0;
+  color: var(--primary);
+}
+.pnl .pnl-tour-tarjeta p {
+  margin: 0 0 14px;
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.55;
+  color: var(--ink-2);
+}
+.pnl .pnl-tour-botones { gap: var(--esp-2); }
+
+
+/* ── AVISO DE SESIÓN ──────────────────────────────────────────────────────
+   Hoja desde abajo en el teléfono y centrada desde 640 (panel-app.css). */
+.pnl .pnl-sesion-caja {
+  border-radius: var(--radio-xl) var(--radio-xl) 0 0;
+  box-shadow: var(--sombra-3);
+}
+@media (min-width: 640px) {
+  .pnl .pnl-sesion-caja { border-radius: var(--radio-xl); }
+}
+.pnl .pnl-sesion-caja h2 {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: 20px; line-height: 1.25; letter-spacing: -.01em;
+  color: var(--primary);
+}
+.pnl .pnl-sesion-caja p {
+  font-size: var(--fs-cuerpo); font-weight: 500; line-height: 1.6;
+  color: var(--ink-2);
+}
+.pnl .pnl-sesion-botones .pnl-btn { min-height: 48px; }
+.pnl .pnl-sesion-caja .pnl-sesion-nota {
+  font-size: var(--fs-meta) !important;
+  color: var(--muted);
+}
+
+
+/* ── PANTALLAS DE RESPALDO ────────────────────────────────────────────────
+   LoadingPage: el spinner es el de base.css; la nota, legible (antes 11,5 px
+   en un gris claro de 2,6:1). CercoErrores usa .ex-sec y .ex-btn (expediente y base). */
+.pnl .pnl-nota {
+  font-size: var(--fs-meta); font-weight: 500;
+  color: var(--muted);
+}
+
+
+/* ── Movimiento reducido: va siempre al final ── */
+@media (prefers-reduced-motion: reduce) {
+  .pnl .pnl-top-progreso,
+  .pnl .pnl-item,
+  .pnl .pnl-avc-boton { transition: none; }
+  .pnl .pnl-avc-boton:active,
+  .pnl .pnl-vacio .pnl-linea:hover,
+  .pnl .pnl-vacio-fantasma:hover { transform: none; }
+}

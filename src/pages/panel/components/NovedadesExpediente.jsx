@@ -21,6 +21,24 @@ import LineaTiempoExpediente from "./LineaTiempoExpediente";
 
 const VISIBLES = 3;
 
+// En el teléfono el bloque sale plegado (Carina, 02/11/2026): el título, la
+// cuenta de nuevas y «Ver». La visita cuenta al desplegarlo, no al cargar la
+// página, así los «Nuevo» esperan a que los mire. En escritorio no cambia nada.
+const TELEFONO = "(max-width: 767.98px)";
+function useTelefono() {
+  const puede = typeof window !== "undefined" && typeof window.matchMedia === "function";
+  const [es, setEs] = useState(() => puede && window.matchMedia(TELEFONO).matches);
+  useEffect(() => {
+    if (!puede) return undefined;
+    const mq = window.matchMedia(TELEFONO);
+    const f = () => setEs(mq.matches);
+    f();
+    if (mq.addEventListener) mq.addEventListener("change", f); else mq.addListener(f);
+    return () => { if (mq.removeEventListener) mq.removeEventListener("change", f); else mq.removeListener(f); };
+  }, [puede]);
+  return es;
+}
+
 /** «hace 5 min», «hace 3 h», «ayer», «hace 4 días»; más allá, la fecha. */
 function haceCuanto(iso) {
   const t = Date.parse(iso);
@@ -46,7 +64,8 @@ const TONO = TONO_NOVEDAD;
  * @param {{ idSolicitud: number, onIrSeccion?: (seccion: string|null) => void, plegable?: boolean }} props
  * `plegable`: empieza cerrada, en una línea con la cuenta de nuevas. Para
  * pantallas de altura fija (el visado en el teléfono), donde la lista abierta
- * le quitaba casi todo el sitio al formulario.
+ * le quitaba casi todo el sitio al formulario. En el teléfono (< 768 px)
+ * todas empiezan cerradas, se pida o no.
  */
 export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, plegable = false }) {
   // Lo cargado va con el id al que pertenece: al cambiar de expediente, lo
@@ -54,7 +73,9 @@ export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, p
   const [datos, setDatos] = useState({ id: null, error: false, items: [] });
   const [abiertoEn, setAbiertoEn] = useState(null);
   const [desplegadaEn, setDesplegadaEn] = useState(null);
-  const desplegada = !plegable || desplegadaEn === idSolicitud;
+  const telefono = useTelefono();
+  const plegada = plegable || telefono;
+  const desplegada = !plegada || desplegadaEn === idSolicitud;
   const vigente = datos.id === idSolicitud;
   const estado = vigente ? { ...datos, cargando: false } : { cargando: true, error: false, items: [] };
   const abierto = abiertoEn === idSolicitud;
@@ -107,14 +128,14 @@ export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, p
           Novedades
           {nuevas > 0 && <span className="pnl-nov-cuenta">{nuevas} {nuevas === 1 ? "nueva" : "nuevas"}</span>}
         </h3>
-        {plegable ? (
-          <button type="button" className="pnl-nov-plegar" aria-expanded={desplegada}
+        {plegada ? (
+          <button type="button" className="pnl-btn-texto pnl-nov-plegar" data-talla="s" aria-expanded={desplegada}
             onClick={() => setDesplegadaEn(desplegada ? null : idSolicitud)}>
             {desplegada ? "Ocultar" : "Ver"}
           </button>
         ) : (
-          <button type="button" className="pnl-nov-historial ux-tap" onClick={() => setHistorialEn(idSolicitud)}>
-            <Icono nombre="reloj" size={13} />
+          <button type="button" className="pnl-btn pnl-nov-historial ux-tap" data-talla="s" onClick={() => setHistorialEn(idSolicitud)}>
+            <Icono nombre="reloj" size={16} />
             Historial
           </button>
         )}
@@ -149,13 +170,17 @@ export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, p
                     <span className="pnl-nov-texto">
                       <span className="pnl-nov-linea">
                         <b>{n.titulo}</b>
-                        {nueva && <span className="pnl-nov-badge">Nuevo</span>}
+                        {/* «Nuevo» y la fecha, juntos a la derecha: en la línea
+                            del título si cabe; si no, justo debajo. */}
+                        <span className="pnl-nov-meta">
+                          {nueva && <span className="pnl-chip pnl-nov-badge" data-talla="sm" data-tono="info">Nuevo</span>}
+                          <time className="pnl-nov-fecha" dateTime={n.fecha} title={fechaHoraDoble(n.fecha)}>
+                            {haceCuanto(n.fecha)}
+                          </time>
+                        </span>
                       </span>
                       {n.detalle && <span className="pnl-nov-detalle">{n.detalle}</span>}
                     </span>
-                    <time className="pnl-nov-fecha" dateTime={n.fecha} title={fechaHoraDoble(n.fecha)}>
-                      {haceCuanto(n.fecha)}
-                    </time>
                   </button>
                 </li>
               );
@@ -170,9 +195,9 @@ export default function NovedadesExpediente({ idSolicitud, onIrSeccion = null, p
       )}
 
       {/* En la versión plegable el botón del historial va abajo, con la lista abierta. */}
-      {plegable && desplegada && !estado.cargando && (
-        <button type="button" className="pnl-nov-historial ux-tap pnl-nov-historial-pie" onClick={() => setHistorialEn(idSolicitud)}>
-          <Icono nombre="reloj" size={13} />
+      {plegada && desplegada && !estado.cargando && (
+        <button type="button" className="pnl-btn pnl-nov-historial ux-tap pnl-nov-historial-pie" data-talla="s" onClick={() => setHistorialEn(idSolicitud)}>
+          <Icono nombre="reloj" size={16} />
           Ver el historial del expediente
         </button>
       )}

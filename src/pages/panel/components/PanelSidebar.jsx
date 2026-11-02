@@ -13,6 +13,7 @@ import { useRef } from "react";
 import SidebarItem from "./SidebarItem";
 import Avatar from "../../../components/common/Avatar";
 import Icono from "../../../components/common/Icono";
+import IconoPaso from "../../../components/common/IconoPaso";
 import { datosUsuario } from "../../../components/common/usuario";
 import { useAuth } from "../../../context/AuthContext";
 import { navigate } from "../../../services/navigate";
@@ -89,17 +90,18 @@ export default function PanelSidebar({
       <div className="md:hidden flex justify-end px-4 pt-4 shrink-0">
         <button
           onClick={onClose}
-          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-white text-base leading-none"
+          className="pnl-btn-icono"
+          data-sobre="noche"
           aria-label="Cerrar menú"
         >
-          ✕
+          <IconoPaso nombre="x" className="w-[18px] h-[18px]" />
         </button>
       </div>
 
       {/* El logotipo de verdad, el mismo del nav. Antes era la palabra
           "inspira" recompuesta con dos <span> y una tipografía distinta, así
           que la marca no coincidía con la de la portada. */}
-      <div className="px-4 pt-5 pb-4 shrink-0">
+      <div className="px-4 pt-4 pb-3 shrink-0">
         <div className="pnl-side-logo">
           <img src={logo} alt="Inspira Legal" />
         </div>
@@ -113,7 +115,7 @@ export default function PanelSidebar({
         </div>
       </div>
 
-      <nav className="flex-1 px-3 pb-4 overflow-y-auto min-h-0" data-tour="menu">
+      <nav className="flex-1 px-3 pb-2 overflow-y-auto min-h-0" data-tour="menu">
         <p className="pnl-side-grupo">Mi cuenta</p>
         <SidebarItem
           icono="panel"
@@ -186,7 +188,7 @@ export default function PanelSidebar({
         )}
       </nav>
 
-      <div className="pnl-side-pie px-3 py-4 shrink-0">
+      <div className="pnl-side-pie px-3 pt-3 pb-4 shrink-0">
         {onTour && (
           <button type="button" onClick={onTour} className="pnl-item">
             <Icono nombre="brujula" size={16} />

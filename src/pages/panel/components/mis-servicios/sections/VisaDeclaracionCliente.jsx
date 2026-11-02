@@ -9,45 +9,44 @@ import { apiPUT } from "../../../../../services/api";
 import {
   djVacia, perfilesSegunVia, sembrarDesdeExpediente, filaVacia, FILAS,
 } from "../../../../../lib/visaDeclaracion";
+import IconoPaso from "../../../../../components/common/IconoPaso";
+import { IconoLinea } from "../utils";
+import Icono from "../../../../../components/common/Icono";
 
+// Los tonos de siempre (info, ok, warn) en el diccionario del panel. El
+// icono: el que se le pase o, si no, el del tono.
+const AVISO_TONO = { info: "info", ok: "ok", warn: "aviso", stop: "alto" };
+const AVISO_ICONO = { info: "info", ok: "checkCircle", aviso: "alert", alto: "alert" };
 function Aviso({ tono = "info", icono, children }) {
-  const tonos = {
-    info: "bg-sky-50 border-sky-200 text-sky-900",
-    ok:   "bg-emerald-50 border-emerald-200 text-emerald-900",
-    warn: "bg-amber-50 border-amber-200 text-amber-900",
-  };
+  const t = AVISO_TONO[tono] || "info";
   return (
-    <div className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] leading-relaxed ${tonos[tono]}`}>
-      <span className="shrink-0 text-base leading-none mt-0.5">{icono}</span>
-      <div>{children}</div>
+    <div className="pnl-aviso pnl-aviso-bloque" data-tono={t}>
+      <span className="pnl-aviso-icono">{icono || <IconoLinea nombre={AVISO_ICONO[t]} />}</span>
+      <div className="pnl-aviso-texto">{children}</div>
     </div>
   );
 }
 
+// La etiqueta va ENCIMA de la caja, legible.
 function Campo({ label, valor, onChange, ancho, disabled, placeholder }) {
   return (
-    <div className={`${ancho === "full" ? "sm:col-span-2" : ""} bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5 focus-within:border-primary-light focus-within:bg-white transition-colors`}>
-      <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">{label}</label>
+    <div className={`pnl-campo ${ancho === "full" ? "sm:col-span-2" : ""}`}>
+      <label className="pnl-campo-etiqueta">{label}</label>
       <input
         value={valor || ""}
         placeholder={placeholder}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-transparent border-none outline-none p-0 text-[13.5px] font-semibold text-neutral-800 placeholder:font-normal placeholder:text-neutral-300 disabled:text-neutral-400"
+        className="pnl-campo-control"
       />
     </div>
   );
 }
 
-function Interruptor({ activo, onClick, disabled }) {
-  return (
-    <button
-      type="button" onClick={onClick} disabled={disabled}
-      className={`relative shrink-0 w-11 h-6 rounded-full transition-colors disabled:opacity-60 ${activo ? "bg-[#1D6A4A]" : "bg-neutral-300"}`}
-    >
-      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${activo ? "left-[22px]" : "left-0.5"}`} />
-    </button>
-  );
+// Solo la pista visual: la fila entera (el botón que la contiene) es la que
+// se toca.
+function Interruptor({ activo }) {
+  return <span className="pnl-interruptor" data-on={activo ? "1" : undefined} aria-hidden="true" />;
 }
 
 /* Tabla repetible (empleos anteriores). En móvil cada fila es una tarjeta. */
@@ -56,15 +55,16 @@ function Repetible({ nombre, filas, onCambiar, onAnadir, onQuitar, disabled, eti
   return (
     <div className="space-y-2">
       {(filas || []).map((fila, i) => (
-        <div key={i} className="relative bg-neutral-50 border border-neutral-200 rounded-xl p-3">
+        <div key={i} className="pnl-repetible-fila">
           {!disabled && (
             <button
               type="button" onClick={() => onQuitar(i)}
-              className="absolute top-2 right-2 w-6 h-6 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 grid place-items-center text-xs"
+              className="pnl-btn-icono pnl-repetible-quitar"
+              data-talla="s"
               aria-label="Quitar"
-            >✕</button>
+            ><IconoPaso nombre="x" strokeWidth={2.2} /></button>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pr-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-4 pr-11">
             {cols.map(([clave, etiqueta, ejemplo, full]) => (
               <Campo
                 key={clave} label={etiqueta} ancho={full ? "full" : undefined}
@@ -78,9 +78,10 @@ function Repetible({ nombre, filas, onCambiar, onAnadir, onQuitar, disabled, eti
       {!disabled && (
         <button
           type="button" onClick={onAnadir}
-          className="w-full py-2.5 rounded-xl border border-dashed border-neutral-300 text-[12.5px] font-semibold text-neutral-500 hover:border-[#1D6A4A] hover:text-[#1D6A4A] transition-colors"
+          className="pnl-repetible-anadir"
         >
-          + {etiquetaAnadir}
+          <IconoPaso nombre="plus" strokeWidth={2.2} />
+          {etiquetaAnadir}
         </button>
       )}
     </div>
@@ -164,7 +165,7 @@ export default function VisaDeclaracionCliente({ idSolicitud, expediente, onGuar
 
   if (!via) {
     return (
-      <Aviso tono="warn" icono="🔒">
+      <Aviso tono="warn" icono={<Icono nombre="candado" size={16} />}>
         Primero elige tu <b>vía de medios económicos</b> en el bloque anterior.
         Según sea con tu dinero o con un avalista, te pediremos unos datos u otros.
       </Aviso>
@@ -175,7 +176,7 @@ export default function VisaDeclaracionCliente({ idSolicitud, expediente, onGuar
 
   return (
     <div className="space-y-3">
-      <Aviso tono="info" icono="💼">
+      <Aviso tono="info" icono={<Icono nombre="usuario" size={16} />}>
         Para terminar tu expediente necesitamos algunos datos de tu <b>situación laboral e
         ingresos</b> (y los de tu patrocinador, si aplica). No repitas lo del bloque 1 —
         aquí van datos nuevos.
@@ -187,24 +188,30 @@ export default function VisaDeclaracionCliente({ idSolicitud, expediente, onGuar
           ? "Tu situación laboral"
           : `Datos de tu ${p.rol.toLowerCase()} (patrocinador)`;
         return (
-          <div key={i} className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 space-y-3">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A]">{titulo}</p>
+          <div key={i} className="pnl-tarjeta pnl-tarjeta-visado space-y-4" data-anidada="1">
+            <p className="pnl-eyebrow"><span className="punto" />{titulo}</p>
 
             {!esEstudiante && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-4">
                 <Campo label="Nombre completo" ancho="full" placeholder="Nombres y apellidos"
                   valor={p.nombre} disabled={off} onChange={(v) => setPerfil(i, "nombre", v)} />
               </div>
             )}
 
-            <div className="flex items-center gap-3 py-1">
-              <p className="flex-1 text-[13px] font-semibold text-neutral-800">¿Trabaja actualmente?</p>
-              <Interruptor activo={p.trabajaActual} disabled={off}
-                onClick={() => setPerfil(i, "trabajaActual", !p.trabajaActual)} />
-            </div>
+            {/* La fila entera es el interruptor: se toca en cualquier punto. */}
+            <button
+              type="button"
+              className="pnl-interruptor-fila"
+              disabled={off}
+              aria-pressed={!!p.trabajaActual}
+              onClick={() => setPerfil(i, "trabajaActual", !p.trabajaActual)}
+            >
+              <span className="pnl-calc-etiqueta">¿Trabaja actualmente?</span>
+              <Interruptor activo={p.trabajaActual} />
+            </button>
 
             {p.trabajaActual ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-4">
                 <Campo label="¿Dónde trabaja?" ancho="full" placeholder="Empresa"
                   valor={p.empresa} disabled={off} onChange={(v) => setPerfil(i, "empresa", v)} />
                 <Campo label="Cargo" placeholder="Tu puesto"
@@ -215,7 +222,7 @@ export default function VisaDeclaracionCliente({ idSolicitud, expediente, onGuar
                   valor={p.ultimaRemuneracion} disabled={off} onChange={(v) => setPerfil(i, "ultimaRemuneracion", v)} />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-4">
                 <Campo label="Último lugar donde trabajó" ancho="full" placeholder="Empresa"
                   valor={p.ultEmpEmpresa} disabled={off} onChange={(v) => setPerfil(i, "ultEmpEmpresa", v)} />
                 <Campo label="Cargo" placeholder="Puesto"
@@ -228,7 +235,7 @@ export default function VisaDeclaracionCliente({ idSolicitud, expediente, onGuar
             )}
 
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 mb-2">
+              <p className="pnl-eyebrow pnl-visado-subtitulo">
                 Empleos anteriores (historial)
               </p>
               <Repetible
@@ -241,7 +248,7 @@ export default function VisaDeclaracionCliente({ idSolicitud, expediente, onGuar
             </div>
 
             {!esEstudiante && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-4">
                 <Campo label="Años de trabajo" placeholder="Ej: 12 años"
                   valor={p.aniosTrabajo} disabled={off} onChange={(v) => setPerfil(i, "aniosTrabajo", v)} />
                 <Campo label="Otros ingresos (alquileres, negocio…)" placeholder="Opcional"
@@ -249,38 +256,38 @@ export default function VisaDeclaracionCliente({ idSolicitud, expediente, onGuar
               </div>
             )}
 
-            <div className="bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5">
-              <label className="block text-[9px] font-bold uppercase tracking-widest text-neutral-400 mb-1">
+            <div className="pnl-campo">
+              <label className="pnl-campo-etiqueta">
                 Notas — cuéntanos cualquier detalle relevante
               </label>
               <textarea
                 rows={3} disabled={off} value={p.notas || ""}
                 onChange={(e) => setPerfil(i, "notas", e.target.value)}
                 placeholder="Cambios de trabajo, ingresos extra, ventas, donaciones…"
-                className="w-full bg-transparent border-none outline-none p-0 text-[13.5px] text-neutral-800 resize-y placeholder:text-neutral-300 disabled:text-neutral-400"
+                className="pnl-campo-control"
               />
             </div>
           </div>
         );
       })}
 
-      <Aviso tono="info" icono="📄">
+      <Aviso tono="info" icono={<IconoPaso nombre="fileText" />}>
         Tendrás que entregar además tu <b>Certificado Único Laboral (CUL)</b> y tu{" "}
         <b>reporte tributario de SUNAT</b>. Súbelos en el bloque de documentos.
       </Aviso>
 
       {!bloqueado && (
-        <div className="sticky bottom-0 -mx-1 px-1 pt-2 pb-1 bg-gradient-to-t from-white via-white to-transparent">
-          {aviso && <div className="mb-2"><Aviso tono={aviso.tono} icono={aviso.tono === "ok" ? "✔" : "⚠️"}>{aviso.texto}</Aviso></div>}
-          <div className="flex items-center gap-3">
+        <div className="pnl-barra-guardar sticky bottom-[var(--selector-alto)] z-[14] flex-wrap">
+          {aviso && <div className="w-full"><Aviso tono={aviso.tono}>{aviso.texto}</Aviso></div>}
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button" onClick={guardar} disabled={guardando}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1D6A4A] text-white text-sm font-semibold shadow-sm hover:bg-[#175a3e] active:scale-95 transition-all disabled:opacity-60"
+              className="pnl-btn-primario"
             >
-              {guardando && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+              {guardando && <span className="pnl-spinner" data-talla="s" />}
               {guardando ? "Guardando…" : "Guardar mis datos"}
             </button>
-            {sucio && <p className="text-[11.5px] text-neutral-400">Tienes cambios sin guardar</p>}
+            {sucio && <p className="pnl-barra-guardar-texto" data-sucio="1">Tienes cambios sin guardar</p>}
           </div>
         </div>
       )}

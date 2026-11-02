@@ -20,6 +20,7 @@ import Icono from "../../../../components/common/Icono";
 import RutaMini from "../../../../components/common/RutaMini";
 import { EsqueletoExpediente } from "../Esqueleto";
 import NovedadesExpediente from "../NovedadesExpediente";
+import ErrorCarga from "./ErrorCarga";
 import EncuestaCierre from "../EncuestaCierre";
 import MensajesFlotante from "./MensajesFlotante";
 import { usePublicarCabecera } from "../../cabeceraExpediente";
@@ -28,8 +29,8 @@ import {
   mostrarValor, pasoDeItem, situacionDe,
 } from "../../../../lib/tramites";
 
-const CAMPO = "w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition";
-const ETIQ = "block text-[11px] font-bold uppercase tracking-wide text-neutral-500 mb-1";
+const CAMPO = "pnl-campo-control";
+const ETIQ = "pnl-campo-etiqueta";
 
 function inicialesDe(nombre) {
   return String(nombre || "").trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "•";
@@ -101,7 +102,7 @@ function Plazos({ plazos }) {
             <li key={p.clave}>
               <span className="pnl-doc-nombre">
                 {p.label}
-                <small className="block text-[11px] font-normal text-neutral-500">{p.de}</small>
+                <small className="pnl-doc-sub">{p.de}</small>
               </span>
               <span className={`pnl-chip pnl-chip-${tono}`}><span className="punto" />{fechaCorta(p.fecha)}{texto ? ` · ${texto}` : ""}</span>
             </li>
@@ -166,28 +167,28 @@ function CamposPaso({ idSolicitud, campos, tramite, onGuardado }) {
       <div className="flex flex-col gap-4 mt-2">
         {gruposDe(campos).map((g, gi) => (
           <div key={g.titulo || gi}>
-            {g.titulo && <p className="text-[11px] font-extrabold uppercase tracking-wider text-primary mb-2">{g.titulo}</p>}
+            {g.titulo && <p className="pnl-eyebrow pnl-tramite-grupo"><span className="punto" />{g.titulo}</p>}
             <div className="grid gap-3 sm:grid-cols-2">
               {g.campos.map((c) => (
-                <div key={c.clave} className={c.tipo === "textarea" ? "sm:col-span-2" : ""}>
+                <div key={c.clave} className={`pnl-campo ${c.tipo === "textarea" ? "sm:col-span-2" : ""}`}>
                   <label className={ETIQ}>{c.label}</label>
                   {c.cliente === "editar" ? (
                     <Entrada campo={c} valor={form[c.clave]} onChange={(v) => setForm((f) => ({ ...f, [c.clave]: v }))} />
                   ) : (
-                    <p className="text-sm text-neutral-800 min-h-[1.5rem] flex items-center gap-2 flex-wrap">
+                    <p className="pnl-dato-valor">
                       {c.tipo === "url" && tramite?.[c.clave] ? (
-                        <a className="text-primary underline break-all" href={tramite[c.clave]} target="_blank" rel="noopener noreferrer">Abrir</a>
+                        <a className="pnl-btn" data-talla="s" href={tramite[c.clave]} target="_blank" rel="noopener noreferrer">Abrir</a>
                       ) : (
-                        <span className={tramite?.[c.clave] ? "" : "text-neutral-400"}>{mostrarValor(c, tramite?.[c.clave], { revelar: !!reveladas[c.clave] })}</span>
+                        <span className={tramite?.[c.clave] ? "" : "pnl-dato-vacio"}>{mostrarValor(c, tramite?.[c.clave], { revelar: !!reveladas[c.clave] })}</span>
                       )}
                       {c.tipo === "secreto" && tramite?.[c.clave] && (
-                        <button type="button" className="text-[11px] font-bold text-primary" onClick={() => setReveladas((r) => ({ ...r, [c.clave]: !r[c.clave] }))}>
+                        <button type="button" className="pnl-btn-texto" data-talla="s" onClick={() => setReveladas((r) => ({ ...r, [c.clave]: !r[c.clave] }))}>
                           {reveladas[c.clave] ? "Ocultar" : "Mostrar"}
                         </button>
                       )}
                     </p>
                   )}
-                  {c.ayuda && <small className="block text-[11.5px] text-neutral-500 mt-1 leading-snug">{c.ayuda}</small>}
+                  {c.ayuda && <small className="pnl-campo-pista">{c.ayuda}</small>}
                 </div>
               ))}
             </div>
@@ -195,10 +196,10 @@ function CamposPaso({ idSolicitud, campos, tramite, onGuardado }) {
         ))}
         {editables.length > 0 && (
           <div className="flex items-center gap-3 flex-wrap">
-            <button type="button" className="pnl-btn pnl-btn-cta" disabled={!cambiado || guardando} onClick={guardar}>
+            <button type="button" className="pnl-btn-primario" disabled={!cambiado || guardando} onClick={guardar}>
               {guardando ? "Guardando…" : "Guardar"}
             </button>
-            {aviso && <span className="text-[12px] text-neutral-600">{aviso}</span>}
+            {aviso && <span className="pnl-tramite-aviso">{aviso}</span>}
           </div>
         )}
       </div>
@@ -242,10 +243,10 @@ function Candidaturas({ def, filas, idSolicitud, pasoId, onGuardado }) {
     <section className="pnl-doc-lista" aria-label={lista.titulo}>
       <h3>{lista.titulo}</h3>
       {!filas.length ? (
-        <p className="text-[13px] text-neutral-500 m-0">Todavía no hay {lista.singular === "requerimiento" ? "ninguno" : "ninguna propuesta"}: tu asesor la está preparando.</p>
+        <p className="pnl-doc-vacio">Todavía no hay {lista.singular === "requerimiento" ? "ninguno" : "ninguna propuesta"}: tu asesor la está preparando.</p>
       ) : grupos.map((g) => (
         <div key={g.t || "todas"} className="mt-2 first:mt-0">
-          {g.t && <p className="m-0 mb-1 text-[11px] font-extrabold uppercase tracking-wider text-primary">{g.t}</p>}
+          {g.t && <p className="pnl-eyebrow pnl-tramite-grupo"><span className="punto" />{g.t}</p>}
           <ul>
             {g.filas.map((f) => {
               const e = f.estado ? { texto: f.estado, tono: TONO_ESTADO[f.estado] || "tipo" } : null;
@@ -256,16 +257,16 @@ function Candidaturas({ def, filas, idSolicitud, pasoId, onGuardado }) {
                 <li key={f.id} className="!items-start !flex-wrap">
                   <span className="pnl-doc-nombre flex-1">
                     {titulo(f)}
-                    {sub(f) && <small className="block text-[11.5px] font-medium text-neutral-500">{sub(f)}</small>}
-                    {f.descripcion && f.programa && <small className="block text-[11.5px] text-neutral-600">{f.descripcion}</small>}
-                    {f.baremo && <small className="block text-[11.5px] text-neutral-600">Admisión: {f.baremo}</small>}
-                    {detalles.length > 0 && <small className="block text-[11px] font-normal text-neutral-500 mt-0.5">{detalles.join(" · ")}</small>}
-                    {f.portal_url && <a className="block text-[11.5px] font-bold text-primary mt-0.5" href={f.portal_url} target="_blank" rel="noopener noreferrer">Abrir portal</a>}
+                    {sub(f) && <small className="pnl-doc-sub">{sub(f)}</small>}
+                    {f.descripcion && f.programa && <small className="pnl-doc-sub">{f.descripcion}</small>}
+                    {f.baremo && <small className="pnl-doc-sub">Admisión: {f.baremo}</small>}
+                    {detalles.length > 0 && <small className="pnl-doc-sub">{detalles.join(" · ")}</small>}
+                    {f.portal_url && <a className="pnl-doc-enlace" href={f.portal_url} target="_blank" rel="noopener noreferrer">Abrir portal</a>}
                   </span>
                   {e && <span className={`pnl-chip pnl-chip-${e.tono}`}><span className="punto" />{e.texto}</span>}
                   {editables.map((c) => (
                     <span key={c.clave} className="basis-full flex items-center gap-2 mt-1">
-                      <small className="text-[11px] font-bold text-neutral-500">{c.label}:</small>
+                      <small className="pnl-doc-sub pnl-doc-sub-fuerte">{c.label}:</small>
                       {(c.opciones || []).map((o) => (
                         <button
                           key={o} type="button"
@@ -315,6 +316,8 @@ export default function DetalleSolicitudTramite({ solicitudBase, onIrAGuia, secc
   }
 
   useEffect(() => { setCargando(true); cargarTodo(); }, [idSolicitud]); // eslint-disable-line react-hooks/exhaustive-deps
+  // «Reintentar» (Carina, 02/11/2026): la misma carga que al entrar.
+  const reintentar = () => { setCargando(true); cargarTodo(); };
 
   const def = datos?.definicion || null;
   const etapa = datos?.etapa ?? solicitudBase.etapa;
@@ -335,7 +338,7 @@ export default function DetalleSolicitudTramite({ solicitudBase, onIrAGuia, secc
   if (!def) {
     return (
       <div className="p-4">
-        <p className="text-sm text-red-700">{error || "No se pudo cargar tu expediente."}</p>
+        <ErrorCarga mensaje={error || "No se pudo cargar tu expediente."} onReintentar={reintentar} />
       </div>
     );
   }
@@ -380,9 +383,7 @@ export default function DetalleSolicitudTramite({ solicitudBase, onIrAGuia, secc
   return (
     <div className="flex flex-col lg:h-full lg:min-h-0">
       {error && (
-        <div className="shrink-0 mb-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
+        <ErrorCarga className="shrink-0 mb-3" mensaje={error} onReintentar={reintentar} />
       )}
 
       {/* Móvil y tablet: la fila de pasos arriba. */}

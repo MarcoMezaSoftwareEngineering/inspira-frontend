@@ -18,6 +18,7 @@ import PlazosLinea from "./PlazosLinea";
 import AvisosMovil from "./AvisosMovil";
 import { EsqueletoTarjetas } from "./Esqueleto";
 import { EncuestasPendientes } from "./EncuestaCierre";
+import { menosMovimiento } from "../hooks/useMovimiento";
 
 // Cinco a la vista y el resto tras «ver más»: el resumen va debajo y tiene
 // que seguir viéndose sin bajar media pantalla.
@@ -36,7 +37,7 @@ function Pendientes({ items }) {
           onClick={() => navigate(it.href)}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(it.href); } }}
         >
-          <span className="pnl-pend-icono"><Icono nombre={it.icono} size={17} /></span>
+          <span className="pnl-pend-icono"><Icono nombre={it.icono} size={18} /></span>
           <span className="pnl-pend-cuerpo">
             <span className="pnl-pend-texto">{it.texto}</span>
             {(it.detalle || it.servicio) && (
@@ -53,7 +54,7 @@ function Pendientes({ items }) {
       ))}
       {ocultos > 0 && (
         <li>
-          <button type="button" className="pnl-btn ux-tap w-full justify-center" onClick={() => setTodo(true)}>
+          <button type="button" className="pnl-btn" onClick={() => setTodo(true)}>
             Ver {ocultos} más
           </button>
         </li>
@@ -72,7 +73,7 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
 
   const irAPendientes = () => {
     const el = document.getElementById("pnl-hoy") || document.getElementById("pnl-proximo");
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    el?.scrollIntoView({ behavior: menosMovimiento() ? "auto" : "smooth", block: "start" });
   };
 
   // Sin servicios (o cargando la primera vez): la lista sabe pintar la espera,
@@ -81,8 +82,8 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
     if (loading) {
       return (
         <div className="space-y-4" aria-busy="true">
-          <div className="pnl-esq" style={{ height: 210, borderRadius: 26 }} />
-          <div className="pnl-esq" style={{ height: 130, borderRadius: 22 }} />
+          <span className="pnl-esq pnl-esq-bloque" data-talla="hero" />
+          <span className="pnl-esq pnl-esq-bloque" data-talla="tarjeta" />
           <EsqueletoTarjetas n={1} />
         </div>
       );
@@ -93,7 +94,7 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
   }
 
   return (
-    <div className="space-y-5 pnl-cascada">
+    <div className="space-y-6 pnl-cascada">
       <SaludoInicio perfil={perfil} servicios={lista} pendientes={items.length} onVerPendientes={irAPendientes} />
 
       {!loading && (
@@ -108,16 +109,8 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
           cuya encuesta falta. El correo de cierre enlaza aquí (?encuesta=ID). */}
       {!loading && <EncuestasPendientes servicios={lista} />}
 
-      {/* Solo en el teléfono, fuera de la app instalada, y nunca a la vez que
-          el recorrido guiado o el asistente de perfil. Va después del
-          próximo paso: no compite con él. */}
-      <AvisoInstalarApp bloqueado={avisoAppBloqueado} />
-
       {/* Las fechas que vienen, con cuenta atrás (se oculta si no hay). */}
       {!loading && <PlazosLinea servicios={lista} pagos={pagos} />}
-
-      {/* Avisos en el móvil (gratis, Web Push). Se oculta si ya están activos. */}
-      {!avisoAppBloqueado && <AvisosMovil variante="inicio" />}
 
       {resto.length > 0 && (
         <section id="pnl-hoy" data-tour="hoy" style={{ scrollMarginTop: 12 }}>
@@ -138,6 +131,14 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
       </div>
 
       {!loading && <MiRutaResumen servicios={lista} />}
+
+      {/* Al final, después de Tus servicios y Mi ruta (Carina, 02/11/2026):
+          lo que le toca hacer va arriba y «para tu teléfono» cierra la
+          portada. Instalar: solo en el teléfono, fuera de la app instalada, y
+          nunca a la vez que el recorrido guiado o el asistente de perfil.
+          Avisos en el móvil (gratis, Web Push): se oculta si ya están activos. */}
+      <AvisoInstalarApp bloqueado={avisoAppBloqueado} />
+      {!avisoAppBloqueado && <AvisosMovil variante="inicio" />}
     </div>
   );
 }

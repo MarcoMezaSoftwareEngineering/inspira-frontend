@@ -32,7 +32,8 @@ function BotonVerDocumento({ id, etiqueta }) {
       type="button"
       onClick={abrir}
       disabled={cargando}
-      className="text-xs font-semibold text-primary hover:underline disabled:opacity-50"
+      className="pnl-btn-texto"
+      data-talla="s"
     >
       {cargando ? "Abriendo…" : etiqueta}
     </button>
@@ -43,20 +44,20 @@ function ResultadosAdmision({ masters }) {
   return (
     <div className="space-y-2">
       {masters.map((m) => (
-        <div key={m.id_acceso_portal} className="border border-neutral-200 rounded-xl p-3">
+        <div key={m.id_acceso_portal} className="border border-linea rounded-xl p-3">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-neutral-900 leading-snug">
+              <p className="text-sm font-semibold text-tinta leading-snug">
                 {m.master_label || m.organismo}
               </p>
-              <p className="text-xs text-neutral-500 mt-0.5">{m.organismo}</p>
+              <p className="text-meta text-tinta-2 mt-0.5">{m.organismo}</p>
             </div>
             <span className="ex-est" data-e="ok">
               {m.estado_tramite === "MATRICULADO" ? "Matriculado" : "Admitido"}
             </span>
           </div>
           {(m.carta_admision || m.comprobante_pago) && (
-            <div className="flex gap-3 mt-2 pt-2 border-t border-neutral-100">
+            <div className="flex gap-3 mt-2 pt-2 border-t border-linea">
               {m.carta_admision && (
                 <BotonVerDocumento id={m.carta_admision.id_justificante} etiqueta="Ver carta de admisión" />
               )}
@@ -155,7 +156,7 @@ function Derivacion({ idSolicitud, derivacion, opciones, testUrl, onCambio }) {
 
       {confirmada && (
         <div className="ex-final" style={{ marginTop: 12 }}>
-          <span className="ex-final-ico">✅</span>
+          <span className="ex-final-ico"><IconoPaso nombre="checkCircle" className="w-5 h-5" /></span>
           <div className="min-w-0">
             <small>Servicio dado de alta</small>
             <b>{c.nombre} · {c.precio} €</b>
@@ -175,12 +176,12 @@ function Derivacion({ idSolicitud, derivacion, opciones, testUrl, onCambio }) {
         <div style={{ marginTop: 14 }}>
           <p className="ex-sub">Planes y precios vigentes</p>
           {pendiente && (
-            <p className="text-[12.5px] leading-relaxed text-primary bg-sky/10 border border-sky/30 rounded-xl px-3 py-2 mb-2">
+            <p className="text-cuerpo-sm leading-relaxed text-primary bg-info-soft border border-sky/30 rounded-xl px-3 py-2 mb-2">
               Pediste <b>{c.nombre}</b> ({c.precio} €) el {fecha(c.solicitada_at)}. Tu asesor confirmará el alta y te indicará la forma de pago dentro de las 48 horas hábiles siguientes; cuando lo haga verás aquí el nuevo expediente. Puedes cambiar de plan mientras tanto.
             </p>
           )}
           {c?.estado === "DESCARTADA" && (
-            <p className="text-[12.5px] leading-relaxed text-neutral-600 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 mb-2">
+            <p className="text-cuerpo-sm leading-relaxed text-tinta-2 bg-fondo border border-linea rounded-xl px-3 py-2 mb-2">
               Tu asesor no dio curso a la petición anterior ({c.nombre}). Si quieres, escríbele por mensajes o vuelve a pedirla.
             </p>
           )}
@@ -190,13 +191,13 @@ function Derivacion({ idSolicitud, derivacion, opciones, testUrl, onCambio }) {
               return (
                 <div
                   key={plan.id}
-                  className={`rounded-xl border p-3 flex flex-col gap-1 ${plan.recomendado ? "border-accent" : "border-neutral-200"} ${esEste ? "bg-sky/10" : "bg-white"}`}
+                  className={`rounded-xl border p-3 flex flex-col gap-1 ${plan.recomendado ? "border-accent" : "border-linea"} ${esEste ? "bg-info-soft" : "bg-white"}`}
                 >
                   {plan.recomendado && planes.length > 1 && (
-                    <span className="self-start text-[10px] font-extrabold uppercase tracking-wider text-accent">Recomendado</span>
+                    <span className="pnl-chip self-start" data-talla="sm" data-tono="aviso">Recomendado</span>
                   )}
                   <b className="text-sm text-primary">{plan.nombre}</b>
-                  <span className="text-xl font-black text-primary">{plan.precio} €</span>
+                  <span className="pnl-cierre-precio">{plan.precio} €</span>
                   <button
                     type="button"
                     className={`ex-btn ${plan.recomendado ? "" : "sec"}`}
@@ -210,7 +211,7 @@ function Derivacion({ idSolicitud, derivacion, opciones, testUrl, onCambio }) {
               );
             })}
           </div>
-          <p className="text-[11.5px] text-neutral-500 mt-2">
+          <p className="text-meta text-tinta-2 mt-2">
             El detalle de cada plan está en{" "}
             <a href="/metodo-inspira" target="_blank" rel="noopener noreferrer" className="underline">el Método Inspira</a>.
           </p>
@@ -233,8 +234,8 @@ function Escala({ desde, hasta, valor, onChange, etiqueta }) {
           role="radio"
           aria-checked={valor === n}
           onClick={() => onChange(n)}
-          className={`min-w-[34px] h-[34px] rounded-lg text-sm font-bold border transition-colors ${
-            valor === n ? "bg-primary text-white border-primary" : "bg-white text-primary border-neutral-200 hover:border-primary"
+          className={`min-w-11 h-11 rounded-lg text-sm font-bold border transition-colors ${
+            valor === n ? "bg-primary text-white border-primary" : "bg-white text-primary border-linea hover:border-primary"
           }`}
         >
           {n}
@@ -286,7 +287,7 @@ function Encuesta({ idSolicitud, encuesta, resenaUrl, onGuardada }) {
           {alta && (
             <div className="rounded-xl border border-accent/40 bg-sun/10 px-4 py-3 mb-3">
               <p className="text-sm font-semibold text-primary">¿Nos ayudas con una reseña en Google?</p>
-              <p className="text-xs text-neutral-600 mt-0.5 mb-2">Es lo que más ayuda a otros estudiantes a encontrarnos. Un minuto.</p>
+              <p className="text-meta text-tinta-2 mt-0.5 mb-2">Es lo que más ayuda a otros estudiantes a encontrarnos. Un minuto.</p>
               <a href={resenaUrl} target="_blank" rel="noopener noreferrer" className="ex-btn" style={{ textDecoration: "none" }}>
                 <IconoPaso nombre="star" /> Dejar reseña en Google
               </a>
@@ -338,7 +339,7 @@ function Encuesta({ idSolicitud, encuesta, resenaUrl, onGuardada }) {
             {encuesta && (
               <button type="button" className="ex-btn plano" onClick={() => setEditando(false)}>Cancelar</button>
             )}
-            {!completo && <span className="text-[11.5px] text-neutral-500">Faltan las tres puntuaciones.</span>}
+            {!completo && <span className="text-meta text-tinta-2">Faltan las tres puntuaciones.</span>}
           </div>
         </div>
       )}
@@ -389,24 +390,21 @@ export default function CierreServicioMasterCliente({ idSolicitud }) {
   return (
     <SeccionPanel numero="6" titulo="Cierre y visado" subtitulo={subtitulo} sectionId="6">
       {loading && (
-        <div className="flex items-center gap-2 text-neutral-400 py-2">
-          <div className="w-4 h-4 border-2 border-neutral-300 border-t-primary-light rounded-full animate-spin" />
+        <div className="flex items-center gap-2 text-tinta-2 py-2">
+          <span className="pnl-spinner" data-talla="s" />
           <span className="text-sm">Cargando…</span>
         </div>
       )}
 
       {msg && !loading && (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-          <span className="text-red-500">⚠</span>
-          <p className="text-sm text-red-700">{msg}</p>
-        </div>
+        <p className="pnl-error" role="alert">{msg}</p>
       )}
 
       {!loading && !msg && data && (
         <div className="space-y-4">
           {masterFinal ? (
             <div className="ex-final">
-              <span className="ex-final-ico">🎓</span>
+              <span className="ex-final-ico"><IconoPaso nombre="cap" className="w-5 h-5" /></span>
               <div className="min-w-0">
                 <small>Tu máster</small>
                 <b>{masterFinal.master_label || masterFinal.organismo}</b>
@@ -463,7 +461,7 @@ export default function CierreServicioMasterCliente({ idSolicitud }) {
           {data.notas_cierre && (
             <section className="ex-sec">
               <p className="ex-sub">Notas de cierre de tu asesor</p>
-              <p className="text-sm text-neutral-700 whitespace-pre-line">{data.notas_cierre}</p>
+              <p className="text-sm text-tinta whitespace-pre-line">{data.notas_cierre}</p>
             </section>
           )}
 

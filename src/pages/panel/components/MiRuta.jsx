@@ -42,7 +42,9 @@ function Marca({ estado, n }) {
     <span className="ex-miruta-marca" data-estado={estado} aria-hidden="true">
       {estado === ESTADO_ETAPA.PENDIENTE && n != null
         ? <span className="ex-miruta-num">{n}</span>
-        : <IconoPaso nombre={ICONO[estado]} className="w-4 h-4" strokeWidth={2.4} />}
+        : estado === ESTADO_ETAPA.ACTUAL
+          ? <Icono nombre="avion" size={16} strokeWidth={2} />
+          : <IconoPaso nombre={ICONO[estado]} className="w-4 h-4" strokeWidth={2.4} />}
     </span>
   );
 }
@@ -59,7 +61,7 @@ function Etapa({ etapa, ultima }) {
         <div className="ex-miruta-cabeza">
           <div className="min-w-0">
             <span className="ex-miruta-estado">{ETIQUETA[etapa.estado]}</span>
-            <h3 className="ex-miruta-titulo text-primary">{etapa.titulo}</h3>
+            <h3 className="ex-miruta-titulo">{etapa.titulo}</h3>
             {etapa.detalle && <p className="ex-miruta-detalle">{etapa.detalle}</p>}
           </div>
           {etapa.contacto
@@ -79,7 +81,7 @@ function Etapa({ etapa, ultima }) {
                     <strong>{p.titulo}</strong>
                     <small>{[ETIQUETA[p.estado], p.detalle].filter(Boolean).join(" · ")}</small>
                   </span>
-                  <IconoPaso nombre="arrowRight" className="w-4 h-4 shrink-0 text-primary/40" />
+                  <IconoPaso nombre="arrowRight" className="pnl-miruta-ir w-4 h-4 shrink-0" />
                 </button>
               </li>
             ))}
@@ -125,14 +127,14 @@ export function MiRutaResumen({ servicios }) {
     <section className="ex-miruta-mini">
       <div className="ex-miruta-mini-cabeza">
         <div className="min-w-0">
-          <span className="ex-miruta-mini-eyebrow text-accent">Mi ruta</span>
+          <span className="ex-miruta-mini-eyebrow pnl-eyebrow"><span className="punto" aria-hidden="true" />Mi ruta</span>
           <p className="ex-miruta-mini-linea">
             {actual ? <>Estás en <b>{actual.titulo}</b>{actual.de ? ` (${actual.de})` : ""}</> : "Tu ruta, etapa a etapa"}
             {siguiente ? <> · Después: <b>{siguiente.titulo}</b></> : null}
           </p>
         </div>
         <button type="button" className="pnl-btn ux-tap" onClick={() => navigate(rutaDe({ tab: "ruta" }))}>
-          <Icono nombre="avion" size={15} />
+          <Icono nombre="avion" size={16} />
           Ver mi ruta
         </button>
       </div>

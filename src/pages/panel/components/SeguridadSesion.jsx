@@ -30,7 +30,7 @@ export default function SeguridadSesion() {
   }
 
   return (
-    <section className="pnl-seguridad pnl-entra" aria-labelledby="pnl-seguridad-titulo">
+    <section className="pnl-tarjeta pnl-seguridad pnl-entra" aria-labelledby="pnl-seguridad-titulo">
       <span className="pnl-seguridad-icono"><Icono nombre="escudo" size={20} /></span>
       <div className="pnl-seguridad-cuerpo">
         <h3 id="pnl-seguridad-titulo">Seguridad de tu cuenta</h3>

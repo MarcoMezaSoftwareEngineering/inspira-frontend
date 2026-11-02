@@ -7,19 +7,16 @@
 // Sin pasos para marcar: la ruta real la lleva su expediente; esto es lectura.
 import Icono from "../../components/common/Icono";
 
-const AZUL = "#013446";
-const AMBAR = "#8A5A0B";
-
-function Seccion({ icono, titulo, children, tono = AZUL }) {
+function Seccion({ icono, titulo, children }) {
   return (
-    <section className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-5">
-      <h2 className="m-0 mb-3 flex items-center gap-2 text-[15px] font-extrabold" style={{ color: tono }}>
-        <span className="w-8 h-8 rounded-xl grid place-items-center shrink-0" style={{ background: `${tono}14`, color: tono }}>
-          <Icono nombre={icono} size={16} />
+    <section className="bg-white border border-linea rounded-[20px] p-4 sm:p-5 shadow-[var(--sombra-1)]">
+      <h2 className="m-0 mb-3 flex items-center gap-3 text-titulo font-bold text-primary">
+        <span className="w-9 h-9 rounded-xl grid place-items-center shrink-0 bg-info-soft text-primary-light">
+          <Icono nombre={icono} size={18} />
         </span>
         {titulo}
       </h2>
-      <div className="text-[13.5px] leading-relaxed text-neutral-800 space-y-2">{children}</div>
+      <div className="text-lectura leading-relaxed text-tinta space-y-2 max-w-[68ch]">{children}</div>
     </section>
   );
 }
@@ -27,10 +24,10 @@ function Seccion({ icono, titulo, children, tono = AZUL }) {
 function Paso({ n, titulo, children }) {
   return (
     <li className="flex gap-3">
-      <span className="shrink-0 w-7 h-7 rounded-full grid place-items-center text-[12px] font-extrabold text-white" style={{ background: AZUL }}>{n}</span>
+      <span className="shrink-0 w-7 h-7 rounded-full grid place-items-center text-meta font-extrabold text-white bg-primary tabular-nums">{n}</span>
       <div className="min-w-0">
-        <b className="block text-[13.5px] text-neutral-900">{titulo}</b>
-        <span className="block text-[13px] text-neutral-700">{children}</span>
+        <b className="block text-lectura font-bold text-tinta">{titulo}</b>
+        <span className="block text-cuerpo text-tinta-2 leading-relaxed">{children}</span>
       </div>
     </li>
   );
@@ -38,17 +35,17 @@ function Paso({ n, titulo, children }) {
 
 function Documento({ titulo, requisitos, nota }) {
   return (
-    <div className="rounded-2xl border p-4" style={{ borderColor: `${AMBAR}55`, background: "#FFFBF3" }}>
-      <h3 className="m-0 mb-2 text-[14px] font-extrabold" style={{ color: AMBAR }}>{titulo}</h3>
+    <div className="rounded-2xl border border-accent/30 bg-white p-4">
+      <h3 className="m-0 mb-2 text-cuerpo font-bold text-aviso-ink">{titulo}</h3>
       <ul className="m-0 pl-0 list-none space-y-1.5">
         {requisitos.map((r) => (
-          <li key={r} className="flex gap-2 text-[13px] text-neutral-800">
-            <span className="mt-[3px] shrink-0 text-[11px]" style={{ color: AMBAR }}>●</span>
+          <li key={r} className="flex gap-2 text-cuerpo text-tinta">
+            <span className="mt-[7px] shrink-0 w-1.5 h-1.5 rounded-full bg-accent" aria-hidden="true" />
             <span>{r}</span>
           </li>
         ))}
       </ul>
-      {nota && <p className="m-0 mt-2 text-[12px] text-neutral-600">{nota}</p>}
+      {nota && <p className="m-0 mt-2 text-cuerpo-sm text-tinta-2">{nota}</p>}
     </div>
   );
 }
@@ -56,10 +53,10 @@ function Documento({ titulo, requisitos, nota }) {
 export default function GuiaGrado() {
   return (
     <div className="max-w-3xl mx-auto w-full px-1 pb-8 space-y-4">
-      <header className="rounded-2xl p-5 text-white" style={{ background: AZUL }}>
-        <p className="m-0 text-[11px] font-extrabold uppercase tracking-[.14em] opacity-80">Guía Inspira</p>
-        <h1 className="m-0 mt-1 text-[22px] font-extrabold leading-tight">Grado universitario y Formación Profesional en España</h1>
-        <p className="m-0 mt-2 text-[13.5px] opacity-90">
+      <header className="pnl-noche relative rounded-3xl p-5 sm:p-6 text-white">
+        <p className="pnl-eyebrow m-0"><span className="punto" aria-hidden="true" />Guía Inspira</p>
+        <h1 className="m-0 mt-2 font-serif text-[24px] sm:text-[28px] font-bold leading-tight">Grado universitario y Formación Profesional en España</h1>
+        <p className="m-0 mt-2 text-lectura leading-relaxed text-white/90 max-w-[68ch]">
           Cómo postula un extranjero a una carrera o a un ciclo de FP en España, qué documentos necesitas y en qué orden
           va todo. Tu expediente te marca en qué paso estás; aquí tienes el mapa completo.
         </p>
@@ -141,14 +138,14 @@ export default function GuiaGrado() {
           <li><b>Julio – agosto:</b> matrícula y solicitud del visado (mínimo dos meses antes de clases).</li>
           <li><b>Septiembre – octubre:</b> inicio de clases.</li>
         </ul>
-        <p className="text-[12.5px] text-neutral-600">Cada comunidad, universidad y UNEDasiss publican sus fechas; las tuyas las verás en tu expediente.</p>
+        <p className="text-cuerpo-sm text-tinta-2">Cada comunidad, universidad y UNEDasiss publican sus fechas; las tuyas las verás en tu expediente.</p>
       </Seccion>
 
-      <section className="rounded-2xl p-4 sm:p-5" style={{ background: "#FFF6E5", border: `1px solid ${AMBAR}44` }}>
-        <h2 className="m-0 mb-1 flex items-center gap-2 text-[15px] font-extrabold" style={{ color: AMBAR }}>
+      <section className="rounded-[20px] p-4 sm:p-5 bg-aviso-soft border border-accent/30">
+        <h2 className="m-0 mb-1 flex items-center gap-2 text-titulo font-bold text-aviso-ink">
           <Icono nombre="documento" size={18} /> Guía directa de documentos
         </h2>
-        <p className="m-0 mb-3 text-[13px] text-neutral-700">
+        <p className="m-0 mb-3 text-lectura leading-relaxed text-tinta max-w-[68ch]">
           Para la postulación académica y la homologación solo necesitas <b>dos documentos</b>. Tienen que venir exactamente así:
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -173,13 +170,13 @@ export default function GuiaGrado() {
             ]}
           />
         </div>
-        <h3 className="m-0 mt-4 mb-2 text-[13.5px] font-extrabold" style={{ color: AMBAR }}>Cómo nos los haces llegar</h3>
-        <ol className="m-0 pl-5 space-y-1.5 text-[13px] text-neutral-800">
+        <h3 className="m-0 mt-4 mb-2 text-cuerpo font-bold text-aviso-ink">Cómo nos los haces llegar</h3>
+        <ol className="m-0 pl-5 space-y-1.5 text-cuerpo leading-relaxed text-tinta max-w-[68ch]">
           <li><b>Súbelos escaneados</b> en tu expediente: escaneo nítido, al 100 %, sin recortes ni sombras, en PDF. Nada de fotos del celular.</li>
           <li>Cuando tu asesor te lo indique, <b>envía los originales a nuestras oficinas</b>. Nosotros los mandamos a España.</li>
           <li>Verás cada tramo en tu expediente: documentos en España, pago de la tasa, volante y resolución de la homologación.</li>
         </ol>
-        <p className="m-0 mt-3 text-[12px] text-neutral-600">
+        <p className="m-0 mt-3 text-cuerpo-sm text-tinta-2">
           La tasa oficial de la homologación no está incluida en el paquete y se paga cuando el Ministerio la requiere; te avisamos del importe y del medio de pago.
         </p>
       </section>

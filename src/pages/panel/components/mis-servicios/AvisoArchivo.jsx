@@ -9,10 +9,13 @@
 // Los avisos no bloquean. Ofrecen «Subir igualmente» porque quien tiene el
 // documento delante sabe más que un cálculo sobre píxeles.
 //
-// Estilos en styles/panel-documentos.css (pnl-arch-*).
+// Estilos en styles/panel-documentos.css (pnl-arch-*), pisados desde
+// styles/panel/tramites.css.
 import { useRef } from "react";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
-function IconoCamara() {
+/** La cámara de «Hacer foto»; también la usa «Cómo escanear» (Bloques.jsx). */
+export function IconoCamara() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -77,7 +80,7 @@ export default function AvisoArchivo({ subida, onElegirOtra }) {
           {pendiente.avisos.map((a) => <li key={a.tipo}>{a.mensaje}</li>)}
         </ul>
         <div className="pnl-arch-botones">
-          <button type="button" className="pnl-btn-cta" onClick={subida.confirmar}>
+          <button type="button" className="pnl-btn-primario" onClick={subida.confirmar}>
             Subir igualmente
           </button>
           {faltaCara && pendiente.desdeFotos && (
@@ -102,7 +105,7 @@ export default function AvisoArchivo({ subida, onElegirOtra }) {
       <div className="pnl-arch-aviso" data-tono="ok" role="status">
         <p><b>Recibido.</b> Tu asesor lo revisa y te avisaremos aquí y por correo.</p>
         <button type="button" className="pnl-arch-cerrar" onClick={subida.cerrarRecibido}
-          aria-label="Cerrar aviso">×</button>
+          aria-label="Cerrar aviso"><IconoPaso nombre="x" /></button>
       </div>
     );
   }

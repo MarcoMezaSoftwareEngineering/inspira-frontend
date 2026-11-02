@@ -53,6 +53,7 @@ export default function MisGuias({ tab, pestanas = [], guiasPortal = [], onCambi
       {/* Con una sola guía no hace falta elegir. */}
       {pestanas.length > 1 && (
         <nav className="ex-guias-pestanas" aria-label="Mis guías">
+          <div className="pnl-segmentos">
           {pestanas.map((p) => {
             const on = p.clave === tab;
             return (
@@ -61,6 +62,7 @@ export default function MisGuias({ tab, pestanas = [], guiasPortal = [], onCambi
                 type="button"
                 className="ex-guias-pestana"
                 data-on={on ? "1" : "0"}
+                aria-pressed={on}
                 aria-current={on ? "page" : undefined}
                 onClick={() => !on && onCambiar?.(p.clave)}
               >
@@ -69,6 +71,7 @@ export default function MisGuias({ tab, pestanas = [], guiasPortal = [], onCambi
               </button>
             );
           })}
+          </div>
         </nav>
       )}
 

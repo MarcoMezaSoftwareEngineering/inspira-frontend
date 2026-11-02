@@ -20,8 +20,9 @@
 //  · Hay que haber terminado la formación ENTERA. No basta con ir aprobando:
 //    si falta una asignatura, el expediente se cae.
 import { useCallback, useState } from "react";
+import Icono from "../../components/common/Icono";
+import IconoPaso from "../../components/common/IconoPaso";
 
-const AZUL = "#013446";
 const CLAVE = "inspira:guia-modificatoria";
 
 /* ── Persistencia local del marcado ──────────────────────────────────────── */
@@ -52,20 +53,20 @@ function useMarcado() {
 function Marcable({ id, marcado, alternar, titulo, children }) {
   const hecho = Boolean(marcado[id]);
   return (
-    <button type="button" onClick={() => alternar(id)}
-      className={`w-full text-left flex gap-3 rounded-xl border px-3.5 py-3 transition-all ${
-        hecho ? "border-[#1D6A4A]/30 bg-[#E8F5EE]/50" : "border-neutral-200 bg-white hover:border-neutral-300"
+    <button type="button" onClick={() => alternar(id)} aria-pressed={hecho}
+      className={`w-full text-left flex gap-3 rounded-xl border px-3.5 py-3 min-h-11 transition-colors ${
+        hecho ? "border-verde/30 bg-verde-soft/60" : "border-linea bg-white hover:border-trazo"
       }`}>
-      <span className={`shrink-0 mt-0.5 w-5 h-5 rounded-md grid place-items-center text-[11px]
-        font-bold border-2 transition-colors ${
-        hecho ? "bg-[#1D6A4A] border-[#1D6A4A] text-white" : "border-neutral-300 text-transparent"
-      }`}>✓</span>
+      <span className={`shrink-0 mt-0.5 w-5 h-5 rounded-md grid place-items-center
+        border-2 transition-colors ${
+        hecho ? "bg-verde border-verde text-white" : "border-trazo text-transparent"
+      }`}><IconoPaso nombre="check" className="w-3.5 h-3.5" strokeWidth={3} /></span>
       <span className="min-w-0 flex-1">
-        <span className={`block text-[13.5px] font-semibold leading-snug ${
-          hecho ? "text-[#14532d] line-through decoration-[#1D6A4A]/40" : "text-neutral-800"
+        <span className={`block text-cuerpo font-semibold leading-snug ${
+          hecho ? "text-verde-ink line-through decoration-verde/40" : "text-tinta"
         }`}>{titulo}</span>
         {children && (
-          <span className="block text-[12px] text-neutral-500 leading-relaxed mt-0.5">{children}</span>
+          <span className="block text-cuerpo-sm text-tinta-2 leading-relaxed mt-0.5">{children}</span>
         )}
       </span>
     </button>
@@ -75,38 +76,40 @@ function Marcable({ id, marcado, alternar, titulo, children }) {
 function Seccion({ numero, icono, titulo, subtitulo, children, avance }) {
   const [abierto, setAbierto] = useState(true);
   return (
-    <div className="bg-white border border-primary/12 rounded-2xl mb-3 overflow-hidden shadow-sm">
-      <button type="button" onClick={() => setAbierto((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-neutral-50/60">
-        <span className="shrink-0 w-9 h-9 rounded-xl grid place-items-center text-white text-[14px] font-bold"
-          style={{ background: AZUL }}>{icono || numero}</span>
+    <div className="bg-white border border-linea rounded-[20px] mb-3 overflow-hidden shadow-sm">
+      <button type="button" onClick={() => setAbierto((v) => !v)} aria-expanded={abierto}
+        className="w-full flex items-center gap-3 px-4 py-3.5 min-h-[60px] text-left hover:bg-fondo transition-colors">
+        <span className="shrink-0 w-9 h-9 rounded-xl grid place-items-center text-white text-cuerpo font-bold bg-primary">{icono || numero}</span>
         <span className="min-w-0 flex-1">
-          <span className="block font-serif text-[15px] font-bold text-primary leading-tight">{titulo}</span>
-          {subtitulo && <span className="block text-[11.5px] text-neutral-500 mt-0.5">{subtitulo}</span>}
+          <span className="block text-lectura font-bold text-primary leading-tight">{titulo}</span>
+          {subtitulo && <span className="block text-meta text-tinta-2 mt-0.5">{subtitulo}</span>}
         </span>
         {avance && (
-          <span className={`shrink-0 text-[11px] font-bold px-2 py-1 rounded-lg ${
-            avance.hechos === avance.total ? "bg-[#E8F5EE] text-[#14532d]" : "bg-neutral-100 text-neutral-500"
+          <span className={`shrink-0 text-meta font-bold px-2 py-1 rounded-lg tabular-nums ${
+            avance.hechos === avance.total ? "bg-verde-soft text-verde-ink" : "bg-neutro-soft text-neutro-ink"
           }`}>{avance.hechos}/{avance.total}</span>
         )}
-        <span className="shrink-0 text-neutral-300 text-[12px]">{abierto ? "▲" : "▼"}</span>
+        <svg className={`shrink-0 w-[18px] h-[18px] text-trazo transition-transform ${abierto ? "rotate-180" : ""}`}
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </button>
-      {abierto && <div className="px-4 pb-4 pt-1 border-t border-neutral-100 space-y-2">{children}</div>}
+      {abierto && <div className="px-4 pb-4 pt-3 border-t border-linea space-y-2">{children}</div>}
     </div>
   );
 }
 
 function Aviso({ titulo, tono = "naranja", children }) {
   const tonos = {
-    naranja: "bg-orange-50 border-orange-300 text-orange-900",
-    rojo: "bg-red-50 border-red-300 text-red-900",
-    verde: "bg-[#E8F5EE] border-[#1D6A4A]/30 text-[#14532d]",
-    azul: "bg-[#EEF2F8] border-primary/20 text-primary",
+    naranja: "bg-aviso-soft border-accent/30 text-aviso-ink",
+    rojo: "bg-alto-soft border-alto/30 text-alto-ink",
+    verde: "bg-verde-soft border-verde/30 text-verde-ink",
+    azul: "bg-info-soft border-info-ink/20 text-info-ink",
   };
   return (
-    <div className={`border rounded-xl px-3.5 py-3 ${tonos[tono]}`}>
-      {titulo && <p className="text-[10.5px] font-bold uppercase tracking-wider mb-1">{titulo}</p>}
-      <div className="text-[12.5px] leading-relaxed">{children}</div>
+    <div className={`border rounded-2xl px-4 py-3 ${tonos[tono]}`}>
+      {titulo && <p className="text-eyebrow font-bold uppercase mb-1">{titulo}</p>}
+      <div className="text-cuerpo leading-relaxed">{children}</div>
     </div>
   );
 }
@@ -159,54 +162,54 @@ function Ventana() {
     : "abierta";
 
   return (
-    <div className="rounded-2xl border border-primary/15 bg-[#EEF2F8]/40 p-4">
-      <p className="font-serif text-[14px] font-bold text-primary mb-0.5">
+    <div className="rounded-2xl border border-linea bg-fondo p-4">
+      <p className="text-lectura font-bold text-primary mb-0.5">
         ¿Cuándo puedo presentar?
       </p>
-      <p className="text-[12px] text-neutral-600 leading-relaxed mb-3">
+      <p className="text-cuerpo-sm text-tinta-2 leading-relaxed mb-3">
         Pon la fecha y te decimos si tu ventana ya está abierta.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-2 mb-3">
         <label className="flex-1 min-w-0">
-          <span className="block text-[11.5px] font-medium text-neutral-600 mb-1">¿Qué pasa primero?</span>
+          <span className="block text-cuerpo-sm font-semibold text-tinta-2 mb-1.5">¿Qué pasa primero?</span>
           <select value={motivo} onChange={(e) => setMotivo(e.target.value)}
-            className="w-full text-[13px] border border-neutral-300 rounded-lg px-3 py-2 bg-white">
+            className="w-full text-base sm:text-cuerpo text-tinta border border-trazo rounded-xl px-3.5 min-h-12 bg-white">
             <option value="titulo">Termino mis estudios y obtengo el título</option>
             <option value="estancia">Se me vence la estancia por estudios</option>
           </select>
         </label>
         <label className="sm:w-48">
-          <span className="block text-[11.5px] font-medium text-neutral-600 mb-1">¿Qué día?</span>
+          <span className="block text-cuerpo-sm font-semibold text-tinta-2 mb-1.5">¿Qué día?</span>
           <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)}
-            className="w-full text-[13px] border border-neutral-300 rounded-lg px-3 py-2 bg-white" />
+            className="w-full text-base sm:text-cuerpo text-tinta border border-trazo rounded-xl px-3.5 min-h-12 bg-white" />
         </label>
       </div>
 
       {fecha && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div className="rounded-xl border border-neutral-200 bg-white px-3.5 py-3">
-              <p className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-500">
+            <div className="rounded-2xl border border-linea bg-white px-4 py-3">
+              <p className="text-eyebrow font-bold uppercase text-tinta-2">
                 Se abre el
               </p>
-              <p className="text-[17px] font-bold text-primary leading-tight mt-0.5">
+              <p className="text-titulo font-bold text-primary leading-tight mt-1">
                 {enLetra(desde)}
               </p>
-              <p className="text-[11px] text-neutral-500 mt-0.5">
+              <p className="text-meta text-tinta-2 mt-0.5">
                 {faltanAbrir > 0 ? `faltan ${faltanAbrir} días` : "ya está abierta"}
               </p>
             </div>
-            <div className={`rounded-xl border px-3.5 py-3 ${
-              estado === "tarde" ? "border-red-300 bg-red-50" : "border-[#1D6A4A]/30 bg-[#E8F5EE]"
+            <div className={`rounded-2xl border px-4 py-3 ${
+              estado === "tarde" ? "border-alto/30 bg-alto-soft" : "border-verde/30 bg-verde-soft"
             }`}>
-              <p className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-500">
+              <p className="text-eyebrow font-bold uppercase text-tinta-2">
                 Se cierra el
               </p>
-              <p className={`text-[17px] font-bold leading-tight mt-0.5 ${
-                estado === "tarde" ? "text-red-700" : "text-[#14532d]"
+              <p className={`text-titulo font-bold leading-tight mt-1 ${
+                estado === "tarde" ? "text-alto-ink" : "text-verde-ink"
               }`}>{enLetra(hasta)}</p>
-              <p className="text-[11px] text-neutral-500 mt-0.5">
+              <p className="text-meta text-tinta-2 mt-0.5">
                 {faltanCerrar >= 0 ? `quedan ${faltanCerrar} días` : `pasó hace ${Math.abs(faltanCerrar)} días`}
               </p>
             </div>
@@ -236,7 +239,7 @@ function Ventana() {
         </>
       )}
 
-      <p className="text-[11px] text-neutral-500 leading-relaxed mt-3">
+      <p className="text-meta text-tinta-2 leading-relaxed mt-3">
         La ventana va de <b>dos meses antes</b> a <b>tres meses después</b> de que termines tus
         estudios o se te venza la estancia, lo que pase primero. Es un cálculo orientativo: la
         fecha que vale es la que confirma tu asesor con tu expediente delante.
@@ -348,22 +351,22 @@ function Clausula() {
   }
 
   return (
-    <div className="rounded-xl border border-primary/20 bg-[#EEF2F8]/50 px-3.5 py-3">
-      <div className="flex items-start gap-2 flex-wrap mb-2">
-        <p className="text-[11.5px] font-bold text-primary min-w-0 flex-1">
+    <div className="rounded-2xl border border-linea bg-info-soft px-4 py-3">
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <p className="text-cuerpo-sm font-bold text-primary min-w-0 flex-1">
           Cláusula que el contrato tiene que incluir, palabra por palabra
         </p>
         <button type="button" onClick={copiar}
-          className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary
-            text-white hover:opacity-90">
-          {copiado ? "✓ copiada" : "Copiar"}
+          className="shrink-0 inline-flex items-center gap-1.5 text-cuerpo-sm font-semibold px-3.5 min-h-9 rounded-full bg-primary
+            text-white hover:bg-primary-light transition-colors">
+          {copiado ? <><IconoPaso nombre="check" className="w-3.5 h-3.5" strokeWidth={2.6} />copiada</> : "Copiar"}
         </button>
       </div>
-      <p className="text-[12px] text-neutral-700 leading-relaxed italic bg-white border
-        border-neutral-200 rounded-lg px-3 py-2.5">
+      <p className="text-cuerpo-sm text-tinta leading-relaxed italic bg-white border
+        border-linea rounded-xl px-3.5 py-3">
         «{CLAUSULA}»
       </p>
-      <p className="text-[11px] text-neutral-500 leading-relaxed mt-2">
+      <p className="text-meta text-tinta-2 leading-relaxed mt-2">
         Pásasela a quien redacte tu contrato. Sin ella, Extranjería devuelve el expediente.
       </p>
     </div>
@@ -388,15 +391,15 @@ export default function GuiaModificatoria() {
   return (
     <div className="max-w-3xl mx-auto pb-10">
       {/* Portada */}
-      <div className="rounded-2xl overflow-hidden mb-4 shadow-sm">
-        <div className="px-5 py-6" style={{ background: `linear-gradient(150deg, #012938 0%, ${AZUL} 48%, #02506b 100%)` }}>
-          <p className="text-[10.5px] font-bold uppercase tracking-[.18em] text-white/60 mb-1.5">
-            Guía del proceso
+      <div className="rounded-3xl overflow-hidden mb-4 shadow-sm">
+        <div className="px-5 py-6 bg-gradient-to-br from-noche via-primary to-primary-light">
+          <p className="flex items-center gap-1.5 text-eyebrow font-bold uppercase text-accent mb-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" aria-hidden="true" />Guía del proceso
           </p>
           <h1 className="font-serif text-[22px] sm:text-[26px] font-bold text-white leading-tight">
             De estancia por estudios<br />a residencia y trabajo
           </h1>
-          <p className="text-[13px] text-white/75 leading-relaxed mt-2.5">
+          <p className="text-lectura text-white/90 leading-relaxed mt-2.5 max-w-[68ch]">
             Terminaste tus estudios y una empresa quiere contratarte. Esto es lo que hay que
             hacer, en qué orden y con qué plazos.
           </p>
@@ -424,13 +427,13 @@ export default function GuiaModificatoria() {
       </Seccion>
 
       {/* Los plazos */}
-      <Seccion numero="1" icono="📅" titulo="Tu ventana de presentación"
+      <Seccion numero="1" icono={<Icono nombre="calendario" size={18} />} titulo="Tu ventana de presentación"
         subtitulo="Calcula cuándo se abre y cuándo se cierra">
         <Ventana />
       </Seccion>
 
       {/* Requisitos tuyos */}
-      <Seccion numero="2" icono="👤" titulo="Lo que tienes que cumplir tú"
+      <Seccion numero="2" icono={<Icono nombre="usuario" size={18} />} titulo="Lo que tienes que cumplir tú"
         subtitulo="La parte de residencia" avance={cuenta(REQUISITOS_TUYOS)}>
         {lista(REQUISITOS_TUYOS)}
         <Aviso tono="naranja" titulo="Ojo">
@@ -441,14 +444,14 @@ export default function GuiaModificatoria() {
       </Seccion>
 
       {/* Requisitos de la empresa */}
-      <Seccion numero="3" icono="🏢" titulo="Lo que tiene que cumplir tu empresa"
+      <Seccion numero="3" icono={<Icono nombre="maletin" size={18} />} titulo="Lo que tiene que cumplir tu empresa"
         subtitulo="La parte laboral" avance={cuenta(REQUISITOS_EMPRESA)}>
         {lista(REQUISITOS_EMPRESA)}
         <Clausula />
       </Seccion>
 
       {/* Documentos tuyos */}
-      <Seccion numero="4" icono="📄" titulo="Documentos que aportas tú"
+      <Seccion numero="4" icono={<Icono nombre="documento" size={18} />} titulo="Documentos que aportas tú"
         subtitulo="Los once que subes tú, en «Ver servicio»" avance={cuenta(DOCS_TUYOS)}>
         {lista(DOCS_TUYOS)}
         <Aviso tono="naranja" titulo="Traducción y legalización">
@@ -458,7 +461,7 @@ export default function GuiaModificatoria() {
       </Seccion>
 
       {/* Documentos de la empresa */}
-      <Seccion numero="5" icono="🏛" titulo="Documentos que aporta tu empresa"
+      <Seccion numero="5" icono={<Icono nombre="balanza" size={18} />} titulo="Documentos que aporta tu empresa"
         subtitulo="Los seis que no dependen de ti. Pídeselos hoy" avance={cuenta(DOCS_EMPRESA)}>
         {lista(DOCS_EMPRESA)}
         <Aviso tono="azul" titulo="Un consejo">
@@ -468,14 +471,14 @@ export default function GuiaModificatoria() {
       </Seccion>
 
       {/* Las tasas */}
-      <Seccion numero="5b" icono="€" titulo="Las dos tasas"
+      <Seccion numero="5b" icono={<Icono nombre="euro" size={18} />} titulo="Las dos tasas"
         subtitulo="No las pagues antes de tiempo">
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-3">
+        <div className="rounded-2xl border border-accent/30 bg-aviso-soft px-4 py-3">
           {TASAS.map(([nombre, importe, detalle]) => (
             <div key={nombre} className="flex items-baseline gap-2 flex-wrap mb-2 last:mb-0">
-              <span className="text-[13.5px] font-bold text-neutral-900">{nombre}</span>
-              <span className="text-[13.5px] font-bold text-amber-700">{importe}</span>
-              <span className="text-[12.5px] text-neutral-600 w-full">{detalle}</span>
+              <span className="text-cuerpo font-bold text-tinta">{nombre}</span>
+              <span className="text-cuerpo font-bold text-aviso-ink tabular-nums">{importe}</span>
+              <span className="text-cuerpo-sm text-tinta-2 w-full">{detalle}</span>
             </div>
           ))}
         </div>
@@ -487,9 +490,9 @@ export default function GuiaModificatoria() {
       </Seccion>
 
       {/* Cómo se presenta */}
-      <Seccion numero="6" icono="🖥" titulo="Cómo se presenta"
+      <Seccion numero="6" icono={<Icono nombre="laptop" size={18} />} titulo="Cómo se presenta"
         subtitulo="De esto nos encargamos nosotros">
-        <div className="text-[13px] text-neutral-700 leading-relaxed space-y-2.5">
+        <div className="text-lectura text-tinta leading-relaxed space-y-2.5 max-w-[68ch]">
           <p>
             La solicitud se presenta ante <b>Extranjería</b>, es <b>solo electrónica</b> y va
             firmada digitalmente. La oficina que te corresponde depende de dónde vivas; de eso
@@ -509,19 +512,19 @@ export default function GuiaModificatoria() {
       </Seccion>
 
       {/* Después */}
-      <Seccion numero="7" icono="✅" titulo="Cuando te la concedan"
+      <Seccion numero="7" icono={<IconoPaso nombre="checkCircle" className="w-[18px] h-[18px]" />} titulo="Cuando te la concedan"
         subtitulo="Queda un paso, y tiene plazo">
         <Aviso tono="rojo" titulo="Un mes para el alta">
           Tu empresa tiene que darte de alta en la Seguridad Social <b>dentro del mes siguiente</b>
           a la notificación. La autorización <b>no vale hasta que esa alta se hace</b>. Recuérdaselo
           tú también: es su obligación, pero el perjudicado si se olvida eres tú.
         </Aviso>
-        <div className="text-[13px] text-neutral-700 leading-relaxed space-y-2">
+        <div className="text-lectura text-tinta leading-relaxed space-y-2 max-w-[68ch]">
           <p>
             A partir de ahí puedes <b>residir y trabajar un año</b> en España, por cuenta ajena
             o por cuenta propia.
           </p>
-          <p className="text-[12.5px] text-neutral-600">
+          <p className="text-cuerpo text-tinta-2">
             Y una obligación que casi nadie conoce: si mientras lo resuelven <b>cambia el contrato
             o la empresa ya no te va a contratar</b>, hay que comunicarlo. Avísanos y lo hacemos
             nosotros.
@@ -529,13 +532,13 @@ export default function GuiaModificatoria() {
         </div>
       </Seccion>
 
-      <div className="rounded-2xl border border-primary/15 bg-white px-4 py-4">
-        <p className="font-serif text-[14px] font-bold text-primary mb-1">¿Dudas?</p>
-        <p className="text-[12.5px] text-neutral-600 leading-relaxed">
+      <div className="rounded-[20px] border border-linea bg-white px-4 py-4">
+        <p className="text-lectura font-bold text-primary mb-1">¿Dudas?</p>
+        <p className="text-cuerpo text-tinta-2 leading-relaxed max-w-[68ch]">
           Escríbenos por el portal o responde a cualquiera de nuestros correos. Es mejor una
           consulta a tiempo que un documento rehecho tres veces.
         </p>
-        <p className="text-[11px] text-neutral-400 leading-relaxed mt-3">
+        <p className="text-meta text-tinta-2 leading-relaxed mt-3">
           Contenido basado en la guía oficial de tramitación del procedimiento (versión de
           26.05.2026, Real Decreto 1155/2024) y en el impreso EX-03. Si la normativa cambia,
           manda lo que diga Extranjería.

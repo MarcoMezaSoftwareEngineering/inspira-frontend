@@ -68,18 +68,18 @@ export default function AvisoInstalarApp({ bloqueado = false }) {
   return (
     <section className="ex-app" aria-label="Instala la app de Inspira">
       <div className="ex-app-cabecera">
-        <span className="ex-app-icono bg-sky/20 text-primary"><IconoTelefono /></span>
+        <span className="ex-app-icono"><IconoTelefono /></span>
         <div className="min-w-0">
-          <h2 className="ex-app-titulo text-primary">Instala la app de Inspira</h2>
+          <h2 className="ex-app-titulo">Instala la app de Inspira</h2>
           <p className="ex-app-sub">Entras más rápido y tienes tu expediente siempre a mano.</p>
         </div>
       </div>
       {cuerpo}
       <div className="ex-app-botones">
         {so === "android" && conEvento && (
-          <button type="button" className="pnl-btn-cta ux-tap" onClick={instalar}>Instalar la app</button>
+          <button type="button" className="pnl-btn-primario ux-tap" onClick={instalar}>Instalar la app</button>
         )}
-        <button type="button" className="ex-app-ahora-no" onClick={ahoraNo}>Ahora no</button>
+        <button type="button" className="ex-app-ahora-no pnl-btn-texto" onClick={ahoraNo}>Ahora no</button>
       </div>
     </section>
   );

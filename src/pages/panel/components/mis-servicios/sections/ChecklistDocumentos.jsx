@@ -7,6 +7,8 @@ import { requisitosDe, NOTA_APOSTILLA } from "./visaRequisitos";
 import { listaSolvencia, VIA_ETIQUETA } from "./visaSolvencia";
 import { permiteVarios, iconoDocumento } from "../../../../../lib/documentos";
 import IconoPaso from "../../../../../components/common/IconoPaso";
+import Icono from "../../../../../components/common/Icono";
+import { IconoLinea } from "../utils";
 import { guiaParaItem } from "../guiaDocumentosMaster";
 import GuiaDocumento from "./GuiaDocumento";
 import TextoConEnlaces from "../../../../../components/common/TextoConEnlaces";
@@ -25,7 +27,7 @@ const ESTADO_CFG = {
   solicitado: { label: "Te lo piden", tono: "ped" },
   rechazado:  { label: "Rechazado",  tono: "no" },
   no_aplica:  { label: "No aplica",  tono: "info" },
-  pendiente:  { label: "Falta",      tono: "info" },
+  pendiente:  { label: "Pendiente",  tono: "info" },
 };
 
 function getCfg(estado) {
@@ -95,40 +97,39 @@ function VisorModal({ doc, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="pnl-velo-token fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-2xl flex flex-col w-full max-w-4xl"
-        style={{ height: "88vh" }}
+        className="pnl-visor relative flex flex-col w-full max-w-4xl"
+        style={{ height: "88dvh" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200 shrink-0">
-          <p className="text-sm font-semibold text-neutral-800 truncate pr-4" title={doc.nombre_original}>
-            📎 {doc.nombre_original}
+        <div className="pnl-visor-cab shrink-0">
+          <p className="pnl-visor-titulo" title={doc.nombre_original}>
+            <IconoPaso nombre="clip" />
+            <span>{doc.nombre_original}</span>
           </p>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors shrink-0"
+            className="pnl-btn-icono"
             aria-label="Cerrar"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <IconoPaso nombre="x" strokeWidth={2.2} />
           </button>
         </div>
 
         {/* Contenido */}
-        <div className="flex-1 overflow-hidden rounded-b-2xl bg-neutral-100 flex items-center justify-center">
-          {cargando && <p className="text-sm text-neutral-500">Cargando archivo…</p>}
-          {error    && <p className="text-sm text-red-600">{error}</p>}
+        <div className="pnl-visor-cuerpo flex-1 overflow-hidden flex items-center justify-center">
+          {cargando && <p className="pnl-visor-estado">Cargando archivo…</p>}
+          {error    && <p className="pnl-error">{error}</p>}
           {!cargando && !error && blobUrl && esPdf && (
             <iframe src={blobUrl} title={doc.nombre_original} className="w-full h-full border-0" />
           )}
           {!cargando && !error && blobUrl && esImagen && (
             <div className="w-full h-full flex items-center justify-center p-4">
-              <img src={blobUrl} alt={doc.nombre_original} className="max-w-full max-h-full object-contain rounded-xl shadow" />
+              <img src={blobUrl} alt={doc.nombre_original} className="max-w-full max-h-full object-contain rounded-xl" />
             </div>
           )}
         </div>
@@ -216,7 +217,7 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
       {/* Lo que pide tu asesor: corregir algo o un documento adicional. */}
       {it.comentario_asesor && (
         <div className="ex-doc-obs" data-k={(it.estado_item || "").toLowerCase() === "solicitado" ? "ped" : "obs"}>
-          <IconoPaso nombre={(it.estado_item || "").toLowerCase() === "solicitado" ? "plus" : "alert"} className="w-4 h-4 shrink-0 mt-0.5" />
+          <IconoLinea nombre={(it.estado_item || "").toLowerCase() === "solicitado" ? "plus" : "alert"} className="w-4 h-4 shrink-0 mt-0.5" />
           <span><b>{(it.estado_item || "").toLowerCase() === "solicitado" ? "Tu asesor te pide:" : "Tu asesor necesita:"}</b> {it.comentario_asesor}</span>
         </div>
       )}
@@ -267,7 +268,7 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
                 )}
                 {canDel && (
                   <button type="button" className="rojo" onClick={() => handleDelete(doc.id_documento)} disabled={isDel}>
-                    {isDel ? "…" : "Eliminar"}
+                    {isDel ? "…" : "Quitar"}
                   </button>
                 )}
               </div>
@@ -282,14 +283,14 @@ function DocCard({ it, solicitudId, onEliminar, onUploaded, onVerDoc, guiaMaster
           <div className="pnl-arch-pie">
             <label className="ex-subir">
               <IconoPaso nombre="upload" className="w-4 h-4" />
-              {subida.preparando ? "Preparando…" : subiendo ? "Subiendo…" : varios ? "Subir archivo" : hayDocs ? "Reemplazar el archivo" : "Subir el documento"}
+              {subida.preparando ? "Preparando…" : subiendo ? "Subiendo…" : (it.estado_item || "").toLowerCase() === "observado" ? "Corregir" : hayDocs ? (varios ? "Añadir otro archivo" : "Reemplazar el archivo") : "Subir archivo"}
               {/* `multiple` también cuando va un solo archivo: varias fotos del
                   mismo documento se juntan en un PDF antes de subir. Si elige
                   varios PDFs donde va uno, se le para con una explicación. */}
               <input
                 ref={entradaRef}
                 type="file"
-                className="hidden"
+                className="pnl-arch-oculto"
                 onChange={handleUpload}
                 multiple
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
@@ -404,10 +405,10 @@ export default function ChecklistDocumentos({
         onToggle={onToggle}
       >
         {bloqueado && (
-          <div className="text-center py-8 px-3">
-            <span className="block text-3xl mb-2">🔒</span>
-            <p className="text-sm font-semibold text-neutral-700">Documentos aún no disponibles</p>
-            <p className="text-sm text-neutral-500 max-w-sm mx-auto mt-1">
+          <div className="pnl-vacio-suave">
+            <span className="pnl-vacio-suave-icono"><Icono nombre="candado" size={22} /></span>
+            <strong>Documentos aún no disponibles</strong>
+            <p>
               {mensajeBloqueo || "La lista de documentos se activará después de tu sesión de diagnóstico, cuando tu asesor defina el tipo de solvencia."}
             </p>
           </div>
@@ -434,28 +435,24 @@ export default function ChecklistDocumentos({
 
         {/* Cuántos van, de un vistazo: el número grande y la barra. */}
         {!bloqueado && total > 0 && (
-          <div className="mb-4">
-            <div className="flex items-end justify-between gap-3 flex-wrap">
-              <p className="text-[26px] font-black text-neutral-900 leading-none tabular-nums">
-                {aprobados} <span className="text-[13px] font-semibold text-neutral-400">de {total} aprobados</span>
-              </p>
-              <div className="flex gap-3 text-[11.5px] font-semibold">
-                {enRevision > 0 && <span className="text-sky-600">● {enRevision} en revisión</span>}
-                {observados > 0 && <span className="text-amber-600">● {observados} por corregir</span>}
-                {sinDoc > 0 && <span className="text-neutral-400">● {sinDoc} sin subir</span>}
-              </div>
+          <div className="pnl-docs-resumen pnl-docs-resumen-checklist">
+            <p className="pnl-docs-resumen-cifra">
+              <b>{aprobados}</b> <span>de {total} {total === 1 ? "aprobado" : "aprobados"}</span>
+            </p>
+            <div className="pnl-docs-resumen-chips">
+              {enRevision > 0 && <span className="pnl-chip" data-talla="sm" data-tono="info">{enRevision} en revisión</span>}
+              {observados > 0 && <span className="pnl-chip" data-talla="sm" data-tono="alto">{observados} por corregir</span>}
+              {sinDoc > 0 && <span className="pnl-chip" data-talla="sm" data-tono="neutro">{sinDoc} {sinDoc === 1 ? "pendiente" : "pendientes"}</span>}
             </div>
-            <div className="h-2 bg-neutral-100 rounded-full overflow-hidden mt-2.5">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#1d7a52] to-[#35b57f] transition-all duration-700"
-                style={{ width: `${Math.round((aprobados / total) * 100)}%` }} />
-            </div>
+            <div className="pnl-barra"><i style={{ "--p": Math.round((aprobados / total) * 100) }} /></div>
           </div>
         )}
 
         {!bloqueado && Object.keys(grupos).length === 0 && (
-          <p className="text-sm text-neutral-400 py-4 text-center">
-            Aún no hay checklist configurado.
-          </p>
+          <div className="pnl-vacio-suave">
+            <span className="pnl-vacio-suave-icono"><IconoPaso nombre="folder" /></span>
+            <p>Aún no hay checklist configurado.</p>
+          </div>
         )}
 
         {!bloqueado && gruposOrdenados.map(([nombre, items]) => (
@@ -469,23 +466,23 @@ export default function ChecklistDocumentos({
             )}
 
             {solvenciaPedida && esGrupoSolvencia(items) && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3.5">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-1">
+              <div className="pnl-tarjeta pnl-tarjeta-visado" data-anidada="1" data-tono="ok">
+                <p className="pnl-eyebrow"><span className="punto" />
                   Según lo que marcaste
                 </p>
-                <p className="text-[12px] text-neutral-600 leading-relaxed mb-2.5">
+                <p className="pnl-visado-texto pnl-visado-texto-primero">
                   Elegiste <b>{VIA_ETIQUETA[via]}</b>. Con tu perfil de ingresos y tus
                   situaciones especiales, el consulado te pedirá estos documentos:
                 </p>
                 <ul className="space-y-1.5">
                   {solvenciaPedida.map((d) => (
-                    <li key={d} className="flex gap-2 text-[12.5px] text-neutral-700 leading-snug">
-                      <span className="shrink-0 text-[#1D6A4A] font-bold">✓</span>
+                    <li key={d} className="pnl-lista-check">
+                      <IconoPaso nombre="check" />
                       <span>{d}</span>
                     </li>
                   ))}
                 </ul>
-                <p className="text-[11px] text-neutral-400 mt-2.5 leading-snug">
+                <p className="pnl-visado-meta pnl-visado-meta-pie">
                   ¿Falta algo o sobra? Ajusta lo que marcaste en <b>Mis medios económicos</b> y
                   esta lista se recalcula sola.
                 </p>
@@ -518,18 +515,18 @@ export default function ChecklistDocumentos({
         )}
 
         {!bloqueado && gruposOrdenados.length > 0 && (
-          <div className="flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-3 mt-4">
-            <span className="shrink-0 text-base leading-none mt-0.5">🌐</span>
-            <p className="text-[12.5px] text-sky-900 leading-relaxed">{NOTA_APOSTILLA}</p>
+          <div className="pnl-aviso pnl-aviso-bloque pnl-docs-apostilla" data-tono="info">
+            <span className="pnl-aviso-icono"><Icono nombre="globo" size={16} /></span>
+            <p className="pnl-aviso-texto">{NOTA_APOSTILLA}</p>
           </div>
         )}
 
         {/* Guías y plantillas del servicio, al pie de los documentos: cada
             guía sirve para un documento, no para un paso aparte. */}
         {!bloqueado && (instructivos || onIrAGuia) && (
-          <div className="mt-6 pt-5 border-t border-neutral-200">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary-light mb-1">Guías y plantillas</p>
-            <p className="text-xs text-neutral-500 mb-3">La guía de cada documento, la de apostilla y las plantillas de tu servicio.</p>
+          <div className="pnl-docs-guias">
+            <p className="pnl-eyebrow"><span className="punto" />Guías y plantillas</p>
+            <p className="pnl-docs-guias-texto">La guía de cada documento, la de apostilla y las plantillas de tu servicio.</p>
             <InstructivosContenido instructivos={instructivos} onIrAGuia={onIrAGuia} guiaDocumentos={guiaMaster} />
           </div>
         )}

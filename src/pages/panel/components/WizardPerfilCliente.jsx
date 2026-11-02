@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { apiPATCH } from "../../../services/api";
 import { dialog } from "../../../services/dialogService";
+import Icono from "../../../components/common/Icono";
+import IconoPaso from "../../../components/common/IconoPaso";
 import {
   PAISES, AREAS, UNIS,
   parseTelefono, parseInicioPrevisto,
@@ -12,22 +14,22 @@ import {
 // el resto termina en los documentos de viaje.
 const STEPS = [
   {
-    icon: "👤",
+    icon: "usuario",
     title: "¿Quién eres?",
     subtitle: "Cuéntanos sobre ti para personalizar tu experiencia",
   },
   {
-    icon: "📞",
+    icon: "telefono",
     title: "Datos de contacto",
     subtitle: "¿Cómo podemos comunicarnos contigo?",
   },
   {
-    icon: "🛂",
+    icon: "pasaporte",
     title: "Documentos de viaje",
     subtitle: "Necesitamos tus datos para los trámites de visado y matrícula",
   },
   {
-    icon: "🎓",
+    icon: "birrete",
     title: "Perfil académico",
     subtitle: "Tu historial y tu plan de inicio en España",
   },
@@ -113,7 +115,7 @@ function StepPersonal({ form, errs, set, handleChange }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-x-3 gap-y-4">
       <div className="col-span-2">
         <FL>Nombre completo *</FL>
         <TI name="nombre" value={form.nombre} onChange={handleChange}
@@ -134,7 +136,7 @@ function StepPersonal({ form, errs, set, handleChange }) {
           renderOption={p => (
             <span className="flex items-center gap-2">
               <span>{p.emoji}</span><span>{p.nombre}</span>
-              <span className="ml-auto text-neutral-400 text-xs">{p.prefijo}</span>
+              <span className="ml-auto text-muted text-meta">{p.prefijo}</span>
             </span>
           )}
         />
@@ -164,9 +166,12 @@ function StepPersonal({ form, errs, set, handleChange }) {
 function StepContacto({ form, set }) {
   return (
     <div className="space-y-4">
-      <p className="text-xs text-neutral-500 bg-[#E8F5EE] border border-[#1D6A4A]/20 rounded-xl px-3 py-2">
-        Tu asesor se comunicará contigo principalmente por WhatsApp. Asegúrate de que el número sea correcto.
-      </p>
+      <div className="pnl-aviso" data-tono="info">
+        <span className="pnl-aviso-icono"><Icono nombre="chat" size={16} /></span>
+        <p className="pnl-aviso-texto">
+          Tu asesor se comunicará contigo principalmente por WhatsApp. Asegúrate de que el número sea correcto.
+        </p>
+      </div>
       <div>
         <FL>Teléfono</FL>
         <TelefonoInput
@@ -175,9 +180,9 @@ function StepContacto({ form, set }) {
         />
       </div>
       <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">WhatsApp</span>
-          <label className="inline-flex items-center gap-1.5 cursor-pointer ml-auto">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="pnl-campo-etiqueta">WhatsApp</span>
+          <label className="pnl-casilla-fila ml-auto">
             <input type="checkbox" checked={form.mismo_whatsapp}
               onChange={e => {
                 const checked = e.target.checked;
@@ -186,13 +191,12 @@ function StepContacto({ form, set }) {
                   set("prefijo_whatsapp", form.prefijo_telefono);
                   set("whatsapp_numero", form.telefono_numero);
                 }
-              }}
-              className="w-3.5 h-3.5 rounded accent-[#1D6A4A]" />
-            <span className="text-xs text-neutral-500">Mismo que teléfono</span>
+              }} />
+            <span>Mismo que teléfono</span>
           </label>
         </div>
         {form.mismo_whatsapp
-          ? <p className="text-xs text-neutral-400 italic">Se usará el mismo número de teléfono</p>
+          ? <p className="pnl-perfil-nota">Se usará el mismo número de teléfono</p>
           : <TelefonoInput
               prefijo={form.prefijo_whatsapp} numero={form.whatsapp_numero}
               onPrefijo={v => set("prefijo_whatsapp", v)} onNumero={v => set("whatsapp_numero", v)}
@@ -208,9 +212,9 @@ function StepDocumentos({ form, errs, handleChange }) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-[10px] font-bold text-[#1D6A4A] uppercase tracking-[.18em] mb-2">Pasaporte *</p>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="col-span-3">
+        <p className="pnl-eyebrow mb-3"><span className="punto" aria-hidden="true" />Pasaporte *</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-4">
+          <div className="col-span-2 sm:col-span-3">
             <FL>Número de pasaporte *</FL>
             <TI name="pasaporte" value={form.pasaporte} onChange={handleChange}
               placeholder="AB123456" err={errs.pasaporte} />
@@ -220,7 +224,7 @@ function StepDocumentos({ form, errs, handleChange }) {
             <FL>Fecha de emisión</FL>
             <TI name="pasaporte_emision" value={form.pasaporte_emision} onChange={handleChange} type="date" />
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <FL>Fecha de vencimiento *</FL>
             <TI name="pasaporte_vencimiento" value={form.pasaporte_vencimiento} onChange={handleChange}
               type="date" err={errs.pasaporte_vencimiento} />
@@ -230,11 +234,11 @@ function StepDocumentos({ form, errs, handleChange }) {
       </div>
 
       <div>
-        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[.18em] mb-2">
-          DNI / NIE / Cédula <span className="font-normal normal-case tracking-normal">(opcional)</span>
+        <p className="pnl-eyebrow mb-3">
+          <span className="punto" aria-hidden="true" />DNI / NIE / Cédula <small className="pnl-wizard-opcional">(opcional)</small>
         </p>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="col-span-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-4">
+          <div className="col-span-2 sm:col-span-3">
             <FL>Número de DNI / Cédula</FL>
             <TI name="dni" value={form.dni} onChange={handleChange} placeholder="12345678" />
           </div>
@@ -242,7 +246,7 @@ function StepDocumentos({ form, errs, handleChange }) {
             <FL>Fecha de emisión</FL>
             <TI name="dni_emision" value={form.dni_emision} onChange={handleChange} type="date" />
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <FL>Fecha de vencimiento</FL>
             <TI name="dni_vencimiento" value={form.dni_vencimiento} onChange={handleChange} type="date" />
           </div>
@@ -255,7 +259,7 @@ function StepDocumentos({ form, errs, handleChange }) {
 // ── Paso 4: Académico ─────────────────────────────────────────────────────────
 function StepAcademico({ form, errs, set, handleChange }) {
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-x-3 gap-y-4">
       <div className="col-span-2">
         <FL>Carrera / Título universitario *</FL>
         <TI name="carrera_titulo" value={form.carrera_titulo} onChange={handleChange}
@@ -265,7 +269,7 @@ function StepAcademico({ form, errs, set, handleChange }) {
       <div className="col-span-2">
         <FL>Área de estudio</FL>
         <select value={form.area_carrera} onChange={e => set("area_carrera", e.target.value)}
-          className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/20 focus:border-[#1D6A4A] transition">
+          className="pnl-campo-control">
           <option value="">— Selecciona —</option>
           {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
         </select>
@@ -308,7 +312,7 @@ function StepAcademico({ form, errs, set, handleChange }) {
       </div>
       <div className="col-span-2">
         <FL>Presupuesto máximo en matrícula (€/año) *</FL>
-        <div className={`border rounded-xl px-4 py-3 mt-1 ${errs.presupuesto_hasta ? "border-red-300 bg-red-50" : "border-neutral-200 bg-neutral-50"}`}>
+        <div className="pnl-perfil-presupuesto" data-estado={errs.presupuesto_hasta ? "error" : undefined}>
           <SliderPresupuesto value={form.presupuesto_hasta} onChange={v => set("presupuesto_hasta", v)} />
         </div>
         <ErrMsg msg={errs.presupuesto_hasta} />
@@ -413,41 +417,38 @@ export default function WizardPerfilCliente({ user, onComplete, conAcademico = t
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="pnl-velo-token pnl-wizard-velo fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
       style={{ animation: "inspira-fade-in 0.2s ease" }}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl flex flex-col max-h-[92vh]"
+        className="pnl-hoja pnl-wizard w-full max-w-xl flex flex-col"
         style={{ animation: "wizard-slide-up 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}
       >
         {/* ── Barra de progreso ── */}
-        <div className="h-1.5 bg-neutral-100 rounded-t-2xl overflow-hidden shrink-0">
-          <div
-            className="h-full bg-[#1D6A4A] transition-all duration-500 ease-out"
-            style={{ width: `${((step + 1) / numSteps) * 100}%` }}
-          />
+        <div className="pnl-barra pnl-wizard-barra shrink-0" style={{ "--p": ((step + 1) / numSteps) * 100 }}>
+          <i />
         </div>
 
         {/* ── Cabecera ── */}
-        <div className="px-7 pt-6 pb-4 shrink-0">
-          <p className="text-[10px] font-bold text-[#1D6A4A] uppercase tracking-widest font-mono mb-4">
-            Paso {step + 1} de {numSteps}
+        <div className="pnl-wizard-cab shrink-0">
+          <p className="pnl-eyebrow mb-4">
+            <span className="punto" aria-hidden="true" />Paso {step + 1} de {numSteps}
           </p>
-          <div className="text-4xl mb-3 select-none">{pasos[step].icon}</div>
+          <span className="pnl-wizard-icono" aria-hidden="true"><Icono nombre={pasos[step].icon} size={24} /></span>
           <h2 className="text-xl font-serif font-bold text-primary leading-tight">
             {pasos[step].title}
           </h2>
-          <p className="text-sm text-neutral-500 mt-1">{pasos[step].subtitle}</p>
+          <p className="text-cuerpo text-tinta-2 mt-1">{pasos[step].subtitle}</p>
         </div>
 
-        <div className="h-px bg-neutral-100 mx-7 shrink-0" />
+        <div className="h-px bg-linea mx-5 sm:mx-7 shrink-0" />
 
         {/* ── Contenido scrollable ── */}
-        <div className="flex-1 overflow-y-auto px-7 py-5 space-y-1">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5 space-y-1">
           {errs._global && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-3">
-              <span className="text-red-500 text-sm shrink-0">⚠</span>
-              <p className="text-xs text-red-700">{errs._global}</p>
+            <div className="pnl-aviso mb-3" data-tono="alto" role="alert">
+              <span className="pnl-aviso-icono"><IconoPaso nombre="info" className="w-4 h-4" /></span>
+              <p className="pnl-aviso-texto">{errs._global}</p>
             </div>
           )}
 
@@ -458,12 +459,13 @@ export default function WizardPerfilCliente({ user, onComplete, conAcademico = t
         </div>
 
         {/* ── Footer de navegación ── */}
-        <div className="px-7 py-4 border-t border-neutral-100 flex items-center justify-between shrink-0 bg-neutral-50 rounded-b-2xl">
+        <div className="pnl-wizard-pie shrink-0">
           {step > 0
             ? (
               <button onClick={handleBack} disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-primary transition disabled:opacity-40">
-                ← Atrás
+                className="pnl-btn-texto">
+                <IconoPaso nombre="arrowLeft" className="w-4 h-4" />
+                Atrás
               </button>
             )
             : <div />
@@ -475,10 +477,10 @@ export default function WizardPerfilCliente({ user, onComplete, conAcademico = t
               <div key={i}
                 className={`rounded-full transition-all duration-300 ${
                   i === step
-                    ? "w-5 h-2 bg-[#1D6A4A]"
+                    ? "w-5 h-2 bg-verde"
                     : i < step
-                      ? "w-2 h-2 bg-[#1D6A4A]/40"
-                      : "w-2 h-2 bg-neutral-200"
+                      ? "w-2 h-2 bg-verde/40"
+                      : "w-2 h-2 bg-linea"
                 }`}
               />
             ))}
@@ -487,16 +489,17 @@ export default function WizardPerfilCliente({ user, onComplete, conAcademico = t
           {step < numSteps - 1
             ? (
               <button onClick={handleNext}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-[#152b47] transition">
-                Siguiente →
+                className="pnl-btn-primario">
+                Siguiente
+                <IconoPaso nombre="arrowRight" className="w-4 h-4" />
               </button>
             )
             : (
               <button onClick={handleSubmit} disabled={saving}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#1D6A4A] text-white text-sm font-semibold hover:bg-[#15533a] disabled:opacity-50 transition">
+                className="pnl-btn-primario">
                 {saving
-                  ? <><span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />Guardando…</>
-                  : <>Guardar y continuar ✓</>
+                  ? <><span className="pnl-spinner" data-talla="s" aria-hidden="true" />Guardando…</>
+                  : <>Guardar y continuar <IconoPaso nombre="check" className="w-4 h-4" strokeWidth={2.5} /></>
                 }
               </button>
             )

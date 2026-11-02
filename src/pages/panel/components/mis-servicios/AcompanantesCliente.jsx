@@ -11,6 +11,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { apiGET, apiPOST, apiPUT, apiDELETE } from "../../../../services/api";
 import { Campo, Selector, Guardado } from "./campos";
 import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
+import { ChevronPlegable, IconoAlerta } from "./Bloques";
+import Icono from "../../../../components/common/Icono";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
 const VINCULOS = [
   ["CONYUGE", "Cónyuge"],
@@ -82,47 +85,44 @@ function Ficha({ idSolicitud, a, abierta, onAbrir, onCambio, onQuitar }) {
   const propio = datos.dom_mismo === false;
 
   return (
-    <div className="rounded-xl border border-neutral-200 overflow-hidden">
-      <button type="button" onClick={onAbrir}
-        className="w-full flex items-center gap-2.5 px-3.5 py-3 text-left hover:bg-neutral-50/60">
-        <span className="shrink-0 w-7 h-7 rounded-lg grid place-items-center text-[12px]
-          bg-[#E8F5EE] text-[#14532d] font-semibold">
-          {datos.vinculo === "HIJO" ? "👦" : datos.vinculo === "CONYUGE" ? "💍" : "👤"}
+    <div className="pnl-acomp" data-abierta={abierta ? "1" : "0"}>
+      <button type="button" onClick={onAbrir} aria-expanded={abierta}
+        className="pnl-acomp-cab">
+        <span className="pnl-ico" data-talla="l" aria-hidden="true">
+          <Icono nombre="usuario" size={18} />
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13.5px] font-semibold text-neutral-900 truncate">
+        <span className="pnl-acomp-txt">
+          <b>
             {nombreDe(datos)}
-          </span>
-          <span className="block text-[11.5px] text-neutral-400">
+          </b>
+          <span>
             {etiquetaVinculo(datos.vinculo)}
             {rev.edad !== null && rev.edad !== undefined ? ` · ${rev.edad} años` : ""}
           </span>
         </span>
         {(rev.faltan?.length > 0 || docsFaltan > 0) && (
-          <span className="shrink-0 text-[10.5px] font-semibold text-amber-600 text-right leading-tight">
+          <span className="pnl-acomp-faltan">
             {rev.faltan?.length > 0 && <>{rev.faltan.length} datos<br /></>}
             {docsFaltan > 0 && <>{docsFaltan} docs</>}
           </span>
         )}
-        <span className="shrink-0 text-neutral-300 text-[11px]">{abierta ? "▲" : "▼"}</span>
+        <ChevronPlegable className="pnl-chev" />
       </button>
 
       {abierta && (
-        <div className="border-t border-neutral-100">
-          <div className="flex gap-1.5 px-3.5 pt-3">
+        <div className="pnl-acomp-cuerpo">
+          <div className="pnl-segmentos pnl-acomp-pestanas">
             {[["datos", "Sus datos"], ["docs", "Sus documentos"]].map(([k, t]) => (
               <button key={k} type="button" onClick={() => setPestana(k)}
-                className={`text-[12.5px] font-semibold px-3 py-1.5 rounded-lg ${
-                  pestana === k ? "bg-primary text-white" : "bg-neutral-100 text-neutral-500"
-                }`}>
+                aria-pressed={pestana === k}>
                 {t}
               </button>
             ))}
           </div>
 
           {pestana === "datos" && (
-            <div className="px-3.5 pb-4 pt-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="pnl-acomp-panel">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
                 <Selector label="Vínculo contigo" obligatorio falta={falta("Vínculo con el titular")}
                   opciones={VINCULOS} valor={datos.vinculo} onChange={set("vinculo")}
                   ayuda="Cómo se relaciona contigo: cónyuge, hijo/a u otro familiar a cargo." />
@@ -160,26 +160,25 @@ function Ficha({ idSolicitud, a, abierta, onAbrir, onCambio, onQuitar }) {
               </div>
 
               {/* No se le vuelve a preguntar el domicilio a quien vive contigo. */}
-              <label className="flex items-start gap-2.5 mt-4 rounded-xl border border-neutral-200
-                px-3.5 py-3 cursor-pointer hover:bg-neutral-50/60">
-                <input type="checkbox" className="mt-0.5 w-4 h-4 accent-[#1D6A4A]"
+              <label className="pnl-casilla-fila pnl-casilla-larga pnl-casilla-caja mt-5">
+                <input type="checkbox"
                   checked={datos.dom_mismo !== false}
                   onChange={(e) => set("dom_mismo")(e.target.checked)} />
                 <span className="min-w-0">
-                  <span className="block text-[13px] font-medium text-neutral-800">
+                  <span className="block">
                     Vive contigo, en la misma dirección
                   </span>
-                  <span className="block text-[11.5px] text-neutral-500 leading-relaxed">
+                  <small>
                     Si es así no hace falta repetirla: usamos la tuya.
-                  </span>
+                  </small>
                 </span>
               </label>
 
               {propio && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4 mt-4">
                   <Campo label="Domicilio" obligatorio falta={falta("Domicilio")}
                     valor={datos.dom_direccion} onChange={set("dom_direccion")} />
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-4">
                     <Campo label="Número" valor={datos.dom_numero} onChange={set("dom_numero")} />
                     <Campo label="Piso / puerta" valor={datos.dom_piso} onChange={set("dom_piso")} />
                   </div>
@@ -193,12 +192,12 @@ function Ficha({ idSolicitud, a, abierta, onAbrir, onCambio, onQuitar }) {
               )}
 
               {rev.menor && (
-                <div className="rounded-xl border-l-[3px] border-sky-400 bg-sky-50 px-3.5 py-3 mt-4">
-                  <p className="text-[12.5px] text-sky-900 leading-relaxed mb-2.5">
+                <div className="pnl-caja-tono mt-5" data-tono="info">
+                  <p className="pnl-caja-tono-texto">
                     Es menor de edad, así que su impreso necesita un <b>representante legal</b>,
                     que normalmente eres tú.
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
                     <Campo label="Representante legal"
                       valor={datos.repr_nombre} onChange={set("repr_nombre")} />
                     <Campo label="DNI / NIE / pasaporte"
@@ -211,13 +210,13 @@ function Ficha({ idSolicitud, a, abierta, onAbrir, onCambio, onQuitar }) {
               )}
 
               {(rev.avisos || []).map((t) => (
-                <p key={t} className="text-[12px] text-amber-700 leading-relaxed mt-3">⚠ {t}</p>
+                <p key={t} className="pnl-aviso-linea"><IconoAlerta /> {t}</p>
               ))}
 
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <Guardado guardando={guardando} tocado={tocado} completo={rev.completo} />
                 <button type="button" onClick={onQuitar}
-                  className="text-[11.5px] text-neutral-400 hover:text-red-600 mt-4">
+                  className="pnl-btn-texto pnl-texto-peligro mt-4" data-talla="s">
                   Quitar a esta persona
                 </button>
               </div>
@@ -225,9 +224,9 @@ function Ficha({ idSolicitud, a, abierta, onAbrir, onCambio, onQuitar }) {
           )}
 
           {pestana === "docs" && (
-            <div className="px-3.5 pb-4 pt-3">
+            <div className="pnl-acomp-panel">
               <ResumenDocumentos ranuras={docs.ranuras} />
-              <div className="space-y-2.5">
+              <div className="ex-docs">
                 {ranurasCliente.map(([clave, def]) => (
                   <TarjetaDocumento key={clave} base={base} clave={clave} def={def}
                     onCambio={onCambio} />
@@ -235,10 +234,10 @@ function Ficha({ idSolicitud, a, abierta, onAbrir, onCambio, onQuitar }) {
               </div>
               {ranurasAsesor.length > 0 && (
                 <>
-                  <p className="text-[12px] font-semibold text-neutral-600 mt-5 mb-2">
+                  <p className="pnl-eyebrow pnl-docs-grupo">
                     Lo que preparamos nosotros
                   </p>
-                  <div className="space-y-2.5">
+                  <div className="ex-docs">
                     {ranurasAsesor.map(([clave, def]) => (
                       <TarjetaDocumento key={clave} base={base} clave={clave} def={def}
                         onCambio={onCambio} />
@@ -290,26 +289,26 @@ export default function AcompanantesCliente({ idSolicitud, conAcompanantes, onMa
 
   return (
     <>
-      <label className="flex items-start gap-3 rounded-xl border border-neutral-200
-        px-3.5 py-3.5 cursor-pointer hover:bg-neutral-50/60 mb-3">
-        <input type="checkbox" className="mt-0.5 w-4.5 h-4.5 accent-[#1D6A4A]"
+      <label className="pnl-casilla-fila pnl-casilla-larga pnl-casilla-caja mb-3">
+        <input type="checkbox"
           checked={Boolean(conAcompanantes)}
           onChange={(e) => onMarcar?.(e.target.checked)} />
         <span className="min-w-0">
-          <span className="block text-[13.5px] font-semibold text-neutral-900 leading-snug">
+          <b className="block">
             Voy con acompañante
-          </span>
-          <span className="block text-[12.5px] text-neutral-500 leading-relaxed mt-0.5">
+          </b>
+          <small>
             Irá vinculado a mi autorización y <b>sin permiso de trabajo</b>: cónyuge, hijos
             o familiares a mi cargo.
-          </span>
+          </small>
         </span>
       </label>
 
       {conAcompanantes && (
         <>
-          <div className="rounded-xl border-l-[3px] border-sky-400 bg-sky-50 px-3.5 py-3 mb-3">
-            <p className="text-[12.5px] text-sky-900 leading-relaxed">
+          <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="info">
+            <span className="pnl-aviso-icono" aria-hidden="true"><Icono nombre="usuarios" size={16} /></span>
+            <p className="pnl-aviso-texto">
               Cada acompañante necesita <b>sus propios datos y sus propios documentos</b>, y
               lleva su propio formulario ante Extranjería. Añade uno por cada persona que
               venga contigo.
@@ -317,9 +316,9 @@ export default function AcompanantesCliente({ idSolicitud, conAcompanantes, onMa
           </div>
 
           {cargando ? (
-            <p className="text-[12.5px] text-neutral-400 py-3">Cargando…</p>
+            <p className="pnl-acomp-nota" role="status">Cargando…</p>
           ) : (
-            <div className="space-y-2.5">
+            <div className="flex flex-col gap-2.5">
               {lista.map((a) => (
                 <Ficha
                   key={a.id_acompanante} idSolicitud={idSolicitud} a={a}
@@ -330,7 +329,7 @@ export default function AcompanantesCliente({ idSolicitud, conAcompanantes, onMa
                 />
               ))}
               {lista.length === 0 && (
-                <p className="text-[12.5px] text-neutral-400 py-2">
+                <p className="pnl-acomp-nota">
                   Todavía no has añadido a nadie.
                 </p>
               )}
@@ -338,10 +337,9 @@ export default function AcompanantesCliente({ idSolicitud, conAcompanantes, onMa
           )}
 
           <button type="button" onClick={anadir} disabled={anadiendo}
-            className="mt-3 text-[13px] font-semibold px-4 py-2.5 rounded-lg border-2
-              border-dashed border-neutral-300 text-neutral-500 w-full
-              hover:border-[#1D6A4A] hover:text-[#1D6A4A] disabled:opacity-50">
-            {anadiendo ? "Añadiendo…" : "+ Añadir acompañante"}
+            className="pnl-btn pnl-anadir mt-3 w-full">
+            {!anadiendo && <IconoPaso nombre="plus" />}
+            {anadiendo ? "Añadiendo…" : "Añadir acompañante"}
           </button>
         </>
       )}

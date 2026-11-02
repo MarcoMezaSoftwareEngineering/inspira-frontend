@@ -23,6 +23,8 @@ import { navigate } from "../../../../services/navigate";
 import { rutaDe } from "../../ruta";
 import { usePublicarCabecera } from "../../cabeceraExpediente";
 import NovedadesExpediente from "../NovedadesExpediente";
+import ErrorCarga from "./ErrorCarga";
+import { inicialesDe } from "./utils";
 
 // Nombre corto de cada paso para la fila de iconos del móvil.
 const CORTO = { docs: "Documentos", form: "Formulario", informe: "Informe", eleccion: "Elección", post: "Postular", cierre: "Cierre" };
@@ -40,10 +42,6 @@ function inicioParaFormulario(valor) {
   if (mes === "Septiembre") return `sep_${anio}`;
   if (mes === "Enero") return `ene_${anio}`;
   return "";
-}
-
-function inicialesDe(nombre) {
-  return String(nombre || "").trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "•";
 }
 
 // Lo primero que le toca hacer al asesorado, dicho una vez y arriba: un
@@ -146,6 +144,9 @@ export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, on
       ]);
 
       if (rDetalle.ok) setDetalle(rDetalle.solicitud);
+      // Sin la solicitud no hay expediente que pintar: se dice, con
+      // «Reintentar» (antes la pantalla quedaba en blanco). (Carina, 02/11/2026)
+      else setError("Error al cargar información.");
       if (rChecklist.ok) setChecklist(rChecklist.checklist || []);
 
       const datosPerfil = rPerfil.ok ? (rPerfil.cliente?.datos_extra || {}) : {};
@@ -379,10 +380,7 @@ export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, on
       {/* Volver vive en la barra de arriba del panel. */}
       <div className="shrink-0 flex items-center gap-3 mb-3 empty:hidden">
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-            <span className="text-red-500 text-sm">⚠</span>
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
+          <ErrorCarga className="flex-1 min-w-0" mensaje={error} onReintentar={cargarTodo} />
         )}
       </div>
 

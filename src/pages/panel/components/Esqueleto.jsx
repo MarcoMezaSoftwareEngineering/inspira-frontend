@@ -26,21 +26,36 @@ export function EsqueletoTarjetas({ n = 2 }) {
   );
 }
 
-/** Un expediente: cabecera, barra de secciones y cuerpo. */
-export function EsqueletoExpediente() {
+/**
+ * Un expediente: cabecera, barra de secciones y cuerpo.
+ *
+ * `variante="bloques"`: estancia, PAC y modificatoria, que no tienen barra de
+ * secciones sino una tarjeta de estado y bloques plegables.
+ */
+export function EsqueletoExpediente({ variante } = {}) {
+  if (variante === "bloques") {
+    return (
+      <div className="flex flex-col gap-3" aria-busy="true" aria-label="Cargando tu expediente">
+        <span className="pnl-esq pnl-esq-bloque" data-talla="tarjeta" />
+        {Array.from({ length: 4 }, (_, i) => (
+          <span key={i} className="pnl-esq pnl-esq-bloque" data-talla="fila" />
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="flex-1 min-h-0 flex flex-col gap-3" aria-busy="true" aria-label="Cargando tu expediente">
       <div className="flex items-center gap-3">
         <span className="pnl-esq" style={{ width: 44, height: 40, borderRadius: 12 }} />
         <span className="pnl-esq" style={{ flex: 1, height: 52, borderRadius: 16 }} />
       </div>
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3">
-        <div className="hidden md:flex w-52 shrink-0 flex-col gap-2">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
+        <div className="hidden lg:flex w-52 shrink-0 flex-col gap-2">
           {Array.from({ length: 6 }, (_, i) => (
             <span key={i} className="pnl-esq" style={{ height: 44, borderRadius: 12 }} />
           ))}
         </div>
-        <div className="md:hidden flex gap-2">
+        <div className="lg:hidden flex gap-2">
           {Array.from({ length: 4 }, (_, i) => (
             <span key={i} className="pnl-esq" style={{ width: 96, height: 38, borderRadius: 12 }} />
           ))}

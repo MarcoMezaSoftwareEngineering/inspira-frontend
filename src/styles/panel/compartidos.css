@@ -1,0 +1,136 @@
+/* ==========================================================================
+   PANEL DEL ASESORADO · piezas compartidas con Inspira Core (02/11/2026)
+   VisorArchivo, HiloMensajes, DocumentosProceso, GuiaDocumento y el formulario
+   académico se pintan también en el backoffice y Core no debe cambiar: sus JSX
+   siguen con sus clases de siempre y aquí se traducen a los tokens del panel.
+   Esta hoja solo la importa PanelCliente.jsx, así que en Core no existe.
+
+   Va en @layer utilities y con :where(.pnl) A PROPÓSITO, a diferencia del resto
+   de hojas del panel: así cada regla pesa lo mismo que la utilidad que sustituye
+   y llega después. Una regla suelta `.pnl .border-neutral-200` taparía el
+   `hover:border-primary` y el `focus:border-primary` de la misma pieza.
+   Las reglas de un sitio concreto (visor, documentos) van fuera de la capa.
+   ========================================================================== */
+@layer utilities {
+  /* ── Tinta ── */
+  :where(.pnl) .text-neutral-400 { color: var(--muted); }
+  :where(.pnl) .text-neutral-500,
+  :where(.pnl) .text-neutral-600 { color: var(--ink-2); }
+  :where(.pnl) .text-neutral-700,
+  :where(.pnl) .text-neutral-800,
+  :where(.pnl) .text-neutral-900 { color: var(--ink); }
+  :where(.pnl) .text-red-400,
+  :where(.pnl) .text-red-500,
+  :where(.pnl) .text-red-600,
+  :where(.pnl) .text-red-700 { color: var(--alto-ink); }
+  :where(.pnl) .text-emerald-700,
+  :where(.pnl) .text-emerald-800 { color: var(--ok-ink); }
+  :where(.pnl) .text-amber-500,
+  :where(.pnl) .text-amber-700,
+  :where(.pnl) .text-amber-800,
+  :where(.pnl) .text-amber-900 { color: var(--aviso-ink); }
+
+  /* ── Bordes ── */
+  :where(.pnl) .border-neutral-100,
+  :where(.pnl) .border-neutral-200 { border-color: var(--line); }
+  :where(.pnl) .border-neutral-300 { border-color: var(--trazo); }
+  :where(.pnl) .border-amber-200 { border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  :where(.pnl) .border-amber-400 { border-color: var(--accent); }
+  :where(.pnl) .border-emerald-200 { border-color: color-mix(in srgb, var(--green) 30%, transparent); }
+
+  /* ── Fondos ── */
+  :where(.pnl) .bg-neutral-50,
+  :where(.pnl) .bg-neutral-50\/60 { background-color: var(--surface); }
+  :where(.pnl) .bg-neutral-100 { background-color: var(--neutro-soft); }
+  :where(.pnl) .bg-neutral-200 { background-color: var(--line); }
+  :where(.pnl) .bg-red-50 { background-color: var(--alto-soft); }
+  :where(.pnl) .bg-amber-50,
+  :where(.pnl) .bg-amber-100 { background-color: var(--aviso-soft); }
+  :where(.pnl) .bg-emerald-50,
+  :where(.pnl) .bg-emerald-100 { background-color: var(--ok-soft); }
+  :where(.pnl) .bg-emerald-300 { background-color: color-mix(in srgb, var(--green) 40%, transparent); }
+  :where(.pnl) .bg-emerald-500 { background-color: var(--green); }
+  :where(.pnl) .bg-black\/70 { background-color: color-mix(in srgb, var(--noche-1) 80%, transparent); }
+  :where(.pnl) .bg-black\/85 { background-color: color-mix(in srgb, var(--noche-1) 90%, transparent); }
+  /* La barra del formulario: verde liso, sin el degradado de Core. */
+  :where(.pnl) .bg-gradient-to-r.from-\[\#1d7a52\] { background: var(--green); }
+
+  /* ── Pasar por encima y foco ── */
+  @media (hover: hover) {
+    :where(.pnl) .hover\:text-neutral-700:hover { color: var(--ink); }
+    :where(.pnl) .hover\:border-neutral-300:hover { border-color: var(--trazo); }
+    :where(.pnl) .hover\:border-red-400:hover { border-color: var(--alto); }
+    :where(.pnl) .hover\:bg-neutral-50:hover { background-color: var(--surface); }
+    :where(.pnl) .hover\:bg-neutral-100:hover { background-color: var(--neutro-soft); }
+    :where(.pnl) .hover\:bg-neutral-200:hover { background-color: var(--line); }
+    :where(.pnl) .hover\:bg-emerald-200:hover { background-color: color-mix(in srgb, var(--green) 20%, transparent); }
+    :where(.pnl) .hover\:bg-emerald-400:hover { background-color: var(--ok-ink); }
+    :where(.pnl) .hover\:bg-amber-200:hover { background-color: color-mix(in srgb, var(--accent) 20%, transparent); }
+  }
+  :where(.pnl) .focus\:border-red-400:focus { border-color: var(--alto); }
+  :where(.pnl) .focus\:ring-red-200:focus { --tw-ring-color: color-mix(in srgb, var(--alto) 20%, transparent); }
+
+  /* ── Escala de texto: nada por debajo de 12, salvo el eyebrow ── */
+  :where(.pnl) .text-\[9px\],
+  :where(.pnl) .text-\[11px\].uppercase {
+    font-size: var(--fs-eyebrow);
+    letter-spacing: var(--tracking-eyebrow);
+  }
+  :where(.pnl) .text-\[10px\],
+  :where(.pnl) .text-\[10\.5px\],
+  :where(.pnl) .text-\[11px\]:not(.uppercase),
+  :where(.pnl) .text-\[11\.5px\] { font-size: var(--fs-meta); }
+  :where(.pnl) .text-\[12\.5px\],
+  :where(.pnl) p.text-\[11\.5px\].leading-relaxed { font-size: var(--fs-cuerpo-sm); }
+  :where(.pnl) .text-\[13\.5px\] { font-size: var(--fs-cuerpo); }
+
+  /* ── HiloMensajes ── */
+  :where(.pnl) .bg-primary > .text-white\/60,
+  :where(.pnl) .bg-primary > .text-white\/70 { color: var(--sobre-noche-3); }
+  /* Sobre sol el texto va en tinta oscura: en blanco no llega a 3:1. */
+  :where(.pnl) .ux-tap.bg-accent.text-white { color: var(--primary-dark); }
+
+  /* ── GuiaDocumento: la marca de «verifica» ── */
+  :where(.pnl) .text-accent.font-black { color: var(--green); font-weight: 800; }
+
+  /* ── Campos: con puntero grueso, 16 px para que iOS no amplíe al enfocar ── */
+  @media (pointer: coarse) {
+    :where(.pnl) input.text-sm,
+    :where(.pnl) select.text-sm,
+    :where(.pnl) textarea.text-sm,
+    :where(.pnl) textarea.text-\[13\.5px\] { font-size: 16px; }
+  }
+}
+
+/* ── VisorArchivo ─────────────────────────────────────────────────────────
+   TarjetaDocumento y la modificatoria lo sacan a document.body con un portal,
+   fuera del .pnl de la página: por eso lo envuelven en <div className="pnl
+   pnl-visor-archivo">. El envoltorio no ocupa sitio (el visor es fixed).
+   pnl-visor (expediente.css) es otra pieza: la vista previa de la declaración. */
+.pnl.pnl-visor-archivo { background: none; }
+.pnl.pnl-visor-archivo button {
+  min-height: 40px;
+  font-size: var(--fs-cuerpo-sm); font-weight: 600;
+}
+.pnl.pnl-visor-archivo .border-neutral-300 { border-color: var(--line); color: var(--primary); }
+.pnl.pnl-visor-archivo button[aria-label='Cerrar'] {
+  display: inline-grid; place-items: center;
+  min-width: 44px; min-height: 44px;
+  padding: 0;
+  border-radius: var(--radio-s);
+  font-size: var(--fs-lectura); line-height: 1;
+  color: var(--ink-2);
+}
+@media (hover: hover) {
+  .pnl.pnl-visor-archivo button[aria-label='Cerrar']:hover { background: var(--surface); color: var(--ink); }
+}
+.pnl.pnl-visor-archivo .bg-\[\#1D6A4A\] { background: var(--primary); color: #fff; }
+@media (hover: hover) {
+  .pnl.pnl-visor-archivo .bg-\[\#1D6A4A\]:hover { background: var(--primary-2); }
+}
+
+/* ── DocumentosProceso (modo cliente) ── */
+.pnl .pnl-docs-proceso .ex-sub { margin: 0; }
+@media (pointer: coarse) {
+  .pnl .pnl-docs-proceso button { min-height: 44px; }
+}

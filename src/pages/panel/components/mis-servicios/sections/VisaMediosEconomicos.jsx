@@ -11,28 +11,30 @@ import {
   PERFILES, ESPECIALES, VIAS, VIA_ETIQUETA,
   listaSolvencia, calcularMedios, CALC_INICIAL, eur,
 } from "./visaSolvencia";
+import IconoPaso from "../../../../../components/common/IconoPaso";
+import { IconoLinea } from "../utils";
+import Icono from "../../../../../components/common/Icono";
 
 /* ── Piezas de interfaz ──────────────────────────────────────────────────── */
+// Los tonos de siempre (info, ok, warn, stop) en el diccionario del panel. El
+// icono: el que se le pase o, si no, el del tono.
+const AVISO_TONO = { info: "info", ok: "ok", warn: "aviso", stop: "alto" };
+const AVISO_ICONO = { info: "info", ok: "checkCircle", aviso: "alert", alto: "alert" };
 function Aviso({ tono = "info", icono, children }) {
-  const tonos = {
-    info: "bg-sky-50 border-sky-200 text-sky-900",
-    ok:   "bg-emerald-50 border-emerald-200 text-emerald-900",
-    warn: "bg-amber-50 border-amber-200 text-amber-900",
-    stop: "bg-red-50 border-red-200 text-red-900",
-  };
+  const t = AVISO_TONO[tono] || "info";
   return (
-    <div className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] leading-relaxed ${tonos[tono]}`}>
-      <span className="shrink-0 text-base leading-none mt-0.5">{icono}</span>
-      <div>{children}</div>
+    <div className="pnl-aviso pnl-aviso-bloque" data-tono={t}>
+      <span className="pnl-aviso-icono">{icono || <IconoLinea nombre={AVISO_ICONO[t]} />}</span>
+      <div className="pnl-aviso-texto">{children}</div>
     </div>
   );
 }
 
-function Tarjeta({ titulo, children, borde }) {
+function Tarjeta({ titulo, children, tono }) {
   return (
-    <div className={`bg-white border rounded-2xl shadow-sm p-4 ${borde || "border-neutral-200"}`}>
+    <div className="pnl-tarjeta pnl-tarjeta-visado" data-anidada="1" data-tono={tono}>
       {titulo && (
-        <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A] mb-3">{titulo}</p>
+        <p className="pnl-eyebrow"><span className="punto" />{titulo}</p>
       )}
       {children}
     </div>
@@ -41,10 +43,10 @@ function Tarjeta({ titulo, children, borde }) {
 
 function Fila({ etiqueta, nota, children }) {
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-neutral-100 last:border-b-0">
+    <div className="pnl-calc-fila">
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-neutral-800 leading-tight">{etiqueta}</p>
-        {nota && <p className="text-[10.5px] text-neutral-400 mt-0.5 leading-snug">{nota}</p>}
+        <p className="pnl-calc-etiqueta">{etiqueta}</p>
+        {nota && <p className="pnl-calc-nota">{nota}</p>}
       </div>
       {children}
     </div>
@@ -59,20 +61,15 @@ function Numero({ valor, onChange, disabled }) {
       value={valor}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
-      className="w-28 shrink-0 text-right border border-neutral-200 rounded-lg px-2.5 py-2 text-[14px] font-bold text-primary outline-none focus:border-[#1D6A4A] disabled:opacity-60"
+      className="pnl-campo-control pnl-calc-numero"
     />
   );
 }
 
-function Interruptor({ activo, onClick, disabled }) {
-  return (
-    <button
-      type="button" onClick={onClick} disabled={disabled}
-      className={`relative shrink-0 w-11 h-6 rounded-full transition-colors disabled:opacity-60 ${activo ? "bg-[#1D6A4A]" : "bg-neutral-300"}`}
-    >
-      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${activo ? "left-[22px]" : "left-0.5"}`} />
-    </button>
-  );
+// Solo la pista visual: la fila entera (el botón que la contiene) es la que
+// se toca.
+function Interruptor({ activo }) {
+  return <span className="pnl-interruptor" data-on={activo ? "1" : undefined} aria-hidden="true" />;
 }
 
 function Casilla({ item, activa, onToggle, disabled }) {
@@ -80,24 +77,23 @@ function Casilla({ item, activa, onToggle, disabled }) {
     <>
       <button
         type="button" onClick={onToggle} disabled={disabled}
-        className={`w-full flex items-center gap-2.5 text-left px-3 py-2.5 rounded-xl border transition-all disabled:opacity-60 ${
-          activa ? "border-[#1D6A4A] bg-emerald-50/60" : "border-neutral-200 bg-white hover:border-neutral-300"
-        }`}
+        aria-pressed={activa}
+        className="pnl-opcion pnl-opcion-casilla"
       >
-        <span className={`shrink-0 w-5 h-5 rounded-md grid place-items-center text-[11px] font-black ${
-          activa ? "bg-[#1D6A4A] text-white" : "bg-neutral-100 text-transparent"
-        }`}>✓</span>
+        <span className="pnl-opcion-check">
+          {activa && <IconoPaso nombre="check" strokeWidth={2.6} />}
+        </span>
         <span className="min-w-0">
-          <span className="block text-[13px] font-semibold text-neutral-800">{item.icono} {item.nombre}</span>
-          <span className="block text-[11px] text-neutral-400">{item.sub}</span>
+          <span className="pnl-opcion-titulo">{item.nombre}</span>
+          <span className="pnl-opcion-texto">{item.sub}</span>
         </span>
       </button>
       {activa && (
-        <div className="ml-8 mb-1 pl-3 border-l-2 border-emerald-200">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1">Documentos que suma</p>
+        <div className="pnl-opcion-suma">
+          <p className="pnl-opcion-suma-rotulo">Documentos que suma</p>
           <ul className="space-y-0.5">
             {item.docs.map((d) => (
-              <li key={d} className="text-[12px] text-neutral-600 leading-snug">· {d}</li>
+              <li key={d}>· {d}</li>
             ))}
           </ul>
         </div>
@@ -167,7 +163,7 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
 
   return (
     <div className="space-y-3">
-      <p className="text-[13.5px] text-neutral-500 leading-relaxed">
+      <p className="pnl-visado-intro">
         Es el punto más importante y el que el consulado revisa con más detalle.
         Elige tu vía, calcula el monto y arma tu lista de documentos.
       </p>
@@ -178,44 +174,42 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
           <button
             key={v.key} type="button" disabled={off}
             onClick={() => { tocar(); setVia(v.key); }}
-            className={`w-full text-left rounded-2xl border-2 p-4 transition-all relative disabled:opacity-60 ${
-              via === v.key ? "border-[#1D6A4A] bg-emerald-50/60" : "border-neutral-200 bg-white hover:border-neutral-300"
-            }`}
+            aria-pressed={via === v.key}
+            className="pnl-opcion"
           >
             {via === v.key && (
-              <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1D6A4A] text-white">
-                ✓ Tu opción
+              <span className="pnl-opcion-marca">
+                <IconoPaso nombre="check" strokeWidth={2.4} />
+                Tu opción
               </span>
             )}
-            <div className="flex items-center gap-3">
-              <span className="shrink-0 w-10 h-10 rounded-xl bg-neutral-100 grid place-items-center text-xl">{v.icono}</span>
-              <div className="min-w-0">
-                <p className="text-[14px] font-bold text-primary">{v.nombre}</p>
-                <p className="text-[12px] text-neutral-500 mt-0.5">{v.desc}</p>
-              </div>
-            </div>
+            <span className="pnl-opcion-cab">
+              <span className="pnl-opcion-ico"><Icono nombre="usuario" size={18} /></span>
+              <span className="min-w-0">
+                <span className="pnl-opcion-titulo">{v.nombre}</span>
+                <span className="pnl-opcion-texto">{v.desc}</span>
+              </span>
+            </span>
           </button>
         ))}
       </div>
 
       {via ? (
-        <Aviso tono="ok" icono="✅">
+        <Aviso tono="ok">
           Elegiste <b>{VIA_ETIQUETA[via]}</b>. Tu lista de solvencia se arma abajo.
         </Aviso>
       ) : (
-        <Aviso tono="warn" icono="🔒">Elige una opción para armar tu lista de solvencia.</Aviso>
+        <Aviso tono="warn" icono={<Icono nombre="candado" size={16} />}>Elige una opción para armar tu lista de solvencia.</Aviso>
       )}
 
       {/* Calculadora */}
       <Tarjeta titulo="Calculadora de medios (IPREM)">
-        <div className="flex gap-1 bg-neutral-100 border border-neutral-200 rounded-xl p-1 mb-3">
+        <div className="pnl-segmentos pnl-segmentos-llenos pnl-calc-segmentos">
           {[[true, "Estancia larga · +6 meses"], [false, "Corta · ≤6 meses"]].map(([v, txt]) => (
             <button
               key={String(v)} type="button" disabled={off}
               onClick={() => setC("larga", v)}
-              className={`flex-1 py-2 rounded-lg text-[12px] font-bold transition-all disabled:opacity-60 ${
-                calc.larga === v ? "bg-primary text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
-              }`}
+              aria-pressed={calc.larga === v}
             >
               {txt}
             </button>
@@ -237,9 +231,20 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
         <Fila etiqueta="Ya pagado del programa (€)">
           <Numero valor={calc.pagado} onChange={(v) => setC("pagado", v)} disabled={off} />
         </Fila>
-        <Fila etiqueta="Incluir vuelo de regreso" nota="~1.000 € de referencia">
-          <Interruptor activo={calc.incluirVuelo} onClick={() => setC("incluirVuelo", !calc.incluirVuelo)} disabled={off} />
-        </Fila>
+        {/* La fila entera es el interruptor: se toca en cualquier punto. */}
+        <button
+          type="button"
+          className="pnl-interruptor-fila pnl-calc-fila"
+          onClick={() => setC("incluirVuelo", !calc.incluirVuelo)}
+          disabled={off}
+          aria-pressed={!!calc.incluirVuelo}
+        >
+          <span className="flex-1 min-w-0">
+            <span className="pnl-calc-etiqueta">Incluir vuelo de regreso</span>
+            <span className="pnl-calc-nota">~1.000 € de referencia</span>
+          </span>
+          <Interruptor activo={calc.incluirVuelo} />
+        </button>
         {calc.incluirVuelo && (
           <Fila etiqueta="Importe del vuelo (€)">
             <Numero valor={calc.vuelo} onChange={(v) => setC("vuelo", v)} disabled={off} />
@@ -249,9 +254,10 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
           <Numero valor={calc.alojPagado} onChange={(v) => setC("alojPagado", v)} disabled={off} />
         </Fila>
 
-        <details className="mt-2">
-          <summary className="cursor-pointer text-[12px] font-semibold text-neutral-500 py-2 select-none">
-            ⚙ Parámetros (editables)
+        <details className="pnl-calc-parametros">
+          <summary>
+            Parámetros (editables)
+            <IconoLinea nombre="chevron" className="pnl-chev" />
           </summary>
           <Fila etiqueta="IPREM mensual (€)">
             <Numero valor={calc.ipremMes} onChange={(v) => setC("ipremMes", v)} disabled={off} />
@@ -259,53 +265,53 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
           <Fila etiqueta="IPREM anual (€)">
             <Numero valor={calc.anual} onChange={(v) => setC("anual", v)} disabled={off} />
           </Fila>
-          <p className="text-[11px] text-neutral-400 mt-1 leading-snug">
+          <p className="pnl-calc-nota">
             Verifica el IPREM vigente del año en curso: es el importe que el consulado toma como referencia.
           </p>
         </details>
 
         {/* Resultado */}
-        <div className="mt-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-light text-white p-4">
-          <div className="space-y-1">
-            <div className="flex justify-between text-[13px] text-white/70">
+        <div className="pnl-calc-resultado">
+          <div className="pnl-calc-lineas">
+            <div className="pnl-calc-linea">
               <span>100% IPREM {calc.larga ? "(año)" : `(${calc.meses || 0} meses)`}</span>
-              <b className="text-white font-semibold">{eur(r.periodo)} €</b>
+              <b>{eur(r.periodo)} €</b>
             </div>
             {r.familiares > 0 && (
-              <div className="flex justify-between text-[13px] text-white/70">
-                <span>Familiares (75% / 50%)</span><b className="text-white font-semibold">{eur(r.familiares)} €</b>
+              <div className="pnl-calc-linea">
+                <span>Familiares (75% / 50%)</span><b>{eur(r.familiares)} €</b>
               </div>
             )}
             {r.programa > 0 && (
-              <div className="flex justify-between text-[13px] text-white/70">
-                <span>Programa pendiente</span><b className="text-white font-semibold">{eur(r.programa)} €</b>
+              <div className="pnl-calc-linea">
+                <span>Programa pendiente</span><b>{eur(r.programa)} €</b>
               </div>
             )}
             {r.vuelo > 0 && (
-              <div className="flex justify-between text-[13px] text-white/70">
-                <span>Vuelo de regreso</span><b className="text-white font-semibold">{eur(r.vuelo)} €</b>
+              <div className="pnl-calc-linea">
+                <span>Vuelo de regreso</span><b>{eur(r.vuelo)} €</b>
               </div>
             )}
             {r.alojamiento > 0 && (
-              <div className="flex justify-between text-[13px] text-white/70">
-                <span>− Alojamiento pagado</span><b className="text-white font-semibold">−{eur(r.alojamiento)} €</b>
+              <div className="pnl-calc-linea">
+                <span>− Alojamiento pagado</span><b>−{eur(r.alojamiento)} €</b>
               </div>
             )}
           </div>
-          <div className="flex justify-between items-baseline mt-2.5 pt-3 border-t border-white/20">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-white/60">A acreditar</span>
-            <b className="text-3xl font-bold">{eur(r.total)} €</b>
+          <div className="pnl-calc-total">
+            <span>A acreditar</span>
+            <b>{eur(r.total)} €</b>
           </div>
         </div>
       </Tarjeta>
 
       {/* Documentación bancaria base */}
       <Tarjeta titulo="Documentación bancaria (base, siempre)">
-        <p className="text-[13px] text-neutral-600 leading-relaxed mb-3">
-          🏦 Extractos <b>originales</b> de cuenta de <b>ahorro y/o corriente</b>, últimos{" "}
+        <p className="pnl-visado-texto pnl-visado-texto-primero">
+          Extractos <b>originales</b> de cuenta de <b>ahorro y/o corriente</b>, últimos{" "}
           <b>6 meses</b>, con firma y sello del banco.
         </p>
-        <Aviso tono="stop" icono="🚫">
+        <Aviso tono="stop">
           No se admiten: cartas del banco, fondos de inversión, cuentas a plazo, cuentas de empresa,
           cuentas CTS, planes de pensiones ni tarjetas de crédito (esos sólo sirven para justificar
           el origen del dinero).
@@ -314,7 +320,7 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
 
       {/* Perfil de quien financia */}
       <Tarjeta titulo="Perfil de quien financia">
-        <p className="text-[12.5px] text-neutral-500 mb-2.5">
+        <p className="pnl-visado-texto pnl-visado-texto-primero">
           Marca los que apliquen (a ti o a tu avalista). Suman documentos:
         </p>
         <div className="space-y-1.5">
@@ -327,7 +333,7 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
 
       {/* Situaciones especiales */}
       <Tarjeta titulo="Situaciones especiales">
-        <p className="text-[12.5px] text-neutral-500 mb-2.5">
+        <p className="pnl-visado-texto pnl-visado-texto-primero">
           Ingresos repentinos o significativos en la cuenta:
         </p>
         <div className="space-y-1.5">
@@ -340,59 +346,59 @@ export default function VisaMediosEconomicos({ idSolicitud, expediente, onGuarda
 
       {/* Carta aval */}
       {(via === "AVAL" || via === "MIXTO") && (
-        <Tarjeta titulo="Carta aval — obligatoria" borde="border-amber-200">
-          <p className="text-[13px] text-neutral-600 leading-relaxed mb-2.5">
+        <Tarjeta titulo="Carta aval — obligatoria" tono="aviso">
+          <p className="pnl-visado-texto pnl-visado-texto-primero">
             Con avalista directo la carta aval <b>siempre va</b>. Pueden financiarte:
           </p>
           <div className="flex flex-wrap gap-1.5 mb-3">
             {["papá", "mamá", "hermano/a", "tío/a", "abuelo/a"].map((f) => (
-              <span key={f} className="text-[11.5px] font-bold text-primary bg-neutral-50 border border-neutral-200 px-2.5 py-1 rounded-full">
+              <span key={f} className="pnl-chip" data-talla="sm">
                 {f}
               </span>
             ))}
           </div>
-          <ul className="space-y-1.5 text-[13px] text-neutral-600 leading-relaxed">
-            <li>📝 Carta aval <b>ante notario, legalizada por el Colegio de Notarios y apostillada</b>, indicando que cubre todos los costes.</li>
-            <li>🔗 Vínculo familiar directo, <b>apostillado</b>.</li>
-            <li>📄 Toda la documentación económica del avalista + tu situación personal, laboral y financiera.</li>
+          <ul className="space-y-1.5">
+            <li className="pnl-lista-check pnl-lista-icono"><IconoPaso nombre="fileText" /><span>Carta aval <b>ante notario, legalizada por el Colegio de Notarios y apostillada</b>, indicando que cubre todos los costes.</span></li>
+            <li className="pnl-lista-check pnl-lista-icono"><IconoPaso nombre="external" /><span>Vínculo familiar directo, <b>apostillado</b>.</span></li>
+            <li className="pnl-lista-check pnl-lista-icono"><IconoPaso nombre="fileText" /><span>Toda la documentación económica del avalista + tu situación personal, laboral y financiera.</span></li>
           </ul>
         </Tarjeta>
       )}
 
       {/* Lista resultante */}
-      <Tarjeta titulo="Tu lista de solvencia" borde="border-emerald-200">
+      <Tarjeta titulo="Tu lista de solvencia" tono="ok">
         <ul className="space-y-1.5">
           {lista.map((d) => (
-            <li key={d} className="flex gap-2 text-[13px] text-neutral-700 leading-relaxed">
-              <span className="shrink-0 text-[#1D6A4A] font-bold">✓</span>
+            <li key={d} className="pnl-lista-check">
+              <IconoPaso nombre="check" />
               <span>{d}</span>
             </li>
           ))}
         </ul>
       </Tarjeta>
 
-      <Aviso tono="info" icono="🌐">
+      <Aviso tono="info" icono={<Icono nombre="globo" size={16} />}>
         Todo documento extranjero debe ir <b>legalizado o apostillado</b>. Si no está en español,
         con <b>traducción oficial</b>. Presenta <b>original + una copia</b>.
       </Aviso>
 
       {/* Guardado */}
       {!bloqueado && (
-        <div className="sticky bottom-0 -mx-1 px-1 pt-2 pb-1 bg-gradient-to-t from-white via-white to-transparent">
+        <div className="pnl-barra-guardar sticky bottom-[var(--selector-alto)] z-[14] flex-wrap">
           {aviso && (
-            <div className="mb-2">
-              <Aviso tono={aviso.tono} icono={aviso.tono === "ok" ? "✔" : "⚠️"}>{aviso.texto}</Aviso>
+            <div className="w-full">
+              <Aviso tono={aviso.tono}>{aviso.texto}</Aviso>
             </div>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button" onClick={guardar} disabled={guardando}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1D6A4A] text-white text-sm font-semibold shadow-sm hover:bg-[#175a3e] active:scale-95 transition-all disabled:opacity-60 disabled:active:scale-100"
+              className="pnl-btn-primario"
             >
-              {guardando && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+              {guardando && <span className="pnl-spinner" data-talla="s" />}
               {guardando ? "Guardando…" : "Guardar"}
             </button>
-            <p className="text-[11.5px] text-neutral-400">
+            <p className="pnl-barra-guardar-texto" data-sucio={sucio ? "1" : undefined}>
               {sucio ? "Tienes cambios sin guardar" : `${lista.length} documentos en tu lista`}
             </p>
           </div>

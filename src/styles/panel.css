@@ -4,26 +4,149 @@
    backoffice, que tiene su propia estética.
    ========================================================================== */
 
+/* ── Tokens del panel (25/10/2026) ──────────────────────────────────────
+   Es la única fuente de variables del panel: el bloque .pnl que había en
+   panel-app.css se quitó y sus cinco variables (--muelle, --salida,
+   --tabbar-alto, --sombra-1, --sombra-2) viven aquí con el mismo valor. Se
+   conservan TODOS los nombres que ya leen las hojas (--ink --muted --primary
+   --primary-2 --accent --accent-2 --sky --sky-2 --sky-soft --sun --green
+   --surface --line --ease --salida --muelle --tabbar-alto --sombra-1
+   --sombra-2); de los de antes solo cambia de valor --muted (#62808f → #587583).
+   PROHIBIDO redeclarar dentro de .pnl las variables de ergonomia.css y
+   v4.css (familias t-, r-, e- y el-, y tap, tap-min, abajo, transicion,
+   radius, shadow y surface-2): las declaran en :root y las leen las clases
+   ux-*. Se pueden LEER (abajo, por ejemplo). El espejo de Tailwind está en
+   tailwind.config.js. */
 .pnl {
-  --ink: #0d2c3a;
-  --muted: #62808f;
-  --primary: #013446;
-  --primary-2: #02506b;
-  --accent: #fa943a;
-  --accent-2: #ffb066;
-  --sky: #88c4fc;
-  --sky-2: #4e9ee8;
-  --sky-soft: #e3f0fe;
-  --sun: #f9c846;
-  --green: #1d6a4a;
-  --surface: #f4f9fe;
-  --line: #d8e7f5;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* ── Marca: hex del logo; al lado, su rol en el manual de redes ── */
+  --primary: #013446;        /* Noche */
+  --primary-2: #02506b;      /* Noche-2 · eyebrow y enlaces sobre claro, 8,9:1 (7,7:1 sobre bruma) */
+  --primary-dark: #01222e;   /* Tinta · texto SOBRE sol: 7,4:1 sobre --accent, 5,5:1 sobre --accent-dark */
+  --noche-1: #012938;
+  --sky: #88c4fc;            /* Cielo · texto e icono sobre noche */
+  --sky-2: #4e9ee8;          /* trazo, relleno, foco · nunca texto (2,9:1) */
+  --sky-soft: #e3f0fe;       /* Bruma */
+  --accent: #fa943a;         /* Sol · fondo del CTA, punto, contador, «ahora» · nunca texto sobre claro */
+  --accent-2: #ffb066;       /* sol sobre noche (4,9:1 sobre #02506b) */
+  --accent-dark: #e07a1c;
+  --sun: #f9c846;            /* beca y destacado · nunca texto */
 
-  font-family: Montserrat, system-ui, sans-serif;
+  /* ── Tinta ── */
+  --ink: #0d2c3a;            /* 14:1 */
+  --ink-2: #4d6775;          /* texto secundario · 6,0 papel, 5,6 --surface, >= 5,1 sobre CUALQUIER *-soft, tile o pista */
+  --muted: #587583;          /* meta >= 12 px · 4,9 papel, 4,6 --surface · NUNCA sobre *-soft, tile ni pista (4,2-4,5) */
+  --trazo: #7a93a2;          /* borde de campo y casilla, chevrón que anuncia un pliegue · 3,2:1 */
+  --decor: #9db0ba;          /* línea de adorno · NUNCA texto ni única señal */
+
+  /* ── Superficies y líneas ── */
+  --surface: #f4f9fe;        /* fondo de página */
+  --papel: #ffffff;
+  --fondo-suave: #f7fafc;    /* fila de archivo, zona de subida, pie de formulario */
+  --fondo-tile: #eef4f7;     /* tile neutro, pista de segmentos */
+  --pista: #e7eff6;          /* fondo de barras y rieles */
+  --line: #d8e7f5;           /* borde de tarjeta */
+  --line-suave: #eaf1f7;     /* divisor dentro de una tarjeta */
+
+  /* ── Estados: base (filo, punto, barra) / soft (fondo) / ink (texto sobre soft, >= 5,9:1) ── */
+  --green: #1d6a4a;   --ok-soft: #e7f5ed;     --ok-ink: #15603f;
+  --aviso: #fa943a;   --aviso-soft: #fdf3e3;  --aviso-ink: #8a4f12;
+  --alto: #be3c42;    --alto-soft: #fdecec;   --alto-ink: #a5262f;
+  --info: #4e9ee8;    --info-soft: #e3f0fe;   --info-ink: #17608f;
+  --neutro: #7a93a2;  --neutro-soft: #eef4f7; --neutro-ink: #2c4a58;
+
+  /* ── Noche: solo lateral, saludo, bienvenida, cabecera de perfil, guías y becas ──
+     AA medido en el PEOR punto del halo: el texto sobre noche solo lleva debajo halo cielo <= .22
+     (el saludo baja el suyo de .38 a este token) y halo sol <= .30. */
+  --noche: linear-gradient(150deg, #012938 0%, #013446 48%, #02506b 100%);
+  --halo-cielo: rgba(136, 196, 252, .22);
+  --halo-sol: rgba(250, 148, 58, .18);
+  --reticula: 46px;
+  --reticula-trazo: rgba(255, 255, 255, .035);
+  --sobre-noche-2: rgba(255, 255, 255, .90);  /* cuerpo · >= 4,76:1 aun con halo cielo .28 */
+  --sobre-noche-3: rgba(255, 255, 255, .85);  /* meta y eyebrow en mayúsculas · >= 4,87:1 con halo cielo .22, >= 5,0 en el lateral */
+  --cristal: rgba(255, 255, 255, .10);        /* botón de cristal: su texto va en #fff al 100 % (>= 5,9:1 fuera del halo cielo) */
+  --cristal-borde: rgba(255, 255, 255, .22);
+  --cristal-texto: rgba(1, 41, 56, .35);      /* tile de cristal QUE LLEVA TEXTO (cifras del saludo, líneas de bienvenida): texto .85 >= 5,57:1 aun sobre halo .38 */
+  --ok-noche: #9fe0bf;
+  --alto-noche: #ffb4a8;
+
+  /* ── Tipografía: Montserrat 500/600/700/800; Merriweather SOLO 700 y >= 20 px ──
+     Mínimo 12 px. 11 px SOLO en: eyebrow en mayúsculas (700), contadores numéricos (800) y etiquetas del tabbar (600, excepción declarada). */
+  --f-texto: Montserrat, 'Montserrat ajuste', system-ui, sans-serif;
+  --f-display: Merriweather, 'Merriweather ajuste', 'Merriweather ajuste Noto', Georgia, serif;
+  --fs-eyebrow: 11px;    /* 700 · MAYÚSCULAS · tracking .12em */
+  --fs-meta: 12px;       /* 500-600 · lh 1.4 · fechas, «se guarda solo», chip sm */
+  --fs-cuerpo-sm: 13px;  /* 500 · lh 1.5 · descripciones */
+  --fs-cuerpo: 14px;     /* 500 · lh 1.55 · texto; botones en 600 */
+  --fs-lectura: 15px;    /* 700 títulos de fila · 500/1.6 párrafos de guía */
+  --fs-titulo: 17px;     /* 700 Montserrat · cabecera de tarjeta y de hoja */
+  --fs-display-2: 20px;  /* Merriweather 700 · título de paso, sección y página (22 desde 640) */
+  --fs-display-1: 26px;  /* Merriweather 700 · saludo y cifras grandes (30 desde 640) */
+  --fs-campo: 16px;      /* 14 con puntero fino: iOS no amplía al enfocar */
+  --tracking-eyebrow: .12em;
+
+  /* ── Espacio (base 4) ── */
+  --esp-1: 4px;  --esp-2: 8px;  --esp-3: 12px; --esp-4: 16px;
+  --esp-5: 20px; --esp-6: 24px; --esp-7: 32px; --esp-8: 40px;
+  --gutter: 16px;          /* = px-4 de PanelCliente.jsx:495; 24 desde 640 (= sm:px-6) */
+  --pad-tarjeta: 16px;     /* 20 desde 640 */
+  --hueco-seccion: 24px;   /* entre bloques de una pantalla; 32 desde 1024 */
+  --pnl-tap: 44px;         /* 40 con puntero fino */
+  --pnl-tap-s: 36px;       /* alto VISIBLE de la talla s; el toque llega a 44 con ::before en puntero grueso */
+  --tabbar-alto: 64px;
+  --selector-alto: 0px;      /* el visado lo pone a calc(68px + env(safe-area-inset-bottom)) por debajo de 1024 */
+  --pnl-barra-abajo: 0px;    /* alto de una .pnl-barra-guardar presente; lo sube expediente.css con :has() */
+
+  /* ── Radios (5 + píldora) ── */
+  --radio-xs: 8px;         /* número de documento, esqueleto de línea */
+  --radio-s: 12px;         /* campo, tile, fila de archivo, botón-icono */
+  --radio-m: 16px;         /* aviso, fila de lista, tarjeta anidada */
+  --radio-l: 20px;         /* tarjeta */
+  --radio-xl: 24px;        /* saludo, hoja, tabbar, vacío */
+  --radio-pildora: 999px;  /* botón y chip */
+
+  /* ── Elevación: el relieve lo da el borde; sombra teñida de petróleo; color solo en el CTA ── */
+  --sombra-1: 0 1px 2px rgba(1, 52, 70, .05), 0 8px 24px -12px rgba(1, 52, 70, .14);
+  --sombra-2: 0 2px 6px rgba(1, 52, 70, .06), 0 22px 44px -18px rgba(1, 52, 70, .26);
+  --sombra-3: 0 24px 60px -24px rgba(1, 41, 56, .45);
+  --sombra-noche: 0 24px 50px -28px rgba(1, 41, 56, .6);
+  --sombra-cta: 0 8px 18px -6px rgba(250, 148, 58, .45);
+  --foco-anillo: #3a8ad8;                        /* 3,6:1 */
+  --foco-noche: #fff;                            /* el anillo sobre noche: el azul no se ve */
+  --foco: 0 0 0 3px rgba(78, 158, 232, .35);
+  --seleccion: 0 0 0 3px var(--sky-soft);
+  --velo: rgba(1, 26, 38, .5);
+
+  /* ── Movimiento: dos curvas de hoy + la de salida; cuatro duraciones ── */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --salida: cubic-bezier(.22, 1, .36, 1);
+  --muelle: cubic-bezier(.34, 1.36, .64, 1);
+  --sale: cubic-bezier(.4, 0, 1, 1);
+  --d-toque: 80ms;   /* :active */
+  --d-corta: 200ms;  /* hover, color, chevrón, chip */
+  --d-media: 320ms;  /* pliegue, cambio de paso, view transition */
+  --d-larga: 480ms;  /* cascada, hoja, barras */
+  --escalon: 50ms;
+
+  font-family: var(--f-texto);
   color: var(--ink);
   background: var(--surface);
 }
+@media (min-width: 640px)  { .pnl { --gutter: 24px; --pad-tarjeta: 20px; --fs-display-2: 22px; --fs-display-1: 30px; } }
+@media (min-width: 1024px) { .pnl { --hueco-seccion: 32px; } }
+@media (pointer: fine)     { .pnl { --fs-campo: 14px; --pnl-tap: 40px; } }
+
+/* Un tono por atributo: lo leen chip, aviso, tile, filo, punto, plazo, pendiente y dato de pago.
+   Incluye los valores que YA emite el código (no se tocan los .js): 'error' (.pnl-arch-aviso),
+   'tipo'/'neutral' (pagosCliente.js, doctorado.js, utils.js, MisPagos), 'importante' (AyudaPlegable),
+   'etapa' (chip de etapa) y 'stop' (Aviso del visado). 'warn' NO está aquí a propósito: su significado
+   depende de la pieza y lo mapea cada hoja de bloque. --tono no choca: TarjetaMaster lo pone en línea (style).
+   Cada componente declara su tono POR DEFECTO con :not([data-tono]) — nunca con var(--tono-x, reserva). */
+.pnl [data-tono='ok']                                                   { --tono: var(--green);  --tono-soft: var(--ok-soft);     --tono-ink: var(--ok-ink); }
+.pnl [data-tono='aviso'], .pnl [data-tono='importante']                 { --tono: var(--aviso);  --tono-soft: var(--aviso-soft);  --tono-ink: var(--aviso-ink); }
+.pnl [data-tono='alto'], .pnl [data-tono='error'], .pnl [data-tono='stop'] { --tono: var(--alto); --tono-soft: var(--alto-soft); --tono-ink: var(--alto-ink); }
+.pnl [data-tono='info'], .pnl [data-tono='etapa']                       { --tono: var(--info);   --tono-soft: var(--info-soft);   --tono-ink: var(--info-ink); }
+.pnl [data-tono='neutro'], .pnl [data-tono='tipo'], .pnl [data-tono='neutral'] { --tono: var(--neutro); --tono-soft: var(--neutro-soft); --tono-ink: var(--neutro-ink); }
 .pnl * { box-sizing: border-box; }
 
 /* ── Barra lateral ───────────────────────────────────────────────────

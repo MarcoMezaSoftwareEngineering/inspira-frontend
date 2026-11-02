@@ -141,9 +141,9 @@ export function docsDelPaso(paso, checklist = []) {
 }
 
 export const ETIQUETA_DOC = {
-  listo: { texto: "Listo", tono: "ok" },
+  listo: { texto: "Aprobado", tono: "ok" },
   revision: { texto: "En revisión", tono: "info" },
   corregir: { texto: "Por corregir", tono: "alto" },
-  falta: { texto: "Falta", tono: "aviso" },
+  falta: { texto: "Pendiente", tono: "aviso" },
   sin_pedir: { texto: "Te lo pedirá tu asesor", tono: "tipo" },
 };

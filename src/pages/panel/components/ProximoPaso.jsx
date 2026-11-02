@@ -10,6 +10,7 @@ import { SERVICIO, servicioDe } from "../servicios";
 import { recorta, plural } from "../pendientes";
 import { cuentaPostulaciones, puntoDeRuta } from "../rutaCliente";
 import { fechaLegible } from "../queMeFalta";
+import { ICONO_SERVICIO } from "../iconoServicio";
 
 const CON_FALTA = [SERVICIO.MASTER, SERVICIO.VISADO, SERVICIO.ESTANCIA];
 
@@ -34,9 +35,9 @@ export function ProximoPaso({ items, servicios }) {
     const despues = actual || siguiente;
     return (
       <section className="ex-proximo" data-tono="ok">
-        <span className="ex-proximo-eyebrow">Tu próximo paso</span>
+        <span className="ex-proximo-eyebrow pnl-eyebrow"><span className="punto" aria-hidden="true" />Tu próximo paso</span>
         <div className="ex-proximo-fila">
-          <span className="ex-proximo-icono"><Icono nombre="escudo" size={20} /></span>
+          <span className="ex-proximo-icono"><Icono nombre="escudo" size={22} /></span>
           <div className="min-w-0 flex-1">
             <h2 className="ex-proximo-titulo">Todo al día</h2>
             <p className="ex-proximo-detalle">
@@ -48,7 +49,7 @@ export function ProximoPaso({ items, servicios }) {
         </div>
         <div className="ex-proximo-botones">
           <button type="button" className="pnl-btn ux-tap" onClick={() => navigate(rutaDe({ tab: "ruta" }))}>
-            <Icono nombre="avion" size={15} />
+            <Icono nombre="avion" size={16} />
             Ver mi ruta
           </button>
         </div>
@@ -59,9 +60,9 @@ export function ProximoPaso({ items, servicios }) {
   const dias = diasHasta(primero.fecha);
   return (
     <section className="ex-proximo" data-tono={primero.tono}>
-      <span className="ex-proximo-eyebrow">Tu próximo paso</span>
+      <span className="ex-proximo-eyebrow pnl-eyebrow"><span className="punto" aria-hidden="true" />Tu próximo paso</span>
       <div className="ex-proximo-fila">
-        <span className="ex-proximo-icono"><Icono nombre={primero.icono} size={20} /></span>
+        <span className="ex-proximo-icono"><Icono nombre={primero.icono} size={22} /></span>
         <div className="min-w-0 flex-1">
           <h2 className="ex-proximo-titulo">{primero.texto}</h2>
           {(primero.detalle || primero.servicio) && (
@@ -77,14 +78,14 @@ export function ProximoPaso({ items, servicios }) {
         </div>
       </div>
       <div className="ex-proximo-botones">
-        <button type="button" className="pnl-btn-cta ux-tap" onClick={() => navigate(primero.href)}>
+        <button type="button" className="pnl-btn-cta pnl-btn-grande ux-tap" onClick={() => navigate(primero.href)}>
           {primero.accion}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M13.5 4.5 21 12l-7.5 7.5M21 12H3" />
           </svg>
         </button>
         {irFalta && (
-          <button type="button" className="ex-proximo-falta" onClick={irFalta}>¿Qué me falta?</button>
+          <button type="button" className="ex-proximo-falta pnl-btn-texto" onClick={irFalta}>¿Qué me falta?</button>
         )}
       </div>
     </section>
@@ -92,7 +93,7 @@ export function ProximoPaso({ items, servicios }) {
 }
 
 function Dato({ n, texto, tono = "tipo" }) {
-  return <span className={`pnl-chip pnl-chip-${tono}`}>{n != null ? <b>{n}</b> : null}{texto}</span>;
+  return <span className="pnl-chip" data-tono={tono} data-talla="sm">{n != null ? <b>{n}</b> : null}{texto}</span>;
 }
 
 function TarjetaResumen({ s }) {
@@ -106,7 +107,7 @@ function TarjetaResumen({ s }) {
   // tarea del asesorado (ver pendientes.js), así que no se enseña.
   const docs = [];
   if (r.docs_observados > 0) docs.push(<Dato key="obs" n={r.docs_observados} texto=" por corregir" tono="alto" />);
-  if ((propia || tipo === SERVICIO.VISADO) && r.docs_pendientes > 0) docs.push(<Dato key="pen" n={r.docs_pendientes} texto=" sin subir" tono="aviso" />);
+  if ((propia || tipo === SERVICIO.VISADO) && r.docs_pendientes > 0) docs.push(<Dato key="pen" n={r.docs_pendientes} texto={r.docs_pendientes === 1 ? " pendiente" : " pendientes"} tono="aviso" />);
   if (r.docs_observados === 0 && !(propia && r.docs_pendientes > 0)) docs.push(<Dato key="ok" texto="Sin correcciones" tono="ok" />);
   filas.push({ clave: "docs", titulo: "Documentos", datos: docs, onIr: () => ir("docs") });
 
@@ -134,7 +135,7 @@ function TarjetaResumen({ s }) {
   if (tipo === SERVICIO.ESTANCIA) {
     const est = [
       r.etapa_propia ? <Dato key="et" texto={r.etapa_propia} tono="info" /> : null,
-      r.datos_faltan > 0 ? <Dato key="df" n={r.datos_faltan} texto=" datos por completar" tono="aviso" /> : null,
+      r.datos_faltan > 0 ? <Dato key="df" n={r.datos_faltan} texto={r.datos_faltan === 1 ? " dato por completar" : " datos por completar"} tono="aviso" /> : null,
     ].filter(Boolean);
     if (est.length) filas.push({ clave: "estado", titulo: "Tu trámite", datos: est, onIr: () => ir(null) });
   }
@@ -158,8 +159,11 @@ function TarjetaResumen({ s }) {
   return (
     <article className="ex-resumen-tarjeta">
       <header className="ex-resumen-cabeza">
-        <h3 className="text-primary" title={s.titulo}>{recorta(s.invitado ? `Expediente de ${s.titular}` : s.titulo, 48)}</h3>
-        <button type="button" className="ex-resumen-abrir text-primary" onClick={() => ir(null)} aria-label="Abrir expediente">
+        <span className="pnl-ico" data-talla="m" aria-hidden="true">
+          <Icono nombre={ICONO_SERVICIO[tipo] || "documento"} size={16} />
+        </span>
+        <h3 title={s.titulo}>{recorta(s.invitado ? `Expediente de ${s.titular}` : s.titulo, 80)}</h3>
+        <button type="button" className="ex-resumen-abrir pnl-btn" data-talla="s" onClick={() => ir(null)} aria-label="Abrir expediente">
           Abrir
           <Icono nombre="documento" size={14} />
         </button>
@@ -190,13 +194,13 @@ export function ResumenExpediente({ servicios, onRecargar = null }) {
         <h2>Tus servicios</h2>
         {/* Recargar también en el ordenador, donde no se tira hacia abajo. */}
         {onRecargar && (
-          <button type="button" className="pnl-recargar" onClick={() => onRecargar()} aria-label="Actualizar">
+          <button type="button" className="pnl-recargar pnl-btn-icono" data-talla="s" onClick={() => onRecargar()} aria-label="Actualizar">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
             </svg>
           </button>
         )}
-        <button type="button" onClick={() => navigate(rutaDe({ tab: "servicios" }))}>
+        <button type="button" className="pnl-btn-texto" onClick={() => navigate(rutaDe({ tab: "servicios" }))}>
           Ver todos
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
         </button>

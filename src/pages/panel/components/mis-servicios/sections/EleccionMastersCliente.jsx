@@ -4,6 +4,7 @@ import SeccionPanel from "./SeccionPanel";
 import TarjetaMaster from "../../../../../components/common/TarjetaMaster";
 import IconoPaso from "../../../../../components/common/IconoPaso";
 import BaremoMaster from "../../../../../components/BaremoMaster";
+import { IconoLinea } from "../utils";
 
 // ── Tarjeta compacta de máster ────────────────────────────────────────────────
 
@@ -83,7 +84,7 @@ function MasterCardVieja({ master, score, prioridad, selected, comentario, onTog
               </span>
             )}
             {master.es_ancla && (
-              <span className="text-[10px] font-semibold bg-[#EEF2F8] text-[#1A3557] border border-[#c9d6e6] px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-semibold bg-info-soft text-primary border border-linea px-1.5 py-0.5 rounded">
                 El que nos indicó
               </span>
             )}
@@ -288,7 +289,7 @@ export default function EleccionMastersCliente({
       estado={estado}
       sectionId="5"
       grow
-      contentClassName="flex-1 min-h-0 flex flex-col overflow-hidden"
+      contentClassName="flex-1 min-h-0 flex flex-col lg:overflow-hidden"
     >
       <div className="flex flex-col flex-1 min-h-0">
 
@@ -296,20 +297,20 @@ export default function EleccionMastersCliente({
 
           {/* Sin formulario guardado */}
           {!hasFormData && !loadingCompat && !compat?.resultados?.length && (
-            <div className="bg-neutral-50 rounded-xl p-4 text-sm text-neutral-500">
-              Completa el formulario académico para ver los másteres recomendados aquí.
+            <div className="pnl-vacio-suave">
+              <p>Completa el formulario académico para ver los másteres recomendados aquí.</p>
             </div>
           )}
 
           {/* Cargando másteres */}
           {loadingCompat && (
-            <div className="flex items-center gap-3 py-6 px-4 bg-neutral-50 rounded-xl">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <div className="w-5 h-5 border-2 border-primary-light border-t-transparent rounded-full animate-spin" />
+            <div className="flex items-center gap-3 py-6 px-4 bg-fondo rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-info-soft flex items-center justify-center shrink-0">
+                <span className="pnl-spinner" data-talla="s" />
               </div>
               <div>
-                <p className="text-sm font-medium text-neutral-800">Cargando másteres recomendados…</p>
-                <p className="text-xs text-neutral-500 mt-0.5">Estamos preparando tu selección personalizada.</p>
+                <p className="text-sm font-semibold text-tinta">Cargando másteres recomendados…</p>
+                <p className="text-meta text-tinta-2 mt-0.5">Estamos preparando tu selección personalizada.</p>
               </div>
             </div>
           )}
@@ -317,9 +318,9 @@ export default function EleccionMastersCliente({
           {/* Informe disponible */}
           {!loadingCompat && compat && (
             <>
-              <div className="flex items-start gap-2 bg-primary/5 rounded-xl px-3 py-2.5 mb-2 text-xs text-neutral-600">
-                <span className="shrink-0 mt-0.5">ℹ️</span>
-                <span>Toca un programa para seleccionarlo. <strong>El orden importa</strong> — el primero es tu primera opción.</span>
+              <div className="pnl-aviso pnl-aviso-bloque pnl-eleccion-ayuda" data-tono="info">
+                <span className="pnl-aviso-icono"><IconoLinea nombre="info" /></span>
+                <span className="pnl-aviso-texto">Toca un programa para seleccionarlo. <strong>El orden importa</strong> — el primero es tu primera opción.</span>
               </div>
 
               {seleccion.length > 0 && (
@@ -327,16 +328,19 @@ export default function EleccionMastersCliente({
                   {/* Lo que decidió el asesor sobre cada máster, y su nota. Antes
                       se guardaba y el asesorado no lo veía por ningún lado. */}
                   {seleccion.some((s) => s.plan_incluido != null) && (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 px-3.5 py-3 text-[12.5px] text-neutral-700 leading-relaxed">
-                      <p className="font-bold text-emerald-800">Tu asesor ya revisó tu elección.</p>
+                    <div className="pnl-aviso pnl-aviso-bloque" data-tono="ok">
+                      <span className="pnl-aviso-icono"><IconoLinea nombre="checkCircle" /></span>
+                      <div className="pnl-aviso-texto">
+                      <p className="pnl-informe-nota-titulo">Tu asesor ya revisó tu elección.</p>
                       <p>
                         {seleccion.filter((s) => s.plan_incluido === true).length} entran en tu plan y ya están en «Postulaciones»;{" "}
                         {seleccion.filter((s) => s.plan_incluido === false).length} quedan para coordinar contigo.
                       </p>
-                      {notaAsesor && <p className="mt-1.5 italic text-neutral-600">«{notaAsesor}»</p>}
+                      {notaAsesor && <p className="pnl-eleccion-nota">«{notaAsesor}»</p>}
+                      </div>
                     </div>
                   )}
-                  <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide px-1 pt-1">
+                  <p className="pnl-eyebrow pnl-eleccion-rotulo">
                     Seleccionados · {seleccion.length}
                   </p>
                   {seleccion.map((s) => {
@@ -351,8 +355,9 @@ export default function EleccionMastersCliente({
                     return (
                       <div key={s.id_master} className="space-y-1">
                         {s.plan_incluido != null && (
-                          <p className={`text-[11px] font-bold px-1 ${s.plan_incluido ? "text-emerald-700" : "text-amber-700"}`}>
-                            {s.plan_incluido ? "✓ En tu plan: pasa a postulación." : "◌ Para coordinar con tu asesor."}
+                          <p className="pnl-eleccion-plan" data-tono={s.plan_incluido ? "ok" : "aviso"}>
+                            <IconoLinea nombre={s.plan_incluido ? "check" : "clock"} className="w-3.5 h-3.5" strokeWidth={2.2} />
+                            {s.plan_incluido ? "En tu plan: pasa a postulación." : "Para coordinar con tu asesor."}
                           </p>
                         )}
                         <MasterCard
@@ -372,7 +377,7 @@ export default function EleccionMastersCliente({
 
               {noSeleccionados.length > 0 && (
                 <>
-                  <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide px-1 pt-2">
+                  <p className="pnl-eyebrow pnl-eleccion-rotulo">
                     {seleccion.length > 0 ? "Otros del informe" : `Del informe · ${compat.total} programas`}
                   </p>
                   {noSeleccionados.map((r) => (
@@ -391,7 +396,7 @@ export default function EleccionMastersCliente({
               )}
 
               {resultados.length === 0 && (
-                <p className="text-sm text-neutral-400 italic py-6 text-center">
+                <p className="text-sm text-muted italic py-6 text-center">
                   El informe no tiene programas compatibles aún.
                 </p>
               )}
@@ -400,8 +405,8 @@ export default function EleccionMastersCliente({
 
           {/* Formulario guardado pero sin compat (error de API) */}
           {hasFormData && !loadingCompat && !compat && (
-            <div className="bg-neutral-50 rounded-xl p-4 text-sm text-neutral-500">
-              No se pudo cargar el informe. Recarga la página para intentarlo de nuevo.
+            <div className="pnl-vacio-suave">
+              <p>No se pudo cargar el informe. Recarga la página para intentarlo de nuevo.</p>
             </div>
           )}
         </div>
@@ -410,10 +415,9 @@ export default function EleccionMastersCliente({
             pulgar de quien sostiene el teléfono con una mano, y el asesorado
             elige másteres desplazando una lista larga. El respiro de abajo
             evita que la barra de gestos de iOS se coma el botón. */}
-        <div className="shrink-0 sticky bottom-0 z-20 border-t border-neutral-100 bg-white/95 backdrop-blur px-4 py-3 flex items-center justify-between gap-3"
-          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}>
+        <div className="pnl-barra-guardar shrink-0 sticky bottom-0 z-20 px-4 justify-between">
           <div className="flex items-center gap-3">
-            <p className="text-xs text-neutral-500">
+            <p className="pnl-barra-guardar-texto">
               {filled > 0
                 ? `${filled} seleccionado${filled > 1 ? "s" : ""}`
                 : "Ninguno seleccionado"}
@@ -422,7 +426,8 @@ export default function EleccionMastersCliente({
               <button
                 type="button"
                 onClick={limpiarSeleccion}
-                className="ux-tap ux-tap-invisible text-[11.5px] text-neutral-400 hover:text-red-500 underline px-1"
+                className="pnl-btn-texto pnl-eleccion-limpiar"
+                data-talla="s"
               >
                 Limpiar
               </button>
@@ -431,11 +436,11 @@ export default function EleccionMastersCliente({
           <button
             onClick={handleGuardar}
             disabled={saving || filled === 0}
-            className="ux-tap inline-flex items-center justify-center gap-2 text-sm font-semibold px-5 min-h-[48px] rounded-xl bg-primary text-white hover:bg-primary-light disabled:opacity-40 shadow-sm"
+            className="pnl-btn-primario"
           >
             {saving ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                <span className="pnl-spinner" data-talla="s" />
                 Guardando…
               </>
             ) : (

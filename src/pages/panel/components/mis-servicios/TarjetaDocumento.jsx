@@ -7,16 +7,22 @@
 // Sirve para el titular y para cada acompañante: lo único que cambia es `base`,
 // el trozo de URL del que cuelgan sus documentos.
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { apiUpload, apiDELETE } from "../../../../services/api";
 import VisorArchivo from "../../../../components/common/VisorArchivo";
 import useSubidaDocumento from "../../hooks/useSubidaDocumento";
 import AvisoArchivo, { BotonHacerFoto } from "./AvisoArchivo";
+import IconoPaso from "../../../../components/common/IconoPaso";
+import { IconoAlerta } from "./Bloques";
 
+// La ficha toma la anatomía .ex-doc del máster (styles/panel/base.css): icono,
+// nombre, chip de estado, zona de subida punteada y archivos en fila. El tono
+// del chip y `e`, el estado que colorea el icono de la ficha.
 const ESTADO_DOC = {
-  SIN_SUBIR: { label: "Pendiente",   bg: "bg-amber-50",   text: "text-amber-700",   borde: "border-neutral-200 bg-white" },
-  PENDIENTE: { label: "En revisión", bg: "bg-sky-50",     text: "text-sky-700",     borde: "border-sky-200 bg-sky-50/30" },
-  APROBADO:  { label: "Aprobado",    bg: "bg-emerald-50", text: "text-emerald-700", borde: "border-emerald-200 bg-emerald-50/20" },
-  OBSERVADO: { label: "Corrígelo",   bg: "bg-red-50",     text: "text-red-700",     borde: "border-red-300 bg-red-50/30" },
+  SIN_SUBIR: { label: "Pendiente",   tono: "neutro", e: "pendiente" },
+  PENDIENTE: { label: "En revisión", tono: "info",   e: "revision" },
+  APROBADO:  { label: "Aprobado",    tono: "ok",     e: "aprobado" },
+  OBSERVADO: { label: "Por corregir", tono: "alto",   e: "observado" },
 };
 
 /** El resumen de arriba: cuántos van y cuántos quedan. */
@@ -24,21 +30,24 @@ export function ResumenDocumentos({ ranuras }) {
   const lista = Object.values(ranuras || {}).filter((r) => r.de === "cliente");
   const cuenta = (est) => lista.filter((r) => r.estado === est).length;
 
+  // Las mismas palabras que el chip de cada ficha, en plural cuando toca.
   const grupos = [
-    ["Aprobados", cuenta("APROBADO"), "bg-emerald-500", "text-emerald-700"],
-    ["En revisión", cuenta("PENDIENTE"), "bg-sky-500", "text-sky-700"],
-    ["Por corregir", cuenta("OBSERVADO"), "bg-red-500", "text-red-700"],
-    ["Sin subir", cuenta("SIN_SUBIR"), "bg-neutral-300", "text-neutral-500"],
+    [cuenta("APROBADO") === 1 ? "aprobado" : "aprobados", cuenta("APROBADO"), "ok"],
+    ["en revisión", cuenta("PENDIENTE"), "info"],
+    ["por corregir", cuenta("OBSERVADO"), "alto"],
+    [cuenta("SIN_SUBIR") === 1 ? "pendiente" : "pendientes", cuenta("SIN_SUBIR"), "neutro"],
   ].filter(([, n]) => n > 0);
 
   return (
-    <div className="flex items-center gap-x-4 gap-y-1.5 flex-wrap mb-3">
-      {grupos.map(([label, n, punto, texto]) => (
-        <span key={label} className="inline-flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-full ${punto}`} />
-          <span className={`text-[12.5px] font-semibold ${texto}`}>{n} {label}</span>
-        </span>
-      ))}
+    <div className="pnl-docs-resumen mb-3">
+      <div className="pnl-docs-resumen-chips">
+        {grupos.map(([label, n, tono]) => (
+          <span key={label} className="pnl-chip" data-talla="sm" data-tono={tono}>
+            <span className="punto" />
+            {n} {label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -79,72 +88,71 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
   }
 
   const textoSubida = subida.preparando ? "Preparando…" : subiendo ? "Subiendo…"
-    : def.estado === "OBSERVADO" ? "↑ Subir la corrección"
-    : def.archivos.length ? (def.varios ? "↑ Añadir otro archivo" : "↑ Reemplazar el archivo")
-    : "↑ Subir archivo";
+    : def.estado === "OBSERVADO" ? "Corregir"
+    : def.archivos.length ? (def.varios ? "Añadir otro archivo" : "Reemplazar el archivo")
+    : "Subir archivo";
 
   return (
-    <div className={`border rounded-xl p-3.5 flex flex-col gap-2 ${cfg.borde}`}>
-      <div className="flex items-start gap-3">
-        <p className="text-[14px] font-semibold text-neutral-900 leading-snug min-w-0 flex-1">
-          {def.etiqueta}
-        </p>
-        <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full
-          ${cfg.bg} ${cfg.text}`}>
+    <div className="ex-doc pnl-doc" data-e={cfg.e}>
+      <span className="ex-doc-ico"><IconoPaso nombre="fileText" /></span>
+      <div className="ex-doc-fila">
+        <span className="n">{def.etiqueta}</span>
+        <span className="pnl-chip" data-tono={cfg.tono}>
           {esDelAsesor && def.estado === "SIN_SUBIR" ? "Lo hacemos nosotros" : cfg.label}
         </span>
       </div>
 
       {def.requisito && (
-        <p className="text-[12.5px] text-neutral-500 leading-relaxed -mt-0.5">{def.requisito}</p>
+        <p className="ex-doc-desc">{def.requisito}</p>
       )}
 
       {ultimo?.observacion && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2">
-          <p className="text-[11px] font-bold text-red-700 mb-0.5">Hay que corregirlo</p>
-          <p className="text-[12.5px] text-red-800 leading-relaxed">{ultimo.observacion}</p>
+        <div className="ex-doc-obs">
+          <IconoAlerta className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>
+            <b className="block">Hay que corregirlo</b>
+            {ultimo.observacion}
+          </span>
         </div>
       )}
 
       {def.estado === "PENDIENTE" && !subida.recibido && (
-        <p className="text-[12px] text-sky-700 leading-relaxed">
+        <p className="pnl-doc-estado">
           Lo tenemos. Tu asesor lo está revisando y te dirá si está correcto.
         </p>
       )}
 
       {def.modelo && (
         <a href={def.modelo} target="_blank" rel="noreferrer"
-          className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-primary-light
-            hover:underline w-fit">
-          Ver un ejemplo ↗
+          className="pnl-btn-texto pnl-doc-ejemplo" data-talla="s">
+          Ver un ejemplo
+          <IconoPaso nombre="external" />
         </a>
       )}
       {def.modelo_nota && (
-        <p className="text-[11.5px] text-neutral-500 leading-relaxed bg-neutral-50
-          border border-neutral-200 rounded-lg px-2.5 py-2">
+        <p className="pnl-doc-modelo-nota">
           {def.modelo_nota}
         </p>
       )}
 
       {def.archivos.length > 0 && (
-        <div className="space-y-1">
+        <div className="ex-doc-archivos">
           {def.archivos.map((a) => (
-            <div key={a.id_documento} className="flex items-center gap-2">
-              <button type="button" onClick={() => setViendo(a)}
-                className="text-[12px] text-primary-light hover:underline truncate flex-1 text-left">
-                📄 {a.nombre}
+            <div key={a.id_documento} className="ex-arch">
+              <IconoPaso nombre="clip" className="w-4 h-4" />
+              <button type="button" onClick={() => setViendo(a)} className="nm" title={a.nombre}>
+                {a.nombre}
               </button>
               {/* Quién lo subió. Con dos personas entrando al expediente,
                   «lo subió el cliente» ya no dice de quién fue. */}
               {a.subido_por_quien && a.subido_por !== "ASESOR" && (
-                <span className="shrink-0 text-[11px] text-neutral-400 truncate max-w-[45%]"
+                <small className="pnl-arch-quien"
                   title={`Lo subió ${a.subido_por_quien}`}>
                   {a.subido_por_quien}
-                </span>
+                </small>
               )}
               {a.subido_por !== "ASESOR" && (
-                <button type="button" onClick={() => quitar(a.id_documento)}
-                  className="shrink-0 text-[11.5px] text-neutral-400 hover:text-red-600">
+                <button type="button" onClick={() => quitar(a.id_documento)} data-peligro>
                   quitar
                 </button>
               )}
@@ -164,16 +172,14 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
               e.preventDefault(); setEncima(false);
               subida.elegir(e.dataTransfer.files);
             }}
-            className={`w-full rounded-xl border-2 border-dashed py-3.5 text-[13px]
-              font-semibold transition-colors disabled:opacity-60 ${
-              encima ? "border-[#1D6A4A] bg-[#E8F5EE] text-[#14532d]"
-                : "border-neutral-300 text-neutral-500 hover:border-[#1D6A4A] hover:text-[#1D6A4A]"
-            }`}
+            className="ex-subir w-full"
+            data-arrastre={encima ? "1" : undefined}
           >
+            <IconoPaso nombre="upload" />
             {textoSubida}
           </button>
           <div className="pnl-arch-pie">
-            <p className="text-[11px] text-neutral-400 leading-relaxed">
+            <p className="ex-nota">
               Un solo archivo, nítido, menos de 4 MB. Si son fotos, elígelas todas a la vez y
               las juntamos en un PDF.
             </p>
@@ -189,19 +195,26 @@ export default function TarjetaDocumento({ base, clave, def, onCambio }) {
       )}
 
       {esDelAsesor && def.archivos.length === 0 && (
-        <p className="text-[12px] text-neutral-400">
+        <p className="ex-nota">
           Lo preparamos nosotros y aparecerá aquí cuando esté listo.
         </p>
       )}
 
-      {viendo && (
-        <VisorArchivo
-          ruta={`${base}/documentos/archivo/${viendo.id_documento}`}
-          nombre={viendo.nombre}
-          mime={viendo.mime}
-          tamano={viendo.tamano}
-          onCerrar={() => setViendo(null)}
-        />
+      {/* En un portal: dentro del expediente, la vista con transición
+          (.pnl-vista) es su propio contexto de apilado y la barra de arriba
+          del panel le tapaba la cabecera (nombre, Descargar, cerrar). */}
+      {viendo && createPortal(
+        // Con su propio .pnl: en document.body quedaría fuera de los tokens.
+        <div className="pnl pnl-visor-archivo">
+          <VisorArchivo
+            ruta={`${base}/documentos/archivo/${viendo.id_documento}`}
+            nombre={viendo.nombre}
+            mime={viendo.mime}
+            tamano={viendo.tamano}
+            onCerrar={() => setViendo(null)}
+          />
+        </div>,
+        document.body,
       )}
     </div>
   );

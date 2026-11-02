@@ -85,7 +85,7 @@ export default function SaludoInicio({ perfil, servicios, pendientes = 0, onVerP
           target="_blank" rel="noopener noreferrer"
           aria-label="Escribir por WhatsApp"
         >
-          <Icono nombre="chat" size={16} />
+          <Icono nombre="chat" size={18} />
           <span className="pnl-hero-wa-texto">WhatsApp</span>
         </a>
       </div>

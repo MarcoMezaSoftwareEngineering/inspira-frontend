@@ -11,6 +11,7 @@
 // cliente sólo descarga.
 import { useCallback, useEffect, useState } from "react";
 import { comprobarRespuesta } from "../../services/sesion";
+import IconoPaso from "./IconoPaso";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud";
 
@@ -126,11 +127,15 @@ export default function DocumentosProceso({ idSolicitud, modo = "cliente" }) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className={esAsesor ? "space-y-3" : "space-y-3 pnl-docs-proceso"}>
       <div>
-        <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A]">
-          📄 Documentos del proceso
-        </p>
+        {esAsesor ? (
+          <p className="text-[9px] font-bold uppercase tracking-widest text-[#1D6A4A]">
+            📄 Documentos del proceso
+          </p>
+        ) : (
+          <p className="ex-sub">Documentos del proceso</p>
+        )}
         <p className="text-[12px] text-neutral-500 mt-1 leading-relaxed">
           {esAsesor
             ? "Lo que se genera durante el trámite: carta de admisión, matrícula, resoluciones. No se mezcla con el checklist del cliente."
@@ -169,7 +174,9 @@ export default function DocumentosProceso({ idSolicitud, modo = "cliente" }) {
         <p className="text-[12px] text-neutral-400">Cargando…</p>
       ) : docs.length === 0 ? (
         <div className="flex flex-col items-center gap-1.5 py-7 border-2 border-dashed border-neutral-200 rounded-xl text-center">
-          <span className="text-2xl">📄</span>
+          {esAsesor
+            ? <span className="text-2xl">📄</span>
+            : <IconoPaso nombre="fileText" className="w-6 h-6 text-muted" />}
           <p className="text-[13px] font-semibold text-neutral-600">Todavía no hay documentos</p>
           <p className="text-[11.5px] text-neutral-400 max-w-[300px] leading-snug">
             {esAsesor
@@ -182,7 +189,9 @@ export default function DocumentosProceso({ idSolicitud, modo = "cliente" }) {
           {docs.map((d) => (
             <li key={d.id_justificante}
               className="flex items-center gap-3 bg-white border border-neutral-200 rounded-xl px-3 py-2.5">
-              <span className="shrink-0 text-xl">{icono(d.mime_type)}</span>
+              <span className="shrink-0 text-xl">
+                {esAsesor ? icono(d.mime_type) : <IconoPaso nombre="fileText" className="w-5 h-5 text-primary-light" />}
+              </span>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-neutral-800 truncate">{d.etiqueta}</p>
                 <p className="text-[11px] text-neutral-400 truncate">

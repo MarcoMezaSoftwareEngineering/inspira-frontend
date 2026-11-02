@@ -4,6 +4,7 @@
 // documentos y no había forma de decir «ya está» salvo escribir por fuera.
 import { useState } from "react";
 import { apiPOST } from "../../../../../services/api";
+import IconoPaso from "../../../../../components/common/IconoPaso";
 
 function fechaLarga(iso) {
   if (!iso) return "";
@@ -33,46 +34,49 @@ export default function PedirRevisionMaster({ idSolicitud, subidos, revisionSoli
   if (!subidos) return null;
 
   return (
-    <div className="mt-4 rounded-xl border border-primary/15 bg-primary/5 px-4 py-3.5">
+    <div className="pnl-aviso pnl-aviso-bloque pnl-revision mt-4" data-tono="info">
+      <span className="pnl-aviso-icono"><IconoPaso nombre="eye" /></span>
+      <div className="min-w-0">
       {revisionSolicitadaAt ? (
-        <p className="text-[12.5px] text-neutral-700 leading-relaxed">
-          <b className="text-primary">Tu asesor ya sabe que has subido documentos</b> — se lo
+        <p className="pnl-aviso-texto">
+          <b>Tu asesor ya sabe que has subido documentos</b> — se lo
           dijiste el {fechaLarga(revisionSolicitadaAt)}. Los está revisando y te dirá si falta algo.
           Si subes más, puedes volver a avisarle.
-          <button type="button" onClick={() => setAbierto((v) => !v)}
-            className="ml-2 text-[12px] font-semibold text-primary-light underline">
+          <button type="button" onClick={() => setAbierto((v) => !v)} aria-expanded={abierto}
+            className="pnl-btn-texto pnl-revision-enlace" data-talla="s">
             {abierto ? "Cancelar" : "Avisar otra vez"}
           </button>
         </p>
       ) : !abierto ? (
         <div className="flex items-center gap-3 flex-wrap">
-          <p className="text-[12.5px] text-neutral-700 leading-relaxed min-w-0 flex-1">
-            <b className="text-primary">¿Ya subiste todo lo que tienes?</b> Avisa a tu asesor para
+          <p className="pnl-aviso-texto min-w-0 flex-1">
+            <b>¿Ya subiste todo lo que tienes?</b> Avisa a tu asesor para
             que lo revise.
           </p>
-          <button type="button" onClick={() => setAbierto(true)}
-            className="ux-tap shrink-0 text-[12.5px] font-semibold px-4 py-2 rounded-lg bg-primary text-white hover:opacity-90">
+          <button type="button" onClick={() => setAbierto(true)} aria-expanded={false}
+            className="pnl-btn-primario shrink-0" data-talla="s">
             Avisar a mi asesor
           </button>
         </div>
       ) : null}
 
       {abierto && (
-        <div className="space-y-2 mt-2">
+        <div className="pnl-revision-form">
           <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)}
             placeholder="¿Algo que debamos saber? (opcional)"
-            className="w-full text-[12.5px] border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+            className="pnl-campo-control" />
           <div className="flex items-center gap-2">
             <button type="button" onClick={pedir} disabled={enviando}
-              className="ux-tap text-[12.5px] font-semibold px-4 py-2 rounded-lg bg-primary text-white disabled:opacity-40 hover:opacity-90">
+              className="pnl-btn-primario" data-talla="s">
               {enviando ? "Avisando…" : "Enviar"}
             </button>
             <button type="button" onClick={() => setAbierto(false)}
-              className="text-[12px] text-neutral-500 hover:text-neutral-800">Cancelar</button>
+              className="pnl-btn-texto" data-talla="s">Cancelar</button>
           </div>
         </div>
       )}
-      {msg && <p className="text-[11.5px] text-neutral-600 mt-2">{msg}</p>}
+      {msg && <p className="pnl-revision-msg">{msg}</p>}
+      </div>
     </div>
   );
 }

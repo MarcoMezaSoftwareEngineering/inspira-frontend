@@ -5,6 +5,7 @@
 // de los hooks y de los efectos es el de siempre.
 import { useState, useRef, useEffect, useContext, useMemo } from "react";
 import { apiGET } from "../../../../../../services/api";
+import { menosMovimiento } from "../../../../hooks/useMovimiento";
 import { SeccionSiempreAbiertoCtx } from "../SeccionPanel";
 import { TODAS_COMUNIDADES_FALLBACK, COMUNIDAD_INDIFERENTE, UNIS_SUGERENCIAS, STEPS } from "./constantes";
 import { norm, detectarAuip, validateStep } from "./utilidades";
@@ -131,7 +132,7 @@ export default function useFormularioAcademico({
         const el = scrollAreaRef.current?.querySelector(
           ".border-red-200, .border-red-300, .border-red-400"
         );
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (el) el.scrollIntoView({ behavior: menosMovimiento() ? "auto" : "smooth", block: "center" });
       }, 30);
       return;
     }

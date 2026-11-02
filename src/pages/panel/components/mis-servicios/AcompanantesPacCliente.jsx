@@ -10,6 +10,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { apiGET, apiPOST, apiPUT, apiDELETE } from "../../../../services/api";
 import { Campo, Selector, Guardado } from "./campos";
 import TarjetaDocumento, { ResumenDocumentos } from "./TarjetaDocumento";
+import { ChevronPlegable, IconoAlerta } from "./Bloques";
+import Icono from "../../../../components/common/Icono";
+import IconoPaso from "../../../../components/common/IconoPaso";
 
 const VINCULOS = [
   ["CONYUGE", "Cónyuge"],
@@ -22,8 +25,6 @@ const ACOMPANA_A = [["TITULAR", "Al titular del PAC"], ["SOLICITANTE", "A mí (s
 const SEXO = ["Hombre", "Mujer"];
 const CIVIL = ["Soltero/a", "Casado/a", "Viudo/a", "Divorciado/a", "Unión de hecho"];
 const PATRIA = [["AMBOS", "La comparten ambos padres"], ["EXCLUSIVA", "La tengo en exclusiva (hay sentencia)"]];
-
-const ICONO = { CONYUGE: "💍", PAREJA: "💍", HIJO_COMUN: "👦", HIJO_NO_COMUN: "👦", ASCENDIENTE: "👵" };
 
 function etiquetaVinculo(v) {
   const par = VINCULOS.find(([k]) => k === v);
@@ -90,36 +91,36 @@ function Ficha({ idSolicitud, a, esFamiliar, abierta, onAbrir, onCambio, onQuita
   ].filter(([, v]) => v);
 
   return (
-    <div className="rounded-xl border border-neutral-200 overflow-hidden">
-      <button type="button" onClick={onAbrir} className="w-full flex items-center gap-2.5 px-3.5 py-3 text-left hover:bg-neutral-50/60">
-        <span className="shrink-0 w-7 h-7 rounded-lg grid place-items-center text-[12px] bg-[#E8F5EE] text-[#14532d] font-semibold">{ICONO[datos.vinculo] || "👤"}</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13.5px] font-semibold text-neutral-900 truncate">{nombreDe(datos)}</span>
-          <span className="block text-[11.5px] text-neutral-400">
+    <div className="pnl-acomp" data-abierta={abierta ? "1" : "0"}>
+      <button type="button" onClick={onAbrir} aria-expanded={abierta} className="pnl-acomp-cab">
+        <span className="pnl-ico" data-talla="l" aria-hidden="true"><Icono nombre="usuario" size={18} /></span>
+        <span className="pnl-acomp-txt">
+          <b>{nombreDe(datos)}</b>
+          <span>
             {etiquetaVinculo(datos.vinculo)}{rev.edad !== null && rev.edad !== undefined ? ` · ${rev.edad} años` : ""}
           </span>
         </span>
         {(rev.faltan?.length > 0 || docsFaltan > 0) && (
-          <span className="shrink-0 text-[10.5px] font-semibold text-amber-600 text-right leading-tight">
+          <span className="pnl-acomp-faltan">
             {rev.faltan?.length > 0 && <>{rev.faltan.length} datos<br /></>}
             {docsFaltan > 0 && <>{docsFaltan} docs</>}
           </span>
         )}
-        <span className="shrink-0 text-neutral-300 text-[11px]">{abierta ? "▲" : "▼"}</span>
+        <ChevronPlegable className="pnl-chev" />
       </button>
 
       {abierta && (
-        <div className="border-t border-neutral-100">
-          <div className="flex gap-1.5 px-3.5 pt-3 flex-wrap">
+        <div className="pnl-acomp-cuerpo">
+          <div className="pnl-segmentos pnl-acomp-pestanas">
             {[["datos", "Sus datos"], ["docs", "Sus documentos"], ["tramite", "Su trámite"]].map(([k, t]) => (
               <button key={k} type="button" onClick={() => setPestana(k)}
-                className={`text-[12.5px] font-semibold px-3 py-1.5 rounded-lg ${pestana === k ? "bg-primary text-white" : "bg-neutral-100 text-neutral-500"}`}>{t}</button>
+                aria-pressed={pestana === k}>{t}</button>
             ))}
           </div>
 
           {pestana === "datos" && (
-            <div className="px-3.5 pb-4 pt-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="pnl-acomp-panel">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
                 <Selector label="Quién es" obligatorio falta={falta("Vínculo")} opciones={VINCULOS} valor={datos.vinculo} onChange={set("vinculo")}
                   ayuda="«Hijo/a solo mío» es el hijo de uno de los dos que no es hijo del titular: lleva documentos propios." />
                 {esFamiliar && (
@@ -144,15 +145,15 @@ function Ficha({ idSolicitud, a, esFamiliar, abierta, onAbrir, onCambio, onQuita
                 <Campo label="Correo electrónico" tipo="email" valor={datos.correo} onChange={set("correo")} />
               </div>
 
-              <label className="flex items-start gap-2.5 mt-4 rounded-xl border border-neutral-200 px-3.5 py-3 cursor-pointer hover:bg-neutral-50/60">
-                <input type="checkbox" className="mt-0.5 w-4 h-4 accent-[#1D6A4A]" checked={datos.dom_mismo !== false} onChange={(e) => set("dom_mismo")(e.target.checked)} />
+              <label className="pnl-casilla-fila pnl-casilla-larga pnl-casilla-caja mt-5">
+                <input type="checkbox" checked={datos.dom_mismo !== false} onChange={(e) => set("dom_mismo")(e.target.checked)} />
                 <span className="min-w-0">
-                  <span className="block text-[13px] font-medium text-neutral-800">Vive contigo, en la misma dirección</span>
-                  <span className="block text-[11.5px] text-neutral-500 leading-relaxed">Si es así no hace falta repetirla: usamos la tuya.</span>
+                  <span className="block">Vive contigo, en la misma dirección</span>
+                  <small>Si es así no hace falta repetirla: usamos la tuya.</small>
                 </span>
               </label>
               {propio && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4 mt-4">
                   <Campo label="Domicilio" obligatorio falta={falta("Domicilio")} valor={datos.dom_direccion} onChange={set("dom_direccion")} />
                   <Campo label="Localidad" obligatorio falta={falta("Localidad")} valor={datos.dom_localidad} onChange={set("dom_localidad")} />
                   <Campo label="Código postal" valor={datos.dom_cp} onChange={set("dom_cp")} />
@@ -161,21 +162,21 @@ function Ficha({ idSolicitud, a, esFamiliar, abierta, onAbrir, onCambio, onQuita
               )}
 
               {rev.menor && (
-                <div className="rounded-xl border-l-[3px] border-sky-400 bg-sky-50 px-3.5 py-3 mt-4 space-y-3">
-                  <p className="text-[12.5px] text-sky-900 leading-relaxed">
+                <div className="pnl-caja-tono mt-5" data-tono="info">
+                  <p className="pnl-caja-tono-texto">
                     Es menor de edad: su MI-F lo firma su <b>representante legal</b>, que normalmente eres tú.
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
                     <Campo label="Representante legal" obligatorio falta={falta("Representante legal (firma su MI-F)")} valor={datos.repr_nombre} onChange={set("repr_nombre")} />
                     <Campo label="DNI / NIE / pasaporte" valor={datos.repr_doc} onChange={set("repr_doc")} />
                     <Campo label="En calidad de" valor={datos.repr_titulo} onChange={set("repr_titulo")} ayuda="Padre, madre, tutor/a…" />
                   </div>
                   {hijoNoComun && (
-                    <div className="rounded-lg bg-white border border-amber-300 px-3 py-3 space-y-3">
-                      <p className="text-[12.5px] text-amber-900 leading-relaxed m-0">
+                    <div className="pnl-caja-tono pnl-caja-tono-anidada mt-4" data-tono="aviso">
+                      <p className="pnl-caja-tono-texto">
                         Como no es hijo del titular, la UGE exige la <b>autorización notarial del otro progenitor</b>, en escritura pública y apostillada, que lo autorice expresamente a viajar, residir legalmente, fijar su domicilio en España contigo y hacer los trámites de extranjería. Si tienes la patria potestad en exclusiva, en su lugar va la <b>sentencia apostillada</b>.
                       </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
                         <Selector label="Patria potestad" obligatorio falta={falta("Patria potestad (ambos padres o exclusiva)")} opciones={PATRIA} valor={datos.patria_potestad} onChange={set("patria_potestad")} />
                         <Campo label="Nombre del otro progenitor" obligatorio falta={falta("Nombre del otro progenitor (otorga la autorización notarial)")} valor={datos.otro_progenitor_nombre} onChange={set("otro_progenitor_nombre")} />
                         <Campo label="Documento del otro progenitor" valor={datos.otro_progenitor_doc} onChange={set("otro_progenitor_doc")} />
@@ -185,28 +186,28 @@ function Ficha({ idSolicitud, a, esFamiliar, abierta, onAbrir, onCambio, onQuita
                 </div>
               )}
 
-              {(rev.avisos || []).map((t) => <p key={t} className="text-[12px] text-amber-700 leading-relaxed mt-3">⚠ {t}</p>)}
+              {(rev.avisos || []).map((t) => <p key={t} className="pnl-aviso-linea"><IconoAlerta /> {t}</p>)}
 
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <Guardado guardando={guardando} tocado={tocado} completo={rev.completo} />
-                <button type="button" onClick={onQuitar} className="text-[11.5px] text-neutral-400 hover:text-red-600 mt-4">Quitar a esta persona</button>
+                <button type="button" onClick={onQuitar} className="pnl-btn-texto pnl-texto-peligro mt-4" data-talla="s">Quitar a esta persona</button>
               </div>
             </div>
           )}
 
           {pestana === "docs" && (
-            <div className="px-3.5 pb-4 pt-3">
-              <p className="text-[12px] text-neutral-600 leading-relaxed mb-3">
+            <div className="pnl-acomp-panel">
+              <p className="pnl-bloque-texto">
                 Sus documentos son los que pide la UGE para <b>{etiquetaVinculo(datos.vinculo).toLowerCase()}</b>{rev.menor ? ", menor de edad" : ""}. El pasaporte, completo; los antecedentes, solo si es mayor de edad.
               </p>
               <ResumenDocumentos ranuras={docs.ranuras} />
-              <div className="space-y-2.5">
+              <div className="ex-docs">
                 {ranurasCliente.map(([clave, def]) => <TarjetaDocumento key={clave} base={base} clave={clave} def={def} onCambio={onCambio} />)}
               </div>
               {ranurasAsesor.length > 0 && (
                 <>
-                  <p className="text-[12px] font-semibold text-neutral-600 mt-5 mb-2">Lo que preparamos nosotros</p>
-                  <div className="space-y-2.5">
+                  <p className="pnl-eyebrow pnl-docs-grupo">Lo que preparamos nosotros</p>
+                  <div className="ex-docs">
                     {ranurasAsesor.map(([clave, def]) => <TarjetaDocumento key={clave} base={base} clave={clave} def={def} onCambio={onCambio} />)}
                   </div>
                 </>
@@ -215,18 +216,18 @@ function Ficha({ idSolicitud, a, esFamiliar, abierta, onAbrir, onCambio, onQuita
           )}
 
           {pestana === "tramite" && (
-            <div className="px-3.5 pb-4 pt-3">
+            <div className="pnl-acomp-panel">
               {seguimiento.length ? (
-                <table className="w-full"><tbody>
+                <div className="pnl-ficha"><table className="pnl-ficha-tabla"><tbody>
                   {seguimiento.map(([k, v]) => (
                     <tr key={k}>
-                      <td className="text-[11.5px] text-neutral-500 py-0.5 pr-3 align-top w-[45%]">{k}</td>
-                      <td className="text-[12.5px] font-bold text-primary py-0.5 select-all">{v}</td>
+                      <td className="pnl-ficha-k">{k}</td>
+                      <td className="pnl-ficha-v">{v}</td>
                     </tr>
                   ))}
-                </tbody></table>
+                </tbody></table></div>
               ) : (
-                <p className="text-[12.5px] text-neutral-500 leading-relaxed">Su solicitud se presenta junto a la del titular. Cuando la presentemos verás aquí su número de expediente, su tasa y su resolución.</p>
+                <p className="pnl-bloque-texto pnl-texto-suave">Su solicitud se presenta junto a la del titular. Cuando la presentemos verás aquí su número de expediente, su tasa y su resolución.</p>
               )}
             </div>
           )}
@@ -268,37 +269,39 @@ export default function AcompanantesPacCliente({ idSolicitud, exp, conAcompanant
 
   return (
     <>
-      <label className="flex items-start gap-3 rounded-xl border border-neutral-200 px-3.5 py-3.5 cursor-pointer hover:bg-neutral-50/60 mb-3">
-        <input type="checkbox" className="mt-0.5 w-4.5 h-4.5 accent-[#1D6A4A]" checked={Boolean(conAcompanantes)} onChange={(e) => onMarcar?.(e.target.checked)} />
+      <label className="pnl-casilla-fila pnl-casilla-larga pnl-casilla-caja mb-3">
+        <input type="checkbox" checked={Boolean(conAcompanantes)} onChange={(e) => onMarcar?.(e.target.checked)} />
         <span className="min-w-0">
-          <span className="block text-[13.5px] font-semibold text-neutral-900 leading-snug">Vienen familiares conmigo</span>
-          <span className="block text-[12.5px] text-neutral-500 leading-relaxed mt-0.5">
+          <b className="block">Vienen familiares conmigo</b>
+          <small>
             Cónyuge o pareja de hecho, hijos (también los que son solo tuyos) y padres a cargo. Con la residencia PAC la familia <b>sí puede trabajar</b>.
-          </span>
+          </small>
         </span>
       </label>
 
       {conAcompanantes && (
         <>
-          <div className="rounded-xl border-l-[3px] border-sky-400 bg-sky-50 px-3.5 py-3 mb-3">
-            <p className="text-[12.5px] text-sky-900 leading-relaxed">
+          <div className="pnl-aviso pnl-aviso-arriba mb-3" data-tono="info">
+            <span className="pnl-aviso-icono" aria-hidden="true"><Icono nombre="usuarios" size={16} /></span>
+            <p className="pnl-aviso-texto">
               Cada persona presenta <b>su propia solicitud</b> ante la UGE —su formulario MI-F, su tasa y su resolución—, todas vinculadas al expediente del titular y enviadas a la vez. Añade una ficha por cada persona que viaja.
             </p>
           </div>
-          {cargando ? <p className="text-[12.5px] text-neutral-400 py-3">Cargando…</p> : (
-            <div className="space-y-2.5">
+          {cargando ? <p className="pnl-acomp-nota" role="status">Cargando…</p> : (
+            <div className="flex flex-col gap-2.5">
               {lista.map((a) => (
                 <Ficha key={a.id_acompanante} idSolicitud={idSolicitud} a={a} esFamiliar={esFamiliar}
                   abierta={abierta === a.id_acompanante}
                   onAbrir={() => setAbierta(abierta === a.id_acompanante ? null : a.id_acompanante)}
                   onCambio={cargar} onQuitar={() => quitar(a.id_acompanante)} />
               ))}
-              {lista.length === 0 && <p className="text-[12.5px] text-neutral-400 py-2">Todavía no has añadido a nadie.</p>}
+              {lista.length === 0 && <p className="pnl-acomp-nota">Todavía no has añadido a nadie.</p>}
             </div>
           )}
           <button type="button" onClick={anadir} disabled={anadiendo}
-            className="mt-3 text-[13px] font-semibold px-4 py-2.5 rounded-lg border-2 border-dashed border-neutral-300 text-neutral-500 w-full hover:border-[#1D6A4A] hover:text-[#1D6A4A] disabled:opacity-50">
-            {anadiendo ? "Añadiendo…" : "+ Añadir a un familiar (cónyuge, hijo/a, padre o madre)"}
+            className="pnl-btn pnl-anadir mt-3 w-full">
+            {!anadiendo && <IconoPaso nombre="plus" />}
+            {anadiendo ? "Añadiendo…" : "Añadir a un familiar (cónyuge, hijo/a, padre o madre)"}
           </button>
         </>
       )}

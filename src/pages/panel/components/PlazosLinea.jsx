@@ -111,10 +111,7 @@ export default function PlazosLinea({ servicios, pagos = null }) {
   return (
     <section className="pnl-plazos" aria-labelledby="pnl-plazos-t">
       <header className="pnl-plazos-cabeza">
-        <h2 id="pnl-plazos-t" className="pnl-plazos-titulo">
-          <Icono nombre="calendario" size={16} />
-          Tus próximas fechas
-        </h2>
+        <h2 id="pnl-plazos-t" className="pnl-plazos-titulo">Tus próximas fechas</h2>
         <span className="pnl-plazos-sub">Próximos {VENTANA} días</span>
       </header>
       <ol className="pnl-plazos-linea">
@@ -136,7 +133,7 @@ export default function PlazosLinea({ servicios, pagos = null }) {
                 </span>
                 <span className="pnl-plazos-cuerpo">
                   <span className="pnl-plazos-cuenta">
-                    <Icono nombre={it.icono} size={13} />
+                    <Icono nombre={it.icono} size={14} />
                     {cuenta(it.dias)}{it.hora ? ` · ${it.hora}` : ""}
                   </span>
                   <span className="pnl-plazos-texto">{it.titulo}</span>

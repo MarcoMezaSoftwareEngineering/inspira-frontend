@@ -5,6 +5,8 @@ import { lineaDe, whatsappDesde } from "../../../../config/contacto";
 const LINEA = lineaDe("inspira");
 import { formatearFecha, badgeEstadoSolicitud, refCorta } from "./utils";
 import { EsqueletoTarjetas } from "../Esqueleto";
+import { servicioDe } from "../../servicios";
+import { ICONO_SERVICIO } from "../../iconoServicio";
 
 /** Los avisos que puede llevar una tarjeta, con su tono y su redacción. */
 // No hay aviso de «documentos pendientes»: contaba lo que el asesor todavía
@@ -12,7 +14,7 @@ import { EsqueletoTarjetas } from "../Esqueleto";
 // —lo que falta por subir y lo que hay que corregir— sigue avisando.
 const AVISOS = {
   datos:          { tono: "aviso", texto: (n) => `${n} dato${n > 1 ? "s" : ""} por completar` },
-  docs_observados:{ tono: "alto",  texto: (n) => `${n} doc${n > 1 ? "s" : ""}. observado${n > 1 ? "s" : ""}` },
+  docs_observados:{ tono: "alto",  texto: (n) => `${n} documento${n > 1 ? "s" : ""} por corregir` },
   formulario:     { tono: "info",  texto: () => "Formulario pendiente" },
   informe:        { tono: "info",  texto: () => "Informe en preparación" },
   eleccion:       { tono: "info",  texto: () => "Pendiente elegir másteres" },
@@ -20,7 +22,7 @@ const AVISOS = {
 
 function Chip({ tono, children }) {
   return (
-    <span className={`pnl-chip pnl-chip-${tono}`}>
+    <span className="pnl-chip" data-tono={tono}>
       <span className="punto" />
       {children}
     </span>
@@ -47,20 +49,25 @@ function ServicioCard({ s, onVerDetalle }) {
   return (
     <article className="pnl-card pnl-card-link">
       <div className="pnl-card-cuerpo">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {r.etapa_propia ? (
-            <span className="pnl-chip pnl-chip-etapa">{r.etapa_propia}</span>
-          ) : (
-            <span className={`pnl-chip pnl-chip-${estado.tono || "tipo"}`}>{estado.text}</span>
-          )}
-          {s.tipo?.nombre && <span className="pnl-chip pnl-chip-tipo">{s.tipo.nombre}</span>}
+        <div className="pnl-card-cabeza">
+          <span className="pnl-ico" data-talla="xl" aria-hidden="true">
+            <Icono nombre={ICONO_SERVICIO[servicioDe(s)] || "documento"} size={22} />
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+            {r.etapa_propia ? (
+              <span className="pnl-chip" data-tono="etapa">{r.etapa_propia}</span>
+            ) : (
+              <span className="pnl-chip" data-tono={estado.tono || "tipo"}>{estado.text}</span>
+            )}
+            {s.tipo?.nombre && <span className="pnl-chip" data-tono="tipo">{s.tipo.nombre}</span>}
+          </div>
         </div>
 
         <div>
           {/* De quién es. Sin esto, quien entra invitado ve en «Mis servicios»
               un expediente con apellidos ajenos y no entiende qué mira. */}
           {s.invitado && (
-            <span className="pnl-chip pnl-chip-titular mb-2">
+            <span className="pnl-chip mb-2" data-tono="aviso">
               Expediente de {s.titular}
             </span>
           )}
@@ -84,7 +91,7 @@ function ServicioCard({ s, onVerDetalle }) {
           <span>Creada el {formatearFecha(s.fecha_creacion)}</span>
           <span className="codigo">{refCorta(s.codigo_publico)}</span>
         </div>
-        <button type="button" onClick={() => onVerDetalle(s)} className="pnl-btn-cta shrink-0">
+        <button type="button" onClick={() => onVerDetalle(s)} className="pnl-btn-primario shrink-0">
           Ver servicio
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

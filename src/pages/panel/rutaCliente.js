@@ -120,7 +120,7 @@ export function rutaDelCliente(servicios = []) {
     const fin = esEst && indiceEstancia(r) === 4;
     const partes = [
       esEst ? r.etapa_propia : null,
-      r.docs_observados > 0 ? `${r.docs_observados} documento(s) por corregir` : null,
+      r.docs_observados > 0 ? `${r.docs_observados} ${r.docs_observados === 1 ? "documento" : "documentos"} por corregir` : null,
     ].filter(Boolean);
     return {
       clave: "via", titulo: esEst ? "Estancia por estudios" : "Visado de estudios",
@@ -145,7 +145,7 @@ export function rutaDelCliente(servicios = []) {
       },
       {
         clave: "admision", titulo: "Admisión y carta",
-        detalle: conAdmision ? `${post.admitidas} admisión(es) recibida(s)` : "Cuando llegue tu primera admisión",
+        detalle: conAdmision ? `${post.admitidas} ${post.admitidas === 1 ? "admisión recibida" : "admisiones recibidas"}` : "Cuando llegue tu primera admisión",
         estado: conAdmision ? ESTADO_ETAPA.ACTUAL : ESTADO_ETAPA.PROXIMAMENTE,
         href: conAdmision ? rutaDe({ idServicio: master.id_solicitud, seccion: "cierre" }) : null,
       },

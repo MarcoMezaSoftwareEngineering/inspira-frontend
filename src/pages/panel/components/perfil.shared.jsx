@@ -1,5 +1,6 @@
 // Constantes, helpers y componentes UI compartidos entre PerfilCliente y WizardPerfilCliente.
 import { useEffect, useRef, useState } from "react";
+import IconoPaso from "../../../components/common/IconoPaso";
 
 export const PAISES = [
   { codigo: "PE", nombre: "Perú",            prefijo: "+51",  emoji: "🇵🇪" },
@@ -156,20 +157,20 @@ export function Combobox({ value, onChange, options, placeholder, renderOption, 
           } else if (e.key === "Escape") { setQuery(""); setOpen(false); }
         }}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/20 focus:border-[#1D6A4A] transition"
+        className="pnl-campo-control"
       />
       {open && filtered.length > 0 && (
-        <ul className="absolute z-30 mt-1 w-full bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden max-h-44 overflow-y-auto">
+        <ul className="pnl-combo-lista absolute z-30 mt-1 w-full overflow-y-auto">
           {filtered.map((o, i) => (
             <li key={i}>
               <button type="button" onMouseDown={() => select(o)}
-                className="w-full text-left px-3 py-2 text-sm text-neutral-700 hover:bg-[#E8F5EE] hover:text-[#1D6A4A] transition-colors">
+                className="pnl-combo-opcion">
                 {renderOption ? renderOption(o) : String(o)}
               </button>
             </li>
           ))}
           {allowCustom && (
-            <li className="px-3 py-1 text-[11px] text-neutral-400 border-t italic">
+            <li className="pnl-combo-nota">
               Escribe si no aparece en la lista
             </li>
           )}
@@ -182,8 +183,8 @@ export function Combobox({ value, onChange, options, placeholder, renderOption, 
 // ── Primitivos ─────────────────────────────────────────────────────────────────
 export function FL({ children, noEdit }) {
   return (
-    <label className="block text-[10px] font-bold text-neutral-400 mb-1 uppercase tracking-wider">
-      {children}{noEdit && <span className="ml-1 font-normal normal-case tracking-normal">(no editable)</span>}
+    <label className="pnl-campo-etiqueta block mb-1.5">
+      {children}{noEdit && <small className="ml-1">(no editable)</small>}
     </label>
   );
 }
@@ -192,16 +193,15 @@ export function TI({ name, value, onChange, placeholder, type = "text", disabled
   return (
     <input type={type} name={name} value={value} onChange={onChange}
       placeholder={placeholder} disabled={disabled}
-      className={`w-full rounded-lg border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition disabled:bg-neutral-50 disabled:text-neutral-400 disabled:cursor-not-allowed
-        ${err ? "border-red-300 bg-red-50 focus:ring-red-200 focus:border-red-400" : "border-neutral-200 focus:ring-[#1D6A4A]/20 focus:border-[#1D6A4A]"}
-        ${className}`}
+      data-estado={err ? "error" : undefined}
+      className={`pnl-campo-control ${className}`}
     />
   );
 }
 
 export function ErrMsg({ msg }) {
   if (!msg) return null;
-  return <p className="text-[10px] text-red-500 mt-0.5">{msg}</p>;
+  return <p className="pnl-campo-ayuda mt-1">{msg}</p>;
 }
 
 export function TelefonoInput({ prefijo, numero, onPrefijo, onNumero }) {
@@ -212,19 +212,22 @@ export function TelefonoInput({ prefijo, numero, onPrefijo, onNumero }) {
   const hintLong = rango ? (rango[0] === rango[1] ? `${rango[0]} dígitos` : `${rango[0]}–${rango[1]} dígitos`) : null;
   return (
     <div>
-      <div className="flex gap-1.5">
+      <div className="flex gap-2">
         <select value={prefijo} onChange={e => onPrefijo(e.target.value)}
-          className="w-24 rounded-lg border border-neutral-200 px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1D6A4A]/20 focus:border-[#1D6A4A] transition shrink-0">
+          className="pnl-campo-control pnl-campo-prefijo shrink-0">
           {PAISES.map(p => <option key={p.codigo} value={p.prefijo}>{p.emoji} {p.prefijo}</option>)}
         </select>
         <input type="tel" value={numero} onChange={e => onNumero(e.target.value)}
           placeholder="999 999 999"
-          className={`flex-1 rounded-lg border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 transition ${invalido ? "border-red-300 focus:ring-red-200" : "border-neutral-200 focus:ring-[#1D6A4A]/20 focus:border-[#1D6A4A]"}`}
+          data-estado={invalido ? "error" : undefined}
+          className="pnl-campo-control flex-1 min-w-0"
         />
       </div>
       {hintLong && digits.length > 0 && (
-        <p className={`text-[10px] mt-0.5 ${invalido ? "text-red-500" : valido ? "text-emerald-600" : "text-neutral-400"}`}>
-          {invalido ? `Esperado: ${hintLong} (tienes ${digits.length})` : "✓ Longitud correcta"}
+        <p className={`pnl-campo-pista mt-1 ${invalido ? "text-alto-ink" : valido ? "text-verde-ink" : "text-muted"}`}>
+          {invalido
+            ? `Esperado: ${hintLong} (tienes ${digits.length})`
+            : <><IconoPaso nombre="check" className="w-3.5 h-3.5" strokeWidth={2.6} />Longitud correcta</>}
         </p>
       )}
     </div>
@@ -237,7 +240,7 @@ export function SliderPresupuesto({ value, onChange }) {
   const pct = ((val - PRES_MIN) / (PRES_MAX - PRES_MIN)) * 100;
   return (
     <div>
-      <p className="text-2xl font-bold text-[#1D6A4A] mb-2">
+      <p className="pnl-perfil-cifra mb-2">
         {val.toLocaleString("es-ES")} €
       </p>
       <input
@@ -246,21 +249,26 @@ export function SliderPresupuesto({ value, onChange }) {
         value={val}
         onChange={e => onChange(Number(e.target.value))}
         style={{
-          background: `linear-gradient(to right, #1D6A4A ${pct}%, #e5e7eb ${pct}%)`,
+          "--pista-rango": `linear-gradient(to right, var(--primary-2) ${pct}%, var(--pista) ${pct}%)`,
         }}
-        className="w-full h-1.5 rounded-full outline-none cursor-pointer appearance-none
-          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-          [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1D6A4A]
+        className="w-full h-11 bg-transparent cursor-pointer appearance-none
+          [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full
+          [&::-webkit-slider-runnable-track]:[background:var(--pista-rango)]
+          [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full
+          [&::-moz-range-track]:[background:var(--pista-rango)]
+          [&::-webkit-slider-thumb]:-mt-[9px]
+          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6
+          [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary
           [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-white
-          [&::-webkit-slider-thumb]:shadow-[0_2px_8px_rgba(29,106,74,.35)]
-          [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5
-          [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#1D6A4A]
+          [&::-webkit-slider-thumb]:shadow-[0_2px_8px_rgba(1,52,70,.35)]
+          [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6
+          [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary
           [&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-white"
       />
-      <div className="flex justify-between text-[11px] text-neutral-400 mt-1">
+      <div className="flex justify-between text-meta text-tinta-2 mt-2 tabular-nums">
         <span>500 €</span><span>7.500 €</span><span>15.000 €</span>
       </div>
-      <p className="text-[11px] text-neutral-400 mt-0.5">Solo tasas universitarias. No incluye alojamiento ni manutención.</p>
+      <p className="text-meta text-tinta-2 mt-1">Solo tasas universitarias. No incluye alojamiento ni manutención.</p>
     </div>
   );
 }
@@ -269,15 +277,14 @@ export function SliderPresupuesto({ value, onChange }) {
 export function MesAnioSelect({ mes, anio, onMes, onAnio, err }) {
   const anioActual = new Date().getFullYear();
   const anios = Array.from({ length: 6 }, (_, i) => anioActual + i);
-  const cls = `rounded-lg border px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 transition
-    ${err ? "border-red-300 focus:ring-red-200" : "border-neutral-200 focus:ring-[#1D6A4A]/20 focus:border-[#1D6A4A]"}`;
+  const cls = "pnl-campo-control";
   return (
     <div className="flex gap-2">
-      <select value={mes} onChange={e => onMes(e.target.value)} className={`flex-1 ${cls}`}>
+      <select value={mes} onChange={e => onMes(e.target.value)} data-estado={err ? "error" : undefined} className={`flex-1 min-w-0 ${cls}`}>
         <option value="">— Mes —</option>
         {MESES.map(m => <option key={m} value={m}>{m}</option>)}
       </select>
-      <select value={anio} onChange={e => onAnio(e.target.value)} className={`w-24 ${cls}`}>
+      <select value={anio} onChange={e => onAnio(e.target.value)} data-estado={err ? "error" : undefined} className={`pnl-campo-anio shrink-0 ${cls}`}>
         <option value="">— Año —</option>
         {anios.map(a => <option key={a} value={a}>{a}</option>)}
       </select>

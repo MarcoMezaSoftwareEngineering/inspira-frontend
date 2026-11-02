@@ -1,4 +1,6 @@
+import { createElement } from "react";
 import { fechaHoraDoble } from "../../../../lib/horas";
+import IconoPaso, { ICONO_POR_BLOQUE } from "../../../../components/common/IconoPaso";
 // src/pages/panel/components/mis-servicios/utils.js
 
 export function formatearFecha(fechaIso) {
@@ -95,3 +97,31 @@ export function badgeEstadoItemChecklist(estado) {
  * asesorado no le dice nada y en la tarjeta parecía un error.
  */
 export const refCorta = (c) => (c ? `Ref. ${String(c).slice(0, 8).toUpperCase()}` : "");
+
+/** Las iniciales del titular para la cabecera del expediente (máster y visado). */
+export function inicialesDe(nombre) {
+  return String(nombre || "").trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "•";
+}
+
+
+/**
+ * Un icono de línea por nombre, con el trazo de IconoPaso. IconoPaso solo
+ * dibuja los de su tabla TRAZOS: «alert», «refresh», «chevron», «clock»,
+ * «copy», «eyeOff», «trash», «filetick» y «euro» viven en ICONO_POR_BLOQUE
+ * (IconoPaso.jsx, compartido con Core, no se toca) y allí caían en «info».
+ * Aquí se dibujan con su propio trazo; el resto pasa a IconoPaso tal cual.
+ */
+export function IconoLinea({ nombre, className = "w-4 h-4", strokeWidth = 1.8 }) {
+  const d = ICONO_POR_BLOQUE[nombre];
+  if (typeof d !== "string" || !d.startsWith("M")) {
+    return createElement(IconoPaso, { nombre, className, strokeWidth });
+  }
+  return createElement(
+    "svg",
+    {
+      className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth,
+      strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
+    },
+    createElement("path", { d }),
+  );
+}

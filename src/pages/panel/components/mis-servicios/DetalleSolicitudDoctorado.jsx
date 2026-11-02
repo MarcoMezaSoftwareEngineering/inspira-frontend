@@ -22,6 +22,7 @@ import { RutaPasos, TituloPaso, LeToca, ExpedienteCabecera } from "../../../../c
 import Icono from "../../../../components/common/Icono";
 import { EsqueletoExpediente } from "../Esqueleto";
 import NovedadesExpediente from "../NovedadesExpediente";
+import ErrorCarga from "./ErrorCarga";
 import EncuestaCierre from "../EncuestaCierre";
 import MensajesFlotante from "./MensajesFlotante";
 import { usePublicarCabecera } from "../../cabeceraExpediente";
@@ -99,6 +100,8 @@ export default function DetalleSolicitudDoctorado({ solicitudBase, onIrAGuia, se
   }
 
   useEffect(() => { setCargando(true); cargarTodo(); }, [idSolicitud]); // eslint-disable-line react-hooks/exhaustive-deps
+  // «Reintentar» (Carina, 02/11/2026): la misma carga que al entrar.
+  const reintentar = () => { setCargando(true); cargarTodo(); };
 
   const situacion = pasoDoctorado(solicitudBase.etapa);
   const porPaso = useMemo(() => checklistPorPaso(checklist), [checklist]);
@@ -150,9 +153,7 @@ export default function DetalleSolicitudDoctorado({ solicitudBase, onIrAGuia, se
   return (
     <div className="flex flex-col lg:h-full lg:min-h-0">
       {error && (
-        <div className="shrink-0 mb-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
+        <ErrorCarga className="shrink-0 mb-3" mensaje={error} onReintentar={reintentar} />
       )}
 
       {/* Móvil y tablet: la fila de pasos arriba. */}

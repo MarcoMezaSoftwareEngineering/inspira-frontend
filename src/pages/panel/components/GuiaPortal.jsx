@@ -19,15 +19,15 @@ export default function GuiaPortal({ guias = [] }) {
       <ul className="ex-guia-portal-lista">
         {guias.map((g) => (
           <li key={g.href} className="ex-guia-portal">
-            <span className="ex-guia-portal-icono bg-sky/20 text-primary">
+            <span className="ex-guia-portal-icono" aria-hidden="true">
               <Icono nombre={g.tipo === "portal" ? "mapa" : "documento"} size={20} />
             </span>
             <div className="min-w-0 flex-1">
-              <small>{g.tipo === "portal" ? "Tu portal" : "Tu trámite"}</small>
+              <small className="pnl-eyebrow"><span className="punto" aria-hidden="true" />{g.tipo === "portal" ? "Tu portal" : "Tu trámite"}</small>
               <strong className="text-primary">{g.titulo}</strong>
               <small>{g.descripcion}</small>
             </div>
-            <a className="pnl-btn-cta ux-tap" href={g.href} target="_blank" rel="noopener noreferrer">
+            <a className="pnl-btn ux-tap" href={g.href} target="_blank" rel="noopener noreferrer">
               Ver guía (PDF)
               {g.peso && <span className="ex-guia-portal-peso">{g.peso}</span>}
             </a>

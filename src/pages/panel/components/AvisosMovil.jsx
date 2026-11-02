@@ -106,7 +106,7 @@ export default function AvisosMovil({ variante = "inicio" }) {
   } else {
     texto = QUE_AVISA;
     botones = (
-      <button type="button" className="pnl-btn-cta pnl-avisos-btn" onClick={activar} disabled={ocupado}>
+      <button type="button" className="pnl-btn-primario pnl-avisos-btn" onClick={activar} disabled={ocupado}>
         {ocupado ? "Activando…" : "Activar avisos"}
       </button>
     );
@@ -127,7 +127,7 @@ export default function AvisosMovil({ variante = "inicio" }) {
         <div className="pnl-avisos-botones">
           {botones}
           {!enPerfil && (
-            <button type="button" className="pnl-avisos-ahora-no" onClick={ahoraNo}>Ahora no</button>
+            <button type="button" className="pnl-avisos-ahora-no pnl-btn-texto" onClick={ahoraNo}>Ahora no</button>
           )}
         </div>
       )}

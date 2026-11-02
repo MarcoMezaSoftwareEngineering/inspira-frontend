@@ -6,6 +6,7 @@
 // —en el móvil el menú es un botón, en escritorio una barra— se busca el
 // primero visible; si no hay ninguno, el paso se salta.
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { menosMovimiento } from "../hooks/useMovimiento";
 
 const MARGEN = 12;
 
@@ -50,7 +51,7 @@ export default function Tour({ pasos, onFin }) {
   useLayoutEffect(() => {
     if (!paso) return undefined;
     const el = paso.clave ? buscar(paso.clave) : null;
-    if (el) el.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (el) el.scrollIntoView({ block: "center", behavior: menosMovimiento() ? "auto" : "smooth" });
     const t = setTimeout(medir, el ? 380 : 0);
     return () => clearTimeout(t);
   }, [paso, medir]);
@@ -90,7 +91,7 @@ export default function Tour({ pasos, onFin }) {
         <h4>{paso.titulo}</h4>
         <p>{paso.texto}</p>
         <div className="pnl-tour-botones">
-          <button type="button" className="pnl-tour-saltar" onClick={() => onFin?.("saltado")}>
+          <button type="button" className="pnl-btn-texto" onClick={() => onFin?.("saltado")}>
             Saltar
           </button>
           <span style={{ flex: 1 }} />
@@ -99,7 +100,7 @@ export default function Tour({ pasos, onFin }) {
               Anterior
             </button>
           )}
-          <button type="button" className="pnl-btn-cta ux-tap" onClick={siguiente}>
+          <button type="button" className="pnl-btn-primario ux-tap" onClick={siguiente}>
             {ultimo ? "Entendido" : "Siguiente"}
           </button>
         </div>

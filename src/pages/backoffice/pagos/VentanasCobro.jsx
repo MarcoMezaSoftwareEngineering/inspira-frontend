@@ -1,8 +1,8 @@
 // Las ventanas de un cobro: marcar pagado, adjuntar voucher, validar el
-// comprobante que subió el asesorado y el detalle. Las abre useAccionesCobro
+// comprobante que subió el asesorado, corregir un cobro pendiente y el detalle. Las abre useAccionesCobro
 // (AccionesCobro.jsx), que decide cuál según el permiso de quien mira.
 import { useState } from "react";
-import { Check, Upload } from "lucide-react";
+import { Check, Upload, Pencil } from "lucide-react";
 import { boPATCH, boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import { navigate } from "../../../services/navigate";
@@ -241,6 +241,74 @@ export function VentanaValidar({ c, opciones, onCerrar, onHecho }) {
             </Campo>
           )}
         </div>
+      </div>
+    </Ventana>
+  );
+}
+
+const MONEDAS = ["EUR", "PEN", "USD"];
+
+/** Corregir un cobro pendiente: importe, moneda, vencimiento y concepto. */
+export function VentanaEditar({ c, onCerrar, onHecho }) {
+  const [monto, setMonto] = useState(c.monto != null ? String(c.monto) : "");
+  const [moneda, setMoneda] = useState(c.moneda || "EUR");
+  const [vence, setVence] = useState(c.fecha_vencimiento ? String(c.fecha_vencimiento).slice(0, 10) : "");
+  const [concepto, setConcepto] = useState(c.concepto || "");
+  const [enviando, setEnviando] = useState(false);
+  const cambiaMoneda = moneda !== c.moneda;
+
+  async function guardar() {
+    const body = {};
+    if (monto !== String(c.monto ?? "")) body.monto = monto;
+    if (cambiaMoneda) body.moneda = moneda;
+    if (vence !== (c.fecha_vencimiento ? String(c.fecha_vencimiento).slice(0, 10) : "")) body.fecha_vencimiento = vence;
+    if (concepto.trim() !== (c.concepto || "")) body.concepto = concepto.trim();
+    if (!Object.keys(body).length) { onCerrar(); return; }
+    setEnviando(true);
+    const r = await boPATCH(`/backoffice/pagos/${c.id_pago}/datos`, body);
+    setEnviando(false);
+    if (!r?.ok) { dialog.toast(r?.msg || "No se pudo corregir el cobro", "error"); return; }
+    dialog.toast("Cobro corregido", "success");
+    onHecho(r.pago);
+  }
+
+  return (
+    <Ventana
+      abierta
+      onCerrar={onCerrar}
+      ancho="sm"
+      titulo="Corregir el cobro"
+      subtitulo={c.id_plan
+        ? "Es una cuota de un plan: el total del plan se recalcula y la moneda cambia para todas sus cuotas."
+        : "Para cuando se registró con otro importe, otra moneda o mal la fecha."}
+      pie={(
+        <>
+          <Boton tono="fantasma" onClick={onCerrar}>Cancelar</Boton>
+          <Boton cargando={enviando} icono={Pencil} onClick={guardar} disabled={!monto || Number(monto) <= 0}>Guardar</Boton>
+        </>
+      )}
+    >
+      <div style={{ display: "grid", gap: 10 }}>
+        <Resumen c={c} />
+        <div className="ase-pg-dos">
+          <Campo etiqueta="Importe">
+            <input className="ase-campo" type="number" min="0.01" step="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} />
+          </Campo>
+          <Campo etiqueta="Moneda">
+            <select className="ase-campo" value={moneda} onChange={(e) => setMoneda(e.target.value)}>
+              {MONEDAS.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </Campo>
+        </div>
+        <Campo etiqueta="Vence">
+          <input className="ase-campo" type="date" value={vence} onChange={(e) => setVence(e.target.value)} />
+        </Campo>
+        <Campo etiqueta={c.id_plan ? "Concepto" : "Concepto (opcional)"}>
+          <input className="ase-campo" value={concepto} maxLength={200} onChange={(e) => setConcepto(e.target.value)} />
+        </Campo>
+        {cambiaMoneda && c.id_plan && (
+          <p className="ase-pg-cobro-s">Solo se puede cambiar la moneda si ninguna cuota del plan está pagada ni en revisión.</p>
+        )}
       </div>
     </Ventana>
   );

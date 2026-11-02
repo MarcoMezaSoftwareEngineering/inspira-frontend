@@ -2,11 +2,11 @@
 // inspira-backend/src/backoffice/permisos.catalog.js):
 //
 //   pagos.ver                  listas, resumen, planes, comprobantes
-//   pagos.registrar            marcar pagado, adjuntar voucher, recordatorio
+//   pagos.registrar            marcar pagado, adjuntar voucher, recordatorio, corregir un cobro suelto
 //   pagos.planes               crear, reprogramar y anular planes
 //   pagos.validar_comprobante  validar o rechazar lo que subió el asesorado
 //   admin                      devolver a pendiente un cobro ya pagado
-import { Check, Upload, Bell, Eye, Undo2, ShieldCheck } from "lucide-react";
+import { Check, Upload, Bell, Eye, Undo2, ShieldCheck, Pencil } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 /** Los permisos de pagos de quien mira. */
@@ -30,6 +30,11 @@ export function accionesPara(c, puede) {
     lista.push({ tipo: "pagado", etiqueta: "Marcar pagado", icono: Check, tono: "primario" });
     lista.push({ tipo: "voucher", etiqueta: "Voucher", icono: Upload, tono: "secundario" });
     lista.push({ tipo: "recordar", etiqueta: "Recordar", icono: Bell, tono: "fantasma" });
+  }
+  // Corregir importe, moneda, vencimiento o concepto: solo mientras está pendiente.
+  // Una cuota de plan toca el plan, así que pide el permiso de planes.
+  if (c.estado === "PENDIENTE" && (c.id_plan ? puede.planes : puede.registrar)) {
+    lista.push({ tipo: "editar", etiqueta: "Editar", icono: Pencil, tono: "fantasma" });
   }
   if (c.estado === "PAGADO" && puede.registrar && !c.tiene_comprobante) {
     lista.push({ tipo: "voucher", etiqueta: "Adjuntar voucher", icono: Upload, tono: "fantasma" });

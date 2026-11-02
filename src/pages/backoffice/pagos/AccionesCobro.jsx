@@ -1,6 +1,6 @@
 // Lo que se puede hacer con un cobro, según el permiso de quien mira:
 //
-//   pagos.registrar            marcar pagado, adjuntar voucher, recordatorio
+//   pagos.registrar            marcar pagado, adjuntar voucher, recordatorio, corregir un cobro suelto
 //   pagos.validar_comprobante  validar o rechazar lo que subió el asesorado
 //   admin                      devolver a pendiente un cobro ya pagado
 //
@@ -11,7 +11,7 @@ import { useState } from "react";
 import { boPATCH, boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import { usePermisosPagos } from "./permisosPagos";
-import { VentanaPagado, VentanaVoucher, VentanaValidar, VentanaDetalle } from "./VentanasCobro";
+import { VentanaPagado, VentanaVoucher, VentanaValidar, VentanaEditar, VentanaDetalle } from "./VentanasCobro";
 import { dinero } from "./pagosComun";
 
 /**
@@ -60,6 +60,7 @@ export function useAccionesCobro({ opciones, onHecho }) {
     abierta.tipo === "pagado" ? <VentanaPagado c={c} opciones={opciones} onCerrar={cerrar} onHecho={hecho} />
       : abierta.tipo === "voucher" ? <VentanaVoucher c={c} opciones={opciones} onCerrar={cerrar} onHecho={hecho} />
         : abierta.tipo === "validar" ? <VentanaValidar c={c} opciones={opciones} onCerrar={cerrar} onHecho={hecho} />
+          : abierta.tipo === "editar" ? <VentanaEditar c={c} onCerrar={cerrar} onHecho={hecho} />
           : <VentanaDetalle c={c} puede={puede} onCerrar={cerrar} onAccion={abrir} />
   );
 

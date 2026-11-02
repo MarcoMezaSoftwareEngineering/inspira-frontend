@@ -28,6 +28,14 @@
     "usd": null,
     "pen": 180
   },
+  "sesionPresencial": {
+    "id": "sesion-presencial",
+    "nombre": "Asesoría presencial",
+    "duracionMin": 60,
+    "eur": null,
+    "usd": null,
+    "pen": 200
+  },
   "master": {
     "listas": [
       {

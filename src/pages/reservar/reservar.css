@@ -1,0 +1,23 @@
+/* Transiciones de la página de reservas. Todo pasa por aquí para poder apagarlo
+   de una vez con «reducir movimiento». */
+@keyframes rv-entrada {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes rv-pop {
+  0%   { transform: scale(0.85); }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes rv-brillo {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+.rv-entrada { animation: rv-entrada 0.28s ease-out both; }
+.rv-pop     { animation: rv-pop 0.22s ease-out both; }
+.rv-esqueleto { animation: rv-brillo 1.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-entrada, .rv-pop, .rv-esqueleto { animation: none; }
+}

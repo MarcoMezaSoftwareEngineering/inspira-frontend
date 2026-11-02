@@ -6,48 +6,32 @@ import { loginGoogle } from "../components/layout/Header/LoginButton";
 import { dialog } from "../services/dialogService";
 import { registrarInicioPago } from "../lib/analytics";
 
-function isMercadoPagoUrl(url) {
-  try {
-    const { hostname } = new URL(url);
-    return hostname.includes("mercadopago.com");
-  } catch {
-    return false;
-  }
-}
-
 export function useReservarCita() {
   const { user } = useAuth();
   const [loadingSlot, setLoadingSlot] = useState(null);
 
-  async function reservarSlot(id_slot) {
-    // Requiere sesión de cliente (login con Google)
+  // Separa el horario sin cobrar y lleva a la página de pago de esa reserva.
+  // modo «ahora»: elige allí cómo pagar; «despues»: queda separado para pagar luego.
+  async function separarHorario(id_slot, servicio_id, modo = "ahora") {
     if (!user) {
-      loginGoogle({ volverAqui: true }); // vuelve a esta página tras Google, no al panel
+      loginGoogle({ volverAqui: true });
       return;
     }
-
     setLoadingSlot(id_slot);
     try {
-      const res = await apiPOST("/mercadopago/reserva/preferencia", { id_slot });
-
-      if (res?.ok && res.preferencia?.init_point && isMercadoPagoUrl(res.preferencia.init_point)) {
-        registrarInicioPago("reserva_cita", { id_slot });
-        window.location.href = res.preferencia.init_point;
+      const res = await apiPOST("/api/reservas/cliente/separar", { id_slot, servicio_id, modo });
+      if (res?.ok && res.id_reserva) {
+        registrarInicioPago("reserva_cita_separada", { id_slot, servicio_id, modo });
+        window.location.assign(`/reservar/pago?r=${res.id_reserva}`);
         return;
       }
-
-      if (res?.msg) {
-        dialog.toast(res.msg, "error"); // p.ej. "Ese horario ya no está disponible"
-      } else {
-        dialog.toast("No se pudo iniciar el pago de la cita.", "error");
-      }
+      dialog.toast(res?.msg || "No se pudo separar el horario.", "error");
     } catch (err) {
       console.error(err);
-      dialog.toast("Error de conexión con el sistema de pagos.", "error");
-    } finally {
-      setLoadingSlot(null);
+      dialog.toast("Error de conexión. Intente de nuevo.", "error");
     }
+    setLoadingSlot(null);
   }
 
-  return { reservarSlot, loadingSlot, isLoggedIn: !!user };
+  return { separarHorario, loadingSlot, isLoggedIn: !!user };
 }

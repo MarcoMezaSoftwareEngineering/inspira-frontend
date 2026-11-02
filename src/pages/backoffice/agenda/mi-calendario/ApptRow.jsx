@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { horaLimaPE } from "../../../../lib/formatos";
 import { pagoEsRedundante, pagoTone } from "../utilidades";
-import { CancelBtn, EditMeetBtn } from "./BotonesCita";
+import { CancelBtn, ConfirmarPagoBtn, EditMeetBtn, VerVoucherBtn } from "./BotonesCita";
 
 function Pill({ tone, children }) {
   const tones = {
@@ -49,6 +49,10 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }
             {!pagoEsRedundante(r.estado, r.pago_estado) && (
               <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
             )}
+            {r.metodo_pago === "TRANSFERENCIA" && r.estado !== "CANCELADA" && <Pill tone="primary">Transferencia</Pill>}
+            {r.metodo_pago === "DESPUES" && r.estado !== "CANCELADA" && <Pill tone="primary">Pagará después</Pill>}
+            {r.metodo_pago === "MERCADOPAGO" && Number(r.recargo) > 0 && <Pill tone="neutral">incluye comisión MP {r.recargo}</Pill>}
+            {r.estado === "PENDIENTE_PAGO" && r.tiene_voucher && <Pill tone="green">subió el voucher</Pill>}
             {r.estado === "PENDIENTE_PAGO" && r.hold_expira_en && (
               <Pill tone="amber">vence {horaLimaPE(r.hold_expira_en)}</Pill>
             )}
@@ -59,6 +63,16 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }
             </p>
           )}
           <div className="flex gap-1.5 flex-wrap">
+            {r.tiene_notas && r.notas_doc_url && (
+              <a href={r.notas_doc_url} target="_blank" rel="noopener noreferrer"
+                className="px-2.5 py-1.5 bg-white border border-primary/30 text-primary rounded-lg text-[10.5px] font-bold hover:bg-primary/5">
+                Notas de Gemini
+              </a>
+            )}
+            <VerVoucherBtn reserva={r}
+              className="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50" />
+            <ConfirmarPagoBtn reserva={r} onChanged={onChanged}
+              className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10.5px] font-bold hover:opacity-90 disabled:opacity-50" />
             {r.meet_url ? (
               <a href={r.meet_url} target="_blank" rel="noopener noreferrer"
                 className="px-2.5 py-1.5 bg-primary text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">

@@ -1,6 +1,6 @@
 // Acciones sobre una cita del panel lateral: añadir el enlace de Meet y cancelar.
 import { useState } from "react";
-import { boPATCH } from "../../../../services/backofficeApi";
+import { boFetch, boPATCH, boPOST } from "../../../../services/backofficeApi";
 import { dialog } from "../../../../services/dialogService";
 
 async function editarMeetReserva(r, onChanged, setEditando) {
@@ -19,6 +19,57 @@ async function cancelarReserva(r, onChanged) {
   const res = await boPATCH(`/backoffice/agenda/reservas/${r.id_reserva}`, { estado: "CANCELADA" });
   if (res?.ok === false) return dialog.toast(res.msg || "No se pudo cancelar", "error");
   onChanged();
+}
+
+async function confirmarPagoTransferencia(r, onChanged, setEnviando) {
+  const ok = await dialog.confirm(
+    `¿Ya vio el abono de ${r.monto} ${r.moneda} (referencia RES-${r.id_reserva}) en la cuenta? Se confirmará la cita y se enviará la confirmación a ${r.cliente?.nombre || r.cliente?.email_contacto}.${r.tiene_voucher ? "" : " Ojo: el cliente no subió voucher."}`,
+    "Confirmar pago"
+  );
+  if (!ok) return;
+  setEnviando(true);
+  const res = await boPOST(`/backoffice/agenda/reservas/${r.id_reserva}/confirmar-pago`);
+  setEnviando(false);
+  if (res?.ok === false) return dialog.toast(res.msg || "No se pudo confirmar el pago", "error");
+  dialog.toast("Pago confirmado. Se envió la confirmación al cliente.", "success");
+  onChanged();
+}
+
+// Abre el voucher que subió el cliente (se pide con la sesión del equipo).
+async function abrirVoucher(r, setAbriendo) {
+  setAbriendo(true);
+  try {
+    const res = await boFetch(`/backoffice/agenda/reservas/${r.id_reserva}/voucher`);
+    if (!res || !res.ok) return dialog.toast("No se pudo abrir el voucher", "error");
+    const url = URL.createObjectURL(await res.blob());
+    window.open(url, "_blank", "noopener");
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } finally {
+    setAbriendo(false);
+  }
+}
+
+export function VerVoucherBtn({ reserva, className }) {
+  const [abriendo, setAbriendo] = useState(false);
+  if (!reserva.tiene_voucher) return null;
+  return (
+    <button onClick={() => abrirVoucher(reserva, setAbriendo)} disabled={abriendo}
+      className={className || "px-3 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[11px] font-bold hover:bg-neutral-50 disabled:opacity-50"}>
+      {abriendo ? "Abriendo…" : "Ver voucher"}
+    </button>
+  );
+}
+
+// Solo para citas por transferencia o «pagar después» que aún esperan el pago.
+export function ConfirmarPagoBtn({ reserva, onChanged, className }) {
+  const [enviando, setEnviando] = useState(false);
+  if (!["TRANSFERENCIA", "DESPUES"].includes(reserva.metodo_pago) || reserva.estado !== "PENDIENTE_PAGO") return null;
+  return (
+    <button onClick={() => confirmarPagoTransferencia(reserva, onChanged, setEnviando)} disabled={enviando}
+      className={className || "px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:opacity-90 disabled:opacity-50"}>
+      {enviando ? "Confirmando…" : "Confirmar pago"}
+    </button>
+  );
 }
 
 export function EditMeetBtn({ reserva, onChanged, className }) {

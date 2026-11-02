@@ -37,6 +37,7 @@ const MuestraUX = import.meta.env.DEV ? lazyConRecarga(() => import("./pages/dev
 const CalculadoraMaster = lazyConRecarga(() => import("./pages/calculadora/CalculadoraMaster"));
 const PanelCliente = lazyConRecarga(() => import("./pages/panel/PanelCliente"));
 const ReservarCita = lazyConRecarga(() => import("./pages/reservar/ReservarCita"));
+const PagarReserva = lazyConRecarga(() => import("./pages/reservar/PagarReserva"));
 const MasterAds2027 = lazyConRecarga(() => import("./pages/landing/master2027/MasterAds2027"));
 const VisaOEstancia = lazyConRecarga(() => import("./pages/decidir/VisaOEstancia"));
 const GradoEspana = lazyConRecarga(() => import("./pages/grado/GradoEspana"));
@@ -455,6 +456,8 @@ const PUBLIC_PATHS = [
   // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
   // cabecera. Solo se llega por URL: la reserva de la web va por Calendly.
   "/reservar",
+  // Pago de una reserva concreta: privada, sin SEO (la página queda noindex).
+  "/reservar/pago",
   "/panel",
   "/pago-exitoso",
   "/pago-fallido",
@@ -635,6 +638,7 @@ export default function App({ ruta, prerenderizada = false }) {
       {path.startsWith("/universidad/") && <PaginaLugar tipo="universidad" id={path.slice("/universidad/".length)} />}
       {isPanel && <PanelCliente path={path} />}
       {path === "/reservar" && <ReservarCita />}
+      {path === "/reservar/pago" && <PagarReserva />}
       {path === "/master-2027-2028" && <MasterAds2027 />}
       {path === "/visa-o-estancia" && <VisaOEstancia />}
       {path === "/grado-en-espana" && <GradoEspana />}

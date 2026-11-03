@@ -21,7 +21,7 @@ const zonaOriginal = await vi.hoisted(async () => {
 });
 
 vi.mock("../../../services/backofficeApi", () => ({
-  boGET: vi.fn(), boPOST: vi.fn(), boPATCH: vi.fn(), boDELETE: vi.fn(),
+  boGET: vi.fn(), boPOST: vi.fn(), boPATCH: vi.fn(), boDELETE: vi.fn(), boPUT: vi.fn(), boFetch: vi.fn(),
 }));
 vi.mock("../../../services/dialogService", () => ({
   dialog: { toast: vi.fn(), confirm: vi.fn(), prompt: vi.fn() },

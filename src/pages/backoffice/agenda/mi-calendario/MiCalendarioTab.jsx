@@ -4,6 +4,7 @@ import useMiCalendario from "./useMiCalendario";
 import BarraCalendario from "./BarraCalendario";
 import CuadriculaCalendario from "./CuadriculaCalendario";
 import PanelLateral from "./PanelLateral";
+import GestionHorarios from "./GestionHorarios";
 
 export default function MiCalendarioTab() {
   const {
@@ -23,6 +24,8 @@ export default function MiCalendarioTab() {
         Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita).
         Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.
       </p>
+      {/* Cerrar o abrir la agenda y el horario fijo semanal */}
+      <GestionHorarios onChanged={cargar} />
       {/* Toolbar: navegación + filtro + vista + acciones */}
       <BarraCalendario
         setWeekStart={setWeekStart} stepDias={stepDias} rangoTexto={rangoTexto}

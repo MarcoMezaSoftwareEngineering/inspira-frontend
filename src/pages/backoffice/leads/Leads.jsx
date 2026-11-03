@@ -16,6 +16,7 @@ import LeadDetalle from "./LeadDetalle";
 import LeadsPestanas from "./LeadsPestanas";
 import LeadAlta from "./LeadAlta";
 import BandejaLeads from "./BandejaLeads";
+import { Segmentado } from "../crm/kit";
 import { ETAPAS, ETAPA, ORIGENES, haceCuanto, fechaHora, nombreDe } from "./leadsComun";
 import "../../../styles/leads-core.css";
 
@@ -263,16 +264,9 @@ export default function Leads() {
       />
 
       <Cuerpo>
-        <div className="mb-4 flex gap-1 overflow-x-auto rounded-2xl border border-neutral-200 bg-white p-1 shadow-sm" role="tablist" aria-label="Cómo ver los leads">
-          {MODOS.map((m) => {
-            const n = m.id === "oportunidades" ? bandeja?.resumen?.oportunidades : m.id === "convertir" ? bandeja?.resumen?.convertir : null;
-            return (
-              <button key={m.id} type="button" role="tab" aria-selected={modo === m.id} onClick={() => cambiarModo(m.id)}
-                className={`min-h-[44px] flex-1 whitespace-nowrap rounded-xl px-3 text-[13px] font-bold transition-colors ${modo === m.id ? "bg-primary-dark text-white" : "text-neutral-600 hover:bg-neutral-50"}`}>
-                {m.texto}{n != null && <span className={`ml-1.5 rounded-full px-1.5 text-[11px] ${modo === m.id ? "bg-white/20" : "bg-neutral-100"}`}>{n}</span>}
-              </button>
-            );
-          })}
+        <div className="mb-4">
+          <Segmentado etiqueta="Cómo ver los leads" valor={modo} onCambio={cambiarModo}
+            opciones={MODOS.map((m) => ({ ...m, n: m.id === "oportunidades" ? bandeja?.resumen?.oportunidades : m.id === "convertir" ? bandeja?.resumen?.convertir : null }))} />
         </div>
 
         {modo !== "tablero" ? (

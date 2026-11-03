@@ -1,18 +1,20 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -665,65 +667,66 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">09:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[10px] text-neutral-400 truncate">ana@example.com</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
-</div>
-</article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">11:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[10px] text-neutral-400 truncate">
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 opacity-75">
+<button type="button" aria-label="Abrir la reserva de Ana Torres" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(15, 118, 110);">AT</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Ana Torres</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">09:00</span>
 </span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">ana@example.com</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">10:00</b>
-<span class="block text-[9px] text-neutral-400">10-12</span>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Marta Ruiz" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">MR</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Marta Ruiz</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">11:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">
+</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[10px] text-neutral-400 truncate">luis@example.com</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</article>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Luis Pérez" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">LP</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Luis Pérez</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">10:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700">Confirmar pago</button>
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
 </div>
@@ -736,18 +739,20 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 `;
 
 exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -1401,64 +1406,65 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">09:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
-</div>
-</article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">11:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 opacity-75">
+<button type="button" aria-label="Abrir la reserva de Ana Torres" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(15, 118, 110);">AT</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Ana Torres</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">09:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">ana@example.com · Carina Meza</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">10:00</b>
-<span class="block text-[9px] text-neutral-400">10-12</span>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Marta Ruiz" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">MR</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Marta Ruiz</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">11:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</article>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Luis Pérez" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">LP</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Luis Pérez</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">10:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700">Confirmar pago</button>
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
 </div>
@@ -1471,18 +1477,20 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 `;
 
 exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de generar horarios abierto > generar horarios 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -2141,65 +2149,66 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">09:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[10px] text-neutral-400 truncate">ana@example.com</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
-</div>
-</article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">11:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[10px] text-neutral-400 truncate">
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 opacity-75">
+<button type="button" aria-label="Abrir la reserva de Ana Torres" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(15, 118, 110);">AT</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Ana Torres</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">09:00</span>
 </span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">ana@example.com</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">10:00</b>
-<span class="block text-[9px] text-neutral-400">10-12</span>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Marta Ruiz" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">MR</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Marta Ruiz</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">11:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">
+</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[10px] text-neutral-400 truncate">luis@example.com</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</article>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Luis Pérez" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">LP</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Luis Pérez</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">10:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700">Confirmar pago</button>
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
 </div>
@@ -2212,18 +2221,20 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 `;
 
 exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de generar horarios abierto > propio 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -2868,65 +2879,66 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">09:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[10px] text-neutral-400 truncate">ana@example.com</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
-</div>
-</article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">11:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[10px] text-neutral-400 truncate">
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 opacity-75">
+<button type="button" aria-label="Abrir la reserva de Ana Torres" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(15, 118, 110);">AT</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Ana Torres</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">09:00</span>
 </span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">ana@example.com</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">10:00</b>
-<span class="block text-[9px] text-neutral-400">10-12</span>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Marta Ruiz" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">MR</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Marta Ruiz</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">11:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">
+</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[10px] text-neutral-400 truncate">luis@example.com</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</article>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Luis Pérez" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">LP</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Luis Pérez</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">10:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700">Confirmar pago</button>
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
 </div>
@@ -2939,18 +2951,20 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 `;
 
 exports[`Agenda — Mi calendario > error al cargar 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -3597,18 +3611,20 @@ exports[`Agenda — Mi calendario > error al cargar 1`] = `
 `;
 
 exports[`Agenda — Mi calendario > sin datos 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -4254,18 +4270,20 @@ exports[`Agenda — Mi calendario > sin datos 1`] = `
 `;
 
 exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con sus botones > citas desplegadas 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -4919,64 +4937,65 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">09:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
-</div>
-</article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">11:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 opacity-75">
+<button type="button" aria-label="Abrir la reserva de Ana Torres" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(15, 118, 110);">AT</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Ana Torres</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">09:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">ana@example.com · Carina Meza</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">10:00</b>
-<span class="block text-[9px] text-neutral-400">10-12</span>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Marta Ruiz" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">MR</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Marta Ruiz</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">11:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</article>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Luis Pérez" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">LP</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Luis Pérez</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">10:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700">Confirmar pago</button>
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
 </div>
@@ -4989,18 +5008,20 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 `;
 
 exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con sus botones > día 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -5281,64 +5302,65 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">09:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
-</div>
-</article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">11:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 opacity-75">
+<button type="button" aria-label="Abrir la reserva de Ana Torres" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(15, 118, 110);">AT</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Ana Torres</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">09:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">ana@example.com · Carina Meza</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">10:00</b>
-<span class="block text-[9px] text-neutral-400">10-12</span>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Marta Ruiz" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">MR</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Marta Ruiz</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">11:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</article>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Luis Pérez" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">LP</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Luis Pérez</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">10:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700">Confirmar pago</button>
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
 </div>
@@ -5351,18 +5373,20 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 `;
 
 exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con sus botones > semana siguiente 1`] = `
-"<div class="h-full flex flex-col min-h-0">
-<header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-<div class="min-w-[220px]">
-<div class="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-<span class="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse">
-</span>Calendario propio</div>
-<h1 class="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-<p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
+"<div class="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+<header class="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+<h1 class="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+<p class="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
-<div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
+<div class="w-full sm:w-auto">
+<div role="tablist" aria-label="Secciones de la agenda" class="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none]">
+<button type="button" role="tab" aria-selected="false" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Reservas</button>
+<button type="button" role="tab" aria-selected="true" class="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition bg-primary-dark text-white">Horarios disponibles</button>
+</div>
+</div>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -5993,64 +6017,65 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">09:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
-</div>
-</article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">11:00</b>
-<span class="block text-[9px] text-neutral-400">10-09</span>
-</div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 opacity-75">
+<button type="button" aria-label="Abrir la reserva de Ana Torres" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(15, 118, 110);">AT</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Ana Torres</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">09:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">ana@example.com · Carina Meza</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
-<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
-<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
-<div>
-<b class="block text-[12px] text-neutral-800">10:00</b>
-<span class="block text-[9px] text-neutral-400">10-12</span>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Marta Ruiz" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">MR</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Marta Ruiz</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">11:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200">Confirmada</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
-<div class="min-w-0">
-<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
-<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
-<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
-<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</article>
+<article class="rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/80 ">
+<button type="button" aria-label="Abrir la reserva de Luis Pérez" class="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+<span aria-hidden="true" class="grid shrink-0 place-items-center rounded-full font-bold text-white" style="width: 42px; height: 42px; font-size: 15.96px; background: rgb(2, 80, 107);">LP</span>
+<span class="min-w-0 flex-1">
+<span class="flex items-baseline justify-between gap-2">
+<span class="truncate text-[15px] font-bold text-neutral-900">Luis Pérez</span>
+<span class="shrink-0 text-[15px] font-bold tabular-nums text-primary-dark">10:00</span>
+</span>
+<span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
+<span class="mt-2 flex flex-wrap gap-1.5">
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+</span>
+</span>
+<span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
+</span>
+</button>
+<div class="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&amp;>*]:flex-1">
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700">Confirmar pago</button>
+<button class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 text-[13px] font-bold transition active:scale-[.98] disabled:opacity-50 border border-red-200 bg-white text-red-600 hover:bg-red-50 !flex-none">Cancelar</button>
 </div>
 </article>
 </div>

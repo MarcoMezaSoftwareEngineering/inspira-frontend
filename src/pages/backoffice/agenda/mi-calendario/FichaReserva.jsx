@@ -1,16 +1,22 @@
-// Ficha de una reserva («Administrar»): todo lo de esa cita en un solo lugar — datos, pago y
-// política aceptada, formulario previo, notas de Gemini, informe (ver, enviar, pedir cambios),
-// avisos al asesorado y la cotización. La lista de reservas solo lleva lo de todos los días
-// (unirse, WhatsApp, cancelar); lo demás vive aquí.
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+// Ficha de una reserva («Administrar»), como ficha de registro de CRM: cabecera fija con la persona,
+// su cita y contacto rápido; pestañas (Resumen · Asesorado · Informe · Cotización · Acciones) y UNA
+// acción principal fija abajo, la que toca según el momento (confirmar pago, unirse, enviar el
+// informe, cotizar…). Todo el contenido de antes sigue aquí, ordenado por pestañas.
+import { useCallback, useEffect, useState } from "react";
 import { boGET, boPOST } from "../../../../services/backofficeApi";
 import { dialog } from "../../../../services/dialogService";
 import Icono from "../../../../components/common/Icono";
 import { ConfirmarPagoBtn, GruposAcciones, InformeBtns, VerVoucherBtn, EditMeetBtn, CancelBtn } from "./BotonesCita";
+import { Chip, Contacto, Dato, Datos, Hoja, Progreso, Seccion } from "../../crm/kit";
+import { BOTON } from "../../crm/estilos";
 
+const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-const fechaCorta = (f) => { const [y, m, d] = String(f || "").split("-").map(Number); return d ? `${d} ${MESES[m - 1]} ${y}` : ""; };
+function fechaLarga(f) {
+  const [y, m, d] = String(f || "").split("-").map(Number);
+  if (!d) return "";
+  return `${DIAS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${d} ${MESES[m - 1]}`;
+}
 const cuando = (iso) => (iso ? new Date(iso).toLocaleString("es-PE", { timeZone: "America/Lima", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
 
 const ETIQUETAS = {
@@ -29,46 +35,12 @@ function texto(v) {
   return String(v ?? "");
 }
 
-// Un dato: la etiqueta pequeña arriba y el valor debajo (mejor que «etiqueta: valor» en una línea).
-const Dato = ({ k, v, ancho }) => (v ? (
-  <div className={ancho ? "col-span-2" : ""}>
-    <p className="text-[9.5px] font-extrabold uppercase tracking-[.1em] text-neutral-400">{k}</p>
-    <p className="mt-0.5 text-[13px] font-semibold leading-snug text-neutral-800 break-words">{v}</p>
-  </div>
-) : null);
-
-// Tarjeta plegable: icono, título y una línea de resumen visibles; el detalle, al abrirla.
-function Tarjeta({ icono, titulo, resumen, tono = "neutral", abierta = false, children }) {
-  const tonos = { neutral: "bg-neutral-100 text-neutral-500", ok: "bg-emerald-100 text-emerald-700", ojo: "bg-amber-100 text-amber-700" };
-  return (
-    <details open={abierta} className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-      <summary className="flex cursor-pointer list-none items-center gap-3 p-3.5 [&::-webkit-details-marker]:hidden">
-        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tonos[tono]}`}><Icono nombre={icono} size={18} /></span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-bold text-primary-dark">{titulo}</span>
-          {resumen && <span className="block truncate text-[11.5px] text-neutral-500">{resumen}</span>}
-        </span>
-        <span className="text-neutral-400 transition-transform group-open:rotate-180" aria-hidden>▾</span>
-      </summary>
-      <div className="border-t border-neutral-100 p-3.5 text-[12.5px] text-neutral-700">{children}</div>
-    </details>
-  );
-}
-const BTN = "inline-flex min-h-[44px] items-center px-3.5 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-50";
-
-function Paso({ hecho, texto: t }) {
-  return (
-    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold ${hecho ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-400"}`}>
-      <Icono nombre={hecho ? "check" : "reloj"} size={13} />{t}
-    </span>
-  );
-}
-
 export default function FichaReserva({ reserva, onCerrar, onChanged }) {
   const [f, setF] = useState(null);
   const [error, setError] = useState("");
   const [cambio, setCambio] = useState("");
   const [ocupado, setOcupado] = useState("");
+  const [pestana, setPestana] = useState("resumen");
   const [ahora] = useState(() => Date.now());
 
   const cargar = useCallback(async () => {
@@ -87,197 +59,225 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
     cargar();
     onChanged?.();
   }
-
-  // Pantalla completa por encima de la app: sin scroll de la página de fondo, y Esc cierra.
-  const cerrarRef = useRef(onCerrar);
-  useEffect(() => { cerrarRef.current = onCerrar; }, [onCerrar]);
-  useEffect(() => {
-    const antes = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const tecla = (e) => { if (e.key === "Escape") cerrarRef.current?.(); };
-    window.addEventListener("keydown", tecla);
-    return () => { document.body.style.overflow = antes; window.removeEventListener("keydown", tecla); };
-  }, []);
-
   const cambiado = () => { cargar(); onChanged?.(); };
+
   const inf = f?.informe;
+  const cancelada = reserva.estado === "CANCELADA";
+  const pendientePago = reserva.estado === "PENDIENTE_PAGO";
   const pagada = !!f?.pagado_en;
   const pasada = f ? new Date(`${f.fecha}T${f.hora_inicio}:00-05:00`).getTime() < ahora : false;
   const conFormulario = !!f?.formulario?.actualizado_en;
   const conNotas = !!f?.notas.texto;
   const enviado = inf?.estado === "ENVIADO";
   const sinInforme = inf?.estado === "DESCARTADO";
+  const borrador = inf?.estado === "BORRADOR";
   const cotizaciones = f?.cotizaciones || [];
   const enviadas = cotizaciones.filter((q) => q.estado === "enviado");
-
-  // Qué toca ahora: una sola frase que ordena todo lo demás.
-  const siguiente = !f ? "" : reserva.estado === "CANCELADA" ? "La reserva está cancelada."
-    : !pagada ? "Falta confirmar el pago."
-    : !pasada ? (conFormulario ? "Todo listo para la reunión." : "Esperando su formulario previo (puede reenviárselo).")
-    : !conNotas ? "Esperando las notas de Gemini."
-    : sinInforme ? (enviadas.length ? "Cotización enviada: queda esperar su respuesta." : "Sin informe: prepare la cotización si corresponde.")
-    : !inf.estado ? "Clawsito está redactando el informe."
-    : !enviado ? "Revise el informe y envíelo al asesorado."
-    : enviadas.length ? "Informe y cotización enviados: queda esperar su respuesta." : "Informe enviado: prepare la cotización.";
-  const abrir = { datos: !pagada, formulario: pagada && !pasada && !conFormulario, notas: pasada && !conNotas, informe: pasada && conNotas && !enviado, cotizacion: (enviado || sinInforme) && !enviadas.length };
   const cotizar = f ? `/backoffice/presupuesto?${new URLSearchParams({ cliente: f.cotizar.cliente, correo: f.cotizar.correo, concepto: f.cotizar.concepto, importe: f.cotizar.importe, reserva: String(reserva.id_reserva) })}` : "#";
-  const estadoInforme = !f ? "" : sinInforme ? "sin informe" : enviado ? "enviado al asesorado" : inf.estado ? "borrador por aprobar" : conNotas ? "en cola" : "sin notas todavía";
 
-  return createPortal(
-    <div className="fixed inset-0 overflow-y-auto overscroll-contain bg-black/50" style={{ zIndex: 2000 }} onClick={onCerrar}>
-      <div role="dialog" aria-modal="true" aria-label={`Reserva de ${reserva.cliente?.nombre || "asesorado"}`}
-        className="mx-auto min-h-full max-w-2xl bg-[#F4F9FE] shadow-2xl sm:my-6 sm:min-h-0 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
-        <header className="sticky top-0 z-10 bg-gradient-to-br from-[#013446] to-[#012938] px-4 pb-3 text-white sm:rounded-t-3xl" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
-          <div className="flex items-center justify-between gap-3">
-            <button type="button" onClick={onCerrar} className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-white/10 px-3 text-[13px] font-bold hover:bg-white/20">← Volver</button>
-            <p className="text-[10.5px] font-bold uppercase tracking-[.14em] text-white/60">Reserva N.° {reserva.id_reserva}</p>
-          </div>
-          <h2 className="mt-2 truncate font-fraunces text-[21px] font-bold leading-tight">{reserva.cliente?.nombre || reserva.cliente?.email_contacto || "Sin nombre"}</h2>
-          <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-white/80"><Icono nombre="calendario" size={14} />{fechaCorta(reserva.fecha)} · {reserva.hora_inicio} (hora Perú)</p>
-        </header>
+  // Qué toca ahora: una frase y UNA acción principal (va fija abajo).
+  let siguiente = "";
+  let principal = null;
+  if (f) {
+    if (cancelada) siguiente = reserva.cancelada_por === "INSPIRA" ? "Cancelada por Inspira: ofrecer nuevo horario o devolver." : "La reserva está cancelada.";
+    else if (pendientePago) { siguiente = "Falta confirmar el pago."; principal = <ConfirmarPagoBtn reserva={reserva} onChanged={cambiado} className={BOTON.exito} />; }
+    else if (!pasada) {
+      siguiente = conFormulario ? "Todo listo para la reunión." : "Esperando su formulario previo.";
+      if (reserva.meet_url) principal = <a href={reserva.meet_url} target="_blank" rel="noopener noreferrer" className={BOTON.principal}><Icono nombre="video" size={16} />Unirse a la reunión</a>;
+    } else if (!conNotas && !sinInforme && !enviado) { siguiente = "Esperando las notas de Gemini."; principal = <button type="button" onClick={() => setPestana("informe")} className={BOTON.principal}>Ver notas e informe</button>; }
+    else if (borrador) { siguiente = "Revise el informe y envíelo al asesorado."; principal = <button type="button" onClick={() => setPestana("informe")} className={BOTON.principal}>Revisar el informe</button>; }
+    else if (!inf.estado) siguiente = "Clawsito está redactando el informe.";
+    else if (!enviadas.length) { siguiente = enviado ? "Informe enviado: prepare la cotización." : "Prepare la cotización si corresponde."; principal = <a href={cotizar} className={BOTON.principal}><Icono nombre="euro" size={16} />Preparar cotización</a>; }
+    else siguiente = "Cotización enviada: queda esperar su respuesta.";
+  }
+  const whatsappPie = reserva.whatsapp_url && !cancelada
+    ? <a href={reserva.whatsapp_url} target="_blank" rel="noopener noreferrer" className={`${BOTON.whatsapp} !flex-none`} aria-label="Enviar por WhatsApp"><Icono nombre="whatsapp" size={18} />{principal ? "" : "WhatsApp"}</a>
+    : null;
 
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 p-3 sm:p-4">
-          {error && <p className="rounded-xl bg-red-50 p-3 text-[12px] text-red-700">{error}</p>}
-          {!f && !error && <p className="p-8 text-center text-[12px] text-neutral-400">Cargando…</p>}
-          {f && (
-            <>
-              <section className="rounded-2xl bg-white p-3.5 shadow-sm border border-neutral-200">
-                <p className="text-[9.5px] font-extrabold uppercase tracking-[.12em] text-neutral-400">Qué sigue</p>
-                <p className="mt-0.5 text-[15px] font-bold text-primary-dark">{siguiente}</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <Paso hecho={pagada} texto="Pago" />
-                  <Paso hecho={conFormulario} texto="Formulario" />
-                  <Paso hecho={pasada && reserva.estado !== "CANCELADA"} texto="Reunión" />
-                  <Paso hecho={conNotas} texto="Notas" />
-                  <Paso hecho={enviado || sinInforme} texto="Informe" />
-                  <Paso hecho={enviadas.length > 0} texto="Cotización" />
-                </div>
+  const chipEstado = cancelada ? <Chip tono="mal">Cancelada</Chip>
+    : pendientePago ? <Chip tono="ojo">Pago pendiente</Chip>
+    : reserva.no_asistio_en ? <Chip tono="mal">No asistió</Chip>
+    : <Chip tono="ok">Confirmada</Chip>;
+
+  const pestanas = [
+    { id: "resumen", texto: "Resumen" },
+    { id: "asesorado", texto: "Asesorado" },
+    { id: "informe", texto: "Informe" },
+    { id: "cotizacion", texto: "Cotización", n: cotizaciones.length || null },
+    { id: "acciones", texto: "Acciones" },
+  ];
+
+  return (
+    <Hoja
+      etiqueta={`Reserva de ${reserva.cliente?.nombre || "asesorado"}`}
+      onCerrar={onCerrar}
+      cabecera={{
+        eyebrow: `Reserva N.° ${reserva.id_reserva}`,
+        titulo: reserva.cliente?.nombre || reserva.cliente?.email_contacto || "Sin nombre",
+        subtitulo: `${fechaLarga(reserva.fecha)} · ${reserva.hora_inicio} (hora Perú)`,
+        chips: <>{chipEstado}{f && <Chip tono="info">{f.monto} {f.moneda}</Chip>}{reserva.metodo_pago === "EQUIPO" && <Chip>Agendada por el equipo</Chip>}</>,
+        contacto: (
+          <>
+            {reserva.meet_url && !cancelada && <Contacto href={reserva.meet_url} icono="video" texto="Meet" />}
+            {reserva.whatsapp_url && <Contacto href={reserva.whatsapp_url} icono="whatsapp" texto="WhatsApp" />}
+            {f?.cliente?.email && <Contacto href={`mailto:${f.cliente.email}`} icono="chat" texto="Correo" />}
+          </>
+        ),
+      }}
+      pestanas={pestanas}
+      pestana={pestana}
+      onPestana={setPestana}
+      pie={principal || whatsappPie ? <>{principal}{whatsappPie}</> : null}
+    >
+      {error && <p className="rounded-xl bg-red-50 p-3 text-[13px] text-red-700">{error}</p>}
+      {!f && !error && <p className="p-10 text-center text-[13px] text-[#4f6672]">Cargando…</p>}
+
+      {f && pestana === "resumen" && (
+        <>
+          <Seccion titulo="Qué sigue">
+            <p className="text-[16px] font-bold text-primary-dark">{siguiente}</p>
+            <div className="mt-4">
+              <Progreso pasos={[
+                { texto: "Pago", hecho: pagada },
+                { texto: "Formulario", hecho: conFormulario },
+                { texto: "Reunión", hecho: pasada && !cancelada },
+                { texto: "Informe", hecho: enviado || sinInforme },
+                { texto: "Cotización", hecho: enviadas.length > 0 },
+              ]} />
+            </div>
+          </Seccion>
+          <Seccion titulo="La cita">
+            <Datos>
+              <Dato k="Fecha" v={`${fechaLarga(f.fecha)} · ${f.hora_inicio}`} />
+              <Dato k="Interés" v={f.interes} />
+              <Dato k="Importe" v={`${f.monto} ${f.moneda}`} />
+              <Dato k="Pago" v={pagada ? `confirmado ${cuando(f.pagado_en)}` : f.metodo_pago === "EQUIPO" ? "se coordina aparte" : "pendiente"} />
+              <Dato k="Quiere empezar" v={f.inicio} />
+              <Dato k="Lo que contó al reservar" v={f.detalle} ancho />
+            </Datos>
+            {Number(f.recargo) > 0 && <p className="mt-3 rounded-xl bg-neutral-50 p-2.5 text-[12.5px] text-[#4f6672]">Incluye {f.recargo} de comisión de tarjeta; sin tarjeta son {(Number(f.monto) - Number(f.recargo)).toFixed(2)} {f.moneda}.</p>}
+          </Seccion>
+        </>
+      )}
+
+      {f && pestana === "asesorado" && (
+        <>
+          <Seccion titulo="Contacto">
+            <Datos>
+              <Dato k="Correo" v={f.cliente.email} ancho />
+              <Dato k="Celular" v={f.cliente.telefono} />
+              <Dato k="Política aceptada" v={f.terminos.aceptados_en ? `${f.terminos.version} · ${cuando(f.terminos.aceptados_en)}` : "sin registro (anterior al 03/11)"} ancho />
+            </Datos>
+          </Seccion>
+          <Seccion titulo="Formulario previo" extra={conFormulario ? `completado ${cuando(f.formulario.actualizado_en)}` : "sin completar"}>
+            {f.formulario ? (
+              <Datos>
+                {Object.entries(ETIQUETAS).map(([k, et]) => <Dato key={k} k={et} v={texto(f.formulario[k])} ancho />)}
+                {Object.entries(VISA_ETIQ).map(([k, et]) => <Dato key={k} k={et} v={texto(f.formulario.visa?.[k])} ancho />)}
+              </Datos>
+            ) : <p className="text-[#4f6672]">Aún no respondió. Puede reenviárselo desde la pestaña Acciones.</p>}
+          </Seccion>
+        </>
+      )}
+
+      {f && pestana === "informe" && (
+        <>
+          <Seccion titulo="Notas de Gemini" extra={conNotas ? `recogidas ${cuando(f.notas.obtenidas_en)}` : ""}>
+            {conNotas ? (
+              <details className="group">
+                <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between font-semibold text-primary [&::-webkit-details-marker]:hidden">
+                  Ver las notas completas <span aria-hidden className="transition-transform group-open:rotate-180">▾</span>
+                </summary>
+                <div className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap rounded-xl bg-neutral-50 p-3 text-[13px] leading-relaxed">{f.notas.texto}</div>
+                {f.notas.url && <a href={f.notas.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block font-bold text-primary underline">Abrir el documento original</a>}
+              </details>
+            ) : (
+              <>
+                <p className="text-[#4f6672]">Gemini las deja unos minutos después de la reunión y Core las recoge solo.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {reserva.estado === "PENDIENTE_PAGO" && (
-                    <>
-                      <ConfirmarPagoBtn reserva={reserva} onChanged={cambiado} className={`${BTN} min-h-[44px] bg-emerald-600 text-white`} />
-                      <VerVoucherBtn reserva={reserva} className={`${BTN} min-h-[44px] border border-neutral-200 bg-white text-neutral-700`} />
-                    </>
-                  )}
-                  {reserva.whatsapp_url && <a href={reserva.whatsapp_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-[#25D366] text-white`}>Enviar por WhatsApp</a>}
-                  {reserva.meet_url && reserva.estado !== "CANCELADA" && <a href={reserva.meet_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-primary text-white`}>Unirse</a>}
-                  {(pasada || enviado || sinInforme) && reserva.estado !== "CANCELADA" && !enviadas.length && <a href={cotizar} className={`${BTN} bg-primary-dark text-white`}>Preparar cotización</a>}
+                  <button type="button" disabled={!!ocupado} onClick={() => accion("notas", "notas", {}, "Notas recogidas.")} className={BOTON.secundario}>{ocupado === "notas" ? "Buscando…" : "Traer las notas ahora"}</button>
+                  {!enviado && !sinInforme && <button type="button" disabled={!!ocupado} onClick={() => accion("sininf", "sin-informe", {}, "Listo: esta cita queda sin informe.")} className={BOTON.suave}>No se grabó: sin informe</button>}
                 </div>
-              </section>
+              </>
+            )}
+          </Seccion>
+          <Seccion titulo="Informe de la asesoría" extra={sinInforme ? "sin informe" : enviado ? "enviado" : borrador ? "por aprobar" : conNotas ? "en cola" : "—"}>
+            {inf.tema && <p className="mb-1 text-[15px] font-bold">{inf.tema}</p>}
+            {inf.conclusion && <p className="mb-3 leading-relaxed text-neutral-700">{inf.conclusion}</p>}
+            {inf.por_confirmar.length > 0 && (
+              <div className="mb-3 rounded-xl bg-amber-50 p-3 ring-1 ring-amber-200">
+                <p className="mb-1 text-[12px] font-bold text-amber-900">Clawsito marcó por confirmar</p>
+                <ul className="list-disc pl-4 text-[13px] text-amber-950">{inf.por_confirmar.map((p, i) => <li key={i}>{p}</li>)}</ul>
+              </div>
+            )}
+            {!inf.estado && !conNotas && <p className="text-[#4f6672]">Cuando lleguen las notas, Clawsito lo redacta y le llega a administración para su visto bueno.</p>}
+            <div className="flex flex-wrap gap-2"><InformeBtns reserva={{ ...reserva, informe_estado: inf.estado }} onChanged={cambiado} /></div>
+            {!enviado && !sinInforme && conNotas && (
+              <div className="mt-3 rounded-xl bg-neutral-50 p-3">
+                {inf.pedido && <p className="mb-2 rounded-lg bg-sky-50 p-2.5 text-[12.5px] text-sky-900">Pedido a Clawsito: «{inf.pedido}». Lo rehace en su próxima pasada (hasta 10 min).</p>}
+                <label className="mb-1 block text-[12px] font-bold text-[#4f6672]" htmlFor="rv-cambio">{inf.estado ? "¿Qué debe cambiar?" : "¿Algo que deba tener en cuenta al redactarlo?"}</label>
+                <textarea id="rv-cambio" value={cambio} onChange={(e) => setCambio(e.target.value)} rows={3} maxLength={600} placeholder="Ej.: añade la beca Carolina y baja el presupuesto a 1 500 €"
+                  className="w-full rounded-xl border border-neutral-300 bg-white p-3 text-[14px]" />
+                <button type="button" disabled={!!ocupado || !cambio.trim()} onClick={() => accion("rehacer", "informe/rehacer", { instruccion: cambio }, "Pedido enviado a Clawsito.").then(() => setCambio(""))}
+                  className={`${BOTON.principal} mt-2`}>{ocupado === "rehacer" ? "Enviando…" : inf.estado ? "Pedir cambios a Clawsito" : "Pedir el informe con esta nota"}</button>
+              </div>
+            )}
+          </Seccion>
+        </>
+      )}
 
-              <Tarjeta icono="usuario" titulo="Datos y pago" resumen={`${f.monto} ${f.moneda} · ${pagada ? "pagado" : "por pagar"}`} tono={pagada ? "ok" : "ojo"} abierta={abrir.datos}>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <Dato k="Correo" v={f.cliente.email} ancho />
-                  <Dato k="Celular" v={f.cliente.telefono} />
-                  <Dato k="Interés" v={f.interes} />
-                  <Dato k="Quiere empezar" v={f.inicio} />
-                  <Dato k="Importe" v={`${f.monto} ${f.moneda}${Number(f.recargo) > 0 ? ` (incluye ${f.recargo} de comisión de tarjeta; sin tarjeta son ${(Number(f.monto) - Number(f.recargo)).toFixed(2)})` : ""}`} ancho />
-                  <Dato k="Pago" v={pagada ? `confirmado el ${cuando(f.pagado_en)}${["TRANSFERENCIA", "DESPUES", "PENDIENTE", "EQUIPO"].includes(f.metodo_pago) ? " (manual)" : ""}` : f.metodo_pago === "EQUIPO" ? "pendiente (se coordina aparte)" : "pendiente"} ancho />
-                  <Dato k="Lo que contó al reservar" v={f.detalle} ancho />
-                  <Dato k="Política aceptada" v={f.terminos.aceptados_en ? `${f.terminos.version} · ${cuando(f.terminos.aceptados_en)}` : "sin registro (reserva anterior al 03/11)"} ancho />
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {f.metodo_pago === "EQUIPO" && !pagada && (
-                    <button type="button" disabled={!!ocupado} onClick={() => accion("pago", "pago-recibido", {}, "Pago anotado.")} className={`${BTN} bg-emerald-600 text-white`}>
-                      {ocupado === "pago" ? "Anotando…" : "Anotar pago recibido"}
-                    </button>
-                  )}
-                  <VerVoucherBtn reserva={reserva} className={`${BTN} bg-white border border-neutral-200 text-neutral-700`} />
-                  {!f.meet_url && reserva.estado !== "CANCELADA" && <EditMeetBtn reserva={reserva} onChanged={cambiado} className={`${BTN} bg-amber-50 text-amber-700 border border-amber-200`} />}
-                  {reserva.estado !== "CANCELADA" && <CancelBtn reserva={reserva} onChanged={() => { onChanged?.(); onCerrar(); }} className={`${BTN} bg-white border border-red-200 text-red-500`} />}
-                </div>
-              </Tarjeta>
-
-              <Tarjeta icono="documento" titulo="Formulario previo" resumen={conFormulario ? `completado ${cuando(f.formulario.actualizado_en)}` : "aún sin completar"} tono={conFormulario ? "ok" : "ojo"} abierta={abrir.formulario}>
-                {f.formulario ? (
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    {Object.entries(ETIQUETAS).map(([k, et]) => <Dato key={k} k={et} v={texto(f.formulario[k])} ancho />)}
-                    {Object.entries(VISA_ETIQ).map(([k, et]) => <Dato key={k} k={et} v={texto(f.formulario.visa?.[k])} ancho />)}
-                  </div>
-                ) : <p className="text-neutral-500">Aún no respondió. Se le envía al confirmar el pago; puede reenviarlo desde «Avisos y cambios».</p>}
-              </Tarjeta>
-
-              <Tarjeta icono="video" titulo="Notas de Gemini" resumen={conNotas ? `recogidas ${cuando(f.notas.obtenidas_en)}` : "todavía no hay notas"} tono={conNotas ? "ok" : "neutral"} abierta={abrir.notas}>
-                {conNotas ? (
-                  <>
-                    <div className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-xl bg-neutral-50 p-3 text-[12.5px] leading-relaxed">{f.notas.texto}</div>
-                    {f.notas.url && <a href={f.notas.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-[12px] font-bold text-primary underline">Abrir el documento original</a>}
-                  </>
-                ) : (
-                  <>
-                    <p className="text-neutral-500">Gemini las deja unos minutos después de terminar la reunión; Core las recoge solo.</p>
-                    <button type="button" disabled={!!ocupado} onClick={() => accion("notas", "notas", {}, "Notas recogidas.")} className={`${BTN} mt-2 bg-white border border-neutral-200 text-neutral-700`}>
-                      {ocupado === "notas" ? "Buscando…" : "Traer las notas ahora"}
-                    </button>
-                  </>
-                )}
-              </Tarjeta>
-
-              <Tarjeta icono="libro" titulo="Informe de la asesoría" resumen={estadoInforme} tono={enviado || sinInforme ? "ok" : inf.estado ? "ojo" : "neutral"} abierta={abrir.informe}>
-                {inf.tema && <p className="mb-1 text-[13.5px] font-bold text-neutral-800">{inf.tema}</p>}
-                {inf.conclusion && <p className="mb-3 leading-relaxed text-neutral-600">{inf.conclusion}</p>}
-                {inf.por_confirmar.length > 0 && (
-                  <div className="mb-3 rounded-xl bg-amber-50 p-3">
-                    <p className="mb-1 text-[11px] font-extrabold text-amber-800">Clawsito marcó por confirmar</p>
-                    <ul className="list-disc pl-4 text-[12px] text-amber-900">{inf.por_confirmar.map((p, i) => <li key={i}>{p}</li>)}</ul>
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2"><InformeBtns reserva={{ ...reserva, informe_estado: inf.estado }} onChanged={cambiado} /></div>
-                {!enviado && !sinInforme && !conNotas && (
-                  <button type="button" disabled={!!ocupado} onClick={() => accion("sininf", "sin-informe", {}, "Listo: esta cita queda sin informe.")} className={`${BTN} mt-1 bg-white border border-neutral-200 text-neutral-700`}>
-                    No se grabó: sin informe
-                  </button>
-                )}
-                {!enviado && !sinInforme && conNotas && (
-                  <div className="mt-3 rounded-xl bg-neutral-50 p-3">
-                    {inf.pedido && <p className="mb-2 rounded-lg bg-sky-50 p-2.5 text-[11.5px] text-sky-800">Pedido a Clawsito: «{inf.pedido}». Lo rehace en su próxima pasada (hasta 10 min) y le llega un borrador nuevo.</p>}
-                    <label className="mb-1 block text-[11px] font-bold text-neutral-500" htmlFor="rv-cambio">{inf.estado ? "¿Qué debe cambiar?" : "¿Algo que deba tener en cuenta al redactarlo?"}</label>
-                    <textarea id="rv-cambio" value={cambio} onChange={(e) => setCambio(e.target.value)} rows={2} maxLength={600} placeholder="Ej.: añade la beca Carolina y baja el presupuesto a 1 500 €"
-                      className="w-full rounded-xl border border-neutral-200 bg-white p-2.5 text-[12.5px]" />
-                    <button type="button" disabled={!!ocupado || !cambio.trim()} onClick={() => accion("rehacer", "informe/rehacer", { instruccion: cambio }, "Pedido enviado a Clawsito.").then(() => setCambio(""))}
-                      className={`${BTN} mt-2 bg-primary text-white`}>{ocupado === "rehacer" ? "Enviando…" : inf.estado ? "Pedir cambios a Clawsito" : "Pedir el informe con esta nota"}</button>
-                  </div>
-                )}
-              </Tarjeta>
-
-              <Tarjeta icono="euro" titulo="Cotización" resumen={enviadas.length ? `enviada · ${enviadas[0].numero || ""} · ${enviadas[0].texto}` : cotizaciones.length ? "en borrador" : f.cotizar.importe ? `propuesta del informe: ${f.cotizar.importe}` : "con sus datos ya cargados"} tono={enviadas.length ? "ok" : "neutral"} abierta={abrir.cotizacion}>
-                {cotizaciones.length > 0 && (
-                  <ul className="mb-3 grid gap-1.5">
-                    {cotizaciones.map((q) => (
-                      <li key={q.id_presupuesto} className="flex items-center justify-between gap-2 rounded-xl bg-neutral-50 p-2.5">
-                        <span><strong>{q.numero || "Sin número"}</strong> · {q.texto} · {q.estado === "enviado" ? `enviada ${cuando(q.enviado_at)}` : q.estado}</span>
-                        <a href={`/backoffice/presupuesto?abrir=${q.id_presupuesto}`} className="text-[12px] font-bold text-primary underline">Abrir</a>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {(f.cotizaciones_por_correo || []).length > 0 && (
-                  <div className="mb-3 rounded-xl bg-sky-50 p-2.5">
-                    <p className="mb-1 text-[11px] font-extrabold text-sky-800">Hay cotizaciones a su correo sin vincular a esta cita</p>
-                    {f.cotizaciones_por_correo.map((q) => (
-                      <div key={q.id_presupuesto} className="flex items-center justify-between gap-2 py-1 text-[12px]">
-                        <span>{q.numero || "Sin número"} · {q.texto} · {q.estado}</span>
-                        <button type="button" disabled={!!ocupado} onClick={() => accion(`v${q.id_presupuesto}`, "vincular-cotizacion", { id_presupuesto: q.id_presupuesto }, "Cotización vinculada.")} className="font-bold text-primary underline">Vincular a esta cita</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="text-neutral-600">Abre el presupuesto con su nombre y correo{f.interes ? `, el interés (${f.interes})` : ""}{f.cotizar.importe ? " y el paquete e importe que propone el informe" : ""}. Lo demás lo completa usted.</p>
-                <a href={cotizar} className={`${BTN} mt-3 inline-block bg-primary text-white`}>Preparar cotización</a>
-                <button type="button" disabled={!!ocupado} className={`${BTN} mt-3 ml-2 bg-white border border-neutral-200 text-neutral-500`}
-                  onClick={async () => { if (await dialog.confirm("¿Cerrar este contacto sin seguimiento? No habrá informe ni cotización y el lead se descarta.", "Cerrar sin seguimiento")) accion("cerrar", "sin-informe", { cerrar: true, motivo: "Sin seguimiento: contactará si necesita otra asesoría" }, "Contacto cerrado sin seguimiento."); }}>
-                  Cerrar sin seguimiento
-                </button>
-              </Tarjeta>
-
-              <Tarjeta icono="campana" titulo="Avisos y cambios" resumen="reenviar accesos, recordar, reagendar, inasistencia">
-                <GruposAcciones reserva={{ ...reserva, estado: reserva.estado }} onChanged={cambiado} sinOtras />
-              </Tarjeta>
-            </>
+      {f && pestana === "cotizacion" && (
+        <Seccion titulo="Cotización" extra={enviadas.length ? "enviada" : cotizaciones.length ? "en borrador" : "sin cotizar"}>
+          {cotizaciones.length > 0 && (
+            <ul className="mb-3 grid gap-2">
+              {cotizaciones.map((q) => (
+                <li key={q.id_presupuesto} className="flex items-center justify-between gap-3 rounded-xl bg-neutral-50 p-3">
+                  <span className="min-w-0"><strong>{q.numero || "Sin número"}</strong><span className="block text-[12.5px] text-[#4f6672]">{q.texto} · {q.estado === "enviado" ? `enviada ${cuando(q.enviado_at)}` : q.estado}</span></span>
+                  <a href={`/backoffice/presupuesto?abrir=${q.id_presupuesto}`} className={BOTON.secundario}>Abrir</a>
+                </li>
+              ))}
+            </ul>
           )}
-        </div>
-      </div>
-    </div>,
-    document.body
+          {(f.cotizaciones_por_correo || []).length > 0 && (
+            <div className="mb-3 rounded-xl bg-sky-50 p-3 ring-1 ring-sky-200">
+              <p className="mb-1 text-[12px] font-bold text-sky-900">Cotizaciones a su correo sin vincular</p>
+              {f.cotizaciones_por_correo.map((q) => (
+                <div key={q.id_presupuesto} className="flex items-center justify-between gap-2 py-1 text-[13px]">
+                  <span>{q.numero || "Sin número"} · {q.texto}</span>
+                  <button type="button" disabled={!!ocupado} onClick={() => accion(`v${q.id_presupuesto}`, "vincular-cotizacion", { id_presupuesto: q.id_presupuesto }, "Cotización vinculada.")} className="min-h-[44px] font-bold text-primary underline">Vincular</button>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-[#4f6672]">Se abre con su nombre y correo{f.interes ? `, el interés (${f.interes})` : ""}{f.cotizar.importe ? " y el paquete que propone el informe" : ""}, y queda ligada a esta cita.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a href={cotizar} className={BOTON.principal}><Icono nombre="euro" size={16} />Preparar cotización</a>
+            <button type="button" disabled={!!ocupado} className={BOTON.suave}
+              onClick={async () => { if (await dialog.confirm("¿Cerrar este contacto sin seguimiento? No habrá informe ni cotización y el lead se descarta.", "Cerrar sin seguimiento")) accion("cerrar", "sin-informe", { cerrar: true, motivo: "Sin seguimiento: contactará si necesita otra asesoría" }, "Contacto cerrado sin seguimiento."); }}>
+              Cerrar sin seguimiento
+            </button>
+          </div>
+        </Seccion>
+      )}
+
+      {f && pestana === "acciones" && (
+        <>
+          <Seccion titulo="Pago y reunión">
+            <div className="flex flex-wrap gap-2">
+              {pendientePago && <ConfirmarPagoBtn reserva={reserva} onChanged={cambiado} className={BOTON.exito} />}
+              {f.metodo_pago === "EQUIPO" && !pagada && (
+                <button type="button" disabled={!!ocupado} onClick={() => accion("pago", "pago-recibido", {}, "Pago anotado.")} className={BOTON.exito}>{ocupado === "pago" ? "Anotando…" : "Anotar pago recibido"}</button>
+              )}
+              <VerVoucherBtn reserva={reserva} className={BOTON.secundario} />
+              {!f.meet_url && !cancelada && <EditMeetBtn reserva={reserva} onChanged={cambiado} className={BOTON.secundario} />}
+              {!cancelada && <CancelBtn reserva={reserva} onChanged={() => { onChanged?.(); onCerrar(); }} className={BOTON.peligro} />}
+            </div>
+          </Seccion>
+          <Seccion titulo="Avisos y cambios de la cita">
+            <GruposAcciones reserva={reserva} onChanged={cambiado} sinOtras />
+          </Seccion>
+        </>
+      )}
+    </Hoja>
   );
 }

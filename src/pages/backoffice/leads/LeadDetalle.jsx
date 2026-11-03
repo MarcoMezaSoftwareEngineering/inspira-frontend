@@ -3,9 +3,10 @@
 // Desde aquí se convierte en cliente (reutiliza el alta rápida) o se
 // anonimiza.
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import { X, Mail, MessageCircle, UserPlus, Trash2, ExternalLink } from "lucide-react";
+import { MessageCircle, UserPlus, Trash2, ExternalLink } from "lucide-react";
 import { boGET, boPATCH, boPOST, boDELETE } from "../../../services/backofficeApi";
+import { Chip as KChip, Contacto, Hoja } from "../crm/kit";
+import { BOTON } from "../crm/estilos";
 import { dialog } from "../../../services/dialogService";
 import { navigate } from "../../../services/navigate";
 import { Boton, Chip, Campo, Esqueleto, Pill, Ventana } from "../ui";
@@ -56,6 +57,7 @@ function Datos({ datos }) {
 export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, onCerrar, onCambio }) {
   // «Qué sigue»: lo mismo que la bandeja (grupo, paso, cita y cotización), calculado en el servidor.
   const [resumen, setResumen] = useState(null);
+  const [pestana, setPestana] = useState("resumen");
   useEffect(() => {
     let vivo = true;
     boGET(`/backoffice/leads/${id}/resumen`).then((r) => { if (vivo && r?.ok) setResumen(r.resumen); });
@@ -165,40 +167,52 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
   const convertido = !!(lead?.convertido_at && lead?.id_cliente);
   const editable = puedeEditar && lead && !lead.anonimizado_en;
 
-  return createPortal(
-    // .ase aporta los tokens; su min-height/fondo no deben pintar nada aquí,
-    // porque este envoltorio cuelga de <body> y solo contiene capas fijas.
-    <div className="ase" style={{ minHeight: 0, background: "transparent" }}>
-      <div className="ase-ld-fondo" onClick={onCerrar} aria-hidden="true" />
-      <aside className="ase-ld-panel" role="dialog" aria-modal="true" aria-label="Ficha del lead">
-        <header className="ase-ld-panel-cab">
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-              {lead && <Chip tono={et.tono} punto>{et.etiqueta}</Chip>}
-              {lead && <Chip tono="gris">{ORIGENES[lead.origen] || lead.origen}</Chip>}
-              {lead?.prueba && <Chip tono="morado">prueba</Chip>}
-              {lead && <span style={{ fontSize: 11, color: "rgba(255,255,255,.6)" }}>#{lead.id_lead} · {fechaHora(lead.created_at)}</span>}
-            </div>
-            <button type="button" className="ase-ld-panel-x" onClick={onCerrar} aria-label="Cerrar">
-              <X size={17} />
-            </button>
-          </div>
-          <h2>{lead ? nombreDe(lead) : "…"}</h2>
-          {lead && (
-            <p>
-              {[lead.servicio_interes, lead.pais, lead.origen_detalle].filter(Boolean).join(" · ") || "Sin más datos"}
-              {lead.utm_source && ` · utm: ${[lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(" / ")}`}
-            </p>
-          )}
-          {lead && (lead.email || wa) && (
-            <div className="ase-ld-contacto">
-              {lead.email && <a href={`mailto:${lead.email}`}><Mail size={13} /> {lead.email}</a>}
-              {wa && <a href={wa} target="_blank" rel="noreferrer"><MessageCircle size={13} /> {lead.whatsapp}</a>}
-            </div>
-          )}
-        </header>
+  const urgente = resumen?.urgencia === 3;
+  const anotarWa = () => { if (puedeEditar && resumen) boPOST(`/backoffice/leads/${id}/${resumen.grupo === "convertir" ? "invitar" : "seguimiento"}`, {}).then((r) => { if (r?.ok) onCambio?.(r.lead); }); };
+  const cotizarUrl = lead ? `/backoffice/presupuesto?${new URLSearchParams({ cliente: lead.nombre || "", correo: lead.email || "", ...(resumen?.reserva ? { reserva: String(resumen.reserva.id_reserva) } : {}) })}` : "#";
+  const pie = lead && !lead.anonimizado_en ? (
+    <>
+      {resumen?.whatsapp_url && (
+        <a href={resumen.whatsapp_url} target="_blank" rel="noopener noreferrer" onClick={anotarWa} className={BOTON.whatsapp}>
+          <MessageCircle size={16} /> {resumen.grupo === "convertir" ? "Invitar a reservar" : "Hacer seguimiento"}
+        </a>
+      )}
+      {resumen?.grupo === "oportunidades" && !resumen.cotizacion && <a href={cotizarUrl} className={BOTON.principal}>Preparar cotización</a>}
+      {!resumen?.whatsapp_url && !(resumen?.grupo === "oportunidades" && !resumen.cotizacion) && puedeEditar && !convertido && (
+        <button type="button" onClick={() => setConvertirAbierta(true)} className={BOTON.principal}><UserPlus size={16} /> Convertir en cliente</button>
+      )}
+    </>
+  ) : null;
 
-        <div className="ase-ld-panel-cuerpo">
+  return (
+    <Hoja
+      etiqueta="Ficha del lead"
+      onCerrar={onCerrar}
+      cabecera={{
+        eyebrow: lead ? `Lead #${lead.id_lead}` : "Lead",
+        titulo: lead ? nombreDe(lead) : "…",
+        subtitulo: lead ? ([lead.servicio_interes, lead.pais, lead.origen_detalle].filter(Boolean).join(" · ") || `Entró ${fechaHora(lead.created_at)}`) : "",
+        chips: lead ? (
+          <>
+            <KChip tono={lead.etapa === "CONTRATADO" ? "ok" : lead.etapa === "DESCARTADO" ? "mal" : "info"}>{et.etiqueta}</KChip>
+            <KChip>{ORIGENES[lead.origen] || lead.origen}</KChip>
+            {resumen && <KChip tono={resumen.grupo === "oportunidades" ? "marca" : "neutro"}>{resumen.grupo === "oportunidades" ? "Oportunidad" : "Por convertir"}</KChip>}
+            {lead.prueba && <KChip tono="ojo">prueba</KChip>}
+          </>
+        ) : null,
+        contacto: lead && (lead.email || wa) ? (
+          <>
+            {wa && <Contacto href={wa} icono="whatsapp" texto={lead.whatsapp} />}
+            {lead.email && <Contacto href={`mailto:${lead.email}`} icono="chat" texto="Correo" />}
+          </>
+        ) : null,
+      }}
+      pestanas={[{ id: "resumen", texto: "Resumen" }, { id: "historia", texto: "Historia", n: lead?.eventos?.length || null }, { id: "datos", texto: "Datos" }]}
+      pestana={pestana}
+      onPestana={setPestana}
+      pie={pie}
+    >
+      <div className="ase grid grid-cols-[minmax(0,1fr)] gap-3" style={{ minHeight: 0, background: "transparent" }}>
           {error && <div className="ase-ld-bloque" style={{ color: "var(--red)", fontSize: 13 }}>{error}</div>}
           {!lead && !error && <Esqueleto filas={4} alto={80} />}
 
@@ -208,31 +222,22 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             </div>
           )}
 
-          {lead && resumen && (
-            <div className="ase-ld-bloque" style={{ borderColor: resumen.urgencia === 3 ? "rgba(250,148,58,.55)" : undefined }}>
+          {pestana === "resumen" && lead && resumen && (
+            <div className="ase-ld-bloque" style={{ borderColor: urgente ? "rgba(250,148,58,.55)" : undefined }}>
               <p className="ase-ld-bloque-t">{resumen.grupo === "oportunidades" ? "Oportunidad · qué sigue" : "Por convertir · qué sigue"}</p>
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--primary)" }}>{resumen.sigue}</div>
               <div style={{ fontSize: 12.5, color: "#4f6672", marginTop: 4 }}>
                 {[resumen.paso, resumen.reserva ? `asesoría ${resumen.reserva.fecha} ${resumen.reserva.hora_inicio}` : null, resumen.cotizacion ? `${resumen.cotizacion.numero || "cotización"} · ${resumen.cotizacion.texto} · ${resumen.cotizacion.estado}` : null].filter(Boolean).join(" · ")}
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-                {resumen.whatsapp_url && (
-                  <a href={resumen.whatsapp_url} target="_blank" rel="noopener noreferrer" className="ase-btn" style={{ background: "#25D366", color: "#fff", minHeight: 44, display: "inline-flex", alignItems: "center", gap: 6, padding: "0 14px", borderRadius: 12, fontWeight: 700, fontSize: 13, textDecoration: "none" }}
-                    onClick={() => { if (puedeEditar) boPOST(`/backoffice/leads/${id}/${resumen.grupo === "convertir" ? "invitar" : "seguimiento"}`, {}).then((r) => { if (r?.ok) onCambio?.(r.lead); }); }}>
-                    <MessageCircle size={15} /> {resumen.grupo === "convertir" ? "Invitar a reservar" : "Hacer seguimiento"}
-                  </a>
-                )}
-                {resumen.reserva && (
-                  <Boton tono="secundario" tam="sm" icono={ExternalLink} onClick={() => navigate("/backoffice/agenda")}>Ver en Agenda → Reservas</Boton>
-                )}
-                {resumen.grupo === "oportunidades" && !resumen.cotizacion && (
-                  <Boton tam="sm" onClick={() => navigate(`/backoffice/presupuesto?${new URLSearchParams({ cliente: lead.nombre || "", correo: lead.email || "", ...(resumen.reserva ? { reserva: String(resumen.reserva.id_reserva) } : {}) })}`)}>Preparar cotización</Boton>
-                )}
-              </div>
+              {resumen.reserva && (
+                <div style={{ marginTop: 10 }}>
+                  <Boton tono="secundario" tam="sm" icono={ExternalLink} onClick={() => navigate("/backoffice/agenda")}>Ver la cita en Agenda</Boton>
+                </div>
+              )}
             </div>
           )}
 
-          {lead && convertido && (
+          {pestana === "resumen" && lead && convertido && (
             <div className="ase-ld-bloque" style={{ borderColor: "rgba(29,106,74,.35)", background: "var(--green-soft)" }}>
               <p className="ase-ld-bloque-t" style={{ color: "var(--green)" }}>Cliente</p>
               <div style={{ fontSize: 13 }}>
@@ -246,9 +251,9 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             </div>
           )}
 
-          {lead && !lead.anonimizado_en && (
+          {pestana === "resumen" && lead && !lead.anonimizado_en && (
             <div className="ase-ld-bloque">
-              <p className="ase-ld-bloque-t">Embudo</p>
+              <p className="ase-ld-bloque-t">Etapa y responsable</p>
               <div className="ase-ld-dos">
                 <Campo etiqueta="Etapa">
                   <select className="ase-campo" value={etapaNueva} disabled={!editable}
@@ -293,7 +298,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             </div>
           )}
 
-          {lead && !lead.anonimizado_en && (
+          {pestana === "resumen" && lead && !lead.anonimizado_en && (
             <div className="ase-ld-bloque">
               <p className="ase-ld-bloque-t">Próxima acción</p>
               <div className="ase-ld-dos">
@@ -321,7 +326,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             </div>
           )}
 
-          {lead && editable && (
+          {pestana === "historia" && lead && editable && (
             <form className="ase-ld-bloque" onSubmit={anotar}>
               <p className="ase-ld-bloque-t">Anotar</p>
               <div className="ase-pills" style={{ marginBottom: 8 }}>
@@ -339,7 +344,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             </form>
           )}
 
-          {lead && (
+          {pestana === "historia" && lead && (
             <div className="ase-ld-bloque">
               <p className="ase-ld-bloque-t">Historia</p>
               {(lead.eventos || []).length === 0 ? (
@@ -359,10 +364,10 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             </div>
           )}
 
-          {lead && !lead.anonimizado_en && <Datos datos={lead.datos} />}
+          {pestana === "datos" && lead && !lead.anonimizado_en && <Datos datos={lead.datos} />}
 
           {/* Marca de prueba: fuera del tablero y de las cifras (como la de clientes). */}
-          {editable && (
+          {pestana === "datos" && editable && (
             <label className="ase-toggle" style={{ alignSelf: "flex-start" }}>
               <input
                 type="checkbox"
@@ -379,7 +384,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
             </label>
           )}
 
-          {lead && !lead.anonimizado_en && (puedeEditar || puedeEliminar) && (
+          {pestana === "datos" && lead && !lead.anonimizado_en && (puedeEditar || puedeEliminar) && (
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "space-between" }}>
               {puedeEditar && !convertido ? (
                 <Boton tono="cta" icono={UserPlus} onClick={() => setConvertirAbierta(true)}>
@@ -391,8 +396,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
               )}
             </div>
           )}
-        </div>
-      </aside>
+      </div>
 
       {lead && convertirAbierta && (
         <Convertir
@@ -407,8 +411,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
           }}
         />
       )}
-    </div>,
-    document.body
+    </Hoja>
   );
 }
 

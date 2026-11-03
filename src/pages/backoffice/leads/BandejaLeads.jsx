@@ -11,6 +11,8 @@ import { dialog } from "../../../services/dialogService";
 import Icono from "../../../components/common/Icono";
 import FichaReserva from "../agenda/mi-calendario/FichaReserva";
 import { ETAPAS, haceCuanto } from "./leadsComun";
+import { Avatar, Chip } from "../crm/kit";
+import { BOTON } from "../crm/estilos";
 
 const GRUPOS = {
   oportunidades: [
@@ -83,34 +85,42 @@ function Tarjeta({ item: i, grupo, onAbrir, onRecargar, puedeEditar }) {
   const [hoja, setHoja] = useState(false);
   const [cita, setCita] = useState(false);
   const urgente = i.urgencia === 3;
+  const nombre = i.nombre || i.email || `Lead #${i.id_lead}`;
   const cotizar = `/backoffice/presupuesto?${new URLSearchParams({ cliente: i.nombre || "", correo: i.email || "", ...(i.reserva ? { reserva: String(i.reserva.id_reserva) } : {}) })}`;
   const anotar = () => {
     if (!puedeEditar) return;
     boPOST(`/backoffice/leads/${i.id_lead}/${grupo === "convertir" ? "invitar" : "seguimiento"}`, {}).then((r) => { if (r?.ok) onRecargar(); });
   };
   const sinCotizar = grupo === "oportunidades" && i.reserva && !i.cotizacion && /cotización/i.test(i.sigue);
+  const textoWa = grupo === "convertir" ? (i.paso === "Separó horario" ? "Recordar pago" : "Invitar a reservar") : "Seguimiento";
 
   return (
-    <article className={`rounded-2xl border bg-white p-3.5 shadow-sm ${urgente ? "border-l-4 border-l-[#FA943A] border-neutral-200" : "border-neutral-200"}`}>
-      <button type="button" onClick={() => onAbrir(i.id_lead)} className="block w-full text-left">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="min-w-0 truncate text-[15px] font-bold text-neutral-900">{i.nombre || i.email || `Lead #${i.id_lead}`}</h3>
-          <span className="shrink-0 rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-bold text-neutral-700">{i.paso}</span>
-        </div>
-        <p className={`mt-1 text-[13.5px] font-semibold ${urgente ? "text-[#9a4a06]" : "text-primary-dark"}`}>{i.sigue}</p>
-        <p className="mt-1 truncate text-[12px] text-neutral-600">
-          {[i.servicio_interes, i.origen_txt, i.cotizacion ? `${i.cotizacion.numero || "cotización"} · ${i.cotizacion.texto}` : null, `entró ${haceCuanto(i.created_at)}`].filter(Boolean).join(" · ")}
-        </p>
+    <article className={`rounded-2xl bg-white shadow-sm ring-1 ${urgente ? "ring-[#f4b98a]" : "ring-neutral-200/80"}`}>
+      <button type="button" onClick={() => onAbrir(i.id_lead)} aria-label={`Abrir la ficha de ${nombre}`}
+        className="flex w-full items-start gap-3 rounded-2xl p-3.5 text-left hover:bg-neutral-50/70">
+        <Avatar nombre={nombre} tam={42} />
+        <span className="min-w-0 flex-1">
+          <span className="flex items-baseline justify-between gap-2">
+            <span className="truncate text-[15px] font-bold text-neutral-900">{nombre}</span>
+            <span className="shrink-0 text-[12px] text-[#4f6672]">{haceCuanto(i.created_at)}</span>
+          </span>
+          <span className={`mt-1 flex items-start gap-1.5 text-[13.5px] font-semibold leading-snug ${urgente ? "text-[#9a4a06]" : "text-primary-dark"}`}>
+            {urgente && <span aria-hidden className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#FA943A]" />}{i.sigue}
+          </span>
+          <span className="mt-2 flex flex-wrap gap-1.5">
+            <Chip tono={grupo === "oportunidades" ? "marca" : "neutro"}>{i.paso}</Chip>
+            {i.cotizacion && <Chip tono={i.cotizacion.estado === "enviado" ? "ok" : "neutro"}>{i.cotizacion.texto}</Chip>}
+            {grupo === "convertir" && <Chip>{i.origen_txt}</Chip>}
+            {i.servicio_interes && <Chip>{i.servicio_interes}</Chip>}
+          </span>
+        </span>
+        <span aria-hidden className="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400" />
       </button>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {i.whatsapp_url && (
-          <a href={i.whatsapp_url} target="_blank" rel="noopener noreferrer" onClick={anotar} className={`${BTN} bg-[#25D366] text-white`}>
-            <Icono nombre="whatsapp" size={16} />{grupo === "convertir" ? (i.paso === "Separó horario" ? "Recordar el pago" : "Invitar a reservar") : "Hacer seguimiento"}
-          </a>
-        )}
-        {i.reserva && <button type="button" onClick={() => setCita(true)} className={`${BTN} bg-primary text-white`}><Icono nombre="calendario" size={16} />Abrir la cita</button>}
-        {sinCotizar && <a href={cotizar} className={`${BTN} bg-primary-dark text-white`}><Icono nombre="euro" size={16} />Cotizar</a>}
-        {puedeEditar && <button type="button" onClick={() => setHoja(true)} className={`${BTN} border border-neutral-200 bg-white text-neutral-700`}>Cambiar etapa</button>}
+      <div className="flex flex-wrap gap-2 border-t border-neutral-100 px-3.5 py-2.5 [&>*]:flex-1">
+        {i.whatsapp_url && <a href={i.whatsapp_url} target="_blank" rel="noopener noreferrer" onClick={anotar} className={BOTON.whatsapp}><Icono nombre="whatsapp" size={16} />{textoWa}</a>}
+        {i.reserva && <button type="button" onClick={() => setCita(true)} className={BOTON.principal}><Icono nombre="calendario" size={16} />Cita</button>}
+        {sinCotizar && <a href={cotizar} className={BOTON.principal}><Icono nombre="euro" size={16} />Cotizar</a>}
+        {puedeEditar && <button type="button" onClick={() => setHoja(true)} className={`${BOTON.secundario} !flex-none`}>Etapa</button>}
       </div>
       {hoja && <HojaEtapa lead={i} onCerrar={() => setHoja(false)} onHecho={() => { setHoja(false); onRecargar(); }} />}
       {cita && (
@@ -157,7 +167,7 @@ export default function BandejaLeads({ grupo, datos, onAbrir, onRecargar, puedeE
           <>
             <span className="text-[15px] font-bold text-primary-dark">{g.titulo}</span>
             <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[12px] font-bold text-primary">{items.length}</span>
-            <span className="mt-0.5 block text-[12px] font-normal text-neutral-600">{g.ayuda}</span>
+            <span className="mt-0.5 block text-[12.5px] font-normal text-[#4f6672]">{g.ayuda}</span>
           </>
         );
         return g.plegado && !buscar ? (

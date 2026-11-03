@@ -6,6 +6,7 @@
 import { useState } from "react";
 import MiCalendarioTab from "./mi-calendario/MiCalendarioTab";
 import ReservasTab from "./ReservasTab";
+import { Segmentado } from "../crm/kit";
 
 const TABS = [
   { id: "reservas", texto: "Reservas" },
@@ -16,32 +17,21 @@ export default function Agenda() {
   const [tab, setTab] = useState("reservas");
 
   return (
-    <div className="h-full flex flex-col min-h-0">
-      {/* Topbar */}
-      <header className="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
-        <div className="min-w-[220px]">
-          <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[.16em] text-primary-light mb-0.5">
-            <span className="w-[7px] h-[7px] rounded-full bg-emerald-400 shadow-[0_0_0_5px_rgba(34,201,131,.10)] animate-pulse" />
-            Calendario propio
+    <div className="h-full flex flex-col min-h-0 bg-[#F2F6FA]">
+      {/* Cabecera compacta: en el celular el espacio es para las citas. */}
+      <header className="flex-none border-b border-neutral-200 bg-white/90 px-4 pb-3 pt-3 backdrop-blur-md sm:px-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#4f6672]">Calendario propio</p>
+            <h1 className="font-fraunces text-[24px] font-bold leading-none text-primary-dark sm:text-[26px]">Agenda</h1>
+            <p className="mt-1 hidden text-[12.5px] text-[#4f6672] sm:block">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
           </div>
-          <h1 className="font-fraunces text-[26px] leading-none font-bold text-primary-dark tracking-tight">Agenda</h1>
-          <p className="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
-        </div>
-        {/* Tabs */}
-        <div className="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors ${tab === t.id ? "bg-primary-dark text-white shadow" : "text-neutral-500 hover:bg-white hover:text-primary-dark"}`}
-            >
-              {t.texto}
-            </button>
-          ))}
+          <div className="w-full sm:w-auto">
+            <Segmentado etiqueta="Secciones de la agenda" valor={tab} onCambio={setTab} opciones={TABS} />
+          </div>
         </div>
       </header>
 
-      {/* Workspace */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {tab === "micalendario" && <MiCalendarioTab />}
         {tab === "reservas" && <ReservasTab />}

@@ -260,14 +260,23 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
 
   return (
     <header className="rv-hero-claro relative overflow-hidden text-primary">
-      {/* Formas que flotan y un avión que cruza: el sello de Inspira en movimiento. */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <span className="rv-forma rv-forma-a" />
-        <span className="rv-forma rv-forma-b" />
-        <span className="rv-forma rv-forma-c" />
-        <svg className="rv-avion" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" />
-        </svg>
+      {/* Fondo líquido: manchas que mutan, aviones que cruzan y una ola que cierra la cabecera. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <span className="rv-liquido rv-liquido-a" />
+        <span className="rv-liquido rv-liquido-b" />
+        <span className="rv-liquido rv-liquido-c" />
+        {[["", ""], ["rv-avion-ruta-2", ""]].map(([extra], i) => (
+          <div key={i} className={`rv-avion-ruta ${extra}`}>
+            <span className="rv-avion-rastro" />
+            <svg className="rv-avion-cuerpo" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" />
+            </svg>
+          </div>
+        ))}
+        <div className="rv-ola-caja text-fondo">
+          <svg className="rv-ola-capa rv-ola-capa-2 text-sky-light" viewBox="0 0 1200 64" preserveAspectRatio="none" fill="currentColor"><path d="M0 34 C 150 6, 300 62, 450 34 S 750 6, 900 34 S 1050 60, 1200 34 V64 H0 Z" /></svg>
+          <svg className="rv-ola-capa" viewBox="0 0 1200 64" preserveAspectRatio="none" fill="currentColor"><path d="M0 44 C 150 18, 300 62, 450 40 S 750 14, 900 42 S 1050 58, 1200 44 V64 H0 Z" /></svg>
+        </div>
       </div>
 
       {/* min-w-0: sin esto, las filas con scroll horizontal ensanchan la cuadrícula y en el celular se corta el texto. */}
@@ -293,16 +302,19 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
             Diagnóstico
           </p>
 
-          <div className="rv-sube mt-5 space-y-3 text-[15px] leading-relaxed text-tinta-2" style={{ animationDelay: "320ms" }}>
-            <p className="text-lg font-extrabold text-primary">¡Excelente! 😊</p>
-            <p>
-              Te recomiendo iniciar con una <strong className="text-primary">asesoría personalizada</strong>, donde evaluaremos tu perfil y te explicaremos con claridad los procesos que debes seguir.
-            </p>
-            <p>
-              Es un servicio profesional individualizado: estarás a cargo de una especialista en <strong className="text-primary">Derecho Internacional y movilidad académica</strong>, con amplia experiencia en trámites hacia el exterior 🇪🇸.
-            </p>
-            <p>Recibirás una orientación clara y estratégica, basada en tu formación y objetivos. Estamos aquí para ayudarte en todo lo que necesites.</p>
-          </div>
+          <p className="rv-sube mt-5 text-[17px] leading-relaxed text-tinta-2 md:text-lg" style={{ animationDelay: "320ms" }}>
+            En <strong className="text-primary">30 minutos</strong>, una especialista en <strong className="text-primary">Derecho Internacional y movilidad académica</strong> analiza tu perfil y te explica, paso a paso, el camino que te conviene seguir.
+          </p>
+          <ul className="mt-4 space-y-2 text-[15px] font-semibold text-primary">
+            {["Orientación clara y estratégica, a tu medida", "Una persona real, con experiencia en trámites hacia España", "Reunión por Google Meet y pago seguro"].map((t, i) => (
+              <li key={t} className="rv-desliza flex items-start gap-2.5" style={{ animationDelay: `${420 + i * 90}ms` }}>
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent text-white">
+                  <Icono nombre="check" className="h-3 w-3" />
+                </span>
+                {t}
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">

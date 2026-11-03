@@ -72,6 +72,54 @@ export function ConfirmarPagoBtn({ reserva, onChanged, className }) {
   );
 }
 
+// Informe de la asesoría (borrador de Clawsito): se abre el PDF y, con el visto
+// bueno, se envía al asesorado.
+async function abrirInforme(r, setAbriendo) {
+  setAbriendo(true);
+  try {
+    const res = await boFetch(`/backoffice/agenda/reservas/${r.id_reserva}/informe.pdf`);
+    if (!res || !res.ok) return dialog.toast("No se pudo generar el informe", "error");
+    const url = URL.createObjectURL(await res.blob());
+    window.open(url, "_blank", "noopener");
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } finally {
+    setAbriendo(false);
+  }
+}
+
+async function enviarInforme(r, onChanged, setEnviando) {
+  const quien = r.cliente?.nombre || r.cliente?.email_contacto;
+  const ok = await dialog.confirm(`¿Enviar el informe a ${quien}? Le llegará por correo con el PDF adjunto.`, "Enviar informe");
+  if (!ok) return;
+  setEnviando(true);
+  const res = await boPOST(`/backoffice/agenda/reservas/${r.id_reserva}/informe/aprobar`);
+  setEnviando(false);
+  if (res?.ok === false) return dialog.toast(res.msg || "No se pudo enviar el informe", "error");
+  dialog.toast("Informe enviado al asesorado.", "success");
+  onChanged();
+}
+
+export function InformeBtns({ reserva, onChanged }) {
+  const [abriendo, setAbriendo] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  if (!["BORRADOR", "ENVIADO"].includes(reserva.informe_estado)) return null;
+  const borrador = reserva.informe_estado === "BORRADOR";
+  return (
+    <>
+      <button onClick={() => abrirInforme(reserva, setAbriendo)} disabled={abriendo}
+        className="px-2.5 py-1.5 bg-white border border-primary/30 text-primary rounded-lg text-[10.5px] font-bold hover:bg-primary/5 disabled:opacity-50">
+        {abriendo ? "Generando…" : borrador ? "Ver borrador del informe" : "Ver informe enviado"}
+      </button>
+      {borrador && (
+        <button onClick={() => enviarInforme(reserva, onChanged, setEnviando)} disabled={enviando}
+          className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10.5px] font-bold hover:opacity-90 disabled:opacity-50">
+          {enviando ? "Enviando…" : "Enviar informe al asesorado"}
+        </button>
+      )}
+    </>
+  );
+}
+
 export function EditMeetBtn({ reserva, onChanged, className }) {
   const [editando, setEditando] = useState(false);
   return (

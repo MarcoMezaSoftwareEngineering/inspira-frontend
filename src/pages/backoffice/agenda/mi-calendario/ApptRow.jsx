@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { horaLimaPE } from "../../../../lib/formatos";
 import { pagoEsRedundante, pagoTone } from "../utilidades";
-import { CancelBtn, ConfirmarPagoBtn, EditMeetBtn, VerVoucherBtn } from "./BotonesCita";
+import { CancelBtn, ConfirmarPagoBtn, EditMeetBtn, InformeBtns, VerVoucherBtn } from "./BotonesCita";
 
 function Pill({ tone, children }) {
   const tones = {
@@ -51,6 +51,8 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }
             )}
             {r.metodo_pago === "TRANSFERENCIA" && r.estado !== "CANCELADA" && <Pill tone="primary">Transferencia</Pill>}
             {r.metodo_pago === "DESPUES" && r.estado !== "CANCELADA" && <Pill tone="primary">Pagará después</Pill>}
+            {r.informe_estado === "BORRADOR" && <Pill tone="amber">informe por aprobar</Pill>}
+            {r.informe_estado === "ENVIADO" && <Pill tone="green">informe enviado</Pill>}
             {r.metodo_pago === "MERCADOPAGO" && Number(r.recargo) > 0 && <Pill tone="neutral">incluye comisión MP {r.recargo}</Pill>}
             {r.estado === "PENDIENTE_PAGO" && r.tiene_voucher && <Pill tone="green">subió el voucher</Pill>}
             {r.estado === "PENDIENTE_PAGO" && r.hold_expira_en && (
@@ -69,6 +71,7 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }
                 Notas de Gemini
               </a>
             )}
+            <InformeBtns reserva={r} onChanged={onChanged} />
             <VerVoucherBtn reserva={r}
               className="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50" />
             <ConfirmarPagoBtn reserva={r} onChanged={onChanged}

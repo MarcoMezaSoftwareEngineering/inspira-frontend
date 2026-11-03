@@ -13,6 +13,7 @@ import Icono from "../../../components/common/Icono";
 import { loginGoogle } from "../../../components/layout/Header/LoginButton";
 import { navigate } from "../../../services/navigate";
 import { whatsappDesde } from "../../../config/contacto";
+import { marcarRegistroApp } from "../herramientas/referido";
 
 // Desde el 03/11/2026 cualquiera crea su cuenta con Google y usa gratis las
 // herramientas; el expediente sigue siendo para quien tiene un servicio.
@@ -53,11 +54,17 @@ export default function Bienvenida() {
         </div>
 
         <div className="pnl-vacio-acciones">
-          <button type="button" className="pnl-btn-cta pnl-btn-grande ux-tap" onClick={() => loginGoogle()}>
-            <Icono nombre="usuario" size={16} />
-            Entrar gratis con Google
+          {/* Dos puertas a la misma cuenta de Google: la primera deja anotado
+              que llegó por la app gratuita (origen «App Inspira»). */}
+          <button type="button" className="pnl-btn-cta pnl-btn-grande ux-tap" onClick={() => { marcarRegistroApp(); loginGoogle(); }}>
+            <Icono nombre="regalo" size={16} />
+            Crear mi cuenta gratis
           </button>
-          <button type="button" className="pnl-btn-noche ux-tap" onClick={() => navigate("/")}>
+          <button type="button" className="pnl-btn-noche ux-tap" onClick={() => loginGoogle()}>
+            <Icono nombre="usuario" size={16} />
+            Ya soy cliente: entrar a mi expediente
+          </button>
+          <button type="button" className="pnl-vacio-enlace" onClick={() => navigate("/")}>
             Ver la web
           </button>
         </div>

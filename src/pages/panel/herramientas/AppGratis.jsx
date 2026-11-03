@@ -9,12 +9,15 @@ import { navigate } from "../../../services/navigate";
 import { Presupuesto, TrackerBecas, Calendario, Schengen, Listas } from "./Herramientas";
 import { MiNota, MeAdmiten, LlegoATiempo, QuedarmeATrabajar, GradoOFP, InvitaAmigo } from "./Orientacion";
 import { useResumen } from "./useHerramienta";
+import { Paquetes, MisPostulaciones, GuiaDocumentos } from "./Premium";
 import { ALIADOS } from "../../../config/aliados";
 import "../../../styles/panel/herramientas.css";
 
 // Por ítems: primero el match de másteres, que es la estrella, y luego el resto.
 const HERRAMIENTAS = [
   { clave: "admision", icono: "diana", titulo: "¿Con cuántos másteres haces match?", texto: "Escribe tu carrera y lo ves al momento", Vista: MeAdmiten, estrella: true },
+  { clave: "postulaciones", icono: "check", titulo: "Mis postulaciones", texto: "El tracker de tu autopostulación", Vista: MisPostulaciones, paquete: "busqueda-master" },
+  { clave: "guia-documentos", icono: "documento", titulo: "Guía de documentos", texto: "Modelos, videos y guías", Vista: GuiaDocumentos, paquete: "guia-documentos" },
   { clave: "calendario", icono: "calendario", titulo: "Mi calendario", texto: "Tus plazos, con avisos al móvil", Vista: Calendario },
   { clave: "becas", icono: "birrete", titulo: "Tracker de becas", texto: "Síguelas y te avisamos del cierre", Vista: TrackerBecas },
   { clave: "schengen", icono: "pasaporte", titulo: "Días Schengen", texto: "Cuántos te quedan como turista", Vista: Schengen },
@@ -53,19 +56,20 @@ const CON_ASESOR = [
 
 const ir = (href) => (e) => { e.preventDefault(); navigate(href); };
 
-function Tarjeta({ h, usada }) {
+function Tarjeta({ h, usada, bloqueada }) {
   return (
     <a href={`/panel/herramientas/${h.clave}`} onClick={ir(`/panel/herramientas/${h.clave}`)}
       className={`pnl-hr-tarjeta ux-tap${h.estrella ? " es-estrella" : ""}`} data-usada={usada ? "1" : undefined}>
       <span className="pnl-hr-tile"><Icono nombre={h.icono} size={h.estrella ? 26 : 22} /></span>
       <span className="pnl-hr-tarjeta-txt"><strong>{h.titulo}</strong><small>{h.texto}</small></span>
       {usada && <span className="pnl-hr-hecho" aria-label="Ya la usaste">✓</span>}
+      {bloqueada && <span className="pnl-hr-de-pago"><Icono nombre="candado" size={11} /> Paquete</span>}
     </a>
   );
 }
 
 export default function AppGratis({ herramienta, nombre, esCliente = false, perfilIncompleto = false }) {
-  const { usadas, dias } = useResumen();
+  const { usadas, dias, compras } = useResumen();
   const abierta = TODAS.find((h) => h.clave === herramienta);
   if (abierta) {
     const { Vista } = abierta;
@@ -100,7 +104,7 @@ export default function AppGratis({ herramienta, nombre, esCliente = false, perf
 
       <h3 className="pnl-hr-grupo">Herramientas gratis</h3>
       <div className="pnl-hr-rejilla">
-        {HERRAMIENTAS.map((h) => <Tarjeta key={h.clave} h={h} usada={usadas.includes(h.clave)} />)}
+        {HERRAMIENTAS.map((h) => <Tarjeta key={h.clave} h={h} usada={usadas.includes(h.clave)} bloqueada={h.paquete && !compras[h.paquete]} />)}
       </div>
 
       <h3 className="pnl-hr-grupo">Para tu viaje</h3>
@@ -125,6 +129,8 @@ export default function AppGratis({ herramienta, nombre, esCliente = false, perf
           </a>
         ))}
       </div>
+
+      <Paquetes />
 
       {!esCliente && (
         <section className="pnl-hr-pro">

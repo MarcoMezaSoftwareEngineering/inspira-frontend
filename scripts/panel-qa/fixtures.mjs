@@ -1012,6 +1012,18 @@ const HERRAMIENTAS = {
   listas: { hecho: { "visa-0": true, "visa-1": true, "visa-3": true }, propios: { visa: [{ id: "p1", texto: "Adaptador de enchufe" }] } },
 };
 
+const TIENDA_APP = [
+  { id: "guia-documentos", nombre: "Guía de documentos", eur: 115, pen: 460, total: 482.52, recargo: 22.52 },
+  { id: "busqueda-master", nombre: "Búsqueda de máster", eur: 150, pen: 600, total: 628.58, recargo: 28.58 },
+  { id: "master-autonomo", nombre: "Máster autónomo", eur: 225, pen: 900, total: 941.57, recargo: 41.57 },
+];
+const MASTERES_APP = [
+  ["Máster Universitario en Derecho Internacional", "Universidad Complutense de Madrid", "Madrid", "Comunidad de Madrid", 3480, "ALTA"],
+  ["Máster en Derecho de la Unión Europea", "Universidad Carlos III de Madrid", "Getafe", "Comunidad de Madrid", 3960, "ALTA"],
+  ["Máster en Abogacía y Procura", "Universidad de Granada", "Granada", "Andalucía", 1180, "MEDIA"],
+  ["Máster en Derecho Ambiental", "Universitat de Barcelona", "Barcelona", "Cataluña", 4100, null],
+].map(([nombre, universidad, ciudad, comunidad, precio, preferencia], i) => ({ id: 900 + i, nombre, universidad, ciudad, comunidad, precio, ects: 60, modalidad: "PRESENCIAL", curso: "2026-27", url: "https://example.org", preinscripcion: null, nombra_tu_carrera: Boolean(preferencia), preferencia }));
+
 // ── Enrutador de fixtures ───────────────────────────────────────────────────
 const ok = (cuerpo = {}) => ({ prevista: true, status: 200, cuerpo: { ok: true, ...cuerpo } });
 
@@ -1056,7 +1068,9 @@ const RUTAS = [
   ["GET", /^\/api\/catalogo\/titulaciones$/, () => ok({ titulaciones: [] })],
   ["GET", /^\/portales\/panel\/.*documentos-proceso$/, () => ok({ documentos: [] })],
   ["GET", /^\/cierre-master\/panel\/solicitudes\/\d+\/bloque8$/, () => ok({ plan_nombre: "Paquete Premium", admitido: false, masters: [], master_final: null, derivacion: { via: null, contratacion: null }, opciones_derivacion: {}, cierre: { archivado: false }, encuesta: null })],
-  ["GET", /^\/cliente\/herramientas$/, () => ok({ herramientas: HERRAMIENTAS, referido: { codigo: "I5WQ", invitados: 3, contrataron: 1 } })],
+  ["GET", /^\/cliente\/herramientas$/, () => ok({ herramientas: HERRAMIENTAS, referido: { codigo: "I5WQ", invitados: 3, contrataron: 1 }, compras: {}, tienda: TIENDA_APP })],
+  ["GET", /^\/cliente\/herramientas\/masteres$/, () => ok({ masteres: MASTERES_APP })],
+  ["POST", /^\/cliente\/herramientas\/comprar$/, () => ok({ url: "about:blank" })],
   ["GET", /^\/api\/catalogo\/titulaciones$/, () => ok({ titulaciones: [{ norm: "derecho", titulacion: "Grado en Derecho", n: 412 }, { norm: "derecho y ade", titulacion: "Doble Grado en Derecho y ADE", n: 51 }] })],
   ["GET", /^\/api\/catalogo\/acceso$/, () => ok({ total: 152, directos: 61, desde: 1180, comunidades: [{ nombre: "Comunidad de Madrid", n: 38 }, { nombre: "Cataluña", n: 27 }, { nombre: "Andalucía", n: 24 }, { nombre: "Comunidad Valenciana", n: 19 }], ejemplo: { nombre: "Máster Universitario en Derecho Internacional", universidad: "Universidad Complutense de Madrid", ciudad: "Madrid", comunidad: "Comunidad de Madrid", ects: 60, modalidad: "PRESENCIAL", curso: "2026-27", precio: 3480 } })],
   ["POST", /^\/cliente\/herramientas\/referido$/, () => ok({ aplicado: false })],
@@ -1084,6 +1098,12 @@ const ESCENARIOS = {
     if (path === "/cliente/pagos") return ok({ planes: [], resumen: {}, medios_pago: PAGOS.medios_pago });
     return null;
   },
+  // Compró la Búsqueda de máster: lista completa y una postulación en curso.
+  "con-busqueda": (method, path) => (
+    method === "GET" && path === "/cliente/herramientas"
+      ? ok({ herramientas: { ...HERRAMIENTAS, postulaciones: { items: [{ id: "p1", master: 900, nombre: MASTERES_APP[0].nombre, universidad: MASTERES_APP[0].universidad, url: "https://example.org", estado: "enviada", cierre: isoEn(20) }] } }, referido: null, compras: { "busqueda-master": { desde: isoEn(-2) } }, tienda: TIENDA_APP })
+      : null
+  ),
   // El servidor falla al dar la solicitud del máster: el expediente enseña el
   // error de carga con «Reintentar» (DetalleSolicitud.jsx). Lo demás, igual.
   "error-155": (method, path) => (

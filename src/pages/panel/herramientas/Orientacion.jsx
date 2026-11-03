@@ -5,7 +5,8 @@ import Icono from "../../../components/common/Icono";
 import { apiGET } from "../../../services/api";
 import { navigate } from "../../../services/navigate";
 import { Cabecera } from "./Herramientas";
-import { useHerramienta, useReferido } from "./useHerramienta";
+import { useHerramienta, useReferido, useResumen } from "./useHerramienta";
+import { BotonComprar, ListaMasteres } from "./Premium";
 import { ESCALAS, notaEspanola, tramoNota, hitosDesde, inicioPorDefecto } from "./calculos";
 
 const hoyIso = () => new Date().toISOString().slice(0, 10);
@@ -79,6 +80,8 @@ export function MiNota() {
 // ── ¿Me admiten? ────────────────────────────────────────────────────────────
 export function MeAdmiten() {
   const [d, guardar, estado] = useHerramienta("admision", { t: "", titulacion: "" });
+  const { compras } = useResumen();
+  const conLista = Boolean(compras["busqueda-master"]);
   // null: todavía no escribió nada en esta visita; se ve la carrera guardada.
   const [texto, setTexto] = useState(null);
   const [sugerencias, setSugerencias] = useState([]);
@@ -125,6 +128,8 @@ export function MeAdmiten() {
             <strong>Haces match con {res.total} másteres</strong>
             <span>{res.directos} nombran tu carrera en su acceso{res.desde ? ` · desde ${eur(res.desde)}` : ""}</span>
           </div>
+          {conLista ? <ListaMasteres t={d.t} /> : (
+            <>
           {res.ejemplo && (
             <article className="pnl-hr-caja pnl-hr-ejemplo">
               <span className="pnl-hr-sello-ok">✓ Uno de tus matches</span>
@@ -156,7 +161,15 @@ export function MeAdmiten() {
               ))}
             </section>
           )}
-          <SoloClientes titulo={`Tus ${res.total} másteres, guiados por profesionales`} texto="Tu asesor los ordena según tu nota, tu presupuesto y tu objetivo, con becas y plazos de cada uno, en tu Informe de másteres." boton="Quiero mi informe" />
+          <section className="pnl-hr-pro">
+                <span className="pnl-hr-pro-sello"><Icono nombre="candado" size={13} /> Búsqueda de máster</span>
+                <h3>Ve tus {res.total} másteres y lleva tu autopostulación</h3>
+                <p className="pnl-hr-pro-txt">Todos con precio, créditos y enlace oficial, con filtros y el tracker de tus postulaciones.</p>
+                <BotonComprar id="busqueda-master" texto="Ver mis másteres" />
+              </section>
+              <SoloClientes titulo={`Tus ${res.total} másteres, guiados por profesionales`} texto="Tu asesor los ordena según tu nota, tu presupuesto y tu objetivo, con becas y plazos de cada uno, en tu Informe de másteres." boton="Quiero mi informe" />
+            </>
+          )}
         </>
       )}
       <p className="pnl-hr-pie">Del catálogo de másteres oficiales de Inspira. Cada universidad decide la admisión final.</p>

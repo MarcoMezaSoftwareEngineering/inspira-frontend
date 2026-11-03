@@ -5,11 +5,13 @@
 // Al escribir se guarda solo, un momento después de la última tecla, con PUT
 // de esa herramienta. No se gasta nada en IA: todo se calcula en el teléfono.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { apiGET, apiPUT } from "../../../services/api";
+import { apiGET, apiPOST, apiPUT } from "../../../services/api";
 
 let pedido = null; // la promesa compartida de GET /cliente/herramientas
 const memoria = {};
 let referido = null; // { codigo, invitados, contrataron } de «Invita a un amigo»
+let compras = {}; // los paquetes que pagó: { "busqueda-master": { desde, … } }
+let tienda = []; // precios de los paquetes, en soles con la comisión (compras.js)
 
 function cargarTodas() {
   if (!pedido) {
@@ -17,6 +19,8 @@ function cargarTodas() {
       if (!r?.ok) { pedido = null; throw new Error(r?.message || "No se pudieron cargar tus herramientas"); }
       Object.assign(memoria, r.herramientas || {});
       referido = r.referido || null;
+      compras = r.compras || {};
+      tienda = r.tienda || [];
       return memoria;
     }, (e) => { pedido = null; throw e; });
   }
@@ -70,7 +74,7 @@ export function useHerramienta(clave, inicial) {
 function resumen() {
   const viaje = memoria.calendario?.viaje;
   const dias = viaje ? Math.ceil((Date.parse(`${viaje}T12:00:00`) - Date.now()) / 864e5) : null;
-  return { referido, usadas: Object.keys(memoria), dias };
+  return { referido, usadas: Object.keys(memoria), dias, compras, tienda };
 }
 
 /** Para la portada: qué herramientas ya usó, los días hasta su viaje y su código de amigo. */
@@ -82,6 +86,17 @@ export function useResumen() {
     return () => { vivo = false; };
   }, []);
   return r;
+}
+
+/** Paga un paquete: lleva a Mercado Pago. Devuelve el error, si lo hay. */
+export async function comprar(id) {
+  try {
+    const r = await apiPOST("/cliente/herramientas/comprar", { id });
+    if (r?.ok && r.url) { window.location.href = r.url; return null; }
+    return r?.message || "No pudimos iniciar el pago.";
+  } catch {
+    return "No hay conexión. Inténtalo de nuevo.";
+  }
 }
 
 /** Su código de amigo y cuántos entraron con él. */

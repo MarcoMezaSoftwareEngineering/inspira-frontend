@@ -64,7 +64,7 @@ import CentroAvisos from "./components/CentroAvisos";
 import InstalarAppModal from "./components/InstalarAppModal";
 import { ServiciosPanelCtx } from "./serviciosCtx";
 import { olvidarNovedades } from "./novedades";
-import { registrarReferido } from "./herramientas/referido";
+import { registrarOrigen, registrarReferido } from "./herramientas/referido";
 
 // Las guías (GuiaMaster, GuiaApostilla…) las descarga MisGuias al abrirlas.
 const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
@@ -234,7 +234,7 @@ export default function PanelCliente({ path }) {
         return;
       }
       setUser(r.cliente || r.user || r);
-      if (!silencioso) registrarReferido();
+      if (!silencioso) { registrarOrigen(); registrarReferido(); }
     } catch {
       if (!silencioso) setErrorMe("No hay conexión. Comprueba tu internet y vuelve a intentarlo.");
     }

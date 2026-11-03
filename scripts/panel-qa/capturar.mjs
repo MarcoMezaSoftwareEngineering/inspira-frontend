@@ -164,6 +164,9 @@ const RUTAS = [
   { ruta: "/panel", nombre: "panel-app-gratis", escenario: "sin-servicios" },
   ...["presupuesto", "becas", "calendario", "schengen", "listas", "admision", "nota", "plazos", "trabajo", "grado", "amigos"].map((h) => (
     { ruta: `/panel/herramientas/${h}`, nombre: `panel-herramientas-${h}`, escenario: "sin-servicios" })),
+  { ruta: "/panel/herramientas/admision", nombre: "panel-herramientas-admision-lista", escenario: "con-busqueda" },
+  { ruta: "/panel/herramientas/postulaciones", nombre: "panel-herramientas-postulaciones", escenario: "con-busqueda" },
+  { ruta: "/panel/herramientas/guia-documentos", nombre: "panel-herramientas-guia-documentos", escenario: "sin-servicios" },
   // Con servicios, las herramientas sin el bloque «Reservado para clientes».
   { ruta: "/panel/herramientas", nombre: "panel-herramientas" },
   { ruta: "/panel", nombre: "panel-sin-token", sinToken: true },

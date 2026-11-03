@@ -169,8 +169,8 @@ export default function HeroReserva({ cargando, primeroTexto, libres7, servicioI
 
         <h1 className="mt-4 max-w-3xl font-fraunces text-[2.4rem] font-semibold leading-[1.08] md:text-6xl" aria-label={TITULO.join(" ")}>
           {TITULO.map((p, i) => (
-            <span key={i} className="rv-palabra" style={{ animationDelay: `${120 + i * 70}ms` }} aria-hidden="true">
-              {p === "conversación." ? <span className="text-accent">{p}</span> : p}{" "}
+            <span key={i} className="rv-palabra mr-[0.26em]" style={{ animationDelay: `${120 + i * 70}ms` }} aria-hidden="true">
+              {p === "conversación." ? <span className="text-accent">{p}</span> : p}
             </span>
           ))}
         </h1>

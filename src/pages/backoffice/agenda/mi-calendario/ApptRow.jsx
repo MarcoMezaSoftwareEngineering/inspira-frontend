@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { horaLimaPE } from "../../../../lib/formatos";
 import { pagoEsRedundante, pagoTone } from "../utilidades";
-import { CancelBtn, ConfirmarPagoBtn, EditMeetBtn, InformeBtns, VerVoucherBtn } from "./BotonesCita";
+import { AvisosBtns, CancelBtn, ConfirmarPagoBtn, EditMeetBtn, InformeBtns, VerVoucherBtn } from "./BotonesCita";
 
 function Pill({ tone, children }) {
   const tones = {
@@ -16,8 +16,8 @@ function Pill({ tone, children }) {
 
 // Fila compacta de cita (estilo ".appt" del mock). Clic para expandir y ver
 // chips + acciones reales (Unirse / Editar Meet / Cancelar) sin salir de la lista.
-export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }) {
-  const [abierta, setAbierta] = useState(false);
+export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada, abierta0 = false }) {
+  const [abierta, setAbierta] = useState(abierta0);
 
   return (
     <article className={`rounded-xl transition-colors ${abierta ? "bg-neutral-50" : "hover:bg-neutral-50"} ${pasada ? "opacity-55" : ""}`}>
@@ -76,6 +76,7 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }
               className="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50" />
             <ConfirmarPagoBtn reserva={r} onChanged={onChanged}
               className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10.5px] font-bold hover:opacity-90 disabled:opacity-50" />
+            <AvisosBtns reserva={r} />
             {r.meet_url ? (
               <a href={r.meet_url} target="_blank" rel="noopener noreferrer"
                 className="px-2.5 py-1.5 bg-primary text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">

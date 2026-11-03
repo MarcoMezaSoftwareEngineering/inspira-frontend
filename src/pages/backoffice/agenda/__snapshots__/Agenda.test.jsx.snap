@@ -12,6 +12,7 @@ exports[`Agenda — Disponibilidad (Calendly) > error 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Disponibilidad (Calendly)</button>
 </div>
@@ -36,6 +37,7 @@ exports[`Agenda — Disponibilidad (Calendly) > horario semanal y huecos libres 
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Disponibilidad (Calendly)</button>
 </div>
@@ -128,6 +130,7 @@ exports[`Agenda — Disponibilidad (Calendly) > sin huecos 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Disponibilidad (Calendly)</button>
 </div>
@@ -206,6 +209,7 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -873,6 +877,7 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -1541,6 +1546,7 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -2214,6 +2220,7 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -2873,6 +2880,7 @@ exports[`Agenda — Mi calendario > error al cargar 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -3485,6 +3493,7 @@ exports[`Agenda — Mi calendario > sin datos 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -4096,6 +4105,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -4722,6 +4732,9 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>
 <p class="text-[10px] text-neutral-500 mb-2 truncate">ana@example.com · +51 999 111 222</p>
 <div class="flex gap-1.5 flex-wrap">
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Reenviar accesos</button>
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Enviar recordatorio</button>
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Enviar formulario previo</button>
 <a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 bg-primary text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">Unirse</a>
 <button class="px-2.5 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[10.5px] font-bold hover:bg-red-50">Cancelar</button>
 </div>
@@ -4769,6 +4782,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>
 <p class="text-[10px] text-neutral-500 mb-2 truncate">luis@example.com</p>
 <div class="flex gap-1.5 flex-wrap">
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Recordar pago</button>
 <button class="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10.5px] font-bold hover:bg-amber-100">Añadir Meet</button>
 <button class="px-2.5 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[10.5px] font-bold hover:bg-red-50">Cancelar</button>
 </div>
@@ -4795,6 +4809,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -5090,6 +5105,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -5735,6 +5751,7 @@ exports[`Agenda — Reuniones (Calendly) > asesora sin reuniones 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -5773,6 +5790,7 @@ exports[`Agenda — Reuniones (Calendly) > con reuniones y el modal de cancelaci
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -5985,6 +6003,7 @@ exports[`Agenda — Reuniones (Calendly) > con reuniones y el modal de cancelaci
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -6198,6 +6217,7 @@ exports[`Agenda — Reuniones (Calendly) > con reuniones y el modal de cancelaci
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>
@@ -6389,6 +6409,7 @@ exports[`Agenda — Reuniones (Calendly) > error de Calendly 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Reuniones (Calendly)</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Disponibilidad (Calendly)</button>
 </div>

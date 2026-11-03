@@ -63,7 +63,7 @@ export function VerVoucherBtn({ reserva, className }) {
 // Solo para citas por transferencia o «pagar después» que aún esperan el pago.
 export function ConfirmarPagoBtn({ reserva, onChanged, className }) {
   const [enviando, setEnviando] = useState(false);
-  if (!["TRANSFERENCIA", "DESPUES"].includes(reserva.metodo_pago) || reserva.estado !== "PENDIENTE_PAGO") return null;
+  if (!["TRANSFERENCIA", "DESPUES", "PENDIENTE"].includes(reserva.metodo_pago) || reserva.estado !== "PENDIENTE_PAGO") return null;
   return (
     <button onClick={() => confirmarPagoTransferencia(reserva, onChanged, setEnviando)} disabled={enviando}
       className={className || "px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:opacity-90 disabled:opacity-50"}>
@@ -116,6 +116,40 @@ export function InformeBtns({ reserva, onChanged }) {
           {enviando ? "Enviando…" : "Enviar informe al asesorado"}
         </button>
       )}
+    </>
+  );
+}
+
+// Avisos al asesorado: recordar el pago, reenviar los accesos de la cita, recordarla y mandar el formulario previo.
+async function avisar(r, { ruta, cuerpo, pregunta, titulo, hecho }, setEnviando) {
+  const quien = r.cliente?.nombre || r.cliente?.email_contacto;
+  const ok = await dialog.confirm(`${pregunta} ${quien} (${r.cliente?.email_contacto || "sin correo"})?`, titulo);
+  if (!ok) return;
+  setEnviando(ruta);
+  const res = await boPOST(`/backoffice/agenda/reservas/${r.id_reserva}/${ruta}`, cuerpo);
+  setEnviando("");
+  if (res?.ok === false) return dialog.toast(res.msg || "No se pudo enviar", "error");
+  dialog.toast(hecho, "success");
+}
+
+export function AvisosBtns({ reserva }) {
+  const [enviando, setEnviando] = useState("");
+  const clase = "px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50";
+  const boton = (ruta, texto, datos) => (
+    <button key={ruta + texto} disabled={!!enviando} className={clase}
+      onClick={() => avisar(reserva, { ruta, ...datos }, setEnviando)}>
+      {enviando === ruta ? "Enviando…" : texto}
+    </button>
+  );
+  if (reserva.estado === "PENDIENTE_PAGO") {
+    return boton("recordar", "Recordar pago", { cuerpo: { tipo: "pago" }, pregunta: "¿Enviar el enlace para completar el pago a", titulo: "Recordar pago", hecho: "Se envió el recordatorio de pago." });
+  }
+  if (reserva.estado !== "CONFIRMADA") return null;
+  return (
+    <>
+      {boton("reenviar-accesos", "Reenviar accesos", { pregunta: "¿Reenviar la confirmación con el enlace de la reunión a", titulo: "Reenviar accesos", hecho: "Se reenviaron los accesos." })}
+      {boton("recordar", "Enviar recordatorio", { cuerpo: { tipo: "cita" }, pregunta: "¿Enviar un recordatorio de la asesoría a", titulo: "Enviar recordatorio", hecho: "Se envió el recordatorio." })}
+      {boton("formulario-previo", "Enviar formulario previo", { pregunta: "¿Enviar el formulario previo a la asesoría a", titulo: "Formulario previo", hecho: "Se envió el formulario previo." })}
     </>
   );
 }

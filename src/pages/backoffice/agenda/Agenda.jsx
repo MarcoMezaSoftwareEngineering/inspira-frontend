@@ -10,6 +10,7 @@
 //   calendly/             reuniones, disponibilidad y modal de Calendly
 import useAgenda from "./useAgenda";
 import MiCalendarioTab from "./mi-calendario/MiCalendarioTab";
+import ReservasTab from "./ReservasTab";
 import ReunionesTab from "./calendly/ReunionesTab";
 import DisponibilidadTab from "./calendly/DisponibilidadTab";
 import ModalCancelacion from "./calendly/ModalCancelacion";
@@ -45,6 +46,12 @@ export default function Agenda() {
             Mi calendario
           </button>
           <button
+            onClick={() => setTab("reservas")}
+            className={`px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors ${tab === "reservas" ? "bg-primary-dark text-white shadow" : "text-neutral-500 hover:bg-white hover:text-primary-dark"}`}
+          >
+            Reservas
+          </button>
+          <button
             onClick={() => setTab("reuniones")}
             className={`px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors ${tab === "reuniones" ? "bg-primary-dark text-white shadow" : "text-neutral-500 hover:bg-white hover:text-primary-dark"}`}
           >
@@ -63,6 +70,9 @@ export default function Agenda() {
       <div className="flex-1 min-h-0 overflow-hidden">
         {/* ===== TAB MI CALENDARIO (sistema propio) ===== */}
         {tab === "micalendario" && <MiCalendarioTab />}
+
+        {/* ===== TAB RESERVAS (por pagar, próximas, informes) ===== */}
+        {tab === "reservas" && <ReservasTab />}
 
         {/* ===== TAB REUNIONES ===== */}
         {tab === "reuniones" && (

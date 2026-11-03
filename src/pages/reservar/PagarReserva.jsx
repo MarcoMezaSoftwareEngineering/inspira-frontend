@@ -5,6 +5,7 @@
 // anterior. Textos de usted; colores y clases de marca de tailwind.config.js.
 import { useCallback, useEffect, useState } from "react";
 import { apiGET, apiPOST, apiUpload } from "../../services/api";
+import { cabeceraReserva } from "./tokenReserva";
 import { useAuth } from "../../context/AuthContext";
 import { loginGoogle } from "../../components/layout/Header/LoginButton";
 import { dialog } from "../../services/dialogService";
@@ -123,7 +124,7 @@ function SubirVoucher({ id, yaSubido, onSubido }) {
     try {
       const datos = new FormData();
       datos.append("comprobante", archivo);
-      await apiUpload(`${BASE}/${id}/voucher`, datos);
+      await apiUpload(`${BASE}/${id}/voucher`, datos, cabeceraReserva(id));
       setListo(true);
       onSubido?.();
     } catch (e) {
@@ -190,6 +191,9 @@ function Opcion({ titulo, importe, detalle, accion, onClick, cargando, deshabili
 export default function PagarReserva() {
   const { user } = useAuth();
   const id = Number(new URLSearchParams(window.location.search).get("r"));
+  // Con el enlace del correo (token) no hace falta cuenta; se lee una sola vez porque limpia la URL.
+  const [cab] = useState(() => cabeceraReserva(id));
+  const acceso = !!user || !!cab["X-Reserva-Token"];
   const [r, setR] = useState(null);
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -201,7 +205,7 @@ export default function PagarReserva() {
 
   const cargar = useCallback(async () => {
     try {
-      const res = await apiGET(`${BASE}/${id}`);
+      const res = await apiGET(`${BASE}/${id}`, cab);
       if (res?.ok) {
         setR(res.reserva);
         setError(null);
@@ -213,20 +217,20 @@ export default function PagarReserva() {
     } finally {
       setCargando(false);
     }
-  }, [id]);
+  }, [id, cab]);
 
   useEffect(() => {
-    if (!id || !user) {
+    if (!id || !acceso) {
       setCargando(false);
       return;
     }
     cargar();
-  }, [id, user, cargar]);
+  }, [id, acceso, cargar]);
 
   const elegir = async (metodo) => {
     setHaciendo(metodo);
     try {
-      const res = await apiPOST(`${BASE}/${id}/${metodo}`, {});
+      const res = await apiPOST(`${BASE}/${id}/${metodo}`, {}, cab);
       if (!res?.ok) {
         dialog.toast(res?.msg || "No se pudo registrar el medio de pago.", "error");
         return;
@@ -252,7 +256,7 @@ export default function PagarReserva() {
   const cancelar = async () => {
     setCancelando(true);
     try {
-      const res = await apiPOST(`${BASE}/${id}/cancelar`, {});
+      const res = await apiPOST(`${BASE}/${id}/cancelar`, {}, cab);
       if (res?.ok) setCancelada({ devolucion: !!res.devolucion });
       else dialog.toast(res?.msg || "No se pudo cancelar la cita.", "error");
     } catch {
@@ -308,11 +312,11 @@ export default function PagarReserva() {
     );
   }
 
-  if (!user) {
+  if (!acceso) {
     return (
       <Marco>
         <h1 className="font-fraunces text-3xl font-semibold text-primary">Inicie sesión para ver su reserva</h1>
-        <p className="mt-2 text-tinta-2">Use la misma cuenta de Google con la que separó el horario.</p>
+        <p className="mt-2 text-tinta-2">Use la misma cuenta de Google con la que separó el horario. Si reservó sin cuenta, abra el enlace «Completar mi reserva» del correo que le enviamos.</p>
         <button type="button" onClick={() => loginGoogle({ volverAqui: true })} className={`${boton.primario} mt-6`}>
           Iniciar sesión con Google
         </button>

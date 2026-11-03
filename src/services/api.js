@@ -73,12 +73,12 @@ async function makeRequest(method, url, body, extraHeaders = {}) {
   return data;
 }
 
-export function apiGET(url) {
-  return makeRequest("GET", url);
+export function apiGET(url, headers) {
+  return makeRequest("GET", url, undefined, headers);
 }
 
-export function apiPOST(url, body) {
-  return makeRequest("POST", url, body);
+export function apiPOST(url, body, headers) {
+  return makeRequest("POST", url, body, headers);
 }
 
 export function apiPATCH(url, body) {
@@ -89,10 +89,10 @@ export function apiPUT(url, body) {
   return makeRequest("PUT", url, body);
 }
 
-export async function apiUpload(path, formData) {
+export async function apiUpload(path, formData, headers = {}) {
   const r = await fetch(API_URL + path, {
     method: "POST",
-    headers: { ...authHeaders() },
+    headers: { ...authHeaders(), ...headers },
     body: formData,
     cache: "no-store",
   });

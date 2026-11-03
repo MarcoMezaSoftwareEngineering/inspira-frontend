@@ -18,6 +18,46 @@
 .rv-pop     { animation: rv-pop 0.22s ease-out both; }
 .rv-esqueleto { animation: rv-brillo 1.2s ease-in-out infinite; }
 
+/* ── Cabecera: aurora, palabras que suben, pulso del dato vivo ── */
+@keyframes rv-sube {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes rv-deriva-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(-6%, 8%, 0) scale(1.12); }
+}
+@keyframes rv-deriva-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(7%, -6%, 0) scale(1.18); }
+}
+@keyframes rv-deriva-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(5%, 7%, 0) scale(0.9); }
+}
+@keyframes rv-pulso {
+  0%   { transform: scale(1); opacity: 0.7; }
+  80%, 100% { transform: scale(2.6); opacity: 0; }
+}
+@keyframes rv-reflejo {
+  0%   { transform: translateX(-120%) skewX(-18deg); }
+  60%, 100% { transform: translateX(220%) skewX(-18deg); }
+}
+
+.rv-hero { background-image: linear-gradient(160deg, #013446 0%, #0a4a62 55%, #013446 100%); }
+.rv-aurora { position: absolute; border-radius: 9999px; filter: blur(70px); opacity: 0.55; will-change: transform; }
+.rv-aurora-a { right: -8%; top: -30%; width: 46rem; height: 46rem; background: radial-gradient(circle, rgba(136,196,252,.55), transparent 65%); animation: rv-deriva-a 16s ease-in-out infinite; }
+.rv-aurora-b { left: -12%; bottom: -45%; width: 40rem; height: 40rem; background: radial-gradient(circle, rgba(250,148,58,.45), transparent 65%); animation: rv-deriva-b 20s ease-in-out infinite; }
+.rv-aurora-c { left: 38%; top: 10%; width: 26rem; height: 26rem; background: radial-gradient(circle, rgba(46,139,87,.28), transparent 65%); animation: rv-deriva-c 24s ease-in-out infinite; }
+
+.rv-sube { animation: rv-sube 0.6s cubic-bezier(.2,.7,.2,1) both; }
+.rv-palabra { display: inline-block; animation: rv-sube 0.6s cubic-bezier(.2,.7,.2,1) both; }
+.rv-pulso { animation: rv-pulso 1.8s ease-out infinite; }
+.rv-camino { transition: transform .25s ease, box-shadow .25s ease; }
+.rv-camino:hover { transform: translateY(-3px); }
+.rv-cta::after { content: ""; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation: rv-reflejo 3.6s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .rv-entrada, .rv-pop, .rv-esqueleto { animation: none; }
+  .rv-entrada, .rv-pop, .rv-esqueleto, .rv-sube, .rv-palabra, .rv-pulso, .rv-aurora, .rv-cta::after { animation: none; }
+  .rv-camino, .rv-camino:hover { transition: none; transform: none; }
 }

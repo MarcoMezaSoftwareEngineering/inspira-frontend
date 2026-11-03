@@ -14,9 +14,14 @@ import { apiGET, apiPOST } from "../../services/api";
 import { useReservarCita } from "../../hooks/useReservarCita";
 import { loginGoogle } from "../../components/layout/Header/LoginButton";
 import { dialog } from "../../services/dialogService";
-import AceptarTerminos from "../../components/legal/AceptarTerminos";
+import { useAuth } from "../../context/AuthContext";
 import { whatsappUrl } from "../../config/contacto";
 import CalendarioReserva from "./CalendarioReserva";
+import FormularioReserva from "./FormularioReserva";
+import HeroReserva from "./HeroReserva";
+import SalidaReserva from "./SalidaReserva";
+import { Icono } from "./iconos";
+import { cabeceraReserva } from "./tokenReserva";
 import { fechaCompleta, fechaCorta } from "./fechas";
 import { ZONA_AGENDA, desfaseDias, horaEn, zonaDetectada, zonasDisponibles } from "./zonas";
 import "./reservar.css";
@@ -39,37 +44,7 @@ function duracionLabel(min) {
 
 const modalidadLabel = (s) => (s.modalidad === "presencial" ? "Presencial · San Isidro" : "Online · Google Meet");
 
-/* ── Iconos (trazo, heredan el color) ───────────────────────────────── */
-function Icono({ nombre, className = "h-5 w-5" }) {
-  const rutas = {
-    video: <path d="M15 10l4.5-3v10L15 14M5 7h8a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />,
-    oficina: <path d="M4 21V5a1 1 0 011-1h8a1 1 0 011 1v16M14 9h5a1 1 0 011 1v11M8 8h2M8 12h2M8 16h2M3 21h18" />,
-    check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
-    escudo: <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3zM9 12l2 2 4-4" />,
-    campana: <path d="M6 16V11a6 6 0 1112 0v5l1.5 2h-15L6 16zM10 20a2 2 0 004 0" />,
-    ciclo: <path d="M4 12a8 8 0 0113.7-5.6L20 8M20 4v4h-4M20 12a8 8 0 01-13.7 5.6L4 16M4 20v-4h4" />,
-    reloj: <path d="M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
-    whatsapp: <path d="M20 12a8 8 0 01-11.9 7L4 20l1.1-4A8 8 0 1120 12z" />,
-  };
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      {rutas[nombre]}
-    </svg>
-  );
-}
-
 const ICONO_SERVICIO = { "sesion-diagnostico": "video", "asesoria-ampliada": "video", "sesion-presencial": "oficina" };
-
-function Garantia({ icono, children }) {
-  return (
-    <li className="flex items-center gap-2 text-[13px] text-white/85">
-      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/10 text-sky ring-1 ring-white/15">
-        <Icono nombre={icono} className="h-4 w-4" />
-      </span>
-      {children}
-    </li>
-  );
-}
 
 export default function ReservarCita() {
   const parametros = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -85,22 +60,24 @@ export default function ReservarCita() {
   const [hora, setHora] = useState(null); // { id_slot, hora_inicio, hora_fin, inicio_utc }
   const [aceptado, setAceptado] = useState(false);
   const [zona, setZona] = useState(zonaDetectada);
-  const [motivo, setMotivo] = useState("");
-  const [celular, setCelular] = useState("");
   const [reprog, setReprog] = useState(null); // la cita que se mueve
   const [reprogError, setReprogError] = useState(null);
   const [moviendo, setMoviendo] = useState(false);
 
+  const { user } = useAuth();
   const { separarHorario, loadingSlot, isLoggedIn } = useReservarCita();
+  // Quien reservó sin cuenta reprograma con el token de su enlace.
+  const cabReprog = useMemo(() => (idReprogramar ? cabeceraReserva(idReprogramar) : {}), [idReprogramar]);
+  const puedeReprogramar = isLoggedIn || !!cabReprog["X-Reserva-Token"];
   const zonas = useMemo(() => zonasDisponibles(zonaDetectada()), []);
 
   // Reprogramar: se carga la cita y se fija su servicio.
   useEffect(() => {
-    if (!idReprogramar || !isLoggedIn) return;
+    if (!idReprogramar || !puedeReprogramar) return;
     let vivo = true;
     (async () => {
       try {
-        const res = await apiGET(`/api/reservas/cliente/${idReprogramar}`);
+        const res = await apiGET(`/api/reservas/cliente/${idReprogramar}`, cabReprog);
         if (!vivo) return;
         if (!res?.ok) return setReprogError(res?.msg || "No encontramos esa reserva.");
         const r = res.reserva;
@@ -117,7 +94,7 @@ export default function ReservarCita() {
     return () => {
       vivo = false;
     };
-  }, [idReprogramar, isLoggedIn]);
+  }, [idReprogramar, puedeReprogramar, cabReprog]);
 
   // Cada servicio tiene sus propios días y horas (online vs presencial, 1 o 2 cupos).
   useEffect(() => {
@@ -157,6 +134,11 @@ export default function ReservarCita() {
   const enviando = !!hora && loadingSlot === hora.id_slot;
   const primero = dias[0] || null;
   const otraZona = zona !== ZONA_AGENDA;
+  const primeroTexto = primero ? `${fechaCorta(primero.fecha)} · ${horaEn(primero.slots[0].inicio_utc, zona)}` : "";
+  const libres7 = useMemo(() => {
+    const limite = new Date(Date.now() + 7 * 86400e3).toISOString().slice(0, 10);
+    return dias.filter((d) => d.fecha <= limite).reduce((n, d) => n + d.slots.length, 0);
+  }, [dias]);
 
   // Paso actual para el indicador: 0 servicio, 1 día, 2 hora, 3 pago.
   const paso = !servicio ? 0 : !fecha ? 1 : !hora ? 2 : 3;
@@ -180,6 +162,11 @@ export default function ReservarCita() {
     setHora(primero.slots[0]);
     setAceptado(false);
   };
+  // «Reservar ya»: se elige el primer horario libre y se baja al formulario.
+  const reservarYa = () => {
+    irAlPrimero();
+    setTimeout(() => document.getElementById("titulo-calendario")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  };
   const irAPaso = (i) => {
     if (i < paso && i === 1) {
       setFecha(null);
@@ -189,12 +176,10 @@ export default function ReservarCita() {
     setAceptado(false);
   };
 
-  const extra = { motivo: motivo.trim(), celular: celular.trim() };
-
   const reprogramar = async () => {
     setMoviendo(true);
     try {
-      const res = await apiPOST(`/api/reservas/cliente/${idReprogramar}/reprogramar`, { id_slot: hora.id_slot });
+      const res = await apiPOST(`/api/reservas/cliente/${idReprogramar}/reprogramar`, { id_slot: hora.id_slot }, cabReprog);
       if (res?.ok) {
         window.location.assign(`/reservar/pago?r=${idReprogramar}`);
         return;
@@ -209,36 +194,22 @@ export default function ReservarCita() {
   return (
     <main className="min-h-screen bg-fondo pb-16">
       {/* ── Cabecera ─────────────────────────────────────────────── */}
-      <header
-        className="relative overflow-hidden bg-primary text-white"
-        style={{
-          backgroundImage:
-            "radial-gradient(60% 90% at 88% 0%, rgba(136,196,252,.30), transparent 62%), radial-gradient(45% 70% at 0% 100%, rgba(250,148,58,.22), transparent 60%)",
-        }}
-      >
-        <div className="mx-auto max-w-5xl px-4 pb-24 pt-10 md:pb-28 md:pt-14">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-sky ring-1 ring-white/15">
-            <Icono nombre="reloj" className="h-3.5 w-3.5" />
-            {reprog ? "Reprogramar cita" : "Agenda tu asesoría"}
-          </p>
-          <h1 className="mt-4 font-fraunces text-4xl font-semibold leading-tight md:text-5xl">
-            {reprog ? "Elige un nuevo horario" : "Reserva tu asesoría"}
-          </h1>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/80">
-            {reprog
-              ? `Tu cita actual es el ${fechaCompleta(reprog.fecha)} a las ${reprog.hora_inicio} (hora de Perú). Al elegir otro horario, el enlace de la reunión sigue siendo el mismo.`
-              : "Con abogados especialistas en extranjería española. Elige el servicio, el día y la hora: tu cita se confirma al pagar y recibes todo por correo."}
-          </p>
-          {!reprog && (
-            <ul className="mt-6 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-              <Garantia icono="escudo">Pago seguro</Garantia>
-              <Garantia icono="campana">Recordatorios por correo</Garantia>
-              <Garantia icono="ciclo">Reprograma sin costo (24 h antes)</Garantia>
-              <Garantia icono="video">Reunión por Google Meet</Garantia>
-            </ul>
-          )}
-        </div>
-      </header>
+      {reprog ? (
+        <header className="relative overflow-hidden bg-primary text-white" style={{ backgroundImage: "radial-gradient(60% 90% at 88% 0%, rgba(136,196,252,.30), transparent 62%)" }}>
+          <div className="mx-auto max-w-5xl px-4 pb-24 pt-10 md:pb-28 md:pt-14">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-sky ring-1 ring-white/15">
+              <Icono nombre="reloj" className="h-3.5 w-3.5" />
+              Reprogramar cita
+            </p>
+            <h1 className="mt-4 font-fraunces text-4xl font-semibold leading-tight md:text-5xl">Elige un nuevo horario</h1>
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/80">
+              {`Tu cita actual es el ${fechaCompleta(reprog.fecha)} a las ${reprog.hora_inicio} (hora de Perú). Al elegir otro horario, el enlace de la reunión sigue siendo el mismo.`}
+            </p>
+          </div>
+        </header>
+      ) : (
+        <HeroReserva cargando={cargando} primeroTexto={primeroTexto} libres7={libres7} servicioId={servicioId} onReservarYa={reservarYa} />
+      )}
 
       <div className="mx-auto -mt-16 max-w-5xl px-4 md:-mt-20">
         {/* ── Indicador de pasos ─────────────────────────────────── */}
@@ -288,9 +259,9 @@ export default function ReservarCita() {
             </a>
           </div>
         )}
-        {idReprogramar && !isLoggedIn && (
+        {idReprogramar && !puedeReprogramar && (
           <div className="rv-entrada mb-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-linea">
-            <p className="text-tinta">Inicie sesión con la cuenta con la que reservó para reprogramar su cita.</p>
+            <p className="text-tinta">Inicie sesión con la cuenta con la que reservó para reprogramar su cita. Si reservó sin cuenta, use el enlace del correo de su reserva.</p>
             <button
               type="button"
               onClick={() => loginGoogle({ volverAqui: true })}
@@ -533,78 +504,20 @@ export default function ReservarCita() {
                     </div>
                   )}
 
-                  {/* Reservar: preguntas como en Calendly + términos + pagar */}
+                  {/* Reservar: datos, preguntas previas, términos y pago */}
                   {!reprog && hora && (
-                    <div className="rv-entrada mt-5 space-y-3">
-                      <div>
-                        <label htmlFor="rv-motivo" className="text-sm font-medium text-tinta">
-                          Cuéntanos algo que nos ayude a prepararnos <span className="font-normal text-muted">(opcional)</span>
-                        </label>
-                        <textarea
-                          id="rv-motivo"
-                          value={motivo}
-                          onChange={(e) => setMotivo(e.target.value)}
-                          maxLength={600}
-                          rows={3}
-                          placeholder="Ej.: mi país de residencia, el máster que me interesa, si ya tuve una denegatoria…"
-                          className="mt-1.5 w-full resize-y rounded-xl border border-linea bg-fondo px-3 py-2.5 text-sm text-tinta placeholder:text-trazo focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="rv-celular" className="text-sm font-medium text-tinta">
-                          Celular o WhatsApp <span className="font-normal text-muted">(opcional)</span>
-                        </label>
-                        <input
-                          id="rv-celular"
-                          type="tel"
-                          inputMode="tel"
-                          autoComplete="tel"
-                          value={celular}
-                          onChange={(e) => setCelular(e.target.value)}
-                          maxLength={30}
-                          placeholder="+51 999 999 999"
-                          className="mt-1.5 w-full rounded-xl border border-linea bg-fondo px-3 py-2.5 text-sm text-tinta placeholder:text-trazo focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
-
-                      <AceptarTerminos
-                        checked={aceptado}
-                        onChange={setAceptado}
-                        resumen={
-                          isLoggedIn
-                            ? "Separamos tu horario y eliges cómo pagar: tarjeta, transferencia con voucher o pagar después. La cita se confirma cuando recibimos el pago. Puedes reprogramar o cancelar sin costo avisando con 24 horas de antelación."
-                            : "Para reservar necesitas iniciar sesión con Google. Al continuar te llevaremos al inicio de sesión y luego podrás pagar. Puedes reprogramar o cancelar sin costo avisando con 24 horas de antelación."
-                        }
-                      />
-
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <button
-                          type="button"
-                          onClick={() => separarHorario(hora.id_slot, servicioId, "ahora", extra)}
-                          disabled={!aceptado || enviando}
-                          className="rounded-full bg-primary px-5 py-3.5 text-sm font-semibold text-white shadow-[0_12px_28px_-14px_rgba(1,52,70,.9)] transition hover:bg-primary-light active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
-                        >
-                          {enviando
-                            ? "Separando…"
-                            : !aceptado
-                            ? "Acepta los términos"
-                            : `${isLoggedIn ? "Pagar ahora" : "Iniciar sesión y reservar"} · ${precio} →`}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => separarHorario(hora.id_slot, servicioId, "despues", extra)}
-                          disabled={!aceptado || enviando || !isLoggedIn}
-                          className="rounded-full border border-primary px-5 py-3.5 text-sm font-semibold text-primary transition hover:bg-primary/5 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          Pagar después
-                        </button>
-                      </div>
-                      {aceptado && isLoggedIn && (
-                        <p className="text-center text-xs text-muted">
-                          Separamos el horario en el acto. Con «pagar después» lo confirmas luego por WhatsApp.
-                        </p>
-                      )}
-                    </div>
+                    <FormularioReserva
+                      key={hora.id_slot}
+                      hora={hora}
+                      servicioId={servicioId}
+                      precio={precio}
+                      isLoggedIn={isLoggedIn}
+                      user={user}
+                      aceptado={aceptado}
+                      setAceptado={setAceptado}
+                      separarHorario={separarHorario}
+                      enviandoCuenta={enviando}
+                    />
                   )}
                 </div>
               </div>
@@ -612,6 +525,7 @@ export default function ReservarCita() {
           </section>
         </div>
       </div>
+      {!reprog && <SalidaReserva activo={!hora} servicioId={servicioId} />}
     </main>
   );
 }

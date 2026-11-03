@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiPOST } from "../../services/api";
 import { whatsappUrl } from "../../config/contacto";
 import { Icono } from "./iconos";
+import retrato from "../../assets/images/carina/retrato-espana.webp";
 import { correoValido } from "./preguntas";
 
 const TITULO = ["Reserva", "tu", "primera", "asesoría"];
@@ -302,14 +303,46 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
             Diagnóstico
           </p>
 
-          <p className="rv-sube mt-5 text-[17px] leading-relaxed text-tinta-2 md:text-lg" style={{ animationDelay: "320ms" }}>
-            En <strong className="text-primary">30 minutos</strong>, una especialista en <strong className="text-primary">Derecho Internacional y movilidad académica</strong> analiza tu perfil y te explica, paso a paso, el camino que te conviene seguir.
-          </p>
-          <ul className="mt-4 space-y-2 text-[15px] font-semibold text-primary">
-            {["Orientación clara y estratégica, a tu medida", "Una persona real, con experiencia en trámites hacia España", "Reunión por Google Meet y pago seguro"].map((t, i) => (
-              <li key={t} className="rv-desliza flex items-start gap-2.5" style={{ animationDelay: `${420 + i * 90}ms` }}>
-                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent text-white">
-                  <Icono nombre="check" className="h-3 w-3" />
+          {/* Quién te atiende: foto, presentación y enlaces a su página y a las reseñas */}
+          <div className="rv-sube mt-5 flex items-start gap-4" style={{ animationDelay: "300ms" }}>
+            <a href="/carina" aria-label="Conoce a Carina Meza" className="relative shrink-0">
+              <span className="rv-anillo absolute -inset-1.5 rounded-full border-2 border-accent" aria-hidden="true" />
+              <img src={retrato} alt="Carina Meza, abogada de Inspira Legal" width="84" height="84" className="relative h-[84px] w-[84px] rounded-full object-cover object-top ring-4 ring-white shadow-lg" />
+              <span className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-accent text-white ring-2 ring-white">
+                <Icono nombre="check" className="h-3.5 w-3.5" />
+              </span>
+            </a>
+            <p className="text-[16px] leading-relaxed text-tinta-2 md:text-[17px]">
+              En <strong className="text-primary">30 minutos</strong>, <strong className="text-primary">Carina Meza</strong>, especialista en <strong className="text-primary">Extranjería</strong> y asesoría de <strong className="text-primary">máster y becas en el extranjero</strong>, analiza tu perfil y te explica, paso a paso, el camino que te conviene.
+            </p>
+          </div>
+
+          <div className="rv-sube mt-4 flex flex-wrap gap-2.5" style={{ animationDelay: "380ms" }}>
+            <a href="/carina" className="rv-enlace inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-light active:scale-[0.97]">
+              <Icono nombre="usuario" className="h-4 w-4 text-accent" /> Conóceme aquí <Icono nombre="flecha" className="h-4 w-4" />
+            </a>
+            <a href="/casos-de-exito" className="rv-enlace inline-flex items-center gap-2 rounded-full border-2 border-primary bg-white px-4 py-2.5 text-sm font-bold text-primary transition hover:bg-primary/5 active:scale-[0.97]">
+              <Icono nombre="estrella" className="h-4 w-4 text-accent" /> Conoce nuestras reseñas aquí <Icono nombre="flecha" className="h-4 w-4" />
+            </a>
+          </div>
+
+          {/* Temas que resolvemos: burbujas con icono que flotan */}
+          <ul className="mt-5 flex flex-wrap gap-2.5" aria-label="Temas que resolvemos">
+            {[["gorro", "Máster"], ["medalla", "Becas"], ["pasaporte", "Visado"], ["globo", "Estancia"], ["balanza", "Homologación"]].map(([ic, t], i) => (
+              <li key={t} className="rv-burbuja inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-[13px] font-bold text-primary shadow-sm ring-1 ring-linea" style={{ animationDelay: `${i * 0.35}s` }}>
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-primary text-accent">
+                  <Icono nombre={ic} className="h-4 w-4" />
+                </span>
+                {t}
+              </li>
+            ))}
+          </ul>
+
+          <ul className="mt-5 space-y-2.5 text-[15px] font-semibold text-primary">
+            {[["gorro", "Orientación clara y estratégica, a tu medida"], ["pasaporte", "Experiencia real en trámites hacia España"], ["video", "Reunión por Google Meet"], ["escudo", "Pago seguro y datos protegidos"]].map(([ic, t], i) => (
+              <li key={t} className="rv-desliza flex items-center gap-3" style={{ animationDelay: `${480 + i * 90}ms` }}>
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-accent text-white">
+                  <Icono nombre={ic} className="h-4 w-4" />
                 </span>
                 {t}
               </li>

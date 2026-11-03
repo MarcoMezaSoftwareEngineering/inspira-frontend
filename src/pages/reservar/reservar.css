@@ -146,10 +146,17 @@
 .rv-avion-ruta-2 .rv-avion-cuerpo { width: 28px; height: 28px; color: #013446; opacity: .75; }
 .rv-avion-ruta-2 .rv-avion-rastro { width: 70px; background-image: radial-gradient(circle, rgba(1,52,70,.6) 1.2px, transparent 1.4px); }
 
+@keyframes rv-anillo { 0% { transform: scale(1); opacity: .9; } 70%, 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes rv-burbuja { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.rv-anillo { animation: rv-anillo 1.8s ease-out infinite; }
+.rv-burbuja { animation: rv-burbuja 2.6s ease-in-out infinite; }
+.rv-enlace { position: relative; overflow: hidden; }
+.rv-enlace:hover { transform: translateY(-2px); }
+
 /* «Reducir movimiento»: se apaga solo lo que cruza la pantalla (aviones); las
    manchas siguen mutando despacio y las entradas se mantienen. */
 @media (prefers-reduced-motion: reduce) {
-  .rv-avion-ruta, .rv-ola-capa, .rv-avion-cuerpo, .rv-pulso, .rv-flota, .rv-brillo-texto, .rv-cta::after { animation: none; }
+  .rv-avion-ruta, .rv-ola-capa, .rv-avion-cuerpo, .rv-anillo, .rv-burbuja, .rv-pulso, .rv-flota, .rv-brillo-texto, .rv-cta::after { animation: none; }
   .rv-avion-ruta { display: none; }
   .rv-liquido-a, .rv-liquido-b, .rv-liquido-c { animation-duration: 16s; }
 }

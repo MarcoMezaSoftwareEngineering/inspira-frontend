@@ -100,11 +100,11 @@
 @keyframes rv-pop-grande { 0% { opacity: 0; transform: scale(.8) rotate(-2deg); } 70% { transform: scale(1.04) rotate(.5deg); } 100% { opacity: 1; transform: none; } }
 @keyframes rv-forma-sube { 0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); } 50% { transform: translate3d(14px, -22px, 0) rotate(12deg); } }
 @keyframes rv-vuelo {
-  0%   { transform: translate3d(-12vw, 70px, 0) rotate(8deg); opacity: 0; }
+  0%   { transform: translate3d(-12vw, 6px, 0) rotate(8deg); opacity: 0; }
   8%   { opacity: .9; }
-  50%  { transform: translate3d(50vw, 10px, 0) rotate(-4deg); }
+  50%  { transform: translate3d(50vw, -6px, 0) rotate(-4deg); }
   92%  { opacity: .9; }
-  100% { transform: translate3d(112vw, -40px, 0) rotate(-10deg); opacity: 0; }
+  100% { transform: translate3d(112vw, -22px, 0) rotate(-10deg); opacity: 0; }
 }
 
 .rv-hero-claro {
@@ -121,7 +121,7 @@
 .rv-forma-a { left: -50px; top: 38%; width: 150px; height: 150px; background: rgba(250,148,58,.18); }
 .rv-forma-b { right: 6%; bottom: 14%; width: 90px; height: 90px; background: rgba(1,52,70,.10); animation-duration: 5s; animation-delay: -2s; }
 .rv-forma-c { left: 46%; top: 6%; width: 46px; height: 46px; background: rgba(250,148,58,.28); animation-duration: 4s; animation-delay: -1s; }
-.rv-avion { position: absolute; left: 0; top: 8%; width: 34px; height: 34px; color: #FA943A; animation: rv-vuelo 9s linear infinite; transform: translate3d(-12vw, 70px, 0); }
+.rv-avion { position: absolute; left: 0; top: 1.5%; width: 34px; height: 34px; color: #FA943A; animation: rv-vuelo 9s linear infinite; transform: translate3d(-12vw, 6px, 0); }
 
 .rv-entra-izq { animation: rv-entra-izq 0.4s cubic-bezier(.2,.8,.2,1) both; }
 .rv-entra-der { animation: rv-entra-der 0.45s cubic-bezier(.2,.8,.2,1) 0.1s both; }

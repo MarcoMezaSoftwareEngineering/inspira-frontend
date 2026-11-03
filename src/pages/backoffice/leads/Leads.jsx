@@ -15,10 +15,19 @@ import { Pagina, Cabecera, Cuerpo, Boton, Chip, Vacio, Esqueleto } from "../ui";
 import LeadDetalle from "./LeadDetalle";
 import LeadsPestanas from "./LeadsPestanas";
 import LeadAlta from "./LeadAlta";
+import BandejaLeads from "./BandejaLeads";
 import { ETAPAS, ETAPA, ORIGENES, haceCuanto, fechaHora, nombreDe } from "./leadsComun";
 import "../../../styles/leads-core.css";
 
 const CLAVE_VISTA = "bo_leads_vista";
+const CLAVE_MODO = "bo_leads_modo";
+// Oportunidades (pasaron por asesoría) y Por convertir (deben reservarla) son la entrada; el tablero
+// por etapas queda como tercera vista, pensada para la computadora.
+const MODOS = [
+  { id: "oportunidades", texto: "Oportunidades" },
+  { id: "convertir", texto: "Por convertir" },
+  { id: "tablero", texto: "Tablero y tabla" },
+];
 
 function leerLeadDeUrl() {
   const id = Number(new URLSearchParams(window.location.search).get("lead"));
@@ -80,6 +89,15 @@ export default function Leads() {
   const [vista, setVista] = useState(() => {
     try { return localStorage.getItem(CLAVE_VISTA) || "tablero"; } catch { return "tablero"; }
   });
+  const [modo, setModo] = useState(() => {
+    try { return localStorage.getItem(CLAVE_MODO) || "oportunidades"; } catch { return "oportunidades"; }
+  });
+  const [bandeja, setBandeja] = useState(null);
+  const cargarBandeja = useCallback(() => boGET("/backoffice/leads/bandeja").then((r) => {
+    if (r?.ok) setBandeja(r); else dialog.toast(r?.msg || "No se pudo cargar la bandeja", "error");
+  }), []);
+  useEffect(() => { cargarBandeja(); }, [cargarBandeja]);
+  const cambiarModo = (m) => { setModo(m); try { localStorage.setItem(CLAVE_MODO, m); } catch { /* sin almacenamiento */ } };
   const [leads, setLeads] = useState(null);
   const [embudo, setEmbudo] = useState(null);
   const [opciones, setOpciones] = useState(null);
@@ -160,6 +178,7 @@ export default function Leads() {
 
   /** Cuando la ficha cambia algo, se refleja en la lista sin recargar todo. */
   const alCambiar = (lead) => {
+    cargarBandeja();
     if (!lead) { cargar(); return; }
     setLeads((ls) => (ls || []).map((x) => (x.id_lead === lead.id_lead ? { ...x, ...lead } : x)));
     boGET(`/backoffice/leads/embudo?${query}`).then((e) => { if (e?.ok) setEmbudo(e); });
@@ -199,6 +218,12 @@ export default function Leads() {
   const maxEtapa = Math.max(1, ...ETAPAS.map((e) => embudo?.etapas?.[e.valor] || 0));
   const nombre = (user?.nombre || "").split(" ")[0];
 
+  const r = bandeja?.resumen;
+  const statsBandeja = [
+    { n: r?.oportunidades_hoy ?? "–", l: "oportunidades para hoy", tono: r?.oportunidades_hoy ? "alerta" : undefined, onClick: () => cambiarModo("oportunidades") },
+    { n: r ? `S/ ${r.cotizado_en_curso.toLocaleString("es-PE")}` : "–", l: "cotizado en curso", tono: "ok" },
+    { n: r?.convertir_hoy ?? "–", l: "por convertir para hoy", tono: r?.convertir_hoy ? "alerta" : undefined, onClick: () => cambiarModo("convertir") },
+  ];
   const stats = [
     { n: embudo?.abiertos || 0, l: "abiertos" },
     {
@@ -220,22 +245,39 @@ export default function Leads() {
       <LeadsPestanas activa="leads" />
       <Cabecera
         eyebrow="Leads"
-        titulo={nombre ? `Quién quiere empezar, ${nombre}` : "Quién quiere empezar"}
-        subtitulo="Todo interesado en un solo sitio: asistente, calculadora, presupuesto web, reservas, WhatsApp y altas a mano. Lo que lleva más de un día sin respuesta sale marcado."
+        titulo={nombre ? `Tus interesados, ${nombre}` : "Tus interesados"}
+        subtitulo={modo === "tablero"
+          ? "Todos los leads por etapa. Toca una tarjeta para abrir su ficha."
+          : "Oportunidades: ya pasaron por asesoría, toca cerrar. Por convertir: aún deben reservar su asesoría."}
         acciones={
           <>
             {puedeEditar && (
               <Boton tono="cta" icono={Plus} onClick={() => setAltaAbierta(true)}>Nuevo lead</Boton>
             )}
-            <Boton tono="cristal" icono={RefreshCw} onClick={cargar} aria-label="Recargar">
+            <Boton tono="cristal" icono={RefreshCw} onClick={() => { cargar(); cargarBandeja(); }} aria-label="Recargar">
               <span className="hidden sm:inline">Recargar</span>
             </Boton>
           </>
         }
-        stats={stats}
+        stats={modo === "tablero" ? stats : statsBandeja}
       />
 
       <Cuerpo>
+        <div className="mb-4 flex gap-1 overflow-x-auto rounded-2xl border border-neutral-200 bg-white p-1 shadow-sm" role="tablist" aria-label="Cómo ver los leads">
+          {MODOS.map((m) => {
+            const n = m.id === "oportunidades" ? bandeja?.resumen?.oportunidades : m.id === "convertir" ? bandeja?.resumen?.convertir : null;
+            return (
+              <button key={m.id} type="button" role="tab" aria-selected={modo === m.id} onClick={() => cambiarModo(m.id)}
+                className={`min-h-[44px] flex-1 whitespace-nowrap rounded-xl px-3 text-[13px] font-bold transition-colors ${modo === m.id ? "bg-primary-dark text-white" : "text-neutral-600 hover:bg-neutral-50"}`}>
+                {m.texto}{n != null && <span className={`ml-1.5 rounded-full px-1.5 text-[11px] ${modo === m.id ? "bg-white/20" : "bg-neutral-100"}`}>{n}</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {modo !== "tablero" ? (
+          <BandejaLeads grupo={modo} datos={bandeja} onAbrir={abrir} onRecargar={() => { cargarBandeja(); cargar(); }} puedeEditar={puedeEditar} />
+        ) : (<>
         {/* Embudo: una cifra por etapa; tocarla filtra. */}
         <div className="ase-ld-embudo ase-anim" role="group" aria-label="Embudo por etapa">
           {ETAPAS.map((e) => {
@@ -384,7 +426,8 @@ export default function Leads() {
                 {visibles.map((l) => {
                   const et = ETAPA[l.etapa] || ETAPAS[0];
                   return (
-                    <tr key={l.id_lead} onClick={() => abrir(l.id_lead)}>
+                    <tr key={l.id_lead} onClick={() => abrir(l.id_lead)} tabIndex={0} role="button" aria-label={`Abrir ficha de ${nombreDe(l)}`}
+                      onKeyDown={(ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); abrir(l.id_lead); } }}>
                       <td style={{ fontWeight: 700, minWidth: 140 }}>
                         {nombreDe(l)}
                         {l.sin_responder && <div style={{ fontSize: 10.5, color: "var(--accent-2)", fontWeight: 700 }}>sin responder</div>}
@@ -412,6 +455,7 @@ export default function Leads() {
             </table>
           </div>
         )}
+        </>)}
       </Cuerpo>
 
       {abierto && (

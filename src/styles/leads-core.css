@@ -40,7 +40,7 @@
 .ase-ld-col-t { font-size: 12px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
 .ase-ld-col-t:before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ld-color, var(--sky-2)); }
 .ase-ld-col-n { font-size: 11px; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
-.ase-ld-col-vacia { font-size: 11.5px; color: #9fb3c0; text-align: center; padding: 18px 6px; border: 1px dashed var(--line); border-radius: 10px; }
+.ase-ld-col-vacia { font-size: 12px; color: #4f6672; text-align: center; padding: 18px 6px; border: 1px dashed var(--line); border-radius: 10px; }
 
 .ase-ld-card {
   text-align: left; width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 11px;
@@ -51,15 +51,15 @@
 .ase-ld-card[data-arrastrando="1"] { opacity: .45; }
 .ase-ld-card[data-alerta="1"] { border-left: 3px solid var(--accent); }
 .ase-ld-card-n { font-size: 13px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
-.ase-ld-card-s { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ase-ld-card-s { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ase-ld-card-pie { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
-.ase-ld-card-f { font-size: 10.5px; font-weight: 700; color: #8aa0ad; white-space: nowrap; }
+.ase-ld-card-f { font-size: 11.5px; font-weight: 700; color: #4f6672; white-space: nowrap; }
 .ase-ld-card-accion { font-size: 11px; color: var(--amber); font-weight: 600; margin-top: 5px; overflow-wrap: anywhere; }
 .ase-ld-card-accion[data-vencida="1"] { color: var(--red); }
 
 /* ── Tabla ─────────────────────────────────────────────────────────────── */
 .ase-ld-tabla { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-.ase-ld-tabla th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: #f4f8fb; padding: 9px 10px; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.ase-ld-tabla th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: #f4f8fb; padding: 9px 10px; white-space: nowrap; border-bottom: 1px solid var(--line); }
 .ase-ld-tabla td { padding: 9px 10px; border-bottom: 1px solid #eef3f7; vertical-align: top; }
 .ase-ld-tabla tr:last-child td { border-bottom: 0; }
 .ase-ld-tabla tbody tr { cursor: pointer; }
@@ -97,7 +97,7 @@
 .ase-ld-linea li:after { content: ""; position: absolute; left: 7.5px; top: 15px; bottom: 0; width: 1px; background: var(--line); }
 .ase-ld-linea li:last-child:after { display: none; }
 .ase-ld-linea-t { font-size: 12.5px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
-.ase-ld-linea-m { font-size: 10.5px; color: #8aa0ad; font-weight: 600; margin-top: 2px; }
+.ase-ld-linea-m { font-size: 11.5px; color: #4f6672; font-weight: 600; margin-top: 2px; }
 
 .ase-ld-datos { font-size: 12px; margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 5px 12px; }
 .ase-ld-datos dt { color: var(--muted); font-weight: 600; }
@@ -138,3 +138,7 @@
 .ase-ld-emb-tabla td { padding: 8px 10px; border-bottom: 1px solid #eef3f7; font-variant-numeric: tabular-nums; }
 .ase-ld-emb-etq { font-weight: 700; color: var(--primary); white-space: nowrap; text-transform: capitalize; }
 @media (prefers-reduced-motion: reduce) { .ase-ld-emb-paso-bar > i { transition: none; } }
+
+/* Accesibilidad (03/11/2026): foco visible en filas de la tabla y tarjetas; nada por debajo de 12 px. */
+.ase-ld-tabla tbody tr:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.ase-ld-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

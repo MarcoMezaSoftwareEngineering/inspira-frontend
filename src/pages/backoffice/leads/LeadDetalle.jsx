@@ -54,6 +54,13 @@ function Datos({ datos }) {
 }
 
 export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, onCerrar, onCambio }) {
+  // «Qué sigue»: lo mismo que la bandeja (grupo, paso, cita y cotización), calculado en el servidor.
+  const [resumen, setResumen] = useState(null);
+  useEffect(() => {
+    let vivo = true;
+    boGET(`/backoffice/leads/${id}/resumen`).then((r) => { if (vivo && r?.ok) setResumen(r.resumen); });
+    return () => { vivo = false; };
+  }, [id]);
   const [lead, setLead] = useState(null);
   const [error, setError] = useState(null);
   const [guardando, setGuardando] = useState(null);
@@ -198,6 +205,30 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
           {lead && lead.anonimizado_en && (
             <div className="ase-ld-bloque" style={{ fontSize: 13, color: "var(--muted)" }}>
               Lead anonimizado el {fechaHora(lead.anonimizado_en)}. Solo queda el dato estadístico.
+            </div>
+          )}
+
+          {lead && resumen && (
+            <div className="ase-ld-bloque" style={{ borderColor: resumen.urgencia === 3 ? "rgba(250,148,58,.55)" : undefined }}>
+              <p className="ase-ld-bloque-t">{resumen.grupo === "oportunidades" ? "Oportunidad · qué sigue" : "Por convertir · qué sigue"}</p>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--primary)" }}>{resumen.sigue}</div>
+              <div style={{ fontSize: 12.5, color: "#4f6672", marginTop: 4 }}>
+                {[resumen.paso, resumen.reserva ? `asesoría ${resumen.reserva.fecha} ${resumen.reserva.hora_inicio}` : null, resumen.cotizacion ? `${resumen.cotizacion.numero || "cotización"} · S/ ${resumen.cotizacion.total} · ${resumen.cotizacion.estado}` : null].filter(Boolean).join(" · ")}
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+                {resumen.whatsapp_url && (
+                  <a href={resumen.whatsapp_url} target="_blank" rel="noopener noreferrer" className="ase-btn" style={{ background: "#25D366", color: "#fff", minHeight: 44, display: "inline-flex", alignItems: "center", gap: 6, padding: "0 14px", borderRadius: 12, fontWeight: 700, fontSize: 13, textDecoration: "none" }}
+                    onClick={() => { if (puedeEditar) boPOST(`/backoffice/leads/${id}/${resumen.grupo === "convertir" ? "invitar" : "seguimiento"}`, {}).then((r) => { if (r?.ok) onCambio?.(r.lead); }); }}>
+                    <MessageCircle size={15} /> {resumen.grupo === "convertir" ? "Invitar a reservar" : "Hacer seguimiento"}
+                  </a>
+                )}
+                {resumen.reserva && (
+                  <Boton tono="secundario" tam="sm" icono={ExternalLink} onClick={() => navigate("/backoffice/agenda")}>Ver en Agenda → Reservas</Boton>
+                )}
+                {resumen.grupo === "oportunidades" && !resumen.cotizacion && (
+                  <Boton tam="sm" onClick={() => navigate(`/backoffice/presupuesto?${new URLSearchParams({ cliente: lead.nombre || "", correo: lead.email || "", ...(resumen.reserva ? { reserva: String(resumen.reserva.id_reserva) } : {}) })}`)}>Preparar cotización</Boton>
+                )}
+              </div>
             </div>
           )}
 

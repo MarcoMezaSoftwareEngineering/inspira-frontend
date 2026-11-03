@@ -143,7 +143,7 @@ export default function BandejaLeads({ grupo, datos, onAbrir, onRecargar, puedeE
   if (!datos) return <p className="p-8 text-center text-[13px] text-neutral-600">Cargando…</p>;
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <label className="block">
         <span className="sr-only">Buscar</span>
         <input type="search" value={buscar} onChange={(e) => setBuscar(e.target.value)} placeholder="Buscar por nombre, correo o WhatsApp"

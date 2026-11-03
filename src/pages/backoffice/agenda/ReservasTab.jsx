@@ -76,8 +76,8 @@ export default function ReservasTab() {
   }, [lista]);
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto">
-      <div className="mx-auto grid max-w-3xl gap-3 p-3 sm:p-4">
+    <div className="h-full min-h-0 overflow-y-auto overflow-x-hidden">
+      <div className="mx-auto grid max-w-3xl grid-cols-[minmax(0,1fr)] gap-3 p-3 sm:p-4">
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
             <Segmentado etiqueta="Filtrar reservas" valor={filtro} onCambio={setElegido}

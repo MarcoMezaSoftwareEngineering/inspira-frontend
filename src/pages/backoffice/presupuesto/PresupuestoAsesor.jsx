@@ -236,6 +236,8 @@ export default function PresupuestoAsesor() {
         if (q.get("cliente") || q.get("correo")) {
           setD((p) => ({
             ...p, cliente: p.cliente || q.get("cliente") || "", correo: p.correo || q.get("correo") || "",
+            // La cotización queda vinculada a la cita desde la que se abrió (se ve en su ficha).
+            id_reserva: Number(q.get("reserva")) || p.id_reserva,
             // El concepto (y el importe, si el informe propuso un paquete) entra en la primera fila de servicios.
             servicios: q.get("concepto") && !p.servicios?.[0]?.concepto
               ? [{ ...p.servicios[0], concepto: q.get("concepto"), importe: String(q.get("importe") || "").replace(/[^\d.,]/g, "") || p.servicios[0].importe }, ...p.servicios.slice(1)]

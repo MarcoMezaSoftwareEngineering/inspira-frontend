@@ -94,18 +94,22 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
   const conFormulario = !!f?.formulario?.actualizado_en;
   const conNotas = !!f?.notas.texto;
   const enviado = inf?.estado === "ENVIADO";
+  const sinInforme = inf?.estado === "DESCARTADO";
+  const cotizaciones = f?.cotizaciones || [];
+  const enviadas = cotizaciones.filter((q) => q.estado === "enviado");
 
   // Qué toca ahora: una sola frase que ordena todo lo demás.
   const siguiente = !f ? "" : reserva.estado === "CANCELADA" ? "La reserva está cancelada."
     : !pagada ? "Falta confirmar el pago."
     : !pasada ? (conFormulario ? "Todo listo para la reunión." : "Esperando su formulario previo (puede reenviárselo).")
     : !conNotas ? "Esperando las notas de Gemini."
+    : sinInforme ? (enviadas.length ? "Cotización enviada: queda esperar su respuesta." : "Sin informe: prepare la cotización si corresponde.")
     : !inf.estado ? "Clawsito está redactando el informe."
     : !enviado ? "Revise el informe y envíelo al asesorado."
-    : "Informe enviado: prepare la cotización.";
-  const abrir = { datos: !pagada, formulario: pagada && !pasada && !conFormulario, notas: pasada && !conNotas, informe: pasada && conNotas && !enviado, cotizacion: enviado };
-  const cotizar = f ? `/backoffice/presupuesto?${new URLSearchParams({ cliente: f.cotizar.cliente, correo: f.cotizar.correo, concepto: f.cotizar.concepto, importe: f.cotizar.importe })}` : "#";
-  const estadoInforme = !f ? "" : enviado ? "enviado al asesorado" : inf.estado ? "borrador por aprobar" : conNotas ? "en cola" : "sin notas todavía";
+    : enviadas.length ? "Informe y cotización enviados: queda esperar su respuesta." : "Informe enviado: prepare la cotización.";
+  const abrir = { datos: !pagada, formulario: pagada && !pasada && !conFormulario, notas: pasada && !conNotas, informe: pasada && conNotas && !enviado, cotizacion: (enviado || sinInforme) && !enviadas.length };
+  const cotizar = f ? `/backoffice/presupuesto?${new URLSearchParams({ cliente: f.cotizar.cliente, correo: f.cotizar.correo, concepto: f.cotizar.concepto, importe: f.cotizar.importe, reserva: String(reserva.id_reserva) })}` : "#";
+  const estadoInforme = !f ? "" : sinInforme ? "sin informe" : enviado ? "enviado al asesorado" : inf.estado ? "borrador por aprobar" : conNotas ? "en cola" : "sin notas todavía";
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 overflow-y-auto" onClick={onCerrar}>
@@ -132,12 +136,13 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                   <Paso hecho={conFormulario} texto="Formulario" />
                   <Paso hecho={pasada && reserva.estado !== "CANCELADA"} texto="Reunión" />
                   <Paso hecho={conNotas} texto="Notas" />
-                  <Paso hecho={enviado} texto="Informe" />
+                  <Paso hecho={enviado || sinInforme} texto="Informe" />
+                  <Paso hecho={enviadas.length > 0} texto="Cotización" />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {reserva.whatsapp_url && <a href={reserva.whatsapp_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-[#25D366] text-white`}>Enviar por WhatsApp</a>}
                   {reserva.meet_url && reserva.estado !== "CANCELADA" && <a href={reserva.meet_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-primary text-white`}>Unirse</a>}
-                  {enviado && <a href={cotizar} className={`${BTN} bg-primary-dark text-white`}>Preparar cotización</a>}
+                  {!enviadas.length && <a href={cotizar} className={`${BTN} bg-primary-dark text-white`}>Preparar cotización</a>}
                 </div>
               </section>
 
@@ -189,7 +194,7 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                 )}
               </Tarjeta>
 
-              <Tarjeta icono="libro" titulo="Informe de la asesoría" resumen={estadoInforme} tono={enviado ? "ok" : inf.estado ? "ojo" : "neutral"} abierta={abrir.informe}>
+              <Tarjeta icono="libro" titulo="Informe de la asesoría" resumen={estadoInforme} tono={enviado || sinInforme ? "ok" : inf.estado ? "ojo" : "neutral"} abierta={abrir.informe}>
                 {inf.tema && <p className="mb-1 text-[13.5px] font-bold text-neutral-800">{inf.tema}</p>}
                 {inf.conclusion && <p className="mb-3 leading-relaxed text-neutral-600">{inf.conclusion}</p>}
                 {inf.por_confirmar.length > 0 && (
@@ -199,7 +204,12 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2"><InformeBtns reserva={{ ...reserva, informe_estado: inf.estado }} onChanged={cambiado} /></div>
-                {!enviado && conNotas && (
+                {!enviado && !sinInforme && !conNotas && (
+                  <button type="button" disabled={!!ocupado} onClick={() => accion("sininf", "sin-informe", {}, "Listo: esta cita queda sin informe.")} className={`${BTN} mt-1 bg-white border border-neutral-200 text-neutral-700`}>
+                    No se grabó: sin informe
+                  </button>
+                )}
+                {!enviado && !sinInforme && conNotas && (
                   <div className="mt-3 rounded-xl bg-neutral-50 p-3">
                     {inf.pedido && <p className="mb-2 rounded-lg bg-sky-50 p-2.5 text-[11.5px] text-sky-800">Pedido a Clawsito: «{inf.pedido}». Lo rehace en su próxima pasada (hasta 10 min) y le llega un borrador nuevo.</p>}
                     <label className="mb-1 block text-[11px] font-bold text-neutral-500" htmlFor="rv-cambio">{inf.estado ? "¿Qué debe cambiar?" : "¿Algo que deba tener en cuenta al redactarlo?"}</label>
@@ -211,9 +221,34 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                 )}
               </Tarjeta>
 
-              <Tarjeta icono="euro" titulo="Cotización" resumen={f.cotizar.importe ? `propuesta del informe: ${f.cotizar.importe}` : "con sus datos ya cargados"} abierta={abrir.cotizacion}>
+              <Tarjeta icono="euro" titulo="Cotización" resumen={enviadas.length ? `enviada · ${enviadas[0].numero || ""} · S/ ${enviadas[0].total}` : cotizaciones.length ? "en borrador" : f.cotizar.importe ? `propuesta del informe: ${f.cotizar.importe}` : "con sus datos ya cargados"} tono={enviadas.length ? "ok" : "neutral"} abierta={abrir.cotizacion}>
+                {cotizaciones.length > 0 && (
+                  <ul className="mb-3 grid gap-1.5">
+                    {cotizaciones.map((q) => (
+                      <li key={q.id_presupuesto} className="flex items-center justify-between gap-2 rounded-xl bg-neutral-50 p-2.5">
+                        <span><strong>{q.numero || "Sin número"}</strong> · S/ {q.total} · {q.estado === "enviado" ? `enviada ${cuando(q.enviado_at)}` : q.estado}</span>
+                        <a href={`/backoffice/presupuesto?abrir=${q.id_presupuesto}`} className="text-[12px] font-bold text-primary underline">Abrir</a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {(f.cotizaciones_por_correo || []).length > 0 && (
+                  <div className="mb-3 rounded-xl bg-sky-50 p-2.5">
+                    <p className="mb-1 text-[11px] font-extrabold text-sky-800">Hay cotizaciones a su correo sin vincular a esta cita</p>
+                    {f.cotizaciones_por_correo.map((q) => (
+                      <div key={q.id_presupuesto} className="flex items-center justify-between gap-2 py-1 text-[12px]">
+                        <span>{q.numero || "Sin número"} · S/ {q.total} · {q.estado}</span>
+                        <button type="button" disabled={!!ocupado} onClick={() => accion(`v${q.id_presupuesto}`, "vincular-cotizacion", { id_presupuesto: q.id_presupuesto }, "Cotización vinculada.")} className="font-bold text-primary underline">Vincular a esta cita</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <p className="text-neutral-600">Abre el presupuesto con su nombre y correo{f.interes ? `, el interés (${f.interes})` : ""}{f.cotizar.importe ? " y el paquete e importe que propone el informe" : ""}. Lo demás lo completa usted.</p>
                 <a href={cotizar} className={`${BTN} mt-3 inline-block bg-primary text-white`}>Preparar cotización</a>
+                <button type="button" disabled={!!ocupado} className={`${BTN} mt-3 ml-2 bg-white border border-neutral-200 text-neutral-500`}
+                  onClick={async () => { if (await dialog.confirm("¿Cerrar este contacto sin seguimiento? No habrá informe ni cotización y el lead se descarta.", "Cerrar sin seguimiento")) accion("cerrar", "sin-informe", { cerrar: true, motivo: "Sin seguimiento: contactará si necesita otra asesoría" }, "Contacto cerrado sin seguimiento."); }}>
+                  Cerrar sin seguimiento
+                </button>
               </Tarjeta>
 
               <Tarjeta icono="campana" titulo="Avisos y cambios" resumen="reenviar accesos, recordar, reagendar, inasistencia">

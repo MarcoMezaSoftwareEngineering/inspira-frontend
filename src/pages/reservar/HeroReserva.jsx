@@ -34,7 +34,7 @@ function useContador(valor) {
   return n;
 }
 
-const TITULO = ["Tu", "camino", "a", "España", "empieza", "con", "una", "conversación."];
+const TITULO = ["Reserva", "tu", "primera", "asesoría"];
 
 export function FormRecordarme({ servicioId, onListo, compacto = false }) {
   const [email, setEmail] = useState("");
@@ -257,7 +257,7 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
 
   return (
     <header className="rv-hero relative overflow-hidden bg-primary text-white">
-      {/* Aurora: tres manchas de color que se desplazan despacio. */}
+      {/* Aurora y partículas: el fondo se mueve despacio sin distraer. */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <span className="rv-aurora rv-aurora-a" />
         <span className="rv-aurora rv-aurora-b" />
@@ -267,43 +267,54 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
         ))}
       </div>
 
-      <div className="relative mx-auto grid max-w-5xl gap-8 px-4 pb-24 pt-9 md:pb-28 md:pt-12 lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-10">
-        <div>
-          <p className="rv-sube inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-sky ring-1 ring-white/15">
-            <Icono nombre="escudo" className="h-3.5 w-3.5" />
-            Abogados especialistas en extranjería española
+      {/* min-w-0: sin esto, las filas con scroll horizontal ensanchan la cuadrícula y en el celular se corta el texto. */}
+      <div className="relative mx-auto grid max-w-5xl gap-x-10 gap-y-6 px-4 pb-24 pt-9 md:pb-28 md:pt-12 lg:grid-cols-[1fr_1.05fr]">
+        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <p className="rv-sube inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+            Diagnóstico
           </p>
 
-          <h1 className="mt-4 font-fraunces text-[2.3rem] font-semibold leading-[1.08] md:text-5xl" aria-label={TITULO.join(" ")}>
+          <h1 className="mt-3 font-fraunces text-[2.2rem] font-semibold leading-[1.08] md:text-5xl" aria-label={TITULO.join(" ")}>
             {TITULO.map((p, i) => (
               <span key={i} className="rv-palabra mr-[0.26em]" style={{ animationDelay: `${i * 40}ms` }} aria-hidden="true">
-                {p === "conversación." ? <span className="rv-brillo-texto">{p}</span> : p}
+                {p === "asesoría" ? <span className="rv-brillo-texto">{p}</span> : p}
               </span>
             ))}
           </h1>
 
-          <p className="rv-sube mt-4 text-[15px] leading-relaxed text-white/80" style={{ animationDelay: "320ms" }}>
-            En una sesión, un abogado revisa tu caso y te dice qué camino te conviene: máster, visado, estancia o becas. Pagas solo la sesión y sales con un plan claro.
-          </p>
+          <div className="rv-sube mt-4 space-y-3 text-[15px] leading-relaxed text-white/85" style={{ animationDelay: "200ms" }}>
+            <p className="text-lg font-semibold text-white">¡Excelente! 😊</p>
+            <p>
+              Te recomiendo iniciar con una <strong className="font-semibold text-white">asesoría personalizada</strong>, donde evaluaremos tu perfil y te explicaremos con claridad los procesos que debes seguir.
+            </p>
+            <p>
+              Es un servicio profesional individualizado: estarás a cargo de una especialista en <strong className="font-semibold text-white">Derecho Internacional y movilidad académica</strong>, con amplia experiencia en trámites hacia el exterior 🇪🇸.
+            </p>
+            <p>Recibirás una orientación clara y estratégica, basada en tu formación y objetivos. Estamos aquí para ayudarte en todo lo que necesites.</p>
+          </div>
+        </div>
 
-          <ul className="rv-sube mt-5 grid gap-2 text-[13px] text-white/85 sm:grid-cols-2 lg:grid-cols-1" style={{ animationDelay: "420ms" }}>
+        <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <Disponibilidad cargando={cargando} servicios={servicios} servicioId={servicioId} onServicio={onServicio} dias={dias} horaVista={horaVista} hora={hora} onElegir={onElegir} libres={libres} />
+        </div>
+
+        <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+          <ul className="rv-sube grid grid-cols-2 gap-2 text-[13px] text-white/90" style={{ animationDelay: "320ms" }}>
             {[
-              ["escudo", "Pago seguro"],
-              ["usuario", "Puedes reservar sin crear cuenta"],
-              ["ciclo", "Reprograma sin costo (24 h antes)"],
+              ["reloj", "Sesión de 30 minutos"],
+              ["usuario", "Atención personalizada"],
               ["video", "Reunión por Google Meet"],
+              ["escudo", "100 % confidencial"],
             ].map(([ic, t]) => (
-              <li key={t} className="inline-flex items-center gap-2">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-sky ring-1 ring-white/15">
-                  <Icono nombre={ic} className="h-3.5 w-3.5" />
-                </span>
+              <li key={t} className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 ring-1 ring-white/10">
+                <Icono nombre={ic} className="h-4 w-4 shrink-0 text-sky" />
                 {t}
               </li>
             ))}
           </ul>
 
           {/* Para quien no se decide todavía */}
-          <div className="rv-sube mt-6 rounded-2xl bg-white/10 p-4 ring-1 ring-white/15 backdrop-blur-sm" style={{ animationDelay: "520ms" }}>
+          <div className="rv-sube mt-4 rounded-2xl bg-white/10 p-4 ring-1 ring-white/15 backdrop-blur-sm" style={{ animationDelay: "420ms" }}>
             <p className="text-sm font-semibold">¿Aún lo estás pensando?</p>
             <p className="mt-0.5 text-[13px] text-white/75">Te enviamos el acceso a la agenda por correo, sin compromiso.</p>
             {pensando ? (
@@ -322,8 +333,6 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
             )}
           </div>
         </div>
-
-        <Disponibilidad cargando={cargando} servicios={servicios} servicioId={servicioId} onServicio={onServicio} dias={dias} horaVista={horaVista} hora={hora} onElegir={onElegir} libres={libres} />
       </div>
     </header>
   );

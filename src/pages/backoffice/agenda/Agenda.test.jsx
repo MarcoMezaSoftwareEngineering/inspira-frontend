@@ -122,8 +122,8 @@ function comoRol(rol) {
 
 async function montar() {
   const r = render(<Agenda />);
-  // Agenda abre en «Reservas»; estas pruebas son del calendario.
-  fireEvent.click(screen.getByText("Mi calendario"));
+  // Agenda abre en «Reservas»; estas pruebas son de los horarios.
+  fireEvent.click(screen.getByText("Horarios disponibles"));
   await esperar();
   return r;
 }

@@ -12,11 +12,12 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -699,11 +700,12 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -1386,11 +1388,12 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -2079,11 +2082,12 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -2758,11 +2762,12 @@ exports[`Agenda — Mi calendario > error al cargar 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -3369,11 +3374,12 @@ exports[`Agenda — Mi calendario > sin datos 1`] = `
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -3979,11 +3985,12 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -4666,11 +4673,12 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>
@@ -4980,11 +4988,12 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Horarios disponibles</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
 <div class="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+<p class="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita). Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.</p>
 <div class="flex-none grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_auto] gap-2.5 items-stretch">
 <div class="flex items-center gap-1.5 flex-wrap bg-white border border-neutral-200 rounded-2xl shadow-sm px-2 py-1.5 min-h-[46px]">
 <button class="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] border border-neutral-200 text-neutral-500 font-extrabold hover:border-primary hover:text-primary transition-colors bg-white flex-shrink-0">‹</button>

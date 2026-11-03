@@ -69,10 +69,16 @@ export default function Preasesoria() {
   const [opc, setOpc] = useState({ intereses: [], inicios: [], becas: [], documentos: [] });
   const [nombre, setNombre] = useState("");
   const [f, setF] = useState({ carrera: "", universidad: "", anio_titulacion: "", promedio: "", cargo: "", anios: "", experiencia_detalle: "", idiomas: "", residencia: "", celular: "", interes: "", inicio: "", presupuesto: "", masteres_pensados: "", dudas: "", web: "" });
+  // Rama de visado o estancia (se muestra cuando lo que le interesa es «Visado o estancia»).
+  const [v, setV] = useState({ situacion: "", fecha_viaje: "", admision: "", centro: "", inicio_clases: "", estados: "", saldo: "", denegada: "", denegada_detalle: "", acompanantes: "", pasaporte: "" });
+  const [origen, setOrigen] = useState([]);
+  const [docsVisa, setDocsVisa] = useState([]);
+  const setVisa = (k) => (e) => setV((p) => ({ ...p, [k]: e.target.value }));
   const [becas, setBecas] = useState([]);
   const [docs, setDocs] = useState([]);
   const [enviando, setEnviando] = useState(false);
   const set = (k) => (e) => setF((p) => ({ ...p, [k]: e.target.value }));
+  const esVisa = f.interes === "Visado o estancia";
 
   useEffect(() => {
     if (sinEnlace) return;
@@ -86,8 +92,14 @@ export default function Preasesoria() {
         }
         setNombre(res.nombre || "");
         setOpc(res.opciones || {});
+        // El interés que eligió al reservar, si todavía no lo ha cambiado aquí.
+        if (res.interes_reserva) setF((p) => ({ ...p, interes: p.interes || res.interes_reserva }));
         const g = res.respuestas;
         if (g) {
+          const vg = g.visa || {};
+          setV({ situacion: vg.situacion || "", fecha_viaje: vg.fecha_viaje || "", admision: vg.admision || "", centro: vg.centro || "", inicio_clases: vg.inicio_clases || "", estados: vg.estados_cuenta || "", saldo: vg.saldo || "", denegada: vg.denegada || "", denegada_detalle: vg.denegada_detalle || "", acompanantes: vg.acompanantes || "", pasaporte: vg.pasaporte_hasta || "" });
+          setOrigen(vg.origen_fondos || []);
+          setDocsVisa(vg.documentos || []);
           setF((p) => ({ ...p, carrera: g.formacion?.carrera || "", universidad: g.formacion?.universidad || "", anio_titulacion: g.formacion?.anio_titulacion || "", promedio: g.formacion?.promedio || "", cargo: g.experiencia?.cargo || "", anios: g.experiencia?.anios || "", experiencia_detalle: g.experiencia?.detalle || "", idiomas: g.idiomas || "", residencia: g.residencia || "", interes: g.interes || "", inicio: g.inicio || "", presupuesto: g.presupuesto || "", masteres_pensados: g.masteres_pensados || "", dudas: g.dudas || "" }));
           setBecas(g.becas_interes || []);
           setDocs(g.documentos_listos || []);
@@ -104,7 +116,7 @@ export default function Preasesoria() {
     e.preventDefault();
     setEnviando(true);
     try {
-      const res = await apiPOST(`/api/preasesoria/${c}?t=${encodeURIComponent(t)}`, { ...f, becas_interes: becas, documentos_listos: docs });
+      const res = await apiPOST(`/api/preasesoria/${c}?t=${encodeURIComponent(t)}`, { ...f, becas_interes: becas, documentos_listos: docs, ...Object.fromEntries(Object.entries(v).map(([k, x]) => [`v_${k}`, x])), origen_fondos: origen, documentos_visa: docsVisa });
       if (res?.ok) setEstado("enviado");
       else setMsg(res?.msg || "No se pudo guardar.");
     } catch {
@@ -162,41 +174,82 @@ export default function Preasesoria() {
       <form onSubmit={enviar} className="relative mx-auto -mt-2 max-w-2xl space-y-4 px-4" noValidate>
         <input type="text" name="web" value={f.web} onChange={set("web")} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 opacity-0" />
 
-        <Seccion i={0} icono="gorro" titulo="Sus estudios" ayuda="Aproximado está bien.">
-          <Etiqueta id="p-carrera" texto="Carrera o título"><input id="p-carrera" value={f.carrera} onChange={set("carrera")} maxLength={120} className={campo} placeholder="Ej.: Arquitectura" /></Etiqueta>
-          <Etiqueta id="p-uni" texto="Universidad"><input id="p-uni" value={f.universidad} onChange={set("universidad")} maxLength={120} className={campo} placeholder="Ej.: Universidad Nacional de Trujillo" /></Etiqueta>
-          <Etiqueta id="p-anio" texto="Año de titulación"><input id="p-anio" inputMode="numeric" value={f.anio_titulacion} onChange={set("anio_titulacion")} maxLength={10} className={campo} placeholder="Ej.: 2021" /></Etiqueta>
-          <Etiqueta id="p-prom" texto="Promedio (con su escala)"><input id="p-prom" value={f.promedio} onChange={set("promedio")} maxLength={40} className={campo} placeholder="Ej.: 16,8 sobre 20" /></Etiqueta>
-        </Seccion>
-
-        <Seccion i={1} icono="pasaporte" titulo="Su experiencia laboral" ayuda="Lo principal: cargo, años y funciones.">
-          <Etiqueta id="p-cargo" texto="Cargo o área"><input id="p-cargo" value={f.cargo} onChange={set("cargo")} maxLength={120} className={campo} placeholder="Ej.: Proyectista" /></Etiqueta>
-          <Etiqueta id="p-anios" texto="Años de experiencia"><input id="p-anios" value={f.anios} onChange={set("anios")} maxLength={20} className={campo} placeholder="Ej.: 3" /></Etiqueta>
-          <Etiqueta id="p-exp" texto="Funciones principales (opcional)" ancho><textarea id="p-exp" value={f.experiencia_detalle} onChange={set("experiencia_detalle")} rows={3} maxLength={500} className={`${campo} resize-y`} /></Etiqueta>
-          <Etiqueta id="p-idiomas" texto="Idiomas y certificados" ancho><input id="p-idiomas" value={f.idiomas} onChange={set("idiomas")} maxLength={200} className={campo} placeholder="Ej.: inglés B2 certificado" /></Etiqueta>
-        </Seccion>
-
-        <Seccion i={2} icono="globo" titulo="Lo que busca" ayuda="Aunque sean ideas sueltas.">
+        {/* Primero lo que busca: de eso depende el resto de las preguntas. */}
+        <Seccion i={0} icono="globo" titulo="Lo que busca" ayuda="Aunque sean ideas sueltas.">
           <Etiqueta id="p-interes" texto="¿Qué le interesa?">
             <select id="p-interes" value={f.interes} onChange={set("interes")} className={campo}><option value="">Elija una opción</option>{(opc.intereses || []).map((o) => <option key={o}>{o}</option>)}</select>
           </Etiqueta>
-          <Etiqueta id="p-inicio" texto="¿Cuándo quiere empezar?">
+          <Etiqueta id="p-inicio" texto={esVisa ? "¿Para cuándo necesita resolverlo?" : "¿Cuándo quiere empezar?"}>
             <select id="p-inicio" value={f.inicio} onChange={set("inicio")} className={campo}><option value="">Elija una opción</option>{(opc.inicios || []).map((o) => <option key={o}>{o}</option>)}</select>
           </Etiqueta>
-          <Etiqueta id="p-mast" texto="Másteres o universidades que ya investigó" ancho><textarea id="p-mast" value={f.masteres_pensados} onChange={set("masteres_pensados")} rows={3} maxLength={600} className={`${campo} resize-y`} placeholder="Nombres, enlaces o ideas: lo que tenga" /></Etiqueta>
-          <Etiqueta id="p-pres" texto="Presupuesto aproximado de matrícula"><input id="p-pres" value={f.presupuesto} onChange={set("presupuesto")} maxLength={80} className={campo} placeholder="Ej.: hasta 3 000 €" /></Etiqueta>
           <Etiqueta id="p-resid" texto="País donde vive"><input id="p-resid" value={f.residencia} onChange={set("residencia")} maxLength={80} className={campo} placeholder="Ej.: Perú" /></Etiqueta>
+          {!esVisa && <Etiqueta id="p-pres" texto="Presupuesto aproximado de matrícula"><input id="p-pres" value={f.presupuesto} onChange={set("presupuesto")} maxLength={80} className={campo} placeholder="Ej.: hasta 3 000 €" /></Etiqueta>}
+          {!esVisa && <Etiqueta id="p-mast" texto="Másteres o universidades que ya investigó" ancho><textarea id="p-mast" value={f.masteres_pensados} onChange={set("masteres_pensados")} rows={3} maxLength={600} className={`${campo} resize-y`} placeholder="Nombres, enlaces o ideas: lo que tenga" /></Etiqueta>}
         </Seccion>
 
-        <Seccion i={3} icono="medalla" titulo="Becas" ayuda="Marque las que le interesen.">
-          <Opciones lista={opc.becas || []} valor={becas} onCambio={setBecas} />
-        </Seccion>
+        {!f.interes && <p className="rounded-2xl bg-white p-4 text-sm text-tinta-2 ring-1 ring-linea">Elija qué le interesa y le mostraremos las preguntas que le corresponden.</p>}
 
-        <Seccion i={4} icono="check" titulo="Documentos que ya tiene" ayuda="Solo para saber por dónde empezar: no los envíe todavía.">
-          <Opciones lista={opc.documentos || []} valor={docs} onCambio={setDocs} />
-        </Seccion>
+        {f.interes && !esVisa && (
+          <>
+            <Seccion i={1} icono="gorro" titulo="Sus estudios" ayuda="Aproximado está bien.">
+              <Etiqueta id="p-carrera" texto="Carrera o título"><input id="p-carrera" value={f.carrera} onChange={set("carrera")} maxLength={120} className={campo} placeholder="Ej.: Arquitectura" /></Etiqueta>
+              <Etiqueta id="p-uni" texto="Universidad"><input id="p-uni" value={f.universidad} onChange={set("universidad")} maxLength={120} className={campo} placeholder="Ej.: Universidad Nacional de Trujillo" /></Etiqueta>
+              <Etiqueta id="p-anio" texto="Año de titulación"><input id="p-anio" inputMode="numeric" value={f.anio_titulacion} onChange={set("anio_titulacion")} maxLength={10} className={campo} placeholder="Ej.: 2021" /></Etiqueta>
+              <Etiqueta id="p-prom" texto="Promedio (con su escala)"><input id="p-prom" value={f.promedio} onChange={set("promedio")} maxLength={40} className={campo} placeholder="Ej.: 16,8 sobre 20" /></Etiqueta>
+            </Seccion>
+            <Seccion i={2} icono="pasaporte" titulo="Su experiencia laboral" ayuda="Lo principal: cargo, años y funciones.">
+              <Etiqueta id="p-cargo" texto="Cargo o área"><input id="p-cargo" value={f.cargo} onChange={set("cargo")} maxLength={120} className={campo} placeholder="Ej.: Proyectista" /></Etiqueta>
+              <Etiqueta id="p-anios" texto="Años de experiencia"><input id="p-anios" value={f.anios} onChange={set("anios")} maxLength={20} className={campo} placeholder="Ej.: 3" /></Etiqueta>
+              <Etiqueta id="p-exp" texto="Funciones principales (opcional)" ancho><textarea id="p-exp" value={f.experiencia_detalle} onChange={set("experiencia_detalle")} rows={3} maxLength={500} className={`${campo} resize-y`} /></Etiqueta>
+              <Etiqueta id="p-idiomas" texto="Idiomas y certificados" ancho><input id="p-idiomas" value={f.idiomas} onChange={set("idiomas")} maxLength={200} className={campo} placeholder="Ej.: inglés B2 certificado" /></Etiqueta>
+            </Seccion>
+            <Seccion i={3} icono="medalla" titulo="Becas" ayuda="Marque las que le interesen.">
+              <Opciones lista={opc.becas || []} valor={becas} onCambio={setBecas} />
+            </Seccion>
+            <Seccion i={4} icono="check" titulo="Documentos que ya tiene" ayuda="Solo para saber por dónde empezar: no los envíe todavía.">
+              <Opciones lista={opc.documentos || []} valor={docs} onCambio={setDocs} />
+            </Seccion>
+          </>
+        )}
 
-        <Seccion i={5} icono="usuario" titulo="Para contactarle y resolver dudas">
+        {esVisa && (
+          <>
+            <Seccion i={1} icono="pasaporte" titulo="Su situación" ayuda="Para saber qué trámite le corresponde.">
+              <Etiqueta id="v-sit" texto="¿Dónde está hoy?" ancho>
+                <select id="v-sit" value={v.situacion} onChange={setVisa("situacion")} className={campo}><option value="">Elija una opción</option>{(opc.situaciones || []).map((o) => <option key={o}>{o}</option>)}</select>
+              </Etiqueta>
+              <Etiqueta id="v-viaje" texto="Fecha prevista de viaje o de vencimiento"><input id="v-viaje" value={v.fecha_viaje} onChange={setVisa("fecha_viaje")} maxLength={60} className={campo} placeholder="Ej.: agosto de 2027" /></Etiqueta>
+              <Etiqueta id="v-pasaporte" texto="Su pasaporte vence en"><input id="v-pasaporte" value={v.pasaporte} onChange={setVisa("pasaporte")} maxLength={40} className={campo} placeholder="Ej.: marzo de 2030" /></Etiqueta>
+            </Seccion>
+            <Seccion i={2} icono="gorro" titulo="Su estudio en España" ayuda="Si todavía no lo tiene definido, déjelo en blanco.">
+              <Etiqueta id="v-adm" texto="¿Tiene carta de admisión?">
+                <select id="v-adm" value={v.admision} onChange={setVisa("admision")} className={campo}><option value="">Elija una opción</option>{(opc.admision || []).map((o) => <option key={o}>{o}</option>)}</select>
+              </Etiqueta>
+              <Etiqueta id="v-ini" texto="Inicio de clases"><input id="v-ini" value={v.inicio_clases} onChange={setVisa("inicio_clases")} maxLength={60} className={campo} placeholder="Ej.: septiembre de 2027" /></Etiqueta>
+              <Etiqueta id="v-centro" texto="Universidad y programa" ancho><input id="v-centro" value={v.centro} onChange={setVisa("centro")} maxLength={160} className={campo} placeholder="Ej.: Máster en Data Science, Universidad de Navarra" /></Etiqueta>
+            </Seccion>
+            <Seccion i={3} icono="medalla" titulo="Sus fondos" ayuda="Solo una idea: no envíe estados de cuenta todavía.">
+              <Etiqueta id="v-est" texto="¿Tiene 6 meses de estados de cuenta?">
+                <select id="v-est" value={v.estados} onChange={setVisa("estados")} className={campo}><option value="">Elija una opción</option>{(opc.estados || []).map((o) => <option key={o}>{o}</option>)}</select>
+              </Etiqueta>
+              <Etiqueta id="v-saldo" texto="Saldo aproximado"><input id="v-saldo" value={v.saldo} onChange={setVisa("saldo")} maxLength={60} className={campo} placeholder="Ej.: 9 000 €" /></Etiqueta>
+              <p className="text-sm font-medium text-tinta sm:col-span-2">¿De dónde viene el dinero?</p>
+              <Opciones lista={opc.origenes || []} valor={origen} onCambio={setOrigen} />
+            </Seccion>
+            <Seccion i={4} icono="usuario" titulo="Antecedentes y acompañantes">
+              <Etiqueta id="v-den" texto="¿Le han denegado una visa antes?">
+                <select id="v-den" value={v.denegada} onChange={setVisa("denegada")} className={campo}><option value="">Elija una opción</option>{(opc.si_no || []).map((o) => <option key={o}>{o}</option>)}</select>
+              </Etiqueta>
+              <Etiqueta id="v-acomp" texto="¿Viaja con alguien? (opcional)"><input id="v-acomp" value={v.acompanantes} onChange={setVisa("acompanantes")} maxLength={200} className={campo} placeholder="Ej.: mi esposa y un hijo" /></Etiqueta>
+              {v.denegada === "Sí" && <Etiqueta id="v-denD" texto="Cuéntenos brevemente qué pasó" ancho><textarea id="v-denD" value={v.denegada_detalle} onChange={setVisa("denegada_detalle")} rows={3} maxLength={400} className={`${campo} resize-y`} placeholder="País, año y motivo que le indicaron" /></Etiqueta>}
+            </Seccion>
+            <Seccion i={5} icono="check" titulo="Documentos que ya tiene" ayuda="Solo para saber por dónde empezar: no los envíe todavía.">
+              <Opciones lista={opc.documentos_visa || []} valor={docsVisa} onCambio={setDocsVisa} />
+            </Seccion>
+          </>
+        )}
+
+        <Seccion i={6} icono="usuario" titulo="Para contactarle y resolver dudas">
           <Etiqueta id="p-cel" texto="Celular o WhatsApp"><input id="p-cel" type="tel" inputMode="tel" value={f.celular} onChange={set("celular")} maxLength={30} className={campo} placeholder="+51 999 999 999" /></Etiqueta>
           <Etiqueta id="p-dudas" texto="¿Qué duda quiere resolver sí o sí?" ancho><textarea id="p-dudas" value={f.dudas} onChange={set("dudas")} rows={3} maxLength={800} className={`${campo} resize-y`} /></Etiqueta>
         </Seccion>

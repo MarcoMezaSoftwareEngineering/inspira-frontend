@@ -9,7 +9,7 @@ import ReservasTab from "./ReservasTab";
 
 const TABS = [
   { id: "reservas", texto: "Reservas" },
-  { id: "micalendario", texto: "Mi calendario" },
+  { id: "micalendario", texto: "Horarios disponibles" },
 ];
 
 export default function Agenda() {

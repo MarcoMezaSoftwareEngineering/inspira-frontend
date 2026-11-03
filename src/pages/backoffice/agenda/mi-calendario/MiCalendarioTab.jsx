@@ -18,6 +18,11 @@ export default function MiCalendarioTab() {
 
   return (
     <div className="h-full flex flex-col min-h-0 p-3 sm:p-4 gap-3">
+      {/* Para qué sirve esta pestaña */}
+      <p className="flex-none rounded-xl bg-sky-50 px-3.5 py-2.5 text-[12px] leading-snug text-sky-900">
+        Aquí abres y cierras los <strong>horarios en los que la gente puede reservar</strong> (verde = libre, amarillo = separado, azul = con cita).
+        Las citas ya reservadas se administran en la pestaña <strong>Reservas</strong>.
+      </p>
       {/* Toolbar: navegación + filtro + vista + acciones */}
       <BarraCalendario
         setWeekStart={setWeekStart} stepDias={stepDias} rangoTexto={rangoTexto}

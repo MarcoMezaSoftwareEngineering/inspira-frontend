@@ -307,7 +307,9 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
           <div className="rv-sube mt-5 flex items-start gap-4" style={{ animationDelay: "300ms" }}>
             <a href="/carina" aria-label="Conoce a Carina Meza" className="relative shrink-0">
               <span className="rv-anillo absolute -inset-1.5 rounded-full border-2 border-accent" aria-hidden="true" />
-              <img src={retrato} alt="Carina Meza, abogada de Inspira Legal" width="84" height="84" className="relative h-[84px] w-[84px] rounded-full object-cover object-top ring-4 ring-white shadow-lg" />
+              <span className="relative block h-[84px] w-[84px] overflow-hidden rounded-full shadow-lg ring-4 ring-white">
+                <img src={retrato} alt="Carina Meza, abogada de Inspira Legal" width="84" height="84" className="h-full w-full scale-[1.6] object-cover" style={{ objectPosition: "48% 40%", transformOrigin: "48% 36%" }} />
+              </span>
               <span className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-accent text-white ring-2 ring-white">
                 <Icono nombre="check" className="h-3.5 w-3.5" />
               </span>

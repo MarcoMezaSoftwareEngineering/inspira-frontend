@@ -297,14 +297,14 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
             </span>
           </div>
 
-          <h1 className="mt-4 text-[2.3rem] font-black uppercase leading-[1.02] tracking-tight md:text-[3.4rem]" aria-label={palabras.join(" ")} key={servicio?.id || "x"}>
+          <h1 className="mt-4 text-[2.3rem] font-black uppercase leading-[1.02] tracking-tight md:text-[3.4rem]" aria-label={palabras.join(" ")}>
             {palabras.map((p, i) => (
               <span key={i} className="rv-palabra mr-[0.22em]" style={{ animationDelay: `${i * 70}ms` }} aria-hidden="true">
                 {i === palabras.length - 1 ? <span className="text-accent">{p}</span> : p}
               </span>
             ))}
           </h1>
-          <p key={servicio?.id || "x"} className="rv-entra-izq mt-3 inline-block rounded-full bg-primary px-5 py-1.5 text-sm font-extrabold uppercase tracking-[0.18em] text-white" style={{ animationDelay: "260ms" }}>
+          <p className="rv-entra-izq mt-3 inline-block rounded-full bg-primary px-5 py-1.5 text-sm font-extrabold uppercase tracking-[0.18em] text-white" style={{ animationDelay: "260ms" }}>
             {esDiag ? "Diagnóstico" : presencial ? "En San Isidro, Lima" : "Online"}
           </p>
 
@@ -320,7 +320,7 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
               </span>
             </a>
             <p className="text-[16px] leading-relaxed text-tinta-2 md:text-[17px]">
-              En <strong className="text-primary" key={dur}>{dur}</strong>, <strong className="text-primary">Carina Meza</strong>, especialista en <strong className="text-primary">Extranjería</strong> y asesoría de <strong className="text-primary">máster y becas en el extranjero</strong>, analiza tu perfil y te explica, paso a paso, el camino que te conviene.
+              En <strong className="text-primary">{dur}</strong>, <strong className="text-primary">Carina Meza</strong>, especialista en <strong className="text-primary">Extranjería</strong> y asesoría de <strong className="text-primary">máster y becas en el extranjero</strong>, analiza tu perfil y te explica, paso a paso, el camino que te conviene.
             </p>
           </div>
 

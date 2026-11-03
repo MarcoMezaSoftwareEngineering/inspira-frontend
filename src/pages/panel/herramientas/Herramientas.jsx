@@ -2,6 +2,7 @@
 // suyo en la cuenta con useHerramienta; ninguna llama a la IA.
 import { useMemo, useState } from "react";
 import Icono from "../../../components/common/Icono";
+import AvisosMovil from "../components/AvisosMovil";
 import { navigate } from "../../../services/navigate";
 import { BECAS, MESES } from "../../becas2027/textos";
 import { IPREM_ANUAL } from "../../../config/visaOEstancia";
@@ -94,8 +95,38 @@ const ESTADOS = [
   { id: "no", texto: "No salió", icono: "—" },
 ];
 
+// El cierre que publica la guía, cuando es un día exacto («15» de «feb»), en
+// su próxima fecha. Si no lo es, la persona lo escribe.
+const MES_NUM = { ene: 1, feb: 2, mar: 3, abr: 4, may: 5, jun: 6, jul: 7, julio: 7, ago: 8, sep: 9, oct: 10, nov: 11, dic: 12 };
+function plazoSugerido(b) {
+  const dia = Number(b.dia), mes = MES_NUM[String(b.cuando).split(/[–-]/)[0]];
+  if (!dia || !mes) return "";
+  const iso = (a) => `${a}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+  const anio = new Date().getFullYear();
+  return iso(anio) >= hoyIso() ? iso(anio) : iso(anio + 1);
+}
+
+/** «Avisarme»: el cierre de la beca va a su calendario, que avisa al móvil. */
+function PlazoBeca({ beca, cal, guardarCal }) {
+  const [abierto, setAbierto] = useState(false);
+  const [fecha, setFecha] = useState(() => plazoSugerido(beca));
+  const apuntado = (cal.eventos || []).find((e) => e.beca === beca.id);
+  if (apuntado) return <p className="pnl-hr-plazo-ok">📅 En tu calendario: {fechaLarga(apuntado.fecha)}. Te avisamos 7 días antes.</p>;
+  if (!abierto) return <button type="button" className="pnl-btn ux-tap" onClick={() => setAbierto(true)}>🔔 Avisarme del cierre</button>;
+  return (
+    <div className="pnl-hr-plazo">
+      <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} aria-label={`Cierre de ${beca.nombre}`} />
+      <button type="button" className="pnl-btn-cta ux-tap" disabled={!fecha}
+        onClick={() => guardarCal({ ...cal, eventos: [...(cal.eventos || []), { id: uid(), fecha, titulo: `Cierra ${beca.nombre}`, beca: beca.id }].slice(-150) })}>
+        Apuntar
+      </button>
+    </div>
+  );
+}
+
 export function TrackerBecas() {
   const [d, guardar, estado] = useHerramienta("becas", { estados: {} });
+  const [cal, guardarCal] = useHerramienta("calendario", { viaje: "", eventos: [] });
   const [filtro, setFiltro] = useState("todas");
   const estados = d.estados || {};
   const mes = (id) => MESES.find((m) => m.id === id)?.titulo || "";
@@ -125,6 +156,7 @@ export function TrackerBecas() {
               </button>
             ))}
           </div>
+          {estados[b.id] && !["ganada", "no"].includes(estados[b.id]) && <PlazoBeca beca={b} cal={cal} guardarCal={guardarCal} />}
           {b.url && <a className="pnl-hr-enlace" href={b.url} target="_blank" rel="noopener noreferrer">Web oficial ↗</a>}
         </article>
       ))}
@@ -157,6 +189,8 @@ export function Calendario() {
           : <span>{faltan !== null ? "¡Ya estás allí! Cambia la fecha si viajas otra vez." : "Pon la fecha y te cuento los días que faltan."}</span>}
         <input type="date" className="pnl-hr-fecha" value={d.viaje || ""} onChange={(e) => guardar({ ...d, viaje: e.target.value })} aria-label="Fecha del viaje" />
       </section>
+      {/* Los avisos al móvil: 7 días antes, el día anterior y el mismo día. */}
+      <AvisosMovil />
       <form className="pnl-hr-caja pnl-hr-form" onSubmit={anadir}>
         <h3>Añadir a tu calendario</h3>
         <input type="date" value={nuevo.fecha} onChange={(e) => setNuevo({ ...nuevo, fecha: e.target.value })} aria-label="Fecha" required />
@@ -237,8 +271,12 @@ export function Schengen() {
 // ── 5. Listas: documentos y llegada ─────────────────────────────────────────
 const LISTAS = [
   {
-    id: "maleta", titulo: "Documentos para viajar", icono: "maleta",
-    items: ["Pasaporte vigente (con margen después del curso)", "Título y notas apostillados", "Carta de admisión o matrícula", "Seguro médico sin copagos", "Prueba de fondos (extractos)", "Antecedentes penales apostillados, si te los piden", "Certificado médico, si te lo piden", "Reserva o contrato de alojamiento", "Billete de vuelo", "Copia digital de todo en el móvil"],
+    id: "visa", titulo: "Visa de estudios",
+    items: ["Formulario nacional de visado, firmado", "Pasaporte vigente y copia de todas sus páginas", "Fotografía tipo carné reciente", "Carta de admisión de la universidad", "Medios económicos (100 % del IPREM por mes)", "Seguro médico sin copagos ni carencias", "Antecedentes penales apostillados (estudios de más de 6 meses)", "Certificado médico (estudios de más de 6 meses)", "Traducción jurada de lo que no esté en español", "Justificante de pago de la tasa", "Cita en el consulado"],
+  },
+  {
+    id: "maleta", titulo: "Para el viaje",
+    items: ["Pasaporte con la visa (o carta de admisión si vas por estancia)", "Título y notas apostillados, originales", "Carta de admisión o matrícula", "Póliza del seguro médico", "Reserva o contrato de alojamiento", "Billete de vuelo", "eSIM o tarjeta para tener datos al llegar", "Euros en efectivo para los primeros días", "Copia digital de todo en el móvil"],
   },
   {
     id: "llegada", titulo: "Al llegar a España", icono: "casa",
@@ -248,7 +286,7 @@ const LISTAS = [
 
 export function Listas() {
   const [d, guardar, estado] = useHerramienta("listas", { hecho: {}, propios: {} });
-  const [cual, setCual] = useState("maleta");
+  const [cual, setCual] = useState("visa");
   const [texto, setTexto] = useState("");
   const lista = LISTAS.find((l) => l.id === cual);
   const hecho = d.hecho || {};
@@ -263,7 +301,7 @@ export function Listas() {
   };
   return (
     <div className="pnl-hr">
-      <Cabecera icono="check" titulo="Tus listas" lema="Qué llevar y qué hacer al llegar, para que no se te olvide nada." estado={estado} />
+      <Cabecera icono="check" titulo="Tus listas" lema="Los papeles de la visa, la maleta y lo que toca al llegar." estado={estado} />
       <div className="pnl-hr-chips">
         {LISTAS.map((l) => <button key={l.id} type="button" aria-pressed={cual === l.id} onClick={() => setCual(l.id)}>{l.titulo}</button>)}
       </div>

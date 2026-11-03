@@ -34,6 +34,7 @@ import logo from "../../assets/images/logo.webp";
 import Icono from "../../components/common/Icono";
 import WhatsAppFlotante from "../../components/common/WhatsAppFlotante";
 import { RESERVAR_URL, LINEAS, MENSAJE_SEGURO, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
+import { HOLAFLY_URL } from "../../config/aliados";
 import { OPCIONES_ASESORIA } from "../../config/asesorias";
 import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 import { eventosActivos } from "../../config/eventos";
@@ -241,7 +242,7 @@ const VIAJE = [
     // El descuento es el gancho: va en grande, no escondido en la frase.
     descuento: "10 %",
     descuentoPie: "de descuento",
-    href: "https://holafly.go.link/3pDol",
+    href: HOLAFLY_URL,
   },
 ];
 

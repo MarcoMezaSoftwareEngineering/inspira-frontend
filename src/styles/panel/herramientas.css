@@ -31,6 +31,10 @@
 .pnl .pnl-hr-fila small { display: block; font-size: 12px; color: var(--ink-2); }
 .pnl .pnl-hr-fila > span:last-child { color: var(--trazo); font-size: 20px; }
 
+.pnl .pnl-hr-fila > .pnl-hr-chip { flex: none; font-size: 11px; font-weight: 800; color: var(--aviso-ink); background: var(--aviso-soft); padding: 4px 8px; border-radius: 999px; }
+.pnl .pnl-hr-plazo { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: var(--fondo-suave); border-radius: 12px; padding: 10px; }
+.pnl .pnl-hr-plazo input { flex: 1; min-width: 150px; }
+.pnl .pnl-hr-plazo-ok { font-size: 13px; font-weight: 700; color: var(--ok-ink); margin: 0; }
 .pnl .pnl-hr-aviso { display: flex; align-items: center; gap: 12px; background: var(--aviso-soft); color: var(--aviso-ink); border-radius: var(--radio-l); padding: 12px 14px; text-decoration: none; }
 .pnl .pnl-hr-aviso strong { display: block; font-size: 14px; }
 .pnl .pnl-hr-aviso small { display: block; font-size: 12.5px; line-height: 1.35; }

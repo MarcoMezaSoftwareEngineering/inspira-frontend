@@ -7,6 +7,7 @@
 import Icono from "../../../components/common/Icono";
 import { navigate } from "../../../services/navigate";
 import { Presupuesto, TrackerBecas, Calendario, Schengen, Listas } from "./Herramientas";
+import { ALIADOS } from "../../../config/aliados";
 import "../../../styles/panel/herramientas.css";
 
 const HERRAMIENTAS = [
@@ -14,7 +15,7 @@ const HERRAMIENTAS = [
   { clave: "becas", icono: "birrete", titulo: "Tracker de becas", texto: "Sigue tus becas: me interesa, postulé, ¡ganada!", Vista: TrackerBecas },
   { clave: "calendario", icono: "calendario", titulo: "Mi calendario", texto: "Tus plazos y la cuenta atrás de tu viaje", Vista: Calendario },
   { clave: "schengen", icono: "pasaporte", titulo: "Días Schengen", texto: "Cuántos días te quedan como turista", Vista: Schengen },
-  { clave: "listas", icono: "maleta", titulo: "Mis listas", texto: "Documentos para viajar y qué hacer al llegar", Vista: Listas },
+  { clave: "listas", icono: "maleta", titulo: "Mis listas", texto: "Documentos de la visa, el viaje y la llegada", Vista: Listas },
 ];
 
 // Lo que ya era gratis en la web: se abre aquí mismo, sin salir de la app.
@@ -82,6 +83,17 @@ export default function AppGratis({ herramienta, nombre, esCliente = false, perf
             <span className="pnl-hr-tile pnl-hr-tile-s"><Icono nombre={r.icono} size={18} /></span>
             <span className="min-w-0 flex-1"><strong>{r.titulo}</strong><small>{r.texto}</small></span>
             <span aria-hidden="true">›</span>
+          </a>
+        ))}
+      </div>
+
+      <h3 className="pnl-hr-grupo">Aliados para tu viaje</h3>
+      <div className="pnl-hr-lista">
+        {ALIADOS.filter((a) => a.href).map((a) => (
+          <a key={a.clave} href={a.href} target="_blank" rel="noopener noreferrer" className="pnl-hr-fila ux-tap">
+            <span className="pnl-hr-tile pnl-hr-tile-s"><Icono nombre={a.icono} size={18} /></span>
+            <span className="min-w-0 flex-1"><strong>{a.titulo}</strong><small>{a.texto}</small></span>
+            <span className="pnl-hr-chip">{a.chip}</span>
           </a>
         ))}
       </div>

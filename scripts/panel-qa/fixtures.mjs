@@ -1007,7 +1007,7 @@ const HERRAMIENTAS = {
     { id: "e3", fecha: isoEn(40), titulo: "Abre Fundación Carolina" },
   ] },
   schengen: { estancias: [{ id: "s1", entrada: isoEn(-120), salida: isoEn(-95) }, { id: "s2", entrada: isoEn(-30), salida: isoEn(-20) }], entrada: isoEn(15) },
-  listas: { hecho: { "maleta-0": true, "maleta-1": true, "maleta-8": true }, propios: { maleta: [{ id: "p1", texto: "Adaptador de enchufe" }] } },
+  listas: { hecho: { "visa-0": true, "visa-1": true, "visa-3": true }, propios: { visa: [{ id: "p1", texto: "Adaptador de enchufe" }] } },
 };
 
 // ── Enrutador de fixtures ───────────────────────────────────────────────────

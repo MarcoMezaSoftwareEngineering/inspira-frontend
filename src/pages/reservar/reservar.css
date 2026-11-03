@@ -115,20 +115,22 @@
 .rv-pop-grande { animation: rv-pop-grande 0.55s cubic-bezier(.2,.9,.3,1.15) 0.35s both; }
 
 /* ── Fondo líquido: manchas que mutan, olas y aviones ── */
+/* Solo transform (rápido en celulares): la «mutación» sale de escalar distinto en X e Y mientras gira. */
 @keyframes rv-liquido-a {
-  0%, 100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  33%      { border-radius: 70% 30% 46% 54% / 30% 62% 38% 70%; transform: translate3d(26px, 22px, 0) rotate(28deg) scale(1.1); }
-  66%      { border-radius: 34% 66% 38% 62% / 58% 36% 64% 42%; transform: translate3d(-18px, 34px, 0) rotate(-14deg) scale(.95); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1); }
+  33%      { transform: translate3d(26px, 22px, 0) rotate(40deg) scale(1.22, .88); }
+  66%      { transform: translate3d(-18px, 34px, 0) rotate(-24deg) scale(.9, 1.16); }
 }
 @keyframes rv-liquido-b {
-  0%, 100% { border-radius: 58% 42% 36% 64% / 52% 40% 60% 48%; transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  50%      { border-radius: 36% 64% 62% 38% / 40% 62% 38% 60%; transform: translate3d(-30px, -26px, 0) rotate(-24deg) scale(1.14); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1); }
+  50%      { transform: translate3d(-30px, -26px, 0) rotate(-34deg) scale(1.2, .86); }
 }
 @keyframes rv-ola { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes rv-cruza { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
 @keyframes rv-cabecea { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-14px) rotate(7deg); } }
 
-.rv-liquido { position: absolute; will-change: transform, border-radius; }
+.rv-liquido { position: absolute; will-change: transform; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+.rv-liquido-b { border-radius: 58% 42% 36% 64% / 52% 40% 60% 48%; }
 .rv-liquido-a { left: -70px; top: 70px; width: 270px; height: 270px; background: radial-gradient(circle at 30% 30%, rgba(255,200,87,.75), rgba(250,148,58,.45) 60%, rgba(250,148,58,0) 72%); animation: rv-liquido-a 7s ease-in-out infinite; }
 .rv-liquido-b { right: -90px; top: 30px; width: 330px; height: 330px; background: radial-gradient(circle at 60% 40%, rgba(136,196,252,.8), rgba(2,80,107,.35) 62%, rgba(2,80,107,0) 74%); animation: rv-liquido-b 9s ease-in-out infinite; }
 .rv-liquido-c { left: 38%; bottom: 40px; width: 190px; height: 190px; background: radial-gradient(circle at 40% 40%, rgba(250,148,58,.5), rgba(250,148,58,0) 70%); animation: rv-liquido-a 8s ease-in-out -3s infinite reverse; }
@@ -140,7 +142,7 @@
 .rv-avion-ruta { position: absolute; left: 0; top: 14px; display: flex; align-items: center; animation: rv-cruza 8s linear infinite; }
 .rv-avion-ruta-2 { top: auto; bottom: 90px; animation-duration: 13s; animation-delay: -5s; transform-origin: center; }
 .rv-avion-rastro { width: 110px; height: 3px; margin-right: 4px; background-image: radial-gradient(circle, rgba(250,148,58,.9) 1.4px, transparent 1.6px); background-size: 11px 3px; -webkit-mask-image: linear-gradient(90deg, transparent, #000); mask-image: linear-gradient(90deg, transparent, #000); }
-.rv-avion-cuerpo { width: 46px; height: 46px; color: #FA943A; filter: drop-shadow(0 6px 6px rgba(1,52,70,.25)); transform: rotate(90deg); animation: rv-cabecea 1.8s ease-in-out infinite; }
+.rv-avion-cuerpo { width: 46px; height: 46px; color: #FA943A; transform: rotate(90deg); animation: rv-cabecea 1.8s ease-in-out infinite; }
 .rv-avion-ruta-2 .rv-avion-cuerpo { width: 28px; height: 28px; color: #013446; opacity: .75; }
 .rv-avion-ruta-2 .rv-avion-rastro { width: 70px; background-image: radial-gradient(circle, rgba(1,52,70,.6) 1.2px, transparent 1.4px); }
 

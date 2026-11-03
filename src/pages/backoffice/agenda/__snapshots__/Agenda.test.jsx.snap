@@ -721,6 +721,7 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 </div>
 </div>
 <div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
 <button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
 <button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
@@ -1455,6 +1456,7 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 </div>
 </div>
 <div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
 <button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
 <button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
@@ -2195,6 +2197,7 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </div>
 </div>
 <div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
 <button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
 <button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
@@ -2921,6 +2924,7 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </div>
 </div>
 <div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
 <button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
 <button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
@@ -4970,6 +4974,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </div>
 </div>
 <div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
 <button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
 <button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
@@ -5331,6 +5336,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </div>
 </div>
 <div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
 <button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
 <button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
@@ -6042,6 +6048,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </div>
 </div>
 <div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50">Confirmar pago</button>
 <button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
 <button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>

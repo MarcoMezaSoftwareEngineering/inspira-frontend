@@ -97,7 +97,7 @@ function Tarjeta({ item: i, grupo, onAbrir, onRecargar, puedeEditar }) {
         </div>
         <p className={`mt-1 text-[13.5px] font-semibold ${urgente ? "text-[#9a4a06]" : "text-primary-dark"}`}>{i.sigue}</p>
         <p className="mt-1 truncate text-[12px] text-neutral-600">
-          {[i.servicio_interes, i.origen_txt, i.cotizacion ? `${i.cotizacion.numero || "cotización"} · S/ ${i.cotizacion.total}` : null, `entró ${haceCuanto(i.created_at)}`].filter(Boolean).join(" · ")}
+          {[i.servicio_interes, i.origen_txt, i.cotizacion ? `${i.cotizacion.numero || "cotización"} · ${i.cotizacion.texto}` : null, `entró ${haceCuanto(i.created_at)}`].filter(Boolean).join(" · ")}
         </p>
       </button>
       <div className="mt-3 flex flex-wrap gap-2">

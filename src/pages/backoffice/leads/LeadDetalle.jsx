@@ -213,7 +213,7 @@ export default function LeadDetalle({ id, opciones, puedeEditar, puedeEliminar, 
               <p className="ase-ld-bloque-t">{resumen.grupo === "oportunidades" ? "Oportunidad · qué sigue" : "Por convertir · qué sigue"}</p>
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--primary)" }}>{resumen.sigue}</div>
               <div style={{ fontSize: 12.5, color: "#4f6672", marginTop: 4 }}>
-                {[resumen.paso, resumen.reserva ? `asesoría ${resumen.reserva.fecha} ${resumen.reserva.hora_inicio}` : null, resumen.cotizacion ? `${resumen.cotizacion.numero || "cotización"} · S/ ${resumen.cotizacion.total} · ${resumen.cotizacion.estado}` : null].filter(Boolean).join(" · ")}
+                {[resumen.paso, resumen.reserva ? `asesoría ${resumen.reserva.fecha} ${resumen.reserva.hora_inicio}` : null, resumen.cotizacion ? `${resumen.cotizacion.numero || "cotización"} · ${resumen.cotizacion.texto} · ${resumen.cotizacion.estado}` : null].filter(Boolean).join(" · ")}
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
                 {resumen.whatsapp_url && (

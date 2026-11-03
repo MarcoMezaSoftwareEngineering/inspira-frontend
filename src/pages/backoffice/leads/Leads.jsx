@@ -221,7 +221,7 @@ export default function Leads() {
   const r = bandeja?.resumen;
   const statsBandeja = [
     { n: r?.oportunidades_hoy ?? "–", l: "oportunidades para hoy", tono: r?.oportunidades_hoy ? "alerta" : undefined, onClick: () => cambiarModo("oportunidades") },
-    { n: r ? `S/ ${r.cotizado_en_curso.toLocaleString("es-PE")}` : "–", l: "cotizado en curso", tono: "ok" },
+    { n: r ? `${r.cotizado_en_curso.toLocaleString("es-ES")} €` : "–", l: "cotizado en curso", tono: "ok" },
     { n: r?.convertir_hoy ?? "–", l: "por convertir para hoy", tono: r?.convertir_hoy ? "alerta" : undefined, onClick: () => cambiarModo("convertir") },
   ];
   const stats = [

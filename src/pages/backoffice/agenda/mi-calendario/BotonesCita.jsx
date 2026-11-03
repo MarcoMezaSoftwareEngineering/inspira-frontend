@@ -63,7 +63,8 @@ export function VerVoucherBtn({ reserva, className }) {
 // Solo para citas por transferencia o «pagar después» que aún esperan el pago.
 export function ConfirmarPagoBtn({ reserva, onChanged, className }) {
   const [enviando, setEnviando] = useState(false);
-  if (!["TRANSFERENCIA", "DESPUES", "PENDIENTE"].includes(reserva.metodo_pago) || reserva.estado !== "PENDIENTE_PAGO") return null;
+  // Cualquier reserva por pagar: transferencia, pagar después, sin elegir, o tarjeta que no llegó a cobrarse.
+  if (reserva.estado !== "PENDIENTE_PAGO") return null;
   return (
     <button onClick={() => confirmarPagoTransferencia(reserva, onChanged, setEnviando)} disabled={enviando}
       className={className || "px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-[11px] font-bold hover:opacity-90 disabled:opacity-50"}>

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { boGET, boPOST } from "../../../../services/backofficeApi";
 import { dialog } from "../../../../services/dialogService";
 import Icono from "../../../../components/common/Icono";
-import { GruposAcciones, InformeBtns, VerVoucherBtn, EditMeetBtn, CancelBtn } from "./BotonesCita";
+import { ConfirmarPagoBtn, GruposAcciones, InformeBtns, VerVoucherBtn, EditMeetBtn, CancelBtn } from "./BotonesCita";
 
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const fechaCorta = (f) => { const [y, m, d] = String(f || "").split("-").map(Number); return d ? `${d} ${MESES[m - 1]} ${y}` : ""; };
@@ -53,7 +53,7 @@ function Tarjeta({ icono, titulo, resumen, tono = "neutral", abierta = false, ch
     </details>
   );
 }
-const BTN = "px-3.5 py-2.5 rounded-xl text-[12px] font-bold disabled:opacity-50";
+const BTN = "inline-flex min-h-[44px] items-center px-3.5 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-50";
 
 function Paso({ hecho, texto: t }) {
   return (
@@ -123,7 +123,7 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
           <p className="mt-1 flex items-center gap-1.5 text-[12.5px] text-white/75"><Icono nombre="calendario" size={14} />{fechaCorta(reserva.fecha)} · {reserva.hora_inicio} (hora Perú)</p>
         </header>
 
-        <div className="grid gap-3 p-3 sm:p-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 p-3 sm:p-4">
           {error && <p className="rounded-xl bg-red-50 p-3 text-[12px] text-red-700">{error}</p>}
           {!f && !error && <p className="p-8 text-center text-[12px] text-neutral-400">Cargando…</p>}
           {f && (
@@ -131,7 +131,7 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
               <section className="rounded-2xl bg-white p-3.5 shadow-sm border border-neutral-200">
                 <p className="text-[9.5px] font-extrabold uppercase tracking-[.12em] text-neutral-400">Qué sigue</p>
                 <p className="mt-0.5 text-[15px] font-bold text-primary-dark">{siguiente}</p>
-                <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
+                <div className="mt-3 flex flex-wrap gap-1.5">
                   <Paso hecho={pagada} texto="Pago" />
                   <Paso hecho={conFormulario} texto="Formulario" />
                   <Paso hecho={pasada && reserva.estado !== "CANCELADA"} texto="Reunión" />
@@ -140,9 +140,15 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                   <Paso hecho={enviadas.length > 0} texto="Cotización" />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
+                  {reserva.estado === "PENDIENTE_PAGO" && (
+                    <>
+                      <ConfirmarPagoBtn reserva={reserva} onChanged={cambiado} className={`${BTN} min-h-[44px] bg-emerald-600 text-white`} />
+                      <VerVoucherBtn reserva={reserva} className={`${BTN} min-h-[44px] border border-neutral-200 bg-white text-neutral-700`} />
+                    </>
+                  )}
                   {reserva.whatsapp_url && <a href={reserva.whatsapp_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-[#25D366] text-white`}>Enviar por WhatsApp</a>}
                   {reserva.meet_url && reserva.estado !== "CANCELADA" && <a href={reserva.meet_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-primary text-white`}>Unirse</a>}
-                  {!enviadas.length && <a href={cotizar} className={`${BTN} bg-primary-dark text-white`}>Preparar cotización</a>}
+                  {(pasada || enviado || sinInforme) && reserva.estado !== "CANCELADA" && !enviadas.length && <a href={cotizar} className={`${BTN} bg-primary-dark text-white`}>Preparar cotización</a>}
                 </div>
               </section>
 
@@ -152,7 +158,7 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                   <Dato k="Celular" v={f.cliente.telefono} />
                   <Dato k="Interés" v={f.interes} />
                   <Dato k="Quiere empezar" v={f.inicio} />
-                  <Dato k="Importe" v={`${f.monto} ${f.moneda}`} />
+                  <Dato k="Importe" v={`${f.monto} ${f.moneda}${Number(f.recargo) > 0 ? ` (incluye ${f.recargo} de comisión de tarjeta; sin tarjeta son ${(Number(f.monto) - Number(f.recargo)).toFixed(2)})` : ""}`} ancho />
                   <Dato k="Pago" v={pagada ? `confirmado el ${cuando(f.pagado_en)}${["TRANSFERENCIA", "DESPUES", "PENDIENTE", "EQUIPO"].includes(f.metodo_pago) ? " (manual)" : ""}` : f.metodo_pago === "EQUIPO" ? "pendiente (se coordina aparte)" : "pendiente"} ancho />
                   <Dato k="Lo que contó al reservar" v={f.detalle} ancho />
                   <Dato k="Política aceptada" v={f.terminos.aceptados_en ? `${f.terminos.version} · ${cuando(f.terminos.aceptados_en)}` : "sin registro (reserva anterior al 03/11)"} ancho />
@@ -221,12 +227,12 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                 )}
               </Tarjeta>
 
-              <Tarjeta icono="euro" titulo="Cotización" resumen={enviadas.length ? `enviada · ${enviadas[0].numero || ""} · S/ ${enviadas[0].total}` : cotizaciones.length ? "en borrador" : f.cotizar.importe ? `propuesta del informe: ${f.cotizar.importe}` : "con sus datos ya cargados"} tono={enviadas.length ? "ok" : "neutral"} abierta={abrir.cotizacion}>
+              <Tarjeta icono="euro" titulo="Cotización" resumen={enviadas.length ? `enviada · ${enviadas[0].numero || ""} · ${enviadas[0].texto}` : cotizaciones.length ? "en borrador" : f.cotizar.importe ? `propuesta del informe: ${f.cotizar.importe}` : "con sus datos ya cargados"} tono={enviadas.length ? "ok" : "neutral"} abierta={abrir.cotizacion}>
                 {cotizaciones.length > 0 && (
                   <ul className="mb-3 grid gap-1.5">
                     {cotizaciones.map((q) => (
                       <li key={q.id_presupuesto} className="flex items-center justify-between gap-2 rounded-xl bg-neutral-50 p-2.5">
-                        <span><strong>{q.numero || "Sin número"}</strong> · S/ {q.total} · {q.estado === "enviado" ? `enviada ${cuando(q.enviado_at)}` : q.estado}</span>
+                        <span><strong>{q.numero || "Sin número"}</strong> · {q.texto} · {q.estado === "enviado" ? `enviada ${cuando(q.enviado_at)}` : q.estado}</span>
                         <a href={`/backoffice/presupuesto?abrir=${q.id_presupuesto}`} className="text-[12px] font-bold text-primary underline">Abrir</a>
                       </li>
                     ))}
@@ -237,7 +243,7 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                     <p className="mb-1 text-[11px] font-extrabold text-sky-800">Hay cotizaciones a su correo sin vincular a esta cita</p>
                     {f.cotizaciones_por_correo.map((q) => (
                       <div key={q.id_presupuesto} className="flex items-center justify-between gap-2 py-1 text-[12px]">
-                        <span>{q.numero || "Sin número"} · S/ {q.total} · {q.estado}</span>
+                        <span>{q.numero || "Sin número"} · {q.texto} · {q.estado}</span>
                         <button type="button" disabled={!!ocupado} onClick={() => accion(`v${q.id_presupuesto}`, "vincular-cotizacion", { id_presupuesto: q.id_presupuesto }, "Cotización vinculada.")} className="font-bold text-primary underline">Vincular a esta cita</button>
                       </div>
                     ))}

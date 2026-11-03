@@ -79,4 +79,28 @@
 @keyframes of-moneda { 0% { transform: translateY(-26px); opacity: 0; } 20% { opacity: 1; } 70% { transform: translateY(0); } 100% { transform: translateY(0); opacity: 0; } }
 @keyframes of-nota { 50% { transform: rotate(2.5deg); } }
 @keyframes of-gira { to { transform: rotate(360deg); } }
+
+/* Caminar, hablar y Hedwig */
+.of-mago[data-camina="1"] .of-cuerpo { animation: of-paso .34s ease-in-out infinite; }
+.of-mago[data-camina="1"] .of-brazo-izq { animation: of-brazo-camina .34s ease-in-out infinite; }
+.of-mago[data-camina="1"] .of-brazo-der { animation: of-brazo-camina .34s ease-in-out infinite reverse; }
+.of-burbuja { opacity: 0; transition: opacity .25s; pointer-events: none; }
+.of-tapa[data-ahi="1"] .of-burbuja { opacity: 1; animation: of-flota 2.2s ease-in-out infinite; }
+.of-burbuja-agua { animation: of-burbuja-agua 2s ease-in infinite; transform-box: fill-box; }
+.of-hedwig-vuelo { animation: of-hedwig 16s ease-in-out infinite; }
+.of-hedwig-vuelo .of-ala { animation: of-aletea .2s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 50%; }
+.of-hedwig-quieta .of-ojos-h { animation: of-parpadea 6s infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+.of-zzz { animation: of-flota 2.6s ease-in-out infinite; }
+@keyframes of-paso { 0%, 100% { transform: translateY(0) rotate(-1.2deg); } 50% { transform: translateY(-3px) rotate(1.2deg); } }
+@keyframes of-brazo-camina { 0%, 100% { transform: rotate(14deg); } 50% { transform: rotate(-14deg); } }
+@keyframes of-burbuja-agua { 0% { transform: translateY(6px); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateY(-8px); opacity: 0; } }
+@keyframes of-aletea { from { transform: scaleY(1); } to { transform: scaleY(.5); } }
+@keyframes of-hedwig {
+  0%, 52% { transform: translate(0, 0); }
+  58% { transform: translate(-90px, -120px) rotate(-8deg); }
+  70% { transform: translate(-300px, -90px) rotate(6deg); }
+  82% { transform: translate(-120px, 40px) rotate(-6deg); }
+  92% { transform: translate(-20px, 4px); }
+  100% { transform: translate(0, 0); }
+}
 @media (prefers-reduced-motion: reduce) { .of-svg *, .of-svg *::before, .of-svg *::after, .of-tarjeta { animation: none !important; transition: none !important; } .of-polvo { opacity: .3; } .of-avion, .of-onda-tel { opacity: 0; } }

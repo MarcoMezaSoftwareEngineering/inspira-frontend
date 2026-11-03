@@ -2,14 +2,14 @@
 // en SVG con formas propias (nada de imágenes de películas). La proyección vive en geometria.js.
 import { pts } from "./geometria";
 
-export function Caja({ iso, x, y, w = 1, d = 1, alto = 28, z = 0 }) {
+export function Caja({ iso, x, y, w = 1, d = 1, alto = 28, z = 0, fills = null }) {
   const a = iso(x, y, z); const b = iso(x + w, y, z); const c = iso(x + w, y + d, z); const e = iso(x, y + d, z);
   const up = (p) => [p[0], p[1] - alto];
   return (
     <g>
-      <polygon points={pts([e, c, up(c), up(e)])} fill="url(#of-madera-izq)" />
-      <polygon points={pts([b, c, up(c), up(b)])} fill="url(#of-madera-der)" />
-      <polygon points={pts([up(a), up(b), up(c), up(e)])} fill="url(#of-madera-top)" />
+      <polygon points={pts([e, c, up(c), up(e)])} fill={fills?.izq || "url(#of-madera-izq)"} />
+      <polygon points={pts([b, c, up(c), up(b)])} fill={fills?.der || "url(#of-madera-der)"} />
+      <polygon points={pts([up(a), up(b), up(c), up(e)])} fill={fills?.top || "url(#of-madera-top)"} />
     </g>
   );
 }
@@ -35,7 +35,7 @@ export function Defs() {
 }
 
 /* ── Personajes ────────────────────────────────────────────────────────────────────────────────── */
-const PELO = { hermione: "#6b4426", harry: "#1c1816", ron: "#c8561a", luna: "#efe0a8", neville: "#6a4a30", albus: "#ece8df" };
+const PELO = { yo: "#3b2a22", hermione: "#6b4426", harry: "#1c1816", ron: "#c8561a", luna: "#efe0a8", neville: "#6a4a30", albus: "#ece8df" };
 
 function Pelo({ id, cx, cy }) {
   const c = PELO[id] || "#333";
@@ -44,16 +44,17 @@ function Pelo({ id, cx, cy }) {
     case "harry": return (<g fill={c}><path d={`M${cx - 14},${cy - 50} Q${cx - 14},${cy - 70} ${cx},${cy - 70} Q${cx + 14},${cy - 70} ${cx + 14},${cy - 50} Q${cx + 2},${cy - 60} ${cx - 14},${cy - 50}Z`} /><path d={`M${cx - 6},${cy - 69} l-6,-5 l9,2 l-2,-7 l7,6 l5,-5 l2,8Z`} /></g>);
     case "ron": return (<g fill={c}><path d={`M${cx - 14},${cy - 48} Q${cx - 16},${cy - 70} ${cx},${cy - 71} Q${cx + 16},${cy - 70} ${cx + 14},${cy - 48} Q${cx},${cy - 60} ${cx - 14},${cy - 48}Z`} /><circle cx={cx - 8} cy={cy - 70} r="5" /><circle cx={cx + 7} cy={cy - 71} r="5" /></g>);
     case "luna": return (<g fill={c}><path d={`M${cx - 15},${cy - 46} Q${cx - 18},${cy - 72} ${cx},${cy - 72} Q${cx + 18},${cy - 72} ${cx + 15},${cy - 46} L${cx + 17},${cy - 18} Q${cx + 9},${cy - 22} ${cx + 8},${cy - 46} Q${cx},${cy - 58} ${cx - 8},${cy - 46} Q${cx - 9},${cy - 22} ${cx - 17},${cy - 18}Z`} /></g>);
+    case "yo": return (<g fill={c}><path d={`M${cx - 15},${cy - 46} Q${cx - 18},${cy - 72} ${cx},${cy - 72} Q${cx + 18},${cy - 72} ${cx + 15},${cy - 46} L${cx + 14},${cy - 30} Q${cx + 9},${cy - 34} ${cx + 8},${cy - 46} Q${cx},${cy - 58} ${cx - 8},${cy - 46} Q${cx - 9},${cy - 34} ${cx - 14},${cy - 30}Z`} /></g>);
     case "neville": return (<g fill={c}><path d={`M${cx - 14},${cy - 49} Q${cx - 14},${cy - 68} ${cx},${cy - 68} Q${cx + 14},${cy - 68} ${cx + 14},${cy - 49} Q${cx},${cy - 58} ${cx - 14},${cy - 49}Z`} /></g>);
     default: return null;
   }
 }
 
-export function Mago({ p, cx, cy, estado, celebra }) {
+export function Mago({ p, cx, cy, estado, celebra, caminando = false }) {
   const c = p.color; const trabajando = estado === "trabajando"; const urgente = estado === "urgente";
   const bufanda = p.casa === "Gryffindor";
   return (
-    <g className="of-mago" data-estado={estado} data-celebra={celebra ? "1" : "0"}>
+    <g className="of-mago" data-estado={estado} data-celebra={celebra ? "1" : "0"} data-camina={caminando ? "1" : "0"}>
       <ellipse cx={cx} cy={cy + 3} rx="21" ry="7.5" fill="rgba(0,0,0,.3)" />
       <g className="of-cuerpo">
         <ellipse cx={cx - 7} cy={cy + 1} rx="6" ry="3" fill="#1a1218" /><ellipse cx={cx + 7} cy={cy + 1} rx="6" ry="3" fill="#1a1218" />

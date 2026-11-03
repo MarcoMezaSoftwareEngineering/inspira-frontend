@@ -6,10 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import { navigate } from "../../../services/navigate";
 import { horaLimaPE } from "../../../lib/formatos";
+import { useAuth } from "../context/AuthContext";
 import { Chip } from "../crm/kit";
 import { BOTON } from "../crm/estilos";
 import { ESTADO_TEXTO, PERSONAJES, porId } from "./personajes";
-import Escena from "./Escena";
+import Plano from "./Plano";
 import Sala from "./Sala";
 import "./oficina.css";
 
@@ -60,7 +61,9 @@ export default function Oficina() {
     try { const id = new URLSearchParams(window.location.search).get("sala"); return porId(id) ? id : null; } catch { return null; }
   });
   const [celebra, setCelebra] = useState({});
-  const [vuelo, setVuelo] = useState(0);
+  const [mensajes, setMensajes] = useState({ total: 0, items: [] });
+  const [hedwig, setHedwig] = useState(false);
+  const { user } = useAuth();
   const [ahora, setAhora] = useState(() => new Date());
   const previo = useRef(null);
   const temporizadores = useRef([]);
@@ -77,10 +80,13 @@ export default function Oficina() {
     }
     previo.current = Object.fromEntries(Object.entries(r.puestos).map(([id, p]) => [id, p.cuenta]));
     if (Object.keys(resueltos).length) {
-      setCelebra(resueltos); setVuelo((v) => v + 1);
+      setCelebra(resueltos);
       temporizadores.current.push(setTimeout(() => setCelebra({}), 3600));
     }
     setDatos(r); setCargando(false);
+    // Hedwig: lo que los asesorados han escrito y nadie ha leído (la misma fuente que la campana).
+    const m = await boGET("/backoffice/solicitudes/mensajes/pendientes");
+    if (m?.ok) setMensajes({ total: m.total || 0, items: m.items || [] });
   }, []);
 
   useEffect(() => { cargar(); }, [cargar]); // eslint-disable-line react-hooks/set-state-in-effect
@@ -94,7 +100,7 @@ export default function Oficina() {
   }, [cargar]);
 
   function elegir(id) {
-    setSala(id);
+    setSala(id); setHedwig(false);
     try {
       const url = new URL(window.location.href);
       if (id) url.searchParams.set("sala", id); else url.searchParams.delete("sala");
@@ -146,8 +152,34 @@ export default function Oficina() {
       {!actual ? (
         <div className="grid gap-4">
           <div className="overflow-hidden rounded-3xl bg-primary-dark ring-1 ring-primary-dark/30">
-            <Escena personajes={personajes} elegido={null} onElegir={elegir} celebra={celebra} vuelo={vuelo} tablero={tablero} hora={hora} noche={noche} />
+            <Plano personajes={personajes} onElegir={elegir} onHedwig={() => setHedwig((v) => !v)} mensajes={mensajes.total} celebra={celebra} tablero={tablero} noche={noche} nombreYo={(user?.nombre || "Tú").split(" ")[0]} />
           </div>
+          <p className="-mt-2 px-1 text-[12.5px] text-[#4f6672]">Toque una oficina o a una persona para ver su mesa. Toque el suelo para caminar: si entra a una oficina, se abre. Hedwig lleva los mensajes de los asesorados.</p>
+          {hedwig && (
+            <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-neutral-200/80" aria-label="Mensajes de Hedwig">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-[16px] font-bold text-primary-dark">Hedwig · mensajes sin leer</h2>
+                <Chip tono={mensajes.total ? "ojo" : "ok"}>{mensajes.total}</Chip>
+              </div>
+              {mensajes.items.length === 0
+                ? <p className="mt-2 text-[13.5px] text-neutral-700">Nadie ha escrito nada nuevo. Hedwig descansa.</p>
+                : (
+                  <ul className="mt-3 grid gap-2">
+                    {mensajes.items.map((m) => (
+                      <li key={m.id_solicitud}>
+                        <button type="button" onClick={() => navigate(`/backoffice/solicitudes/${m.id_solicitud}`)} className="flex min-h-[52px] w-full items-center gap-3 rounded-xl bg-white p-3 text-left ring-1 ring-neutral-200/80 hover:bg-neutral-50">
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[14px] font-bold text-neutral-900">{m.cliente}</span>
+                            <span className="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">{m.ultimo?.texto || m.titulo}</span>
+                          </span>
+                          <Chip tono="ojo">{m.sin_leer}</Chip>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </section>
+          )}
           <ul className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {personajes.map((p) => (
               <li key={p.id}>

@@ -94,10 +94,42 @@
 .rv-hora:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -10px rgba(250,148,58,.8); }
 .rv-dia:hover  { transform: translateY(-3px); }
 
+/* ── Cabecera clara (estilo flyers): formas, avión y entradas ── */
+@keyframes rv-entra-izq { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
+@keyframes rv-entra-der { from { opacity: 0; transform: translateX(34px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes rv-pop-grande { 0% { opacity: 0; transform: scale(.8) rotate(-2deg); } 70% { transform: scale(1.04) rotate(.5deg); } 100% { opacity: 1; transform: none; } }
+@keyframes rv-forma-sube { 0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); } 50% { transform: translate3d(14px, -22px, 0) rotate(12deg); } }
+@keyframes rv-vuelo {
+  0%   { transform: translate3d(-12vw, 70px, 0) rotate(8deg); opacity: 0; }
+  8%   { opacity: .9; }
+  50%  { transform: translate3d(50vw, 10px, 0) rotate(-4deg); }
+  92%  { opacity: .9; }
+  100% { transform: translate3d(112vw, -40px, 0) rotate(-10deg); opacity: 0; }
+}
+
+.rv-hero-claro {
+  background-color: #f4f9ff;
+  background-image:
+    radial-gradient(circle, rgba(1,52,70,.14) 1.2px, transparent 1.3px),
+    linear-gradient(180deg, #ffffff 0%, #e8f2fd 100%);
+  background-size: 16px 16px, 100% 100%;
+  background-position: 100% 0, 0 0;
+  background-repeat: no-repeat, no-repeat;
+}
+.rv-hero-claro::before { content: ""; position: absolute; right: 0; top: 0; width: 220px; height: 120px; background-image: radial-gradient(circle, rgba(1,52,70,.22) 1.3px, transparent 1.4px); background-size: 14px 14px; opacity: .6; pointer-events: none; }
+.rv-forma { position: absolute; border-radius: 9999px; animation: rv-forma-sube 6s ease-in-out infinite; }
+.rv-forma-a { left: -50px; top: 38%; width: 150px; height: 150px; background: rgba(250,148,58,.18); }
+.rv-forma-b { right: 6%; bottom: 14%; width: 90px; height: 90px; background: rgba(1,52,70,.10); animation-duration: 5s; animation-delay: -2s; }
+.rv-forma-c { left: 46%; top: 6%; width: 46px; height: 46px; background: rgba(250,148,58,.28); animation-duration: 4s; animation-delay: -1s; }
+.rv-avion { position: absolute; left: 0; top: 8%; width: 34px; height: 34px; color: #FA943A; animation: rv-vuelo 9s linear infinite; transform: translate3d(-12vw, 70px, 0); }
+
+.rv-entra-izq { animation: rv-entra-izq 0.4s cubic-bezier(.2,.8,.2,1) both; }
+.rv-entra-der { animation: rv-entra-der 0.45s cubic-bezier(.2,.8,.2,1) 0.1s both; }
+.rv-pop-grande { animation: rv-pop-grande 0.55s cubic-bezier(.2,.9,.3,1.15) 0.35s both; }
+
+/* «Reducir movimiento»: se apaga solo lo grande (avión y formas); las entradas y
+   transiciones cortas se mantienen para que la página no se vea inerte. */
 @media (prefers-reduced-motion: reduce) {
-  .rv-desliza, .rv-aparece, .rv-flota, .rv-latido, .rv-particula, .rv-brillo-texto { animation: none; }
-  .rv-brillo-texto { color: #FA943A; background: none; }
-  .rv-hora:hover, .rv-dia:hover { transform: none; }
-  .rv-entrada, .rv-pop, .rv-esqueleto, .rv-sube, .rv-palabra, .rv-pulso, .rv-aurora, .rv-cta::after { animation: none; }
-  .rv-camino, .rv-camino:hover { transition: none; transform: none; }
+  .rv-avion, .rv-forma, .rv-pulso, .rv-flota, .rv-brillo-texto, .rv-cta::after { animation: none; }
+  .rv-avion { opacity: 0; }
 }

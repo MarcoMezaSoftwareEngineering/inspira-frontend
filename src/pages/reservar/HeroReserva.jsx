@@ -14,28 +14,6 @@ import { correoValido } from "./preguntas";
 
 const TITULO = ["Tu", "camino", "a", "España", "empieza", "con", "una", "conversación."];
 
-// Cuenta de 0 a `valor` en ~0,9 s (sin animar si el usuario pidió menos movimiento).
-function useContador(valor) {
-  const [n, setN] = useState(0);
-  useEffect(() => {
-    if (!valor) return undefined;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      const t = setTimeout(() => setN(valor), 0);
-      return () => clearTimeout(t);
-    }
-    let raf;
-    const inicio = performance.now();
-    const paso = (ahora) => {
-      const p = Math.min(1, (ahora - inicio) / 900);
-      setN(Math.round(valor * (1 - (1 - p) ** 3)));
-      if (p < 1) raf = requestAnimationFrame(paso);
-    };
-    raf = requestAnimationFrame(paso);
-    return () => cancelAnimationFrame(raf);
-  }, [valor]);
-  return n;
-}
-
 export function FormRecordarme({ servicioId, onListo, compacto = false }) {
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
@@ -125,28 +103,128 @@ export function FormRecordarme({ servicioId, onListo, compacto = false }) {
   );
 }
 
-function Camino({ icono, titulo, texto, children, destacado = false }) {
+const DIA = (f) => {
+  const d = new Date(`${f}T12:00:00Z`);
+  return {
+    semana: d.toLocaleDateString("es", { weekday: "short", timeZone: "UTC" }).replace(".", ""),
+    num: d.getUTCDate(),
+    mes: d.toLocaleDateString("es", { month: "short", timeZone: "UTC" }).replace(".", ""),
+  };
+};
+
+const precioCorto = (s) => (s?.precio ? `${s.moneda === "PEN" ? "S/ " : ""}${s.precio}` : "");
+
+// La disponibilidad de los próximos 14 días, de frente, como en Calendly:
+// servicio → día → hora. Elegir una hora separa la selección y baja al formulario.
+function Disponibilidad({ cargando, servicios, servicioId, onServicio, dias, horaVista, hora, onElegir, libres }) {
+  const [diaVista, setDiaVista] = useState(null);
+  const fechaActiva = diaVista && dias.some((d) => d.fecha === diaVista) ? diaVista : dias[0]?.fecha;
+  const horas = dias.find((d) => d.fecha === fechaActiva)?.slots || [];
+
   return (
-    <li
-      className={[
-        "rv-camino flex flex-col rounded-2xl p-4 text-left ring-1 backdrop-blur-sm",
-        destacado ? "bg-white text-tinta ring-white/60 shadow-[0_22px_50px_-24px_rgba(0,0,0,.7)]" : "bg-white/10 text-white ring-white/15",
-      ].join(" ")}
-    >
-      <span className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${destacado ? "bg-accent text-white" : "bg-white/15 text-sky"}`}>
-        <Icono nombre={icono} />
-      </span>
-      <h3 className={`font-semibold ${destacado ? "text-primary" : "text-white"}`}>{titulo}</h3>
-      <p className={`mt-1 text-[13px] leading-relaxed ${destacado ? "text-tinta-2" : "text-white/75"}`}>{texto}</p>
-      <div className="mt-4 flex-1 content-end">{children}</div>
-    </li>
+    <section aria-label="Disponibilidad de los próximos 14 días" className="rv-sube rounded-3xl bg-white p-4 text-tinta shadow-[0_30px_70px_-30px_rgba(0,0,0,.75)] ring-1 ring-white/60 md:p-5" style={{ animationDelay: "500ms" }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+          <span className="relative flex h-2 w-2">
+            <span className="rv-pulso absolute inline-flex h-full w-full rounded-full bg-white" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+          </span>
+          Cupos limitados
+        </span>
+        {!cargando && libres > 0 && (
+          <span className="text-xs text-muted">
+            Quedan <strong className="tabular-nums text-tinta">{libres}</strong> horarios en las próximas 2 semanas
+          </span>
+        )}
+      </div>
+
+      {/* Servicio */}
+      <div className="mt-3 flex gap-2 overflow-x-auto pb-1" role="radiogroup" aria-label="Servicio">
+        {servicios.length === 0 && cargando && [0, 1, 2].map((i) => <span key={i} className="rv-esqueleto h-11 w-36 shrink-0 rounded-xl bg-linea" />)}
+        {servicios.map((sv) => {
+          const activo = sv.id === servicioId;
+          return (
+            <button
+              key={sv.id}
+              type="button"
+              role="radio"
+              aria-checked={activo}
+              onClick={() => onServicio(sv.id)}
+              className={`shrink-0 rounded-xl border px-3.5 py-2 text-left text-[13px] transition active:scale-[0.98] ${activo ? "border-primary bg-primary text-white" : "border-linea bg-white text-tinta hover:border-primary"}`}
+            >
+              <span className="block font-semibold leading-tight">{sv.titulo}</span>
+              <span className={`block text-[11px] ${activo ? "text-white/75" : "text-muted"}`}>
+                {sv.duracion_min === 60 ? "1 hora" : `${sv.duracion_min} min`} · {precioCorto(sv)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {cargando && dias.length === 0 ? (
+        <div className="mt-4 space-y-2" aria-busy="true">
+          <span className="rv-esqueleto block h-16 rounded-xl bg-linea" />
+          <span className="rv-esqueleto block h-24 rounded-xl bg-linea" />
+        </div>
+      ) : dias.length === 0 ? (
+        <div className="mt-4 rounded-2xl bg-fondo p-4 text-sm text-tinta-2">
+          <p>Por ahora no hay horarios libres para este servicio en las próximas 2 semanas.</p>
+          <p className="mt-1">Déjanos tu correo abajo y te avisamos cuando se abran nuevos cupos.</p>
+        </div>
+      ) : (
+        <>
+          {/* Días */}
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-2" role="listbox" aria-label="Día">
+            {dias.map((d) => {
+              const { semana, num, mes } = DIA(d.fecha);
+              const activo = d.fecha === fechaActiva;
+              return (
+                <button
+                  key={d.fecha}
+                  type="button"
+                  role="option"
+                  aria-selected={activo}
+                  onClick={() => setDiaVista(d.fecha)}
+                  className={`flex w-[68px] shrink-0 flex-col items-center rounded-2xl border px-2 py-2 transition active:scale-95 ${activo ? "border-primary bg-primary text-white shadow-md" : "border-linea bg-white hover:border-primary hover:bg-secondary-light"}`}
+                >
+                  <span className={`text-[11px] font-medium uppercase ${activo ? "text-sky" : "text-muted"}`}>{semana}</span>
+                  <span className="font-fraunces text-xl font-semibold leading-none">{num}</span>
+                  <span className={`text-[11px] ${activo ? "text-white/80" : "text-muted"}`}>{mes}</span>
+                  <span className={`mt-1 rounded-full px-1.5 text-[10px] font-semibold ${activo ? "bg-white/15 text-white" : "bg-accent/10 text-accent-dark"}`}>
+                    {d.slots.length} {d.slots.length === 1 ? "libre" : "libres"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Horas del día */}
+          <div key={fechaActiva} className="rv-entrada mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {horas.map((sl) => {
+              const activa = hora?.id_slot === sl.id_slot;
+              return (
+                <button
+                  key={sl.id_slot}
+                  type="button"
+                  onClick={() => onElegir(fechaActiva, sl)}
+                  aria-pressed={activa}
+                  className={`rounded-xl border px-2 py-2.5 text-sm font-semibold transition active:scale-95 ${activa ? "border-accent bg-accent text-white" : "border-linea bg-white text-tinta hover:border-accent hover:bg-accent/5"}`}
+                >
+                  {horaVista(sl)}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-center text-[11px] text-muted">Elige una hora y completa tus datos en el siguiente paso. Pagas después de separar el horario.</p>
+        </>
+      )}
+    </section>
   );
 }
 
-export default function HeroReserva({ cargando, primeroTexto, libres7, servicioId, onReservarYa }) {
+export default function HeroReserva({ cargando, servicios, servicioId, onServicio, dias, horaVista, hora, onElegir, libres }) {
   const [pensando, setPensando] = useState(false);
   const formRef = useRef(null);
-  const contador = useContador(libres7);
 
   useEffect(() => {
     if (pensando) formRef.current?.querySelector("input[type=email]")?.focus();
@@ -161,103 +239,63 @@ export default function HeroReserva({ cargando, primeroTexto, libres7, servicioI
         <span className="rv-aurora rv-aurora-c" />
       </div>
 
-      <div className="relative mx-auto max-w-5xl px-4 pb-28 pt-10 md:pb-32 md:pt-14">
-        <p className="rv-sube inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-sky ring-1 ring-white/15" style={{ animationDelay: "0ms" }}>
-          <Icono nombre="escudo" className="h-3.5 w-3.5" />
-          Abogados especialistas en extranjería española
-        </p>
+      <div className="relative mx-auto grid max-w-5xl gap-8 px-4 pb-24 pt-9 md:pb-28 md:pt-12 lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-10">
+        <div>
+          <p className="rv-sube inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-sky ring-1 ring-white/15">
+            <Icono nombre="escudo" className="h-3.5 w-3.5" />
+            Abogados especialistas en extranjería española
+          </p>
 
-        <h1 className="mt-4 max-w-3xl font-fraunces text-[2.4rem] font-semibold leading-[1.08] md:text-6xl" aria-label={TITULO.join(" ")}>
-          {TITULO.map((p, i) => (
-            <span key={i} className="rv-palabra mr-[0.26em]" style={{ animationDelay: `${120 + i * 70}ms` }} aria-hidden="true">
-              {p === "conversación." ? <span className="text-accent">{p}</span> : p}
-            </span>
-          ))}
-        </h1>
-
-        <p className="rv-sube mt-4 max-w-2xl text-[15px] leading-relaxed text-white/80 md:text-base" style={{ animationDelay: "700ms" }}>
-          En una sesión, un abogado revisa tu caso y te dice qué camino te conviene: máster, visado, estancia o becas. Pagas solo la sesión y sales con un plan claro.
-        </p>
-
-        {/* Dato vivo de la agenda */}
-        <div className="rv-sube mt-5 flex flex-wrap items-center gap-2.5 text-[13px]" style={{ animationDelay: "820ms" }} aria-live="polite">
-          {cargando ? (
-            <span className="rv-esqueleto h-8 w-64 rounded-full bg-white/10" />
-          ) : primeroTexto ? (
-            <>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 ring-1 ring-white/15">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="rv-pulso absolute inline-flex h-full w-full rounded-full bg-verde" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-verde" />
-                </span>
-                Próximo horario libre: <strong className="font-semibold capitalize">{primeroTexto}</strong>
+          <h1 className="mt-4 font-fraunces text-[2.3rem] font-semibold leading-[1.08] md:text-5xl" aria-label={TITULO.join(" ")}>
+            {TITULO.map((p, i) => (
+              <span key={i} className="rv-palabra mr-[0.26em]" style={{ animationDelay: `${120 + i * 70}ms` }} aria-hidden="true">
+                {p === "conversación." ? <span className="text-accent">{p}</span> : p}
               </span>
-              {libres7 > 0 && (
-                <span className="rounded-full bg-white/10 px-3.5 py-1.5 ring-1 ring-white/15">
-                  <strong className="font-semibold tabular-nums">{contador}</strong> horarios libres en los próximos 7 días
+            ))}
+          </h1>
+
+          <p className="rv-sube mt-4 text-[15px] leading-relaxed text-white/80" style={{ animationDelay: "650ms" }}>
+            En una sesión, un abogado revisa tu caso y te dice qué camino te conviene: máster, visado, estancia o becas. Pagas solo la sesión y sales con un plan claro.
+          </p>
+
+          <ul className="rv-sube mt-5 grid gap-2 text-[13px] text-white/85 sm:grid-cols-2 lg:grid-cols-1" style={{ animationDelay: "800ms" }}>
+            {[
+              ["escudo", "Pago seguro"],
+              ["usuario", "Puedes reservar sin crear cuenta"],
+              ["ciclo", "Reprograma sin costo (24 h antes)"],
+              ["video", "Reunión por Google Meet"],
+            ].map(([ic, t]) => (
+              <li key={t} className="inline-flex items-center gap-2">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-sky ring-1 ring-white/15">
+                  <Icono nombre={ic} className="h-3.5 w-3.5" />
                 </span>
-              )}
-            </>
-          ) : (
-            <span className="rounded-full bg-white/10 px-3.5 py-1.5 ring-1 ring-white/15">Los horarios nuevos se abren cada semana: déjanos tu correo y te avisamos.</span>
-          )}
-        </div>
+                {t}
+              </li>
+            ))}
+          </ul>
 
-        {/* Tres maneras de empezar */}
-        <ul className="mt-7 grid gap-3 md:grid-cols-3">
-          <Camino icono="rayo" titulo="Quiero reservar ya" texto="Elige el servicio, el día y la hora. En un minuto tu horario queda separado." destacado>
-            <button
-              type="button"
-              onClick={onReservarYa}
-              disabled={cargando}
-              className="rv-cta group relative w-full overflow-hidden rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:bg-accent-dark active:scale-[0.98] disabled:opacity-60"
-            >
-              <span className="relative inline-flex items-center justify-center gap-2">
-                {primeroTexto ? "Reservar el primer horario libre" : "Ver horarios"}
-                <Icono nombre="flecha" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </button>
-          </Camino>
-
-          <Camino icono="whatsapp" titulo="Prefiero escribir primero" texto="¿Dudas antes de pagar? Cuéntanos tu caso por WhatsApp y te orientamos.">
-            <a
-              href={whatsappUrl("Hola Inspira, tengo dudas antes de reservar mi asesoría.")}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.98]"
-            >
-              <Icono nombre="whatsapp" className="h-4 w-4" /> Escribir por WhatsApp
-            </a>
-          </Camino>
-
-          <Camino icono="sobre" titulo="Aún lo estoy pensando" texto="Te enviamos el acceso a la agenda por correo, sin compromiso.">
+          {/* Para quien no se decide todavía */}
+          <div className="rv-sube mt-6 rounded-2xl bg-white/10 p-4 ring-1 ring-white/15 backdrop-blur-sm" style={{ animationDelay: "950ms" }}>
+            <p className="text-sm font-semibold">¿Aún lo estás pensando?</p>
+            <p className="mt-0.5 text-[13px] text-white/75">Te enviamos el acceso a la agenda por correo, sin compromiso.</p>
             {pensando ? (
-              <div ref={formRef} className="rv-entrada">
+              <div ref={formRef} className="rv-entrada mt-3">
                 <FormRecordarme servicioId={servicioId} compacto />
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => setPensando(true)}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.98]"
-              >
-                <Icono nombre="sobre" className="h-4 w-4" /> Enviármelo al correo
-              </button>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={() => setPensando(true)} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-[13px] font-semibold transition hover:bg-white/10 active:scale-[0.98]">
+                  <Icono nombre="sobre" className="h-4 w-4" /> Enviármelo al correo
+                </button>
+                <a href={whatsappUrl("Hola Inspira, tengo dudas antes de reservar mi asesoría.")} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-[13px] font-semibold transition hover:bg-white/10 active:scale-[0.98]">
+                  <Icono nombre="whatsapp" className="h-4 w-4" /> Escribir por WhatsApp
+                </a>
+              </div>
             )}
-          </Camino>
-        </ul>
+          </div>
+        </div>
 
-        <ul className="rv-sube mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-white/80" style={{ animationDelay: "1000ms" }}>
-          {[
-            ["escudo", "Pago seguro"],
-            ["usuario", "Puedes reservar sin crear cuenta"],
-            ["ciclo", "Reprograma sin costo (24 h antes)"],
-            ["video", "Reunión por Google Meet"],
-          ].map(([ic, t]) => (
-            <li key={t} className="inline-flex items-center gap-2">
-              <Icono nombre={ic} className="h-4 w-4 text-sky" />
-              {t}
-            </li>
-          ))}
-        </ul>
+        <Disponibilidad cargando={cargando} servicios={servicios} servicioId={servicioId} onServicio={onServicio} dias={dias} horaVista={horaVista} hora={hora} onElegir={onElegir} libres={libres} />
       </div>
     </header>
   );

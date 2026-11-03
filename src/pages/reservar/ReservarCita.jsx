@@ -106,7 +106,9 @@ export default function ReservarCita() {
         if (!vivo) return;
         if (res?.ok) {
           setError(null);
-          setDias(res.dias || []);
+          // Solo las próximas dos semanas: la agenda se abre por tandas y los cupos son limitados.
+          const limite = new Date(Date.now() - 5 * 3600e3 + 14 * 86400e3).toISOString().slice(0, 10);
+          setDias((res.dias || []).filter((d) => d.fecha <= limite));
           setLugar(res.lugar || null);
           if (res.servicios?.length) setServicios(res.servicios);
           setFecha(null);
@@ -134,11 +136,7 @@ export default function ReservarCita() {
   const enviando = !!hora && loadingSlot === hora.id_slot;
   const primero = dias[0] || null;
   const otraZona = zona !== ZONA_AGENDA;
-  const primeroTexto = primero ? `${fechaCorta(primero.fecha)} · ${horaEn(primero.slots[0].inicio_utc, zona)}` : "";
-  const libres7 = useMemo(() => {
-    const limite = new Date(Date.now() + 7 * 86400e3).toISOString().slice(0, 10);
-    return dias.filter((d) => d.fecha <= limite).reduce((n, d) => n + d.slots.length, 0);
-  }, [dias]);
+  const libres = useMemo(() => dias.reduce((n, d) => n + d.slots.length, 0), [dias]);
 
   // Paso actual para el indicador: 0 servicio, 1 día, 2 hora, 3 pago.
   const paso = !servicio ? 0 : !fecha ? 1 : !hora ? 2 : 3;
@@ -162,9 +160,11 @@ export default function ReservarCita() {
     setHora(primero.slots[0]);
     setAceptado(false);
   };
-  // «Reservar ya»: se elige el primer horario libre y se baja al formulario.
-  const reservarYa = () => {
-    irAlPrimero();
+  // Elegir una hora en la cabecera: queda seleccionada y se baja a «tus datos».
+  const elegirDesdeCabecera = (f, slot) => {
+    setFecha(f);
+    setHora(slot);
+    setAceptado(false);
     setTimeout(() => document.getElementById("titulo-calendario")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   };
   const irAPaso = (i) => {
@@ -208,7 +208,17 @@ export default function ReservarCita() {
           </div>
         </header>
       ) : (
-        <HeroReserva cargando={cargando} primeroTexto={primeroTexto} libres7={libres7} servicioId={servicioId} onReservarYa={reservarYa} />
+        <HeroReserva
+          cargando={cargando}
+          servicios={servicios}
+          servicioId={servicioId}
+          onServicio={elegirServicio}
+          dias={dias}
+          horaVista={horaVista}
+          hora={hora}
+          onElegir={elegirDesdeCabecera}
+          libres={libres}
+        />
       )}
 
       <div className="mx-auto -mt-16 max-w-5xl px-4 md:-mt-20">

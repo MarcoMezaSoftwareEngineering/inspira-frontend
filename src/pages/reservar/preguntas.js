@@ -13,3 +13,26 @@ export const nombreCompletoValido = (v) => String(v || "").trim().split(/\s+/).f
 export function componerMotivo({ interes, inicio, detalle }) {
   return [interes && `Interés: ${interes}`, inicio && `Inicio: ${inicio}`, detalle?.trim() && `Detalle: ${detalle.trim()}`].filter(Boolean).join(" · ");
 }
+
+// La elección (servicio, día, hora y lo ya escrito) sobrevive a recargas y al
+// inicio de sesión con Google, que saca al usuario de la página y lo devuelve.
+const CLAVE_BORRADOR = "inspira:reserva-borrador";
+export function guardarBorrador(datos) {
+  try {
+    const previo = leerBorrador() || {};
+    localStorage.setItem(CLAVE_BORRADOR, JSON.stringify({ ...previo, ...datos, ts: Date.now() }));
+  } catch { /* sin almacenamiento: se pierde, como antes */ }
+}
+export function leerBorrador() {
+  try {
+    const d = JSON.parse(localStorage.getItem(CLAVE_BORRADOR) || "null");
+    return d && Date.now() - d.ts < 30 * 60e3 ? d : null;
+  } catch {
+    return null;
+  }
+}
+export function borrarBorrador() {
+  try {
+    localStorage.removeItem(CLAVE_BORRADOR);
+  } catch { /* ignorado */ }
+}

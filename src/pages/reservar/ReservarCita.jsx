@@ -22,6 +22,7 @@ import HeroReserva from "./HeroReserva";
 import SalidaReserva from "./SalidaReserva";
 import { Icono } from "./iconos";
 import { cabeceraReserva } from "./tokenReserva";
+import { guardarBorrador, leerBorrador } from "./preguntas";
 import { fechaCompleta, fechaCorta } from "./fechas";
 import { ZONA_AGENDA, desfaseDias, horaEn, zonaDetectada, zonasDisponibles } from "./zonas";
 import "./reservar.css";
@@ -51,7 +52,7 @@ export default function ReservarCita() {
   const idReprogramar = Number(parametros.get("reprogramar")) || null;
 
   const [servicios, setServicios] = useState([]);
-  const [servicioId, setServicioId] = useState(parametros.get("servicio") || SERVICIO_INICIAL);
+  const [servicioId, setServicioId] = useState(() => parametros.get("servicio") || (!idReprogramar && leerBorrador()?.servicioId) || SERVICIO_INICIAL);
   const [dias, setDias] = useState([]);
   const [lugar, setLugar] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -108,12 +109,22 @@ export default function ReservarCita() {
           setError(null);
           // Solo las próximas dos semanas: la agenda se abre por tandas y los cupos son limitados.
           const limite = new Date(Date.now() - 5 * 3600e3 + 14 * 86400e3).toISOString().slice(0, 10);
-          setDias((res.dias || []).filter((d) => d.fecha <= limite));
+          const visibles = (res.dias || []).filter((d) => d.fecha <= limite);
+          setDias(visibles);
           setLugar(res.lugar || null);
           if (res.servicios?.length) setServicios(res.servicios);
           setFecha(null);
           setHora(null);
           setAceptado(false);
+          // Si venía de iniciar sesión (o de recargar), se recupera su elección mientras el horario siga libre.
+          const b = !idReprogramar ? leerBorrador() : null;
+          const sl = b && b.servicioId === servicioId ? visibles.find((d) => d.fecha === b.fecha)?.slots.find((x) => x.id_slot === b.id_slot) : null;
+          if (sl) {
+            setFecha(b.fecha);
+            setHora(sl);
+            setAceptado(!!b.aceptado);
+            setTimeout(() => document.getElementById("titulo-calendario")?.scrollIntoView({ behavior: "smooth", block: "start" }), 400);
+          }
         } else {
           setError(res?.msg || "No se pudo cargar la disponibilidad.");
         }
@@ -126,7 +137,7 @@ export default function ReservarCita() {
     return () => {
       vivo = false;
     };
-  }, [servicioId]);
+  }, [servicioId, idReprogramar]);
 
   const servicio = servicios.find((s) => s.id === servicioId) || null;
   const diasConHorario = useMemo(() => dias.map((d) => d.fecha), [dias]);
@@ -160,6 +171,12 @@ export default function ReservarCita() {
     setHora(primero.slots[0]);
     setAceptado(false);
   };
+  // Cada elección queda guardada: así no se pierde al iniciar sesión ni al recargar.
+  useEffect(() => {
+    if (reprog || idReprogramar) return;
+    if (fecha && hora) guardarBorrador({ servicioId, fecha, id_slot: hora.id_slot });
+  }, [servicioId, fecha, hora, reprog, idReprogramar]);
+
   // Elegir una hora en la cabecera: queda seleccionada y se baja a «tus datos».
   const elegirDesdeCabecera = (f, slot) => {
     setFecha(f);
@@ -520,6 +537,7 @@ export default function ReservarCita() {
                       key={hora.id_slot}
                       hora={hora}
                       servicioId={servicioId}
+                      fecha={fecha}
                       precio={precio}
                       isLoggedIn={isLoggedIn}
                       user={user}

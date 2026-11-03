@@ -14,7 +14,7 @@ import { registrarInicioPago } from "../../lib/analytics";
 import AceptarTerminos from "../../components/legal/AceptarTerminos";
 import { Icono } from "./iconos";
 import { guardarToken } from "./tokenReserva";
-import { INICIOS, INTERESES, celularValido, componerMotivo, correoValido, nombreCompletoValido } from "./preguntas";
+import { INICIOS, INTERESES, borrarBorrador, celularValido, componerMotivo, correoValido, guardarBorrador, leerBorrador, nombreCompletoValido } from "./preguntas";
 
 const campo = "mt-1.5 w-full rounded-xl border bg-fondo px-3 py-2.5 text-sm text-tinta placeholder:text-trazo focus:outline-none focus:ring-2";
 const claseCampo = (error) => `${campo} ${error ? "border-alto focus:border-alto focus:ring-alto/20" : "border-linea focus:border-primary focus:ring-primary/20"}`;
@@ -37,14 +37,18 @@ function Campo({ id, etiqueta, error, ayuda, children }) {
   );
 }
 
-export default function FormularioReserva({ hora, servicioId, precio, isLoggedIn, user, aceptado, setAceptado, separarHorario, enviandoCuenta }) {
-  const [invitado, setInvitado] = useState(false);
-  const [nombre, setNombre] = useState("");
-  const [email, setEmail] = useState("");
-  const [celular, setCelular] = useState("");
-  const [interes, setInteres] = useState("");
-  const [inicio, setInicio] = useState("");
-  const [detalle, setDetalle] = useState("");
+export default function FormularioReserva({ hora, servicioId, fecha, precio, isLoggedIn, user, aceptado, setAceptado, separarHorario, enviandoCuenta }) {
+  const [previo] = useState(() => {
+    const b = leerBorrador();
+    return b && b.id_slot === hora.id_slot ? b : null;
+  });
+  const [invitado, setInvitado] = useState(!!previo?.invitado);
+  const [nombre, setNombre] = useState(previo?.nombre || "");
+  const [email, setEmail] = useState(previo?.email || "");
+  const [celular, setCelular] = useState(previo?.celular || "");
+  const [interes, setInteres] = useState(previo?.interes || "");
+  const [inicio, setInicio] = useState(previo?.inicio || "");
+  const [detalle, setDetalle] = useState(previo?.detalle || "");
   const [trampa, setTrampa] = useState("");
   const [intento, setIntento] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -70,6 +74,7 @@ export default function FormularioReserva({ hora, servicioId, precio, isLoggedIn
       return;
     }
     if (conCuenta) {
+      borrarBorrador();
       separarHorario(hora.id_slot, servicioId, modo, { motivo: componerMotivo({ interes, inicio, detalle }), celular: celular.trim() });
       return;
     }
@@ -80,6 +85,7 @@ export default function FormularioReserva({ hora, servicioId, precio, isLoggedIn
         nombre: nombre.trim(), email: email.trim(), celular: celular.trim(), interes, inicio, motivo: detalle.trim(),
       });
       if (res?.ok && res.id_reserva) {
+        borrarBorrador();
         guardarToken(res.id_reserva, res.token);
         registrarInicioPago("reserva_cita_separada", { id_slot: hora.id_slot, servicio_id: servicioId, modo, invitado: true });
         window.location.assign(`/reservar/pago?r=${res.id_reserva}`);
@@ -99,7 +105,10 @@ export default function FormularioReserva({ hora, servicioId, precio, isLoggedIn
         <h3 className="font-semibold text-tinta">¿Cómo quieres reservar?</h3>
         <button
           type="button"
-          onClick={() => loginGoogle({ volverAqui: true })}
+          onClick={() => {
+            guardarBorrador({ servicioId, fecha, id_slot: hora.id_slot, celular, interes, inicio, detalle, aceptado });
+            loginGoogle({ volverAqui: true });
+          }}
           className="flex w-full items-center justify-between gap-3 rounded-2xl bg-primary px-5 py-4 text-left text-white shadow-[0_14px_30px_-16px_rgba(1,52,70,.9)] transition hover:bg-primary-light active:scale-[0.99]"
         >
           <span>
@@ -110,7 +119,10 @@ export default function FormularioReserva({ hora, servicioId, precio, isLoggedIn
         </button>
         <button
           type="button"
-          onClick={() => setInvitado(true)}
+          onClick={() => {
+            setInvitado(true);
+            guardarBorrador({ invitado: true });
+          }}
           className="flex w-full items-center justify-between gap-3 rounded-2xl border border-linea bg-white px-5 py-4 text-left transition hover:border-primary hover:bg-secondary-light active:scale-[0.99]"
         >
           <span>

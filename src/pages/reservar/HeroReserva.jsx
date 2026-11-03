@@ -14,7 +14,6 @@ import { Icono } from "./iconos";
 import retrato from "../../assets/images/carina/retrato-espana.webp";
 import { correoValido } from "./preguntas";
 
-const TITULO = ["Reserva", "tu", "primera", "asesoría"];
 
 // Cuenta hasta `valor` en ~0,6 s.
 function useContador(valor) {
@@ -244,16 +243,22 @@ function Disponibilidad({ cargando, servicios, servicioId, onServicio, dias, hor
   );
 }
 
-const TARJETAS = [
-  ["reloj", "Sesión de 30 minutos", "Clara, rápida y profesional"],
-  ["usuario", "Atención personalizada", "Te escuchamos y te entendemos"],
-  ["escudo", "100 % confidencial", "Tu información está segura con nosotros"],
-];
+const duracionTexto = (min) => (min === 60 ? "1 hora" : min > 60 && min % 60 === 0 ? `${min / 60} horas` : `${min || 30} minutos`);
 
 export default function HeroReserva({ cargando, servicios, servicioId, onServicio, dias, horaVista, hora, onElegir, libres }) {
   const [pensando, setPensando] = useState(false);
   const formRef = useRef(null);
   const servicio = servicios.find((s) => s.id === servicioId) || servicios[0];
+  // Todo lo que habla del servicio sigue al servicio elegido (duración, modalidad, nombre).
+  const dur = duracionTexto(servicio?.duracion_min);
+  const esDiag = !servicio || servicio.id === "sesion-diagnostico";
+  const presencial = servicio?.modalidad === "presencial";
+  const palabras = esDiag ? ["Reserva", "tu", "primera", "asesoría"] : ["Reserva", "tu", "asesoría", servicio.titulo.replace(/^Asesoría\s+/i, "").toLowerCase()];
+  const tarjetas = [
+    ["reloj", `Sesión de ${dur}`, "Clara, rápida y profesional"],
+    ["usuario", "Atención personalizada", "Te escuchamos y te entendemos"],
+    ["escudo", "100 % confidencial", "Tu información está segura con nosotros"],
+  ];
 
   useEffect(() => {
     if (pensando) formRef.current?.querySelector("input[type=email]")?.focus();
@@ -292,15 +297,15 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
             </span>
           </div>
 
-          <h1 className="mt-4 text-[2.3rem] font-black uppercase leading-[1.02] tracking-tight md:text-[3.4rem]" aria-label={TITULO.join(" ")}>
-            {TITULO.map((p, i) => (
+          <h1 className="mt-4 text-[2.3rem] font-black uppercase leading-[1.02] tracking-tight md:text-[3.4rem]" aria-label={palabras.join(" ")} key={servicio?.id || "x"}>
+            {palabras.map((p, i) => (
               <span key={i} className="rv-palabra mr-[0.22em]" style={{ animationDelay: `${i * 70}ms` }} aria-hidden="true">
-                {p === "asesoría" ? <span className="text-accent">{p}</span> : p}
+                {i === palabras.length - 1 ? <span className="text-accent">{p}</span> : p}
               </span>
             ))}
           </h1>
-          <p className="rv-entra-izq mt-3 inline-block rounded-full bg-primary px-5 py-1.5 text-sm font-extrabold uppercase tracking-[0.18em] text-white" style={{ animationDelay: "260ms" }}>
-            Diagnóstico
+          <p key={servicio?.id || "x"} className="rv-entra-izq mt-3 inline-block rounded-full bg-primary px-5 py-1.5 text-sm font-extrabold uppercase tracking-[0.18em] text-white" style={{ animationDelay: "260ms" }}>
+            {esDiag ? "Diagnóstico" : presencial ? "En San Isidro, Lima" : "Online"}
           </p>
 
           {/* Quién te atiende: foto, presentación y enlaces a su página y a las reseñas */}
@@ -315,7 +320,7 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
               </span>
             </a>
             <p className="text-[16px] leading-relaxed text-tinta-2 md:text-[17px]">
-              En <strong className="text-primary">30 minutos</strong>, <strong className="text-primary">Carina Meza</strong>, especialista en <strong className="text-primary">Extranjería</strong> y asesoría de <strong className="text-primary">máster y becas en el extranjero</strong>, analiza tu perfil y te explica, paso a paso, el camino que te conviene.
+              En <strong className="text-primary" key={dur}>{dur}</strong>, <strong className="text-primary">Carina Meza</strong>, especialista en <strong className="text-primary">Extranjería</strong> y asesoría de <strong className="text-primary">máster y becas en el extranjero</strong>, analiza tu perfil y te explica, paso a paso, el camino que te conviene.
             </p>
           </div>
 
@@ -341,7 +346,7 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
           </ul>
 
           <ul className="mt-5 space-y-2.5 text-[15px] font-semibold text-primary">
-            {[["gorro", "Orientación clara y estratégica, a tu medida"], ["pasaporte", "Experiencia real en trámites hacia España"], ["video", "Reunión por Google Meet"], ["escudo", "Pago seguro y datos protegidos"]].map(([ic, t], i) => (
+            {[["gorro", "Orientación clara y estratégica, a tu medida"], ["pasaporte", "Experiencia real en trámites hacia España"], [presencial ? "oficina" : "video", presencial ? "Atención presencial en San Isidro, Lima" : "Reunión por Google Meet"], ["escudo", "Pago seguro y datos protegidos"]].map(([ic, t], i) => (
               <li key={t} className="rv-desliza flex items-center gap-3" style={{ animationDelay: `${480 + i * 90}ms` }}>
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-accent text-white">
                   <Icono nombre={ic} className="h-4 w-4" />
@@ -364,19 +369,19 @@ export default function HeroReserva({ cargando, servicios, servicioId, onServici
                 <Icono nombre="rayo" className="h-7 w-7" />
               </span>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-primary/80">Primera asesoría por solo</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-primary/80">{esDiag ? "Primera asesoría" : servicio.titulo} por solo</p>
                 <p className="text-4xl font-black leading-none text-primary">{precioCorto(servicio)}</p>
               </div>
               <ul className="ml-auto hidden text-[12px] font-semibold text-primary sm:block">
                 <li>✓ Pago seguro</li>
                 <li>✓ Reprograma sin costo</li>
-                <li>✓ Reunión por Google Meet</li>
+                <li>{presencial ? "✓ Atención presencial" : "✓ Reunión por Google Meet"}</li>
               </ul>
             </div>
           )}
 
           <ul className="mt-3 grid gap-2.5 sm:grid-cols-3">
-            {TARJETAS.map(([ic, t, d], i) => (
+            {tarjetas.map(([ic, t, d], i) => (
               <li key={t} className="rv-sube flex items-start gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-linea sm:flex-col" style={{ animationDelay: `${420 + i * 80}ms` }}>
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-accent">
                   <Icono nombre={ic} className="h-5 w-5" />

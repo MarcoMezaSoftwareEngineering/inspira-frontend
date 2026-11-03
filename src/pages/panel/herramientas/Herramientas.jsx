@@ -9,7 +9,7 @@ import { IPREM_ANUAL } from "../../../config/visaOEstancia";
 import { useHerramienta, textoEstado, uid } from "./useHerramienta";
 import { usados, salidaMaxima, diaDe } from "./schengen";
 
-const eur = (n) => `${Math.round(n || 0).toLocaleString("es-ES")} €`;
+const eur = (n) => `${Math.round(n || 0).toLocaleString("es-ES")}\u00a0€`;
 const hoyIso = () => new Date().toISOString().slice(0, 10);
 const mesDe = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString("es-ES", { month: "long", year: "numeric" });
 const fechaLarga = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });

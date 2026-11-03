@@ -1007,6 +1007,8 @@ const HERRAMIENTAS = {
     { id: "e3", fecha: isoEn(40), titulo: "Abre Fundación Carolina" },
   ] },
   schengen: { estancias: [{ id: "s1", entrada: isoEn(-120), salida: isoEn(-95) }, { id: "s2", entrada: isoEn(-30), salida: isoEn(-20) }], entrada: isoEn(15) },
+  admision: { t: "derecho", titulacion: "Grado en Derecho" },
+  nota: { pais: "pe", nota: 15.4 },
   listas: { hecho: { "visa-0": true, "visa-1": true, "visa-3": true }, propios: { visa: [{ id: "p1", texto: "Adaptador de enchufe" }] } },
 };
 
@@ -1054,7 +1056,10 @@ const RUTAS = [
   ["GET", /^\/api\/catalogo\/titulaciones$/, () => ok({ titulaciones: [] })],
   ["GET", /^\/portales\/panel\/.*documentos-proceso$/, () => ok({ documentos: [] })],
   ["GET", /^\/cierre-master\/panel\/solicitudes\/\d+\/bloque8$/, () => ok({ plan_nombre: "Paquete Premium", admitido: false, masters: [], master_final: null, derivacion: { via: null, contratacion: null }, opciones_derivacion: {}, cierre: { archivado: false }, encuesta: null })],
-  ["GET", /^\/cliente\/herramientas$/, () => ok({ herramientas: HERRAMIENTAS })],
+  ["GET", /^\/cliente\/herramientas$/, () => ok({ herramientas: HERRAMIENTAS, referido: { codigo: "I5WQ", invitados: 3, contrataron: 1 } })],
+  ["GET", /^\/api\/catalogo\/titulaciones$/, () => ok({ titulaciones: [{ norm: "derecho", titulacion: "Grado en Derecho", n: 412 }, { norm: "derecho y ade", titulacion: "Doble Grado en Derecho y ADE", n: 51 }] })],
+  ["GET", /^\/api\/catalogo\/acceso$/, () => ok({ total: 152, directos: 61, desde: 1180, comunidades: [{ nombre: "Comunidad de Madrid", n: 38 }, { nombre: "Cataluña", n: 27 }, { nombre: "Andalucía", n: 24 }, { nombre: "Comunidad Valenciana", n: 19 }], ejemplo: { nombre: "Máster Universitario en Derecho Internacional", universidad: "Universidad Complutense de Madrid", ciudad: "Madrid", comunidad: "Comunidad de Madrid", ects: 60, modalidad: "PRESENCIAL", curso: "2026-27", precio: 3480 } })],
+  ["POST", /^\/cliente\/herramientas\/referido$/, () => ok({ aplicado: false })],
   ["PUT", /^\/cliente\/herramientas\/\w+$/, () => ok({ actualizado: new Date().toISOString() })],
   ["POST", /^\/api\/errores-web$/, () => ok({})],
 ];

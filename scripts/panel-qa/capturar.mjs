@@ -162,7 +162,7 @@ const RUTAS = [
     antes: (p) => p.clic({ selector: "button", texto: "Instalar la app", visible: false }) },
   // Sin servicios y con el perfil incompleto: la app gratuita (AppGratis).
   { ruta: "/panel", nombre: "panel-app-gratis", escenario: "sin-servicios" },
-  ...["presupuesto", "becas", "calendario", "schengen", "listas"].map((h) => (
+  ...["presupuesto", "becas", "calendario", "schengen", "listas", "admision", "nota", "plazos", "trabajo", "grado", "amigos"].map((h) => (
     { ruta: `/panel/herramientas/${h}`, nombre: `panel-herramientas-${h}`, escenario: "sin-servicios" })),
   // Con servicios, las herramientas sin el bloque «Reservado para clientes».
   { ruta: "/panel/herramientas", nombre: "panel-herramientas" },

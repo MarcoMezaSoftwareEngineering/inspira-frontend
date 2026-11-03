@@ -9,12 +9,14 @@ import { apiGET, apiPUT } from "../../../services/api";
 
 let pedido = null; // la promesa compartida de GET /cliente/herramientas
 const memoria = {};
+let referido = null; // { codigo, invitados, contrataron } de «Invita a un amigo»
 
 function cargarTodas() {
   if (!pedido) {
     pedido = apiGET("/cliente/herramientas").then((r) => {
       if (!r?.ok) { pedido = null; throw new Error(r?.message || "No se pudieron cargar tus herramientas"); }
       Object.assign(memoria, r.herramientas || {});
+      referido = r.referido || null;
       return memoria;
     }, (e) => { pedido = null; throw e; });
   }
@@ -64,6 +66,26 @@ export function useHerramienta(clave, inicial) {
 
   return [datos, guardar, estado];
 }
+
+function resumen() {
+  const viaje = memoria.calendario?.viaje;
+  const dias = viaje ? Math.ceil((Date.parse(`${viaje}T12:00:00`) - Date.now()) / 864e5) : null;
+  return { referido, usadas: Object.keys(memoria), dias };
+}
+
+/** Para la portada: qué herramientas ya usó, los días hasta su viaje y su código de amigo. */
+export function useResumen() {
+  const [r, setR] = useState(resumen);
+  useEffect(() => {
+    let vivo = true;
+    cargarTodas().then(() => { if (vivo) setR(resumen()); }).catch(() => {});
+    return () => { vivo = false; };
+  }, []);
+  return r;
+}
+
+/** Su código de amigo y cuántos entraron con él. */
+export const useReferido = () => useResumen().referido;
 
 /** «Guardado en tu cuenta», al lado del título de cada herramienta. */
 export function textoEstado(estado) {

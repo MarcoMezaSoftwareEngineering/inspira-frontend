@@ -1,26 +1,23 @@
 // Aliados externos con enlace de referido o atención prioritaria (03/11/2026).
-// Los usan /enlaces y la app gratuita. Un aliado sin `href` no se pinta: se
-// añade aquí el enlace de referido y aparece solo.
+// Los usan /enlaces y la app gratuita. Un aliado sin `href` no se pinta. El
+// seguro lo atiende Félix, de StarSeguro.
 import { MENSAJE_SEGURO, WHATSAPP_SEGURO } from "./contacto";
 
 export const HOLAFLY_URL = "https://holafly.go.link/3pDol";
 
 export const ALIADOS = [
   {
-    clave: "seguro", icono: "salud", titulo: "Seguro médico para la visa",
-    texto: "Adeslas sin copagos con StarSeguro, con atención prioritaria",
+    clave: "seguro", icono: "salud", titulo: "Seguro de viaje",
+    texto: "Los mejores, también para tu visa. Te atiende Félix, de StarSeguro",
     chip: "Prioritario", href: WHATSAPP_SEGURO, mensaje: MENSAJE_SEGURO,
   },
   {
-    clave: "esim", icono: "senal", titulo: "eSIM Holafly",
-    texto: "Datos en toda Europa desde que aterrizas", chip: "10 % dto.", href: HOLAFLY_URL,
+    clave: "esim", icono: "senal", titulo: "Adquiere tu eSIM",
+    texto: "Datos para tus primeros días de viaje, con Holafly", chip: "10 % dto.", href: HOLAFLY_URL,
   },
   {
     clave: "global66", icono: "euro", titulo: "Global66",
-    texto: "Cuenta en euros y envíos de dinero entre países", chip: "Referido", href: null,
-  },
-  {
-    clave: "felix", icono: "whatsapp", titulo: "Félix Pago",
-    texto: "Envía dinero a tu familia desde WhatsApp", chip: "Referido", href: null,
+    texto: "Tu primera transacción gratis. Envía y recibe dinero entre países", chip: "Gratis",
+    href: "https://share.global66.com/CARMEZ1467",
   },
 ];

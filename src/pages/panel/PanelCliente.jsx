@@ -71,7 +71,8 @@ const BecasEspana   = lazyConRecarga(() => import("./BecasEspana"));
 // perfil» o cuando faltan datos: ya no viajan con la portada del panel
 // (09/10/2026).
 const PerfilCliente = lazyConRecarga(() => import("./components/PerfilCliente"));
-const WizardPerfilCliente = lazyConRecarga(() => import("./components/WizardPerfilCliente"));
+// La app gratuita: herramientas que guardan en su cuenta (03/11/2026).
+const AppGratis     = lazyConRecarga(() => import("./herramientas/AppGratis"));
 // «Mis pagos» se descarga al abrirlo; sus estilos van en panel.css (ex-pg-*).
 const MisPagos      = lazyConRecarga(() => import("./components/MisPagos"));
 const MisAsesorias  = lazyConRecarga(() => import("./components/MisAsesorias"));
@@ -163,10 +164,11 @@ export default function PanelCliente({ path }) {
   // Paquete de máster: el perfil entero es condición del servicio.
   const conCompleto = !soloInvitado && pideCompleto(lista);
   const perfilIncompleto = usePerfilIncompletoBool(user, conAcademico, conCompleto);
-  // El asistente solo cierra el paso a quien todavía no tiene nada contratado:
-  // completar sus datos es lo previo a que un asesor le dé acceso. A quien ya
+  // Hasta el 03/11/2026 un asistente cerraba el paso a quien no tenía nada
+  // contratado hasta completar sus datos. Con la app gratuita entra directo a
+  // sus herramientas y la portada le pide completar el perfil. A quien ya
   // tiene expediente se le avisa arriba de lo que falta, y sigue trabajando.
-  const mostrarWizard = user !== null && cargado && perfilIncompleto && sinServicios;
+  const inicioGratis = sinServicios && tab === "inicio" && !ruta.idServicio;
   const avisarPerfil = user !== null && cargado && perfilIncompleto && !sinServicios && tab !== "perfil";
   const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico, conCompleto) : 0;
   // Lo mismo, para «¿Qué me falta?» dentro de cada expediente.
@@ -309,14 +311,15 @@ export default function PanelCliente({ path }) {
 
   // Inicio y la lista de servicios comparten el marco: son las dos vistas
   // desde las que se abre un expediente.
-  const esServicios = tab === "servicios" || tab === "inicio";
+  // Sin nada contratado, su Inicio es la app gratuita.
+  const esServicios = (tab === "servicios" || tab === "inicio") && !inicioGratis;
   // Solo un expediente abierto gestiona su propio scroll (sus secciones llenan
   // la altura). Inicio y la lista se desplazan dentro de <main>, con la barra
   // de arriba fija: si no, en el móvil el botón del menú se iba con el scroll.
   const esScrollInterno = esServicios && Boolean(ruta.idServicio);
   const claveVista = ruta.idServicio ? `expediente-${ruta.idServicio}` : tab;
 
-  const tourPendiente = user !== null && cargado && lista.length > 0 && !mostrarWizard
+  const tourPendiente = user !== null && cargado && lista.length > 0
     && tab === "inicio" && !ruta.idServicio && !user?.datos_extra?.tour_visto_at;
   useEffect(() => {
     if (!tourPendiente) return undefined;
@@ -342,7 +345,7 @@ export default function PanelCliente({ path }) {
   // Tab titles
   // Todas las guías comparten título: la pestaña de dentro dice cuál es.
   const titles = {
-    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", pagos: "Mis pagos", asesorias: "Mis asesorías", perfil: "Mi perfil", becas: "Becas España",
+    inicio: inicioGratis ? "App Inspira" : "Mi expediente", herramientas: "Herramientas gratis", servicios: "Mis servicios", ruta: "Mi ruta", pagos: "Mis pagos", asesorias: "Mis asesorías", perfil: "Mi perfil", becas: "Becas España",
     ...Object.fromEntries(CLAVES_GUIAS.map((clave) => [clave, "Mis guías"])),
   };
 
@@ -454,7 +457,7 @@ export default function PanelCliente({ path }) {
           <div className="min-w-0 pnl-top-titulo">
             <p className="pnl-top-eyebrow">
               <span className="punto" />
-              {eyebrowBarra || <>Expediente Digital<span className="hidden sm:inline">&nbsp;Inspira</span></>}
+              {eyebrowBarra || (sinServicios ? "App Inspira · gratis" : <>Expediente Digital<span className="hidden sm:inline">&nbsp;Inspira</span></>)}
             </p>
             <h1 title={ruta.idServicio ? (cabExp?.titulo || servicioAbierto?.titulo || "") : undefined}>{tituloBarra}</h1>
           </div>
@@ -542,7 +545,7 @@ export default function PanelCliente({ path }) {
                 error={errorServicios}
                 onRecargar={cargarServicios}
                 onIrAGuia={handleChangeTab}
-                avisoAppBloqueado={tour || tourPendiente || mostrarWizard}
+                avisoAppBloqueado={tour || tourPendiente}
                 faltanPerfil={faltanPerfil}
                 pagos={planesPago}
                 avisoPerfil={avisarPerfil && enPortada && primerPendiente !== "perfil"
@@ -551,6 +554,21 @@ export default function PanelCliente({ path }) {
               />
               </CabeceraExpedienteCtx.Provider>
             </div>
+          )}
+
+          {/* App gratuita: su Inicio si no tiene nada contratado, y
+              «Herramientas» para todos. */}
+          {(inicioGratis || tab === "herramientas") && (
+            <CercoErrores donde="panel-herramientas" clave="herramientas" titulo="Tus herramientas no se pudieron mostrar">
+              <Suspense fallback={<LoadingPage />}>
+                <AppGratis
+                  herramienta={tab === "herramientas" ? ruta.herramienta : null}
+                  nombre={datosUsuario(user).corto}
+                  esCliente={!sinServicios}
+                  perfilIncompleto={perfilIncompleto}
+                />
+              </Suspense>
+            </CercoErrores>
           )}
 
           {/* Perfil: scroll externo */}
@@ -604,7 +622,8 @@ export default function PanelCliente({ path }) {
 
       {conTabbar && user && (
         <BarraPestanas
-          tab={tab}
+          tab={ruta.herramienta ? `herramientas/${ruta.herramienta}` : tab}
+          gratis={sinServicios}
           pendientes={nPendientes}
           conPagos={conPagos}
           conRuta={lista.length > 0}
@@ -621,17 +640,6 @@ export default function PanelCliente({ path }) {
       {tour && <Tour pasos={PASOS_INICIO} onFin={terminarTour} />}
 
       {instalarAbierto && <InstalarAppModal onCerrar={() => setInstalarAbierto(false)} />}
-
-      {/* Es un modal: mientras llega su trozo no se pinta nada. */}
-      {mostrarWizard && !finSesion && (
-        <Suspense fallback={null}>
-          <WizardPerfilCliente
-            user={user}
-            conAcademico={conAcademico}
-            onComplete={(updatedUser) => setUser(updatedUser)}
-          />
-        </Suspense>
-      )}
 
       {finSesion && <AvisoSesion motivo={finSesion} />}
     </div>

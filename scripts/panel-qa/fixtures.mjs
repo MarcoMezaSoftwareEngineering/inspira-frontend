@@ -997,6 +997,19 @@ const CATALOGO = {
   comunidades: ["Andalucía", "Cataluña", "Comunidad de Madrid", "Comunidad Valenciana", "Galicia", "País Vasco"],
 };
 
+// Lo que la app gratuita guarda en su cuenta (/cliente/herramientas).
+const isoEn = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+const HERRAMIENTAS = {
+  becas: { estados: { carolina: "preparando", jaen: "interesa", erasmus: "postule" } },
+  calendario: { viaje: isoEn(240), eventos: [
+    { id: "e1", fecha: isoEn(-3), titulo: "Pedir la apostilla del título" },
+    { id: "e2", fecha: isoEn(12), titulo: "Cierra la beca de la U. de Jaén" },
+    { id: "e3", fecha: isoEn(40), titulo: "Abre Fundación Carolina" },
+  ] },
+  schengen: { estancias: [{ id: "s1", entrada: isoEn(-120), salida: isoEn(-95) }, { id: "s2", entrada: isoEn(-30), salida: isoEn(-20) }], entrada: isoEn(15) },
+  listas: { hecho: { "maleta-0": true, "maleta-1": true, "maleta-8": true }, propios: { maleta: [{ id: "p1", texto: "Adaptador de enchufe" }] } },
+};
+
 // ── Enrutador de fixtures ───────────────────────────────────────────────────
 const ok = (cuerpo = {}) => ({ prevista: true, status: 200, cuerpo: { ok: true, ...cuerpo } });
 
@@ -1041,6 +1054,8 @@ const RUTAS = [
   ["GET", /^\/api\/catalogo\/titulaciones$/, () => ok({ titulaciones: [] })],
   ["GET", /^\/portales\/panel\/.*documentos-proceso$/, () => ok({ documentos: [] })],
   ["GET", /^\/cierre-master\/panel\/solicitudes\/\d+\/bloque8$/, () => ok({ plan_nombre: "Paquete Premium", admitido: false, masters: [], master_final: null, derivacion: { via: null, contratacion: null }, opciones_derivacion: {}, cierre: { archivado: false }, encuesta: null })],
+  ["GET", /^\/cliente\/herramientas$/, () => ok({ herramientas: HERRAMIENTAS })],
+  ["PUT", /^\/cliente\/herramientas\/\w+$/, () => ok({ actualizado: new Date().toISOString() })],
   ["POST", /^\/api\/errores-web$/, () => ok({})],
 ];
 
@@ -1055,8 +1070,8 @@ const PERFIL_NUEVO = {
 };
 
 const ESCENARIOS = {
-  // Nadie le ha dado de alta todavía y el perfil está incompleto: el panel
-  // cierra el paso con el asistente del perfil (PanelCliente: mostrarWizard).
+  // Nadie le ha dado de alta todavía y el perfil está incompleto: su Inicio
+  // es la app gratuita, con el aviso de completar el perfil.
   "sin-servicios": (method, path) => {
     if (method !== "GET") return null;
     if (path === "/cliente/me") return ok({ cliente: PERFIL_NUEVO });

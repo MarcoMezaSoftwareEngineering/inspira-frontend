@@ -14,10 +14,12 @@ import { loginGoogle } from "../../../components/layout/Header/LoginButton";
 import { navigate } from "../../../services/navigate";
 import { whatsappDesde } from "../../../config/contacto";
 
+// Desde el 03/11/2026 cualquiera crea su cuenta con Google y usa gratis las
+// herramientas; el expediente sigue siendo para quien tiene un servicio.
 const QUE_HAY = [
-  { icono: "documento", titulo: "Tus documentos", texto: "Súbelos desde el móvil y ve cuáles ya están revisados." },
-  { icono: "reloj", titulo: "Tus plazos", texto: "Qué cierra y cuándo, sin tener que preguntarlo." },
-  { icono: "brujula", titulo: "Tu trámite paso a paso", texto: "En qué punto está y qué te toca hacer hoy." },
+  { icono: "regalo", titulo: "Herramientas gratis", texto: "Presupuesto, tracker de becas, calendario, días Schengen y listas." },
+  { icono: "birrete", titulo: "Todo guardado en tu cuenta", texto: "Lo que escribes te espera en el móvil y en el ordenador." },
+  { icono: "documento", titulo: "Y si ya eres cliente, tu expediente", texto: "Documentos, plazos y tu trámite paso a paso." },
 ];
 
 export default function Bienvenida() {
@@ -28,12 +30,12 @@ export default function Bienvenida() {
         <div className="pnl-side-logo pnl-vacio-logo">
           <img src={logo} alt="Inspira Legal" />
         </div>
-        <h3>Expediente Digital Inspira</h3>
-        <p className="ex-lema">No tienes una carpeta. Tienes un expediente.</p>
+        <h3>App Inspira</h3>
+        <p className="ex-lema">Prepara tu viaje a España. Gratis.</p>
         <p>
-          Aquí vive tu expediente con Inspira: lo que has entregado, lo que falta
-          y lo que viene después. Entra con el correo de Google con el que te dimos
-          el acceso.
+          Crea tu cuenta con tu correo de Google y usa las herramientas para
+          estudiar, vivir o viajar a España. Si ya eres cliente, entra con el
+          correo con el que te dimos el acceso.
         </p>
 
         <div className="pnl-lineas">
@@ -53,7 +55,7 @@ export default function Bienvenida() {
         <div className="pnl-vacio-acciones">
           <button type="button" className="pnl-btn-cta pnl-btn-grande ux-tap" onClick={() => loginGoogle()}>
             <Icono nombre="usuario" size={16} />
-            Entrar con tu correo de Google
+            Entrar gratis con Google
           </button>
           <button type="button" className="pnl-btn-noche ux-tap" onClick={() => navigate("/")}>
             Ver la web
@@ -61,7 +63,7 @@ export default function Bienvenida() {
         </div>
 
         <p className="pnl-vacio-pie">
-          ¿Todavía no tienes acceso?{" "}
+          ¿Quieres tu Expediente Digital con un asesor?{" "}
           <a
             href={whatsappDesde("panel-bienvenida", "Quiero información para acceder a mi panel.")}
             target="_blank" rel="noopener noreferrer"

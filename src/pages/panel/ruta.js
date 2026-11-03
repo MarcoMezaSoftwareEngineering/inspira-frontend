@@ -9,6 +9,8 @@
 //                                   ?cuota=ID resalta una)
 //   /panel/portal, /panel/guia…   → una pestaña de «Mis guías» (PDF, máster,
 //                                   estancia, residencia y trabajo, apostilla)
+//   /panel/herramientas[/becas]   → la app gratuita: herramientas que guardan en su
+//                                   cuenta, para todos (sin servicio es su Inicio)
 //   /panel/servicios/155          → un expediente
 //   /panel/servicios/155/post     → una sección de ese expediente
 //
@@ -20,6 +22,7 @@
 
 export const PESTANAS = [
   "inicio", "servicios", "ruta", "pagos", "asesorias", "perfil", "portal", "becas", "guia", "apostilla", "estancia", "modificatoria", "grado",
+  "herramientas",
 ];
 
 /** @returns {{tab: string|null, idServicio: number|null, seccion: string|null}} */
@@ -39,6 +42,9 @@ export function leerRuta(path) {
       seccion: partes[2] || null,
     };
   }
+
+  // Las herramientas gratuitas: /panel/herramientas y /panel/herramientas/becas…
+  if (partes[0] === "herramientas") return { tab: "herramientas", idServicio: null, seccion: null, herramienta: partes[1] || null };
 
   if (PESTANAS.includes(partes[0])) return { tab: partes[0], idServicio: null, seccion: null };
 

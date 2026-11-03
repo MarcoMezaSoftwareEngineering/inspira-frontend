@@ -160,8 +160,12 @@ const RUTAS = [
   // teléfono el lateral está fuera de la pantalla, pero en el DOM: se le hace clic igual.
   { ruta: "/panel", nombre: "panel-instalar", estirar: false,
     antes: (p) => p.clic({ selector: "button", texto: "Instalar la app", visible: false }) },
-  // Sin servicios y con el perfil incompleto: WizardPerfilCliente.
-  { ruta: "/panel", nombre: "panel-asistente-perfil", escenario: "sin-servicios", estirar: false },
+  // Sin servicios y con el perfil incompleto: la app gratuita (AppGratis).
+  { ruta: "/panel", nombre: "panel-app-gratis", escenario: "sin-servicios" },
+  ...["presupuesto", "becas", "calendario", "schengen", "listas"].map((h) => (
+    { ruta: `/panel/herramientas/${h}`, nombre: `panel-herramientas-${h}`, escenario: "sin-servicios" })),
+  // Con servicios, las herramientas sin el bloque «Reservado para clientes».
+  { ruta: "/panel/herramientas", nombre: "panel-herramientas" },
   { ruta: "/panel", nombre: "panel-sin-token", sinToken: true },
 ];
 

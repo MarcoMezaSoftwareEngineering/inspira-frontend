@@ -18,8 +18,16 @@ function IconoMas() {
   );
 }
 
-export default function BarraPestanas({ tab, pendientes = 0, conPagos = false, conRuta = false, menuAbierto = false, onIr, onMas }) {
-  const pestanas = [
+export default function BarraPestanas({ tab, gratis = false, pendientes = 0, conPagos = false, conRuta = false, menuAbierto = false, onIr, onMas }) {
+  // Sin nada contratado no hay servicios ni pagos que enseñar: abajo van las
+  // herramientas gratuitas que más se usan (03/11/2026).
+  const pestanas = gratis ? [
+    { clave: "inicio", icono: "regalo", texto: "Inicio" },
+    { clave: "herramientas/becas", icono: "birrete", texto: "Becas" },
+    { clave: "herramientas/calendario", icono: "calendario", texto: "Calendario" },
+    { clave: "perfil", icono: "usuario", texto: "Perfil" },
+    { clave: "mas", texto: "Más" },
+  ] : [
     { clave: "inicio", icono: "panel", texto: "Inicio", badge: pendientes },
     { clave: "servicios", icono: "maletin", texto: "Servicios" },
     conPagos

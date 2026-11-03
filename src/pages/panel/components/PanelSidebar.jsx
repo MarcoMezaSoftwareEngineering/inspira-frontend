@@ -119,7 +119,7 @@ export default function PanelSidebar({
         <p className="pnl-side-grupo">Mi cuenta</p>
         <SidebarItem
           icono="panel"
-          label="Mi expediente"
+          label={conRuta ? "Mi expediente" : "Inicio"}
           badge={pendientes}
           active={activeTab === "inicio"}
           onClick={() => onChangeTab("inicio")}
@@ -171,9 +171,16 @@ export default function PanelSidebar({
           onClick={() => onChangeTab("perfil")}
         />
 
+        <p className="pnl-side-grupo">Recursos Inspira</p>
+        {/* La app gratuita, para todos: con o sin servicios (03/11/2026). */}
+        <SidebarItem
+          icono="regalo"
+          label="Herramientas gratis"
+          active={activeTab === "herramientas"}
+          onClick={() => onChangeTab("herramientas")}
+        />
         {(conGuias || conBecas) && (
           <>
-            <p className="pnl-side-grupo">Recursos Inspira</p>
             {/* Una sola entrada para todas las guías: abre la primera que le
                 toca y, si ya está en una, se queda en ella. */}
             {conGuias && (

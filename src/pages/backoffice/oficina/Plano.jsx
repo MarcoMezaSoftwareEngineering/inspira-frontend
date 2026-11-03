@@ -48,7 +48,7 @@ function Rotulo({ x, texto, cuenta, urgente }) {
   );
 }
 
-function Paredes({ noche, tablero, personajes }) {
+function Paredes({ noche, tablero, personajes, roles }) {
   const p = Object.fromEntries(personajes.map((q) => [q.id, q]));
   const libros = useMemo(() => Array.from({ length: 3 }, (_, f) => Array.from({ length: 9 }, (_, i) => ({ f, i, c: ["#8f1d2c", "#1d3f73", "#2f6b3f", "#b0831f", "#4a2a85", "#a3541a"][Math.floor(rnd(f * 9 + i) * 6)], h: 15 + rnd(f * 31 + i) * 9, w: 7 + rnd(i + f) * 3 }))).flat(), []);
   const lineas = (L, c) => Array.from({ length: 7 }, (_, i) => <line key={i} x1={c} x2={c + L} y1={-ALTO + (i + 1) * 20} y2={-ALTO + (i + 1) * 20} stroke="#012a3a" strokeWidth=".6" opacity=".5" />);
@@ -78,9 +78,9 @@ function Paredes({ noche, tablero, personajes }) {
         {/* Neville: ventanas */}
         <Ventana x0={322} noche={noche} id="c" /><Ventana x0={392} noche={noche} id="d" />
         <g transform="translate(152,-150)"><g className="of-estandarte"><path d="M0,0 H34 V70 L17,58 L0,70 Z" fill="#013446" stroke="#FA943A" strokeWidth="2" /><path d="M0,16 H34" stroke="#FA943A" strokeWidth="3" /></g></g>
-        <Rotulo x={76} texto={ROL.hermione} cuenta={p.hermione?.cuenta} urgente={p.hermione?.estado === "urgente"} />
-        <Rotulo x={228} texto={ROL.harry} cuenta={p.harry?.cuenta} urgente={p.harry?.estado === "urgente"} />
-        <Rotulo x={380} texto={ROL.neville} cuenta={p.neville?.cuenta} urgente={p.neville?.estado === "urgente"} />
+        <Rotulo x={76} texto={roles.hermione} cuenta={p.hermione?.cuenta} urgente={p.hermione?.estado === "urgente"} />
+        <Rotulo x={228} texto={roles.harry} cuenta={p.harry?.cuenta} urgente={p.harry?.estado === "urgente"} />
+        <Rotulo x={380} texto={roles.neville} cuenta={p.neville?.cuenta} urgente={p.neville?.estado === "urgente"} />
         <rect x="0" y="-12" width={LDER} height="12" fill="#012331" />
       </g>
     </g>
@@ -204,7 +204,7 @@ function particiones() {
   return out;
 }
 
-export default function Plano({ personajes, onElegir, onHedwig, mensajes = 0, celebra = {}, tablero, noche, nombreYo = "Tú" }) {
+export default function Plano({ personajes, onElegir, onHedwig, mensajes = 0, celebra = {}, tablero, noche, nombreYo = "Tú", roles = ROL }) {
   const mundo = useRef(null);
   const nodos = useRef({});
   const tapas = useRef({});
@@ -326,7 +326,7 @@ export default function Plano({ personajes, onElegir, onHedwig, mensajes = 0, ce
     <svg ref={svgRef} viewBox="0 0 880 592" className="of-svg" role="group" aria-label="Oficina Inspira. Toque una oficina o a una persona para ver su mesa; toque el suelo para caminar">
       <Defs />
       <rect x="0" y="0" width="880" height="600" fill="url(#of-fondo)" />
-      <Paredes noche={noche} tablero={tablero} personajes={personajes} />
+      <Paredes noche={noche} tablero={tablero} personajes={personajes} roles={roles} />
       <g onClick={alTocarSuelo} style={{ cursor: "pointer" }}><Suelo personajes={personajes} /></g>
       <g ref={mundo} pointerEvents="none">
         {estaticos.map((s) => <g key={s.k} data-k={s.k} data-d={s.d}>{s.el}</g>)}

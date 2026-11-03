@@ -201,7 +201,7 @@ export default function PagarReserva() {
   const [cambiar, setCambiar] = useState(false);
   const [confirmandoCancelar, setConfirmandoCancelar] = useState(false);
   const [cancelando, setCancelando] = useState(false);
-  const [cancelada, setCancelada] = useState(null); // { devolucion }
+  const [cancelada, setCancelada] = useState(null); // { pagada }
 
   const cargar = useCallback(async () => {
     try {
@@ -257,7 +257,7 @@ export default function PagarReserva() {
     setCancelando(true);
     try {
       const res = await apiPOST(`${BASE}/${id}/cancelar`, {}, cab);
-      if (res?.ok) setCancelada({ devolucion: !!res.devolucion });
+      if (res?.ok) setCancelada({ pagada: !!res.pagada });
       else dialog.toast(res?.msg || "No se pudo cancelar la cita.", "error");
     } catch {
       dialog.toast("Error de conexión. Intente de nuevo.", "error");
@@ -272,8 +272,8 @@ export default function PagarReserva() {
       <Marco>
         <h1 className="font-fraunces text-3xl font-semibold text-primary">Reserva cancelada</h1>
         <p className="mt-2 text-tinta-2">
-          {cancelada.devolucion
-            ? "Como faltaban más de 24 horas, procede la devolución del importe. Nos pondremos en contacto con usted para gestionarla. Le enviamos la confirmación por correo."
+          {cancelada.pagada
+            ? "Su cita quedó cancelada y el horario volvió a la agenda. Conforme a la política de la cita, la cancelación no genera devolución del importe. Le enviamos la confirmación por correo."
             : "El horario volvió a la agenda."}
         </p>
         <a href="/reservar" className={`${boton.primario} mt-6 inline-block`}>Reservar otro horario</a>
@@ -286,7 +286,7 @@ export default function PagarReserva() {
     confirmandoCancelar ? (
       <div className="rv-entrada rounded-2xl border border-alto/30 bg-alto-soft p-4">
         <p className="text-sm font-semibold text-alto-ink">
-          {pagada ? "¿Cancelar esta cita? Procede la devolución del importe." : "¿Cancelar esta reserva?"}
+          {pagada ? "¿Cancelar esta cita? La cancelación no genera devolución del importe." : "¿Cancelar esta reserva?"}
         </p>
         <div className="mt-3 flex gap-2">
           <button type="button" onClick={cancelar} disabled={cancelando} className="rounded-full bg-alto px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
@@ -374,7 +374,7 @@ export default function PagarReserva() {
           <h2 className="font-semibold text-tinta">¿Necesita hacer un cambio?</h2>
           {r.puede_gestionar ? (
             <>
-              <p className="mt-1 text-sm text-tinta-2">Puede reprogramar o cancelar sin costo hasta 24 horas antes de la cita.</p>
+              <p className="mt-1 text-sm text-tinta-2">Puede reprogramar sin costo con un mínimo de 24 horas de antelación. La cancelación no genera devolución, y si no asiste sin reprogramar ni cancelar tampoco hay devolución.</p>
               <div className="mt-3 flex flex-wrap items-center gap-4">
                 <a href={`/reservar?reprogramar=${r.id_reserva}`} className={boton.secundario}>Reprogramar</a>
                 {bloqueCancelar(true)}
@@ -384,7 +384,7 @@ export default function PagarReserva() {
             <div className="mt-1">
               <ContactosWhatsApp
                 contactos={r.contactos}
-                titulo="Faltan menos de 24 horas para la cita. Para cualquier cambio, escríbanos por WhatsApp:"
+                titulo="Faltan menos de 24 horas para la cita. Solo previa coordinación con el equipo se puede reagendar, pagando el 50 % del importe. Escríbanos por WhatsApp:"
                 mensaje={`Hola, necesito hacer un cambio en mi reserva ${r.transferencia.referencia} (${resumen}).`}
               />
             </div>

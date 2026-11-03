@@ -143,12 +143,21 @@ export default function TerminosCondiciones() {
             este vuelve a quedar disponible.
           </Li>
           <Li>
+            <strong>La cancelación de una cita no genera devolución</strong> del
+            importe pagado.
+          </Li>
+          <Li>
             Puedes reprogramar tu cita sin costo comunicándolo con al menos{" "}
             <strong>24 horas</strong> de antelación al horario reservado.
           </Li>
           <Li>
-            Si no asistes a la cita ni la reprogramas dentro de ese plazo, el
-            servicio se considera prestado.
+            Con menos de 24 horas, la cita solo se puede reagendar previa
+            coordinación con nuestro equipo y pagando el{" "}
+            <strong>50 %</strong> del importe de la cita.
+          </Li>
+          <Li>
+            Si no asistes a la cita y no la reprogramas ni la cancelas, no hay
+            devolución y el servicio se considera prestado.
           </Li>
           <Li>
             Si somos nosotros quienes cancelamos o reprogramamos, podrás elegir

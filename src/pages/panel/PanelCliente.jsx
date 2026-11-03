@@ -74,6 +74,7 @@ const PerfilCliente = lazyConRecarga(() => import("./components/PerfilCliente"))
 const WizardPerfilCliente = lazyConRecarga(() => import("./components/WizardPerfilCliente"));
 // «Mis pagos» se descarga al abrirlo; sus estilos van en panel.css (ex-pg-*).
 const MisPagos      = lazyConRecarga(() => import("./components/MisPagos"));
+const MisAsesorias  = lazyConRecarga(() => import("./components/MisAsesorias"));
 
 // Recursos que solo se abren si algún servicio suyo los incluye (servicios.js):
 // Becas España y las pestañas de «Mis guías».
@@ -139,6 +140,9 @@ export default function PanelCliente({ path }) {
   const [pagos, setPagos] = useState(null);
   const planesPago = useMemo(() => pagos?.planes || [], [pagos]);
   const conPagos = planesPago.length > 0;
+  // Su historial de asesorías (GET /cliente/asesorias). La pestaña solo existe si tiene alguna.
+  const [asesorias, setAsesorias] = useState(null);
+  const conAsesorias = (asesorias?.asesorias || []).length > 0;
 
   const lista = useMemo(() => servicios || [], [servicios]);
   const cargado = servicios !== null;
@@ -216,6 +220,7 @@ export default function PanelCliente({ path }) {
     if (!silencioso) {
       cargarServicios();
       cargarPagos();
+      cargarAsesorias();
     }
     try {
       const r = await apiGET("/cliente/me");
@@ -235,7 +240,7 @@ export default function PanelCliente({ path }) {
   const recargarTodo = useCallback(
     () => {
       olvidarNovedades(); // que la campana y las novedades pidan lo último
-      return Promise.all([cargarMe({ silencioso: true }), cargarServicios({ silencioso: true }), cargarPagos()]);
+      return Promise.all([cargarMe({ silencioso: true }), cargarServicios({ silencioso: true }), cargarPagos(), cargarAsesorias()]);
     },
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
@@ -268,6 +273,15 @@ export default function PanelCliente({ path }) {
     }
   }
 
+  async function cargarAsesorias() {
+    try {
+      const r = await apiGET("/cliente/asesorias");
+      setAsesorias(r?.ok ? r : { asesorias: [] });
+    } catch {
+      setAsesorias((antes) => antes || { asesorias: [] });
+    }
+  }
+
   // El panel recuerda la última pestaña abierta. Si era una guía que ya no le
   // corresponde —porque cerró ese servicio, o porque nunca fue suya— se vuelve
   // a sus servicios en vez de dejarle mirando algo que no ha contratado.
@@ -282,6 +296,11 @@ export default function PanelCliente({ path }) {
   useEffect(() => {
     if (tab === "pagos" && pagos !== null && !pagos.error && !conPagos) navigate("/panel", { replace: true });
   }, [tab, pagos, conPagos]);
+
+  // «Mis asesorías» sin ninguna tampoco es una página.
+  useEffect(() => {
+    if (tab === "asesorias" && asesorias !== null && !conAsesorias) navigate("/panel", { replace: true });
+  }, [tab, asesorias, conAsesorias]);
 
   function handleChangeTab(newTab) {
     navigate(rutaDe({ tab: newTab }));
@@ -323,7 +342,7 @@ export default function PanelCliente({ path }) {
   // Tab titles
   // Todas las guías comparten título: la pestaña de dentro dice cuál es.
   const titles = {
-    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", pagos: "Mis pagos", perfil: "Mi perfil", becas: "Becas España",
+    inicio: "Mi expediente", servicios: "Mis servicios", ruta: "Mi ruta", pagos: "Mis pagos", asesorias: "Mis asesorías", perfil: "Mi perfil", becas: "Becas España",
     ...Object.fromEntries(CLAVES_GUIAS.map((clave) => [clave, "Mis guías"])),
   };
 
@@ -408,6 +427,7 @@ export default function PanelCliente({ path }) {
         onTour={verTour}
         guias={pestanasGuia}
         conPagos={conPagos}
+        conAsesorias={conAsesorias}
         onInstalarApp={() => { setSidebarOpen(false); setInstalarAbierto(true); }}
       />
 
@@ -552,6 +572,15 @@ export default function PanelCliente({ path }) {
             <CercoErrores donde="panel-pagos" clave="pagos" titulo="Tus pagos no se pudieron mostrar">
               <Suspense fallback={<LoadingPage />}>
                 <MisPagos datos={pagos} onRecargar={cargarPagos} />
+              </Suspense>
+            </CercoErrores>
+          )}
+
+          {/* Mis asesorías: el historial de sus citas, formulario previo e informes. */}
+          {tab === "asesorias" && (
+            <CercoErrores donde="panel-asesorias" clave="asesorias" titulo="Tus asesorías no se pudieron mostrar">
+              <Suspense fallback={<LoadingPage />}>
+                <MisAsesorias datos={asesorias} />
               </Suspense>
             </CercoErrores>
           )}

@@ -4,6 +4,7 @@
 //   /panel/servicios              → la lista de sus servicios
 //   /panel/perfil                 → su perfil
 //   /panel/becas                  → Becas España
+//   /panel/asesorias              → el historial de sus asesorías (solo si tiene alguna)
 //   /panel/pagos                  → sus planes de pago y cuotas (solo si tiene alguno;
 //                                   ?cuota=ID resalta una)
 //   /panel/portal, /panel/guia…   → una pestaña de «Mis guías» (PDF, máster,
@@ -18,7 +19,7 @@
 // la única verdad; todo lo demás se deriva de ella.
 
 export const PESTANAS = [
-  "inicio", "servicios", "ruta", "pagos", "perfil", "portal", "becas", "guia", "apostilla", "estancia", "modificatoria", "grado",
+  "inicio", "servicios", "ruta", "pagos", "asesorias", "perfil", "portal", "becas", "guia", "apostilla", "estancia", "modificatoria", "grado",
 ];
 
 /** @returns {{tab: string|null, idServicio: number|null, seccion: string|null}} */

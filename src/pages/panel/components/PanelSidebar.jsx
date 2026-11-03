@@ -27,7 +27,7 @@ const MAX_ENTRADAS = 8;
 
 export default function PanelSidebar({
   user, activeTab, onChangeTab, isOpen, onClose, accesos,
-  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour, guias = [], conPagos = false,
+  pendientes = 0, servicios = [], idServicioActivo = null, onAbrirServicio, onTour, guias = [], conPagos = false, conAsesorias = false,
   onInstalarApp = null,
 }) {
   // Qué recursos le corresponden lo decide servicios.js; aquí solo se pintan.
@@ -36,7 +36,7 @@ export default function PanelSidebar({
   const conRuta = servicios.length > 0;
   const conGuias = guias.length > 0;
   const conBecas = Boolean(accesos?.has("becas"));
-  const fijas = 3 + Number(conRuta) + Number(conPagos) + Number(conGuias) + Number(conBecas);
+  const fijas = 3 + Number(conRuta) + Number(conPagos) + Number(conAsesorias) + Number(conGuias) + Number(conBecas);
   // Los expedientes, por nombre, como accesos directos: los que quepan sin
   // pasar de ocho entradas, y cuatro como mucho. Todos están en «Mis servicios».
   const directos = servicios.slice(0, Math.max(0, Math.min(4, MAX_ENTRADAS - fijas)));
@@ -154,6 +154,14 @@ export default function PanelSidebar({
             label="Mis pagos"
             active={activeTab === "pagos"}
             onClick={() => onChangeTab("pagos")}
+          />
+        )}
+        {conAsesorias && (
+          <SidebarItem
+            icono="calendario"
+            label="Mis asesorías"
+            active={activeTab === "asesorias"}
+            onClick={() => onChangeTab("asesorias")}
           />
         )}
         <SidebarItem

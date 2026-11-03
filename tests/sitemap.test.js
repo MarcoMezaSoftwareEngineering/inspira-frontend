@@ -42,12 +42,15 @@ const FUERA_DEL_SITEMAP = new Set([
   "/legal/privacidad",
   "/legal/terminos",
   "/libro-de-reclamaciones",
+  // Se entran desde un enlace firmado del correo (reserva y formulario previo), no son destinos.
+  "/reservar/pago",
+  "/preasesoria",
 ]);
 
 // Landings que se entran desde fuera —anuncios, el enlace de la bio de
 // Instagram y TikTok— y que a propósito no se enlazan desde dentro.
 // /becas-espana-2027 es la del carrusel de becas de redes (06/10/2026).
-const ENTRADA_EXTERNA = new Set(["/enlaces", "/master-2027-2028", "/becas-espana-2027"]);
+const ENTRADA_EXTERNA = new Set(["/enlaces", "/master-2027-2028", "/becas-espana-2027", "/reservar/pago", "/preasesoria"]);
 
 // Huérfanas conocidas: páginas públicas que aún no enlaza nadie y cuya suerte
 // no se ha decidido. Vacía desde el 24/09/2026 (/reservar y /doctorado se

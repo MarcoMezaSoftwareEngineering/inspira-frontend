@@ -77,6 +77,12 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada, 
             <ConfirmarPagoBtn reserva={r} onChanged={onChanged}
               className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10.5px] font-bold hover:opacity-90 disabled:opacity-50" />
             <AvisosBtns reserva={r} />
+            {r.whatsapp_url && (
+              <a href={r.whatsapp_url} target="_blank" rel="noopener noreferrer"
+                className="px-2.5 py-1.5 bg-[#25D366] text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">
+                Enviar por WhatsApp
+              </a>
+            )}
             {r.meet_url ? (
               <a href={r.meet_url} target="_blank" rel="noopener noreferrer"
                 className="px-2.5 py-1.5 bg-primary text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">

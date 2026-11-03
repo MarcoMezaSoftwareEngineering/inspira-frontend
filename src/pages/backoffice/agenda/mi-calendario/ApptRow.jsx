@@ -42,6 +42,7 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }
               {r.estado === "CANCELADA" ? "Cancelada" : pendiente ? "Pago pendiente" : r.no_asistio_en ? "No asistió" : "Confirmada"}
             </Pill>
             {pagoManual && <Pill tone="green">Pago confirmado manualmente</Pill>}
+            {r.metodo_pago === "EQUIPO" && r.estado !== "CANCELADA" && <Pill tone={r.pago_estado === "APROBADO" ? "green" : "primary"}>{r.pago_estado === "APROBADO" ? "Agendada por el equipo · pagada" : "Agendada por el equipo · pago aparte"}</Pill>}
             {pendiente && r.tiene_voucher && <Pill tone="green">subió el voucher</Pill>}
             {pendiente && r.hold_expira_en && <Pill tone="amber">vence {horaLimaPE(r.hold_expira_en)}</Pill>}
             {r.cancelada_por === "INSPIRA" && <Pill tone="red">cancelada por Inspira</Pill>}

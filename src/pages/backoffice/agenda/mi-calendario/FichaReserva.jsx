@@ -148,11 +148,16 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
                   <Dato k="Interés" v={f.interes} />
                   <Dato k="Quiere empezar" v={f.inicio} />
                   <Dato k="Importe" v={`${f.monto} ${f.moneda}`} />
-                  <Dato k="Pago" v={pagada ? `confirmado el ${cuando(f.pagado_en)}${["TRANSFERENCIA", "DESPUES", "PENDIENTE"].includes(f.metodo_pago) ? " (manual)" : ""}` : "pendiente"} ancho />
+                  <Dato k="Pago" v={pagada ? `confirmado el ${cuando(f.pagado_en)}${["TRANSFERENCIA", "DESPUES", "PENDIENTE", "EQUIPO"].includes(f.metodo_pago) ? " (manual)" : ""}` : f.metodo_pago === "EQUIPO" ? "pendiente (se coordina aparte)" : "pendiente"} ancho />
                   <Dato k="Lo que contó al reservar" v={f.detalle} ancho />
                   <Dato k="Política aceptada" v={f.terminos.aceptados_en ? `${f.terminos.version} · ${cuando(f.terminos.aceptados_en)}` : "sin registro (reserva anterior al 03/11)"} ancho />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
+                  {f.metodo_pago === "EQUIPO" && !pagada && (
+                    <button type="button" disabled={!!ocupado} onClick={() => accion("pago", "pago-recibido", {}, "Pago anotado.")} className={`${BTN} bg-emerald-600 text-white`}>
+                      {ocupado === "pago" ? "Anotando…" : "Anotar pago recibido"}
+                    </button>
+                  )}
                   <VerVoucherBtn reserva={reserva} className={`${BTN} bg-white border border-neutral-200 text-neutral-700`} />
                   {!f.meet_url && reserva.estado !== "CANCELADA" && <EditMeetBtn reserva={reserva} onChanged={cambiado} className={`${BTN} bg-amber-50 text-amber-700 border border-amber-200`} />}
                   {reserva.estado !== "CANCELADA" && <CancelBtn reserva={reserva} onChanged={() => { onChanged?.(); onCerrar(); }} className={`${BTN} bg-white border border-red-200 text-red-500`} />}

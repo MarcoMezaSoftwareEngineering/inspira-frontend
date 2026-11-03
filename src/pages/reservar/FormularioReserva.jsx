@@ -15,7 +15,7 @@ import AceptarTerminos from "../../components/legal/AceptarTerminos";
 import { VERSIONES } from "../../config/legal";
 import { Icono } from "./iconos";
 import { guardarToken } from "./tokenReserva";
-import { INICIOS, INTERESES, borrarBorrador, celularValido, componerMotivo, correoValido, guardarBorrador, leerBorrador, nombreCompletoValido } from "./preguntas";
+import { INICIOS, INTERESES, borrarBorrador, celularValido, componerMotivo, correoValido, esGmail, guardarBorrador, leerBorrador, nombreCompletoValido } from "./preguntas";
 
 const campo = "mt-1.5 w-full rounded-xl border bg-fondo px-3 py-2.5 text-sm text-tinta placeholder:text-trazo focus:outline-none focus:ring-2";
 const claseCampo = (error) => `${campo} ${error ? "border-alto focus:border-alto focus:ring-alto/20" : "border-linea focus:border-primary focus:ring-primary/20"}`;
@@ -58,7 +58,7 @@ export default function FormularioReserva({ hora, servicioId, fecha, precio, isL
   const sinCuenta = !isLoggedIn && invitado;
   const errores = {
     nombre: sinCuenta && !nombreCompletoValido(nombre) ? "Escribe tu nombre y apellido." : "",
-    email: sinCuenta && !correoValido(email) ? "Revisa tu correo: parece incompleto." : "",
+    email: sinCuenta && !correoValido(email) ? "Revisa tu correo: parece incompleto." : sinCuenta && !esGmail(email) ? "Usa tu correo de Gmail (@gmail.com): con él entras a tu panel con Google y todo queda vinculado." : "",
     celular: !celularValido(celular) ? "Escribe tu celular o WhatsApp con el código de país." : "",
     interes: !interes ? "Elige qué te interesa." : "",
     inicio: !inicio ? "Elige cuándo quieres empezar." : "",
@@ -160,7 +160,7 @@ export default function FormularioReserva({ hora, servicioId, fecha, precio, isL
             <input id="rv-nombre" type="text" autoComplete="name" value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={120} placeholder="Nombre y apellido" aria-invalid={!!mostrar("nombre")} className={claseCampo(mostrar("nombre"))} />
           </Campo>
           <Campo id="rv-email" etiqueta="Correo *" error={mostrar("email")} ayuda="Aquí te enviamos el enlace para pagar y gestionar tu cita.">
-            <input id="rv-email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={254} placeholder="tucorreo@ejemplo.com" aria-invalid={!!mostrar("email")} className={claseCampo(mostrar("email"))} />
+            <input id="rv-email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={254} placeholder="tucorreo@gmail.com" aria-invalid={!!mostrar("email")} className={claseCampo(mostrar("email"))} />
           </Campo>
         </>
       )}

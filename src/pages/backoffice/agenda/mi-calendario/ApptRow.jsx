@@ -49,8 +49,10 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada, 
             {!pagoEsRedundante(r.estado, r.pago_estado) && (
               <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
             )}
-            {r.metodo_pago === "TRANSFERENCIA" && r.estado !== "CANCELADA" && <Pill tone="primary">Transferencia</Pill>}
-            {r.metodo_pago === "DESPUES" && r.estado !== "CANCELADA" && <Pill tone="primary">Pagará después</Pill>}
+            {/* Si el pago ya se confirmó a mano, eso es lo que importa; lo que eligió queda como dato. */}
+            {["TRANSFERENCIA", "DESPUES", "PENDIENTE"].includes(r.metodo_pago) && ["CONFIRMADA", "COMPLETADA"].includes(r.estado) && <Pill tone="green">Pago confirmado manualmente</Pill>}
+            {r.metodo_pago === "TRANSFERENCIA" && r.estado !== "CANCELADA" && <Pill tone="neutral">{r.estado === "PENDIENTE_PAGO" ? "Transferencia" : "Eligió transferencia"}</Pill>}
+            {r.metodo_pago === "DESPUES" && r.estado !== "CANCELADA" && <Pill tone="neutral">{r.estado === "PENDIENTE_PAGO" ? "Pagará después" : "Eligió pagar después"}</Pill>}
             {r.no_asistio_en && <Pill tone="red">no asistió</Pill>}
             {r.cancelada_por === "INSPIRA" && <Pill tone="red">cancelada por Inspira</Pill>}
             {r.reagenda_autorizada && <Pill tone="amber">reagendar autorizado</Pill>}

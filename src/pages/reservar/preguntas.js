@@ -7,6 +7,7 @@ export const INICIOS = ["Lo antes posible", "Septiembre de 2027", "2028 o despuÃ
 
 export const celularValido = (v) => String(v || "").replace(/\D/g, "").length >= 8;
 export const correoValido = (v) => /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(String(v || "").trim());
+export const esGmail = (v) => /@(gmail|googlemail)\.com$/i.test(String(v || "").trim());
 export const nombreCompletoValido = (v) => String(v || "").trim().split(/\s+/).filter((p) => p.length >= 2).length >= 2;
 
 // El mismo resumen que arma el backend para quien reserva sin cuenta.

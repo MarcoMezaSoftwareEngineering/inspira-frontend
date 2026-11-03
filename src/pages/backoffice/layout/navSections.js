@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Calendar, FileText, TrendingUp, Users, Settings, Wrench, Wallet, ListChecks, Workflow, Mail,
+  LayoutDashboard, Calendar, FileText, TrendingUp, Users, Settings, Wrench, Wallet, ListChecks, Workflow, Mail, Building2,
 } from "lucide-react";
 
 // El menú de Inspira Core. Lo leen la barra lateral (Sidebar), el cajón del
@@ -76,6 +76,8 @@ export const NAV_SECTIONS = [
       // Correo (16/09/2026): los alias de administracion@ en un buzón con pestañas.
       { id: "correo", label: "Correo", href: "/backoffice/correo", icon: Mail },
       { id: "flujos", label: "Flujos", href: "/backoffice/flujos", icon: Workflow },
+      // Oficina Inspira (03/11/2026): lo pendiente de cada área como una oficina con seis personajes.
+      { id: "oficina", label: "Oficina", href: "/backoffice/oficina", icon: Building2 },
       {
         id: "herramientas", label: "Herramientas", href: "/backoffice/herramientas",
         alsoActive: [

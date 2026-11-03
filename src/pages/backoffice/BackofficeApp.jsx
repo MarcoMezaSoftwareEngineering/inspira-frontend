@@ -53,6 +53,7 @@ const CARGAR = {
   pagos: () => import("./pagos/Pagos"),
   tareas: () => import("./tareas/Tareas"),
   flujos: () => import("./flujos/Flujos"),
+  oficina: () => import("./oficina/Oficina"),
   correo: () => import("./correo/Correo"),
   tracker: () => import("./tracker/TrackerUniversidades"),
   catalogo: () => import("./catalogo/CatalogoMasters"),
@@ -88,6 +89,7 @@ const EmbudoVentas = lazyConRecarga(CARGAR.leadsEmbudo);
 const Pagos = lazyConRecarga(CARGAR.pagos);
 const Tareas = lazyConRecarga(CARGAR.tareas);
 const Flujos = lazyConRecarga(CARGAR.flujos);
+const Oficina = lazyConRecarga(CARGAR.oficina);
 const Correo = lazyConRecarga(CARGAR.correo);
 const TrackerUniversidades = lazyConRecarga(CARGAR.tracker);
 const CatalogoMasters = lazyConRecarga(CARGAR.catalogo);
@@ -139,6 +141,7 @@ const SECCION_DE_RUTA = {
   "/backoffice/pagos": "pagos",
   "/backoffice/tareas": "tareas",
   "/backoffice/flujos": "flujos",
+  "/backoffice/oficina": "oficina",
   "/backoffice/correo": "correo",
   "/backoffice/tracker-universidades": "tracker",
   "/backoffice/catalogo-masters": "catalogo",
@@ -463,6 +466,7 @@ export default function BackofficeApp() {
             {/* TAREAS — lo pendiente del equipo por área. ?tarea=ID abre la ficha (enlace de los correos). */}
             {path === "/backoffice/tareas" && <Tareas />}
             {path === "/backoffice/flujos" && <Flujos />}
+            {path === "/backoffice/oficina" && <Oficina />}
             {path === "/backoffice/correo" && <Correo />}
 
             {path === "/backoffice/tracker-universidades" && <ModuleGate perm="tracker.ver"><TrackerUniversidades /></ModuleGate>}

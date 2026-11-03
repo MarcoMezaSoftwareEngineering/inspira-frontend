@@ -233,7 +233,15 @@ export default function PresupuestoAsesor() {
         if (r?.siguiente_numero) setD((p) => (p.numero ? p : { ...p, numero: r.siguiente_numero }));
         // Desde una cita (Agenda → Reservas → Cotizar): llega con el nombre y el correo del asesorado.
         const q = new URLSearchParams(window.location.search);
-        if (q.get("cliente") || q.get("correo")) setD((p) => ({ ...p, cliente: p.cliente || q.get("cliente") || "", correo: p.correo || q.get("correo") || "" }));
+        if (q.get("cliente") || q.get("correo")) {
+          setD((p) => ({
+            ...p, cliente: p.cliente || q.get("cliente") || "", correo: p.correo || q.get("correo") || "",
+            // El concepto (y el importe, si el informe propuso un paquete) entra en la primera fila de servicios.
+            servicios: q.get("concepto") && !p.servicios?.[0]?.concepto
+              ? [{ ...p.servicios[0], concepto: q.get("concepto"), importe: String(q.get("importe") || "").replace(/[^\d.,]/g, "") || p.servicios[0].importe }, ...p.servicios.slice(1)]
+              : p.servicios,
+          }));
+        }
       }
     });
     // Sólo al montar: lo demás se recarga a mano tras cada guardado.

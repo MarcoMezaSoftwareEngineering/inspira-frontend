@@ -72,7 +72,7 @@ export default function ReservasTab() {
         ) : (
           <div className="grid gap-1 max-w-3xl mx-auto">
             {lista.map((r) => (
-              <ApptRow key={r.id_reserva} reserva={r} onChanged={cargar} mostrarAsesor abierta0 />
+              <ApptRow key={r.id_reserva} reserva={r} onChanged={cargar} mostrarAsesor />
             ))}
           </div>
         )}

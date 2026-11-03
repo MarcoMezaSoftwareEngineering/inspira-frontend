@@ -133,31 +133,63 @@ async function avisar(r, { ruta, cuerpo, pregunta, titulo, hecho, recarga }, set
   if (recarga) onChanged?.();
 }
 
-export function AvisosBtns({ reserva, onChanged }) {
+// Acciones agrupadas de una reserva (el panel «Más acciones»): avisar al asesorado, cambios de la
+// cita según la política y otras. Cada botón pide confirmación y dice a quién le llega.
+const BTN = "w-full text-left px-3 py-2.5 bg-white border border-neutral-200 text-neutral-700 rounded-xl text-[11.5px] font-semibold hover:bg-neutral-50 disabled:opacity-50";
+const GRUPO = "text-[9px] uppercase tracking-[.12em] text-neutral-400 font-extrabold mb-1.5";
+
+export function GruposAcciones({ reserva, onChanged, children, sinOtras = false }) {
   const [enviando, setEnviando] = useState("");
-  const clase = "px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50";
-  const boton = (ruta, texto, datos) => (
-    <button key={ruta + texto} disabled={!!enviando} className={clase}
+  const boton = (ruta, texto, datos, ayuda) => (
+    <button key={ruta + texto} disabled={!!enviando} className={BTN} title={ayuda}
       onClick={() => avisar(reserva, { ruta, ...datos }, setEnviando, onChanged)}>
       {enviando === ruta ? "Enviando…" : texto}
     </button>
   );
-  if (reserva.estado === "PENDIENTE_PAGO") {
-    return boton("recordar", "Recordar pago", { cuerpo: { tipo: "pago" }, pregunta: "¿Enviar el enlace para completar el pago a", titulo: "Recordar pago", hecho: "Se envió el recordatorio de pago." });
-  }
-  if (reserva.estado !== "CONFIRMADA") return null;
+  const pendiente = reserva.estado === "PENDIENTE_PAGO";
+  const confirmada = reserva.estado === "CONFIRMADA";
   const cotizar = `/backoffice/presupuesto?cliente=${encodeURIComponent(reserva.cliente?.nombre || "")}&correo=${encodeURIComponent(reserva.cliente?.email_contacto || "")}`;
   return (
-    <>
-      {boton("cobro-reagendamiento", "Cobrar 50 % por reagendar", { pregunta: "¿Enviar el cobro del 50 % para reagendar a", titulo: "Cobro por reagendar", hecho: "Se envió el cobro del 50 %." })}
-      {boton("autorizar-reagendamiento", "Autorizar reagendar (50 % cobrado)", { pregunta: "¿Ya vio el abono del 50 % y habilita que reagende, avisando a", titulo: "Autorizar reagendamiento", hecho: reserva.reagenda_autorizada ? "Se volvió a enviar la autorización." : "Se autorizó el reagendamiento y se avisó al asesorado." })}
-      {boton("no-asistio", "No asistió (sin devolución)", { cuerpo: { quien: "cliente" }, pregunta: "¿Marcar que no asistió y avisar, sin devolución, a", titulo: "Inasistencia", hecho: "Se marcó la inasistencia y se avisó al asesorado.", recarga: true })}
-      {boton("no-asistio", "Canceló Inspira (devolver o reagendar)", { cuerpo: { quien: "inspira" }, pregunta: "¿Cancelar por responsabilidad de Inspira y ofrecer nuevo horario o devolución íntegra a", titulo: "Cancelada por Inspira", hecho: "Se canceló y se avisó al asesorado y al equipo.", recarga: true })}
-      <a href={cotizar} className={clase}>Cotizar</a>
-      {boton("reenviar-accesos", "Reenviar accesos", { pregunta: "¿Reenviar la confirmación con el enlace de la reunión a", titulo: "Reenviar accesos", hecho: "Se reenviaron los accesos." })}
-      {boton("recordar", "Enviar recordatorio", { cuerpo: { tipo: "cita" }, pregunta: "¿Enviar un recordatorio de la asesoría a", titulo: "Enviar recordatorio", hecho: "Se envió el recordatorio." })}
-      {boton("formulario-previo", "Enviar formulario previo", { pregunta: "¿Enviar el formulario previo a la asesoría a", titulo: "Formulario previo", hecho: "Se envió el formulario previo." })}
-    </>
+    <div className="grid gap-3 rounded-xl border border-neutral-200 bg-white p-3">
+      {pendiente && (
+        <section>
+          <p className={GRUPO}>Avisar al asesorado</p>
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {boton("recordar", "Recordar el pago", { cuerpo: { tipo: "pago" }, pregunta: "¿Enviar el enlace para completar el pago a", titulo: "Recordar pago", hecho: "Se envió el recordatorio de pago." }, "Le llega el enlace para pagar")}
+          </div>
+        </section>
+      )}
+      {confirmada && (
+        <>
+          <section>
+            <p className={GRUPO}>Avisar al asesorado</p>
+            <div className="grid gap-1.5 sm:grid-cols-2">
+              {boton("reenviar-accesos", "Reenviar accesos", { pregunta: "¿Reenviar la confirmación con el enlace de la reunión a", titulo: "Reenviar accesos", hecho: "Se reenviaron los accesos." }, "Confirmación con Meet, calendario y política")}
+              {boton("recordar", "Recordar la cita", { cuerpo: { tipo: "cita" }, pregunta: "¿Enviar un recordatorio de la asesoría a", titulo: "Recordar la cita", hecho: "Se envió el recordatorio." })}
+              {boton("formulario-previo", "Enviar formulario previo", { pregunta: "¿Enviar el formulario previo a la asesoría a", titulo: "Formulario previo", hecho: "Se envió el formulario previo." })}
+            </div>
+          </section>
+          <section>
+            <p className={GRUPO}>Si la cita cambia</p>
+            <div className="grid gap-1.5 sm:grid-cols-2">
+              {boton("cobro-reagendamiento", "Cobrar 50 % para reagendar", { pregunta: "¿Enviar el cobro del 50 % para reagendar a", titulo: "Cobro por reagendar", hecho: "Se envió el cobro del 50 %." }, "Con menos de 24 h, previa coordinación")}
+              {boton("autorizar-reagendamiento", "Autorizar reagendar", { pregunta: "¿Ya vio el abono del 50 % y habilita que reagende, avisando a", titulo: "Autorizar reagendamiento", hecho: reserva.reagenda_autorizada ? "Se volvió a enviar la autorización." : "Se autorizó el reagendamiento y se avisó al asesorado." }, "Cuando ya se verificó el 50 %")}
+              {boton("no-asistio", "No asistió · sin devolución", { cuerpo: { quien: "cliente" }, pregunta: "¿Marcar que no asistió y avisar, sin devolución, a", titulo: "Inasistencia", hecho: "Se marcó la inasistencia y se avisó al asesorado.", recarga: true })}
+              {boton("no-asistio", "Canceló Inspira · devolver o reagendar", { cuerpo: { quien: "inspira" }, pregunta: "¿Cancelar por responsabilidad de Inspira y ofrecer nuevo horario o devolución íntegra a", titulo: "Cancelada por Inspira", hecho: "Se canceló y se avisó al asesorado y al equipo.", recarga: true })}
+            </div>
+          </section>
+        </>
+      )}
+      {!sinOtras && (
+        <section>
+          <p className={GRUPO}>Otras</p>
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            <a href={cotizar} className={`${BTN} block`}>Preparar cotización</a>
+            {children}
+          </div>
+        </section>
+      )}
+    </div>
   );
 }
 

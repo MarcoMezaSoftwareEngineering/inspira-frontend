@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { horaLimaPE } from "../../../../lib/formatos";
-import { pagoEsRedundante, pagoTone } from "../utilidades";
-import { AvisosBtns, CancelBtn, ConfirmarPagoBtn, EditMeetBtn, InformeBtns, VerVoucherBtn } from "./BotonesCita";
+import { pagoEsRedundante } from "../utilidades";
+import { CancelBtn, ConfirmarPagoBtn } from "./BotonesCita";
+import FichaReserva from "./FichaReserva";
 
 function Pill({ tone, children }) {
   const tones = {
@@ -14,94 +15,57 @@ function Pill({ tone, children }) {
   return <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${tones[tone]}`}>{children}</span>;
 }
 
-// Fila compacta de cita (estilo ".appt" del mock). Clic para expandir y ver
-// chips + acciones reales (Unirse / Editar Meet / Cancelar) sin salir de la lista.
-export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada, abierta0 = false }) {
-  const [abierta, setAbierta] = useState(abierta0);
+const BTN = "px-3 py-2 rounded-xl text-[11.5px] font-bold text-center";
+
+// Fila de cita: quién, cuándo y cómo va, con lo de todos los días a mano (confirmar pago, unirse,
+// WhatsApp, cancelar). Todo lo demás —formulario previo, notas, informe, avisos, cotización— está
+// dentro de «Administrar», para que con muchas asesorías la lista siga clara.
+export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada }) {
+  const [ficha, setFicha] = useState(false);
+  const pagoManual = ["TRANSFERENCIA", "DESPUES", "PENDIENTE"].includes(r.metodo_pago) && ["CONFIRMADA", "COMPLETADA"].includes(r.estado);
+  const pendiente = r.estado === "PENDIENTE_PAGO";
 
   return (
-    <article className={`rounded-xl transition-colors ${abierta ? "bg-neutral-50" : "hover:bg-neutral-50"} ${pasada ? "opacity-55" : ""}`}>
-      <button onClick={() => setAbierta((v) => !v)}
-        className="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+    <article className={`rounded-xl border border-neutral-200 bg-white p-3 ${pasada ? "opacity-60" : ""}`}>
+      <div className="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
         <div>
-          <b className="block text-[11px] text-neutral-800">{r.hora_inicio}</b>
-          <span className="block text-[8.5px] text-neutral-400">{r.fecha.slice(5)}</span>
+          <b className="block text-[12px] text-neutral-800">{r.hora_inicio}</b>
+          <span className="block text-[9px] text-neutral-400">{r.fecha.slice(5)}</span>
         </div>
         <div className="min-w-0">
-          <b className="block text-[10.5px] text-neutral-800 truncate">{r.cliente?.nombre || "Sin nombre"}</b>
-          <span className="block text-[9px] text-neutral-400 truncate mt-0.5">
-            {r.hora_inicio}{mostrarAsesor && r.asesor ? ` · ${r.asesor.nombre}` : ""}
+          <b className="block text-[12.5px] text-neutral-800 truncate">{r.cliente?.nombre || "Sin nombre"}</b>
+          <span className="block text-[10px] text-neutral-400 truncate">
+            {r.cliente?.email_contacto}{mostrarAsesor && r.asesor ? ` · ${r.asesor.nombre}` : ""}
           </span>
-          <span className={`inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold ${
-            r.estado === "CANCELADA" ? "bg-red-50 text-red-500"
-              : !pagoEsRedundante(r.estado, r.pago_estado) && r.pago_estado === "PENDIENTE" ? "bg-[#fff2e7] text-[#b46a37]"
-              : "bg-[#edf8f2] text-[#277553]"
-          }`}>
-            {r.estado === "CANCELADA" ? "Cancelada" : r.estado === "CONFIRMADA" || r.estado === "COMPLETADA" ? "Confirmada" : "Pago pendiente"}
-          </span>
-        </div>
-      </button>
-
-      {abierta && (
-        <div className="px-2.5 pb-2.5">
-          <div className="flex items-center gap-1.5 flex-wrap mb-2">
-            <Pill tone="neutral">{r.monto} {r.moneda}</Pill>
-            {!pagoEsRedundante(r.estado, r.pago_estado) && (
-              <Pill tone={pagoTone(r.pago_estado)}>Pago {r.pago_estado.toLowerCase()}</Pill>
-            )}
-            {/* Si el pago ya se confirmó a mano, eso es lo que importa; lo que eligió queda como dato. */}
-            {["TRANSFERENCIA", "DESPUES", "PENDIENTE"].includes(r.metodo_pago) && ["CONFIRMADA", "COMPLETADA"].includes(r.estado) && <Pill tone="green">Pago confirmado manualmente</Pill>}
-            {r.metodo_pago === "TRANSFERENCIA" && r.estado !== "CANCELADA" && <Pill tone="neutral">{r.estado === "PENDIENTE_PAGO" ? "Transferencia" : "Eligió transferencia"}</Pill>}
-            {r.metodo_pago === "DESPUES" && r.estado !== "CANCELADA" && <Pill tone="neutral">{r.estado === "PENDIENTE_PAGO" ? "Pagará después" : "Eligió pagar después"}</Pill>}
-            {r.no_asistio_en && <Pill tone="red">no asistió</Pill>}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <Pill tone={r.estado === "CANCELADA" ? "red" : pendiente ? "amber" : "green"}>
+              {r.estado === "CANCELADA" ? "Cancelada" : pendiente ? "Pago pendiente" : r.no_asistio_en ? "No asistió" : "Confirmada"}
+            </Pill>
+            {pagoManual && <Pill tone="green">Pago confirmado manualmente</Pill>}
+            {pendiente && r.tiene_voucher && <Pill tone="green">subió el voucher</Pill>}
+            {pendiente && r.hold_expira_en && <Pill tone="amber">vence {horaLimaPE(r.hold_expira_en)}</Pill>}
             {r.cancelada_por === "INSPIRA" && <Pill tone="red">cancelada por Inspira</Pill>}
             {r.reagenda_autorizada && <Pill tone="amber">reagendar autorizado</Pill>}
             {r.informe_estado === "BORRADOR" && <Pill tone="amber">informe por aprobar</Pill>}
             {r.informe_estado === "ENVIADO" && <Pill tone="green">informe enviado</Pill>}
-            {r.metodo_pago === "MERCADOPAGO" && Number(r.recargo) > 0 && <Pill tone="neutral">incluye comisión MP {r.recargo}</Pill>}
-            {r.estado === "PENDIENTE_PAGO" && r.tiene_voucher && <Pill tone="green">subió el voucher</Pill>}
-            {r.estado === "PENDIENTE_PAGO" && r.hold_expira_en && (
-              <Pill tone="amber">vence {horaLimaPE(r.hold_expira_en)}</Pill>
-            )}
-          </div>
-          {r.cliente?.email_contacto && (
-            <p className="text-[10px] text-neutral-500 mb-2 truncate">
-              {r.cliente.email_contacto}{r.cliente?.telefono ? ` · ${r.cliente.telefono}` : ""}
-            </p>
-          )}
-          <div className="flex gap-1.5 flex-wrap">
-            {r.tiene_notas && r.notas_doc_url && (
-              <a href={r.notas_doc_url} target="_blank" rel="noopener noreferrer"
-                className="px-2.5 py-1.5 bg-white border border-primary/30 text-primary rounded-lg text-[10.5px] font-bold hover:bg-primary/5">
-                Notas de Gemini
-              </a>
-            )}
-            <InformeBtns reserva={r} onChanged={onChanged} />
-            <VerVoucherBtn reserva={r}
-              className="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50" />
-            <ConfirmarPagoBtn reserva={r} onChanged={onChanged}
-              className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10.5px] font-bold hover:opacity-90 disabled:opacity-50" />
-            <AvisosBtns reserva={r} onChanged={onChanged} />
-            {r.whatsapp_url && (
-              <a href={r.whatsapp_url} target="_blank" rel="noopener noreferrer"
-                className="px-2.5 py-1.5 bg-[#25D366] text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">
-                Enviar por WhatsApp
-              </a>
-            )}
-            {r.meet_url ? (
-              <a href={r.meet_url} target="_blank" rel="noopener noreferrer"
-                className="px-2.5 py-1.5 bg-primary text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">
-                Unirse
-              </a>
-            ) : (
-              <EditMeetBtn reserva={r} onChanged={onChanged}
-                className="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10.5px] font-bold hover:bg-amber-100" />
-            )}
-            <CancelBtn reserva={r} onChanged={onChanged}
-              className="px-2.5 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[10.5px] font-bold hover:bg-red-50" />
+            {!pagoEsRedundante(r.estado, r.pago_estado) && r.pago_estado === "PENDIENTE" && !pendiente && <Pill tone="neutral">{r.monto} {r.moneda}</Pill>}
           </div>
         </div>
-      )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <ConfirmarPagoBtn reserva={r} onChanged={onChanged} className={`${BTN} bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50`} />
+        {r.meet_url && r.estado !== "CANCELADA" && (
+          <a href={r.meet_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-primary text-white hover:opacity-90`}>Unirse</a>
+        )}
+        {r.whatsapp_url && (
+          <a href={r.whatsapp_url} target="_blank" rel="noopener noreferrer" className={`${BTN} bg-[#25D366] text-white hover:opacity-90`}>Enviar por WhatsApp</a>
+        )}
+        <CancelBtn reserva={r} onChanged={onChanged} className={`${BTN} bg-white border border-red-200 text-red-500 hover:bg-red-50`} />
+        <button type="button" onClick={() => setFicha(true)} className={`${BTN} ml-auto bg-primary-dark text-white hover:opacity-90`}>Administrar</button>
+      </div>
+
+      {ficha && <FichaReserva reserva={r} onCerrar={() => setFicha(false)} onChanged={onChanged} />}
     </article>
   );
 }

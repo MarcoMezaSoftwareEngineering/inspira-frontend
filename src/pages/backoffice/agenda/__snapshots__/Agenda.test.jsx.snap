@@ -618,44 +618,65 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl transition-colors hover:bg-neutral-50 opacity-55">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">09:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">09:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">09:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Confirmada</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
+<span class="block text-[10px] text-neutral-400 truncate">ana@example.com</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">11:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">11:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">11:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
+<span class="block text-[10px] text-neutral-400 truncate">
+</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">10:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-12</span>
+<b class="block text-[12px] text-neutral-800">10:00</b>
+<span class="block text-[9px] text-neutral-400">10-12</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">10:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
+<span class="block text-[10px] text-neutral-400 truncate">luis@example.com</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
 </div>
 </section>
@@ -1285,44 +1306,64 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl transition-colors hover:bg-neutral-50 opacity-55">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">09:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">09:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">09:00 · Carina Meza</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Confirmada</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
+<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">11:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">11:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">11:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
+<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">10:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-12</span>
+<b class="block text-[12px] text-neutral-800">10:00</b>
+<span class="block text-[9px] text-neutral-400">10-12</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">10:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
+<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
 </div>
 </section>
@@ -1957,44 +1998,65 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl transition-colors hover:bg-neutral-50 opacity-55">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">09:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">09:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">09:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Confirmada</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
+<span class="block text-[10px] text-neutral-400 truncate">ana@example.com</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">11:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">11:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">11:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
+<span class="block text-[10px] text-neutral-400 truncate">
+</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">10:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-12</span>
+<b class="block text-[12px] text-neutral-800">10:00</b>
+<span class="block text-[9px] text-neutral-400">10-12</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">10:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
+<span class="block text-[10px] text-neutral-400 truncate">luis@example.com</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
 </div>
 </section>
@@ -2615,44 +2677,65 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl transition-colors hover:bg-neutral-50 opacity-55">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">09:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">09:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">09:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Confirmada</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
+<span class="block text-[10px] text-neutral-400 truncate">ana@example.com</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">11:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">11:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">11:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
+<span class="block text-[10px] text-neutral-400 truncate">
+</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">10:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-12</span>
+<b class="block text-[12px] text-neutral-800">10:00</b>
+<span class="block text-[9px] text-neutral-400">10-12</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">10:00</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
+<span class="block text-[10px] text-neutral-400 truncate">luis@example.com</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
 </div>
 </section>
@@ -3884,7 +3967,7 @@ exports[`Agenda — Mi calendario > sin datos 1`] = `
 </div>"
 `;
 
-exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita desplegada > citas desplegadas 1`] = `
+exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con sus botones > citas desplegadas 1`] = `
 "<div class="h-full flex flex-col min-h-0">
 <header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
 <div class="min-w-[220px]">
@@ -4503,83 +4586,63 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl transition-colors bg-neutral-50 opacity-55">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">09:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">09:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">09:00 · Carina Meza</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Confirmada</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
+<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
-<div class="px-2.5 pb-2.5">
-<div class="flex items-center gap-1.5 flex-wrap mb-2">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-neutral-100 text-neutral-500 border-neutral-200">50 USD</span>
 </div>
-<p class="text-[10px] text-neutral-500 mb-2 truncate">ana@example.com · +51 999 111 222</p>
-<div class="flex gap-1.5 flex-wrap">
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Cobrar 50 % por reagendar</button>
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Autorizar reagendar (50 % cobrado)</button>
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">No asistió (sin devolución)</button>
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Canceló Inspira (devolver o reagendar)</button>
-<a href="/backoffice/presupuesto?cliente=Ana%20Torres&amp;correo=ana%40example.com" class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Cotizar</a>
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Reenviar accesos</button>
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Enviar recordatorio</button>
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Enviar formulario previo</button>
-<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 bg-primary text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">Unirse</a>
-<button class="px-2.5 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[10.5px] font-bold hover:bg-red-50">Cancelar</button>
 </div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
 </article>
-<article class="rounded-xl transition-colors bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">11:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">11:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">11:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
+<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
-<div class="px-2.5 pb-2.5">
-<div class="flex items-center gap-1.5 flex-wrap mb-2">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-neutral-100 text-neutral-500 border-neutral-200">50 USD</span>
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-red-50 text-red-600 border-red-200">Pago rechazado</span>
 </div>
-<div class="flex gap-1.5 flex-wrap">
-<button class="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10.5px] font-bold hover:bg-amber-100">Añadir Meet</button>
-<button class="px-2.5 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[10.5px] font-bold hover:bg-red-50">Cancelar</button>
 </div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
 </article>
-<article class="rounded-xl transition-colors bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">10:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-12</span>
+<b class="block text-[12px] text-neutral-800">10:00</b>
+<span class="block text-[9px] text-neutral-400">10-12</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">10:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
-</div>
-</button>
-<div class="px-2.5 pb-2.5">
-<div class="flex items-center gap-1.5 flex-wrap mb-2">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-neutral-100 text-neutral-500 border-neutral-200">150 PEN</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
+<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
 <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
 </div>
-<p class="text-[10px] text-neutral-500 mb-2 truncate">luis@example.com</p>
-<div class="flex gap-1.5 flex-wrap">
-<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Recordar pago</button>
-<button class="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10.5px] font-bold hover:bg-amber-100">Añadir Meet</button>
-<button class="px-2.5 py-1.5 bg-white border border-red-200 text-red-500 rounded-lg text-[10.5px] font-bold hover:bg-red-50">Cancelar</button>
 </div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
 </div>
 </article>
 </div>
@@ -4591,7 +4654,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>"
 `;
 
-exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita desplegada > día 1`] = `
+exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con sus botones > día 1`] = `
 "<div class="h-full flex flex-col min-h-0">
 <header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
 <div class="min-w-[220px]">
@@ -4837,44 +4900,64 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl transition-colors hover:bg-neutral-50 opacity-55">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">09:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">09:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">09:00 · Carina Meza</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Confirmada</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
+<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">11:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">11:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">11:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
+<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">10:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-12</span>
+<b class="block text-[12px] text-neutral-800">10:00</b>
+<span class="block text-[9px] text-neutral-400">10-12</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">10:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
+<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
 </div>
 </section>
@@ -4885,7 +4968,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>"
 `;
 
-exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita desplegada > semana siguiente 1`] = `
+exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con sus botones > semana siguiente 1`] = `
 "<div class="h-full flex flex-col min-h-0">
 <header class="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-neutral-200 bg-white/85 backdrop-blur-md z-20">
 <div class="min-w-[220px]">
@@ -5481,44 +5564,64 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 <span class="min-w-[24px] h-6 px-2 rounded-full grid place-items-center bg-secondary text-primary text-[10px] font-extrabold">3</span>
 </div>
 <div class="flex-1 min-h-0 overflow-y-auto p-1.5">
-<article class="rounded-xl transition-colors hover:bg-neutral-50 opacity-55">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 opacity-60">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">09:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">09:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Ana Torres</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">09:00 · Carina Meza</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Confirmada</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Ana Torres</b>
+<span class="block text-[10px] text-neutral-400 truncate">ana@example.com · Carina Meza</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a href="https://meet.google.com/abc-defg-hij" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-primary text-white hover:opacity-90">Unirse</a>
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">11:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-09</span>
+<b class="block text-[12px] text-neutral-800">11:00</b>
+<span class="block text-[9px] text-neutral-400">10-09</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Marta Ruiz</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">11:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Marta Ruiz</b>
+<span class="block text-[10px] text-neutral-400 truncate"> · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmada</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
-<article class="rounded-xl transition-colors hover:bg-neutral-50 ">
-<button class="w-full grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-center p-2.5 text-left">
+<article class="rounded-xl border border-neutral-200 bg-white p-3 ">
+<div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2.5 items-start">
 <div>
-<b class="block text-[11px] text-neutral-800">10:00</b>
-<span class="block text-[8.5px] text-neutral-400">10-12</span>
+<b class="block text-[12px] text-neutral-800">10:00</b>
+<span class="block text-[9px] text-neutral-400">10-12</span>
 </div>
 <div class="min-w-0">
-<b class="block text-[10.5px] text-neutral-800 truncate">Luis Pérez</b>
-<span class="block text-[9px] text-neutral-400 truncate mt-0.5">10:00 · Nicole Ramos</span>
-<span class="inline-flex items-center mt-[5px] px-1.5 py-[3px] rounded-full text-[8px] font-extrabold bg-[#edf8f2] text-[#277553]">Pago pendiente</span>
+<b class="block text-[12.5px] text-neutral-800 truncate">Luis Pérez</b>
+<span class="block text-[10px] text-neutral-400 truncate">luis@example.com · Nicole Ramos</span>
+<div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">Pago pendiente</span>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">vence 10:45 a.&nbsp;m.</span>
 </div>
-</button>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<button class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center bg-white border border-red-200 text-red-500 hover:bg-red-50">Cancelar</button>
+<button type="button" class="px-3 py-2 rounded-xl text-[11.5px] font-bold text-center ml-auto bg-primary-dark text-white hover:opacity-90">Administrar</button>
+</div>
 </article>
 </div>
 </section>

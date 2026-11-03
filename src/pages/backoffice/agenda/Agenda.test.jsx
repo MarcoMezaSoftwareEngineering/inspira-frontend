@@ -169,7 +169,7 @@ describe("Agenda — Mi calendario", () => {
     expect(html(container)).toMatchSnapshot("generar horarios");
   });
 
-  it("vista de día, semana siguiente y cita desplegada", async () => {
+  it("vista de día, semana siguiente y citas con sus botones", async () => {
     const { container } = await montar();
     fireEvent.click(screen.getByText("Día"));
     expect(html(container)).toMatchSnapshot("día");
@@ -179,10 +179,10 @@ describe("Agenda — Mi calendario", () => {
     expect(html(container)).toMatchSnapshot("semana siguiente");
     fireEvent.click(screen.getByText("Hoy"));
     await esperar();
-    // Las tres citas activas del panel lateral, desplegadas.
-    const filas = container.querySelectorAll("aside article > button");
+    // Las tres citas activas del panel lateral, cada una con «Administrar» y lo de todos los días.
+    const filas = container.querySelectorAll("aside article");
     expect(filas).toHaveLength(3);
-    filas.forEach((b) => fireEvent.click(b));
+    expect(container.querySelectorAll("aside article button").length).toBeGreaterThanOrEqual(3);
     expect(html(container)).toMatchSnapshot("citas desplegadas");
   });
 

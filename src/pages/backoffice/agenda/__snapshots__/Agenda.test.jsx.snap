@@ -11,8 +11,8 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -677,8 +677,8 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -1344,8 +1344,8 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -2016,8 +2016,8 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -2674,8 +2674,8 @@ exports[`Agenda — Mi calendario > error al cargar 1`] = `
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -3285,8 +3285,8 @@ exports[`Agenda — Mi calendario > sin datos 1`] = `
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -3895,8 +3895,8 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -4602,8 +4602,8 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">
@@ -4896,8 +4896,8 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 <p class="text-[11px] text-neutral-400 mt-0.5">Citas, pagos y disponibilidad del equipo en una sola vista.</p>
 </div>
 <div class="flex gap-0.5 p-1 rounded-[14px] border border-neutral-200 bg-neutral-50 shadow-sm text-[11px] font-bold overflow-x-auto">
-<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 <button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors text-neutral-500 hover:bg-white hover:text-primary-dark">Reservas</button>
+<button class="px-3.5 py-2.5 rounded-[10px] whitespace-nowrap transition-colors bg-primary-dark text-white shadow">Mi calendario</button>
 </div>
 </header>
 <div class="flex-1 min-h-0 overflow-hidden">

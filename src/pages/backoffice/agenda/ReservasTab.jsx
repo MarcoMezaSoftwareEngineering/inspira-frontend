@@ -19,7 +19,7 @@ const inicioDe = (r) => new Date(`${r.fecha}T${r.hora_inicio}:00-05:00`).getTime
 
 export default function ReservasTab() {
   const [reservas, setReservas] = useState([]);
-  const [filtro, setFiltro] = useState("pagar");
+  const [elegido, setElegido] = useState(null); // lo que tocó la persona; si no, el primer filtro con algo
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [ahora, setAhora] = useState(() => Date.now());
@@ -47,6 +47,7 @@ export default function ReservasTab() {
     };
   }, [reservas, ahora]);
 
+  const filtro = elegido || ["pagar", "informe", "proximas", "todas"].find((id) => grupos[id].length) || "todas";
   const actual = FILTROS.find((f) => f.id === filtro);
   const lista = grupos[filtro];
 
@@ -54,7 +55,7 @@ export default function ReservasTab() {
     <div className="h-full min-h-0 flex flex-col p-3 sm:p-4 gap-3">
       <div className="flex-none flex items-center gap-1.5 flex-wrap">
         {FILTROS.map((f) => (
-          <button key={f.id} onClick={() => setFiltro(f.id)}
+          <button key={f.id} onClick={() => setElegido(f.id)}
             className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${filtro === f.id ? "bg-primary-dark text-white border-primary-dark" : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50"}`}>
             {f.texto}
             <span className={`ml-1.5 px-1.5 rounded-full text-[10px] ${filtro === f.id ? "bg-white/20" : "bg-neutral-100 text-neutral-500"}`}>{grupos[f.id].length}</span>

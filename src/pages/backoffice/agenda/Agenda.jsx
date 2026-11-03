@@ -8,12 +8,12 @@ import MiCalendarioTab from "./mi-calendario/MiCalendarioTab";
 import ReservasTab from "./ReservasTab";
 
 const TABS = [
-  { id: "micalendario", texto: "Mi calendario" },
   { id: "reservas", texto: "Reservas" },
+  { id: "micalendario", texto: "Mi calendario" },
 ];
 
 export default function Agenda() {
-  const [tab, setTab] = useState("micalendario");
+  const [tab, setTab] = useState("reservas");
 
   return (
     <div className="h-full flex flex-col min-h-0">

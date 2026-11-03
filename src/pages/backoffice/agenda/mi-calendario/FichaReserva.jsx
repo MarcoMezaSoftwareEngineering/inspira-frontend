@@ -2,7 +2,8 @@
 // política aceptada, formulario previo, notas de Gemini, informe (ver, enviar, pedir cambios),
 // avisos al asesorado y la cotización. La lista de reservas solo lleva lo de todos los días
 // (unirse, WhatsApp, cancelar); lo demás vive aquí.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { boGET, boPOST } from "../../../../services/backofficeApi";
 import { dialog } from "../../../../services/dialogService";
 import Icono from "../../../../components/common/Icono";
@@ -87,6 +88,17 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
     onChanged?.();
   }
 
+  // Pantalla completa por encima de la app: sin scroll de la página de fondo, y Esc cierra.
+  const cerrarRef = useRef(onCerrar);
+  useEffect(() => { cerrarRef.current = onCerrar; }, [onCerrar]);
+  useEffect(() => {
+    const antes = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const tecla = (e) => { if (e.key === "Escape") cerrarRef.current?.(); };
+    window.addEventListener("keydown", tecla);
+    return () => { document.body.style.overflow = antes; window.removeEventListener("keydown", tecla); };
+  }, []);
+
   const cambiado = () => { cargar(); onChanged?.(); };
   const inf = f?.informe;
   const pagada = !!f?.pagado_en;
@@ -111,16 +123,17 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
   const cotizar = f ? `/backoffice/presupuesto?${new URLSearchParams({ cliente: f.cotizar.cliente, correo: f.cotizar.correo, concepto: f.cotizar.concepto, importe: f.cotizar.importe, reserva: String(reserva.id_reserva) })}` : "#";
   const estadoInforme = !f ? "" : sinInforme ? "sin informe" : enviado ? "enviado al asesorado" : inf.estado ? "borrador por aprobar" : conNotas ? "en cola" : "sin notas todavía";
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 overflow-y-auto" onClick={onCerrar}>
-      <div className="mx-auto min-h-full max-w-2xl bg-[#F4F9FE] sm:my-6 sm:min-h-0 sm:rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <header className="sticky top-0 z-10 bg-gradient-to-br from-[#013446] to-[#012938] px-4 pb-4 pt-3 text-white sm:rounded-t-3xl">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-white/55">Reserva N.° {reserva.id_reserva}</p>
-            <button type="button" onClick={onCerrar} aria-label="Cerrar" className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-[16px] hover:bg-white/20">✕</button>
+  return createPortal(
+    <div className="fixed inset-0 overflow-y-auto overscroll-contain bg-black/50" style={{ zIndex: 2000 }} onClick={onCerrar}>
+      <div role="dialog" aria-modal="true" aria-label={`Reserva de ${reserva.cliente?.nombre || "asesorado"}`}
+        className="mx-auto min-h-full max-w-2xl bg-[#F4F9FE] shadow-2xl sm:my-6 sm:min-h-0 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <header className="sticky top-0 z-10 bg-gradient-to-br from-[#013446] to-[#012938] px-4 pb-3 text-white sm:rounded-t-3xl" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
+          <div className="flex items-center justify-between gap-3">
+            <button type="button" onClick={onCerrar} className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-white/10 px-3 text-[13px] font-bold hover:bg-white/20">← Volver</button>
+            <p className="text-[10.5px] font-bold uppercase tracking-[.14em] text-white/60">Reserva N.° {reserva.id_reserva}</p>
           </div>
-          <h2 className="font-fraunces text-[22px] font-bold leading-tight">{reserva.cliente?.nombre || "Sin nombre"}</h2>
-          <p className="mt-1 flex items-center gap-1.5 text-[12.5px] text-white/75"><Icono nombre="calendario" size={14} />{fechaCorta(reserva.fecha)} · {reserva.hora_inicio} (hora Perú)</p>
+          <h2 className="mt-2 truncate font-fraunces text-[21px] font-bold leading-tight">{reserva.cliente?.nombre || reserva.cliente?.email_contacto || "Sin nombre"}</h2>
+          <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-white/80"><Icono nombre="calendario" size={14} />{fechaCorta(reserva.fecha)} · {reserva.hora_inicio} (hora Perú)</p>
         </header>
 
         <div className="grid grid-cols-[minmax(0,1fr)] gap-3 p-3 sm:p-4">
@@ -264,6 +277,7 @@ export default function FichaReserva({ reserva, onCerrar, onChanged }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -5,6 +5,7 @@
 // con el mensaje ya escrito (queda anotado el contacto), cambiar de etapa con un toque (sin
 // arrastrar), abrir la cita o preparar la cotización. El cálculo vive en el backend (leads.bandeja.js).
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { boPATCH, boPOST } from "../../../services/backofficeApi";
 import { dialog } from "../../../services/dialogService";
 import Icono from "../../../components/common/Icono";
@@ -41,8 +42,8 @@ function HojaEtapa({ lead, onCerrar, onHecho }) {
     dialog.toast("Etapa actualizada.", "success");
     onHecho();
   }
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 sm:items-center" onClick={onCerrar}>
+  return createPortal(
+    <div className="fixed inset-0 flex items-end justify-center bg-black/45 sm:items-center" style={{ zIndex: 2000 }} onClick={onCerrar}>
       <div role="dialog" aria-modal="true" aria-label={`Cambiar etapa de ${lead.nombre || "este lead"}`}
         className="w-full max-w-md rounded-t-3xl bg-white p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
         <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-neutral-200 sm:hidden" aria-hidden />
@@ -73,7 +74,8 @@ function HojaEtapa({ lead, onCerrar, onHecho }) {
         )}
         <button type="button" onClick={onCerrar} className={`${BTN} mt-3 w-full bg-neutral-100 text-neutral-700`}>Cerrar</button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

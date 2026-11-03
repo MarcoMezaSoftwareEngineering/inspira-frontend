@@ -51,6 +51,9 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada, 
             )}
             {r.metodo_pago === "TRANSFERENCIA" && r.estado !== "CANCELADA" && <Pill tone="primary">Transferencia</Pill>}
             {r.metodo_pago === "DESPUES" && r.estado !== "CANCELADA" && <Pill tone="primary">Pagará después</Pill>}
+            {r.no_asistio_en && <Pill tone="red">no asistió</Pill>}
+            {r.cancelada_por === "INSPIRA" && <Pill tone="red">cancelada por Inspira</Pill>}
+            {r.reagenda_autorizada && <Pill tone="amber">reagendar autorizado</Pill>}
             {r.informe_estado === "BORRADOR" && <Pill tone="amber">informe por aprobar</Pill>}
             {r.informe_estado === "ENVIADO" && <Pill tone="green">informe enviado</Pill>}
             {r.metodo_pago === "MERCADOPAGO" && Number(r.recargo) > 0 && <Pill tone="neutral">incluye comisión MP {r.recargo}</Pill>}
@@ -76,7 +79,7 @@ export default function ApptRow({ reserva: r, onChanged, mostrarAsesor, pasada, 
               className="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50" />
             <ConfirmarPagoBtn reserva={r} onChanged={onChanged}
               className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10.5px] font-bold hover:opacity-90 disabled:opacity-50" />
-            <AvisosBtns reserva={r} />
+            <AvisosBtns reserva={r} onChanged={onChanged} />
             {r.whatsapp_url && (
               <a href={r.whatsapp_url} target="_blank" rel="noopener noreferrer"
                 className="px-2.5 py-1.5 bg-[#25D366] text-white rounded-lg text-[10.5px] font-bold hover:opacity-90">

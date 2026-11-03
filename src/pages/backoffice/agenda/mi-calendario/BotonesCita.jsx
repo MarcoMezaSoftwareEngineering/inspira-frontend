@@ -121,7 +121,7 @@ export function InformeBtns({ reserva, onChanged }) {
 }
 
 // Avisos al asesorado: recordar el pago, reenviar los accesos de la cita, recordarla y mandar el formulario previo.
-async function avisar(r, { ruta, cuerpo, pregunta, titulo, hecho }, setEnviando) {
+async function avisar(r, { ruta, cuerpo, pregunta, titulo, hecho, recarga }, setEnviando, onChanged) {
   const quien = r.cliente?.nombre || r.cliente?.email_contacto;
   const ok = await dialog.confirm(`${pregunta} ${quien} (${r.cliente?.email_contacto || "sin correo"})?`, titulo);
   if (!ok) return;
@@ -130,14 +130,15 @@ async function avisar(r, { ruta, cuerpo, pregunta, titulo, hecho }, setEnviando)
   setEnviando("");
   if (res?.ok === false) return dialog.toast(res.msg || "No se pudo enviar", "error");
   dialog.toast(hecho, "success");
+  if (recarga) onChanged?.();
 }
 
-export function AvisosBtns({ reserva }) {
+export function AvisosBtns({ reserva, onChanged }) {
   const [enviando, setEnviando] = useState("");
   const clase = "px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50";
   const boton = (ruta, texto, datos) => (
     <button key={ruta + texto} disabled={!!enviando} className={clase}
-      onClick={() => avisar(reserva, { ruta, ...datos }, setEnviando)}>
+      onClick={() => avisar(reserva, { ruta, ...datos }, setEnviando, onChanged)}>
       {enviando === ruta ? "Enviando…" : texto}
     </button>
   );
@@ -145,8 +146,14 @@ export function AvisosBtns({ reserva }) {
     return boton("recordar", "Recordar pago", { cuerpo: { tipo: "pago" }, pregunta: "¿Enviar el enlace para completar el pago a", titulo: "Recordar pago", hecho: "Se envió el recordatorio de pago." });
   }
   if (reserva.estado !== "CONFIRMADA") return null;
+  const cotizar = `/backoffice/presupuesto?cliente=${encodeURIComponent(reserva.cliente?.nombre || "")}&correo=${encodeURIComponent(reserva.cliente?.email_contacto || "")}`;
   return (
     <>
+      {boton("cobro-reagendamiento", "Cobrar 50 % por reagendar", { pregunta: "¿Enviar el cobro del 50 % para reagendar a", titulo: "Cobro por reagendar", hecho: "Se envió el cobro del 50 %." })}
+      {boton("autorizar-reagendamiento", "Autorizar reagendar (50 % cobrado)", { pregunta: "¿Ya vio el abono del 50 % y habilita que reagende, avisando a", titulo: "Autorizar reagendamiento", hecho: reserva.reagenda_autorizada ? "Se volvió a enviar la autorización." : "Se autorizó el reagendamiento y se avisó al asesorado." })}
+      {boton("no-asistio", "No asistió (sin devolución)", { cuerpo: { quien: "cliente" }, pregunta: "¿Marcar que no asistió y avisar, sin devolución, a", titulo: "Inasistencia", hecho: "Se marcó la inasistencia y se avisó al asesorado.", recarga: true })}
+      {boton("no-asistio", "Canceló Inspira (devolver o reagendar)", { cuerpo: { quien: "inspira" }, pregunta: "¿Cancelar por responsabilidad de Inspira y ofrecer nuevo horario o devolución íntegra a", titulo: "Cancelada por Inspira", hecho: "Se canceló y se avisó al asesorado y al equipo.", recarga: true })}
+      <a href={cotizar} className={clase}>Cotizar</a>
       {boton("reenviar-accesos", "Reenviar accesos", { pregunta: "¿Reenviar la confirmación con el enlace de la reunión a", titulo: "Reenviar accesos", hecho: "Se reenviaron los accesos." })}
       {boton("recordar", "Enviar recordatorio", { cuerpo: { tipo: "cita" }, pregunta: "¿Enviar un recordatorio de la asesoría a", titulo: "Enviar recordatorio", hecho: "Se envió el recordatorio." })}
       {boton("formulario-previo", "Enviar formulario previo", { pregunta: "¿Enviar el formulario previo a la asesoría a", titulo: "Formulario previo", hecho: "Se envió el formulario previo." })}

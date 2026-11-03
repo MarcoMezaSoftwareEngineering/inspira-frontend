@@ -4521,6 +4521,11 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y cita despl
 </div>
 <p class="text-[10px] text-neutral-500 mb-2 truncate">ana@example.com · +51 999 111 222</p>
 <div class="flex gap-1.5 flex-wrap">
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Cobrar 50 % por reagendar</button>
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Autorizar reagendar (50 % cobrado)</button>
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">No asistió (sin devolución)</button>
+<button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Canceló Inspira (devolver o reagendar)</button>
+<a href="/backoffice/presupuesto?cliente=Ana%20Torres&amp;correo=ana%40example.com" class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Cotizar</a>
 <button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Reenviar accesos</button>
 <button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Enviar recordatorio</button>
 <button class="px-2.5 py-1.5 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-[10.5px] font-bold hover:bg-neutral-50 disabled:opacity-50">Enviar formulario previo</button>

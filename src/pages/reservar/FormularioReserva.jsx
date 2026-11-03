@@ -12,6 +12,7 @@ import { loginGoogle } from "../../components/layout/Header/LoginButton";
 import { dialog } from "../../services/dialogService";
 import { registrarInicioPago } from "../../lib/analytics";
 import AceptarTerminos from "../../components/legal/AceptarTerminos";
+import { VERSIONES } from "../../config/legal";
 import { Icono } from "./iconos";
 import { guardarToken } from "./tokenReserva";
 import { INICIOS, INTERESES, borrarBorrador, celularValido, componerMotivo, correoValido, guardarBorrador, leerBorrador, nombreCompletoValido } from "./preguntas";
@@ -75,13 +76,13 @@ export default function FormularioReserva({ hora, servicioId, fecha, precio, isL
     }
     if (conCuenta) {
       borrarBorrador();
-      separarHorario(hora.id_slot, servicioId, modo, { motivo: componerMotivo({ interes, inicio, detalle }), celular: celular.trim() });
+      separarHorario(hora.id_slot, servicioId, modo, { motivo: componerMotivo({ interes, inicio, detalle }), celular: celular.trim(), acepta: true, terminos_version: VERSIONES.terminos.version });
       return;
     }
     setEnviando(true);
     try {
       const res = await apiPOST("/api/reservas/invitado/separar", {
-        id_slot: hora.id_slot, servicio_id: servicioId, modo, acepta: true, web: trampa,
+        id_slot: hora.id_slot, servicio_id: servicioId, modo, acepta: true, web: trampa, terminos_version: VERSIONES.terminos.version,
         nombre: nombre.trim(), email: email.trim(), celular: celular.trim(), interes, inicio, motivo: detalle.trim(),
       });
       if (res?.ok && res.id_reserva) {
@@ -194,7 +195,7 @@ export default function FormularioReserva({ hora, servicioId, fecha, precio, isL
       <AceptarTerminos
         checked={aceptado}
         onChange={setAceptado}
-        resumen="Separamos tu horario y eliges cómo pagar: tarjeta, transferencia con voucher o pagar después. La cita se confirma cuando recibimos el pago. Puedes reprogramar o cancelar sin costo avisando con 24 horas de antelación."
+        resumen="Separamos tu horario y eliges cómo pagar. La cita se confirma cuando recibimos el pago. Política de la cita: no hay devolución por cancelación; puedes reprogramar sin costo con mínimo 24 horas de antelación (con menos, solo previa coordinación y pagando el 50 %); si no asistes y no reprogramas ni cancelas, no hay devolución. Si Inspira Legal no se presenta o cancela, eliges nuevo horario o la devolución íntegra."
       />
       {intento && !aceptado && (
         <p className="text-xs text-alto-ink" role="alert">

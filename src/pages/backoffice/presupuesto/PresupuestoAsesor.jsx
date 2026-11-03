@@ -229,7 +229,12 @@ export default function PresupuestoAsesor() {
     cargarHistorial().then((r) => {
       if (abrirId) abrir(abrirId);
       // Al empezar de cero se propone el número que toca. Se puede cambiar.
-      else if (r?.siguiente_numero) setD((p) => (p.numero ? p : { ...p, numero: r.siguiente_numero }));
+      else {
+        if (r?.siguiente_numero) setD((p) => (p.numero ? p : { ...p, numero: r.siguiente_numero }));
+        // Desde una cita (Agenda → Reservas → Cotizar): llega con el nombre y el correo del asesorado.
+        const q = new URLSearchParams(window.location.search);
+        if (q.get("cliente") || q.get("correo")) setD((p) => ({ ...p, cliente: p.cliente || q.get("cliente") || "", correo: p.correo || q.get("correo") || "" }));
+      }
     });
     // Sólo al montar: lo demás se recarga a mano tras cada guardado.
     // eslint-disable-next-line react-hooks/exhaustive-deps

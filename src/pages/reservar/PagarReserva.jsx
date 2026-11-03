@@ -374,7 +374,7 @@ export default function PagarReserva() {
           <h2 className="font-semibold text-tinta">¿Necesita hacer un cambio?</h2>
           {r.puede_gestionar ? (
             <>
-              <p className="mt-1 text-sm text-tinta-2">Puede reprogramar sin costo con un mínimo de 24 horas de antelación. La cancelación no genera devolución, y si no asiste sin reprogramar ni cancelar tampoco hay devolución.</p>
+              <p className="mt-1 text-sm text-tinta-2">Puede reprogramar sin costo con un mínimo de 24 horas de antelación. La cancelación no genera devolución, y si no asiste sin reprogramar ni cancelar tampoco. Si Inspira Legal no se presenta o cancela, usted elige nuevo horario o la devolución íntegra.</p>
               <div className="mt-3 flex flex-wrap items-center gap-4">
                 <a href={`/reservar?reprogramar=${r.id_reserva}`} className={boton.secundario}>Reprogramar</a>
                 {bloqueCancelar(true)}

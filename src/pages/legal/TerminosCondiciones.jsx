@@ -160,16 +160,23 @@ export default function TerminosCondiciones() {
             devolución y el servicio se considera prestado.
           </Li>
           <Li>
-            Si somos nosotros quienes cancelamos o reprogramamos, podrás elegir
-            entre un nuevo horario o la devolución íntegra de lo pagado.
+            Si <strong>Inspira Legal no se presenta o cancela</strong> la cita,
+            o la reprogramamos nosotros, podrás elegir entre un nuevo horario o
+            la devolución íntegra de lo pagado.
+          </Li>
+          <Li>
+            Las citas de asesoría se rigen por esta sección. Si tuviste una
+            causa justificada y debidamente comunicada, escríbenos y lo
+            revisamos caso por caso.
           </Li>
         </ul>
       </Seccion>
 
       <Seccion n="6" titulo="Desistimiento y devoluciones">
         <p>
-          Puedes desistir de un servicio contratado y solicitar la devolución en
-          las siguientes condiciones:
+          Salvo las citas de asesoría, que se rigen por la sección 5, puedes
+          desistir de un servicio contratado y solicitar la devolución en las
+          siguientes condiciones:
         </p>
         <ul className="space-y-1">
           <Li>

@@ -58,7 +58,10 @@ export const VERSIONES = {
   // 1.1 (27/08/2026): precio total sin excepciones (art. 5.2 Ley 29571), la
   // limitación de responsabilidad deja fuera el dolo y la culpa inexcusable, y
   // el consumidor conserva el fuero de su propio domicilio.
-  terminos: { version: "1.1", fecha: "2026-08-27" },
+  // 1.2 (03/11/2026): política de la cita — sin devolución por cancelación, reprogramación
+  // con 24 h (con menos, previa coordinación y 50 %), inasistencia sin devolución y devolución
+  // íntegra si Inspira no se presenta o cancela.
+  terminos: { version: "1.2", fecha: "2026-11-03" },
 };
 
 // Plazos legales aplicables (Ley N.° 29733 y su Reglamento)

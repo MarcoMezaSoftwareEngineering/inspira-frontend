@@ -8,6 +8,7 @@ import VisaDatosCliente from "./sections/VisaDatosCliente";
 import VisaMediosEconomicos from "./sections/VisaMediosEconomicos";
 import VisaDeclaracionCliente from "./sections/VisaDeclaracionCliente";
 import { estadoVisado } from "../../../../lib/visaFlujoInterno";
+import { plazoCitaBls, textoVentana, fechaLarga } from "../../../../lib/visaPlazoCita";
 import { EsqueletoExpediente } from "../Esqueleto";
 import HiloMensajes from "../../../../components/common/HiloMensajes";
 import SelectorSeccionMovil from "./SelectorSeccionMovil";
@@ -476,6 +477,23 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
               vacio="La agendamos contigo y te confirmamos aquí"
               pie="BLS International · llega 15 min antes"
             />
+
+            {(!visaExp?.cita_estado || visaExp.cita_estado === "PENDIENTE") && (() => {
+              const p = plazoCitaBls({ inicioClases: visaExp?.centro_inicio });
+              if (!p?.ventana) return null;
+              return (
+                <Tarjeta titulo="Cuándo conviene tu cita">
+                  <p className="pnl-visado-texto">
+                    Lo ideal es que tu cita en BLS sea del <b>{textoVentana(p.ventana)}</b>. Para entonces ya tendrás
+                    tu estado de cuenta cerrado hasta {p.ventana.cuentasHasta}.
+                  </p>
+                  <p className="pnl-visado-meta">
+                    Como regla general, la cita debe ser como mínimo dos meses antes del inicio de clases
+                    ({fechaLarga(p.inicio)}), es decir, a más tardar el {fechaLarga(p.limite)}.
+                  </p>
+                </Tarjeta>
+              );
+            })()}
 
             {visaExp?.cita_estado === "REAGENDAR" && (
               <Aviso tono="warn" icono={<IconoLinea nombre="refresh" />}>

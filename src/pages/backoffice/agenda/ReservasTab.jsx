@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { boGET } from "../../../services/backofficeApi";
 import { addDays, toISODate } from "./utilidades";
 import ApptRow from "./mi-calendario/ApptRow";
+import AgendarCita from "./AgendarCita";
 import { Segmentado } from "../crm/kit";
 import { BOTON } from "../crm/estilos";
 
@@ -36,6 +37,7 @@ export default function ReservasTab() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [ahora, setAhora] = useState(() => Date.now());
+  const [agendando, setAgendando] = useState(false);
 
   const cargar = useCallback(async () => {
     const hoy = new Date();
@@ -86,7 +88,13 @@ export default function ReservasTab() {
           <button type="button" onClick={() => { setCargando(true); cargar(); }} aria-label="Actualizar" className={`${BOTON.secundario} !px-3`}>
             <span aria-hidden className={cargando ? "animate-spin" : ""}>↻</span>
           </button>
+          <button type="button" onClick={() => setAgendando(true)} className={`${BOTON.principal} shrink-0`}>
+            <span aria-hidden>+</span> Agendar cita
+          </button>
         </div>
+        {agendando && (
+          <AgendarCita onCerrar={() => setAgendando(false)} onAgendada={() => { setElegido("proximas"); cargar(); }} />
+        )}
 
         {error && <div className="rounded-xl bg-red-50 p-3 text-[13px] text-red-700 ring-1 ring-red-200">{error}</div>}
 

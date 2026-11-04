@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from "react";
 import { boPATCH } from "../../../../../services/backofficeApi";
 import { Campo, Selecc, SubLabel } from "./visaWidgets";
+import CalculadoraCitaBls from "./CalculadoraCitaBls";
 import { RESULTADOS, VIAS_POSTERIORES, REQUERIMIENTO, estadoVisado, TONOS } from "../../../../../lib/visaFlujoInterno";
 
 const CITA_ESTADOS = [
@@ -83,6 +84,7 @@ export default function VisaEstadoVisadoAdmin({ idSolicitud, expediente, onSaved
       {/* 1 · La cita */}
       <div>
         <SubLabel>1 · Cita en BLS</SubLabel>
+        <CalculadoraCitaBls inicioClases={expediente?.centro_inicio} citaFecha={f.cita_fecha} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           <Selecc label="Estado de la cita" value={f.cita_estado} onChange={set("cita_estado")} options={CITA_ESTADOS} />
           <Campo label="Fecha de la cita" value={f.cita_fecha} onChange={set("cita_fecha")} type="date" />

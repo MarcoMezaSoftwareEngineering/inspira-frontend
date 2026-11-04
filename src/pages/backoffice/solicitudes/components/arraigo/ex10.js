@@ -33,7 +33,7 @@ const may = (v) => String(v || "").toUpperCase();
 export const TIPOS_FORMACION = [
   { clave: "secundaria", etiqueta: "Educación secundaria postobligatoria" },
   { clave: "certificado", etiqueta: "Obtención de certificado profesional" },
-  { clave: "adultos", etiqueta: "Oferta presencial de las enseñanzas obligatorias (educación de personas adultas)" },
+  { clave: "adultos", etiqueta: "Oferta presencial de enseñanzas obligatorias (educación de personas adultas)" },
   { clave: "spe", etiqueta: "Formación promovida por los Servicios Públicos de Empleo" },
 ];
 
@@ -42,6 +42,10 @@ export const MODALIDADES = [
   { clave: "A_DISTANCIA", etiqueta: "A distancia" },
   { clave: "MIXTA", etiqueta: "Mixta" },
 ];
+
+const norm = (v) => String(v ?? "").trim().toLowerCase();
+/** Acepta la clave (`certificado`) o la etiqueta de la ficha («Obtención de…»). */
+const claveDe = (lista, v) => lista.find((x) => norm(x.clave) === norm(v) || norm(x.etiqueta) === norm(v))?.clave;
 
 /** El domicilio en España del solicitante (el del expediente, sin más). */
 function domicilio(exp) {
@@ -121,7 +125,10 @@ const MODALIDAD = { PRESENCIAL: 116, A_DISTANCIA: 117, MIXTA: 118 };
 // marca: es una decisión del solicitante y de su representante, no un dato.
 
 export function casillasEX10(exp = {}) {
-  const n = [SEXO[exp.sexo], CIVIL[exp.estado_civil], TIPO[exp.form_tipo], MODALIDAD[exp.form_modalidad]];
+  const n = [
+    SEXO[exp.sexo], CIVIL[exp.estado_civil],
+    TIPO[claveDe(TIPOS_FORMACION, exp.form_tipo)], MODALIDAD[claveDe(MODALIDADES, exp.form_modalidad)],
+  ];
   return n.filter(Boolean).map((x) => `Casilla de verificación${x}`);
 }
 

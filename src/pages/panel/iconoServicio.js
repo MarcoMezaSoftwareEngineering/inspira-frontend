@@ -16,5 +16,6 @@ export const ICONO_SERVICIO = {
   homesc: "documento",
   homuni: "documento",
   recurso: "documento",
+  arraigo: "documento",
   otro: "documento",
 };

@@ -19,12 +19,13 @@ export const SERVICIO = {
   HOMESC: "homesc",
   HOMUNI: "homuni",
   RECURSO: "recurso",
+  ARRAIGO: "arraigo",
   PAC: "pac",
   OTRO: "otro",
 };
 
 /** Los que abren el recorrido genérico por pasos (DetalleSolicitudTramite). */
-export const TRAMITES = [SERVICIO.GRADO, SERVICIO.FP, SERVICIO.HOMESC, SERVICIO.HOMUNI, SERVICIO.RECURSO];
+export const TRAMITES = [SERVICIO.GRADO, SERVICIO.FP, SERVICIO.HOMESC, SERVICIO.HOMUNI, SERVICIO.RECURSO, SERVICIO.ARRAIGO];
 
 // El identificador del tipo manda: es lo que decide el backend. El texto es el
 // respaldo para los expedientes antiguos, que no lo llevaban.
@@ -85,6 +86,7 @@ export function servicioDe(s) {
   if (TIPOS_MASTER.includes(idTipo)) return SERVICIO.MASTER;
   // El máster antes que la FP y el grado: «posgrado» contiene «grado».
   if (/m[aá]ster|maestr[ií]a|postgrado|posgrado/.test(txt)) return SERVICIO.MASTER;
+  if (/arraigo/.test(txt)) return SERVICIO.ARRAIGO;
   if (/reposici|recurso/.test(txt)) return SERVICIO.RECURSO;
   if (/homologaci[oó]n.*(t[ií]tulo|universitari)|equivalencia/.test(txt)) return SERVICIO.HOMUNI;
   if (/homologaci[oó]n.*(escolar|bachiller|secundaria)/.test(txt)) return SERVICIO.HOMESC;
@@ -125,6 +127,7 @@ const ACCESOS = {
   [SERVICIO.HOMESC]: ["portal", "apostilla"],
   [SERVICIO.HOMUNI]: ["portal", "apostilla"],
   [SERVICIO.RECURSO]: ["portal", "apostilla"],
+  [SERVICIO.ARRAIGO]: ["portal", "apostilla"],
   [SERVICIO.PAC]: ["portal", "apostilla"],
   [SERVICIO.OTRO]: ["apostilla"],
 };

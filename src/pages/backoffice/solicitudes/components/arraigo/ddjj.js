@@ -19,8 +19,9 @@ function hoyLargo(fecha = new Date()) {
 
 /** Las filas «etiqueta: valor» de la declaración, en el orden del modelo. */
 export function filasDDJJ(exp = {}) {
-  const tipo = TIPOS_FORMACION.find((t) => t.clave === exp.form_tipo)?.etiqueta;
-  const modalidad = MODALIDADES.find((m) => m.clave === exp.form_modalidad)?.etiqueta;
+  const igual = (a, b) => String(a ?? "").trim().toLowerCase() === String(b ?? "").trim().toLowerCase();
+  const tipo = TIPOS_FORMACION.find((t) => igual(t.clave, exp.form_tipo) || igual(t.etiqueta, exp.form_tipo))?.etiqueta;
+  const modalidad = MODALIDADES.find((m) => igual(m.clave, exp.form_modalidad) || igual(m.etiqueta, exp.form_modalidad))?.etiqueta;
   const duracion = exp.form_horas ? `${exp.form_horas} horas` : "";
   const fechas = [exp.form_inicio && aDMY(exp.form_inicio), exp.form_fin && aDMY(exp.form_fin)]
     .filter(Boolean).join(" – ");

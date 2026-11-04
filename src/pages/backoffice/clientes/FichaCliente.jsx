@@ -57,6 +57,7 @@ const TONO_SERVICIO = {
   homuni: "bg-[#F1ECFA] text-[#5B3B9E]",
   recurso: "bg-[#FDECEC] text-[#A93226]",
   pac:    "bg-[#DFF3F1] text-[#0B5D5A]",
+  arraigo: "bg-[#E8F4EC] text-[#1D6A4A]",
 };
 
 function fecha(v) {

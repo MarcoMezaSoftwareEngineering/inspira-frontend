@@ -161,7 +161,7 @@ function respuestasPorDefecto() {
 }
 
 /** HTML exacto, con un salto entre etiquetas para que el diff se lea. */
-const html = (c) => c.innerHTML.replace(/></g, ">\n<");
+import { html } from "@/test-utils/html.js";
 /** Deja que terminen las promesas de los fetch simulados. */
 const esperar = async () => { for (let i = 0; i < 3; i++) await act(() => new Promise((r) => setTimeout(r, 0))); };
 /** El recuadro de una sección, por su título. */

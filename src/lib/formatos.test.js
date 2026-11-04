@@ -61,7 +61,8 @@ describe("formatos de fecha", () => {
     const d = new Date("2026-10-09T19:05:00Z"); // 21:05 en Madrid, 14:05 en Lima
     expect(f.fechaLarga(d)).toBe("09 de octubre de 2026");
     expect(f.horaLima(d)).toBe("14:05");
-    expect(f.horaLimaPE(d)).toBe("02:05 p. m."); // ICU separa «p.» y «m.» con espacio duro
+    // Según la versión de ICU, «p. m.» lleva espacio duro, estrecho o normal.
+    expect(f.horaLimaPE(d).replace(/[\u00a0\u202f]/g, " ")).toBe("02:05 p. m.");
     expect(f.diaSemanaYMesLima(d)).toBe("viernes, 9 de octubre");
   });
 });

@@ -718,7 +718,7 @@ exports[`Agenda — Mi calendario > admin, filtrado por una asesora 1`] = `
 </span>
 <span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com</span>
 <span class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a. m.</span>
 </span>
 </span>
 <span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
@@ -1456,7 +1456,7 @@ exports[`Agenda — Mi calendario > admin, todo el equipo 1`] = `
 </span>
 <span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
 <span class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a. m.</span>
 </span>
 </span>
 <span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
@@ -2200,7 +2200,7 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </span>
 <span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com</span>
 <span class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a. m.</span>
 </span>
 </span>
 <span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
@@ -2930,7 +2930,7 @@ exports[`Agenda — Mi calendario > asesora: su calendario, con el panel de gene
 </span>
 <span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com</span>
 <span class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a. m.</span>
 </span>
 </span>
 <span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
@@ -4987,7 +4987,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </span>
 <span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
 <span class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a. m.</span>
 </span>
 </span>
 <span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
@@ -5352,7 +5352,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </span>
 <span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
 <span class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a. m.</span>
 </span>
 </span>
 <span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">
@@ -6067,7 +6067,7 @@ exports[`Agenda — Mi calendario > vista de día, semana siguiente y citas con 
 </span>
 <span class="mt-0.5 block truncate text-[12.5px] text-[#4f6672]">luis@example.com · Nicole Ramos</span>
 <span class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a.&nbsp;m.</span>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold bg-amber-50 text-amber-900 ring-1 ring-amber-200">Pago pendiente · vence 10:45 a. m.</span>
 </span>
 </span>
 <span aria-hidden="true" class="mr-1 h-2.5 w-2.5 shrink-0 self-center rotate-45 border-r-2 border-t-2 border-neutral-400">

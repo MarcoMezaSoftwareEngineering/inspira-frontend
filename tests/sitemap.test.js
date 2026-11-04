@@ -32,6 +32,8 @@ const FUERA_DEL_SITEMAP = new Set([
   // /expediente: Marco la retiró de menús y sitemap el 25/09/2026 («ese no»);
   // sigue respondiendo para quien tenga el enlace, con noindex.
   "/expediente",
+  // /app: landing de la App Inspira para Ads y redes, con noindex (App.jsx).
+  "/app",
   "/auth/success",
   "/dev/muestra",
   "/pago-exitoso",

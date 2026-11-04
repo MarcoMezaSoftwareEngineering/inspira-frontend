@@ -87,7 +87,7 @@ function formCompleto(datos) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, onSeccion, perfil, faltanPerfil = 0, onPerfilCambiado }) {
+export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, onSeccion, perfil, faltanPerfil = 0, camposFaltan = [], onPerfilCambiado }) {
   const [detalle,           setDetalle]           = useState(null);
   const [checklist,         setChecklist]         = useState([]);
   const [formData,          setFormData]          = useState({});
@@ -367,7 +367,7 @@ export default function DetalleSolicitud({ solicitudBase, onIrAGuia, seccion, on
     : "Tu expediente, paso a paso";
   const leToca = calcularLeToca({ checklist, formGuardado, compat, elecciones });
   const falta = queMeFaltaMaster({
-    checklist, formGuardado, compat, elecciones, resumen: solicitudBase?.resumen, faltanPerfil,
+    checklist, formGuardado, compat, elecciones, resumen: solicitudBase?.resumen, faltanPerfil, camposFaltan,
     ir: { seccion: (s) => setActiveSection(s), perfil: () => navigate(rutaDe({ tab: "perfil" })) },
   });
 

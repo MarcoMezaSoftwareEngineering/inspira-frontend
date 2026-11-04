@@ -2,7 +2,7 @@
 // para la lista «Hoy» y el menú para el contador.
 import { rutaDe } from "./ruta";
 import { SERVICIO, servicioDe } from "./servicios";
-import { datosQueFaltan } from "./hooks/usePerfilIncompletoBool";
+import { camposQueFaltan } from "./hooks/usePerfilIncompletoBool";
 import { cuotasPorAtender, importe, nombreCuota } from "./pagosCliente";
 
 function diasHasta(iso) {
@@ -32,7 +32,7 @@ export const recorta = (t, n = 44) => (t && t.length > n ? t.slice(0, n - 1).tri
  * `planesPago` son los planes de GET /cliente/pagos: entra la cuota vencida,
  * la que vence en siete días o menos y la del comprobante rechazado.
  */
-export function pendientesDe(servicios, perfil, conAcademico, conCompleto = false, planesPago = null) {
+export function pendientesDe(servicios, perfil, planesPago = null) {
   const items = [];
 
   for (const { cuota: c, plan } of cuotasPorAtender(planesPago)) {
@@ -57,18 +57,6 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
     });
   }
 
-  // Con paquete de máster el perfil entero es condición del servicio: va
-  // arriba y en rojo hasta que esté, y dice para qué hace falta.
-  const faltan = datosQueFaltan(perfil, conAcademico, conCompleto);
-  if (faltan > 0) {
-    items.push({
-      clave: "perfil", peso: conCompleto ? 1 : 3, tono: conCompleto ? "alto" : "aviso", icono: "usuario",
-      texto: `Completa tu perfil: ${faltan === 1 ? "falta un dato" : `faltan ${faltan} datos`}`,
-      detalle: conCompleto ? "Imprescindible para preparar tu informe y tu postulación" : null,
-      accion: "Completar", href: rutaDe({ tab: "perfil" }),
-    });
-  }
-
   for (const s of servicios || []) {
     const r = s.resumen || {};
     const tipo = servicioDe(s);
@@ -80,6 +68,19 @@ export function pendientesDe(servicios, perfil, conAcademico, conCompleto = fals
     // Desde dónde empiezan los de este servicio: al final se les apunta su id
     // para que «Tu próximo paso» sepa a qué expediente pertenecen.
     const desde = items.length;
+
+    // Los datos del perfil que pide ESTE servicio. Los del expediente de otra
+    // persona no son suyos: no se le piden.
+    const faltan = s.invitado ? [] : camposQueFaltan(perfil, tipo);
+    if (faltan.length) {
+      const imprescindible = tipo === SERVICIO.MASTER;
+      items.push({
+        clave: `perfil-${id}`, peso: imprescindible ? 1 : 3, tono: imprescindible ? "alto" : "aviso", icono: "usuario",
+        texto: `Completa tus datos: ${faltan.length === 1 ? "falta uno" : `faltan ${faltan.length}`}`,
+        detalle: faltan.length <= 3 ? faltan.join(", ") : `${faltan.slice(0, 3).join(", ")} y ${faltan.length - 3} más`,
+        servicio: de, accion: "Completar", href: rutaDe({ tab: "perfil" }),
+      });
+    }
 
     // Un mensaje del asesor sin leer va antes que casi todo: si escribió, es
     // porque hace falta algo o hay una novedad.

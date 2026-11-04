@@ -244,7 +244,7 @@ function PedirRevision({ id, docs, exp, onHecho }) {
 
 /* ── Principal ───────────────────────────────────────────────────────────── */
 
-export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIrAGuia, faltanPerfil = 0 }) {
+export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIrAGuia, faltanPerfil = 0, camposFaltan = [] }) {
   const id = solicitudBase?.id_solicitud;
   const [exp, setExp] = useState(null);
   const [docs, setDocs] = useState(null);
@@ -408,7 +408,7 @@ export default function DetalleSolicitudEstancia({ solicitudBase, onVolver, onIr
 
         <QueMeFalta
           {...queMeFaltaEstancia({
-            revision: rev, docs, extranjeria: ext, faltanPerfil,
+            revision: rev, docs, extranjeria: ext, faltanPerfil, camposFaltan,
             ir: { bloque: (n) => setBloque(n), perfil: () => navigate(rutaDe({ tab: "perfil" })) },
           })}
         />

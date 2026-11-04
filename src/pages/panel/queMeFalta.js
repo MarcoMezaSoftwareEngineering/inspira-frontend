@@ -76,13 +76,13 @@ function filasChecklist(c, irDocs) {
   return filas;
 }
 
-function filasComunes({ faltanPerfil, resumen, irPerfil, irPlazos, irRequerimientos }) {
+function filasComunes({ faltanPerfil, camposFaltan, resumen, irPerfil, irPlazos, irRequerimientos }) {
   const filas = [];
   if (faltanPerfil > 0) {
     filas.push({
       clave: "perfil", tono: "aviso", icono: "user",
-      texto: `Te ${faltanPerfil === 1 ? "falta un dato" : `faltan ${faltanPerfil} datos`} del perfil`,
-      accion: "Completar", onIr: irPerfil,
+      texto: `Te ${faltanPerfil === 1 ? "falta un dato" : `faltan ${faltanPerfil} datos`} para este servicio`,
+      detalle: nombresFalta(camposFaltan), accion: "Completar", onIr: irPerfil,
     });
   }
   for (const q of resumen?.requerimientos || []) {
@@ -106,12 +106,15 @@ function filasComunes({ faltanPerfil, resumen, irPerfil, irPlazos, irRequerimien
   return filas;
 }
 
+/** «Pasaporte, Vencimiento y 2 más»: qué datos son, no solo cuántos. */
+const nombresFalta = (nombres) => (nombres?.length ? lista(nombres, 3) : null);
+
 function frase(partes) {
   return partes.filter(Boolean).join(" ");
 }
 
 /** Máster. */
-export function queMeFaltaMaster({ checklist, formGuardado, compat, elecciones, resumen, faltanPerfil, ir }) {
+export function queMeFaltaMaster({ checklist, formGuardado, compat, elecciones, resumen, faltanPerfil, camposFaltan, ir }) {
   const c = cuentasChecklist(checklist);
   const filas = filasChecklist(c, () => ir.seccion("docs"));
   if (!formGuardado) {
@@ -128,13 +131,13 @@ export function queMeFaltaMaster({ checklist, formGuardado, compat, elecciones, 
     });
   }
   filas.push(...filasComunes({
-    faltanPerfil, resumen, irPerfil: ir.perfil, irPlazos: () => ir.seccion("post"), irRequerimientos: () => ir.seccion("post"),
+    faltanPerfil, camposFaltan, resumen, irPerfil: ir.perfil, irPlazos: () => ir.seccion("post"), irRequerimientos: () => ir.seccion("post"),
   }));
   return { resumen: resumenTexto(c, filas, faltanPerfil, resumen), filas };
 }
 
 /** Visado. */
-export function queMeFaltaVisado({ checklist, datosCompletos, viaElegida, djCompleta, resumen, faltanPerfil, ir }) {
+export function queMeFaltaVisado({ checklist, datosCompletos, viaElegida, djCompleta, resumen, faltanPerfil, camposFaltan, ir }) {
   const c = cuentasChecklist(checklist);
   const filas = [];
   if (!datosCompletos) {
@@ -156,13 +159,13 @@ export function queMeFaltaVisado({ checklist, datosCompletos, viaElegida, djComp
   }
   filas.push(...filasChecklist(c, () => ir.seccion("docs")));
   filas.push(...filasComunes({
-    faltanPerfil, resumen, irPerfil: ir.perfil, irPlazos: () => ir.seccion("estado"), irRequerimientos: () => ir.seccion("estado"),
+    faltanPerfil, camposFaltan, resumen, irPerfil: ir.perfil, irPlazos: () => ir.seccion("estado"), irRequerimientos: () => ir.seccion("estado"),
   }));
   return { resumen: resumenTexto(c, filas, faltanPerfil, resumen), filas };
 }
 
 /** Estancia: sus ranuras de documentos, su revisión de datos y Extranjería. */
-export function queMeFaltaEstancia({ revision, docs, extranjeria, faltanPerfil, ir }) {
+export function queMeFaltaEstancia({ revision, docs, extranjeria, faltanPerfil, camposFaltan, ir }) {
   const filas = [];
   const faltanDatos = revision?.faltan || [];
   if (faltanDatos.length) {
@@ -208,8 +211,8 @@ export function queMeFaltaEstancia({ revision, docs, extranjeria, faltanPerfil, 
   if (faltanPerfil > 0) {
     filas.push({
       clave: "perfil", tono: "aviso", icono: "user",
-      texto: `Te ${faltanPerfil === 1 ? "falta un dato" : `faltan ${faltanPerfil} datos`} del perfil`,
-      accion: "Completar", onIr: ir.perfil,
+      texto: `Te ${faltanPerfil === 1 ? "falta un dato" : `faltan ${faltanPerfil} datos`} para este servicio`,
+      detalle: nombresFalta(camposFaltan), accion: "Completar", onIr: ir.perfil,
     });
   }
   const pl = revision?.plazos;

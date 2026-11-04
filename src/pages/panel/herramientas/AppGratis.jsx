@@ -68,7 +68,7 @@ function Tarjeta({ h, usada, bloqueada }) {
   );
 }
 
-export default function AppGratis({ herramienta, nombre, esCliente = false, perfilIncompleto = false }) {
+export default function AppGratis({ herramienta, nombre, esCliente = false }) {
   const { usadas, dias, compras } = useResumen();
   const abierta = TODAS.find((h) => h.clave === herramienta);
   if (abierta) {
@@ -93,14 +93,6 @@ export default function AppGratis({ herramienta, nombre, esCliente = false, perf
           </span>
         </div>
       </header>
-
-      {perfilIncompleto && !esCliente && (
-        <a href="/panel/perfil" onClick={ir("/panel/perfil")} className="pnl-hr-aviso">
-          <Icono nombre="usuario" size={18} />
-          <span><strong>Completa tu perfil</strong><small>Así tu asesor llega a tu primera asesoría sabiendo quién eres.</small></span>
-          <span aria-hidden="true">→</span>
-        </a>
-      )}
 
       <h3 className="pnl-hr-grupo">Herramientas gratis</h3>
       <div className="pnl-hr-rejilla">

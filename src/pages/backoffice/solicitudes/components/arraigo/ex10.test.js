@@ -1,4 +1,5 @@
 // @vitest-environment node
+/* global Buffer, __dirname */
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
@@ -6,7 +7,7 @@ import { PDFDocument } from "pdf-lib";
 import JSZip from "jszip";
 import { valoresEX10, casillasEX10, faltaParaEX10 } from "./ex10";
 import { construirDDJJ } from "./ddjj";
-import { construirEX10 } from "./GeneradoresArraigo.jsx";
+import { construirEX10 } from "./ex10.pdf";
 
 const PLANTILLA = path.resolve(__dirname, "../../../../../../public/formularios/ex10-arraigo-socioformativo.pdf");
 const plantilla = async () => {

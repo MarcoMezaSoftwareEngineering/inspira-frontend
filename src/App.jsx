@@ -46,6 +46,7 @@ const DoctoradoEspana = lazyConRecarga(() => import("./pages/doctorado/Doctorado
 const FechasExtranjeria = lazyConRecarga(() => import("./pages/extranjeria/FechasExtranjeria"));
 const BecaBicentenario2026 = lazyConRecarga(() => import("./pages/bicentenario/BecaBicentenario2026"));
 const Enlaces = lazyConRecarga(() => import("./pages/enlaces/Enlaces"));
+const AppInspira = lazyConRecarga(() => import("./pages/app/AppInspira"));
 const Eventos = lazyConRecarga(() => import("./pages/eventos/Eventos"));
 const CasosExito = lazyConRecarga(() => import("./pages/casos/CasosExito"));
 const MapaEspana = lazyConRecarga(() => import("./pages/mapa/MapaEspana"));
@@ -106,6 +107,11 @@ const SEO_PAGES = {
   "/master-2027-2028": {
     title: NOMBRE_PAQUETE,
     path: "/master-2027-2028",
+  },
+  // Puerta pública a la App Inspira: noindex como las demás landings.
+  "/app": {
+    title: "App Inspira: tu viaje a España, gratis",
+    path: "/app",
   },
   "/servicios/estancia": {
     title: "Estancia por estudios en España",
@@ -349,7 +355,7 @@ const PRIVATE_PATHS = ["/panel", "/auth/success"];
 // Landings standalone: sin Header/Footer del sitio, y sin indexar. La de Ads
 // (tráfico pagado) y /enlaces, la página de las biografías de redes que
 // sustituye a Linktree (15/09/2026).
-const LANDING_ADS_PATHS = ["/master-2027-2028", "/enlaces"];
+const LANDING_ADS_PATHS = ["/master-2027-2028", "/enlaces", "/app"];
 
 // Rutas retiradas: se sustituyen en el historial (replace) antes de pintar
 // nada, conservando los utm_* de la URL. La página vieja no se monta nunca.
@@ -454,6 +460,8 @@ const PUBLIC_PATHS = [
   "/beca-generacion-bicentenario-2026",
   // Enlaces para las biografías de redes (sustituye a Linktree).
   "/enlaces",
+  // La puerta pública a la App Inspira gratuita (03/11/2026).
+  "/app",
   // Sin estar aquí, /reservar pintaba su página y debajo el 404 con otra
   // cabecera. Es la reserva de la web.
   "/reservar",
@@ -589,7 +597,7 @@ export default function App({ ruta, prerenderizada = false }) {
     !PUBLIC_PATHS.includes(path) && !isBlogPost && !isServicioDetalle && !isPanel;
 
   return (
-    <div className={`min-h-screen w-full bg-white${path === "/enlaces" || isJuego || isMasterTodo ? " sin-relleno-barra" : ""}`}>
+    <div className={`min-h-screen w-full bg-white${path === "/enlaces" || path === "/app" || isJuego || isMasterTodo ? " sin-relleno-barra" : ""}`}>
       <RouteSEO path={path} />
       {!isPanel && !sinChrome && <BarraProgreso />}
 
@@ -649,6 +657,7 @@ export default function App({ ruta, prerenderizada = false }) {
       {path === "/por-que-fecha-va-extranjeria" && <FechasExtranjeria />}
       {path === "/beca-generacion-bicentenario-2026" && <BecaBicentenario2026 />}
       {path === "/enlaces" && <Enlaces />}
+      {path === "/app" && <AppInspira />}
       {path === "/pago-exitoso" && <PagoExitoso />}
       {path === "/pago-fallido" && <PagoFallido />}
       {path === "/pago-pendiente" && <PagoPendiente />}

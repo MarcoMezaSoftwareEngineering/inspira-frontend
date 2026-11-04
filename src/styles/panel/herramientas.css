@@ -224,3 +224,13 @@
 .pnl .pnl-hr-master > small { font-size: 13px; color: var(--ink-2); }
 .pnl .pnl-hr-master-datos { font-size: 13px; font-weight: 700; color: var(--primary-2); }
 .pnl .pnl-hr-caja[data-estado="admitido"] { border: 2px solid var(--green); background: var(--ok-soft); }
+
+/* ── Entrada a la app (Bienvenida): botón arriba y lista corrida ─────────── */
+.pnl .pnl-vacio .pnl-vacio-acciones { margin-top: 22px; }
+.pnl .pnl-bienvenida-nota { font-size: 13px; line-height: 1.45; color: var(--sky); text-align: center; margin: 14px auto 0; max-width: 30ch; }
+.pnl .pnl-bienvenida-lista { list-style: none; margin: 22px 0 18px; padding: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.pnl .pnl-bienvenida-lista li { display: grid; grid-template-columns: auto auto; column-gap: 10px; align-items: center; font-size: 15px; font-weight: 600; color: #fff; margin: 0; padding: 0; }
+.pnl .pnl-bienvenida-check { display: inline-flex; color: var(--accent-2); }
+.pnl .pnl-vacio .pnl-vacio-enlace { margin-top: 4px; }
+.pnl .pnl-hr-prueba { border-style: dashed; border-color: var(--accent); background: var(--aviso-soft); }
+.pnl .pnl-hr-prueba p { font-size: 13.5px; line-height: 1.45; color: var(--ink); margin: 0; }

@@ -111,6 +111,7 @@ export function origenDeRuta(path = "") {
   if (p.startsWith("/beca-generacion-bicentenario")) return "bicentenario-2026";
   if (p.startsWith("/becas-espana")) return "becas-2027";
   if (p.startsWith("/enlaces")) return "enlaces";
+  if (p === "/app") return "app";
   if (p.startsWith("/asistente")) return "asistente";
   if (p.startsWith("/visa-o-estancia")) return "visa-o-estancia";
   if (p.startsWith("/grado-en-espana")) return "grado-espana";

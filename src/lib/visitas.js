@@ -12,7 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL || "https://api.inspira-legal.cloud
 // Desde el 25/10/2026 también las páginas de campaña, para saber cuántas visitas
 // de anuncios llegan y cuántas acaban en lead.
 const PAGINAS = [
-  "/enlaces", "/beca-generacion-bicentenario-2026", "/mapa-estudiar-en-espana", "/grado-en-espana",
+  "/enlaces", "/app", "/beca-generacion-bicentenario-2026", "/mapa-estudiar-en-espana", "/grado-en-espana",
   "/master-2027-2028", "/master", "/servicios/master", "/visado", "/estancia", "/servicios/estancia",
   "/visa-o-estancia", "/te-alcanza", "/becas-espana-2027", "/calculadora-master", "/asistente",
 ];

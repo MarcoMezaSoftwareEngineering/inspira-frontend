@@ -57,7 +57,9 @@ export function BotonComprar({ id, texto = "Desbloquear" }) {
 
 /** La sección de la portada con los tres paquetes. */
 export function Paquetes() {
-  const { compras } = useResumen();
+  const { compras, tienda } = useResumen();
+  // Solo llega para las cuentas internas: comprueba el cobro pagando S/ 1.
+  const prueba = tienda.find((t) => t.id === "prueba");
   return (
     <>
       <h3 className="pnl-hr-grupo">Hazlo tú mismo</h3>
@@ -76,6 +78,13 @@ export function Paquetes() {
           </article>
         ))}
       </div>
+      {prueba && (
+        <section className="pnl-hr-caja pnl-hr-prueba">
+          <h3>Prueba de cobro (solo equipo)</h3>
+          <p>Paga {soles(prueba.total)} con Mercado Pago para comprobar el cobro, el desbloqueo y el aviso de venta. No da ningún beneficio.</p>
+          <BotonComprar id="prueba" texto="Probar el cobro" />
+        </section>
+      )}
       <p className="pnl-hr-pie">Con cualquiera de los tres, 15 % de descuento en tu visa o estancia por estudios. ¿Dudas? Agenda una sesión de 25 € con un asesor.</p>
     </>
   );

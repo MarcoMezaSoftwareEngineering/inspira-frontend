@@ -170,6 +170,8 @@ const RUTAS = [
   // Con servicios, las herramientas sin el bloque «Reservado para clientes».
   { ruta: "/panel/herramientas", nombre: "panel-herramientas" },
   { ruta: "/panel", nombre: "panel-sin-token", sinToken: true },
+  // La puerta pública a la app (/app), sin sesión.
+  { ruta: "/app", nombre: "app-publica", sinToken: true },
 ];
 
 for (const r of RUTAS) {

@@ -1,0 +1,61 @@
+/* /app: puerta pública a la App Inspira. Prefijo ap-. Marca: noche #013446, sol #FA943A. */
+.ap { --noche: #013446; --noche-2: #02506b; --tinta: #01222e; --sol: #fa943a; --sol-2: #ffb066; --cielo: #88c4fc; --papel: #fff; --fondo: #f4f9fe; --ink: #0d2c3a; --ink-2: #4d6775; --linea: #d8e7f5;
+  min-height: 100dvh; background: var(--fondo); color: var(--ink); }
+.ap * { box-sizing: border-box; }
+.ap-top, .ap-hero, .ap-bloque, .ap-cierre { padding-inline: max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px)); }
+.ap-top { background: var(--noche); padding-block: max(14px, env(safe-area-inset-top, 0px)) 6px; }
+.ap-top img { display: block; margin-inline: auto; width: auto; height: 34px; background: #fff; border-radius: 10px; padding: 5px 10px; }
+
+.ap-hero { background: var(--noche); color: #fff; padding-block: 26px 40px; text-align: center; }
+.ap-hero h1 { font-size: clamp(2.1rem, 9vw, 3rem); line-height: 1.05; font-weight: 800; letter-spacing: -.02em; margin: 0 auto; max-width: 14ch; text-wrap: balance; }
+.ap-hero > p { font-size: 1.06rem; line-height: 1.5; color: #d6e6f5; max-width: 34ch; margin: 16px auto 0; }
+.ap-botones { display: flex; flex-direction: column; gap: 10px; max-width: 340px; margin: 24px auto 10px; }
+.ap-hero small { display: block; font-size: .82rem; color: var(--cielo); max-width: 36ch; margin-inline: auto; line-height: 1.45; }
+.ap-ejemplo { margin-top: 10px !important; opacity: .8; }
+
+.ap-cta, .ap-sec { font: inherit; font-weight: 800; font-size: 1.02rem; min-height: 52px; border-radius: 999px; border: 0; padding: 0 22px; cursor: pointer; transition: transform .2s cubic-bezier(.2, .8, .2, 1), box-shadow .2s; }
+.ap-cta { background: linear-gradient(135deg, var(--sol), #e07a1c); color: var(--tinta); box-shadow: 0 10px 24px -8px rgba(250, 148, 58, .55); }
+.ap-sec { background: transparent; color: #fff; border: 1.5px solid rgba(255, 255, 255, .35); font-weight: 700; }
+.ap-cta:active, .ap-sec:active { transform: scale(.97); }
+.ap-cta:focus-visible, .ap-sec:focus-visible, .ap-os button:focus-visible { outline: 3px solid var(--cielo); outline-offset: 3px; }
+@media (hover: hover) { .ap-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -8px rgba(250, 148, 58, .6); } .ap-sec:hover { border-color: #fff; } }
+
+.ap-pantallas { display: flex; justify-content: center; gap: 14px; margin-top: 30px; align-items: flex-start; }
+.ap-tel { display: block; width: min(44vw, 210px); border-radius: 26px; padding: 6px; background: #0a1a22; box-shadow: 0 30px 50px -22px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .12) inset; }
+.ap-tel img { display: block; width: 100%; height: auto; border-radius: 21px; }
+.ap-tel:nth-child(2) { margin-top: 28px; }
+
+.ap-bloque { padding-block: 34px 6px; max-width: 560px; margin-inline: auto; }
+.ap-bloque h2, .ap-cierre h2 { font-size: 1.45rem; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; margin: 0 0 14px; text-wrap: balance; }
+.ap-lista { margin: 0; }
+.ap-lista div { padding: 14px 0; border-top: 1px solid var(--linea); }
+.ap-lista div:first-child { border-top: 0; padding-top: 0; }
+.ap-lista dt { font-weight: 800; font-size: 1.02rem; }
+.ap-lista dd { margin: 4px 0 0; color: var(--ink-2); line-height: 1.5; font-size: .96rem; max-width: 52ch; }
+
+.ap-os { display: inline-flex; background: #e6eff8; border-radius: 999px; padding: 4px; margin-bottom: 14px; }
+.ap-os button { font: inherit; font-weight: 700; font-size: .95rem; min-height: 40px; padding: 0 20px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); cursor: pointer; }
+.ap-os button[aria-selected="true"] { background: var(--noche); color: #fff; }
+.ap-pasos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.ap-pasos li { display: flex; gap: 12px; align-items: center; line-height: 1.45; font-size: .98rem; }
+.ap-paso-i { flex: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #e3f0fe; color: var(--noche-2); }
+
+.ap-aliados { list-style: none; margin: 0; padding: 0; }
+.ap-aliados li { border-top: 1px solid var(--linea); }
+.ap-aliados li:first-child { border-top: 0; }
+.ap-aliados a { display: block; padding: 13px 0; text-decoration: none; color: var(--ink); }
+.ap-aliados b { display: block; font-size: 1rem; }
+.ap-aliados span { display: block; font-size: .92rem; color: var(--ink-2); margin-top: 2px; line-height: 1.45; }
+
+.ap-cierre { margin-top: 38px; background: var(--noche); color: #fff; padding-block: 40px 96px; text-align: center; }
+.ap-cierre p { color: #d6e6f5; max-width: 36ch; margin: 0 auto 20px; line-height: 1.5; }
+.ap-cierre .ap-cta { width: 100%; max-width: 340px; }
+.ap-cierre a { display: block; margin: 16px auto 0; color: #fff; font-weight: 700; text-underline-offset: 4px; }
+.ap-cierre small { display: block; margin-top: 26px; color: var(--cielo); font-size: .82rem; }
+.ap ::selection { background: var(--sol); color: var(--tinta); }
+@media (min-width: 760px) {
+  .ap-botones { flex-direction: row; justify-content: center; max-width: none; }
+  .ap-pantallas { gap: 28px; }
+  .ap-tel { width: 230px; }
+}
+@media (prefers-reduced-motion: reduce) { .ap-cta, .ap-sec { transition: none; } }

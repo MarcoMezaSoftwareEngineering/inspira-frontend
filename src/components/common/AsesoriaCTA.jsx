@@ -15,7 +15,7 @@ import { useDiaDeHoy } from "../../lib/hidratacion";
 const VISTO_KEY = "inspira_cta_asesoria_visto"; // sessionStorage: por sesión
 
 // Páginas con su propia barra de acción fija: la ventana no se abre sola ahí.
-const SIN_VENTANA = ["/beca-generacion-bicentenario-2026", "/mapa-estudiar-en-espana", "/enlaces"];
+const SIN_VENTANA = ["/beca-generacion-bicentenario-2026", "/mapa-estudiar-en-espana", "/enlaces", "/app"];
 
 export default function AsesoriaCTA() {
   const [abierto, setAbierto] = useState(false);

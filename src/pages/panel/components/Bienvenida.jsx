@@ -14,13 +14,14 @@ import { loginGoogle } from "../../../components/layout/Header/LoginButton";
 import { navigate } from "../../../services/navigate";
 import { whatsappDesde } from "../../../config/contacto";
 import { marcarRegistroApp } from "../herramientas/referido";
+import "../../../styles/panel/herramientas.css";
 
-// Desde el 03/11/2026 cualquiera crea su cuenta con Google y usa gratis las
-// herramientas; el expediente sigue siendo para quien tiene un servicio.
-const QUE_HAY = [
-  { icono: "regalo", titulo: "Herramientas gratis", texto: "Presupuesto, tracker de becas, calendario, días Schengen y listas." },
-  { icono: "birrete", titulo: "Todo guardado en tu cuenta", texto: "Lo que escribes te espera en el móvil y en el ordenador." },
-  { icono: "documento", titulo: "Y si ya eres cliente, tu expediente", texto: "Documentos, plazos y tu trámite paso a paso." },
+// Lo que da la app gratis, en una lista corrida: sin tarjetas, que el botón de
+// entrar se vea sin bajar (03/11/2026).
+const GRATIS = [
+  "Con cuántos másteres haces match",
+  "Tus becas, con aviso antes del cierre",
+  "Calendario, presupuesto y días Schengen",
 ];
 
 export default function Bienvenida() {
@@ -31,27 +32,8 @@ export default function Bienvenida() {
         <div className="pnl-side-logo pnl-vacio-logo">
           <img src={logo} alt="Inspira Legal" />
         </div>
-        <h3>App Inspira</h3>
-        <p className="ex-lema">Prepara tu viaje a España. Gratis.</p>
-        <p>
-          Crea tu cuenta con tu correo de Google y usa las herramientas para
-          estudiar, vivir o viajar a España. Si ya eres cliente, entra con el
-          correo con el que te dimos el acceso.
-        </p>
-
-        <div className="pnl-lineas">
-          {QUE_HAY.map((q) => (
-            <div key={q.titulo} className="pnl-linea pnl-cristal-texto" data-fija="1">
-              <span className="pnl-linea-tile">
-                <Icono nombre={q.icono} size={18} />
-              </span>
-              <span className="pnl-linea-datos">
-                <strong>{q.titulo}</strong>
-                <small>{q.texto}</small>
-              </span>
-            </div>
-          ))}
-        </div>
+        <h3>Tu viaje a España, en tu celular</h3>
+        <p className="ex-lema">App Inspira · gratis</p>
 
         <div className="pnl-vacio-acciones">
           {/* Dos puertas a la misma cuenta de Google: la primera deja anotado
@@ -64,10 +46,14 @@ export default function Bienvenida() {
             <Icono nombre="usuario" size={16} />
             Ya soy cliente: entrar a mi expediente
           </button>
-          <button type="button" className="pnl-vacio-enlace" onClick={() => navigate("/")}>
-            Ver la web
-          </button>
         </div>
+        <p className="pnl-bienvenida-nota">Entras con tu cuenta de Google, sin contraseña ni tarjeta.</p>
+
+        <ul className="pnl-bienvenida-lista">
+          {GRATIS.map((t) => <li key={t}><span className="pnl-bienvenida-check"><Icono nombre="check" size={15} /></span><span>{t}</span></li>)}
+        </ul>
+
+        <button type="button" className="pnl-vacio-enlace" onClick={() => navigate("/")}>Ver la web</button>
 
         <p className="pnl-vacio-pie">
           ¿Quieres tu Expediente Digital con un asesor?{" "}

@@ -35,6 +35,7 @@ import Icono from "../../components/common/Icono";
 import WhatsAppFlotante from "../../components/common/WhatsAppFlotante";
 import { RESERVAR_URL, LINEAS, MENSAJE_SEGURO, WHATSAPP_INSPIRA, WHATSAPP_SEGURO } from "../../config/contacto";
 import { HOLAFLY_URL } from "../../config/aliados";
+import appInicio from "../../assets/images/app/inicio.jpg";
 import { OPCIONES_ASESORIA } from "../../config/asesorias";
 import { CIFRAS, estadoPostulacion } from "../../config/bicentenario2026";
 import { eventosActivos } from "../../config/eventos";
@@ -974,6 +975,27 @@ export default function Enlaces() {
             {NUMERO}
           </a>
         </header>
+
+        {/* La App Inspira gratuita, lo primero (03/11/2026): es el enlace que se
+            pide en los vídeos («link en mi bio»). Lleva a /app. */}
+        <a
+          href={interno("/app")}
+          onClick={() => marcar("app-inspira")}
+          data-wa="app"
+          data-revelar className="enl-sube enl-tarjeta mt-3 flex overflow-hidden"
+        >
+          <span className="relative block w-[34%] shrink-0 overflow-hidden bg-[#013446]">
+            <img src={appInicio} alt="" width="560" height="1212" className="absolute left-1/2 top-3 w-[88%] -translate-x-1/2 rounded-2xl shadow-lg" loading="lazy" decoding="async" />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col justify-center p-3.5 text-white">
+            <span className="enl-marca-fuego">
+              <Icono nombre="regalo" size={12} aria-hidden="true" /> Gratis
+            </span>
+            <span className="font-extrabold leading-snug">App Inspira: tu viaje a España</span>
+            <span className="enl-tarjeta-texto mt-1">Mira con cuántos másteres haces match, sigue tus becas y arma tu presupuesto</span>
+            <span className="mt-2 inline-flex items-center gap-1 text-sm font-extrabold text-[#FA943A]">Crear mi cuenta gratis <Flecha /></span>
+          </span>
+        </a>
 
         {/* Arriba: el mapa funcionando, para quien llega desde los vídeos del mapa. */}
         <div ref={refMapa} data-wa="mapa" data-revelar className="enl-sube">

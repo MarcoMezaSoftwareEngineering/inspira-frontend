@@ -172,6 +172,7 @@ const RUTAS = [
   { ruta: "/panel", nombre: "panel-sin-token", sinToken: true },
   // La puerta pública a la app (/app), sin sesión.
   { ruta: "/app", nombre: "app-publica", sinToken: true },
+  { ruta: "/enlaces", nombre: "enlaces-publica", sinToken: true, estirar: false },
 ];
 
 for (const r of RUTAS) {

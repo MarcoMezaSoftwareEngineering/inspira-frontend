@@ -336,7 +336,7 @@
 
 /* ── AVISO ────────────────────────────────────────────────────────────────
    Pule la .pnl-aviso de panel.css:371-381 (AvisoPerfil): icono, texto y
-   botón en rejilla; el tono por defecto es aviso, así AvisoPerfil.jsx sigue
+   botón en rejilla; el tono por defecto es aviso, así (ya retirado) sigue
    igual sin tocarlo. */
 .pnl .pnl-aviso:not([data-tono]) { --tono: var(--aviso); --tono-soft: var(--aviso-soft); --tono-ink: var(--aviso-ink); }
 .pnl .pnl-aviso {

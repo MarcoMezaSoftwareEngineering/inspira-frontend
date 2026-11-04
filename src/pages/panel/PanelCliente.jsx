@@ -39,8 +39,6 @@ import Avatar from "../../components/common/Avatar";
 import Icono from "../../components/common/Icono";
 import { datosUsuario } from "../../components/common/usuario";
 import MisServicios from "./components/MisServicios";
-import { usePerfilIncompletoBool, datosQueFaltan } from "./hooks/usePerfilIncompletoBool";
-import AvisoPerfil from "./components/AvisoPerfil";
 import Bienvenida from "./components/Bienvenida";
 import { pendientesDe } from "./pendientes";
 import Tour from "./components/Tour";
@@ -164,24 +162,18 @@ export default function PanelCliente({ path }) {
   const conAcademico = !soloInvitado && (sinServicios || pideAcademico(lista));
   // Paquete de máster: el perfil entero es condición del servicio.
   const conCompleto = !soloInvitado && pideCompleto(lista);
-  const perfilIncompleto = usePerfilIncompletoBool(user, conAcademico, conCompleto);
-  // Hasta el 03/11/2026 un asistente cerraba el paso a quien no tenía nada
-  // contratado hasta completar sus datos. Con la app gratuita entra directo a
-  // sus herramientas y la portada le pide completar el perfil. A quien ya
-  // tiene expediente se le avisa arriba de lo que falta, y sigue trabajando.
+  // Al entrar no se pide ningún formulario: ni asistente ni aviso general. Cada
+  // servicio pide sus propios datos dentro de su expediente (MisServicios
+  // calcula lo que falta para ese servicio) y la portada lo lista en «Hoy».
   const inicioGratis = sinServicios && tab === "inicio" && !ruta.idServicio;
-  const avisarPerfil = user !== null && cargado && perfilIncompleto && !sinServicios && tab !== "perfil";
-  const faltanDatos = avisarPerfil ? datosQueFaltan(user, conAcademico, conCompleto) : 0;
-  // Lo mismo, para «¿Qué me falta?» dentro de cada expediente.
-  const faltanPerfil = user !== null && cargado ? datosQueFaltan(user, conAcademico, conCompleto) : 0;
+
   // Cuántas cosas esperan: sale en el menú junto a «Inicio» y como punto sobre
   // el botón del menú, para saberlo sin abrir nada.
   const listaPendientes = useMemo(
-    () => (user && cargado ? pendientesDe(lista, user, conAcademico, conCompleto, planesPago) : []),
-    [user, cargado, lista, conAcademico, conCompleto, planesPago],
+    () => (user && cargado ? pendientesDe(lista, user, planesPago) : []),
+    [user, cargado, lista, planesPago],
   );
   const nPendientes = listaPendientes.length;
-  const primerPendiente = listaPendientes[0]?.clave || null;
 
   // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
   // ofrece entrar. Al pulsar, el login conserva esta misma URL, así que un
@@ -526,11 +518,6 @@ export default function PanelCliente({ path }) {
           </span>
         )}
         <div key={claveVista} className={`pnl-entra pnl-entra-llena pnl-vista pnl-ptr-contenido${conTabbar ? " pnl-con-tabbar" : ""}`}>
-          {avisarPerfil && !enPortada && (
-            <div className="px-4 sm:px-6 pt-4 shrink-0">
-              <AvisoPerfil faltan={faltanDatos} imprescindible={conCompleto} onIr={() => handleChangeTab("perfil")} />
-            </div>
-          )}
 
           {/* Servicios: scroll interno */}
           {esServicios && (
@@ -548,11 +535,7 @@ export default function PanelCliente({ path }) {
                 onRecargar={cargarServicios}
                 onIrAGuia={handleChangeTab}
                 avisoAppBloqueado={tour || tourPendiente}
-                faltanPerfil={faltanPerfil}
                 pagos={planesPago}
-                avisoPerfil={avisarPerfil && enPortada && primerPendiente !== "perfil"
-                  ? <AvisoPerfil faltan={faltanDatos} imprescindible={conCompleto} onIr={() => handleChangeTab("perfil")} />
-                  : null}
               />
               </CabeceraExpedienteCtx.Provider>
             </div>
@@ -567,7 +550,6 @@ export default function PanelCliente({ path }) {
                   herramienta={tab === "herramientas" ? ruta.herramienta : null}
                   nombre={datosUsuario(user).corto}
                   esCliente={!sinServicios}
-                  perfilIncompleto={perfilIncompleto}
                 />
               </Suspense>
             </CercoErrores>

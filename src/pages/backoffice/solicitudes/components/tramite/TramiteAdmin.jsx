@@ -15,6 +15,7 @@ import DocumentosProceso from "../../../../../components/common/DocumentosProces
 import RutaMini from "../../../../../components/common/RutaMini";
 import { fechaCorta, gruposDe, mostrarValor } from "../../../../../lib/tramites";
 import Ventana from "../../../ui/Ventana";
+import GeneradoresArraigo from "../arraigo/GeneradoresArraigo";
 
 // El catálogo de grados (QEDU) y FP (RCD) se carga solo si se abre: pesa.
 const BuscadorEstudios = lazy(() => import("../../../estudios/BuscadorEstudios"));
@@ -356,6 +357,10 @@ export default function TramiteAdmin({ detalle, setDetalle, checklistPorEtapa, r
               )}
 
               <CamposAdmin idSolicitud={idSolicitud} campos={pasoActivo.campos || []} tramite={datos.tramite} onGuardado={onGuardado} />
+
+              {def.clave === "arraigo" && pasoActivo.id === "presentacion" && (
+                <GeneradoresArraigo exp={datos.tramite || {}} />
+              )}
 
               {modoLista && (
                 <ListaAdmin idSolicitud={idSolicitud} def={def} modo={modoLista} candidaturas={datos.candidaturas} onGuardado={onGuardado} />

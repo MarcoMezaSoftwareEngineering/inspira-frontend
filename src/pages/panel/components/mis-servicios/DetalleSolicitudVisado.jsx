@@ -179,7 +179,7 @@ const TONO_VISADO = { sky: "info", emerald: "ok", red: "alto", amber: "aviso", v
 const ICONO_TONO = { info: "info", ok: "checkCircle", alto: "alert", aviso: "alert", neutro: "info" };
 
 // ── Componente principal ──────────────────────────────────────────────────────
-export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion, faltanPerfil = 0, onPerfilCambiado }) {
+export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccion, onSeccion, faltanPerfil = 0, camposFaltan = [], onPerfilCambiado }) {
   const [detalle, setDetalle] = useState(null);
   const [checklist, setChecklist] = useState([]);
   const [visaExp, setVisaExp] = useState(null);
@@ -325,7 +325,7 @@ export default function DetalleSolicitudVisado({ solicitudBase, onVolver, seccio
   const activeSection = navSections.some((x) => x.id === seccion) ? seccion : navSections[0]?.id;
 
   const falta = queMeFaltaVisado({
-    checklist, datosCompletos, viaElegida, djCompleta, resumen: solicitudBase?.resumen, faltanPerfil,
+    checklist, datosCompletos, viaElegida, djCompleta, resumen: solicitudBase?.resumen, faltanPerfil, camposFaltan,
     ir: { seccion: (s) => setActiveSection(s), perfil: () => navigate(rutaDe({ tab: "perfil" })) },
   });
 

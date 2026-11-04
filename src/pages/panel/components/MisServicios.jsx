@@ -6,6 +6,8 @@ import ServiciosList from "./mis-servicios/ServiciosList";
 import { navigate } from "../../../services/navigate";
 import { rutaDe } from "../ruta";
 import { SERVICIO, TRAMITES, servicioDe } from "../servicios";
+import DatosDelServicio from "./DatosDelServicio";
+import { camposQueFaltan } from "../hooks/usePerfilIncompletoBool";
 import { EsqueletoExpediente } from "./Esqueleto";
 
 // Cada tipo de expediente se descarga solo cuando se abre. Los cuatro juntos
@@ -29,7 +31,7 @@ const DetalleSolicitudPac = lazyConRecarga(() => import("./mis-servicios/Detalle
  * (`/panel/servicios/155/post`). Recargar conserva el sitio, «atrás» vuelve a
  * la lista, y un correo puede enlazar a una sección concreta.
  */
-export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia, avisoAppBloqueado = false, faltanPerfil = 0, pagos = null, avisoPerfil = null, onPerfilCambiado }) {
+export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, servicios, loading, error, onRecargar, onIrAGuia, avisoAppBloqueado = false, pagos = null, onPerfilCambiado }) {
   const { idServicio, seccion, tab } = ruta;
   const seleccionada = idServicio
     ? (servicios || []).find((s) => Number(s.id_solicitud) === idServicio) || null
@@ -57,9 +59,17 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
     // El perfil ya lo tiene el panel: el expediente lo recibe en vez de volver a pedirlo.
     // Guardar un formulario del expediente también cambia el perfil (el
     // backend lo sube: perfilSync); `onPerfilCambiado` lo vuelve a leer.
-    const comunes = { solicitudBase: seleccionada, onVolver: volver, onIrAGuia, perfil, faltanPerfil, onPerfilCambiado };
+    // Lo que ESTE servicio necesita del perfil: el expediente de otra persona
+    // (invitado) no pide datos suyos.
+    const camposFaltan = seleccionada.invitado ? [] : camposQueFaltan(perfil, tipo);
+    const comunes = { solicitudBase: seleccionada, onVolver: volver, onIrAGuia, perfil, faltanPerfil: camposFaltan.length, camposFaltan, onPerfilCambiado };
     return (
       <div className="flex-1 min-h-0 flex flex-col">
+        <DatosDelServicio
+          faltan={camposFaltan}
+          imprescindible={tipo === SERVICIO.MASTER}
+          onIr={() => navigate(rutaDe({ tab: "perfil" }))}
+        />
         <Suspense fallback={<EsqueletoExpediente />}>
           {tipo === SERVICIO.MODIFICATORIA ? (
             <DetalleSolicitudModificatoria {...comunes} />
@@ -108,7 +118,6 @@ export default function MisServicios({ ruta, perfil, conAcademico, conCompleto, 
       onVerDetalle={abrir}
       avisoAppBloqueado={avisoAppBloqueado}
       pagos={pagos}
-      avisoPerfil={avisoPerfil}
     />
   );
 }

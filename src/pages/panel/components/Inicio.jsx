@@ -63,7 +63,7 @@ function Pendientes({ items }) {
   );
 }
 
-export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle, avisoAppBloqueado = false, pagos = null, avisoPerfil = null }) {
+export default function Inicio({ servicios, perfil, conAcademico, conCompleto, loading, error, onRecargar, onVerDetalle, avisoAppBloqueado = false, pagos = null }) {
   const lista = servicios || [];
   // `pagos`: sus planes de pago; las cuotas que vencen pronto entran en «Hoy».
   const items = loading ? [] : pendientesDe(lista, perfil, conAcademico, conCompleto, pagos);
@@ -121,10 +121,6 @@ export default function Inicio({ servicios, perfil, conAcademico, conCompleto, l
           <Pendientes items={resto} />
         </section>
       )}
-
-      {/* El aviso de perfil, si su pendiente no es ya el próximo paso: con
-          peso bajo podía quedar escondido tras «Ver más». */}
-      {avisoPerfil}
 
       <div data-tour="servicios">
         <ResumenExpediente servicios={lista} onRecargar={onRecargar} />

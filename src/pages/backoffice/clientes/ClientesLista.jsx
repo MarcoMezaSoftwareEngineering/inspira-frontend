@@ -11,7 +11,7 @@ import { dialog } from "../../../services/dialogService";
 import RevisionRapida from "../comun/RevisionRapida";
 import { cambiarEtapa as patchEtapa } from "../comun/cambiarEtapa";
 
-const NOMBRE_SERVICIO = { master: "postulación a máster", visa: "visado de estudios", ee: "estancia por estudios", mod: "modificatoria", fp: "formación profesional", legal: "extranjería", doc: "doctorado", grado: "grado en España", homesc: "homologación escolar", homuni: "homologación de título", recurso: "recurso de reposición", pac: "profesional altamente cualificado" };
+const NOMBRE_SERVICIO = { master: "postulación a máster", visa: "visado de estudios", ee: "estancia por estudios", mod: "modificatoria", fp: "formación profesional", legal: "extranjería", doc: "doctorado", grado: "grado en España", homesc: "homologación escolar", homuni: "homologación de título", recurso: "recurso de reposición", pac: "profesional altamente cualificado", arraigo: "arraigo socioformativo" };
 
 /* Mensaje de WhatsApp ya redactado, de usted, según lo que le toca. */
 function plantillaWhatsApp(c) {
@@ -43,12 +43,13 @@ const SERVICIO = {
   homuni: { corto: "Homol. título", tono: "bg-[#F1ECFA] text-[#5B3B9E]" },
   recurso:{ corto: "Recurso",       tono: "bg-[#FDECEC] text-[#A93226]" },
   pac:    { corto: "PAC",           tono: "bg-[#DFF3F1] text-[#0B5D5A]" },
+  arraigo:{ corto: "Arraigo",       tono: "bg-[#E8F4EC] text-[#1D6A4A]" },
 };
 
 /* Color del servicio principal, para el avatar, la franja y la barra. */
 const ACENTO = {
   master: "#1A3557", visa: "#B9770E", ee: "#7D3C98", mod: "#B9770E", fp: "#1D6A4A", legal: "#C0392B", doc: "#0E5E6B",
-  grado: "#1F4E8C", homesc: "#8A5A0B", homuni: "#5B3B9E", recurso: "#A93226", pac: "#0B5D5A",
+  grado: "#1F4E8C", homesc: "#8A5A0B", homuni: "#5B3B9E", recurso: "#A93226", pac: "#0B5D5A", arraigo: "#1D6A4A",
 };
 
 // Quién tiene que mover. Mismo código de color que la pantalla Flujos.

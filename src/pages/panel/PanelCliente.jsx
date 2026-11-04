@@ -174,7 +174,6 @@ export default function PanelCliente({ path }) {
     [user, cargado, lista, planesPago],
   );
   const nPendientes = listaPendientes.length;
-  const primerPendiente = listaPendientes[0]?.clave || null;
 
   // Sin sesión se recibe, no se expulsa: la bienvenida explica qué es esto y
   // ofrece entrar. Al pulsar, el login conserva esta misma URL, así que un

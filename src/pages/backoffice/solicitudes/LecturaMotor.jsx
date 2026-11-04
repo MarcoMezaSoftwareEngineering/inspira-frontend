@@ -51,7 +51,14 @@ export default function LecturaMotor({ datos, idSolicitud, onEditar, onIrAInform
     ["Presupuesto", leer("presupuesto_hasta"), perfil?.presupuesto ? `tope ${Number(perfil.presupuesto).toLocaleString("es-ES")} € por curso` : null],
     ["Comunidades", leer("comunidades_preferidas"), perfil?.ccaa?.length ? `solo ${perfil.ccaa.join(", ")}` : perfil ? "toda España" : null],
     ["Inicio", leer("inicio_previsto"), null],
-    ["Idiomas", [leer("ingles_situacion"), leer("idioma_master_ingles") === "Sí" ? "acepta máster en inglés" : null].filter(Boolean).join(" · ") || null, null],
+    ["Idiomas", [
+      leer("ingles_situacion"),
+      (() => {
+        const acepta = [["idioma_master_es", "español"], ["idioma_master_bilingue", "bilingüe"], ["idioma_master_ingles", "inglés"]]
+          .filter(([k]) => leer(k) === "Sí").map(([, t]) => t);
+        return acepta.length ? `acepta máster en ${acepta.join(", ")}` : null;
+      })(),
+    ].filter(Boolean).join(" · ") || null, null],
   ].filter(([, v]) => v);
 
   return (

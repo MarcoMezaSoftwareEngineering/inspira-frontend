@@ -6,20 +6,14 @@ export default function PasoIdiomaBecas({ formData, set, has }) {
     <div className="space-y-6">
       <div>
         <FLabel>Idioma del máster que aceptas</FLabel>
+        <p className="text-xs text-neutral-500 mb-2">Puedes marcar más de uno. Cuantos más aceptes, más másteres entran en tu búsqueda.</p>
         <div className={`flex flex-col gap-2 ${has("idioma_master") ? "p-2 rounded-xl bg-red-50 border border-red-200" : ""}`}>
           {[
-            { key: "idioma_master_es",       label: "Solo en español" },
+            { key: "idioma_master_es",       label: "100 % en español" },
             { key: "idioma_master_bilingue",  label: "Bilingüe (español + inglés)" },
-            { key: "idioma_master_ingles",    label: "Totalmente en inglés" },
+            { key: "idioma_master_ingles",    label: "100 % en inglés" },
           ].map(({ key, label }) => (
-            <WBtn key={key} active={!!formData[key]} onClick={() => {
-              if (!formData[key]) {
-                set("idioma_master_es", false);
-                set("idioma_master_bilingue", false);
-                set("idioma_master_ingles", false);
-                set(key, true);
-              }
-            }}>
+            <WBtn key={key} active={!!formData[key]} onClick={() => set(key, !formData[key])}>
               {label}
             </WBtn>
           ))}

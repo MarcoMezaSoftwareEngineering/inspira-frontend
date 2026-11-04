@@ -280,8 +280,8 @@ describe("FormularioDatosAcademicos — secciones del expediente", () => {
 
     abrirSeccion(container, 2);
     fireEvent.click(screen.getByText("Tengo certificación internacional (IELTS, TOEFL, Cambridge…)"));
-    fireEvent.click(screen.getByText("Solo en español"));
-    fireEvent.click(screen.getByText("Totalmente en inglés"));
+    fireEvent.click(screen.getByText("100 % en español"));
+    fireEvent.click(screen.getByText("100 % en inglés"));
     fireEvent.click(screen.getByText("Sí, me interesa"));
     fireEvent.click(screen.getByText("💸 Becas parciales / descuentos"));
     expect(html(container)).toMatchSnapshot("idiomas y becas");

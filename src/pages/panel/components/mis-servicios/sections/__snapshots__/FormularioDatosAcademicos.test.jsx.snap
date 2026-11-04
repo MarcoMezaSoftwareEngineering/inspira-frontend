@@ -1483,11 +1483,12 @@ exports[`FormularioDatosAcademicos — modo modal (sin el contexto) > con datos:
 <div>
 <p class="text-sm font-semibold text-neutral-800 mb-3">Idioma del máster que aceptas<span class="text-red-400 ml-0.5">*</span>
 </p>
+<p class="text-xs text-neutral-500 mb-2">Puedes marcar más de uno. Cuantos más aceptes, más másteres entran en tu búsqueda.</p>
 <div class="flex flex-col gap-2 ">
-<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Solo en español</button>
+<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">100 % en español</button>
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] bg-primary text-white border-primary shadow-sm">
 <span class="float-right opacity-70">✓</span>Bilingüe (español + inglés)</button>
-<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Totalmente en inglés</button>
+<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">100 % en inglés</button>
 </div>
 </div>
 <div>
@@ -2456,11 +2457,12 @@ exports[`FormularioDatosAcademicos — modo modal (sin el contexto) > variante e
 <div>
 <p class="text-sm font-semibold text-neutral-800 mb-3">Idioma del máster que aceptas<span class="text-red-400 ml-0.5">*</span>
 </p>
+<p class="text-xs text-neutral-500 mb-2">Puedes marcar más de uno. Cuantos más aceptes, más másteres entran en tu búsqueda.</p>
 <div class="flex flex-col gap-2 ">
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] bg-primary text-white border-primary shadow-sm">
-<span class="float-right opacity-70">✓</span>Solo en español</button>
+<span class="float-right opacity-70">✓</span>100 % en español</button>
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Bilingüe (español + inglés)</button>
-<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Totalmente en inglés</button>
+<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">100 % en inglés</button>
 </div>
 </div>
 <div>
@@ -3469,11 +3471,12 @@ exports[`FormularioDatosAcademicos — secciones del expediente > asesor con tod
 <div>
 <p class="text-sm font-semibold text-neutral-800 mb-3">Idioma del máster que aceptas<span class="text-red-400 ml-0.5">*</span>
 </p>
+<p class="text-xs text-neutral-500 mb-2">Puedes marcar más de uno. Cuantos más aceptes, más másteres entran en tu búsqueda.</p>
 <div class="flex flex-col gap-2 ">
-<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Solo en español</button>
+<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">100 % en español</button>
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] bg-primary text-white border-primary shadow-sm">
 <span class="float-right opacity-70">✓</span>Bilingüe (español + inglés)</button>
-<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Totalmente en inglés</button>
+<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">100 % en inglés</button>
 </div>
 </div>
 <div>
@@ -7533,11 +7536,13 @@ exports[`FormularioDatosAcademicos — secciones del expediente > interacciones:
 <div>
 <p class="text-sm font-semibold text-neutral-800 mb-3">Idioma del máster que aceptas<span class="text-red-400 ml-0.5">*</span>
 </p>
+<p class="text-xs text-neutral-500 mb-2">Puedes marcar más de uno. Cuantos más aceptes, más másteres entran en tu búsqueda.</p>
 <div class="flex flex-col gap-2 ">
-<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Solo en español</button>
+<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] bg-primary text-white border-primary shadow-sm">
+<span class="float-right opacity-70">✓</span>100 % en español</button>
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Bilingüe (español + inglés)</button>
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] bg-primary text-white border-primary shadow-sm">
-<span class="float-right opacity-70">✓</span>Totalmente en inglés</button>
+<span class="float-right opacity-70">✓</span>100 % en inglés</button>
 </div>
 </div>
 <div>
@@ -11135,11 +11140,12 @@ exports[`FormularioDatosAcademicos — secciones del expediente > variantes: sin
 <div>
 <p class="text-sm font-semibold text-neutral-800 mb-3">Idioma del máster que aceptas<span class="text-red-400 ml-0.5">*</span>
 </p>
+<p class="text-xs text-neutral-500 mb-2">Puedes marcar más de uno. Cuantos más aceptes, más másteres entran en tu búsqueda.</p>
 <div class="flex flex-col gap-2 ">
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] bg-primary text-white border-primary shadow-sm">
-<span class="float-right opacity-70">✓</span>Solo en español</button>
+<span class="float-right opacity-70">✓</span>100 % en español</button>
 <button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Bilingüe (español + inglés)</button>
-<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">Totalmente en inglés</button>
+<button type="button" class="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-[0.99] border-neutral-200 text-neutral-700 hover:border-primary hover:text-primary bg-white">100 % en inglés</button>
 </div>
 </div>
 <div>
